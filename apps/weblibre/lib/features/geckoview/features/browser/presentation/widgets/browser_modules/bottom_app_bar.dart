@@ -862,13 +862,30 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    // Titles can't fit the narrow vertical rail; force icon-only chips there.
-    final showTitles = axis != Axis.vertical && showTitlesSetting;
-    final titleMaxWidth = ref.watch(
+    final railWidth = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+    );
+    // Titles can't fit the narrow vertical rail; force icon-only chips there
+    // unless the rail has been widened enough to show them (isWideRail).
+    final wideRail = isWideRail(
+      isVertical: axis == Axis.vertical,
+      railWidth: railWidth,
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+    final showTitles = (axis != Axis.vertical || wideRail) && showTitlesSetting;
+    final titleMaxWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
+    // On a wide rail the title has to additionally fit beside the favicon
+    // inside railWidth, or it overflows the rail itself.
+    final titleMaxWidth = wideRail
+        ? titleMaxWidthSetting.clamp(
+            0.0,
+            (railWidth - railChipChromeWidth).clamp(0.0, double.infinity),
+          )
+        : titleMaxWidthSetting;
     final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherCloseButtonMode,

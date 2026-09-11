@@ -148,28 +148,34 @@ const minWideRailWidth = 120.0;
 const narrowRailViewportBreakpoint = 600.0;
 
 /// Whether the vertical side rail is wide enough to show upright titles
-/// instead of icon-only chips: [position] is vertical, [railWidth] clears
-/// [minWideRailWidth], and [viewportWidth] is not narrow (see
-/// [narrowRailViewportBreakpoint]).
+/// instead of icon-only chips: [isVertical] (the tab bar position is left or
+/// right), [railWidth] clears [minWideRailWidth], and [viewportWidth] is not
+/// narrow (see [narrowRailViewportBreakpoint]).
 bool isWideRail({
-  required TabBarPosition position,
+  required bool isVertical,
   required double railWidth,
   required double viewportWidth,
 }) =>
-    position.isVertical &&
+    isVertical &&
     railWidth >= minWideRailWidth &&
     viewportWidth >= narrowRailViewportBreakpoint;
+
+/// Approximate width (logical px) a quick tab switcher chip spends on
+/// everything except its title on the vertical rail — the favicon, its
+/// padding, and the chip's own horizontal insets. Used to clamp the title so
+/// it fits inside [GeneralSettings.railWidth] rather than overflowing it.
+const railChipChromeWidth = 48.0;
 
 /// Effective content width of the vertical side rail: [railWidth] when
 /// [isWideRail] holds, [defaultRailWidth] (== [kToolbarHeight]) otherwise —
 /// the width the rail always used before this setting existed.
 double effectiveRailWidth({
-  required TabBarPosition position,
+  required bool isVertical,
   required double railWidth,
   required double viewportWidth,
 }) =>
     isWideRail(
-      position: position,
+      isVertical: isVertical,
       railWidth: railWidth,
       viewportWidth: viewportWidth,
     )
