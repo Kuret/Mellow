@@ -23,7 +23,6 @@ import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
-import 'package:weblibre/features/user/data/database/daos/proxy_profile.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
@@ -40,12 +39,11 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
     ToolbarButtonConfigDao,
     QuickSwitcherButtonConfigDao,
     SearchTokensDao,
-    ProxyProfileDao,
   ],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 10;
+  final int schemaVersion = 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -129,6 +127,13 @@ class UserDatabase extends $UserDatabase {
     },
     from9To10: (m, schema) async {
       await m.addColumn(schema.proxyProfile, schema.proxyProfile.autostart);
+    },
+    from10To11: (m, schema) async {
+      // Proxy/Tor support was removed; the sing-box profile store goes with
+      // it. Frozen DROP rather than `m.deleteTable(schema.proxyProfile)`,
+      // matching the from7To8 precedent for proxy_routing_setting — this
+      // step's meaning must not drift with the current schema.
+      await m.database.customStatement('DROP TABLE IF EXISTS proxy_profile');
     },
   );
 }

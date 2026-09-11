@@ -14,16 +14,13 @@ import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_
     as i7;
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart'
     as i8;
-import 'package:weblibre/features/user/data/database/daos/proxy_profile.dart'
-    as i9;
-import 'package:drift/internal/modular.dart' as i10;
-import 'package:sqlite3/common.dart' as i11;
+import 'package:drift/internal/modular.dart' as i9;
+import 'package:sqlite3/common.dart' as i10;
 
 abstract class $UserDatabase extends i0.GeneratedDatabase {
   $UserDatabase(i0.QueryExecutor e) : super(e);
   $UserDatabaseManager get managers => $UserDatabaseManager(this);
   late final i1.Setting setting = i1.Setting(this);
-  late final i1.ProxyProfileTable proxyProfile = i1.ProxyProfileTable(this);
   late final i1.IconCache iconCache = i1.IconCache(this);
   late final i1.Onboarding onboarding = i1.Onboarding(this);
   late final i1.Riverpod riverpod = i1.Riverpod(this);
@@ -44,10 +41,7 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i8.SearchTokensDao searchTokensDao = i8.SearchTokensDao(
     this as i3.UserDatabase,
   );
-  late final i9.ProxyProfileDao proxyProfileDao = i9.ProxyProfileDao(
-    this as i3.UserDatabase,
-  );
-  i1.DefinitionsDrift get definitionsDrift => i10.ReadDatabaseContainer(
+  i1.DefinitionsDrift get definitionsDrift => i9.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -56,8 +50,6 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   @override
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     setting,
-    proxyProfile,
-    i1.idxProxyProfileUpdatedAt,
     iconCache,
     onboarding,
     riverpod,
@@ -104,8 +96,6 @@ class $UserDatabaseManager {
   $UserDatabaseManager(this._db);
   i1.$SettingTableManager get setting =>
       i1.$SettingTableManager(_db, _db.setting);
-  i1.$ProxyProfileTableTableManager get proxyProfile =>
-      i1.$ProxyProfileTableTableManager(_db, _db.proxyProfile);
   i1.$IconCacheTableManager get iconCache =>
       i1.$IconCacheTableManager(_db, _db.iconCache);
   i1.$OnboardingTableManager get onboarding =>
@@ -123,7 +113,7 @@ class $UserDatabaseManager {
       i1.$SearchTokensTableManager(_db, _db.searchTokens);
 }
 
-extension DefineFunctions on i11.CommonDatabase {
+extension DefineFunctions on i10.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
@@ -137,7 +127,7 @@ extension DefineFunctions on i11.CommonDatabase {
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i11.AllowedArgumentCount(2),
+      argumentCount: const i10.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -146,7 +136,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i11.AllowedArgumentCount(2),
+      argumentCount: const i10.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -155,7 +145,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i11.AllowedArgumentCount(2),
+      argumentCount: const i10.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -164,7 +154,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i11.AllowedArgumentCount(2),
+      argumentCount: const i10.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -173,14 +163,14 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'generate_content_hash',
-      argumentCount: const i11.AllowedArgumentCount(0),
+      argumentCount: const i10.AllowedArgumentCount(0),
       function: (args) {
         return generateContentHash();
       },
     );
     createFunction(
       functionName: 'url_indexable',
-      argumentCount: const i11.AllowedArgumentCount(1),
+      argumentCount: const i10.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlIndexable(arg0);
@@ -188,7 +178,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'url_canonical',
-      argumentCount: const i11.AllowedArgumentCount(1),
+      argumentCount: const i10.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlCanonical(arg0);
@@ -196,7 +186,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'url_host',
-      argumentCount: const i11.AllowedArgumentCount(1),
+      argumentCount: const i10.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlHost(arg0);
@@ -204,7 +194,7 @@ extension DefineFunctions on i11.CommonDatabase {
     );
     createFunction(
       functionName: 'url_path',
-      argumentCount: const i11.AllowedArgumentCount(1),
+      argumentCount: const i10.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlPath(arg0);
