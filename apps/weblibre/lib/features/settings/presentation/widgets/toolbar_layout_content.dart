@@ -128,6 +128,12 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         keywords: ['hierarchy', 'nesting', 'depth', 'tree', 'chevrons'],
         child: _QuickTabSwitcherHierarchyGlyphsTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Rail Width',
+        subtitle: 'Width of the side rail when the tab bar is on the left or right',
+        keywords: ['rail', 'width', 'side', 'vertical', 'left', 'right'],
+        child: _RailWidthTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -642,6 +648,87 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
                               .save(
                                 (currentSettings) => currentSettings.copyWith
                                     .quickTabSwitcherTitleWidth(normalized),
+                              );
+                        }
+                      : null,
+                ),
+              ),
+              Text(
+                _label(sliderValue.value),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RailWidthTile extends HookConsumerWidget {
+  const _RailWidthTile();
+
+  static final _divisions =
+      ((maxRailWidth - minRailWidth) / railWidthStep).round();
+
+  static String _label(double width) => '${width.round()} px';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final width = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+    );
+    final isVerticalPosition = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarPosition.isVertical,
+      ),
+    );
+
+    final sliderValue = useKeyedState(width, [width]);
+
+    final enabled = isVerticalPosition;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text('Rail Width'),
+            subtitle: const Text(
+              'Width of the side rail when the tab bar is on the left or right',
+            ),
+            leading: const Icon(MdiIcons.arrowExpand),
+            contentPadding: EdgeInsets.zero,
+            enabled: enabled,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  min: minRailWidth,
+                  max: maxRailWidth,
+                  divisions: _divisions,
+                  label: _label(sliderValue.value),
+                  value: sliderValue.value.clamp(minRailWidth, maxRailWidth),
+                  onChanged: enabled
+                      ? (value) {
+                          sliderValue.value = value;
+                        }
+                      : null,
+                  onChangeEnd: enabled
+                      ? (value) async {
+                          final normalized =
+                              (value / railWidthStep).round() * railWidthStep;
+                          sliderValue.value = normalized;
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .railWidth(normalized),
                               );
                         }
                       : null,

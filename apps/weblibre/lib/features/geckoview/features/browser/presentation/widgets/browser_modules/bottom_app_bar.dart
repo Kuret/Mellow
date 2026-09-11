@@ -184,6 +184,11 @@ class BrowserSideRail extends ConsumerWidget {
 
   final bool suppressMainToolbar;
 
+  /// Resolved content width for the rail (the caller has already applied
+  /// [effectiveRailWidth], including the narrow-viewport collapse); falls
+  /// back to [defaultRailWidth] when unset.
+  final double? railWidth;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromWidth(_tabBar.getToolbarWidth());
 
@@ -194,6 +199,7 @@ class BrowserSideRail extends ConsumerWidget {
     required this.isSmallWebMode,
     required this.position,
     this.suppressMainToolbar = false,
+    this.railWidth,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
@@ -205,6 +211,7 @@ class BrowserSideRail extends ConsumerWidget {
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
       suppressMainToolbar: suppressMainToolbar,
+      railWidth: railWidth,
     );
   }
 
@@ -280,6 +287,13 @@ class BrowserTabBar extends HookConsumerWidget {
   /// wrappers rewrite before it reaches this widget.
   final bool suppressMainToolbar;
 
+  /// Resolved content width for the vertical side rail (excludes the system
+  /// safe-area inset on the rail's outer edge, which is added by the
+  /// caller). Only meaningful in [TabBarPosition.left]/[TabBarPosition.right];
+  /// null falls back to [sideRailWidth] (== [kToolbarHeight]), which is also
+  /// what a fresh install (and every horizontal position) uses.
+  final double? railWidth;
+
   const BrowserTabBar({
     super.key,
     required this.showMainToolbar,
@@ -290,18 +304,18 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
+    this.railWidth,
   });
 
   static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = 48.0;
 
-  /// Content width of the vertical side rail (excludes the system safe-area
-  /// inset on the rail's outer edge, which is added by the caller). Kept equal
-  /// to [kToolbarHeight] so the rail reuses the same base sizing as the
-  /// horizontal bar.
+  /// Default content width of the vertical side rail, kept equal to
+  /// [kToolbarHeight] so the rail reuses the same base sizing as the
+  /// horizontal bar when [railWidth] is unset.
   static const sideRailWidth = kToolbarHeight;
 
-  double getToolbarWidth() => sideRailWidth;
+  double getToolbarWidth() => railWidth ?? sideRailWidth;
 
   bool get displayAppBar =>
       showMainToolbar &&
@@ -379,6 +393,10 @@ class BrowserTabBar extends HookConsumerWidget {
     final switcherAxis = tabBarPosition.axis;
     // Left rail reads bottom-to-top, right rail top-to-bottom.
     final railQuarterTurns = tabBarPosition == TabBarPosition.left ? 3 : 1;
+    // railWidth (the widget field) is already the caller-resolved effective
+    // width — see effectiveRailWidth — so this needs no extra viewport check.
+    final resolvedRailWidth = railWidth ?? sideRailWidth;
+    final wideRail = isVertical && resolvedRailWidth >= minWideRailWidth;
 
     final dragStartPosition = useRef(Offset.zero);
 
@@ -467,11 +485,27 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? isVertical
+          ? isVertical && !wideRail
                 ? RailAppBarTitle(
                     quarterTurns: railQuarterTurns,
                     containerColor: effectiveContainerColor,
                     useCustomColor: effectiveUseCustomColor,
+                  )
+                : isVertical
+                // A wide rail reads upright, like the horizontal bars, but the
+                // title still has to fit inside railWidth rather than the
+                // horizontal bar's much wider budget.
+                ? ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: resolvedRailWidth),
+                    child: settings.tabBarLayout == TabBarLayout.compact
+                        ? CompactAppBarTitle(
+                            containerColor: effectiveContainerColor,
+                            useCustomColor: effectiveUseCustomColor,
+                          )
+                        : AppBarTitle(
+                            containerColor: effectiveContainerColor,
+                            useCustomColor: effectiveUseCustomColor,
+                          ),
                   )
                 : settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(
@@ -862,13 +896,30 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    // Titles can't fit the narrow vertical rail; force icon-only chips there.
-    final showTitles = axis != Axis.vertical && showTitlesSetting;
-    final titleMaxWidth = ref.watch(
+    final railWidth = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+    );
+    // Titles can't fit the narrow vertical rail; force icon-only chips there
+    // unless the rail has been widened enough to show them (isWideRail).
+    final wideRail = isWideRail(
+      isVertical: axis == Axis.vertical,
+      railWidth: railWidth,
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+    final showTitles = (axis != Axis.vertical || wideRail) && showTitlesSetting;
+    final titleMaxWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
+    // On a wide rail the title has to additionally fit beside the favicon
+    // inside railWidth, or it overflows the rail itself.
+    final titleMaxWidth = wideRail
+        ? titleMaxWidthSetting.clamp(
+            0.0,
+            (railWidth - railChipChromeWidth).clamp(0.0, double.infinity),
+          )
+        : titleMaxWidthSetting;
     final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherCloseButtonMode,

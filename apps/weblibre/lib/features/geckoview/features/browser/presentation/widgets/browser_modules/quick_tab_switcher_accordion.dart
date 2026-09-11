@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
@@ -74,8 +75,17 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    // Titles can't fit the narrow vertical rail; force icon-only chips there.
-    final showTitles = !isVertical && showTitlesSetting;
+    final railWidth = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+    );
+    // Titles can't fit the narrow vertical rail; force icon-only chips there
+    // unless the rail has been widened enough to show them (isWideRail).
+    final wideRail = isWideRail(
+      isVertical: isVertical,
+      railWidth: railWidth,
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+    final showTitles = (!isVertical || wideRail) && showTitlesSetting;
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -84,11 +94,19 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherHierarchyGlyphs,
       ),
     );
-    final titleMaxWidth = ref.watch(
+    final titleMaxWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
+    // On a wide rail the title has to additionally fit beside the favicon
+    // inside railWidth, or it overflows the rail itself.
+    final titleMaxWidth = wideRail
+        ? titleMaxWidthSetting.clamp(
+            0.0,
+            (railWidth - railChipChromeWidth).clamp(0.0, double.infinity),
+          )
+        : titleMaxWidthSetting;
     final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherCloseButtonMode,
