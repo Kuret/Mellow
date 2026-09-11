@@ -15,6 +15,7 @@ dependencies:
   country_codes: ^3.3.0
   country_flags: ^4.1.2
   crypto: ^3.0.7
+  cryptography: ^2.9.0
   cryptography_flutter: ^2.3.4
   device_info_plus: ^13.2.0
   drift: ^2.34.3
