@@ -933,6 +933,7 @@ class AddTabParams {
     required this.private,
     this.historyMetadata,
     this.additionalHeaders,
+    this.tabId,
   });
 
   String url;
@@ -953,6 +954,10 @@ class AddTabParams {
 
   Map<String, String>? additionalHeaders;
 
+  /// Caller-chosen tab id. If null, a random id is generated as before.
+  /// If a tab with this id already exists, the call fails.
+  String? tabId;
+
   List<Object?> _toList() {
     return <Object?>[
       url,
@@ -964,6 +969,7 @@ class AddTabParams {
       private,
       historyMetadata,
       additionalHeaders,
+      tabId,
     ];
   }
 
@@ -982,6 +988,7 @@ class AddTabParams {
       private: result[6]! as bool,
       historyMetadata: result[7] as HistoryMetadataKey?,
       additionalHeaders: (result[8] as Map<Object?, Object?>?)?.cast<String, String>(),
+      tabId: result[9] as String?,
     );
   }
 
@@ -994,7 +1001,7 @@ class AddTabParams {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(url, other.url) && _deepEquals(startLoading, other.startLoading) && _deepEquals(parentId, other.parentId) && _deepEquals(flags, other.flags) && _deepEquals(contextId, other.contextId) && _deepEquals(source, other.source) && _deepEquals(private, other.private) && _deepEquals(historyMetadata, other.historyMetadata) && _deepEquals(additionalHeaders, other.additionalHeaders);
+    return _deepEquals(url, other.url) && _deepEquals(startLoading, other.startLoading) && _deepEquals(parentId, other.parentId) && _deepEquals(flags, other.flags) && _deepEquals(contextId, other.contextId) && _deepEquals(source, other.source) && _deepEquals(private, other.private) && _deepEquals(historyMetadata, other.historyMetadata) && _deepEquals(additionalHeaders, other.additionalHeaders) && _deepEquals(tabId, other.tabId);
   }
 
   @override
@@ -1003,7 +1010,7 @@ class AddTabParams {
 
   @override
   String toString() {
-    return 'AddTabParams(url: $url, startLoading: $startLoading, parentId: $parentId, flags: $flags, contextId: $contextId, source: $source, private: $private, historyMetadata: $historyMetadata, additionalHeaders: $additionalHeaders)';
+    return 'AddTabParams(url: $url, startLoading: $startLoading, parentId: $parentId, flags: $flags, contextId: $contextId, source: $source, private: $private, historyMetadata: $historyMetadata, additionalHeaders: $additionalHeaders, tabId: $tabId)';
   }
 }
 
@@ -9158,14 +9165,14 @@ class GeckoTabsApi {
     ;
   }
 
-  Future<String> addTab({required String url, required bool selectTab, required bool startLoading, required String? parentId, required LoadUrlFlagsValue flags, required String? contextId, required SourceValue source, required bool private, required HistoryMetadataKey? historyMetadata, required Map<String, String>? additionalHeaders, required bool excludeFromHistory, }) async {
+  Future<String> addTab({required String url, required bool selectTab, required bool startLoading, required String? parentId, required LoadUrlFlagsValue flags, required String? contextId, required SourceValue source, required bool private, required HistoryMetadataKey? historyMetadata, required Map<String, String>? additionalHeaders, required bool excludeFromHistory, String? tabId, }) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.addTab$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, selectTab, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders, excludeFromHistory]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, selectTab, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders, excludeFromHistory, tabId]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(

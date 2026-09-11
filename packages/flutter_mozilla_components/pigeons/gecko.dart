@@ -137,6 +137,10 @@ class AddTabParams {
   final HistoryMetadataKey? historyMetadata;
   final Map<String, String>? additionalHeaders;
 
+  /// Caller-chosen tab id. If null, a random id is generated as before.
+  /// If a tab with this id already exists, the call fails.
+  final String? tabId;
+
   const AddTabParams({
     required this.url,
     required this.startLoading,
@@ -147,6 +151,7 @@ class AddTabParams {
     required this.private,
     this.historyMetadata,
     this.additionalHeaders,
+    this.tabId,
   });
 }
 
@@ -1728,6 +1733,10 @@ abstract class GeckoTabsApi {
     /// history. Applied before the tab starts loading, so the first visit can't
     /// outrun the exclusion snapshot Dart pushes once the tab is persisted.
     required bool excludeFromHistory,
+
+    /// Caller-chosen tab id. If null, a random id is generated as before.
+    /// If a tab with this id already exists, the call fails.
+    String? tabId,
   });
 
   List<String> addMultipleTabs({

@@ -30,6 +30,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
 import eu.weblibre.flutter_mozilla_components.pigeons.TabTranslationStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationEngineStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationLanguage
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -513,10 +514,15 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         private: Boolean,
         historyMetadata: PigeonHistoryMetadataKey?,
         additionalHeaders: Map<String, String>?,
-        excludeFromHistory: Boolean
+        excludeFromHistory: Boolean,
+        tabId: String?
     ): String {
         try {
             val loadFlags = EngineSession.LoadUrlFlags.select(flags.value.toInt())
+
+            if (tabId != null && components.core.store.state.findTab(tabId) != null) {
+                throw IllegalArgumentException("tab id already exists")
+            }
 
             // Inlined from TabsUseCases.AddNewTabUseCase so the exclusion can be
             // marked *between* creating the tab and dispatching it, exactly as
@@ -542,6 +548,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 initialLoadFlags = loadFlags,
                 initialAdditionalHeaders = additionalHeaders,
                 desktopMode = components.core.store.state.desktopMode,
+                id = tabId ?: UUID.randomUUID().toString(),
             )
 
             if (excludeFromHistory) {
@@ -771,6 +778,12 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         excludeFromHistory: Boolean
     ): List<String> {
         try {
+            tabs.forEach { params ->
+                if (params.tabId != null && components.core.store.state.findTab(params.tabId) != null) {
+                    throw IllegalArgumentException("tab id already exists")
+                }
+            }
+
             val tabSessionStates = tabs.map { params ->
                 createTab(
                     url = params.url,
@@ -786,7 +799,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                             referrerUrl = metadata.referrerUrl
                         )
                     },
-                    desktopMode = components.core.store.state.desktopMode
+                    desktopMode = components.core.store.state.desktopMode,
+                    id = params.tabId ?: UUID.randomUUID().toString(),
                 )
             }
 

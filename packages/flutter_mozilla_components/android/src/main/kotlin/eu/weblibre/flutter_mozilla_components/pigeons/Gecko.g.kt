@@ -1252,7 +1252,12 @@ data class AddTabParams (
   val source: SourceValue,
   val private: Boolean,
   val historyMetadata: HistoryMetadataKey? = null,
-  val additionalHeaders: Map<String, String>? = null
+  val additionalHeaders: Map<String, String>? = null,
+  /**
+   * Caller-chosen tab id. If null, a random id is generated as before.
+   * If a tab with this id already exists, the call fails.
+   */
+  val tabId: String? = null
 )
  {
   companion object {
@@ -1266,7 +1271,8 @@ data class AddTabParams (
       val private = pigeonVar_list[6] as Boolean
       val historyMetadata = pigeonVar_list[7] as HistoryMetadataKey?
       val additionalHeaders = pigeonVar_list[8] as Map<String, String>?
-      return AddTabParams(url, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders)
+      val tabId = pigeonVar_list[9] as String?
+      return AddTabParams(url, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders, tabId)
     }
   }
   fun toList(): List<Any?> {
@@ -1280,6 +1286,7 @@ data class AddTabParams (
       private,
       historyMetadata,
       additionalHeaders,
+      tabId,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -1290,7 +1297,7 @@ data class AddTabParams (
       return true
     }
     val other = other as AddTabParams
-    return GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.startLoading, other.startLoading) && GeckoPigeonUtils.deepEquals(this.parentId, other.parentId) && GeckoPigeonUtils.deepEquals(this.flags, other.flags) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.source, other.source) && GeckoPigeonUtils.deepEquals(this.private, other.private) && GeckoPigeonUtils.deepEquals(this.historyMetadata, other.historyMetadata) && GeckoPigeonUtils.deepEquals(this.additionalHeaders, other.additionalHeaders)
+    return GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.startLoading, other.startLoading) && GeckoPigeonUtils.deepEquals(this.parentId, other.parentId) && GeckoPigeonUtils.deepEquals(this.flags, other.flags) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.source, other.source) && GeckoPigeonUtils.deepEquals(this.private, other.private) && GeckoPigeonUtils.deepEquals(this.historyMetadata, other.historyMetadata) && GeckoPigeonUtils.deepEquals(this.additionalHeaders, other.additionalHeaders) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId)
   }
 
   override fun hashCode(): Int {
@@ -1304,10 +1311,11 @@ data class AddTabParams (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.private)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.historyMetadata)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.additionalHeaders)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
     return result
   }
   override fun toString(): String {
-    return "AddTabParams(url=$url, startLoading=$startLoading, parentId=$parentId, flags=$flags, contextId=$contextId, source=$source, private=$private, historyMetadata=$historyMetadata, additionalHeaders=$additionalHeaders)"
+    return "AddTabParams(url=$url, startLoading=$startLoading, parentId=$parentId, flags=$flags, contextId=$contextId, source=$source, private=$private, historyMetadata=$historyMetadata, additionalHeaders=$additionalHeaders, tabId=$tabId)"
   }
 }
 
@@ -8993,7 +9001,7 @@ interface GeckoTabsApi {
   fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
-  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean): String
+  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean, tabId: String?): String
   fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?, excludeFromHistory: Boolean): List<String>
   fun removeAllTabs(recoverable: Boolean)
   fun removeTabs(ids: List<String>)
@@ -9105,8 +9113,9 @@ interface GeckoTabsApi {
             val historyMetadataArg = args[8] as HistoryMetadataKey?
             val additionalHeadersArg = args[9] as Map<String, String>?
             val excludeFromHistoryArg = args[10] as Boolean
+            val tabIdArg = args[11] as String?
             val wrapped: List<Any?> = try {
-              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg))
+              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg, tabIdArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
