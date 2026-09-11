@@ -32,9 +32,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
-import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
@@ -47,13 +44,9 @@ class ContainerListScreen extends HookConsumerWidget {
     final repository = ref.watch(containerRepositoryProvider.notifier);
 
     Future<void> setSelectedContainer(ContainerDataWithCount container) async {
-      final result = await ref
+      await ref
           .read(selectedContainerProvider.notifier)
           .setContainerId(container.id);
-
-      if (context.mounted && result == SetContainerResult.success) {
-        await ensureProxyStartedForContainer(context, ref, container);
-      }
     }
 
     Future<void> editContainer(ContainerDataWithCount container) async {
@@ -188,11 +181,6 @@ class _ContainerCard extends HookConsumerWidget {
       containerColor,
       useCustomColor: container.metadata.useCustomColor,
     );
-    final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
-    final proxyOptionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
-    final proxyOptionsLoading =
-        proxyOptionsState.isLoading && !proxyOptionsState.hasValue;
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
@@ -260,22 +248,6 @@ class _ContainerCard extends HookConsumerWidget {
                                 const _ContainerInfoChip(
                                   icon: Icons.cookie_outlined,
                                   label: 'Isolated',
-                                ),
-                              if (container.metadata.proxyConnectionId != null)
-                                _ContainerInfoChip(
-                                  icon: Icons.route_outlined,
-                                  label: proxyConnectionTitle(
-                                    proxyOptions,
-                                    container.metadata.proxyConnectionId!,
-                                    isLoading: proxyOptionsLoading,
-                                  ),
-                                ),
-                              if (container.metadata.proxyConnectionId ==
-                                      null &&
-                                  container.metadata.bypassGlobalProxy)
-                                const _ContainerInfoChip(
-                                  icon: Icons.public,
-                                  label: 'Direct',
                                 ),
                               if (container.metadata.clearDataOnExit)
                                 const _ContainerInfoChip(

@@ -26,21 +26,15 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/uuid.dart';
-import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
-import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
@@ -85,21 +79,11 @@ class ContainerEditScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
-    final proxyOptionsLoading = ref.watch(
-      singboxProxyProfilesRepositoryProvider.select(
-        (value) => value.isLoading && !value.hasValue,
-      ),
-    );
-
     final selectedColor = useState(initialContainer.color);
     final useCustomColor = useState(initialContainer.metadata.useCustomColor);
     final selectedIcon = useState(initialContainer.metadata.iconData);
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
-    );
-    final proxyConnectionId = useState<ProxyConnectionId?>(
-      initialContainer.metadata.proxyConnectionId,
     );
     final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
     final excludeFromIndex = useState(
@@ -107,14 +91,6 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final excludeFromHistory = useState(
       initialContainer.metadata.excludeFromHistory,
-    );
-    final bypassGlobalProxy = useState(
-      initialContainer.metadata.bypassGlobalProxy,
-    );
-    final assignedSites = useState(initialContainer.metadata.assignedSites);
-    final strictMode = useState(initialContainer.metadata.strictMode);
-    final isolatedAppLinkSettings = useState(
-      initialContainer.metadata.isolatedAppLinkSettings,
     );
     final isPinned = useState(initialContainer.isPinned);
     final wallpaper = useState(initialContainer.metadata.wallpaper);
@@ -134,29 +110,11 @@ class ContainerEditScreen extends HookConsumerWidget {
             .copyWith(
               contextualIdentity: contextualIdentity.value,
               iconData: selectedIcon.value,
-              proxyConnectionId: contextualIdentity.value != null
-                  ? proxyConnectionId.value
-                  : null,
               clearDataOnExit:
                   clearDataOnExit.value && contextualIdentity.value != null,
               excludeFromIndex: excludeFromIndex.value,
               excludeFromHistory: excludeFromHistory.value,
-              bypassGlobalProxy:
-                  contextualIdentity.value != null &&
-                  proxyConnectionId.value == null &&
-                  bypassGlobalProxy.value,
               useCustomColor: useCustomColor.value,
-              assignedSites: assignedSites.value,
-              // Strict mode requires a Gecko contextId (the extension keys
-              // strictness on the tab's cookieStoreId). sanitized() enforces the
-              // same invariant defensively on write.
-              strictMode: strictMode.value && contextualIdentity.value != null,
-              // Isolated app-link settings require a Gecko contextId (the
-              // interceptor keys the override on the tab's contextId).
-              // sanitized() enforces the same invariant defensively on write.
-              isolatedAppLinkSettings:
-                  isolatedAppLinkSettings.value &&
-                  contextualIdentity.value != null,
               wallpaper: wallpaper.value,
             )
             .sanitized(),
@@ -177,15 +135,6 @@ class ContainerEditScreen extends HookConsumerWidget {
           container.id,
           isPinned: isPinned.value,
         );
-      }
-      // Keep the per-container app-link override in step with the isolation
-      // toggle: drop it when the container is no longer isolated (or lost its
-      // contextId) so it can't linger orphaned in GeneralSettings.
-      if (!container.metadata.isolatedAppLinkSettings) {
-        await removeContainerAppLinkOverrides(ref, {
-          initialContainer.metadata.contextualIdentity,
-          container.metadata.contextualIdentity,
-        });
       }
       return container;
     }
@@ -288,12 +237,6 @@ class ContainerEditScreen extends HookConsumerWidget {
       selectedColor.value,
       useCustomColor: useCustomColor.value,
     );
-    final assignedSiteCount = assignedSites.value?.length ?? 0;
-    final canPickProxy =
-        _mode == _DialogMode.create || contextualIdentity.value != null;
-    final canBypassGlobalProxy =
-        contextualIdentity.value != null && proxyConnectionId.value == null;
-
     return PopScope(
       canPop: container == comparison,
       onPopInvokedWithResult: (didPop, result) async {
@@ -525,90 +468,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                                             uuid.v4()
                                       : null;
 
-                                  if (!value) {
-                                    proxyConnectionId.value = null;
-                                    bypassGlobalProxy.value = false;
-                                  }
-
                                   if (!value && clearDataOnExit.value) {
                                     clearDataOnExit.value = false;
                                   }
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: const Icon(Icons.route_outlined),
-                          title: const Text('Proxy Connection'),
-                          subtitle: Text(switch (proxyConnectionId.value) {
-                            final id? => proxyConnectionTitle(
-                              proxyOptions,
-                              id,
-                              isLoading: proxyOptionsLoading,
-                            ),
-                            null => 'None',
-                          }),
-                          trailing: const Icon(Icons.chevron_right),
-                          enabled: canPickProxy,
-                          onTap: canPickProxy
-                              ? () async {
-                                  final createdTemporaryIdentity =
-                                      contextualIdentity.value == null;
-
-                                  if (createdTemporaryIdentity) {
-                                    contextualIdentity.value =
-                                        initialContainer
-                                            .metadata
-                                            .contextualIdentity ??
-                                        uuid.v4();
-                                  }
-
-                                  final outcome =
-                                      await showProxyConnectionPicker(
-                                        context,
-                                        selectedProxyConnectionId:
-                                            proxyConnectionId.value,
-                                      );
-
-                                  switch (outcome) {
-                                    case null:
-                                      // Dismissed without selecting — leave
-                                      // existing value untouched, but undo any
-                                      // temporary identity we created.
-                                      if (createdTemporaryIdentity) {
-                                        contextualIdentity.value = null;
-                                      }
-                                    case ProxyPickerCleared():
-                                      proxyConnectionId.value = null;
-                                      if (createdTemporaryIdentity) {
-                                        contextualIdentity.value = null;
-                                        bypassGlobalProxy.value = false;
-                                      }
-                                    case ProxyPickerSelected(:final id):
-                                      proxyConnectionId.value = id;
-                                      bypassGlobalProxy.value = false;
-                                    case ProxyPickerDirect():
-                                      // Not offered here — this screen has its
-                                      // own bypass switch below — but the
-                                      // mapping is the same one it performs.
-                                      proxyConnectionId.value = null;
-                                      bypassGlobalProxy.value = true;
-                                  }
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value:
-                              canBypassGlobalProxy && bypassGlobalProxy.value,
-                          title: const Text('Bypass Global Proxy'),
-                          subtitle: const Text(
-                            'Use the normal connection for this container when global routing is enabled',
-                          ),
-                          secondary: const Icon(Icons.public),
-                          onChanged: canBypassGlobalProxy
-                              ? (value) {
-                                  bypassGlobalProxy.value = value;
                                 }
                               : null,
                         ),
@@ -654,142 +516,6 @@ class ContainerEditScreen extends HookConsumerWidget {
                             excludeFromHistory.value = value;
                           },
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Assignments',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card.filled(
-                    margin: EdgeInsets.zero,
-                    color: colorScheme.surfaceContainer,
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.web),
-                          title: const Text('Assigned Sites'),
-                          subtitle: assignedSiteCount > 0
-                              ? Text(
-                                  '$assignedSiteCount ${assignedSiteCount == 1 ? 'rule' : 'rules'} configured',
-                                )
-                              : const Text(
-                                  'Route matching origins into this container',
-                                ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () async {
-                            final result = await showDialog<Set<Uri>>(
-                              context: context,
-                              builder: (context) => ContainerSitesScreen(
-                                initialSites:
-                                    assignedSites.value?.toSet() ?? {},
-                              ),
-                            );
-
-                            if (result == null || result.isEmpty) {
-                              assignedSites.value = null;
-                            } else {
-                              assignedSites.value = result.toList();
-                            }
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value:
-                              contextualIdentity.value != null &&
-                              strictMode.value,
-                          title: const Text('Strict Mode'),
-                          subtitle: Text(
-                            contextualIdentity.value != null
-                                ? 'Only allow assigned sites to load; block everything else'
-                                : 'Requires cookie isolation to be enabled',
-                          ),
-                          secondary: const Icon(MdiIcons.shieldLockOutline),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  strictMode.value = value;
-                                }
-                              : null,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'App Links',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card.filled(
-                    margin: EdgeInsets.zero,
-                    color: colorScheme.surfaceContainer,
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        SwitchListTile.adaptive(
-                          value:
-                              contextualIdentity.value != null &&
-                              isolatedAppLinkSettings.value,
-                          title: const Text('Isolated App Link Settings'),
-                          subtitle: Text(
-                            contextualIdentity.value != null
-                                ? 'Use a separate open-in-app mode and remembered '
-                                      'site rules for this container instead of the '
-                                      'global settings'
-                                : 'Requires cookie isolation to be enabled',
-                          ),
-                          secondary: const Icon(MdiIcons.openInApp),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  isolatedAppLinkSettings.value = value;
-                                }
-                              : null,
-                        ),
-                        // The per-container mode + rules live in GeneralSettings
-                        // (keyed by the persisted contextId) and are edited live,
-                        // like the global app-link settings. Only offered in edit
-                        // mode against the saved, immutable contextId — a create
-                        // draft's contextId can still churn (cookie-isolation
-                        // toggling regenerates it), which would orphan overrides.
-                        if (_mode == _DialogMode.edit &&
-                            initialContainer.metadata.contextualIdentity !=
-                                null &&
-                            isolatedAppLinkSettings.value) ...[
-                          const Divider(height: 1, indent: 56),
-                          ListTile(
-                            leading: const Icon(Icons.tune),
-                            title: const Text('App Link Behavior'),
-                            subtitle: const Text(
-                              "Configure this container's open-in-app mode and "
-                              'remembered sites',
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () async {
-                              await showDialog<void>(
-                                context: context,
-                                builder: (context) =>
-                                    ContainerAppLinkSettingsDialog(
-                                      contextId: initialContainer
-                                          .metadata
-                                          .contextualIdentity!,
-                                      containerName:
-                                          textController.text.trim().isNotEmpty
-                                          ? textController.text.trim()
-                                          : initialContainer.name,
-                                    ),
-                              );
-                            },
-                          ),
-                        ],
                       ],
                     ),
                   ),

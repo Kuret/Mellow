@@ -11,23 +11,13 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata contextualIdentity(String? contextualIdentity);
 
-  ContainerMetadata proxyConnectionId(ProxyConnectionId? proxyConnectionId);
-
   ContainerMetadata clearDataOnExit(bool clearDataOnExit);
 
   ContainerMetadata excludeFromIndex(bool excludeFromIndex);
 
   ContainerMetadata excludeFromHistory(bool excludeFromHistory);
 
-  ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy);
-
   ContainerMetadata useCustomColor(bool useCustomColor);
-
-  ContainerMetadata assignedSites(List<Uri>? assignedSites);
-
-  ContainerMetadata strictMode(bool strictMode);
-
-  ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings);
 
   ContainerMetadata wallpaper(WallpaperOverride? wallpaper);
 
@@ -41,15 +31,10 @@ abstract class _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     IconData? iconData,
     String? contextualIdentity,
-    ProxyConnectionId? proxyConnectionId,
     bool clearDataOnExit,
     bool excludeFromIndex,
     bool excludeFromHistory,
-    bool bypassGlobalProxy,
     bool useCustomColor,
-    List<Uri>? assignedSites,
-    bool strictMode,
-    bool isolatedAppLinkSettings,
     WallpaperOverride? wallpaper,
   });
 }
@@ -69,10 +54,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(contextualIdentity: contextualIdentity);
 
   @override
-  ContainerMetadata proxyConnectionId(ProxyConnectionId? proxyConnectionId) =>
-      call(proxyConnectionId: proxyConnectionId);
-
-  @override
   ContainerMetadata clearDataOnExit(bool clearDataOnExit) =>
       call(clearDataOnExit: clearDataOnExit);
 
@@ -85,23 +66,8 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(excludeFromHistory: excludeFromHistory);
 
   @override
-  ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy) =>
-      call(bypassGlobalProxy: bypassGlobalProxy);
-
-  @override
   ContainerMetadata useCustomColor(bool useCustomColor) =>
       call(useCustomColor: useCustomColor);
-
-  @override
-  ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
-      call(assignedSites: assignedSites);
-
-  @override
-  ContainerMetadata strictMode(bool strictMode) => call(strictMode: strictMode);
-
-  @override
-  ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings) =>
-      call(isolatedAppLinkSettings: isolatedAppLinkSettings);
 
   @override
   ContainerMetadata wallpaper(WallpaperOverride? wallpaper) =>
@@ -118,15 +84,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
-    Object? proxyConnectionId = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? excludeFromIndex = const $CopyWithPlaceholder(),
     Object? excludeFromHistory = const $CopyWithPlaceholder(),
-    Object? bypassGlobalProxy = const $CopyWithPlaceholder(),
     Object? useCustomColor = const $CopyWithPlaceholder(),
-    Object? assignedSites = const $CopyWithPlaceholder(),
-    Object? strictMode = const $CopyWithPlaceholder(),
-    Object? isolatedAppLinkSettings = const $CopyWithPlaceholder(),
     Object? wallpaper = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
@@ -138,10 +99,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.contextualIdentity
           // ignore: cast_nullable_to_non_nullable
           : contextualIdentity as String?,
-      proxyConnectionId: proxyConnectionId == const $CopyWithPlaceholder()
-          ? _value.proxyConnectionId
-          // ignore: cast_nullable_to_non_nullable
-          : proxyConnectionId as ProxyConnectionId?,
       clearDataOnExit:
           clearDataOnExit == const $CopyWithPlaceholder() ||
               clearDataOnExit == null
@@ -160,33 +117,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.excludeFromHistory
           // ignore: cast_nullable_to_non_nullable
           : excludeFromHistory as bool,
-      bypassGlobalProxy:
-          bypassGlobalProxy == const $CopyWithPlaceholder() ||
-              bypassGlobalProxy == null
-          ? _value.bypassGlobalProxy
-          // ignore: cast_nullable_to_non_nullable
-          : bypassGlobalProxy as bool,
       useCustomColor:
           useCustomColor == const $CopyWithPlaceholder() ||
               useCustomColor == null
           ? _value.useCustomColor
           // ignore: cast_nullable_to_non_nullable
           : useCustomColor as bool,
-      assignedSites: assignedSites == const $CopyWithPlaceholder()
-          ? _value.assignedSites
-          // ignore: cast_nullable_to_non_nullable
-          : assignedSites as List<Uri>?,
-      strictMode:
-          strictMode == const $CopyWithPlaceholder() || strictMode == null
-          ? _value.strictMode
-          // ignore: cast_nullable_to_non_nullable
-          : strictMode as bool,
-      isolatedAppLinkSettings:
-          isolatedAppLinkSettings == const $CopyWithPlaceholder() ||
-              isolatedAppLinkSettings == null
-          ? _value.isolatedAppLinkSettings
-          // ignore: cast_nullable_to_non_nullable
-          : isolatedAppLinkSettings as bool,
       wallpaper: wallpaper == const $CopyWithPlaceholder()
           ? _value.wallpaper
           // ignore: cast_nullable_to_non_nullable
@@ -315,51 +251,37 @@ extension $ContainerDataCopyWith on ContainerData {
 // JsonSerializableGenerator
 // **************************************************************************
 
-ContainerMetadata _$ContainerMetadataFromJson(
-  Map<String, dynamic> json,
-) => ContainerMetadata.withDefaults(
-  iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
-    json['iconData'],
-    const IconDataJsonConverter().fromJson,
-  ),
-  contextualIdentity: json['contextualIdentity'] as String?,
-  proxyConnectionId: _proxyConnectionIdFromJson(
-    json['proxyConnectionId'] as String?,
-  ),
-  clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
-  excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
-  excludeFromHistory: json['excludeFromHistory'] as bool? ?? false,
-  bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
-  useCustomColor: json['useCustomColor'] as bool? ?? false,
-  assignedSites: (json['assignedSites'] as List<dynamic>?)
-      ?.map((e) => Uri.parse(e as String))
-      .toList(),
-  strictMode: json['strictMode'] as bool? ?? false,
-  isolatedAppLinkSettings: json['isolatedAppLinkSettings'] as bool? ?? false,
-  wallpaper: json['wallpaper'] == null
-      ? null
-      : WallpaperOverride.fromJson(json['wallpaper'] as Map<String, dynamic>),
-);
+ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
+    ContainerMetadata.withDefaults(
+      iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
+        json['iconData'],
+        const IconDataJsonConverter().fromJson,
+      ),
+      contextualIdentity: json['contextualIdentity'] as String?,
+      clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
+      excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
+      excludeFromHistory: json['excludeFromHistory'] as bool? ?? false,
+      useCustomColor: json['useCustomColor'] as bool? ?? false,
+      wallpaper: json['wallpaper'] == null
+          ? null
+          : WallpaperOverride.fromJson(
+              json['wallpaper'] as Map<String, dynamic>,
+            ),
+    );
 
-Map<String, dynamic> _$ContainerMetadataToJson(
-  ContainerMetadata instance,
-) => <String, dynamic>{
-  'iconData': _$JsonConverterToJson<Map<String, dynamic>, IconData>(
-    instance.iconData,
-    const IconDataJsonConverter().toJson,
-  ),
-  'contextualIdentity': instance.contextualIdentity,
-  'proxyConnectionId': _proxyConnectionIdToJson(instance.proxyConnectionId),
-  'clearDataOnExit': instance.clearDataOnExit,
-  'excludeFromIndex': instance.excludeFromIndex,
-  'excludeFromHistory': instance.excludeFromHistory,
-  'bypassGlobalProxy': instance.bypassGlobalProxy,
-  'useCustomColor': instance.useCustomColor,
-  'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
-  'strictMode': instance.strictMode,
-  'isolatedAppLinkSettings': instance.isolatedAppLinkSettings,
-  'wallpaper': instance.wallpaper?.toJson(),
-};
+Map<String, dynamic> _$ContainerMetadataToJson(ContainerMetadata instance) =>
+    <String, dynamic>{
+      'iconData': _$JsonConverterToJson<Map<String, dynamic>, IconData>(
+        instance.iconData,
+        const IconDataJsonConverter().toJson,
+      ),
+      'contextualIdentity': instance.contextualIdentity,
+      'clearDataOnExit': instance.clearDataOnExit,
+      'excludeFromIndex': instance.excludeFromIndex,
+      'excludeFromHistory': instance.excludeFromHistory,
+      'useCustomColor': instance.useCustomColor,
+      'wallpaper': instance.wallpaper?.toJson(),
+    };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

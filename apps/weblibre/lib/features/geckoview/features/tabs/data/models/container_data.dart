@@ -23,7 +23,6 @@ import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/icon_data.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 
 part 'container_data.g.dart';
@@ -35,12 +34,6 @@ class ContainerMetadata with FastEquatable {
   final IconData? iconData;
 
   final String? contextualIdentity;
-
-  @JsonKey(
-    fromJson: _proxyConnectionIdFromJson,
-    toJson: _proxyConnectionIdToJson,
-  )
-  final ProxyConnectionId? proxyConnectionId;
 
   @JsonKey(defaultValue: false)
   final bool clearDataOnExit;
@@ -63,130 +56,56 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool excludeFromHistory;
 
-  @JsonKey(defaultValue: false)
-  final bool bypassGlobalProxy;
-
   // When true, ContainerData.color is used directly as primaryContainer
   // instead of being fed through ColorScheme.fromSeed. Lets power users pick
   // any color (including dark/black) at the cost of M3 harmonization.
   @JsonKey(defaultValue: false)
   final bool useCustomColor;
 
-  final List<Uri>? assignedSites;
-
-  // When true, tabs in this container may only load origins listed in
-  // [assignedSites]; any other top-level navigation is blocked. Read on the
-  // native side via `json_extract(metadata, '$.strictMode')` (see the
-  // `strictContextAssignments` query in definitions.drift) and pushed to the
-  // container-proxy web extension. Requires a Gecko contextId — the extension
-  // keys strictness on the tab's cookieStoreId — so it is normalized to false
-  // when [contextualIdentity] is null (mirrors [excludeFromHistory]).
-  @JsonKey(defaultValue: false)
-  final bool strictMode;
-
-  // When true, this container has its own app-link policy (open-in-app mode +
-  // remembered per-site rules) that fully replaces the global one for its tabs.
-  // The override itself lives in `GeneralSettings.appLinkContextOverrides` keyed
-  // by [contextualIdentity]; this flag only gates whether that override is
-  // consulted. Requires a Gecko contextId — the native interceptor keys the
-  // override on the tab's contextId, so it is normalized to false when
-  // [contextualIdentity] is null (mirrors [strictMode]/[excludeFromHistory]).
-  @JsonKey(defaultValue: false)
-  final bool isolatedAppLinkSettings;
-
   // This container's own home wallpaper, shown instead of the profile-wide one
   // while the container is selected. Null follows the profile. See
   // [WallpaperOverride] and [GeneralSettings.homeWallpaperFile].
   //
-  // Unlike strictMode / isolatedAppLinkSettings this needs no contextId: it is
-  // pure presentation, resolved in Dart from the selected container, and means
-  // the same thing with cookie isolation off.
+  // This needs no contextId: it is pure presentation, resolved in Dart from
+  // the selected container, and means the same thing with cookie isolation
+  // off.
   final WallpaperOverride? wallpaper;
 
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
-    required this.proxyConnectionId,
     required this.clearDataOnExit,
     required this.excludeFromIndex,
     required this.excludeFromHistory,
-    required this.bypassGlobalProxy,
     required this.useCustomColor,
-    required this.assignedSites,
-    required this.strictMode,
-    required this.isolatedAppLinkSettings,
     required this.wallpaper,
   });
 
   ContainerMetadata.withDefaults({
     IconData? iconData,
     String? contextualIdentity,
-    ProxyConnectionId? proxyConnectionId,
     bool? clearDataOnExit,
     bool? excludeFromIndex,
     bool? excludeFromHistory,
-    bool? bypassGlobalProxy,
     bool? useCustomColor,
-    List<Uri>? assignedSites,
-    bool? strictMode,
-    bool? isolatedAppLinkSettings,
     WallpaperOverride? wallpaper,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
-         proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
          excludeFromIndex: excludeFromIndex ?? false,
          excludeFromHistory: excludeFromHistory ?? false,
-         bypassGlobalProxy: bypassGlobalProxy ?? false,
          useCustomColor: useCustomColor ?? false,
-         assignedSites: assignedSites,
-         // Strict mode needs a contextId (the extension keys on cookieStoreId);
-         // normalize away the invalid combination on read, and writers re-apply
-         // it via [sanitized].
-         strictMode: (strictMode ?? false) && contextualIdentity != null,
-         // Isolated app-link settings need a contextId — the native interceptor
-         // keys the override on the tab's contextId. Normalize the invalid
-         // combination on read; writers re-apply it via [sanitized].
-         isolatedAppLinkSettings:
-             (isolatedAppLinkSettings ?? false) && contextualIdentity != null,
          wallpaper: wallpaper,
        );
 
-  /// Enforce the settings that only mean something for a cookie-isolated
-  /// (contextId-bearing) container before persistence. The primary constructor
-  /// can't normalize (copy_with_extension_gen requires params to map 1:1 to
-  /// fields), so writers route through this.
+  /// No-op today — kept as the seam writers route persistence through, so a
+  /// future contextId-only field has somewhere to normalize itself before
+  /// being written.
   ///
-  /// [excludeFromHistory] is deliberately absent: it is keyed on tabs natively
-  /// and applies to every container.
-  ContainerMetadata sanitized() {
-    var result = this;
-    // Strict mode is meaningless without a contextId: the extension keys
-    // strictness on the tab's cookieStoreId.
-    if (result.strictMode && result.contextualIdentity == null) {
-      result = result.copyWith(strictMode: false);
-    }
-    // Isolated app-link settings need a contextId: the interceptor keys the
-    // override on the tab's contextId.
-    if (result.isolatedAppLinkSettings && result.contextualIdentity == null) {
-      result = result.copyWith(isolatedAppLinkSettings: false);
-    }
-    // Routing is keyed on the cookie-store context too: the snapshot skips a
-    // container without one, so a proxy or bypass kept here is a setting the
-    // user can see but nothing applies — the container's tabs run in the
-    // general context and follow the global route regardless.
-    if (result.contextualIdentity == null &&
-        (result.proxyConnectionId != null || result.bypassGlobalProxy)) {
-      result = result.copyWith(
-        proxyConnectionId: null,
-        bypassGlobalProxy: false,
-      );
-    }
-    return result;
-  }
-
-  bool get usesTorProxy => proxyConnectionId is TorProxyConnectionId;
+  /// [excludeFromHistory] is deliberately absent from any such normalization:
+  /// it is keyed on tabs natively and applies to every container.
+  ContainerMetadata sanitized() => this;
 
   factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
       _$ContainerMetadataFromJson(json);
@@ -197,15 +116,10 @@ class ContainerMetadata with FastEquatable {
   List<Object?> get hashParameters => [
     iconData,
     contextualIdentity,
-    proxyConnectionId,
     clearDataOnExit,
     excludeFromIndex,
     excludeFromHistory,
-    bypassGlobalProxy,
     useCustomColor,
-    assignedSites,
-    strictMode,
-    isolatedAppLinkSettings,
     wallpaper,
   ];
 }
@@ -273,8 +187,3 @@ class ContainerDataWithCount extends ContainerData {
   @override
   List<Object?> get hashParameters => [...super.hashParameters, tabCount];
 }
-
-ProxyConnectionId? _proxyConnectionIdFromJson(String? json) =>
-    ProxyConnectionId.decode(json);
-
-String? _proxyConnectionIdToJson(ProxyConnectionId? object) => object?.encode();
