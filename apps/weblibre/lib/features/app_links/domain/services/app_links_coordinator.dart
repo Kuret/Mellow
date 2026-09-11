@@ -22,9 +22,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
-import 'package:weblibre/features/app_links/domain/services/effective_app_link_policy.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -139,16 +136,11 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
     return result;
   }
 
-  /// Remember-then-resolve (§2.6): persist the rule to `GeneralSettings` first so
-  /// it is replicated to native, then resolve the still-pending request.
-  ///
-  /// [contextId] is the source tab's live contextId (from the prompt request) —
-  /// the container's base contextId for a regular tab, or the tab's
-  /// `isolation_context_id` for an isolated tab. When it resolves to a container
-  /// with "isolated app link settings" enabled, the rule is written to that
-  /// container's own override bucket (`appLinkContextOverrides`, keyed by the
-  /// container's base contextId) rather than the global [GeneralSettings.appLinkRules],
-  /// keeping the two rule sets separate (replace semantics).
+  /// Remember-then-resolve (§2.6): persist the rule to the global
+  /// [GeneralSettings.appLinkRules] first so it is replicated to native, then
+  /// resolve the still-pending request. Per-container app-link overrides were
+  /// removed along with container strict mode, so every remembered rule is
+  /// global now.
   Future<AppLinkResolutionResult> resolveWithRule(
     int requestId,
     AppLinkDecision decision,
@@ -159,50 +151,15 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
       'app-link resolveWithRule request=$requestId decision=$decision '
       'rule=${rule.decision} scope=${rule.scope} contextId=$contextId',
     );
-    final overrideKey = await _overrideKeyForContext(contextId);
 
     await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
       current,
     ) {
-      if (overrideKey != null) {
-        final existing =
-            current.appLinkContextOverrides[overrideKey] ??
-            ContextAppLinkPolicy.blank();
-        final updated = existing.copyWith.rules({
-          ...existing.rules,
-          rule.scope: rule,
-        });
-        return current.copyWith.appLinkContextOverrides({
-          ...current.appLinkContextOverrides,
-          overrideKey: updated,
-        });
-      }
       return current.copyWith.appLinkRules({
         ...current.appLinkRules,
         rule.scope: rule,
       });
     });
     return resolve(requestId, decision);
-  }
-
-  /// Resolve the source tab's live [contextId] to the override storage key — the
-  /// base contextId of the owning isolated-app-link container — or null to write
-  /// globally. Handles both a regular tab (contextId is already the container
-  /// base) and an isolated tab (contextId is an `isolation_context_id` mapping to
-  /// its container). Delegates to [resolveAppLinkOverrideKey] so writes land in
-  /// the bucket that is published back to native.
-  Future<String?> _overrideKeyForContext(String? contextId) async {
-    if (contextId == null) return null;
-
-    final containers = await ref.read(watchContainersWithCountProvider.future);
-    final isolationMap = await ref.read(
-      watchIsolatedContextContainerMapProvider.future,
-    );
-
-    return resolveAppLinkOverrideKey(
-      liveContextId: contextId,
-      containers: containers,
-      isolationContextContainerMap: isolationMap,
-    );
   }
 }

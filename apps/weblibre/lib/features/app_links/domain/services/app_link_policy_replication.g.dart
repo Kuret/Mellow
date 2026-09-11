@@ -8,71 +8,22 @@ part of 'app_link_policy_replication.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Effective app-link protection (§2.3), recomputed whenever routing, strict
-/// mode, contextual identities, or site assignments change.
-
-@ProviderFor(appLinkProtection)
-final appLinkProtectionProvider = AppLinkProtectionProvider._();
-
-/// Effective app-link protection (§2.3), recomputed whenever routing, strict
-/// mode, contextual identities, or site assignments change.
-
-final class AppLinkProtectionProvider
-    extends
-        $FunctionalProvider<
-          AppLinkProtection,
-          AppLinkProtection,
-          AppLinkProtection
-        >
-    with $Provider<AppLinkProtection> {
-  /// Effective app-link protection (§2.3), recomputed whenever routing, strict
-  /// mode, contextual identities, or site assignments change.
-  AppLinkProtectionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'appLinkProtectionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$appLinkProtectionHash();
-
-  @$internal
-  @override
-  $ProviderElement<AppLinkProtection> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  AppLinkProtection create(Ref ref) {
-    return appLinkProtection(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AppLinkProtection value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AppLinkProtection>(value),
-    );
-  }
-}
-
-String _$appLinkProtectionHash() => r'6aab203c9b7d2f2c8a73684ea0b624e09fe6179f';
-
 /// The complete policy snapshot to push, or null until the real persisted
-/// settings have loaded (the `...WithDefaults` loading placeholder is not valid
-/// input, §2.8). Combines the user-intent settings with computed protection.
+/// settings have loaded. Combines the user-intent settings with the (now
+/// constant) protection fields — proxy routing, container strict mode and
+/// per-container app-link overrides have all been removed, so nothing is
+/// ever protected or overridden any more, but the native pigeon contract
+/// still expects these fields on every snapshot.
 
 @ProviderFor(appLinkPolicySnapshot)
 final appLinkPolicySnapshotProvider = AppLinkPolicySnapshotProvider._();
 
 /// The complete policy snapshot to push, or null until the real persisted
-/// settings have loaded (the `...WithDefaults` loading placeholder is not valid
-/// input, §2.8). Combines the user-intent settings with computed protection.
+/// settings have loaded. Combines the user-intent settings with the (now
+/// constant) protection fields — proxy routing, container strict mode and
+/// per-container app-link overrides have all been removed, so nothing is
+/// ever protected or overridden any more, but the native pigeon contract
+/// still expects these fields on every snapshot.
 
 final class AppLinkPolicySnapshotProvider
     extends
@@ -83,8 +34,11 @@ final class AppLinkPolicySnapshotProvider
         >
     with $Provider<AppLinkPolicySnapshot?> {
   /// The complete policy snapshot to push, or null until the real persisted
-  /// settings have loaded (the `...WithDefaults` loading placeholder is not valid
-  /// input, §2.8). Combines the user-intent settings with computed protection.
+  /// settings have loaded. Combines the user-intent settings with the (now
+  /// constant) protection fields — proxy routing, container strict mode and
+  /// per-container app-link overrides have all been removed, so nothing is
+  /// ever protected or overridden any more, but the native pigeon contract
+  /// still expects these fields on every snapshot.
   AppLinkPolicySnapshotProvider._()
     : super(
         from: null,
@@ -120,7 +74,7 @@ final class AppLinkPolicySnapshotProvider
 }
 
 String _$appLinkPolicySnapshotHash() =>
-    r'cd426c6f142478cf16ac59eba5a4c37a5a6263e0';
+    r'ddd4497cdbfe862de58ed1a02f1ed463684ea0a8';
 
 /// Single serialised writer that mirrors the Dart-owned app-link policy to the
 /// native profile-scoped store (§2.8), the sole policy source consulted by the

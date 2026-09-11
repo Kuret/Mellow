@@ -57,7 +57,7 @@ final class AppLinksCoordinatorProvider
 }
 
 String _$appLinksCoordinatorHash() =>
-    r'bb34ca15b7f10fbb8bd394412faae62fc100e901';
+    r'f2f3c497ed88f6ca5ec396ba7e191d02c1b340e8';
 
 /// Orchestrates Flutter-owned app-link prompts (§2.6): registers the availability
 /// event handler, queries the native pending store on attach/resume/event, and

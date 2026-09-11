@@ -179,10 +179,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings appLinkRules(Map<String, PersistedAppLinkRule> appLinkRules);
 
-  GeneralSettings appLinkContextOverrides(
-    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
-  );
-
   GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback);
 
   GeneralSettings appLinkAuthExceptionsEnabled(
@@ -290,7 +286,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool customTabsEnabled,
     AppLinksMode appLinksMode,
     Map<String, PersistedAppLinkRule> appLinkRules,
-    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
     bool appLinkMarketplaceFallback,
     bool appLinkAuthExceptionsEnabled,
     bool appLinkBlockWhilePrompting,
@@ -629,11 +624,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(appLinkRules: appLinkRules);
 
   @override
-  GeneralSettings appLinkContextOverrides(
-    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
-  ) => call(appLinkContextOverrides: appLinkContextOverrides);
-
-  @override
   GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback) =>
       call(appLinkMarketplaceFallback: appLinkMarketplaceFallback);
 
@@ -762,7 +752,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? customTabsEnabled = const $CopyWithPlaceholder(),
     Object? appLinksMode = const $CopyWithPlaceholder(),
     Object? appLinkRules = const $CopyWithPlaceholder(),
-    Object? appLinkContextOverrides = const $CopyWithPlaceholder(),
     Object? appLinkMarketplaceFallback = const $CopyWithPlaceholder(),
     Object? appLinkAuthExceptionsEnabled = const $CopyWithPlaceholder(),
     Object? appLinkBlockWhilePrompting = const $CopyWithPlaceholder(),
@@ -1201,12 +1190,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.appLinkRules
           // ignore: cast_nullable_to_non_nullable
           : appLinkRules as Map<String, PersistedAppLinkRule>,
-      appLinkContextOverrides:
-          appLinkContextOverrides == const $CopyWithPlaceholder() ||
-              appLinkContextOverrides == null
-          ? _value.appLinkContextOverrides
-          // ignore: cast_nullable_to_non_nullable
-          : appLinkContextOverrides as Map<String, ContextAppLinkPolicy>,
       appLinkMarketplaceFallback:
           appLinkMarketplaceFallback == const $CopyWithPlaceholder() ||
               appLinkMarketplaceFallback == null
@@ -1437,9 +1420,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   appLinkRules: parseAppLinkRules(
     json['appLinkRules'] as Map<String, dynamic>?,
   ),
-  appLinkContextOverrides: parseAppLinkContextOverrides(
-    json['appLinkContextOverrides'] as Map<String, dynamic>?,
-  ),
   appLinkMarketplaceFallback: json['appLinkMarketplaceFallback'] as bool?,
   appLinkAuthExceptionsEnabled: json['appLinkAuthExceptionsEnabled'] as bool?,
   appLinkBlockWhilePrompting: json['appLinkBlockWhilePrompting'] as bool?,
@@ -1551,9 +1531,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'customTabsEnabled': instance.customTabsEnabled,
   'appLinksMode': _$AppLinksModeEnumMap[instance.appLinksMode]!,
   'appLinkRules': instance.appLinkRules.map((k, e) => MapEntry(k, e.toJson())),
-  'appLinkContextOverrides': instance.appLinkContextOverrides.map(
-    (k, e) => MapEntry(k, e.toJson()),
-  ),
   'appLinkMarketplaceFallback': instance.appLinkMarketplaceFallback,
   'appLinkAuthExceptionsEnabled': instance.appLinkAuthExceptionsEnabled,
   'appLinkBlockWhilePrompting': instance.appLinkBlockWhilePrompting,

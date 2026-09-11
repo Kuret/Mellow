@@ -24,10 +24,9 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
-import 'package:weblibre/features/app_links/domain/services/effective_app_link_policy.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 final _appLinkTargetProvider = FutureProvider.autoDispose
     .family<AppLinkTarget?, Uri>((ref, url) {
@@ -37,21 +36,21 @@ final _appLinkTargetProvider = FutureProvider.autoDispose
 enum _SiteRuleChoice { followDefault, alwaysOpen, neverOpen }
 
 /// Section widget showing the app-link rule for the current tab's site. Edits
-/// the effective bucket — the owning container's override when it has isolated
-/// app-link settings, otherwise the global rules — but does not expose the
-/// global/container default from this site-specific sheet.
+/// the global rules — per-container app-link overrides were removed along
+/// with container strict mode, so there is only one bucket now.
 class AppLinkSection extends HookConsumerWidget {
   final Uri url;
 
-  /// The tab's live contextId (`TabState.contextId`): the container base
-  /// contextId for a regular tab, the isolation contextId for an isolated tab.
+  /// The tab's live contextId (`TabState.contextId`). No longer consulted —
+  /// kept so callers that still pass it (e.g. `view_tab.dart`) don't need an
+  /// unrelated edit.
   final String? contextId;
 
   const AppLinkSection({required this.url, required this.contextId, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final policy = ref.watch(effectiveAppLinkPolicyProvider(contextId));
+    final settings = ref.watch(generalSettingsRepositoryProvider).value;
     final target = ref.watch(_appLinkTargetProvider(url));
     final isLoadingTarget = target.isLoading && !target.hasValue;
 
@@ -68,7 +67,7 @@ class AppLinkSection extends HookConsumerWidget {
             ),
           ),
         ),
-        if (policy == null || isLoadingTarget)
+        if (settings == null || isLoadingTarget)
           const Skeletonizer(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -83,7 +82,8 @@ class AppLinkSection extends HookConsumerWidget {
           )
         else
           _SiteRuleTile(
-            policy: policy,
+            mode: settings.appLinksMode,
+            rules: settings.appLinkRules,
             target: target.hasValue ? target.value : null,
           ),
       ],
@@ -92,17 +92,20 @@ class AppLinkSection extends HookConsumerWidget {
 }
 
 class _SiteRuleTile extends ConsumerWidget {
-  final EffectiveAppLinkPolicy policy;
+  final AppLinksMode mode;
+  final Map<String, PersistedAppLinkRule> rules;
   final AppLinkTarget? target;
 
-  const _SiteRuleTile({required this.policy, required this.target});
+  const _SiteRuleTile({
+    required this.mode,
+    required this.rules,
+    required this.target,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scope = target?.scopeKey;
-    final rule = (scope != null && scope.isNotEmpty)
-        ? policy.rules[scope]
-        : null;
+    final rule = (scope != null && scope.isNotEmpty) ? rules[scope] : null;
     final choice = switch (rule?.decision) {
       AppLinkRuleDecision.alwaysOpen => _SiteRuleChoice.alwaysOpen,
       AppLinkRuleDecision.neverOpen => _SiteRuleChoice.neverOpen,
@@ -165,7 +168,7 @@ class _SiteRuleTile extends ConsumerWidget {
       _SiteRuleChoice.alwaysOpen =>
         'Always opens in ${rule!.packageName ?? 'the app'}',
       _SiteRuleChoice.neverOpen => 'Always stays in the browser',
-      _SiteRuleChoice.followDefault => switch (policy.mode) {
+      _SiteRuleChoice.followDefault => switch (mode) {
         AppLinksMode.always =>
           canAlwaysOpen
               ? 'Follows the default: opens in apps'
@@ -201,20 +204,10 @@ class _SiteRuleTile extends ConsumerWidget {
       return next;
     }
 
-    final overrideKey = policy.overrideKey;
     await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
       current,
     ) {
-      if (overrideKey == null) {
-        return current.copyWith.appLinkRules(updateRules(current.appLinkRules));
-      }
-      final existing =
-          current.appLinkContextOverrides[overrideKey] ??
-          ContextAppLinkPolicy.blank();
-      return current.copyWith.appLinkContextOverrides({
-        ...current.appLinkContextOverrides,
-        overrideKey: existing.copyWith.rules(updateRules(existing.rules)),
-      });
+      return current.copyWith.appLinkRules(updateRules(current.appLinkRules));
     });
   }
 }

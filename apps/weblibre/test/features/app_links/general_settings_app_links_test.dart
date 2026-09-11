@@ -21,7 +21,6 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 void main() {
@@ -85,49 +84,6 @@ void main() {
 
       final restored = GeneralSettings.fromJson(json);
       expect(restored.appLinkRules, isEmpty);
-    });
-  });
-
-  group('GeneralSettings per-container app-link overrides', () {
-    test('defaults to an empty override map', () {
-      expect(GeneralSettings.withDefaults().appLinkContextOverrides, isEmpty);
-    });
-
-    test('a container override survives a toJson -> fromJson round-trip', () {
-      final rule = PersistedAppLinkRule(
-        decision: AppLinkRuleDecision.neverOpen,
-        scope: 'host:reddit.com',
-      );
-      final override = ContextAppLinkPolicy(
-        mode: AppLinksMode.never,
-        rules: {rule.scope: rule},
-      );
-      final settings = GeneralSettings.withDefaults(
-        appLinkContextOverrides: {'work': override},
-      );
-
-      final restored = GeneralSettings.fromJson(settings.toJson());
-
-      expect(restored.appLinkContextOverrides.keys, ['work']);
-      final restoredOverride = restored.appLinkContextOverrides['work']!;
-      expect(restoredOverride.mode, AppLinksMode.never);
-      expect(restoredOverride.rules['host:reddit.com'], rule);
-    });
-
-    test('the blank override is ask / empty rules', () {
-      final blank = ContextAppLinkPolicy.blank();
-      expect(blank.mode, AppLinksMode.ask);
-      expect(blank.rules, isEmpty);
-    });
-
-    test('malformed override entries are dropped on read', () {
-      final json = GeneralSettings.withDefaults().toJson();
-      json['appLinkContextOverrides'] = {
-        'work': <String, dynamic>{'mode': 'not-a-mode'},
-      };
-
-      final restored = GeneralSettings.fromJson(json);
-      expect(restored.appLinkContextOverrides, isEmpty);
     });
   });
 }

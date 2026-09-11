@@ -25,7 +25,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
@@ -357,14 +356,6 @@ class GeneralSettings with FastEquatable {
   @JsonKey(fromJson: parseAppLinkRules)
   final Map<String, PersistedAppLinkRule> appLinkRules;
 
-  /// Per-container app-link overrides for containers with "isolated app link
-  /// settings" enabled, keyed by the container's Gecko contextId. Each entry
-  /// fully *replaces* the global mode + [appLinkRules] for navigations in that
-  /// container (replace semantics). Containers without isolation have no entry
-  /// and fall back to the global policy. Malformed entries dropped on read.
-  @JsonKey(fromJson: parseAppLinkContextOverrides)
-  final Map<String, ContextAppLinkPolicy> appLinkContextOverrides;
-
   /// Whether an install-app (marketplace) intent is offered when an app link
   /// resolves to no installed app and has no validated http(s) fallback.
   /// Defaults to false — the wrong default for a de-Googled browser.
@@ -505,7 +496,6 @@ class GeneralSettings with FastEquatable {
     required this.customTabsEnabled,
     required this.appLinksMode,
     required this.appLinkRules,
-    required this.appLinkContextOverrides,
     required this.appLinkMarketplaceFallback,
     required this.appLinkAuthExceptionsEnabled,
     required this.appLinkBlockWhilePrompting,
@@ -593,7 +583,6 @@ class GeneralSettings with FastEquatable {
     bool? customTabsEnabled,
     AppLinksMode? appLinksMode,
     Map<String, PersistedAppLinkRule>? appLinkRules,
-    Map<String, ContextAppLinkPolicy>? appLinkContextOverrides,
     bool? appLinkMarketplaceFallback,
     bool? appLinkAuthExceptionsEnabled,
     bool? appLinkBlockWhilePrompting,
@@ -708,7 +697,6 @@ class GeneralSettings with FastEquatable {
        customTabsEnabled = customTabsEnabled ?? true,
        appLinksMode = appLinksMode ?? AppLinksMode.ask,
        appLinkRules = appLinkRules ?? const {},
-       appLinkContextOverrides = appLinkContextOverrides ?? const {},
        appLinkMarketplaceFallback = appLinkMarketplaceFallback ?? false,
        appLinkAuthExceptionsEnabled = appLinkAuthExceptionsEnabled ?? true,
        appLinkBlockWhilePrompting = appLinkBlockWhilePrompting ?? false,
@@ -923,7 +911,6 @@ class GeneralSettings with FastEquatable {
     customTabsEnabled,
     appLinksMode,
     appLinkRules,
-    appLinkContextOverrides,
     appLinkMarketplaceFallback,
     appLinkAuthExceptionsEnabled,
     appLinkBlockWhilePrompting,

@@ -142,7 +142,6 @@ const generalSettingJsonKeys = <String>{
   'deleteBrowsingDataOnQuit',
   'externalAppIntentPolicies',
   'appLinkRules',
-  'appLinkContextOverrides',
   'desktopModeSites',
   'pinnedBangs',
 };
