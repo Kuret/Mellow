@@ -2,7 +2,6 @@
 ext {
     compileSdkVersion   = 37
     targetSdkVersion    = 37
-    ndkVersion          = providers.gradleProperty("weblibre.ndkVersion").get()
 }
 
 allprojects {
@@ -31,7 +30,6 @@ subprojects {
         if (it.hasProperty("android")) {
             android {
                 compileSdkVersion 37
-                ndkVersion rootProject.ext.ndkVersion
             }
         }
     }

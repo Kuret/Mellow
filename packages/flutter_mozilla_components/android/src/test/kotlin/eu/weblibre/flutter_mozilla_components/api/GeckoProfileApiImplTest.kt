@@ -98,21 +98,3 @@ class GeckoProfileApiImplTest {
         assertFalse(attachment().claimProfileAccess(ProfileStartupOwnerType.UI, "ui", null))
     }
 }
-
-/**
- * The container-proxy half of the same restart.
- *
- * Everything a hot restart touches on this API is engine-scoped and hard to
- * reach from a unit test; what is reachable is the rule that keeps a restart
- * arriving before the engine was ever set up from registering an API for an
- * extension that does not exist — and, more usefully, from dereferencing a
- * plugin binding that was never attached.
- */
-class GeckoBrowserApiContainerProxyTest {
-    @Test
-    fun reinstallingBeforeTheEngineIsSetUpLeavesTheChannelAlone() {
-        // No `attachBinding`, so a reinstall that did not check would fail on the
-        // lateinit binding rather than doing nothing.
-        GeckoBrowserApiImpl().reinstallContainerProxyApi()
-    }
-}

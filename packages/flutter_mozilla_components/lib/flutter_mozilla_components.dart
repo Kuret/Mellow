@@ -12,7 +12,6 @@ export 'src/domain/services/gecko_app_links.dart';
 export 'src/domain/services/gecko_bookmarks.dart';
 export 'src/domain/services/gecko_browser.dart';
 export 'src/domain/services/gecko_browser_extension.dart';
-export 'src/domain/services/gecko_container_proxy.dart';
 export 'src/domain/services/gecko_cookie.dart';
 export 'src/domain/services/gecko_delete_browser_data.dart';
 export 'src/domain/services/gecko_downloads.dart';
@@ -87,12 +86,8 @@ export 'src/pigeons/gecko.g.dart'
         GeckoFetchResponse,
         GeckoHistoryEvents,
         GeckoPref,
-        GeckoProxyRoutingSnapshot,
-        GeckoProxyRoutingStatus,
-        GeckoProxySettings,
         GeckoPublicSuffixListApi,
         GeckoPwaApi,
-        GeckoRoutingDemand,
         GeckoSitePermissionsApi,
         GeckoSuggestion,
         GeckoSuggestionType,

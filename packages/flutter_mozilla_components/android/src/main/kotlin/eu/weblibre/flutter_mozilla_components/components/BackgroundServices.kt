@@ -43,7 +43,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncAccountInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineValue
-import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.sync.CachedSyncDevice
 import eu.weblibre.flutter_mozilla_components.sync.SyncStateCache
 import eu.weblibre.flutter_mozilla_components.sync.SyncedTabsIntegration
@@ -80,13 +79,6 @@ class BackgroundServices(
         private const val FXA_STATE_PREFS_NAME = "fxaStatePrefAC"
         private const val FXA_STATE_KEY = "fxaState"
         private const val FXA_STATE_PRESENT_KEY = "fxaStatePresent"
-
-        /**
-         * How long to wait for routing before giving up on starting FxA at all.
-         * Generous: the cost of waiting is a late sync, the cost of not waiting is
-         * a disconnected account.
-         */
-        private const val ROUTING_WAIT_MS = 30_000L
     }
 
     data class IncomingTab(
@@ -460,37 +452,6 @@ class BackgroundServices(
             }, owner = ProcessLifecycleOwner.get(), autoPause = false)
 
             MainScope().launch {
-                // Nothing may touch the FxA network before the proxy extension holds
-                // routing. Until it does it answers every request with the emergency
-                // break, and `accountManager.start()` sends `FxaEvent.Initialize`,
-                // whose `ensure_capabilities` call app-services does *not* treat as
-                // retriable: a network failure there becomes
-                // `(EnsureDeviceCapabilities, CallError) -> Complete(Disconnected)`
-                // (`state_machine/internal_machines/uninitialized.rs`), and that
-                // disconnected state is then persisted. The account is gone, and only
-                // signing in again brings it back.
-                //
-                // Measured on a real cold start: the call ran at +8.8s, gave up at
-                // +13.4s, and routing arrived at +14.3s — under a second too late.
-                if (!ContainerProxyFeature.awaitRoutingInstalled(ROUTING_WAIT_MS)) {
-                    // Deliberately not starting anyway. If routing never installed
-                    // then the network is blocked, so starting would not succeed — it
-                    // would only reach the disconnect above. Leaving the account
-                    // untouched on disk keeps it recoverable on the next launch,
-                    // which is the better of the two failures.
-                    logger.error(
-                        "Not starting the account manager: the proxy extension never " +
-                            "installed routing, so FxA calls would fail and disconnect " +
-                            "the account",
-                    )
-                    if (!startedSignal.isCompleted) {
-                        startedSignal.completeExceptionally(
-                            IllegalStateException("Routing was never installed"),
-                        )
-                    }
-                    return@launch
-                }
-
                 runCatching {
                     accountManager.start()
                 }.fold(

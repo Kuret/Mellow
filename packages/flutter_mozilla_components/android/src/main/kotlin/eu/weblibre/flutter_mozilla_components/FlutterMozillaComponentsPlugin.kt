@@ -9,7 +9,6 @@ package eu.weblibre.flutter_mozilla_components
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
-import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
@@ -17,7 +16,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
-import eu.weblibre.flutter_mozilla_components.startup.DartStartupProgress
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -66,25 +64,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
       override fun onPreEngineRestart() {
         pointerRouter?.reset()
         profileApi?.onEngineRestarting()
-        // A new isolate starts its own cold start, exactly as it does on a fresh
-        // engine; carrying the old one's progress into it would report a stage
-        // nothing has reached.
-        DartStartupProgress.reset()
-        // Replaced rather than merely disposed: the old instance holds the dead
-        // isolate's `nextRoutingDemand` waiter, which would take the next
-        // launch's demand and answer nobody — and an engine whose Gecko is
-        // already initialized never re-runs the setup that registers this, so
-        // leaving the channel bare would fail every routing call the
-        // replacement makes.
-        browserApi.reinstallContainerProxyApi()
-        // The routing on the extension was pushed by that same isolate, and the
-        // proxies its endpoints name are about to be restarted by another one.
-        // Until they are, the snapshot reads as live and would wave a launch
-        // through to ports that no longer mean what they meant; the seed this
-        // installs blocks the proxied contexts and leaves the direct ones
-        // direct. The replaced form, because it has to land before the
-        // replacement's first push rather than whenever it reaches the lock.
-        ContainerProxyFeature.onAppHalfReplaced()
       }
 
       // Destruction is followed by `onDetachedFromEngine`, which hands the same
@@ -137,7 +116,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()
-    browserApi.disposeContainerProxyApi()
     browserApi.disposeEngineViewVisibility()
     GlobalComponents.historyEvents = null
     // The availability event is optimisation-only; once Flutter detaches, the surface

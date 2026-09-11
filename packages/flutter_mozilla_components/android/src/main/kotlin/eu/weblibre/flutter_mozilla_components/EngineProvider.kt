@@ -6,7 +6,6 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
@@ -14,7 +13,6 @@ import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeatur
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
@@ -168,7 +166,6 @@ object EngineProvider {
         context: Context,
         defaultSettings: DefaultSettings,
         extensionEvents: BrowserExtensionEvents,
-        stateEvents: GeckoStateEvents
     ): Engine {
         Logger.debug("Creating Engine")
         val runtime = getOrCreateRuntime(context)
@@ -176,7 +173,6 @@ object EngineProvider {
         return GeckoEngine(context, defaultSettings, runtime).also {
             WebCompatFeature.install(it)
             //CookieManagerFeature.install(it)
-            ContainerProxyFeature.install(it, stateEvents)
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
 

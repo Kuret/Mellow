@@ -37,7 +37,6 @@ import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
-import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import eu.weblibre.flutter_mozilla_components.push.Push
@@ -394,28 +393,6 @@ object GlobalComponents {
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
 
         previousComponents?.existingPush?.close()
-
-        // Restore this profile's last routing before the engine — and with it the
-        // proxy extension — exists. This runs on every setup, including a rebuild:
-        // the extension blocks every request until it holds a snapshot, and on the
-        // headless paths (external mode, no Flutter engine) Dart is never there to
-        // push one. It only ever
-        // takes effect while nothing has been pushed, so a full start still runs
-        // on the live snapshot the moment Dart produces it.
-        //
-        // Only a full setup carries the Dart listener that reopens an assigned
-        // site in the container it belongs to, so only a full setup may be
-        // seeded with the assignments that cancel those navigations.
-        ContainerProxyFeature.loadPersisted(
-            applicationContext,
-            canReopenAssignedSites = mode == ComponentsMode.FULL,
-            // Only a full setup has the Dart half that pushes live routing over
-            // the seed. Where it does, the extension holds requests the
-            // endpoint-less seed would block for that push rather than turning
-            // a startup window into an error page; where it does not, the seed
-            // is final and blocking is immediate.
-            expectsAppPush = mode == ComponentsMode.FULL,
-        )
 
         val newComponents = Components(
             applicationContext,

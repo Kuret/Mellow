@@ -20,10 +20,6 @@ import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
 import eu.weblibre.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver
-import eu.weblibre.flutter_mozilla_components.startup.AppHalfBootstrap
-import eu.weblibre.flutter_mozilla_components.startup.BootstrapFailure
-import eu.weblibre.flutter_mozilla_components.startup.LaunchRouting
-import eu.weblibre.flutter_mozilla_components.startup.LaunchRoutingPlan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -203,47 +199,14 @@ class IntentReceiverActivity : Activity() {
 
         if (!profileBound) {
             // Nothing decided which profile this process serves, so there is no
-            // routing to read, no profile to build components under, and none to
-            // start the app half with. Everything below would run anyway and
-            // discover that one step at a time — `plan` would read UNKNOWN for
-            // both inputs, say BOOTSTRAP, and spend the whole bootstrap timeout
-            // on an engine that has no profile to come up on. Fail here instead,
-            // at the browser, which is where the profile question has an owner.
-            // ExternalAppBrowserActivity.startWithRouting refuses on the same
-            // grounds.
+            // profile to build components under. Fail here instead, at the
+            // browser, which is where the profile question has an owner.
             Log.i(TAG, "No profile is bound for this launch; opening it in the browser")
             handleRegularIntent(intent)
             return
         }
 
-        val plan = AppHalfBootstrap.plan(applicationContext, launchContextId(intent))
-
-        // A launch that opens a window of its own does its own waiting, in that
-        // window — this activity is translucent, so waiting here means the user
-        // watches their launcher for however long the app half takes and is then
-        // handed a browser they did not ask for. Everything else keeps waiting
-        // here, where the caller's own window is still on screen behind us.
-        //
-        // A blocked plan waits as well, rather than ending here: the app half
-        // can be asked to start the proxy the route names, and `ensure` says
-        // whether that is on its way or whether this really is the end of the
-        // launch. It refuses in the same turn when there is nothing to start,
-        // so the dialog below is only postponed by a round trip.
-        val awaitsRoutingInItsOwnWindow = plan != LaunchRoutingPlan.PROCEED &&
-            descriptor.classification == LaunchClassification.TRUSTED_PWA &&
-            intent.dataString != null
-
-        if (plan != LaunchRoutingPlan.PROCEED && !awaitsRoutingInItsOwnWindow) {
-            bootstrapAppThenRoute(intent, descriptor)
-            return
-        }
-
-        // Deliberately skipped for a launch that is going to wait in its own
-        // window: components built here would be the headless EXTERNAL ones, and
-        // the app half this launch is waiting for replaces them with a full set
-        // — Gecko runtime and all — the moment it comes up.
-        if (!awaitsRoutingInItsOwnWindow &&
-            GlobalComponents.components == null &&
+        if (GlobalComponents.components == null &&
             !GlobalComponents.ensureExternalComponents(applicationContext)
         ) {
             Log.w(TAG, "Components unavailable, routing directly to MainActivity")
@@ -251,88 +214,7 @@ class IntentReceiverActivity : Activity() {
             return
         }
 
-        routeIntent(intent, descriptor, awaitsRouting = awaitsRoutingInItsOwnWindow)
-    }
-
-    /**
-     * The cookie-store context this launch's traffic will be keyed on.
-     *
-     * Read off the intent rather than off the session, because the decision it
-     * feeds has to happen *before* a session — or an engine — exists.
-     */
-    private fun launchContextId(intent: Intent): String {
-        return LaunchRouting.contextIdFor(
-            pwaContextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID),
-            isPrivate = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false),
-        )
-    }
-
-    /**
-     * Starts the app half without showing it, waits for the routing only it can
-     * install, and then serves the launch.
-     *
-     * The engine is the very one `MainActivity` hosts, so this is a head start
-     * rather than a second app: if the user opens the browser later it attaches
-     * to what this started. Waiting happens here because this activity is
-     * translucent — the user is looking at whatever they launched from, exactly
-     * as they would during any cold start.
-     *
-     * A trusted PWA does not come through here: it is launched from the home
-     * screen, so there is no such window to look at, and its wait happens inside
-     * the PWA's own — see [ExternalAppBrowserActivity.EXTRA_AWAITING_ROUTING].
-     */
-    private fun bootstrapAppThenRoute(intent: Intent, descriptor: LaunchDescriptor) {
-        coroutineScope.launch {
-            val outcome = AppHalfBootstrap.ensure(applicationContext, launchContextId(intent))
-
-            if (isFinishing || isDestroyed) return@launch
-
-            if (outcome.canProceed && GlobalComponents.components != null) {
-                routeIntent(intent, descriptor)
-                return@launch
-            }
-
-            // Either the route is blocked for good, or the app half never got far
-            // enough to say. The browser can serve either — it is where the proxy
-            // prompt lives — but which of them happened is the user's to know and
-            // the diversion theirs to make.
-            showRoutingUnavailable(
-                intent,
-                descriptor,
-                outcome.failure ?: BootstrapFailure.STILL_STARTING,
-            )
-        }
-    }
-
-    /**
-     * Ends an unserviceable launch in a choice rather than in a substitution.
-     *
-     * "Try again" re-enters [AppHalfBootstrap.ensure], which is idempotent about
-     * the engine and starts a fresh patience window — so a first launch after an
-     * update, where the app half is genuinely coming but slowly, can be given
-     * more time without the user having to re-tap anything.
-     */
-    private fun showRoutingUnavailable(
-        intent: Intent,
-        descriptor: LaunchDescriptor,
-        failure: BootstrapFailure,
-    ) {
-        RoutingUnavailableDialog.show(
-            activity = this,
-            failure = failure,
-            launchUrl = intent.dataString,
-            isStandaloneApp = descriptor.classification == LaunchClassification.TRUSTED_PWA ||
-                descriptor.classification == LaunchClassification.LEGACY_PWA,
-            onTryAgain = { bootstrapAppThenRoute(intent, descriptor) },
-            onOpenInBrowser = {
-                Log.d(TAG, "User chose the browser for an unserviceable launch ($failure)")
-                handleRegularIntent(intent)
-            },
-            onCancel = {
-                Log.d(TAG, "User cancelled an unserviceable launch ($failure)")
-                finish()
-            },
-        )
+        routeIntent(intent, descriptor)
     }
 
     /**
@@ -390,7 +272,6 @@ class IntentReceiverActivity : Activity() {
     private fun routeIntent(
         intent: Intent,
         descriptor: LaunchDescriptor,
-        awaitsRouting: Boolean = false,
     ) {
         val privateBrowsingMode = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false)
         intent.putExtra(PRIVATE_BROWSING_MODE, privateBrowsingMode)
@@ -431,7 +312,7 @@ class IntentReceiverActivity : Activity() {
                     val contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
                     val token = intent.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
                     Log.d(TAG, "Trusted PWA launch under $profileUuid (context=$contextId)")
-                    handlePwaIntent(intent, profileUuid, contextId, token, awaitsRouting)
+                    handlePwaIntent(intent, profileUuid, contextId, token)
                 }
                 return
             }
@@ -548,7 +429,6 @@ class IntentReceiverActivity : Activity() {
         profileUuid: String,
         contextId: String?,
         token: String?,
-        awaitsRouting: Boolean,
     ) {
         val url = intent.dataString
         if (url == null) {
@@ -573,7 +453,6 @@ class IntentReceiverActivity : Activity() {
                         token = token,
                         installStartUrl = installStartUrl,
                         allowTaskReuse = false,
-                        awaitsRouting = awaitsRouting,
                     )
                 },
                 isPwa = true,
@@ -589,7 +468,6 @@ class IntentReceiverActivity : Activity() {
                 token = token,
                 installStartUrl = installStartUrl,
                 allowTaskReuse = true,
-                awaitsRouting = awaitsRouting,
             )
         }
     }
@@ -788,40 +666,10 @@ class IntentReceiverActivity : Activity() {
         token: String?,
         installStartUrl: String?,
         allowTaskReuse: Boolean,
-        awaitsRouting: Boolean,
     ) {
-        // Reuse is for a launch that can be served right now. A launch still
-        // waiting on routing must not be handed to an existing task: the system
-        // recreates that task from its *base* intent, which carries no
-        // awaiting-routing flag whenever the task was first opened while
-        // routing was healthy. In a fresh process the recreated window then
-        // builds its engine immediately, before `GlobalComponents.setUp` has
-        // run, and the PWA dies on the spot instead of waiting — see
-        // `BaseBrowserFragment.onViewCreated`.
         if (allowTaskReuse &&
-            !awaitsRouting &&
             bringPwaTaskToFront(url, profileUuid, contextId, token, installStartUrl)
         ) {
-            finish()
-            return
-        }
-
-        if (awaitsRouting) {
-            // Opened before the session exists, on purpose: the routing this PWA
-            // needs is not installed yet, and the window it opens is where that
-            // wait becomes something the user can see and act on. It creates its
-            // own session once routing lands.
-            Log.d(TAG, "PWA needs app-owned routing; opening its window to wait for it")
-            startActivity(
-                ExternalAppBrowserActivity.createAwaitingRoutingIntent(
-                    context = this,
-                    launchUrl = url,
-                    pwaProfileUuid = profileUuid,
-                    pwaContextId = contextId,
-                    pwaToken = token,
-                    pwaInstallStartUrl = installStartUrl,
-                ),
-            )
             finish()
             return
         }
