@@ -23,12 +23,9 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
-def weblibreGoMobileAar = file("../../../../native/go_mobile_runtime/build/weblibre-go.aar")
-
 android {
     namespace = "eu.weblibre.gecko"
     compileSdk = 37
-    ndkVersion = rootProject.ext.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -82,13 +79,6 @@ android {
 
     dependencies {
         // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-        if (!weblibreGoMobileAar.exists()) {
-            throw new GradleException(
-                "Missing combined gomobile runtime AAR: ${weblibreGoMobileAar}. " +
-                    "Run native/go_mobile_runtime/scripts/build-android.sh from the repository root."
-            )
-        }
-        implementation files(weblibreGoMobileAar)
         implementation('androidx.glance:glance-appwidget') {
             version {
                 strictly '1.1.1'
