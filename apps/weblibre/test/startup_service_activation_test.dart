@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 /// wired to the intent bus.
 const _services = <String>[
   'visitContainerRecorderProvider',
-  'proxySettingsReplicationProvider',
   'geckoSyncStateServiceProvider',
   'preferenceFixatorProvider',
   'engineSettingsReplicationServiceProvider',
