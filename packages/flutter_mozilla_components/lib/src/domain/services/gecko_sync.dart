@@ -14,6 +14,12 @@ class GeckoSyncService {
     return _api.getAccountInfo();
   }
 
+  /// Credentials for a Dart Sync 1.5 client, or null when no account is
+  /// signed in.
+  Future<SyncCredentials?> getSyncCredentials() {
+    return _api.getSyncCredentials();
+  }
+
   Future<void> beginAuthentication() {
     return _api.beginAuthentication();
   }

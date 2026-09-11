@@ -1509,10 +1509,44 @@ class SyncDeviceTabs {
   });
 }
 
+/// Credentials for a Dart-side Sync 1.5 client, derived from the native
+/// FxA account's OAuth session. Null fields are never returned; instead
+/// [GeckoSyncApi.getSyncCredentials] itself returns null when no account is
+/// signed in or the credentials aren't (yet) available.
+class SyncCredentials {
+  /// OAuth token for scope https://identity.mozilla.com/apps/oldsync
+  final String accessToken;
+
+  /// OAuthScopedKey.kid, sent as the X-KeyID header.
+  final String keyId;
+
+  /// OAuthScopedKey.k: base64url-encoded, 64 bytes when decoded.
+  final String syncKeyBase64Url;
+
+  /// Effective token server: the app's override if configured, else the
+  /// account's default token server endpoint.
+  final String tokenServerUrl;
+
+  final int expiresAtEpochSeconds;
+
+  SyncCredentials({
+    required this.accessToken,
+    required this.keyId,
+    required this.syncKeyBase64Url,
+    required this.tokenServerUrl,
+    required this.expiresAtEpochSeconds,
+  });
+}
+
 @HostApi()
 abstract class GeckoSyncApi {
   @async
   SyncAccountInfo getAccountInfo();
+
+  /// Returns credentials for a Dart Sync 1.5 client, or null when no
+  /// account is signed in.
+  @async
+  SyncCredentials? getSyncCredentials();
 
   @async
   void beginAuthentication();

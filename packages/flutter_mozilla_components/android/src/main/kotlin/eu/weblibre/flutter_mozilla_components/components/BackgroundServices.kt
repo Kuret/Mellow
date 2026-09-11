@@ -127,6 +127,14 @@ class BackgroundServices(
         tokenServerOverride = syncTokenServerOverride,
     )
 
+    /**
+     * The app-configured token server override, trimmed and normalised to null when
+     * blank. Same logic as [FxaServer.config] applies to the sync server, so a Dart
+     * Sync 1.5 client sees the same effective token server as the native sync engine.
+     */
+    val effectiveTokenServerOverride: String?
+        get() = syncTokenServerOverride?.trim()?.takeUnless { it.isNullOrEmpty() }
+
     private val deviceConfig = DeviceConfig(
         name = "WebLibre ${Build.MANUFACTURER} ${Build.MODEL}",
         type = DeviceType.MOBILE,
