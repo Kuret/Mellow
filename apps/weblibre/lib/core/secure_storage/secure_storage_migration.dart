@@ -21,7 +21,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/secure_storage/profile_secure_keys.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 
 /// Base key of the account session, sync key and in-flight PKCE verifier.
 const accountSecureBaseKey = 'account_auth_data';
@@ -168,23 +167,19 @@ Future<SecureStorageMigrationResult> migrateUnqualifiedSecureRecords({
 
 /// Runs the migration for the profile this isolate has activated.
 ///
-/// Takes the repository rather than a `Ref`, because the two entry points hold
-/// different kinds of ref — `Ref` in the initialization service, `WidgetRef` in
-/// `main` — and the migration has no business caring which.
+/// Takes no repository any more: proxy support (and the profile database
+/// table that made a proxy secret's ownership look-uppable) is gone, so no
+/// proxy secret can be attributed to a profile any more. They are left
+/// exactly where [migrateUnqualifiedSecureRecords] already leaves anything it
+/// cannot attribute — inert, and harmless.
 ///
 /// Failure is recorded and swallowed: legacy records staying put for another
 /// launch is a far better outcome than a profile that will not start.
-Future<void> migrateSecureStorageForActiveProfile(
-  SingboxProxyProfilesRepository proxyProfilesRepository,
-) async {
+Future<void> migrateSecureStorageForActiveProfile() async {
   try {
-    final proxyProfiles = await proxyProfilesRepository.fetchProfiles();
-
     await migrateUnqualifiedSecureRecords(
       profileId: filesystem.selectedProfile.uuid,
-      // The ownership evidence: a proxy secret belongs to this profile exactly
-      // when this profile's database holds the proxy profile that uses it.
-      ownedProxyProfileIds: proxyProfiles.map((profile) => profile.id).toSet(),
+      ownedProxyProfileIds: const {},
     );
   } catch (error, stackTrace) {
     logger.w(
