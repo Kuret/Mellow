@@ -60,6 +60,15 @@ const minQuickTabSwitcherTitleWidth = 32.0;
 const maxQuickTabSwitcherTitleWidth = 128.0;
 const quickTabSwitcherTitleWidthStep = 8.0;
 
+/// Width (logical px) of the vertical tab bar side rail. The default matches
+/// [kToolbarHeight] so a fresh install looks identical to before this setting
+/// existed; values above [minWideRailWidth] widen the rail enough to show
+/// chip titles upright instead of forcing icon-only chips.
+const defaultRailWidth = kToolbarHeight;
+const minRailWidth = 56.0;
+const maxRailWidth = 320.0;
+const railWidthStep = 8.0;
+
 /// Controls the Android display refresh rate the app requests at startup.
 ///
 /// Flutter does not request a high refresh rate by default, so on many devices
@@ -126,6 +135,46 @@ enum TabBarPosition {
   /// Main axis along which the bar's content flows.
   Axis get axis => isVertical ? Axis.vertical : Axis.horizontal;
 }
+
+/// Minimum [GeneralSettings.railWidth] at which the vertical rail is wide
+/// enough to show a chip title upright, instead of collapsing to icon-only
+/// chips.
+const minWideRailWidth = 120.0;
+
+/// Viewport width, in logical px, below which the vertical rail always
+/// collapses to icon-only regardless of [GeneralSettings.railWidth] — phones
+/// in portrait, where a wide rail would eat too much of the content area.
+/// Tablets, landscape and foldables clear this and get the wide rail.
+const narrowRailViewportBreakpoint = 600.0;
+
+/// Whether the vertical side rail is wide enough to show upright titles
+/// instead of icon-only chips: [position] is vertical, [railWidth] clears
+/// [minWideRailWidth], and [viewportWidth] is not narrow (see
+/// [narrowRailViewportBreakpoint]).
+bool isWideRail({
+  required TabBarPosition position,
+  required double railWidth,
+  required double viewportWidth,
+}) =>
+    position.isVertical &&
+    railWidth >= minWideRailWidth &&
+    viewportWidth >= narrowRailViewportBreakpoint;
+
+/// Effective content width of the vertical side rail: [railWidth] when
+/// [isWideRail] holds, [defaultRailWidth] (== [kToolbarHeight]) otherwise —
+/// the width the rail always used before this setting existed.
+double effectiveRailWidth({
+  required TabBarPosition position,
+  required double railWidth,
+  required double viewportWidth,
+}) =>
+    isWideRail(
+      position: position,
+      railWidth: railWidth,
+      viewportWidth: viewportWidth,
+    )
+    ? railWidth
+    : defaultRailWidth;
 
 enum TabBarLayout { withTitle, compact }
 
@@ -319,6 +368,10 @@ class GeneralSettings with FastEquatable {
   /// Max width (logical px) for chip titles in the quick tab switcher.
   final double quickTabSwitcherTitleWidth;
 
+  /// Width (logical px) of the vertical tab bar side rail. See
+  /// [defaultRailWidth].
+  final double railWidth;
+
   /// Which tab chips show a close button in the quick tab switcher and the
   /// tab bar.
   final TabChipCloseButtonMode quickTabSwitcherCloseButtonMode;
@@ -484,6 +537,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
+    required this.railWidth,
     required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
@@ -572,6 +626,7 @@ class GeneralSettings with FastEquatable {
     int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
+    double? railWidth,
     TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
     String? syncTokenServerOverride,
@@ -681,6 +736,10 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
+       railWidth = (railWidth ?? defaultRailWidth).clamp(
+         minRailWidth,
+         maxRailWidth,
+       ),
        quickTabSwitcherCloseButtonMode =
            quickTabSwitcherCloseButtonMode ??
            TabChipCloseButtonMode.activeTabOnly,
@@ -902,6 +961,7 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
+    railWidth,
     quickTabSwitcherCloseButtonMode,
     syncServerOverride,
     syncTokenServerOverride,

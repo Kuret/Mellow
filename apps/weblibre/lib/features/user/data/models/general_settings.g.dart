@@ -131,6 +131,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
 
+  GeneralSettings railWidth(double railWidth);
+
   GeneralSettings quickTabSwitcherCloseButtonMode(
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
   );
@@ -269,6 +271,7 @@ abstract class _$GeneralSettingsCWProxy {
     int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
+    double railWidth,
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
     String syncTokenServerOverride,
@@ -540,6 +543,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
 
   @override
+  GeneralSettings railWidth(double railWidth) => call(railWidth: railWidth);
+
+  @override
   GeneralSettings quickTabSwitcherCloseButtonMode(
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
   ) => call(quickTabSwitcherCloseButtonMode: quickTabSwitcherCloseButtonMode);
@@ -741,6 +747,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
+    Object? railWidth = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
@@ -1078,6 +1085,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherTitleWidth
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherTitleWidth as double,
+      railWidth: railWidth == const $CopyWithPlaceholder() || railWidth == null
+          ? _value.railWidth
+          // ignore: cast_nullable_to_non_nullable
+          : railWidth as double,
       quickTabSwitcherCloseButtonMode:
           quickTabSwitcherCloseButtonMode == const $CopyWithPlaceholder() ||
               quickTabSwitcherCloseButtonMode == null
@@ -1400,6 +1411,7 @@ GeneralSettings _$GeneralSettingsFromJson(
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
       ?.toDouble(),
+  railWidth: (json['railWidth'] as num?)?.toDouble(),
   quickTabSwitcherCloseButtonMode: $enumDecodeNullable(
     _$TabChipCloseButtonModeEnumMap,
     json['quickTabSwitcherCloseButtonMode'],
@@ -1526,6 +1538,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
+  'railWidth': instance.railWidth,
   'quickTabSwitcherCloseButtonMode':
       _$TabChipCloseButtonModeEnumMap[instance
           .quickTabSwitcherCloseButtonMode]!,
