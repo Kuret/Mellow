@@ -273,6 +273,15 @@ class _TabBar extends HookConsumerWidget {
       ),
     );
 
+    final railWidthSetting = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+    );
+    final railWidth = effectiveRailWidth(
+      isVertical: tabBarPosition.isVertical,
+      railWidth: railWidthSetting,
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+
     // Return the toolbar widget - parent handles animation.
     // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
     // are handled here for exhaustiveness/correctness.
@@ -298,6 +307,7 @@ class _TabBar extends HookConsumerWidget {
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
+        railWidth: railWidth,
         suppressMainToolbar: suppressMainToolbar,
       ),
     };
@@ -680,6 +690,9 @@ class _SideRailToolbarLayer extends StatelessWidget {
   /// main toolbar row only in the rail positions.
   final bool suppressMainToolbar;
 
+  /// Resolved content width for the rail (see [effectiveRailWidth]).
+  final double railWidth;
+
   const _SideRailToolbarLayer({
     required this.sheetDisplayed,
     required this.tabInFullScreen,
@@ -688,6 +701,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
     required this.suppressMainToolbar,
+    required this.railWidth,
   });
 
   @override
@@ -700,6 +714,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
       child: BrowserSideRail(
         position: tabBarPosition,
         showContextualToolbar: showContextualToolbar,
+        railWidth: railWidth,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: false,
         suppressMainToolbar: suppressMainToolbar,
@@ -1159,6 +1174,15 @@ class BrowserScreen extends HookConsumerWidget {
     // it is reserved via a plain content offset and dismissed only by gesture.
     final isRail = tabBarPosition.isVertical;
 
+    final railWidthSetting = ref.watch(
+      generalSettingsWithDefaultsProvider.select((value) => value.railWidth),
+    );
+    final railWidth = effectiveRailWidth(
+      isVertical: isRail,
+      railWidth: railWidthSetting,
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+
     final autoHideTabBar =
         !isSmallWebActive &&
         tabBarPosition.isHorizontal &&
@@ -1324,9 +1348,7 @@ class BrowserScreen extends HookConsumerWidget {
       TabBarPosition.right => MediaQuery.of(context).padding.right,
       _ => 0.0,
     };
-    final sideRailTotalWidth = isRail
-        ? BrowserTabBar.sideRailWidth + horizontalSafeArea
-        : 0.0;
+    final sideRailTotalWidth = isRail ? railWidth + horizontalSafeArea : 0.0;
     // Horizontal insets used to keep overlays (progress, find-in-page) clear of
     // the rail on its docked edge.
     final railLeftInset = tabBarPosition == TabBarPosition.left
@@ -1662,6 +1684,7 @@ class BrowserScreen extends HookConsumerWidget {
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
                     suppressMainToolbar: suppressMainToolbarForHome,
+                    railWidth: railWidth,
                   ),
                 ),
 

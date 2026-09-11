@@ -184,6 +184,11 @@ class BrowserSideRail extends ConsumerWidget {
 
   final bool suppressMainToolbar;
 
+  /// Resolved content width for the rail (the caller has already applied
+  /// [effectiveRailWidth], including the narrow-viewport collapse); falls
+  /// back to [defaultRailWidth] when unset.
+  final double? railWidth;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromWidth(_tabBar.getToolbarWidth());
 
@@ -194,6 +199,7 @@ class BrowserSideRail extends ConsumerWidget {
     required this.isSmallWebMode,
     required this.position,
     this.suppressMainToolbar = false,
+    this.railWidth,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
@@ -205,6 +211,7 @@ class BrowserSideRail extends ConsumerWidget {
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
       suppressMainToolbar: suppressMainToolbar,
+      railWidth: railWidth,
     );
   }
 
@@ -280,6 +287,13 @@ class BrowserTabBar extends HookConsumerWidget {
   /// wrappers rewrite before it reaches this widget.
   final bool suppressMainToolbar;
 
+  /// Resolved content width for the vertical side rail (excludes the system
+  /// safe-area inset on the rail's outer edge, which is added by the
+  /// caller). Only meaningful in [TabBarPosition.left]/[TabBarPosition.right];
+  /// null falls back to [sideRailWidth] (== [kToolbarHeight]), which is also
+  /// what a fresh install (and every horizontal position) uses.
+  final double? railWidth;
+
   const BrowserTabBar({
     super.key,
     required this.showMainToolbar,
@@ -290,18 +304,18 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
+    this.railWidth,
   });
 
   static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = 48.0;
 
-  /// Content width of the vertical side rail (excludes the system safe-area
-  /// inset on the rail's outer edge, which is added by the caller). Kept equal
-  /// to [kToolbarHeight] so the rail reuses the same base sizing as the
-  /// horizontal bar.
+  /// Default content width of the vertical side rail, kept equal to
+  /// [kToolbarHeight] so the rail reuses the same base sizing as the
+  /// horizontal bar when [railWidth] is unset.
   static const sideRailWidth = kToolbarHeight;
 
-  double getToolbarWidth() => sideRailWidth;
+  double getToolbarWidth() => railWidth ?? sideRailWidth;
 
   bool get displayAppBar =>
       showMainToolbar &&
