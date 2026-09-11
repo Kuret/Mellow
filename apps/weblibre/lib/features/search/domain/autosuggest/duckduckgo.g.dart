@@ -43,7 +43,7 @@ final class DuckDuckGoAutosuggestServiceProvider
 }
 
 String _$duckDuckGoAutosuggestServiceHash() =>
-    r'8fd234229d0b3ab71d9952c84f66e53b928d5941';
+    r'45274a3c9837d02d75a1ef131e002769d27dbc79';
 
 abstract class _$DuckDuckGoAutosuggestService extends $Notifier<void> {
   void build();

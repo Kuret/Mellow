@@ -24,9 +24,9 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_file.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_rule.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -77,7 +77,7 @@ class UrlCleanerCatalogService extends _$UrlCleanerCatalogService {
     final catalogUrl = settings.urlCleanerCatalogUrl;
     final hashUrl = settings.urlCleanerHashUrl;
 
-    final client = ref.read(routedHttpClientProvider);
+    final client = ref.read(appHttpClientProvider);
 
     // Fetch catalog and hash in parallel since they are independent.
     final catalogFuture = client

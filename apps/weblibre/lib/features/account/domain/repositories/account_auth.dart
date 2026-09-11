@@ -25,6 +25,7 @@ import 'package:supabase/supabase.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/account/data/account_handoff_ledger.dart';
 import 'package:weblibre/features/account/data/account_secure_store.dart';
@@ -34,7 +35,6 @@ import 'package:weblibre/features/account/data/models/persisted_session.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
 import 'package:weblibre/features/account/domain/services/handoff_redeem_client.dart';
 import 'package:weblibre/features/account/domain/utils/pkce.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 // Re-export so call sites that already imported AccountAuthFlowException from
 // this repository keep compiling after the redeem client split.
@@ -254,7 +254,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       //
       // Not closed by `SupabaseClient.dispose()` — it only closes the transport
       // it created itself — which is what this shared, app-wide client needs.
-      httpClient: ref.read(routedHttpClientProvider),
+      httpClient: ref.read(appHttpClientProvider),
     );
   }
 

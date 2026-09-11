@@ -26,8 +26,6 @@ import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/proxy/domain/services/app_routing_context.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'website_title.g.dart';
 
@@ -75,19 +73,9 @@ Future<WebPageInfo> pageInfo(
 }) async {
   final link = ref.cacheFor(const Duration(minutes: 2));
 
-  final tabState = ref.read(selectedTabStateProvider);
-
-  // Fetching page info requests the page itself, so it must travel the same
-  // route the tab would. The context id is resolved here and the routing
-  // decision is left to the snapshot — re-deriving it from container settings
-  // is how this path used to honour Tor but silently go direct for every
-  // sing-box connection.
-  final contextId = await routingContextIdForTab(ref, tabState);
-  final policy = await resolveAppRoutingPolicy(ref, contextId);
-
   final result = await ref
       .watch(genericWebsiteServiceProvider.notifier)
-      .fetchPageInfo(url: url, isImageRequest: isImageRequest, policy: policy);
+      .fetchPageInfo(url: url, isImageRequest: isImageRequest);
 
   if (!result.isSuccess) {
     link.close();

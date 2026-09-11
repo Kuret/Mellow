@@ -26,7 +26,7 @@ import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/http_error_handler.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'qwant.g.dart';
@@ -43,7 +43,7 @@ class QwantAutosuggestService extends _$QwantAutosuggestService
     // Suggestions reveal what the user is typing into the selected tab, so they
     // follow that tab's routing rather than the general container's. The
     // provider owns the client's lifetime.
-    _client = ref.watch(selectedTabRoutedHttpClientProvider);
+    _client = ref.watch(appHttpClientProvider);
   }
 
   @override

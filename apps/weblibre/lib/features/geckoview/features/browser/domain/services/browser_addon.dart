@@ -24,9 +24,9 @@ import 'dart:io';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'browser_addon.g.dart';
 
@@ -91,10 +91,8 @@ class BrowserAddonService extends _$BrowserAddonService {
     final url = 'https://addons.mozilla.org/api/v5/addons/addon/$guid/';
 
     try {
-      // Which add-ons are installed or updated is identifying, so the AMO
-      // lookup follows global routing rather than going out on its own.
       final response = await ref
-          .read(routedHttpClientProvider)
+          .read(appHttpClientProvider)
           .get(Uri.parse(url));
 
       if (response.statusCode == 200) {

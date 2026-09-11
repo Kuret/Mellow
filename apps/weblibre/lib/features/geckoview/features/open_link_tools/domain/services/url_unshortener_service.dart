@@ -22,10 +22,10 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/data/models/unshorten_response_data.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/unshorten_result.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'url_unshortener_service.g.dart';
 
@@ -100,7 +100,7 @@ class UrlUnshortenerService extends _$UrlUnshortenerService {
     // selected tab's business, so it follows that tab's routing rather than the
     // general container's. The shared client is owned by its provider.
     final http.Client httpClient =
-        client ?? ref.read(selectedTabRoutedHttpClientProvider);
+        client ?? ref.read(appHttpClientProvider);
 
     final http.Response response;
     final bool authenticated = token.isNotEmpty;

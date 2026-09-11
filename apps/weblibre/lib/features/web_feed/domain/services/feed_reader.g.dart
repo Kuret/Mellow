@@ -40,7 +40,7 @@ final class FeedReaderProvider extends $NotifierProvider<FeedReader, void> {
   }
 }
 
-String _$feedReaderHash() => r'bf6ba987b1a5ee18145316b42c3b0899e2d87aa5';
+String _$feedReaderHash() => r'3fec45c815bac47afd19d393329dbed0b0ec3ab9';
 
 abstract class _$FeedReader extends $Notifier<void> {
   void build();

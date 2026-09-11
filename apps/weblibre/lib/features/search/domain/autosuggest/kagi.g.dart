@@ -42,7 +42,7 @@ final class KagiAutosuggestServiceProvider
 }
 
 String _$kagiAutosuggestServiceHash() =>
-    r'e45eea8358ab27cc972475c8c5e2b1276c8145e8';
+    r'1f148a60fcf3d70d907953d4bd21bab0e265bd54';
 
 abstract class _$KagiAutosuggestService extends $Notifier<void> {
   void build();

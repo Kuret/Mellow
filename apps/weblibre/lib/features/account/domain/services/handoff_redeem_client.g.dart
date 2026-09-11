@@ -55,4 +55,4 @@ final class HandoffRedeemClientProvider
 }
 
 String _$handoffRedeemClientHash() =>
-    r'a59610fb82e3605e73dbf50cb978a887c2ab8839';
+    r'c432b7951a6b0b86586279ccd266a124055d6750';

@@ -24,9 +24,6 @@ import 'package:flutter/services.dart';
 import 'package:http/io_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
-import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
-import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_parse_result.dart';
 import 'package:weblibre/features/web_feed/utils/feed_parser.dart';
 
@@ -37,19 +34,13 @@ class FeedReader extends _$FeedReader {
   Future<FeedParseResult> parseFeed(Uri url) async {
     final rootIsolateToken = ServicesBinding.rootIsolateToken!;
 
-    // Which feeds are fetched, and when, is as revealing as browsing history,
-    // so feed fetches follow global routing like any other request.
-    final policy = await resolveAppRoutingPolicy(ref, generalContextId);
-
     final result = await compute((args) async {
       // Initialize BackgroundIsolateBinaryMessenger with the token
       BackgroundIsolateBinaryMessenger.ensureInitialized(
         args['token']! as RootIsolateToken,
       );
 
-      final httpClient = HttpClient();
-      applyRoutingPolicy(httpClient, args['policy']! as AppRoutingPolicy);
-      final client = IOClient(httpClient);
+      final client = IOClient(HttpClient());
       try {
         final url = Uri.parse(args['url']! as String);
         final response = await client
@@ -69,7 +60,7 @@ class FeedReader extends _$FeedReader {
       } finally {
         client.close();
       }
-    }, {'token': rootIsolateToken, 'url': url.toString(), 'policy': policy});
+    }, {'token': rootIsolateToken, 'url': url.toString()});
 
     return FeedParseResult.fromJson(result);
   }

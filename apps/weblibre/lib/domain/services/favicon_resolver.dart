@@ -20,9 +20,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:http/io_client.dart';
-import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
+import 'package:http/http.dart' as http;
 
 enum FaviconResolveStatus { hit, missing, error }
 
@@ -43,15 +41,12 @@ class FaviconResolveResult {
 }
 
 abstract class FaviconResolver {
-  /// Resolves the icon for [url] under [policy].
+  /// Resolves the icon for [url] using [client].
   ///
-  /// [policy] is required rather than optional: the lookup tells DuckDuckGo
-  /// every host the user visits, so a caller that forgets to pass routing is
-  /// exactly the bug this signature prevents.
-  Future<FaviconResolveResult> resolve(
-    Uri url, {
-    required AppRoutingPolicy policy,
-  });
+  /// [client] is required rather than optional: the caller decides which
+  /// shared HTTP client backs the lookup rather than this class opening its
+  /// own connection.
+  Future<FaviconResolveResult> resolve(Uri url, {required http.Client client});
 }
 
 final class DdgFaviconResolver implements FaviconResolver {
@@ -60,23 +55,13 @@ final class DdgFaviconResolver implements FaviconResolver {
   @override
   Future<FaviconResolveResult> resolve(
     Uri url, {
-    required AppRoutingPolicy policy,
+    required http.Client client,
   }) async {
     final host = url.host.trim().toLowerCase();
     if (host.isEmpty) {
       return const FaviconResolveResult.error();
     }
 
-    final httpClient = HttpClient();
-    try {
-      applyRoutingPolicy(httpClient, policy);
-    } on AppRoutingBlockedException {
-      // No icon is worth revealing the host over an unproxied connection.
-      httpClient.close(force: true);
-      return const FaviconResolveResult.error();
-    }
-
-    final client = IOClient(httpClient);
     try {
       final response = await client
           .get(Uri.https('icons.duckduckgo.com', '/ip2/$host.ico'))
@@ -101,8 +86,6 @@ final class DdgFaviconResolver implements FaviconResolver {
       return const FaviconResolveResult.error();
     } catch (_) {
       return const FaviconResolveResult.error();
-    } finally {
-      client.close();
     }
   }
 }

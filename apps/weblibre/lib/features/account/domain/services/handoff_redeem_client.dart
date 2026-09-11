@@ -21,8 +21,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'handoff_redeem_client.g.dart';
 
@@ -113,5 +113,5 @@ class HandoffRedeemClient {
 HandoffRedeemClient handoffRedeemClient(Ref ref) {
   // Shares the routed client, whose lifetime its own provider owns — so this
   // one deliberately does not close it on dispose.
-  return HandoffRedeemClient(client: ref.watch(routedHttpClientProvider));
+  return HandoffRedeemClient(client: ref.watch(appHttpClientProvider));
 }

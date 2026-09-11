@@ -29,13 +29,12 @@ import 'package:http/io_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/services/favicon_resolver.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
 import 'package:weblibre/utils/lru_cache.dart';
@@ -120,20 +119,13 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   Future<Result<WebPageInfo>> fetchPageInfo({
     required Uri url,
     required bool isImageRequest,
-    required AppRoutingPolicy policy,
     bool forceRefresh = false,
   }) {
     return Result.fromAsync(() async {
       final result = await compute((args) async {
-        final [String urlString, bool isImageRequest, AppRoutingPolicy policy] =
-            args;
+        final [String urlString, bool isImageRequest] = args;
 
-        final httpClient = HttpClient();
-        // Throws for a blocked policy, which surfaces as a failed Result rather
-        // than as an unproxied request to the page being inspected.
-        applyRoutingPolicy(httpClient, policy);
-
-        final client = IOClient(httpClient);
+        final client = IOClient(HttpClient());
         try {
           final baseUri = Uri.parse(urlString);
           final response = await client
@@ -165,7 +157,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         } finally {
           client.close();
         }
-      }, <dynamic>[url.toString(), isImageRequest, policy]);
+      }, <dynamic>[url.toString(), isImageRequest]);
 
       if (result['imageBytes'] case final Uint8List imageBytes) {
         final favicon = await BrowserIcon.fromBytes(
@@ -377,22 +369,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     Uri url, {
     required bool cacheMissing,
   }) async {
-    // The lookup tells the resolver which host is being displayed, so it has to
-    // travel the route of the tab that is displaying it. Falling back to the
-    // general container would hand that host to a third party over a direct
-    // connection while the user browses in a proxied one.
-    //
-    // This applies to every icon, including those requested by surfaces with no
-    // tab behind them (bookmarks, settings, history). That is deliberate rather
-    // than overreach: the icon cache is global and keyed by origin, so whichever
-    // surface asks first decides the route for all of them, and a contextless
-    // request routed direct would leak the host just as surely. The cost is
-    // bounded — a blocked lookup resolves to an error, which yields a generated
-    // placeholder and is not negatively cached, so it retries once the route
-    // works again.
     final result = await _faviconResolver.resolve(
       url,
-      policy: await ref.read(selectedTabRoutingPolicyProvider)(),
+      client: ref.read(appHttpClientProvider),
     );
     switch (result.status) {
       case FaviconResolveStatus.hit:

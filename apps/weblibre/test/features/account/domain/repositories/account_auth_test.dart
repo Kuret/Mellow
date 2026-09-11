@@ -22,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:supabase/supabase.dart';
+import 'package:weblibre/core/providers/http_client.dart';
 import 'package:weblibre/core/secure_storage/profile_secure_keys.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/features/account/data/account_secure_store.dart';
@@ -29,7 +30,6 @@ import 'package:weblibre/features/account/data/models/account_auth_state.dart';
 import 'package:weblibre/features/account/data/models/account_persisted_data.dart';
 import 'package:weblibre/features/account/data/models/persisted_session.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
-import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 const _a = '0199a0b1-1111-7111-8111-111111111111';
 const _key = '$accountSecureBaseKey$secureKeyProfileSeparator$_a';
@@ -87,7 +87,7 @@ void main() {
         accountSecureStoreProvider.overrideWithValue(
           AccountSecureStore(profileId: _a),
         ),
-        routedHttpClientProvider.overrideWithValue(client),
+        appHttpClientProvider.overrideWithValue(client),
       ],
     );
     addTearDown(container.dispose);

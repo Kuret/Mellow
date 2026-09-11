@@ -131,7 +131,7 @@ final class BrowserAddonServiceProvider
 }
 
 String _$browserAddonServiceHash() =>
-    r'9f4a07bee54b8c8f158bf95f2ca804bcac50d85a';
+    r'1a292d555b208ffc671fc68f601d9fd83a677d1d';
 
 abstract class _$BrowserAddonService extends $Notifier<void> {
   void build();

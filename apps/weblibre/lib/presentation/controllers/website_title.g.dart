@@ -162,7 +162,7 @@ final class PageInfoProvider
   }
 }
 
-String _$pageInfoHash() => r'de6a17a592c2e013c222436b8a1a4bedba2175a2';
+String _$pageInfoHash() => r'57137d47969598d8b60629b58e3de78b4737edcb';
 
 final class PageInfoFamily extends $Family
     with
