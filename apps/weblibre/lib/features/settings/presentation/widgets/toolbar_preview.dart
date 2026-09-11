@@ -211,16 +211,33 @@ class TabBarPreviewCard extends HookWidget {
       ScrollController scrollController, {
       Axis axis = Axis.horizontal,
     }) {
+      // Mirrors isWideRail, but ignores the viewport breakpoint: this preview
+      // shows what the configured railWidth looks like regardless of the
+      // settings screen's own current width.
+      final wideRail =
+          settings.tabBarPosition.isVertical &&
+          settings.railWidth >= minWideRailWidth;
+      final showTitles =
+          (axis != Axis.vertical || wideRail) &&
+          settings.quickTabSwitcherShowTitles;
+      final titleMaxWidth = wideRail && axis == Axis.vertical
+          ? settings.quickTabSwitcherTitleWidth.clamp(
+              0.0,
+              (settings.railWidth - railChipChromeWidth).clamp(
+                0.0,
+                double.infinity,
+              ),
+            )
+          : settings.quickTabSwitcherTitleWidth;
       return QuickTabSwitcherView(
         availableItems: previewQuickItems,
         activeItem: previewQuickItems.firstWhere((item) => item.isActive),
         scrollController: scrollController,
         axis: axis,
-        showTitles:
-            axis != Axis.vertical && settings.quickTabSwitcherShowTitles,
+        showTitles: showTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
-        titleMaxWidth: settings.quickTabSwitcherTitleWidth,
+        titleMaxWidth: titleMaxWidth,
         closeButtonMode: settings.quickTabSwitcherCloseButtonMode,
         enablePinTabInMenu: false,
         onSelected: (_) async {},
@@ -320,6 +337,8 @@ class TabBarPreviewCard extends HookWidget {
     );
 
     final isRailPreview = settings.tabBarPosition.isVertical;
+    final isWideRailPreview =
+        isRailPreview && settings.railWidth >= minWideRailWidth;
 
     final railToolbar = BrowserTabBarView(
       axis: Axis.vertical,
@@ -331,10 +350,19 @@ class TabBarPreviewCard extends HookWidget {
       displayQuickTabSwitcher: true,
       backgroundColor:
           previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
-      title: _RailPreviewTitle(
-        tabState: previewTabState,
-        quarterTurns: settings.tabBarPosition == TabBarPosition.left ? 3 : 1,
-      ),
+      title: isWideRailPreview
+          ? ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: settings.railWidth),
+              child: settings.tabBarLayout == TabBarLayout.compact
+                  ? _CompactPreviewTitle(tabState: previewTabState)
+                  : _RegularPreviewTitle(tabState: previewTabState),
+            )
+          : _RailPreviewTitle(
+              tabState: previewTabState,
+              quarterTurns: settings.tabBarPosition == TabBarPosition.left
+                  ? 3
+                  : 1,
+            ),
       actions: mainToolbarActions,
       quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
       contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
@@ -360,10 +388,7 @@ class TabBarPreviewCard extends HookWidget {
 
     final Widget previewContent;
     if (isRailPreview) {
-      final rail = SizedBox(
-        width: BrowserTabBar.sideRailWidth,
-        child: railToolbar,
-      );
+      final rail = SizedBox(width: settings.railWidth, child: railToolbar);
       final railOnLeft = settings.tabBarPosition == TabBarPosition.left;
       previewContent = Container(
         clipBehavior: Clip.antiAlias,
