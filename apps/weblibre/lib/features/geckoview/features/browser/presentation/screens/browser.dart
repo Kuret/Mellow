@@ -42,7 +42,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -64,13 +63,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/w
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
-import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
-import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -303,50 +296,6 @@ class _TabBar extends HookConsumerWidget {
     };
   }
 }
-
-/// Which proxy this tab's traffic needs, so a failed load can offer to start
-/// it. Null when the tab connects directly, or while routing is unresolved.
-///
-/// Read off the acknowledged routing snapshot rather than re-derived from
-/// settings and container rows. The snapshot already holds the resolved
-/// relation for every scope — private, global, per-container, per-isolation
-/// group, and the isolation-context aliases — so this asks the same question
-/// the extension answered when it blocked the request. Re-deriving it here is
-/// how an isolated tab ended up with no prompt at all while the route that was
-/// down was its own.
-ProxyConnectionId? _proxyConnectionIdForLoadError(
-  WidgetRef ref, {
-  required String tabId,
-  required String? contextId,
-}) {
-  final snapshot = ref.read(containerRoutingSnapshotProvider);
-  if (snapshot == null) return null;
-
-  final tabState = ref.read(tabStateProvider(tabId));
-  // The failing load reports the cookie store it ran under; the tab's own is
-  // the fallback for events that carry none.
-  final loadContextId = (contextId != null && contextId.isNotEmpty)
-      ? contextId
-      : tabState?.contextId;
-
-  final relation = effectiveRelationFor(
-    snapshot,
-    tabRoutingContextId(
-      contextId: loadContextId,
-      isPrivate: tabState?.tabMode is PrivateTabMode,
-    ),
-  );
-
-  // Empty is an explicit direct connection: there is nothing to start, and the
-  // load failed for some other reason.
-  return relation.isEmpty ? null : ProxyConnectionId.decode(relation.first);
-}
-
-typedef _PendingProxyLoadError = ({
-  String? contextId,
-  String errorType,
-  String? url,
-});
 
 class _BrowserScaffoldTheme extends ConsumerWidget {
   final String? selectedTabId;
@@ -974,153 +923,6 @@ class BrowserScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final eventService = ref.watch(eventServiceProvider);
     final viewportService = ref.watch(viewportServiceProvider);
-    final activeProxyPromptKeys = useRef(<String>{});
-    final pendingProxyLoadErrors = useRef(<String, _PendingProxyLoadError>{});
-    final selectedTabIdForProxyPrompt = ref.watch(selectedTabProvider);
-
-    Future<void> handleProxyLoadError({
-      required String tabId,
-      required String? contextId,
-      required String? url,
-      required String errorType,
-    }) async {
-      final promptKey = '$tabId:${url ?? errorType}';
-      if (!activeProxyPromptKeys.value.add(promptKey)) return;
-
-      // Set once this tab starts a load of its own while the waits below run.
-      // The unattended reload is only ever meant to get a tab past the load
-      // that failed in the routing-install window; a tab that has started
-      // loading again since — because the user retried, or because the engine
-      // did — is no longer sitting on that failure, and reloading it would
-      // throw away the page and the scroll position they now have.
-      var tabReloadedMeanwhile = false;
-      final tabLoadSubscription = ref.listenManual(
-        tabStateProvider(tabId).select((state) => state?.isLoading ?? false),
-        (previous, isLoading) {
-          if (isLoading) tabReloadedMeanwhile = true;
-        },
-      );
-
-      try {
-        Future<void> reloadTab() async {
-          if (!context.mounted || ref.read(selectedTabProvider) != tabId) {
-            return;
-          }
-          await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
-        }
-
-        // The extension blocks *every* request until routing is installed, so a
-        // load that lands in that window fails this way whether or not the tab
-        // routes through a proxy at all — which is what a cold start, and the
-        // first navigation of one, most often is. Wait the install out and
-        // reload, instead of leaving a page the user has to retry by hand.
-        final containerProxy = ref.read(
-          containerProxyRepositoryProvider.notifier,
-        );
-        final routingWasPending = !await containerProxy.isRoutingReady();
-        // Every read past this point goes through `ref`, which throws once the
-        // screen is gone — and the throw is swallowed by the catch below, so
-        // the recovery would be lost silently rather than loudly.
-        if (!context.mounted) return;
-
-        if (routingWasPending) {
-          final routingReady = await containerProxy.waitUntilRoutingReady();
-          // Routing that never arrives is a broken browser, not a proxy that
-          // needs starting: there is no snapshot to say what this tab needs, so
-          // the error page stands and the repair loop keeps retrying behind it.
-          if (!routingReady || !context.mounted) return;
-        }
-
-        final proxyConnectionId = _proxyConnectionIdForLoadError(
-          ref,
-          tabId: tabId,
-          contextId: contextId,
-        );
-
-        if (proxyConnectionId == null) {
-          // Nothing to start — this context connects directly, so the block was
-          // the install window itself and it is over.
-          if (routingWasPending && !tabReloadedMeanwhile) await reloadTab();
-          return;
-        }
-
-        // Starting a proxy asks the user about *a tab*, and the wait above can
-        // run for seconds. If they have moved on since, hand the error back to
-        // the queue that defers it until this tab is on screen again — the same
-        // route an error for an unselected tab takes in the first place —
-        // instead of prompting over whatever they are looking at now.
-        if (ref.read(selectedTabProvider) != tabId) {
-          pendingProxyLoadErrors.value[tabId] = (
-            contextId: contextId,
-            errorType: errorType,
-            url: url,
-          );
-          return;
-        }
-
-        final isProxyStarted = await ensureProxyStartedForConnection(
-          context,
-          ref,
-          proxyConnectionId,
-        );
-
-        if (isProxyStarted) {
-          await reloadTab();
-        }
-      } catch (error, stackTrace) {
-        logger.e(
-          'Failed to handle proxy load error',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      } finally {
-        tabLoadSubscription.close();
-        activeProxyPromptKeys.value.remove(promptKey);
-      }
-    }
-
-    useEffect(() {
-      final tabId = selectedTabIdForProxyPrompt;
-      if (tabId == null) return null;
-
-      final pending = pendingProxyLoadErrors.value.remove(tabId);
-      if (pending == null) return null;
-
-      unawaited(
-        handleProxyLoadError(
-          tabId: tabId,
-          contextId: pending.contextId,
-          url: pending.url,
-          errorType: pending.errorType,
-        ),
-      );
-      return null;
-    }, [selectedTabIdForProxyPrompt]);
-
-    useOnStreamChange(
-      eventService.proxyLoadErrorEvents,
-      onData: (event) async {
-        final selectedTabId = ref.read(selectedTabProvider);
-        final tabId = event.tabId ?? selectedTabId;
-        if (tabId == null) return;
-
-        if (tabId != selectedTabId) {
-          pendingProxyLoadErrors.value[tabId] = (
-            contextId: event.contextId,
-            errorType: event.errorType,
-            url: event.url,
-          );
-          return;
-        }
-
-        await handleProxyLoadError(
-          tabId: tabId,
-          contextId: event.contextId,
-          url: event.url,
-          errorType: event.errorType,
-        );
-      },
-    );
 
     final tabInFullScreen = ref.watch(
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),

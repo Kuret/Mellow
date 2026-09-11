@@ -50,10 +50,8 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -448,20 +446,6 @@ class TabRepository extends _$TabRepository {
       tabMode: Value(duplicateTabMode),
     );
 
-    // The duplicate is a new isolation group, so it starts with no route of its
-    // own — carry the source's over, or the copy silently falls back to its
-    // container's routing.
-    if (sourceTabMode case IsolatedTabMode(
-      :final isolationContextId,
-    ) when ref.mounted) {
-      await ref
-          .read(proxyRoutingSettingsRepositoryProvider.notifier)
-          .copyIsolationContextRoute(
-            isolationContextId,
-            duplicateIsolationContextId!,
-          );
-    }
-
     if (selectTab && ref.mounted) {
       _clearForceBrowserHome();
     }
@@ -620,36 +604,6 @@ class TabRepository extends _$TabRepository {
       ref.read(pendingTabSelectionProvider.notifier).queue(tabId);
       _clearForceBrowserHome();
       return true;
-    }
-
-    final containerData = await ref
-        .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerData(tabId);
-
-    if (!ref.mounted) return false;
-
-    if (containerData != null) {
-      if (containerData.metadata.proxyConnectionId != null) {
-        // Routing has to be *installed*, not merely answering: an extension
-        // that responds but holds no snapshot blocks this container's traffic,
-        // so opening the tab would only show a broken page.
-        //
-        // Waited on rather than sampled, because the install window is a normal
-        // part of a cold start and a tap that lands inside it should open the
-        // tab a moment later instead of doing nothing at all.
-        final routingReady = await ref
-            .read(containerProxyRepositoryProvider.notifier)
-            .waitUntilRoutingReady();
-
-        if (!ref.mounted) return false;
-
-        if (!routingReady) {
-          logger.w(
-            'Tried to open proxied tab $tabId before container routing was installed',
-          );
-          return false;
-        }
-      }
     }
 
     _clearForceBrowserHome();
@@ -1026,24 +980,6 @@ class TabRepository extends _$TabRepository {
     } catch (e, st) {
       logger.e(
         'Failed to clear data for isolation context $contextId',
-        error: e,
-        stackTrace: st,
-      );
-    }
-
-    // The alias derived from the group's container needs no teardown: it is
-    // computed from the tabs that reference the context, so dropping those tabs
-    // removes it from the next routing snapshot. A route the *user* set on the
-    // group is stored, though, and would outlive every tab that could use it.
-    if (!ref.mounted) return;
-
-    try {
-      await ref
-          .read(proxyRoutingSettingsRepositoryProvider.notifier)
-          .clearIsolationContextRoute(contextId);
-    } catch (e, st) {
-      logger.e(
-        'Failed to drop the isolation route for $contextId',
         error: e,
         stackTrace: st,
       );

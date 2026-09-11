@@ -63,7 +63,6 @@ import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatek
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -779,24 +778,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to pwaManifestStateProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    // Keep-alive subscription for Tor status. The body is intentionally empty:
-    // the listener exists so the provider stays active while the browser view
-    // is mounted and Tor state events are not dropped. singboxProxyLogs is
-    // kept alive from main.dart so startup logs are captured even before the
-    // browser view mounts.
-    ref.listenManual(
-      fireImmediately: true,
-      torProxyServiceProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to torProxyServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );

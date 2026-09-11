@@ -34,7 +34,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
@@ -230,15 +229,9 @@ class TabTrayGestures extends HookConsumerWidget {
         return;
       }
 
-      // The rest mirrors the container chips, so a swipe onto a proxied
-      // container offers to start its proxy instead of quietly refusing.
-      final result = await ref
+      await ref
           .read(selectedContainerProvider.notifier)
           .setContainerId(container.id);
-
-      if (context.mounted && result == SetContainerResult.success) {
-        await ensureProxyStartedForContainer(context, ref, container);
-      }
     }
 
     void cycleViewMode({required bool expand}) {

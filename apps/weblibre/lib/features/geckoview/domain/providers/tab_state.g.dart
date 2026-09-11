@@ -271,12 +271,23 @@ final class TabStateWithFallbackFamily extends $Family
   String toString() => r'tabStateWithFallbackProvider';
 }
 
+/// Always false: there is no proxy left to tunnel a tab through. Kept as the
+/// seam the address-bar shield icon watches, so that UI stays put rather than
+/// being unwound here.
+
 @ProviderFor(isTabTunneled)
 final isTabTunneledProvider = IsTabTunneledFamily._();
+
+/// Always false: there is no proxy left to tunnel a tab through. Kept as the
+/// seam the address-bar shield icon watches, so that UI stays put rather than
+/// being unwound here.
 
 final class IsTabTunneledProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Always false: there is no proxy left to tunnel a tab through. Kept as the
+  /// seam the address-bar shield icon watches, so that UI stays put rather than
+  /// being unwound here.
   IsTabTunneledProvider._({
     required IsTabTunneledFamily super.from,
     required String? super.argument,
@@ -320,7 +331,11 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'd36607ff812f71870af32ce59c2dbe898a9c1917';
+String _$isTabTunneledHash() => r'ec5ab8f7dc5d040fd4df46595df4342525547739';
+
+/// Always false: there is no proxy left to tunnel a tab through. Kept as the
+/// seam the address-bar shield icon watches, so that UI stays put rather than
+/// being unwound here.
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
@@ -332,6 +347,10 @@ final class IsTabTunneledFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
+
+  /// Always false: there is no proxy left to tunnel a tab through. Kept as the
+  /// seam the address-bar shield icon watches, so that UI stays put rather than
+  /// being unwound here.
 
   IsTabTunneledProvider call(String? tabId) =>
       IsTabTunneledProvider._(argument: tabId, from: this);

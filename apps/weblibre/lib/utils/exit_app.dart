@@ -27,7 +27,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 /// Tears down the app and ends the process.
 ///
@@ -59,7 +58,7 @@ Future<void> exitApp(
   //     Caveat: GeckoView's session-context clear is fire-and-forget (see
   //     GeckoDeleteBrowsingDataControllerImpl.clearDataForSessionContext) — it
   //     has no completion signal, so awaiting it does NOT mean the clear
-  //     finished, only that it was dispatched. Since step 3 tears down the
+  //     finished, only that it was dispatched. Since step 2 tears down the
   //     GeckoRuntime, we give the dispatched clear a short best-effort window to
   //     reach Gecko first. The startup fallback in browser_view.dart is retained
   //     as the actual guarantee — it covers force-stop/process death and this
@@ -73,7 +72,7 @@ Future<void> exitApp(
       await container
           .read(browserDataServiceProvider.notifier)
           .clearContainerData(containersToClear);
-      // Best-effort settle: yield before the engine shutdown in step 3 so the
+      // Best-effort settle: yield before the engine shutdown in step 2 so the
       // fire-and-forget native clear has a chance to be processed by Gecko.
       await Future<void>.delayed(const Duration(milliseconds: 500));
       logger.i(
@@ -89,17 +88,7 @@ Future<void> exitApp(
     );
   }
 
-  // 2. Stop Tor proxy (only if it was initialized)
-  if (container.exists(torProxyServiceProvider)) {
-    try {
-      await container.read(torProxyServiceProvider.notifier).disconnect();
-      logger.i('Tor proxy stopped');
-    } catch (e, st) {
-      logger.e('Failed to stop Tor proxy', error: e, stackTrace: st);
-    }
-  }
-
-  // 3. Shutdown GeckoView engine. Must happen while the activity is still
+  // 2. Shutdown GeckoView engine. Must happen while the activity is still
   //    attached so shutdown() can access the FragmentManager. Internally it:
   //    a) removes the BrowserFragment via commitNow() (view teardown with
   //       the runtime still alive),
@@ -112,20 +101,20 @@ Future<void> exitApp(
     logger.e('Failed to shut down GeckoView', error: e, stackTrace: st);
   }
 
-  // 4. Close all registered databases
+  // 3. Close all registered databases
   try {
     await DatabaseRegistry.instance.closeAll();
   } catch (e, st) {
     logger.e('Failed to close databases', error: e, stackTrace: st);
   }
 
-  // 5. Dispose the Riverpod container (remaining sync cleanup).
+  // 4. Dispose the Riverpod container (remaining sync cleanup).
   //    This fires async onDispose callbacks (e.g. stream cancellations in
   //    GeckoView services, viewport service) as fire-and-forget futures.
   container.dispose();
   logger.i('Provider container disposed');
 
-  // 6. Give fire-and-forget async onDispose callbacks time to settle.
+  // 5. Give fire-and-forget async onDispose callbacks time to settle.
   //
   //    Finishing the Activity is skipped when restarting. There is nothing to
   //    return to — the process is about to die and the trampoline is already

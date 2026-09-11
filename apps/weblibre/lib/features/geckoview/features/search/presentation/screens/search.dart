@@ -62,7 +62,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolatio
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
@@ -595,12 +594,6 @@ class SearchScreen extends HookConsumerWidget {
         final result = await ref
             .read(selectedContainerProvider.notifier)
             .setContainerId(container.id);
-
-        if (!context.mounted) return;
-
-        if (result == SetContainerResult.success) {
-          await ensureProxyStartedForContainer(context, ref, container);
-        }
 
         if (context.mounted && result == SetContainerResult.success) {
           const TabViewRoute().go(context);

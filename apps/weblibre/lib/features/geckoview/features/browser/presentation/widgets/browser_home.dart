@@ -36,7 +36,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
@@ -115,15 +114,9 @@ class BrowserHome extends ConsumerWidget {
         unawaited(FeedArticleRoute(articleId: article.id).push(context));
       },
       onContainerSelected: (container) async {
-        final result = await ref
+        await ref
             .read(selectedContainerProvider.notifier)
             .setContainerId(container.id);
-
-        if (!context.mounted) return;
-
-        if (result == SetContainerResult.success) {
-          await ensureProxyStartedForContainer(context, ref, container);
-        }
       },
       onNewTab: openNewTab,
       onViewTabs: viewTabs,

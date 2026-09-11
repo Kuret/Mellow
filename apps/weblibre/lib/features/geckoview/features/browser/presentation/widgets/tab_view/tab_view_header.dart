@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
-import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -90,13 +89,9 @@ class _TabFilters extends ConsumerWidget {
             ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
 
             if (container != null) {
-              final result = await ref
+              await ref
                   .read(selectedContainerProvider.notifier)
                   .setContainerId(container.id);
-
-              if (context.mounted && result == SetContainerResult.success) {
-                await ensureProxyStartedForContainer(context, ref, container);
-              }
             } else {
               ref.read(selectedContainerProvider.notifier).clearContainer();
             }
