@@ -25,7 +25,6 @@ import 'package:weblibre/features/account/data/repositories/account_sync_reposit
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'settings_sync_service.g.dart';
 
@@ -45,16 +44,15 @@ class SettingsSyncService extends _$SettingsSyncService
 
   @override
   Future<List<int>> serializeCurrent() async {
-    final (general, engine, tor) = await (
+    final (general, engine) = await (
       ref.read(generalSettingsRepositoryProvider.notifier).fetchSettings(),
       ref.read(engineSettingsRepositoryProvider.notifier).fetchSettings(),
-      ref.read(torSettingsRepositoryProvider.notifier).fetchSettings(),
     ).wait;
 
     final envelope = SettingsSyncEnvelope(
       schemaVersion: _schemaVersion,
       exportedAt: DateTime.now().toUtc().toIso8601String(),
-      payload: SettingsSyncPayload(general: general, engine: engine, tor: tor),
+      payload: SettingsSyncPayload(general: general, engine: engine),
     );
 
     return utf8.encode(jsonEncode(envelope.toJson()));
@@ -83,11 +81,6 @@ class SettingsSyncService extends _$SettingsSyncService
       await ref
           .read(engineSettingsRepositoryProvider.notifier)
           .updateSettings((_) => payload.engine!);
-    }
-    if (payload.tor != null) {
-      await ref
-          .read(torSettingsRepositoryProvider.notifier)
-          .updateSettings((_) => payload.tor!);
     }
   }
 }

@@ -14,9 +14,6 @@ SettingsSyncPayload _$SettingsSyncPayloadFromJson(Map<String, dynamic> json) =>
       engine: json['engine'] == null
           ? null
           : EngineSettings.fromJson(json['engine'] as Map<String, dynamic>),
-      tor: json['tor'] == null
-          ? null
-          : TorSettings.fromJson(json['tor'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SettingsSyncPayloadToJson(
@@ -24,7 +21,6 @@ Map<String, dynamic> _$SettingsSyncPayloadToJson(
 ) => <String, dynamic>{
   'general': instance.general?.toJson(),
   'engine': instance.engine?.toJson(),
-  'tor': instance.tor?.toJson(),
 };
 
 SettingsSyncEnvelope _$SettingsSyncEnvelopeFromJson(

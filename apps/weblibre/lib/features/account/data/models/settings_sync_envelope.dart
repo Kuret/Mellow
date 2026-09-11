@@ -20,7 +20,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/tor_settings.dart';
 
 part 'settings_sync_envelope.g.dart';
 
@@ -28,9 +27,8 @@ part 'settings_sync_envelope.g.dart';
 class SettingsSyncPayload {
   final GeneralSettings? general;
   final EngineSettings? engine;
-  final TorSettings? tor;
 
-  SettingsSyncPayload({this.general, this.engine, this.tor});
+  SettingsSyncPayload({this.general, this.engine});
 
   factory SettingsSyncPayload.fromJson(Map<String, dynamic> json) =>
       _$SettingsSyncPayloadFromJson(json);
