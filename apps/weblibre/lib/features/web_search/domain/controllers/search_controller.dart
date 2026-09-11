@@ -294,7 +294,6 @@ class MetaSearchController extends _$MetaSearchController {
       query: normalizedQuery,
     );
 
-
     final TokenAvailabilityOutcome availability;
     try {
       availability = await ref.read(metaSearchEnsureTokenAvailableProvider)();

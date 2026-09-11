@@ -99,8 +99,7 @@ class UrlUnshortenerService extends _$UrlUnshortenerService {
     // Unshortening discloses the link the user is about to open, which is the
     // selected tab's business, so it follows that tab's routing rather than the
     // general container's. The shared client is owned by its provider.
-    final http.Client httpClient =
-        client ?? ref.read(appHttpClientProvider);
+    final http.Client httpClient = client ?? ref.read(appHttpClientProvider);
 
     final http.Response response;
     final bool authenticated = token.isNotEmpty;
