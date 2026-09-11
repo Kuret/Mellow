@@ -393,6 +393,10 @@ class BrowserTabBar extends HookConsumerWidget {
     final switcherAxis = tabBarPosition.axis;
     // Left rail reads bottom-to-top, right rail top-to-bottom.
     final railQuarterTurns = tabBarPosition == TabBarPosition.left ? 3 : 1;
+    // railWidth (the widget field) is already the caller-resolved effective
+    // width — see effectiveRailWidth — so this needs no extra viewport check.
+    final resolvedRailWidth = railWidth ?? sideRailWidth;
+    final wideRail = isVertical && resolvedRailWidth >= minWideRailWidth;
 
     final dragStartPosition = useRef(Offset.zero);
 
@@ -481,11 +485,27 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? isVertical
+          ? isVertical && !wideRail
                 ? RailAppBarTitle(
                     quarterTurns: railQuarterTurns,
                     containerColor: effectiveContainerColor,
                     useCustomColor: effectiveUseCustomColor,
+                  )
+                : isVertical
+                // A wide rail reads upright, like the horizontal bars, but the
+                // title still has to fit inside railWidth rather than the
+                // horizontal bar's much wider budget.
+                ? ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: resolvedRailWidth),
+                    child: settings.tabBarLayout == TabBarLayout.compact
+                        ? CompactAppBarTitle(
+                            containerColor: effectiveContainerColor,
+                            useCustomColor: effectiveUseCustomColor,
+                          )
+                        : AppBarTitle(
+                            containerColor: effectiveContainerColor,
+                            useCustomColor: effectiveUseCustomColor,
+                          ),
                   )
                 : settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(
