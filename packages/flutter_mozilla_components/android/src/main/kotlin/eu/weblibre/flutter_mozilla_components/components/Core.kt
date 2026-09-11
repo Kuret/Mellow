@@ -156,7 +156,7 @@ class Core(
     }
 
     val engine: Engine by lazy {
-        EngineProvider.createEngine(context, engineSettings, extensionEvents, flutterEvents)
+        EngineProvider.createEngine(context, engineSettings, extensionEvents)
     }
 
     /**

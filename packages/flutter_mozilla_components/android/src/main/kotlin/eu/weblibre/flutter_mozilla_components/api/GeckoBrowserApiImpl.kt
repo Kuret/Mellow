@@ -32,7 +32,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoCookieApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
@@ -144,7 +143,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     private var activity: Activity? = null
     private var isPlatformViewRegistered = false
     private var pushApi: GeckoPushApiImpl? = null
-    private var containerProxyApi: GeckoContainerProxyApiImpl? = null
     private var engineViewVisibility: EngineViewVisibility? = null
 
     private lateinit var _flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
@@ -199,57 +197,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     fun disposePushApi() {
         pushApi?.dispose()
         pushApi = null
-    }
-
-    fun disposeContainerProxyApi() {
-        val api = containerProxyApi
-        containerProxyApi = null
-        api?.dispose()
-        if (::_flutterPluginBinding.isInitialized) {
-            GeckoContainerProxyApi.setUp(_flutterPluginBinding.binaryMessenger, null)
-        }
-    }
-
-    /**
-     * Puts a fresh container-proxy API on the channel, replacing whatever is
-     * there.
-     *
-     * Its own method because [setupGeckoEngine] is not the only caller that
-     * needs it, and is the one place a second caller cannot borrow it from:
-     * [initialize] does nothing once [isGeckoInitialized] is true, which it
-     * stays for the life of the process.
-     */
-    private fun installContainerProxyApi() {
-        disposeContainerProxyApi()
-
-        val containerProxyApiImpl = GeckoContainerProxyApiImpl()
-        GeckoContainerProxyApi.setUp(
-            _flutterPluginBinding.binaryMessenger,
-            containerProxyApiImpl
-        )
-        containerProxyApi = containerProxyApiImpl
-    }
-
-    /**
-     * Hands the container-proxy API to a replacement isolate, after a hot
-     * restart.
-     *
-     * The instance left behind holds the dead isolate's `nextRoutingDemand`
-     * waiter, which would take the next launch's demand off the queue and answer
-     * an isolate that cannot hear it. Disposing it alone is not enough: nothing
-     * else would register the channel again short of destroying the engine, so
-     * every routing push and demand poll the replacement makes would land on a
-     * channel with no handler — Gecko is already initialized, and `initialize`
-     * is the call that would otherwise have set this up.
-     *
-     * A restart before the engine was ever set up is left alone: an unregistered
-     * channel is exactly what a cold start has until [initialize], and this API
-     * speaks for an extension that does not exist yet.
-     */
-    fun reinstallContainerProxyApi() {
-        if (containerProxyApi == null) return
-
-        installContainerProxyApi()
     }
 
     fun detachActivity() {
@@ -446,7 +393,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
         GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
-        installContainerProxyApi()
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
         GeckoSelectionActionController.setUp(
             _flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
@@ -626,11 +572,9 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         val intent = ExternalAppBrowserActivity.createIntent(
             context = currentActivity,
             customTabSessionId = tab.id,
-            // The window decides what routing this launch needs from the intent,
-            // not from the session (`LaunchRouting.contextIdFor`), and the
-            // fallback to the ordinary browser reopens the URL from it as well.
-            // Left off, a tab created for a container is served — and recovered —
-            // as if it belonged to no container at all.
+            // Carried so a fallback to the ordinary browser reopens the URL in the
+            // right container. Left off, a tab created for a container is served
+            // — and recovered — as if it belonged to no container at all.
             pwaContextId = contextId,
             isPrivate = `private`,
         )
@@ -692,7 +636,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // 2. Stop component-level services
         try {
             GlobalComponents.stopPrivateTabsNotificationFeature()
-            disposeContainerProxyApi()
             disposePushApi()
             GlobalComponents.closePush()
 

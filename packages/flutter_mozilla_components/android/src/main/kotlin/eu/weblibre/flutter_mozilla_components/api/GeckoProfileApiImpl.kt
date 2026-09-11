@@ -37,9 +37,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKin
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupPromptMode
 import eu.weblibre.flutter_mozilla_components.pigeons.StartupIntentRecord
-import eu.weblibre.flutter_mozilla_components.startup.BootstrapStage
 import eu.weblibre.flutter_mozilla_components.startup.DartAccessOwner
-import eu.weblibre.flutter_mozilla_components.startup.DartStartupProgress
 import eu.weblibre.flutter_mozilla_components.startup.DartProfileAccess
 import eu.weblibre.flutter_mozilla_components.startup.ProfilePromptMode
 import eu.weblibre.flutter_mozilla_components.startup.RestartCoordinator
@@ -127,10 +125,6 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         abandonSupersededEngines(except = engineId)
 
         synchronized(startupEngines) { startupEngines += engineId }
-
-        // Noted, not required: a launch waiting for this app half needs to know
-        // it got this far. See [DartStartupProgress].
-        DartStartupProgress.record(BootstrapStage.ARBITRATING)
 
         val directive = StartupArbiter.beginStartup(
             owner,
@@ -344,9 +338,6 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         }
         synchronized(grantedAccess) { grantedAccess += owner }
 
-        // The earliest call Dart's startup makes, and so the first moment a
-        // waiting launch can tell a running isolate from a started one.
-        DartStartupProgress.record(BootstrapStage.ARBITRATING)
         return true
     }
 
