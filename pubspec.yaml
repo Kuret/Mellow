@@ -78,7 +78,6 @@ melos:
       description: Build JS components and generate quotes/sites DBs
       run: |
         set -e
-        sh scripts/build-container-proxy.sh
         sh scripts/build-readability.sh
         python3 scripts/build_quotes_db.py
         python3 scripts/build_sites_db.py
