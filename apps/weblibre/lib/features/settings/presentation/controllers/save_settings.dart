@@ -20,7 +20,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'save_settings.g.dart';
 
@@ -61,30 +60,6 @@ class SaveEngineSettingsController extends _$SaveEngineSettingsController {
     final result = await AsyncValue.guard(
       () => ref
           .read(engineSettingsRepositoryProvider.notifier)
-          .updateSettings(updateSettings),
-    );
-
-    if (!ref.mounted) {
-      return;
-    }
-
-    state = result;
-  }
-}
-
-@Riverpod(keepAlive: true)
-class SaveTorSettingsController extends _$SaveTorSettingsController {
-  @override
-  Future<void> build() {
-    return Future.value();
-  }
-
-  Future<void> save(UpdateTorSettingsFunc updateSettings) async {
-    state = const AsyncLoading();
-
-    final result = await AsyncValue.guard(
-      () => ref
-          .read(torSettingsRepositoryProvider.notifier)
           .updateSettings(updateSettings),
     );
 
