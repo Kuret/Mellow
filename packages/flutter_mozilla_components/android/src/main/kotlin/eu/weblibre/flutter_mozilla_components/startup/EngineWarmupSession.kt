@@ -7,7 +7,7 @@ package eu.weblibre.flutter_mozilla_components.startup
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
+import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,8 +34,8 @@ import mozilla.components.support.base.log.logger.Logger
  * `ExtensionParent.browserStartupPromise`; `SafeBrowsing.init()`,
  * `Blocklist.loadBlocklistAsync()` and `RemoteSecuritySettings.init()` are
  * scheduled next to it. Without a window none of it runs — which is why a cold
- * start that never opens a tab has no ad blocking, no container routing and no
- * native port from any built-in extension: every one of them opens its bridge
+ * start that never opens a tab has no ad blocking and no native port from any
+ * built-in extension: every one of them opens its bridge
  * with `browser.runtime.connectNative(...)` from a background script that has
  * not been allowed to start.
  *
@@ -131,7 +131,7 @@ object EngineWarmupSession {
                 .map { }
         },
         extensionReadySignal = {
-            ContainerProxyFeature.extensionBackgroundStarted.filter { it }.map { }
+            BrowserExtensionFeature.extensionBackgroundStarted.filter { it }.map { }
         },
     )
 
