@@ -47,9 +47,6 @@ enum MenuSectionType {
   /// Icon grid of the browser's other screens (history, bookmarks, …).
   quickLinks,
 
-  /// Routing for this tab plus the proxy backends it names.
-  connection,
-
   /// Profile switch, sync, settings and quit.
   profile,
 
@@ -62,7 +59,6 @@ enum MenuSectionType {
     extensions => 'Extensions',
     tabActions => 'Tab Actions',
     quickLinks => 'Quick Links',
-    connection => 'Connection',
     profile => 'Profile & App',
     about => 'About',
   };
@@ -75,7 +71,6 @@ enum MenuSectionType {
     extensions => MdiIcons.puzzle,
     tabActions => MdiIcons.tab,
     quickLinks => MdiIcons.viewGridOutline,
-    connection => MdiIcons.shieldOutline,
     profile => Icons.person,
     about => Icons.info,
   };
@@ -106,8 +101,6 @@ enum MenuItemType {
   containers,
   manageContainers,
   assignContainer,
-  assignUrlToContainer,
-  unassignUrlFromContainer,
   unassignContainer,
 
   share,
@@ -166,8 +159,6 @@ enum MenuItemType {
     containers => 'Containers',
     manageContainers => 'Manage Containers',
     assignContainer => 'Assign Container',
-    assignUrlToContainer => 'Assign URL to Container',
-    unassignUrlFromContainer => 'Unassign URL from Container',
     unassignContainer => 'Unassign Container',
     share => 'Share',
     copyAddress => 'Copy Address',
@@ -219,8 +210,6 @@ enum MenuItemType {
     containers => MdiIcons.folder,
     manageContainers => MdiIcons.folder,
     assignContainer => MdiIcons.folderArrowUpDownOutline,
-    assignUrlToContainer => MdiIcons.webPlus,
-    unassignUrlFromContainer => MdiIcons.webMinus,
     unassignContainer => MdiIcons.folderCancelOutline,
     share => Icons.share,
     copyAddress => MdiIcons.contentCopy,
@@ -329,8 +318,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
         items: [
           MenuItemDefault(MenuItemType.manageContainers),
           MenuItemDefault(MenuItemType.assignContainer),
-          MenuItemDefault(MenuItemType.assignUrlToContainer),
-          MenuItemDefault(MenuItemType.unassignUrlFromContainer),
           MenuItemDefault(MenuItemType.unassignContainer),
         ],
       ),
@@ -378,7 +365,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       MenuItemDefault(MenuItemType.smallWeb),
     ],
   ),
-  MenuSectionDefault(MenuSectionType.connection),
   MenuSectionDefault(
     MenuSectionType.profile,
     items: [

@@ -25,7 +25,6 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/domai
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/navigation_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/about_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/connection_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/extensions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/page_actions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
@@ -75,8 +74,6 @@ _buildSectionBuilders(String? selectedTabId) {
     MenuSectionType.extensions: (_) => const ExtensionsSection(),
     MenuSectionType.quickLinks: (section) =>
         QuickLinksSection(items: section.visibleItemTypes),
-    MenuSectionType.connection: (_) =>
-        ConnectionSection(selectedTabId: selectedTabId),
     MenuSectionType.profile: (section) =>
         ProfileSection(items: section.visibleItemTypes),
     MenuSectionType.about: (section) =>

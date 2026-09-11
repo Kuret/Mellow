@@ -64,12 +64,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_settings_screen.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
-import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
-import 'package:weblibre/features/proxy/presentation/screens/proxy_routing_settings.dart';
-import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_logs.dart';
-import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profile_editor.dart';
-import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profiles.dart';
-import 'package:weblibre/features/proxy/presentation/screens/subscription_import.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
@@ -88,7 +82,6 @@ import 'package:weblibre/features/settings/presentation/screens/locale_settings.
 import 'package:weblibre/features/settings/presentation/screens/menu_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/module_surface_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings_transfer.dart';
@@ -100,8 +93,6 @@ import 'package:weblibre/features/settings/presentation/screens/web_engine_harde
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/sync/presentation/screens/sync_settings.dart';
-import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
-import 'package:weblibre/features/tor/presentation/screens/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/select_profile.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_backup.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_backup_list.dart';
@@ -128,7 +119,6 @@ part 'routes.g.dart';
 part 'routes.history.dart';
 part 'routes.profiles.dart';
 part 'routes.settings.dart';
-part 'routes.tor.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData with $AboutRoute {

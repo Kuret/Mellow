@@ -167,7 +167,7 @@ void main() {
           MenuSectionType.quickLinks,
           items: [_item(MenuItemType.history), _item(MenuItemType.bangs)],
         ),
-        _section(MenuSectionType.connection),
+        _section(MenuSectionType.about),
       ];
 
       final merged = mergeMenuLayoutWithDefaults(persisted, defaults);

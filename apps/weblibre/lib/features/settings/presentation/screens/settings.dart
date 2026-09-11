@@ -30,7 +30,6 @@ import 'package:weblibre/features/settings/presentation/screens/extensions_setti
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -187,23 +186,6 @@ _CategoryGroups _buildCategories() {
       ],
       sections: privacySecuritySettingsSections,
       onTap: (context) => PrivacySecuritySettingsRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
-      title: 'Proxy',
-      subtitle: 'Connections and routing',
-      icon: MdiIcons.lanConnect,
-      keywords: const [
-        'proxy',
-        'sing-box',
-        'socks',
-        'vpn',
-        'wireguard',
-        'routing',
-        'tor',
-        'container',
-      ],
-      sections: proxySettingsSections,
-      onTap: (context) => const ProxySettingsRoute().push(context),
     ),
   ];
 

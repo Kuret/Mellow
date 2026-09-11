@@ -34,8 +34,6 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.containers: 'containers',
   MenuItemType.manageContainers: 'manageContainers',
   MenuItemType.assignContainer: 'assignContainer',
-  MenuItemType.assignUrlToContainer: 'assignUrlToContainer',
-  MenuItemType.unassignUrlFromContainer: 'unassignUrlFromContainer',
   MenuItemType.unassignContainer: 'unassignContainer',
   MenuItemType.share: 'share',
   MenuItemType.copyAddress: 'copyAddress',
@@ -91,7 +89,6 @@ const _$MenuSectionTypeEnumMap = {
   MenuSectionType.extensions: 'extensions',
   MenuSectionType.tabActions: 'tabActions',
   MenuSectionType.quickLinks: 'quickLinks',
-  MenuSectionType.connection: 'connection',
   MenuSectionType.profile: 'profile',
   MenuSectionType.about: 'about',
 };
