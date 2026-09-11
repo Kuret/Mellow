@@ -43,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -100,7 +99,6 @@ class ContainerMenu extends HookConsumerWidget {
   final bool enableCloseFilteredTabs;
 
   final bool enableBookmarkAll;
-  final bool enableAssignedSites;
   final bool enableClearData;
   final bool enableEdit;
   final bool enableDelete;
@@ -117,7 +115,6 @@ class ContainerMenu extends HookConsumerWidget {
     this.enableCloseTabs = true,
     this.enableCloseFilteredTabs = false,
     this.enableBookmarkAll = true,
-    this.enableAssignedSites = false,
     this.enableClearData = true,
     this.enableEdit = false,
     this.enableDelete = false,
@@ -164,9 +161,7 @@ class ContainerMenu extends HookConsumerWidget {
     // storage partition, which only an isolated container has.
     final clearDataContextId = enableClearData ? contextualIdentity : null;
     final hasTrailingSection =
-        enableAssignedSites && container != null ||
-        clearDataContextId != null ||
-        enableEdit && container != null;
+        clearDataContextId != null || enableEdit && container != null;
 
     return MenuAnchor(
       controller: controller,
@@ -346,14 +341,6 @@ class ContainerMenu extends HookConsumerWidget {
             child: const Text('Bookmark all'),
           ),
         if (hasTrailingSection) const Divider(),
-        if (enableAssignedSites && container != null)
-          MenuItemButton(
-            leadingIcon: const Icon(Icons.web),
-            onPressed: canEdit
-                ? () => _editAssignedSites(context, ref, container)
-                : null,
-            child: const Text('Assigned Sites…'),
-          ),
         if (clearDataContextId != null)
           MenuItemButton(
             closeOnActivate: false,
@@ -450,33 +437,6 @@ Future<void> _bookmarkAllTabs(
       }
     }
   }
-}
-
-Future<void> _editAssignedSites(
-  BuildContext context,
-  WidgetRef ref,
-  ContainerData container,
-) async {
-  final result = await showDialog<Set<Uri>>(
-    context: context,
-    builder: (context) => ContainerSitesScreen(
-      initialSites: container.metadata.assignedSites?.toSet() ?? {},
-    ),
-  );
-
-  if (result == null) {
-    return;
-  }
-
-  await ref
-      .read(containerRepositoryProvider.notifier)
-      .replaceContainer(
-        container.copyWith.metadata(
-          container.metadata.copyWith
-              .assignedSites(result.isEmpty ? null : result.toList())
-              .sanitized(),
-        ),
-      );
 }
 
 /// Close the container's tabs, wipe its Gecko storage partition and — if the

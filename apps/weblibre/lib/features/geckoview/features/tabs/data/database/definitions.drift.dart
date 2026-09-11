@@ -19,8 +19,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/history_qu
     as i10;
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart'
     as i11;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart'
-    as i12;
 
 typedef $ContainerCreateCompanionBuilder =
     i3.ContainerCompanion Function({
@@ -6798,34 +6796,6 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('next_tab_id'));
   }
 
-  i0.Selectable<bool> areSitesAvailable({
-    required String uriList,
-    required String ignoreContainerId,
-  }) {
-    return customSelect(
-      'SELECT NOT EXISTS (SELECT 1 AS _c0 FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE json_each.value IN (SELECT value FROM json_each(?1)) AND container.id IS NOT ?2) AS existing',
-      variables: [
-        i0.Variable<String>(uriList),
-        i0.Variable<String>(ignoreContainerId),
-      ],
-      readsFrom: {container},
-    ).map((i0.QueryRow row) => row.read<bool>('existing'));
-  }
-
-  i0.Selectable<i12.SiteAssignment> allAssignedSites() {
-    return customSelect(
-      'SELECT container.id, COALESCE(container.metadata ->> \'\$.contextualIdentity\', \'general\') AS contextualIdentity, value AS assigned_site FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE value IS NOT NULL',
-      variables: [],
-      readsFrom: {container},
-    ).map(
-      (i0.QueryRow row) => i12.SiteAssignment(
-        id: row.read<String>('id'),
-        contextualIdentity: row.read<String>('contextualIdentity'),
-        assignedSite: row.readNullable<String>('assigned_site'),
-      ),
-    );
-  }
-
   i0.Selectable<i1.ContainerData> containerByContextualIdentity({
     required String contextId,
   }) {
@@ -6881,19 +6851,6 @@ class DefinitionsDrift extends i9.ModularAccessor {
       variables: [],
       readsFrom: {container},
     ).map((i0.QueryRow row) => row.readNullable<String>('context_id'));
-  }
-
-  i0.Selectable<StrictContextAssignmentsResult> strictContextAssignments() {
-    return customSelect(
-      'SELECT container.metadata ->> \'\$.contextualIdentity\' AS context_id, container.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM container WHERE json_extract(container.metadata, \'\$.strictMode\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL UNION SELECT DISTINCT t.isolation_context_id AS context_id, c.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM tab AS t INNER JOIN container AS c ON c.id = t.container_id WHERE t.tab_mode = 2 AND t.isolation_context_id IS NOT NULL AND json_extract(c.metadata, \'\$.strictMode\') = 1 AND c.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
-      variables: [],
-      readsFrom: {container, tab},
-    ).map(
-      (i0.QueryRow row) => StrictContextAssignmentsResult(
-        contextId: row.readNullable<String>('context_id'),
-        assignmentContextId: row.readNullable<String>('assignment_context_id'),
-      ),
-    );
   }
 
   i0.Selectable<int> tabsInIsolationGroup({String? contextId}) {
@@ -7011,12 +6968,6 @@ class HistoryExclusionTabsResult {
     this.containerId,
     required this.excluded,
   });
-}
-
-class StrictContextAssignmentsResult {
-  final String? contextId;
-  final String? assignmentContextId;
-  StrictContextAssignmentsResult({this.contextId, this.assignmentContextId});
 }
 
 class IsolatedContextContainerPairsResult {

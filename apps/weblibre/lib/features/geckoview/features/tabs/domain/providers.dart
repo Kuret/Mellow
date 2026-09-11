@@ -21,12 +21,9 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/util/tokenized_filter.dart';
@@ -217,72 +214,4 @@ Stream<Map<String, String?>> watchTabsContainerId(
       .getTabsContainerId(tabIds.value)
       .watch()
       .map(Map.fromEntries);
-}
-
-@Riverpod(keepAlive: true)
-Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.allAssignedSites().watch();
-}
-
-/// Strict-mode enforcement map: each Gecko cookie-store context that must be
-/// enforced (a strict container's base context, plus the isolation contexts of
-/// its isolated tabs) mapped to the base contextualIdentities its site
-/// assignments are keyed on. Replicated to the container-proxy extension by
-/// ProxySettingsReplication.
-@Riverpod(keepAlive: true)
-Stream<Map<String, List<String>>> watchStrictContextAssignments(Ref ref) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.strictContextAssignments().watch().map((rows) {
-    final assignments = <String, Set<String>>{};
-    for (final row in rows) {
-      final contextId = row.contextId;
-      final assignmentContextId = row.assignmentContextId;
-      if (contextId == null || assignmentContextId == null) continue;
-
-      assignments
-          .putIfAbsent(contextId, () => <String>{})
-          .add(assignmentContextId);
-    }
-
-    return {
-      for (final entry in assignments.entries)
-        entry.key: entry.value.toList()..sort(),
-    };
-  });
-}
-
-/// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
-/// assigned to containers. Used by ProxySettingsReplication to manage proxy
-/// aliases for isolated contexts.
-///
-/// Returns a map from isolation context ID to the set of container IDs it
-/// appears in. An isolation context needs an explicit routing alias if any
-/// associated container has a proxy connection or bypasses global routing.
-@Riverpod(keepAlive: true)
-Stream<Map<String, Set<String>>> watchIsolatedContextContainerMap(Ref ref) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.isolatedContextContainerPairs().watch().map((pairs) {
-    final map = <String, Set<String>>{};
-    for (final p in pairs) {
-      map.putIfAbsent(p.isolationContextId!, () => {}).add(p.containerId!);
-    }
-    return map;
-  });
-}
-
-@Riverpod()
-Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
-  final currentUri = ref.watch(
-    selectedTabStateProvider.select(
-      (value) => value?.url ?? TabState.$default('').url,
-    ),
-  );
-
-  final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.allAssignedSites().watch().map((assignments) {
-    return assignments.any(
-      (a) => siteAssignmentMatches(a.assignedSite, currentUri),
-    );
-  });
 }

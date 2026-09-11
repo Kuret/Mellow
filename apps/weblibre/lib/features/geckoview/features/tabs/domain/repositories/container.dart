@@ -20,30 +20,18 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 
 part 'container.g.dart';
 
 @Riverpod(keepAlive: true)
 class ContainerRepository extends _$ContainerRepository {
-  Future<void> addContainer(ContainerData container) async {
-    if (container.metadata.assignedSites.isNotEmpty) {
-      if (!await areSitesAvailable(
-        container.metadata.assignedSites!,
-        container.id,
-      )) {
-        throw Exception('Sites already assigned to another container');
-      }
-    }
-
+  Future<void> addContainer(ContainerData container) {
     if (container.orderKey.isEmpty) {
       throw ArgumentError.value(
         container.orderKey,
@@ -63,42 +51,11 @@ class ContainerRepository extends _$ContainerRepository {
         .get();
   }
 
-  Future<void> replaceContainer(ContainerData container) async {
-    if (container.metadata.assignedSites.isNotEmpty) {
-      if (!await areSitesAvailable(
-        container.metadata.assignedSites!,
-        container.id,
-      )) {
-        throw Exception('Sites already assigned to another container');
-      }
-    }
-
+  Future<void> replaceContainer(ContainerData container) {
     return ref
         .read(tabDatabaseProvider)
         .containerDao
         .replaceContainer(container);
-  }
-
-  Future<void> clearProxyConnectionAssignments(
-    ProxyConnectionId proxyConnectionId,
-  ) async {
-    final containers = await getAllContainersWithCount();
-    final affectedContainers = containers.where(
-      (container) => container.metadata.proxyConnectionId == proxyConnectionId,
-    );
-
-    for (final container in affectedContainers) {
-      await replaceContainer(
-        ContainerData(
-          id: container.id,
-          name: container.name,
-          color: container.color,
-          orderKey: container.orderKey,
-          isPinned: container.isPinned,
-          metadata: container.metadata.copyWith.proxyConnectionId(null),
-        ),
-      );
-    }
   }
 
   Future<void> assignContainerOrderKey(String id, {required String orderKey}) {
@@ -318,37 +275,10 @@ class ContainerRepository extends _$ContainerRepository {
     );
   }
 
-  Future<bool> isSiteAssignedToContainer(Uri uri) async {
-    return (await siteAssignedContainerId(uri)) != null;
-  }
-
-  Future<bool> areSitesAvailable(
-    Iterable<Uri> origins,
-    String ignoreContainerId,
-  ) {
-    return ref
-        .read(tabDatabaseProvider)
-        .containerDao
-        .areSitesAvailable(origins, ignoreContainerId)
-        .getSingle();
-  }
-
-  Future<String?> siteAssignedContainerId(Uri uri) async {
-    final all = await ref
-        .read(tabDatabaseProvider)
-        .containerDao
-        .allAssignedSites()
-        .get();
-
-    String? wildcardMatch;
-    for (final a in all) {
-      if (siteAssignmentMatches(a.assignedSite, uri)) {
-        if (!isWildcardSite(a.assignedSite)) return a.id;
-        wildcardMatch ??= a.id;
-      }
-    }
-    return wildcardMatch;
-  }
+  /// Always null: per-site container assignment was removed along with
+  /// container strict mode. Kept as the seam callers already null-check
+  /// rather than editing every call site's fallback path.
+  Future<String?> siteAssignedContainerId(Uri uri) async => null;
 
   Future<List<String>> getContainersToClearOnExit() async {
     final contextIds = await ref

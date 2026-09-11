@@ -26,7 +26,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -48,7 +47,6 @@ import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pw
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -369,88 +367,6 @@ class TabMenu extends HookConsumerWidget {
                       break;
                   }
                 },
-              ),
-              ContainerRelationUnassignedVisibility(
-                child: MenuItemButton(
-                  leadingIcon: const Icon(MdiIcons.webPlus),
-                  child: const Text('URL relation'),
-                  onPressed: () async {
-                    final selection = await const ContainerSelectionRoute()
-                        .push<ContainerSelectionResult?>(context);
-
-                    if (selection case ContainerSelectionSelected(
-                      :final containerId,
-                    )) {
-                      final containerData = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
-
-                      if (containerData != null) {
-                        final tabState = ref.read(
-                          tabStateProvider(selectedTabId),
-                        );
-                        final origin = tabState?.url.origin.mapNotNull(
-                          Uri.parse,
-                        );
-
-                        if (origin != null) {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    [
-                                      ...?containerData.metadata.assignedSites,
-                                      origin,
-                                    ],
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-                  },
-                ),
-              ),
-              ContainerRelationAssignedVisibility(
-                child: MenuItemButton(
-                  leadingIcon: const Icon(MdiIcons.webMinus),
-                  child: const Text('Unassign URL relation'),
-                  onPressed: () async {
-                    final tabState = ref.read(tabStateProvider(selectedTabId));
-                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
-
-                    if (origin != null) {
-                      final containerId = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .siteAssignedContainerId(origin);
-
-                      if (containerId != null) {
-                        final containerData = await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .getContainerData(containerId);
-
-                        if (containerData != null) {
-                          final updatedSites = containerData
-                              .metadata
-                              .assignedSites
-                              ?.where((site) => site != origin)
-                              .toList();
-
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    updatedSites,
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-                  },
-                ),
               ),
               ContainerAssignedVisibility(
                 tabId: selectedTabId,

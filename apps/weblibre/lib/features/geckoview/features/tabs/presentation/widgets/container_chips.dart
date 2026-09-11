@@ -115,7 +115,6 @@ class _ContainerChipMenu extends StatelessWidget {
       scopeContainerId: container?.id,
       enableNewTab: true,
       enablePin: isRealContainer,
-      enableAssignedSites: isRealContainer,
       enableEdit: isRealContainer,
       enableDelete: isRealContainer,
       builder: (context, controller, _) => HoldMenuListener(

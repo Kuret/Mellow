@@ -361,7 +361,6 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                       scopeContainerId: entry.container?.id,
                       enableNewTab: true,
                       enablePin: entry.container != null,
-                      enableAssignedSites: entry.container != null,
                       enableEdit: entry.container != null,
                       enableDelete: entry.container != null,
                       builder: (context, controller, _) => _AccordionHeaderChip(

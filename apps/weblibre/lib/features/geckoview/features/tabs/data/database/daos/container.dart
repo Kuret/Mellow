@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
@@ -27,7 +26,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/features/geckoview/features/tabs/data/database/projections/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
 @DriftAccessor()
@@ -247,26 +245,8 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  SingleSelectable<bool> areSitesAvailable(
-    Iterable<Uri> origins,
-    String ignoredContainerId,
-  ) {
-    return db.definitionsDrift.areSitesAvailable(
-      ignoreContainerId: ignoredContainerId,
-      uriList: jsonEncode(origins.map((value) => value.origin).toList()),
-    );
-  }
-
-  Selectable<SiteAssignment> allAssignedSites() {
-    return db.definitionsDrift.allAssignedSites();
-  }
-
   Selectable<String?> containersToClearOnExit() {
     return db.definitionsDrift.containersToClearOnExit();
-  }
-
-  Selectable<StrictContextAssignmentsResult> strictContextAssignments() {
-    return db.definitionsDrift.strictContextAssignments();
   }
 
   Selectable<String?> excludedHistoryContextIds() {

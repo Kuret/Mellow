@@ -23,30 +23,6 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-
-/// Remove any per-container app-link overrides (§ container isolation) stored
-/// for [contextIds] in GeneralSettings. Null ids are ignored; a no-op when none
-/// are present. Keeps overrides from lingering after a container drops
-/// isolation or is deleted.
-Future<void> removeContainerAppLinkOverrides(
-  WidgetRef ref,
-  Set<String?> contextIds,
-) async {
-  final ids = contextIds.nonNulls.toSet();
-  if (ids.isEmpty) return;
-
-  await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
-    current,
-  ) {
-    if (!ids.any(current.appLinkContextOverrides.containsKey)) return current;
-    return current.copyWith.appLinkContextOverrides(
-      {...current.appLinkContextOverrides}
-        ..removeWhere((key, _) => ids.contains(key)),
-    );
-  });
-}
 
 /// Ask for confirmation and delete [container], honouring the dialog's
 /// wipe-history choice. Returns whether the container was deleted.
@@ -75,11 +51,6 @@ Future<bool> confirmAndDeleteContainer(
   await ref
       .read(containerRepositoryProvider.notifier)
       .deleteContainer(container.id);
-
-  // Drop the container's app-link override so it doesn't outlive it.
-  await removeContainerAppLinkOverrides(ref, {
-    container.metadata.contextualIdentity,
-  });
 
   return true;
 }

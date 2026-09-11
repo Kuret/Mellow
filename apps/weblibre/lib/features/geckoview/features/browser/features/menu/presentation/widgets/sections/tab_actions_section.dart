@@ -43,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -196,94 +195,6 @@ class _ContainerExpansion extends ConsumerWidget {
               if (context.mounted) Navigator.pop(context);
             },
           ),
-          MenuItemType.assignUrlToContainer: () =>
-              ContainerRelationUnassignedVisibility(
-                child: buildMenuSubTile(
-                  'Assign URL to Container',
-                  icon: MdiIcons.webPlus,
-                  onTap: () async {
-                    final selection = await const ContainerSelectionRoute()
-                        .push<ContainerSelectionResult?>(context);
-
-                    if (selection case ContainerSelectionSelected(
-                      :final containerId,
-                    )) {
-                      final containerData = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
-
-                      if (containerData != null) {
-                        final tabState = ref.read(
-                          tabStateProvider(selectedTabId),
-                        );
-                        final origin = tabState?.url.origin.mapNotNull(
-                          Uri.parse,
-                        );
-
-                        if (origin != null) {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    [
-                                      ...?containerData.metadata.assignedSites,
-                                      origin,
-                                    ],
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                ),
-              ),
-          MenuItemType.unassignUrlFromContainer: () =>
-              ContainerRelationAssignedVisibility(
-                child: buildMenuSubTile(
-                  'Unassign URL from Container',
-                  icon: MdiIcons.webMinus,
-                  onTap: () async {
-                    final tabState = ref.read(tabStateProvider(selectedTabId));
-                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
-
-                    if (origin != null) {
-                      final containerId = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .siteAssignedContainerId(origin);
-
-                      if (containerId != null) {
-                        final containerData = await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .getContainerData(containerId);
-
-                        if (containerData != null) {
-                          final updatedSites = containerData
-                              .metadata
-                              .assignedSites
-                              ?.where((site) => site != origin)
-                              .toList();
-
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    updatedSites,
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                ),
-              ),
           MenuItemType.unassignContainer: () => ContainerAssignedVisibility(
             tabId: selectedTabId,
             child: buildMenuSubTile(
