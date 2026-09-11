@@ -18,23 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:logger/logger.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/features/search_credits/data/search_backend_config.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
-import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 
 part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 BackendEndpoints searchBackendEndpoints(Ref ref) {
-  final routeThroughTor = ref.watch(
-    webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
-  );
-  return BackendEndpoints.fromOrigin(
-    routeThroughTor ? searchBackendTorOriginUri : searchBackendOriginUri,
-  );
+  return BackendEndpoints.fromOrigin(searchBackendOriginUri);
 }
 
 @Riverpod(keepAlive: true)

@@ -27,7 +27,6 @@ part 'web_search_settings.g.dart';
 @CopyWith()
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class WebSearchSettings with FastEquatable {
-  final bool routeThroughTor;
   final SearchMode searchMode;
 
   /// ISO 639-1 language code (e.g. `en`, `de`). `null` means "use backend
@@ -45,7 +44,6 @@ class WebSearchSettings with FastEquatable {
   final TimeRange? timeRange;
 
   WebSearchSettings({
-    required this.routeThroughTor,
     required this.searchMode,
     required this.language,
     required this.region,
@@ -54,14 +52,12 @@ class WebSearchSettings with FastEquatable {
   });
 
   WebSearchSettings.withDefaults({
-    bool? routeThroughTor,
     SearchMode? searchMode,
     this.language,
     this.region,
     this.safeSearch,
     this.timeRange,
-  }) : routeThroughTor = routeThroughTor ?? false,
-       searchMode = searchMode ?? SearchMode.general;
+  }) : searchMode = searchMode ?? SearchMode.general;
 
   factory WebSearchSettings.fromJson(Map<String, dynamic> json) =>
       _$WebSearchSettingsFromJson(json);
@@ -70,7 +66,6 @@ class WebSearchSettings with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
-    routeThroughTor,
     searchMode,
     language,
     region,

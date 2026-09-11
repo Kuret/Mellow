@@ -67,7 +67,6 @@ import 'package:weblibre/features/search_credits/domain/repositories/web_search_
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/presentation/open_in_new_tab.dart';
-import 'package:weblibre/features/web_search/presentation/widgets/route_through_tor_toggle.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_filter_chips.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_mode_selector.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/web_search_results_section.dart';
@@ -893,16 +892,7 @@ class SearchScreen extends HookConsumerWidget {
                   if (isWebSearchBang(activeBang))
                     const SliverPadding(
                       padding: EdgeInsets.fromLTRB(0, 8, 0, 4),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _WebSearchOptionsRow(),
-                            WebSearchTorBootstrapProgress(),
-                          ],
-                        ),
-                      ),
+                      sliver: SliverToBoxAdapter(child: _WebSearchOptionsRow()),
                     ),
                   if (reorderActive)
                     SearchModuleReorderView(surface: activeSurface)
@@ -975,7 +965,6 @@ class _WebSearchOptionsRow extends StatelessWidget {
           child: const Row(
             children: [
               WebSearchStatusChip(),
-              RouteThroughTorToggle(),
               SizedBox(width: 8),
               SearchModeSelector(),
               SizedBox(width: 8),

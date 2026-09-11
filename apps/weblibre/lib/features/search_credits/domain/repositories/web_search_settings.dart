@@ -30,10 +30,6 @@ part 'web_search_settings.g.dart';
 @Riverpod(keepAlive: true)
 @JsonPersist()
 class WebSearchSettingsController extends _$WebSearchSettingsController {
-  void setRouteThroughTor(bool value) {
-    state = state.copyWith(routeThroughTor: value);
-  }
-
   void setSearchMode(SearchMode mode) {
     state = state.copyWith(searchMode: mode);
   }

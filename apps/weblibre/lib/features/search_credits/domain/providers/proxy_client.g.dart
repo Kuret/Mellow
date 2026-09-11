@@ -8,78 +8,20 @@ part of 'proxy_client.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Resolved Tor SOCKS5 port for search traffic, or `null` when search should
-/// route directly. Returns non-null only when the user has enabled the
-/// "route search through Tor" toggle AND Tor is currently running with a
-/// known SOCKS port.
-
-@ProviderFor(searchProxyPort)
-final searchProxyPortProvider = SearchProxyPortProvider._();
-
-/// Resolved Tor SOCKS5 port for search traffic, or `null` when search should
-/// route directly. Returns non-null only when the user has enabled the
-/// "route search through Tor" toggle AND Tor is currently running with a
-/// known SOCKS port.
-
-final class SearchProxyPortProvider
-    extends $FunctionalProvider<int?, int?, int?>
-    with $Provider<int?> {
-  /// Resolved Tor SOCKS5 port for search traffic, or `null` when search should
-  /// route directly. Returns non-null only when the user has enabled the
-  /// "route search through Tor" toggle AND Tor is currently running with a
-  /// known SOCKS port.
-  SearchProxyPortProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'searchProxyPortProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$searchProxyPortHash();
-
-  @$internal
-  @override
-  $ProviderElement<int?> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  int? create(Ref ref) {
-    return searchProxyPort(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(int? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<int?>(value),
-    );
-  }
-}
-
-String _$searchProxyPortHash() => r'1ca1d6f08f9eeabf2f70ce2e27b71242e0808dc0';
-
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)
-/// and HTTP-based search clients. SOCKS5-routed when Tor toggle is on, plain
-/// otherwise. Rebuilt when the proxy port changes.
+/// and HTTP-based search clients.
 
 @ProviderFor(searchHttpClient)
 final searchHttpClientProvider = SearchHttpClientProvider._();
 
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)
-/// and HTTP-based search clients. SOCKS5-routed when Tor toggle is on, plain
-/// otherwise. Rebuilt when the proxy port changes.
+/// and HTTP-based search clients.
 
 final class SearchHttpClientProvider
     extends $FunctionalProvider<HttpClient, HttpClient, HttpClient>
     with $Provider<HttpClient> {
   /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)
-  /// and HTTP-based search clients. SOCKS5-routed when Tor toggle is on, plain
-  /// otherwise. Rebuilt when the proxy port changes.
+  /// and HTTP-based search clients.
   SearchHttpClientProvider._()
     : super(
         from: null,
@@ -113,7 +55,7 @@ final class SearchHttpClientProvider
   }
 }
 
-String _$searchHttpClientHash() => r'b3aa4b658e99fb580031ac412fabfbeece5fe830';
+String _$searchHttpClientHash() => r'984df0e3fc6770b7de174b5a227bce77b8824efc';
 
 /// `package:http` Client wrapping [searchHttpClientProvider]. Use for the
 /// non-WebSocket parts of the search flow (token issuance, one-shot capture,

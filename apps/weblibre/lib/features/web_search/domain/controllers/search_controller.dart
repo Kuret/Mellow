@@ -5,16 +5,11 @@ import 'dart:typed_data';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
-import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/search_token_stash_repository.dart';
-import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
-import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/web_search/domain/entities/captured_page_state.dart';
 import 'package:weblibre/features/web_search/domain/entities/fetch_method.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_artifact_downloader.dart';
@@ -299,15 +294,6 @@ class MetaSearchController extends _$MetaSearchController {
       query: normalizedQuery,
     );
 
-    if (!await _ensureTorReadyIfRequested()) {
-      state = state.copyWith(
-        status: WebSearchStatus.error,
-        errorMessage:
-            'Could not start $torBrand for the search. Disable the $torBrand toggle or try again.',
-        hasOpenSession: false,
-      );
-      return;
-    }
 
     final TokenAvailabilityOutcome availability;
     try {
@@ -652,55 +638,6 @@ class MetaSearchController extends _$MetaSearchController {
     unawaited(_closeActiveSession());
     ref.read(webSearchScrollOffsetProvider.notifier).reset();
     state = const MetaSearchState();
-  }
-
-  /// When the user has opted to route web search through Tor, ensure the
-  /// Tor proxy is running and a SOCKS port is known before the search
-  /// session is opened. Returns false if Tor could not be brought up.
-  Future<bool> _ensureTorReadyIfRequested() async {
-    final route = ref.read(webSearchSettingsControllerProvider).routeThroughTor;
-    if (!route) return true;
-
-    if (ref.read(searchProxyPortProvider) != null) return true;
-
-    try {
-      await ref.read(startProxyControllerProvider.notifier).startProxy();
-    } catch (error, stackTrace) {
-      ref
-          .read(searchClientLoggerProvider)
-          .e(
-            'Failed to start Tor for search',
-            error: error,
-            stackTrace: stackTrace,
-          );
-      return false;
-    }
-
-    // startProxy() returns as soon as the Tor process has been launched, but
-    // the SOCKS port only becomes usable once bootstrap reaches 100%.
-    // Pushing the just-launched status into the stream synchronously is not
-    // enough — at that point bootstrap is still near 0, so
-    // searchProxyPortProvider stays null and the search fails even though
-    // Tor is coming up fine. Wait for the status stream to report a fully
-    // bootstrapped, running proxy before opening the search session.
-    await ref.read(torProxyServiceProvider.notifier).requestSync();
-    if (ref.read(searchProxyPortProvider) != null) return true;
-
-    final completer = Completer<bool>();
-    final subscription = ref.listen(torProxyServiceProvider, (previous, next) {
-      if (next.isReady) {
-        if (!completer.isCompleted) completer.complete(true);
-      }
-    });
-
-    try {
-      return await completer.future.timeout(
-        const Duration(seconds: 90),
-        onTimeout: () => false,
-      );
-    } finally {
-      subscription.close();
-    }
   }
 
   Future<void> _closeActiveSession() async {

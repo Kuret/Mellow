@@ -21,34 +21,14 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:socks5_proxy/socks_client.dart';
-import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
-import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'proxy_client.g.dart';
 
-/// Resolved Tor SOCKS5 port for search traffic, or `null` when search should
-/// route directly. Returns non-null only when the user has enabled the
-/// "route search through Tor" toggle AND Tor is currently running with a
-/// known SOCKS port.
-@Riverpod(keepAlive: true)
-int? searchProxyPort(Ref ref) {
-  final route = ref.watch(
-    webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
-  );
-  if (!route) return null;
-  return ref.watch(torProxyServiceProvider).value?.usableSocksPort;
-}
-
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)
-/// and HTTP-based search clients. SOCKS5-routed when Tor toggle is on, plain
-/// otherwise. Rebuilt when the proxy port changes.
+/// and HTTP-based search clients.
 @Riverpod(keepAlive: true)
 HttpClient searchHttpClient(Ref ref) {
-  final port = ref.watch(searchProxyPortProvider);
   final client = HttpClient()
     // The default HttpClient has no connection timeout, so a search service
     // that is unreachable can stall the UI for ~minute(s) before failing.
@@ -56,11 +36,6 @@ HttpClient searchHttpClient(Ref ref) {
     // quickly and can retry; the WebSocket session itself imposes no
     // ceiling on long-running streams once connected.
     ..connectionTimeout = const Duration(seconds: 25);
-  if (port != null) {
-    SocksTCPClient.assignToHttpClient(client, [
-      ProxySettings(InternetAddress.loopbackIPv4, port),
-    ]);
-  }
   ref.onDispose(() => client.close(force: true));
   return client;
 }

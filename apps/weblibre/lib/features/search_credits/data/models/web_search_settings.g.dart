@@ -7,8 +7,6 @@ part of 'web_search_settings.dart';
 // **************************************************************************
 
 abstract class _$WebSearchSettingsCWProxy {
-  WebSearchSettings routeThroughTor(bool routeThroughTor);
-
   WebSearchSettings searchMode(SearchMode searchMode);
 
   WebSearchSettings language(String? language);
@@ -27,7 +25,6 @@ abstract class _$WebSearchSettingsCWProxy {
   /// WebSearchSettings(...).copyWith(id: 12, name: "My name")
   /// ```
   WebSearchSettings call({
-    bool routeThroughTor,
     SearchMode searchMode,
     String? language,
     String? region,
@@ -42,10 +39,6 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
   const _$WebSearchSettingsCWProxyImpl(this._value);
 
   final WebSearchSettings _value;
-
-  @override
-  WebSearchSettings routeThroughTor(bool routeThroughTor) =>
-      call(routeThroughTor: routeThroughTor);
 
   @override
   WebSearchSettings searchMode(SearchMode searchMode) =>
@@ -74,7 +67,6 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
   /// ```
   @override
   WebSearchSettings call({
-    Object? routeThroughTor = const $CopyWithPlaceholder(),
     Object? searchMode = const $CopyWithPlaceholder(),
     Object? language = const $CopyWithPlaceholder(),
     Object? region = const $CopyWithPlaceholder(),
@@ -82,12 +74,6 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
     Object? timeRange = const $CopyWithPlaceholder(),
   }) {
     return WebSearchSettings(
-      routeThroughTor:
-          routeThroughTor == const $CopyWithPlaceholder() ||
-              routeThroughTor == null
-          ? _value.routeThroughTor
-          // ignore: cast_nullable_to_non_nullable
-          : routeThroughTor as bool,
       searchMode:
           searchMode == const $CopyWithPlaceholder() || searchMode == null
           ? _value.searchMode
@@ -127,7 +113,6 @@ extension $WebSearchSettingsCopyWith on WebSearchSettings {
 
 WebSearchSettings _$WebSearchSettingsFromJson(Map<String, dynamic> json) =>
     WebSearchSettings.withDefaults(
-      routeThroughTor: json['routeThroughTor'] as bool?,
       searchMode: $enumDecodeNullable(_$SearchModeEnumMap, json['searchMode']),
       language: json['language'] as String?,
       region: json['region'] as String?,
@@ -137,7 +122,6 @@ WebSearchSettings _$WebSearchSettingsFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$WebSearchSettingsToJson(WebSearchSettings instance) =>
     <String, dynamic>{
-      'routeThroughTor': instance.routeThroughTor,
       'searchMode': _$SearchModeEnumMap[instance.searchMode]!,
       'language': instance.language,
       'region': instance.region,
