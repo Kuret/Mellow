@@ -6,16 +6,12 @@ workspace:
   - apps/weblibre/
   - packages/flutter_mozilla_components
   - packages/flutter_mozilla_components/example
-  - packages/flutter_tor
-  - packages/flutter_tor/example
   - packages/simple_intent_receiver
   - packages/simple_intent_receiver/example
   - packages/locale_resolver
   - packages/locale_resolver/example
   - packages/speech_to_text_dialog
   - packages/speech_to_text_dialog/example
-  - packages/flutter_singbox_proxy
-  - packages/flutter_singbox_proxy/example
 dev_dependencies:
   melos: ^7.8.1
 
