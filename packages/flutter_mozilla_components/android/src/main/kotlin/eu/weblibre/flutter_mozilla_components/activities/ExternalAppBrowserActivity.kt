@@ -11,12 +11,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import com.google.android.material.button.MaterialButton
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
@@ -24,11 +21,6 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
-import eu.weblibre.flutter_mozilla_components.startup.AppHalfBootstrap
-import eu.weblibre.flutter_mozilla_components.startup.BootstrapFailure
-import eu.weblibre.flutter_mozilla_components.startup.BootstrapStage
-import eu.weblibre.flutter_mozilla_components.startup.LaunchRouting
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,48 +60,6 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
          * would bounce a perfectly serviceable launch to the browser.
          */
         private const val PRIVATE_BROWSING_MODE = "private_browsing_mode"
-
-        /**
-         * Marks a window opened *before* its session exists, to wait here for
-         * routing the app half has yet to install.
-         *
-         * The wait used to happen in `IntentReceiverActivity`, which is
-         * translucent — so a PWA cold start into a proxied container showed the
-         * launcher, unchanged, for as long as the bootstrap took, and then a
-         * browser window if it did not finish. Neither half of that is something
-         * the user can act on. Opening this window first gives the wait somewhere
-         * to be seen and the failure somewhere to offer a choice, and costs
-         * nothing: no components are built and no session created until routing
-         * says the launch can actually be served.
-         */
-        const val EXTRA_AWAITING_ROUTING = "awaiting_routing"
-
-        /**
-         * A PWA window that opens straight into the wait.
-         *
-         * Carries everything [recoverPwaSession] needs to create the session once
-         * routing lands — which is the same path a PWA task whose session went
-         * missing already takes, so there is one way to create a PWA session here
-         * rather than two.
-         */
-        fun createAwaitingRoutingIntent(
-            context: Context,
-            launchUrl: String,
-            pwaProfileUuid: String? = null,
-            pwaContextId: String? = null,
-            pwaToken: String? = null,
-            pwaInstallStartUrl: String? = null,
-        ): Intent {
-            return Intent(context, ExternalAppBrowserActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                putExtra(EXTRA_AWAITING_ROUTING, true)
-                putExtra(EXTRA_WEB_APP_MANIFEST_URL, launchUrl)
-                pwaProfileUuid?.let { putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, it) }
-                pwaContextId?.let { putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, it) }
-                pwaToken?.let { putExtra(PwaConstants.EXTRA_PWA_TOKEN, it) }
-                putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, pwaInstallStartUrl ?: launchUrl)
-            }
-        }
 
         fun createIntent(
             context: Context,
@@ -155,9 +105,8 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // This window's traffic may be routed through a proxy the Flutter
-        // isolate runs, so the engine has to outlive `MainActivity` going away
-        // for as long as this task exists — see
+        // This task can outlive `MainActivity`, so the shared engine has to as
+        // well for as long as this task exists — see
         // [FlutterEngineCoordinator.retainForExternalTask].
         FlutterEngineCoordinator.retainForExternalTask()
 
@@ -173,14 +122,6 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_external_app_browser)
 
-        if (intent?.getBooleanExtra(EXTRA_AWAITING_ROUTING, false) == true) {
-            // Opened deliberately without a session: this window *is* where the
-            // wait for the app half happens, and the session is created on the
-            // other side of it. See [beginAwaitingRouting].
-            beginAwaitingRouting()
-            return
-        }
-
         val sessionId = customTabSessionId
         if (sessionId == null) {
             Log.e(TAG, "No custom tab session ID provided")
@@ -195,118 +136,12 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         if (components == null) {
             // The process this task belonged to is gone — the system handed the
             // task back and nothing has been built in the new one yet. That makes
-            // this a cold start like any other, including the part where a
-            // proxied context cannot be served without the app half: building
-            // external components here first is exactly what would strand it.
-            startWithRouting(sessionId)
-            return
-        }
-
-        showFragment(sessionId)
-    }
-
-    /**
-     * Brings up whatever this launch's routing needs, then shows it.
-     *
-     * The context comes off the intent because there is no session to read it
-     * from yet: a PWA carries its container, and everything else runs in the
-     * general context.
-     */
-    private fun startWithRouting(sessionId: String) {
-        if (StartupArbiter.committedProfileId() == null) {
-            // Nothing has decided which profile this process serves, so there is
-            // no routing to read and no profile to start the app half under.
-            // Leave that to the path below, which refuses for the same reason and
-            // ends at the browser, where the profile question has an owner.
-            logger.debug("No committed profile; not starting the app half here")
+            // this a cold start like any other.
             startWithExistingComponents(sessionId)
             return
         }
 
-        awaitRoutingThenServe { startWithExistingComponents(sessionId) }
-    }
-
-    /**
-     * Runs the wait this window was opened for, then creates the session on the
-     * other side of it.
-     *
-     * The session is deliberately not created first. A window with no routing has
-     * nothing to show but a proxy error page, and a session created into one is a
-     * session that has to be thrown away or reloaded when routing finally lands.
-     */
-    private fun beginAwaitingRouting() {
-        val launchUrl = webAppManifestUrl
-        if (launchUrl == null) {
-            Log.e(TAG, "Awaiting-routing launch carries no URL")
-            logger.error("Awaiting-routing launch carries no URL, using the browser.")
-            fallbackToMainActivity()
-            return
-        }
-
-        if (StartupArbiter.committedProfileId() == null) {
-            // Same refusal, same reason as [startWithRouting]. There is nothing to
-            // wait for: no routing to read, and no profile to start the app half
-            // under.
-            logger.debug("No committed profile; not starting the app half here")
-            fallbackToMainActivity()
-            return
-        }
-
-        awaitRoutingThenServe {
-            // The wait is over for this window: a later recreation with the
-            // session already in hand must show it, not queue behind a second
-            // one. A task the system restores from its base intent still arrives
-            // with the flag set, and still needs to wait — which is correct,
-            // because that process has no session either.
-            intent?.removeExtra(EXTRA_AWAITING_ROUTING)
-
-            if (!recoverPwaSession(null, "routing installed")) {
-                fallbackToMainActivity()
-            }
-        }
-    }
-
-    /**
-     * Waits for the app half in this window rather than behind it, and ends the
-     * wait in something the user can act on either way.
-     *
-     * [onReady] is not required to be synchronous — creating a session is not —
-     * so the progress it replaces is left up until [showFragment] takes the
-     * window over.
-     */
-    private fun awaitRoutingThenServe(onReady: () -> Unit) {
-        showLaunchProgress()
-
-        coroutineScope.launch {
-            val contextId = LaunchRouting.contextIdFor(
-                pwaContextId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID),
-                isPrivate = intent?.getBooleanExtra(PRIVATE_BROWSING_MODE, false) == true,
-            )
-
-            val outcome = AppHalfBootstrap.ensure(
-                applicationContext,
-                contextId,
-                onStage = ::showLaunchStep,
-            )
-
-            if (isFinishing || isDestroyed) return@launch
-
-            if (outcome.canProceed) {
-                onReady()
-                return@launch
-            }
-
-            // Blocked for good, or the app half never came up. Either way this
-            // window can only show a proxy error page — but which of those
-            // happened, and what to do about it, is the user's to decide here
-            // rather than something to be answered by silently becoming a
-            // browser.
-            logger.debug("Routing cannot serve this launch: ${outcome.failure}")
-            showLaunchFailure(
-                failure = outcome.failure ?: BootstrapFailure.STILL_STARTING,
-                onTryAgain = { awaitRoutingThenServe(onReady) },
-            )
-        }
+        showFragment(sessionId)
     }
 
     /**
@@ -320,103 +155,6 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         get() = webAppManifestUrl
             ?: intent?.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
             ?: intent?.dataString
-
-    /**
-     * The wait, with a way out of it from the first frame.
-     *
-     * "Open in browser" is offered before anything has gone wrong on purpose: a
-     * wait the user cannot leave is the thing this window was added to stop
-     * being, and someone who knows their proxy is off should not have to sit out
-     * fifty seconds to be told so. "Cancel" is the third answer — closing the
-     * window they opened by mistake, without being handed a browser for it.
-     */
-    private fun showLaunchProgress() {
-        val status = findViewById<View>(R.id.launch_status) ?: return
-        status.visibility = View.VISIBLE
-        status.findViewById<View>(R.id.launch_status_progress).visibility = View.VISIBLE
-        status.findViewById<ImageView>(R.id.launch_status_icon).visibility = View.GONE
-        status.findViewById<TextView>(R.id.launch_status_title).text =
-            RoutingUnavailableCopy.waitingTitle(this)
-        status.findViewById<TextView>(R.id.launch_status_message).text =
-            RoutingUnavailableCopy.waitingMessage(this, windowLaunchUrl)
-
-        // Filled in by the first [showLaunchStep]; until then the spinner and
-        // the explanation are the whole of it, rather than a step this window
-        // has not actually observed yet.
-        status.findViewById<TextView>(R.id.launch_status_step).visibility = View.GONE
-
-        status.findViewById<MaterialButton>(R.id.launch_status_primary).visibility = View.GONE
-        status.findViewById<MaterialButton>(R.id.launch_status_secondary).apply {
-            setText(R.string.weblibre_launch_action_open_in_browser)
-            visibility = View.VISIBLE
-            setOnClickListener { fallbackToMainActivity() }
-        }
-        status.findViewById<MaterialButton>(R.id.launch_status_tertiary).apply {
-            setText(R.string.weblibre_launch_action_cancel)
-            visibility = View.VISIBLE
-            setOnClickListener { finishAndRemoveTask() }
-        }
-    }
-
-    /** Names the step the app half is on, so a working wait looks like one. */
-    private fun showLaunchStep(stage: BootstrapStage) {
-        val status = findViewById<View>(R.id.launch_status) ?: return
-        if (status.visibility != View.VISIBLE) return
-
-        status.findViewById<TextView>(R.id.launch_status_step).apply {
-            text = RoutingUnavailableCopy.stepMessage(this@ExternalAppBrowserActivity, stage)
-            visibility = View.VISIBLE
-        }
-    }
-
-    /**
-     * The end of the wait, as a choice.
-     *
-     * The emphasised button is whichever one gets the user what they asked for:
-     * another attempt when the app half was merely slow, the browser when the
-     * proxy is not running and only the browser can offer to start it. Both are
-     * always present — a user who knows better than this classification should
-     * not have to take its word for which one to want.
-     */
-    private fun showLaunchFailure(failure: BootstrapFailure, onTryAgain: () -> Unit) {
-        val status = findViewById<View>(R.id.launch_status) ?: return
-        status.visibility = View.VISIBLE
-        status.findViewById<View>(R.id.launch_status_progress).visibility = View.GONE
-        status.findViewById<ImageView>(R.id.launch_status_icon).visibility = View.VISIBLE
-        status.findViewById<TextView>(R.id.launch_status_step).visibility = View.GONE
-        status.findViewById<TextView>(R.id.launch_status_title).text =
-            RoutingUnavailableCopy.title(this, failure)
-        status.findViewById<TextView>(R.id.launch_status_message).text =
-            RoutingUnavailableCopy.message(
-                this,
-                failure,
-                RoutingUnavailableCopy.subject(
-                    windowLaunchUrl,
-                    isStandaloneApp = webAppManifestUrl != null,
-                ),
-            )
-
-        val canTryAgain = failure.canKeepWaiting
-        status.findViewById<MaterialButton>(R.id.launch_status_primary).apply {
-            if (canTryAgain) {
-                setText(R.string.weblibre_launch_action_try_again)
-                visibility = View.VISIBLE
-                setOnClickListener { onTryAgain() }
-            } else {
-                visibility = View.GONE
-            }
-        }
-        status.findViewById<MaterialButton>(R.id.launch_status_secondary).apply {
-            setText(R.string.weblibre_launch_action_open_in_browser)
-            visibility = View.VISIBLE
-            setOnClickListener { fallbackToMainActivity() }
-        }
-        status.findViewById<MaterialButton>(R.id.launch_status_tertiary).apply {
-            setText(R.string.weblibre_launch_action_close)
-            visibility = View.VISIBLE
-            setOnClickListener { finishAndRemoveTask() }
-        }
-    }
 
     private fun hideLaunchStatus() {
         findViewById<View>(R.id.launch_status)?.visibility = View.GONE
