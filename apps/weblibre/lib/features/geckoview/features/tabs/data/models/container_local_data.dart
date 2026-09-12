@@ -53,6 +53,11 @@ class ContainerLocalData with FastEquatable {
   factory ContainerLocalData.fromJson(Map<String, dynamic> json) =>
       _$ContainerLocalDataFromJson(json);
 
+  /// The settings a container has before any row was written for it — every
+  /// flag off, no wallpaper.
+  factory ContainerLocalData.defaults(String containerId) =>
+      ContainerLocalData(containerId: containerId);
+
   Map<String, dynamic> toJson() => _$ContainerLocalDataToJson(this);
 
   @override

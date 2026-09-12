@@ -28,15 +28,21 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 /// be worth spelling the projection out by hand.
 List<Expression<Object>> tabSummaryColumns(Tab tab) => [
   tab.id,
+  tab.engineTabId,
   tab.source,
   tab.parentId,
   tab.containerId,
+  tab.spaceUuid,
+  tab.folderId,
+  tab.splitId,
+  tab.splitIndex,
+  tab.tabShelf,
   tab.orderKey,
   tab.url,
   tab.title,
+  tab.iconUrl,
+  tab.staticLabel,
   tab.tabMode,
-  tab.isolationContextId,
-  tab.isPinned,
   tab.isProbablyReaderable,
   tab.timestamp,
 ];
@@ -44,17 +50,23 @@ List<Expression<Object>> tabSummaryColumns(Tab tab) => [
 /// Reads a row produced by a `selectOnly` over [tabSummaryColumns].
 TabSummary readTabSummary(TypedResult row, Tab tab) => TabSummary(
   id: row.read(tab.id)!,
+  engineTabId: row.read(tab.engineTabId),
   source: row.readWithConverter(tab.source)!,
   parentId: row.read(tab.parentId),
   containerId: row.read(tab.containerId),
+  spaceUuid: row.read(tab.spaceUuid),
+  folderId: row.read(tab.folderId),
+  splitId: row.read(tab.splitId),
+  splitIndex: row.read(tab.splitIndex),
+  tabShelf: row.readWithConverter(tab.tabShelf)!,
   orderKey: row.read(tab.orderKey)!,
   // Type arguments pinned: inference would take the `Uri?` context type as
   // `D?` and demand a non-nullable `Uri` converter column.
   url: row.readWithConverter<Uri?, String>(tab.url),
   title: row.read(tab.title),
+  iconUrl: row.read(tab.iconUrl),
+  staticLabel: row.read(tab.staticLabel),
   tabMode: row.readWithConverter(tab.tabMode)!,
-  isolationContextId: row.read(tab.isolationContextId),
-  isPinned: row.read(tab.isPinned)!,
   isProbablyReaderable: row.read(tab.isProbablyReaderable),
   timestamp: row.read(tab.timestamp)!,
 );

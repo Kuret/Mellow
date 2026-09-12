@@ -47,3 +47,31 @@ final class TabParentToSpecific extends TabParentChange {
 
   const TabParentToSpecific(this.parentTabId);
 }
+
+/// How a reorder should affect the moving block's `(space_uuid, folder_id)`
+/// (PLAN §6.6). [TabScopeChange.unchanged] keeps the current values; a
+/// [TabScopeChange.toScope] rewrites them for every tab in the moving block.
+///
+/// A `TabParentChange.toParent` wins over this: a child always shares its
+/// parent's space and folder (F1), so the parent's scope is used instead.
+sealed class TabScopeChange {
+  const TabScopeChange();
+
+  const factory TabScopeChange.unchanged() = TabScopeUnchanged;
+
+  const factory TabScopeChange.toScope({
+    required String? spaceUuid,
+    required String? folderId,
+  }) = TabScopeToSpecific;
+}
+
+final class TabScopeUnchanged extends TabScopeChange {
+  const TabScopeUnchanged();
+}
+
+final class TabScopeToSpecific extends TabScopeChange {
+  final String? spaceUuid;
+  final String? folderId;
+
+  const TabScopeToSpecific({required this.spaceUuid, required this.folderId});
+}

@@ -19,6 +19,7 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 
 /// Every column of `tab` except the four content columns and `content_hash`.
@@ -36,30 +37,49 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_sour
 /// for the one row it needs.
 class TabSummary with FastEquatable {
   final String id;
+
+  /// `NULL` = cold tab, no live engine session (PLAN §7.4). When set it equals
+  /// [id] (DESIGN.md "D2 refinement").
+  final String? engineTabId;
   final TabSource source;
   final String? parentId;
   final String? containerId;
+  final String? spaceUuid;
+  final String? folderId;
+  final String? splitId;
+  final int? splitIndex;
+  final TabShelf tabShelf;
   final String orderKey;
   final Uri? url;
   final String? title;
+  final String? iconUrl;
+
+  /// Zen's user-renamed tab title. Rendered in preference to [title] when set.
+  final String? staticLabel;
   final TabModeDbValue tabMode;
-  final String? isolationContextId;
-  final bool isPinned;
   final bool? isProbablyReaderable;
   final DateTime timestamp;
+
+  bool get isCold => engineTabId == null;
 
   // Not `const`: the FastEquatable mixin carries a mutable cached-hash field.
   TabSummary({
     required this.id,
+    required this.engineTabId,
     required this.source,
     required this.parentId,
     required this.containerId,
+    required this.spaceUuid,
+    required this.folderId,
+    required this.splitId,
+    required this.splitIndex,
+    required this.tabShelf,
     required this.orderKey,
     required this.url,
     required this.title,
+    required this.iconUrl,
+    required this.staticLabel,
     required this.tabMode,
-    required this.isolationContextId,
-    required this.isPinned,
     required this.isProbablyReaderable,
     required this.timestamp,
   });
@@ -67,15 +87,21 @@ class TabSummary with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     id,
+    engineTabId,
     source,
     parentId,
     containerId,
+    spaceUuid,
+    folderId,
+    splitId,
+    splitIndex,
+    tabShelf,
     orderKey,
     url,
     title,
+    iconUrl,
+    staticLabel,
     tabMode,
-    isolationContextId,
-    isPinned,
     isProbablyReaderable,
     timestamp,
   ];

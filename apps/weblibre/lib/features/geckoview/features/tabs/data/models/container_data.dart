@@ -20,6 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 
 part 'container_data.g.dart';
 
@@ -57,6 +58,15 @@ class ContainerData with FastEquatable {
 
   factory ContainerData.fromJson(Map<String, dynamic> json) =>
       _$ContainerDataFromJson(json);
+
+  /// Display interpretation of [colorKey]; unknown keywords render as
+  /// [FirefoxContainerColor.toolbar]. The raw keyword stays in the row.
+  FirefoxContainerColor get color =>
+      FirefoxContainerColor.fromKeyword(colorKey);
+
+  /// Display interpretation of [iconKey]; unknown keywords render as
+  /// [FirefoxContainerIcon.circle]. The raw keyword stays in the row.
+  FirefoxContainerIcon get icon => FirefoxContainerIcon.fromKeyword(iconKey);
 
   Map<String, dynamic> toJson() => _$ContainerDataToJson(this);
 

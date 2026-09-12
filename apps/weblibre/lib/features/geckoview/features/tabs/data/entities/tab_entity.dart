@@ -70,63 +70,63 @@ class SearchResultTabEntity extends TabEntity {
 ///
 /// Distinct from [TabEntity] which serves the original flat-only path. The
 /// grouped variant carries enough information to render parent-with-children
-/// blocks while keeping a single ordered top-level list.
+/// blocks — and, since PLAN §6.6, folders — while keeping a single ordered
+/// top-level list. Items are scoped by space rather than container.
 sealed class TabListItemEntity with FastEquatable {
-  String get tabId;
   String get orderKey;
-  String? get containerId;
+  String? get spaceUuid;
 }
 
-class TabListStandaloneItem extends TabListItemEntity {
+/// A [TabListItemEntity] that is a tab (as opposed to a folder).
+sealed class TabListTabItem extends TabListItemEntity {
+  String get tabId;
+}
+
+class TabListStandaloneItem extends TabListTabItem {
   @override
   final String tabId;
   @override
   final String orderKey;
   @override
-  final String? containerId;
+  final String? spaceUuid;
 
   TabListStandaloneItem({
     required this.tabId,
     required this.orderKey,
-    required this.containerId,
+    required this.spaceUuid,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, orderKey, containerId];
+  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid];
 }
 
-class TabListParentGroup extends TabListItemEntity {
+class TabListParentGroup extends TabListTabItem {
   @override
   final String tabId;
   @override
   final String orderKey;
   @override
-  final String? containerId;
+  final String? spaceUuid;
   final int childCount;
 
   TabListParentGroup({
     required this.tabId,
     required this.orderKey,
-    required this.containerId,
+    required this.spaceUuid,
     required this.childCount,
   });
 
   @override
-  List<Object?> get hashParameters => [
-    tabId,
-    orderKey,
-    containerId,
-    childCount,
-  ];
+  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid, childCount];
 }
 
-class TabListChildItem extends TabListItemEntity {
+class TabListChildItem extends TabListTabItem {
   @override
   final String tabId;
   @override
   final String orderKey;
   @override
-  final String? containerId;
+  final String? spaceUuid;
   final String parentId;
   final String rootId;
   final int depth;
@@ -135,7 +135,7 @@ class TabListChildItem extends TabListItemEntity {
   TabListChildItem({
     required this.tabId,
     required this.orderKey,
-    required this.containerId,
+    required this.spaceUuid,
     required this.parentId,
     required this.rootId,
     required this.depth,
@@ -146,9 +146,45 @@ class TabListChildItem extends TabListItemEntity {
   List<Object?> get hashParameters => [
     tabId,
     orderKey,
-    containerId,
+    spaceUuid,
     parentId,
     rootId,
+    depth,
+    childCount,
+  ];
+}
+
+/// A folder occupying a slot in its scope's child sequence (PLAN §6.6).
+/// [depth] is the folder nesting depth from the space root; [childCount] is
+/// the number of direct children (tabs, folders and splits) it holds.
+class TabListFolderItem extends TabListItemEntity {
+  final String folderId;
+  @override
+  final String orderKey;
+  @override
+  final String? spaceUuid;
+  final String name;
+  final bool isCollapsed;
+  final int depth;
+  final int childCount;
+
+  TabListFolderItem({
+    required this.folderId,
+    required this.orderKey,
+    required this.spaceUuid,
+    required this.name,
+    required this.isCollapsed,
+    required this.depth,
+    required this.childCount,
+  });
+
+  @override
+  List<Object?> get hashParameters => [
+    folderId,
+    orderKey,
+    spaceUuid,
+    name,
+    isCollapsed,
     depth,
     childCount,
   ];
