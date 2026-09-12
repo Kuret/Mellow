@@ -106,6 +106,8 @@ Future<TabDatabase> _memoryDatabaseWithOneTab({required String title}) async {
       },
     ),
   );
+  // Regular tabs reference their space (FK), so the space row comes first.
+  await db.spaceDao.insertSpace(SpaceData(uuid: 'space-1', orderIndex: 0));
   await db.tabDao.insertTab(
     'tab-1',
     source: TabSource.manual,
