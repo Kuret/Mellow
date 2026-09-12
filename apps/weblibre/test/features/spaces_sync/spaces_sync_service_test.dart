@@ -8,6 +8,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
+import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -292,6 +293,83 @@ void main() {
     expect(retried.difference({space1, remoteSpace}), isEmpty);
   });
 
+  /// Stores the digest of every record on [server], as if this device had
+  /// applied all of them on an earlier sync.
+  Future<void> storeServerDigests(ServiceHarness harness) async {
+    for (final entry in harness.server.records.entries) {
+      final cleartext = entry.value.cleartext;
+      await harness.db.syncStateDao.putDigest(
+        entry.key,
+        cleartext['kind']! as String,
+        recordDigest(
+          cleartext['kind']! as String,
+          (cleartext['data']! as Map).cast<String, Object?>(),
+        ),
+      );
+    }
+  }
+
+  /// A device that applied the whole collection earlier: the collection has
+  /// not changed since, so `newer=` returns nothing.
+  GeneralSettings settledSettings(
+    FakeSyncServer server, {
+    bool writesEnabled = true,
+  }) => GeneralSettings.withDefaults(
+    spacesSyncLastSyncId: server.syncId,
+    spacesSyncBaselineDone: true,
+    spacesSyncLastModified: server.collectionModified,
+    spacesSyncWritesEnabled: writesEnabled,
+  );
+
+  test(
+    'an applier version change re-applies every remote record, no tombstones',
+    () async {
+      final server = serverWithRemoteState();
+      final harness = await ServiceHarness.open(
+        server: server,
+        initialSettings: settledSettings(server),
+        applierVersion: 1,
+      );
+      await seedLocalState(harness);
+      // Digests say the remote records were applied, but the rows the old
+      // applier produced are gone (or filed wrongly): nothing changed
+      // remotely, so a `newer=` fetch alone would never bring them back.
+      await storeServerDigests(harness);
+      // A stale digest with a deletion note: a tombstone on any normal sync.
+      await harness.db.syncStateDao.putDigest('ghost', 'space', 'stale');
+      await harness.db.syncStateDao.recordDeletion('ghost', 'space');
+
+      await harness.container
+          .read(spacesSyncServiceProvider.notifier)
+          .sync(reason: 'test');
+
+      expect(
+        harness.container.read(spacesSyncServiceProvider).lastError,
+        isNull,
+      );
+      // The whole collection was fetched (no `newer=`) and re-applied.
+      expect(
+        server.fetches.any(
+          (request) => !request.url.queryParameters.containsKey('newer'),
+        ),
+        isTrue,
+      );
+      expect(
+        await harness.db.spaceDao.getByUuid(remoteSpace).getSingleOrNull(),
+        isNotNull,
+      );
+      expect(await tabIds(harness.db), contains('rt1'));
+      // No digest survived the reset, so nothing could become a tombstone;
+      // the local-only records were uploaded as creates.
+      expect(uploadedTombstones(server), isEmpty);
+      expect(uploadedIds(server), containsAll([space1, 'local1']));
+      expect(
+        harness.settings.current.spacesSyncApplierVersion,
+        spacesApplierVersion,
+      );
+      expect(harness.settings.current.spacesSyncBaselineDone, isTrue);
+    },
+  );
   test('the kill switch blocks uploads', () async {
     final harness = await ServiceHarness.open(
       server: serverWithRemoteState(),

@@ -53,7 +53,7 @@ final class SpacesSyncServiceProvider
   }
 }
 
-String _$spacesSyncServiceHash() => r'57b1a78dced9f882aa686d6467587b40f70aa5c6';
+String _$spacesSyncServiceHash() => r'3c31b1324bb57af559f25d9574c3427ba58b503f';
 
 /// The two-way Firefox Sync client for Zen's `spaces` collection (PLAN §8,
 /// W6.3). Runs on start, on resume, every minute in the foreground, three

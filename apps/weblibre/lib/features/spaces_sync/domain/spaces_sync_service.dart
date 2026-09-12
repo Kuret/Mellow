@@ -246,6 +246,16 @@ class SpacesSyncService extends _$SpacesSyncService {
         settings = await settingsRepo.fetchSettings();
       }
 
+      if (settings.spacesSyncApplierVersion != spacesApplierVersion) {
+        logger.i(
+          'spaces sync: applier version '
+          '${settings.spacesSyncApplierVersion} -> $spacesApplierVersion; '
+          're-applying the whole collection',
+        );
+        await _resetForApplierVersion();
+        settings = await settingsRepo.fetchSettings();
+      }
+
       final keys = await client.getCryptoKeys(
         KeyBundle.fromSyncKey(_decodeSyncKey(credentials.syncKeyBase64Url)),
       );
@@ -336,6 +346,25 @@ class SpacesSyncService extends _$SpacesSyncService {
                 spacesSyncLastSyncId: syncId,
                 spacesSyncBaselineDone: false,
               )
+              .copyWith
+              .spacesSyncLastModified(null),
+        );
+  }
+
+  /// A new applier files rows differently: forget every digest and foreign
+  /// copy and fetch from the beginning, so the next run re-applies every
+  /// remote record (incoming always wins, PLAN §4.4). The baseline flag and
+  /// syncID stay — this is not a first sync — and with no digest stored no
+  /// tombstone can be projected from it either.
+  Future<void> _resetForApplierVersion() async {
+    final db = ref.read(tabDatabaseProvider);
+    await db.syncStateDao.clearAll();
+    await db.syncStateDao.clearAllForeign();
+    await ref
+        .read(generalSettingsRepositoryProvider.notifier)
+        .updateSettings(
+          (current) => current
+              .copyWith(spacesSyncApplierVersion: spacesApplierVersion)
               .copyWith
               .spacesSyncLastModified(null),
         );

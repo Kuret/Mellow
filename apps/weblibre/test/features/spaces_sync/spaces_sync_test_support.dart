@@ -16,6 +16,7 @@ import 'package:weblibre/features/spaces_sync/data/snapshot_store.dart';
 import 'package:weblibre/features/spaces_sync/data/sync15/key_bundle.dart';
 import 'package:weblibre/features/spaces_sync/data/sync15/record_crypto.dart';
 import 'package:weblibre/features/spaces_sync/domain/providers.dart';
+import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -528,9 +529,13 @@ class ServiceHarness {
   final FakeGeneralSettingsRepository settings;
   final Directory snapshotDir;
 
+  /// [applierVersion] defaults to the current one so a test starts from a
+  /// device whose rows the current applier produced; pass an older value to
+  /// exercise the re-apply reset.
   static Future<ServiceHarness> open({
     FakeSyncServer? server,
     GeneralSettings? initialSettings,
+    int applierVersion = spacesApplierVersion,
     bool authenticated = true,
     List<Override> overrides = const [],
   }) async {
@@ -539,7 +544,9 @@ class ServiceHarness {
     final tabs = FakeSyncTabRepository();
     final fakeServer = server ?? FakeSyncServer();
     final settings = FakeGeneralSettingsRepository(
-      initialSettings ?? GeneralSettings.withDefaults(),
+      (initialSettings ?? GeneralSettings.withDefaults()).copyWith(
+        spacesSyncApplierVersion: applierVersion,
+      ),
     );
     final snapshotDir = await Directory.systemTemp.createTemp('spaces_sync');
     final container = ProviderContainer(

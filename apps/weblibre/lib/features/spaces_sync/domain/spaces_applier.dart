@@ -92,6 +92,14 @@ class _Removals {
   final spaces = <String>[];
 }
 
+/// The rules this build's applier files remote records under. Bump it when
+/// the applier changes how existing rows should look (e.g. where folder
+/// members sit): a device whose stored `spacesSyncApplierVersion` differs
+/// forgets its digests and re-applies the whole collection on the next sync,
+/// since records that did not change remotely would otherwise never be
+/// re-applied (incoming always wins, PLAN §4.4).
+const int spacesApplierVersion = 2;
+
 /// Incoming Zen records → local rows, in `ZenSpacesSyncApplier.applyBatch`'s
 /// order: containers, routed tombstones, tab and split deletes, spaces,
 /// folders (parents first), tabs, splits, folder and space deletes,
