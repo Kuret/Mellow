@@ -49,6 +49,10 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   late final i1.ForeignRecord foreignRecord = i1.ForeignRecord(this);
   late final i1.SyncRecordState syncRecordState = i1.SyncRecordState(this);
   late final i1.DeletedRecord deletedRecord = i1.DeletedRecord(this);
+  late final i1.AppliedTombstone appliedTombstone = i1.AppliedTombstone(this);
+  late final i1.PendingEngineClose pendingEngineClose = i1.PendingEngineClose(
+    this,
+  );
   late final i2.ContainerDao containerDao = i2.ContainerDao(
     this as i3.TabDatabase,
   );
@@ -118,6 +122,8 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     foreignRecord,
     syncRecordState,
     deletedRecord,
+    appliedTombstone,
+    pendingEngineClose,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>
@@ -352,6 +358,10 @@ class $TabDatabaseManager {
       i1.$SyncRecordStateTableManager(_db, _db.syncRecordState);
   i1.$DeletedRecordTableManager get deletedRecord =>
       i1.$DeletedRecordTableManager(_db, _db.deletedRecord);
+  i1.$AppliedTombstoneTableManager get appliedTombstone =>
+      i1.$AppliedTombstoneTableManager(_db, _db.appliedTombstone);
+  i1.$PendingEngineCloseTableManager get pendingEngineClose =>
+      i1.$PendingEngineCloseTableManager(_db, _db.pendingEngineClose);
 }
 
 extension DefineFunctions on i13.CommonDatabase {

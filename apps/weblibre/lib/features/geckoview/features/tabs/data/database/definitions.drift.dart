@@ -6437,6 +6437,316 @@ typedef $DeletedRecordProcessedTableManager =
       i2.DeletedRecordData,
       i0.PrefetchHooks Function()
     >;
+typedef $AppliedTombstoneCreateCompanionBuilder =
+    i2.AppliedTombstoneCompanion Function({
+      required String id,
+      required DateTime appliedAt,
+      i0.Value<int> rowid,
+    });
+typedef $AppliedTombstoneUpdateCompanionBuilder =
+    i2.AppliedTombstoneCompanion Function({
+      i0.Value<String> id,
+      i0.Value<DateTime> appliedAt,
+      i0.Value<int> rowid,
+    });
+
+class $AppliedTombstoneFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.AppliedTombstone> {
+  $AppliedTombstoneFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get appliedAt => $composableBuilder(
+    column: $table.appliedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $AppliedTombstoneOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.AppliedTombstone> {
+  $AppliedTombstoneOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get appliedAt => $composableBuilder(
+    column: $table.appliedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $AppliedTombstoneAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.AppliedTombstone> {
+  $AppliedTombstoneAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get appliedAt =>
+      $composableBuilder(column: $table.appliedAt, builder: (column) => column);
+}
+
+class $AppliedTombstoneTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i2.AppliedTombstone,
+          i2.AppliedTombstoneData,
+          i2.$AppliedTombstoneFilterComposer,
+          i2.$AppliedTombstoneOrderingComposer,
+          i2.$AppliedTombstoneAnnotationComposer,
+          $AppliedTombstoneCreateCompanionBuilder,
+          $AppliedTombstoneUpdateCompanionBuilder,
+          (
+            i2.AppliedTombstoneData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i2.AppliedTombstone,
+              i2.AppliedTombstoneData
+            >,
+          ),
+          i2.AppliedTombstoneData,
+          i0.PrefetchHooks Function()
+        > {
+  $AppliedTombstoneTableManager(
+    i0.GeneratedDatabase db,
+    i2.AppliedTombstone table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i2.$AppliedTombstoneFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i2.$AppliedTombstoneOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i2.$AppliedTombstoneAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> id = const i0.Value.absent(),
+                i0.Value<DateTime> appliedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.AppliedTombstoneCompanion(
+                id: id,
+                appliedAt: appliedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime appliedAt,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.AppliedTombstoneCompanion.insert(
+                id: id,
+                appliedAt: appliedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $AppliedTombstoneProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i2.AppliedTombstone,
+      i2.AppliedTombstoneData,
+      i2.$AppliedTombstoneFilterComposer,
+      i2.$AppliedTombstoneOrderingComposer,
+      i2.$AppliedTombstoneAnnotationComposer,
+      $AppliedTombstoneCreateCompanionBuilder,
+      $AppliedTombstoneUpdateCompanionBuilder,
+      (
+        i2.AppliedTombstoneData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i2.AppliedTombstone,
+          i2.AppliedTombstoneData
+        >,
+      ),
+      i2.AppliedTombstoneData,
+      i0.PrefetchHooks Function()
+    >;
+typedef $PendingEngineCloseCreateCompanionBuilder =
+    i2.PendingEngineCloseCompanion Function({
+      required String engineTabId,
+      required DateTime requestedAt,
+      i0.Value<int> rowid,
+    });
+typedef $PendingEngineCloseUpdateCompanionBuilder =
+    i2.PendingEngineCloseCompanion Function({
+      i0.Value<String> engineTabId,
+      i0.Value<DateTime> requestedAt,
+      i0.Value<int> rowid,
+    });
+
+class $PendingEngineCloseFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.PendingEngineClose> {
+  $PendingEngineCloseFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get engineTabId => $composableBuilder(
+    column: $table.engineTabId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $PendingEngineCloseOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.PendingEngineClose> {
+  $PendingEngineCloseOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get engineTabId => $composableBuilder(
+    column: $table.engineTabId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $PendingEngineCloseAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.PendingEngineClose> {
+  $PendingEngineCloseAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get engineTabId => $composableBuilder(
+    column: $table.engineTabId,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<DateTime> get requestedAt => $composableBuilder(
+    column: $table.requestedAt,
+    builder: (column) => column,
+  );
+}
+
+class $PendingEngineCloseTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i2.PendingEngineClose,
+          i2.PendingEngineCloseData,
+          i2.$PendingEngineCloseFilterComposer,
+          i2.$PendingEngineCloseOrderingComposer,
+          i2.$PendingEngineCloseAnnotationComposer,
+          $PendingEngineCloseCreateCompanionBuilder,
+          $PendingEngineCloseUpdateCompanionBuilder,
+          (
+            i2.PendingEngineCloseData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i2.PendingEngineClose,
+              i2.PendingEngineCloseData
+            >,
+          ),
+          i2.PendingEngineCloseData,
+          i0.PrefetchHooks Function()
+        > {
+  $PendingEngineCloseTableManager(
+    i0.GeneratedDatabase db,
+    i2.PendingEngineClose table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i2.$PendingEngineCloseFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i2.$PendingEngineCloseOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i2.$PendingEngineCloseAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> engineTabId = const i0.Value.absent(),
+                i0.Value<DateTime> requestedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.PendingEngineCloseCompanion(
+                engineTabId: engineTabId,
+                requestedAt: requestedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String engineTabId,
+                required DateTime requestedAt,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.PendingEngineCloseCompanion.insert(
+                engineTabId: engineTabId,
+                requestedAt: requestedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $PendingEngineCloseProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i2.PendingEngineClose,
+      i2.PendingEngineCloseData,
+      i2.$PendingEngineCloseFilterComposer,
+      i2.$PendingEngineCloseOrderingComposer,
+      i2.$PendingEngineCloseAnnotationComposer,
+      $PendingEngineCloseCreateCompanionBuilder,
+      $PendingEngineCloseUpdateCompanionBuilder,
+      (
+        i2.PendingEngineCloseData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i2.PendingEngineClose,
+          i2.PendingEngineCloseData
+        >,
+      ),
+      i2.PendingEngineCloseData,
+      i0.PrefetchHooks Function()
+    >;
 
 class Container extends i0.Table
     with i0.TableInfo<Container, i1.ContainerData> {
@@ -11721,6 +12031,394 @@ class DeletedRecordCompanion extends i0.UpdateCompanion<i2.DeletedRecordData> {
           ..write('id: $id, ')
           ..write('kind: $kind, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class AppliedTombstone extends i0.Table
+    with i0.TableInfo<AppliedTombstone, i2.AppliedTombstoneData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  AppliedTombstone(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> id = i0.GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final i0.GeneratedColumn<DateTime> appliedAt =
+      i0.GeneratedColumn<DateTime>(
+        'applied_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [id, appliedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'applied_tombstone';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i2.AppliedTombstoneData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i2.AppliedTombstoneData(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      appliedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}applied_at'],
+      )!,
+    );
+  }
+
+  @override
+  AppliedTombstone createAlias(String alias) {
+    return AppliedTombstone(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class AppliedTombstoneData extends i0.DataClass
+    implements i0.Insertable<i2.AppliedTombstoneData> {
+  final String id;
+  final DateTime appliedAt;
+  const AppliedTombstoneData({required this.id, required this.appliedAt});
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<String>(id);
+    map['applied_at'] = i0.Variable<DateTime>(appliedAt);
+    return map;
+  }
+
+  factory AppliedTombstoneData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return AppliedTombstoneData(
+      id: serializer.fromJson<String>(json['id']),
+      appliedAt: serializer.fromJson<DateTime>(json['applied_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'applied_at': serializer.toJson<DateTime>(appliedAt),
+    };
+  }
+
+  i2.AppliedTombstoneData copyWith({String? id, DateTime? appliedAt}) =>
+      i2.AppliedTombstoneData(
+        id: id ?? this.id,
+        appliedAt: appliedAt ?? this.appliedAt,
+      );
+  AppliedTombstoneData copyWithCompanion(i2.AppliedTombstoneCompanion data) {
+    return AppliedTombstoneData(
+      id: data.id.present ? data.id.value : this.id,
+      appliedAt: data.appliedAt.present ? data.appliedAt.value : this.appliedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppliedTombstoneData(')
+          ..write('id: $id, ')
+          ..write('appliedAt: $appliedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, appliedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i2.AppliedTombstoneData &&
+          other.id == this.id &&
+          other.appliedAt == this.appliedAt);
+}
+
+class AppliedTombstoneCompanion
+    extends i0.UpdateCompanion<i2.AppliedTombstoneData> {
+  final i0.Value<String> id;
+  final i0.Value<DateTime> appliedAt;
+  final i0.Value<int> rowid;
+  const AppliedTombstoneCompanion({
+    this.id = const i0.Value.absent(),
+    this.appliedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  AppliedTombstoneCompanion.insert({
+    required String id,
+    required DateTime appliedAt,
+    this.rowid = const i0.Value.absent(),
+  }) : id = i0.Value(id),
+       appliedAt = i0.Value(appliedAt);
+  static i0.Insertable<i2.AppliedTombstoneData> custom({
+    i0.Expression<String>? id,
+    i0.Expression<DateTime>? appliedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (appliedAt != null) 'applied_at': appliedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i2.AppliedTombstoneCompanion copyWith({
+    i0.Value<String>? id,
+    i0.Value<DateTime>? appliedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i2.AppliedTombstoneCompanion(
+      id: id ?? this.id,
+      appliedAt: appliedAt ?? this.appliedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<String>(id.value);
+    }
+    if (appliedAt.present) {
+      map['applied_at'] = i0.Variable<DateTime>(appliedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppliedTombstoneCompanion(')
+          ..write('id: $id, ')
+          ..write('appliedAt: $appliedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class PendingEngineClose extends i0.Table
+    with i0.TableInfo<PendingEngineClose, i2.PendingEngineCloseData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  PendingEngineClose(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> engineTabId =
+      i0.GeneratedColumn<String>(
+        'engine_tab_id',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL PRIMARY KEY',
+      );
+  late final i0.GeneratedColumn<DateTime> requestedAt =
+      i0.GeneratedColumn<DateTime>(
+        'requested_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [engineTabId, requestedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_engine_close';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {engineTabId};
+  @override
+  i2.PendingEngineCloseData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i2.PendingEngineCloseData(
+      engineTabId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}engine_tab_id'],
+      )!,
+      requestedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}requested_at'],
+      )!,
+    );
+  }
+
+  @override
+  PendingEngineClose createAlias(String alias) {
+    return PendingEngineClose(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class PendingEngineCloseData extends i0.DataClass
+    implements i0.Insertable<i2.PendingEngineCloseData> {
+  final String engineTabId;
+  final DateTime requestedAt;
+  const PendingEngineCloseData({
+    required this.engineTabId,
+    required this.requestedAt,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['engine_tab_id'] = i0.Variable<String>(engineTabId);
+    map['requested_at'] = i0.Variable<DateTime>(requestedAt);
+    return map;
+  }
+
+  factory PendingEngineCloseData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return PendingEngineCloseData(
+      engineTabId: serializer.fromJson<String>(json['engine_tab_id']),
+      requestedAt: serializer.fromJson<DateTime>(json['requested_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'engine_tab_id': serializer.toJson<String>(engineTabId),
+      'requested_at': serializer.toJson<DateTime>(requestedAt),
+    };
+  }
+
+  i2.PendingEngineCloseData copyWith({
+    String? engineTabId,
+    DateTime? requestedAt,
+  }) => i2.PendingEngineCloseData(
+    engineTabId: engineTabId ?? this.engineTabId,
+    requestedAt: requestedAt ?? this.requestedAt,
+  );
+  PendingEngineCloseData copyWithCompanion(
+    i2.PendingEngineCloseCompanion data,
+  ) {
+    return PendingEngineCloseData(
+      engineTabId: data.engineTabId.present
+          ? data.engineTabId.value
+          : this.engineTabId,
+      requestedAt: data.requestedAt.present
+          ? data.requestedAt.value
+          : this.requestedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingEngineCloseData(')
+          ..write('engineTabId: $engineTabId, ')
+          ..write('requestedAt: $requestedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(engineTabId, requestedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i2.PendingEngineCloseData &&
+          other.engineTabId == this.engineTabId &&
+          other.requestedAt == this.requestedAt);
+}
+
+class PendingEngineCloseCompanion
+    extends i0.UpdateCompanion<i2.PendingEngineCloseData> {
+  final i0.Value<String> engineTabId;
+  final i0.Value<DateTime> requestedAt;
+  final i0.Value<int> rowid;
+  const PendingEngineCloseCompanion({
+    this.engineTabId = const i0.Value.absent(),
+    this.requestedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  PendingEngineCloseCompanion.insert({
+    required String engineTabId,
+    required DateTime requestedAt,
+    this.rowid = const i0.Value.absent(),
+  }) : engineTabId = i0.Value(engineTabId),
+       requestedAt = i0.Value(requestedAt);
+  static i0.Insertable<i2.PendingEngineCloseData> custom({
+    i0.Expression<String>? engineTabId,
+    i0.Expression<DateTime>? requestedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (engineTabId != null) 'engine_tab_id': engineTabId,
+      if (requestedAt != null) 'requested_at': requestedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i2.PendingEngineCloseCompanion copyWith({
+    i0.Value<String>? engineTabId,
+    i0.Value<DateTime>? requestedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i2.PendingEngineCloseCompanion(
+      engineTabId: engineTabId ?? this.engineTabId,
+      requestedAt: requestedAt ?? this.requestedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (engineTabId.present) {
+      map['engine_tab_id'] = i0.Variable<String>(engineTabId.value);
+    }
+    if (requestedAt.present) {
+      map['requested_at'] = i0.Variable<DateTime>(requestedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingEngineCloseCompanion(')
+          ..write('engineTabId: $engineTabId, ')
+          ..write('requestedAt: $requestedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

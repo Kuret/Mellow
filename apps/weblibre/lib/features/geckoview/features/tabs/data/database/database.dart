@@ -61,7 +61,7 @@ import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 19;
+  final int schemaVersion = 20;
 
   @override
   final int ftsTokenLimit = 10;
@@ -512,6 +512,13 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // The local "deleted for a reason" ledger the sync client reads before
       // it projects a tombstone (PLAN §8.6 item 5).
       await m.create(schema.deletedRecord);
+    },
+    from19To20: (m, schema) async {
+      // The applied-deletion ledger the upload canary reads, and the queue of
+      // engine sessions an applied batch left behind (PLAN §8.6, Zen
+      // gh-15380).
+      await m.create(schema.appliedTombstone);
+      await m.create(schema.pendingEngineClose);
     },
   );
 }

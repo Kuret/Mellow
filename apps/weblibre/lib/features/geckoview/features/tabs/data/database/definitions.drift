@@ -954,6 +954,23 @@ CREATE TABLE deleted_record (
   deleted_at DATETIME NOT NULL
 );
 
+-- Remote deletions this device has applied, with the time it applied them.
+-- The upload canary refuses a batch that would re-create an id we tombstoned
+-- moments ago — the signature of a projection/snapshot skew (Zen gh-15380).
+CREATE TABLE applied_tombstone (
+  id TEXT NOT NULL PRIMARY KEY,
+  applied_at DATETIME NOT NULL
+);
+
+-- Engine sessions whose rows an applied batch already deleted. Written inside
+-- the apply transaction and drained after it commits, so a crash in between
+-- cannot leave a live session whose row is gone (syncTabs would re-insert it
+-- as a new tab).
+CREATE TABLE pending_engine_close (
+  engine_tab_id TEXT NOT NULL PRIMARY KEY,
+  requested_at DATETIME NOT NULL
+);
+
 containersWithCount WITH ContainerDataWithCount:
   SELECT
     container.*,
