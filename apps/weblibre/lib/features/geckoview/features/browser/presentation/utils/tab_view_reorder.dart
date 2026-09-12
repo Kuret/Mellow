@@ -33,14 +33,41 @@ class TabViewReorderResult {
   /// the drop lands outside the moving root's current parent scope.
   final TabParentChange parentChange;
 
+  /// Space/folder assignment implied by the drop position — see
+  /// [buildTabViewReorderResult] doc for the anchor rule.
+  final TabScopeChange scopeChange;
+
   const TabViewReorderResult({
     required this.movingTabIds,
     required this.previousTabId,
     required this.nextTabId,
     this.parentChange = const TabParentChange.unchanged(),
+    this.scopeChange = const TabScopeChange.unchanged(),
   });
 }
 
+/// Builds the reorder/reparent/rescope request implied by dragging
+/// `visibleItems[oldIndex]` to `newIndex`.
+///
+/// [folderIdByTab] and [splitMembers] are pure lookups the caller builds once
+/// per build from `watchSpaceTabsDataProvider(spaceUuid)` summaries — this
+/// function does no Riverpod reads of its own:
+/// - [folderIdByTab]: tab id -> its current `folderId` (`null` at the space
+///   root). Used to decide [TabScopeChange].
+/// - [splitMembers]: tab id -> every tab id sharing that tab's `splitId`
+///   (including itself), already ordered by `splitIndex`. Tabs with no split
+///   should either be absent or map to `[tabId]`.
+///
+/// Folder rows ([FolderTabViewItem]) are never draggable: a reorder whose
+/// moving item is a folder returns `null`.
+///
+/// Scope anchor rule (folder the moving block lands in): find the nearest
+/// non-folder tab neighbours above/below the drop slot (skipping folder rows
+/// entirely) — if both sit in the same folder, drop into that folder. Else,
+/// if the row immediately above the drop slot (folder or not) is a folder
+/// row, drop into that folder. Otherwise the block moves to the space root,
+/// which is only reported as a change (`toScope(folderId: null)`) when the
+/// moving root did not already sit at the root.
 TabViewReorderResult? buildTabViewReorderResult({
   required List<TabViewItem> visibleItems,
   required List<TabsWithRootAndDepthResult> treeRows,
@@ -51,6 +78,9 @@ TabViewReorderResult? buildTabViewReorderResult({
   required TabDirection tabListDirection,
   required bool hierarchical,
   required bool sortPinnedFirst,
+  required Map<String, String?> folderIdByTab,
+  required Map<String, List<String>> splitMembers,
+  required String? spaceUuid,
 }) {
   if (oldIndex < 0 || oldIndex >= visibleItems.length) {
     logger.t(
@@ -60,16 +90,48 @@ TabViewReorderResult? buildTabViewReorderResult({
     return null;
   }
 
+  if (visibleItems[oldIndex].isFolder) {
+    logger.t('reorder refused: folder rows are not draggable');
+    return null;
+  }
+
   final reordered = visibleItems.toList();
   final movingItem = reordered.removeAt(oldIndex);
 
   final insertIndex = newIndex.clamp(0, reordered.length);
   reordered.insert(insertIndex, movingItem);
 
+  // Every other tab sharing the moving tab's splitId must move as one block
+  // with it, in splitIndex order, regardless of hierarchy mode.
+  final movingSplitSiblings = (splitMembers[movingItem.tabId] ?? const [])
+      .where((tabId) => tabId != movingItem.tabId)
+      .toList();
+
   if (!hierarchical) {
-    final ordered = reordered.map((item) => item.tabId).toList();
+    final withoutSplitSiblings = movingSplitSiblings.isEmpty
+        ? reordered
+        : [
+            for (final item in reordered)
+              if (!movingSplitSiblings.contains(item.tabId)) item,
+          ];
+
+    final scopeChange = _computeScopeChange(
+      displayOrder: withoutSplitSiblings,
+      movingTabId: movingItem.tabId,
+      folderIdByTab: folderIdByTab,
+      spaceUuid: spaceUuid,
+    );
+
+    final ordered = <String>[];
+    for (final item in withoutSplitSiblings) {
+      ordered.add(item.tabId);
+      if (item.tabId == movingItem.tabId) {
+        ordered.addAll(movingSplitSiblings);
+      }
+    }
+
     return _resultFromOrderedIds(
-      movingTabIds: [movingItem.tabId],
+      movingTabIds: [movingItem.tabId, ...movingSplitSiblings],
       orderedTabIds: _orderedIdsForStorageAnchors(
         ordered,
         tabListDirection: tabListDirection,
@@ -78,6 +140,7 @@ TabViewReorderResult? buildTabViewReorderResult({
         movingPartitionRootId: movingItem.tabId,
         sortPinnedFirst: sortPinnedFirst,
       ),
+      scopeChange: scopeChange,
     );
   }
 
@@ -88,7 +151,11 @@ TabViewReorderResult? buildTabViewReorderResult({
   // every collapsed group encountered while flattening, so reusing this map
   // turns N tree walks into N cheap lookups.
   final childrenByParent = _buildChildrenByParent(rowsById, parentById);
-  final moveBlock = _subtreeIds(movingItem.tabId, rowsById, childrenByParent);
+  final treeBlock = _subtreeIds(movingItem.tabId, rowsById, childrenByParent);
+  // Split siblings ride along with the moving block but are not part of its
+  // tab-tree subtree, so they are appended rather than walked via
+  // _subtreeIds.
+  final moveBlock = [...treeBlock, ...movingSplitSiblings];
   final moveBlockIds = moveBlock.toSet();
 
   final withoutMovingItem = visibleItems.toList()..removeAt(oldIndex);
@@ -142,6 +209,13 @@ TabViewReorderResult? buildTabViewReorderResult({
 
   final reorderedBlocks = remaining.toList()
     ..insert(resolvedInsertIndex, movingItem);
+
+  final scopeChange = _computeScopeChange(
+    displayOrder: reorderedBlocks,
+    movingTabId: movingItem.tabId,
+    folderIdByTab: folderIdByTab,
+    spaceUuid: spaceUuid,
+  );
 
   final displayBlocks = <List<String>>[];
   final emitted = <String>{};
@@ -222,6 +296,7 @@ TabViewReorderResult? buildTabViewReorderResult({
       sortPinnedFirst: sortPinnedFirst,
     ),
     parentChange: parentChange,
+    scopeChange: scopeChange,
   );
 }
 
@@ -272,6 +347,7 @@ TabViewReorderResult? _resultFromOrderedIds({
   required List<String> movingTabIds,
   required List<String> orderedTabIds,
   TabParentChange parentChange = const TabParentChange.unchanged(),
+  TabScopeChange scopeChange = const TabScopeChange.unchanged(),
 }) {
   if (movingTabIds.isEmpty) {
     return null;
@@ -296,7 +372,75 @@ TabViewReorderResult? _resultFromOrderedIds({
         ? orderedTabIds[lastIndex + 1]
         : null,
     parentChange: parentChange,
+    scopeChange: scopeChange,
   );
+}
+
+/// Derives the folder [TabScopeChange] implied by the drop, given the
+/// display order after the moving block has been collapsed back into a
+/// single [movingTabId] placeholder at its new slot. See
+/// [buildTabViewReorderResult] doc for the anchor rule.
+TabScopeChange _computeScopeChange({
+  required List<TabViewItem> displayOrder,
+  required String movingTabId,
+  required Map<String, String?> folderIdByTab,
+  required String? spaceUuid,
+}) {
+  final index = displayOrder.indexWhere((item) => item.tabId == movingTabId);
+  if (index < 0) {
+    return const TabScopeChange.unchanged();
+  }
+
+  TabViewItem? directlyAbove;
+  for (var i = index - 1; i >= 0; i--) {
+    if (displayOrder[i].tabId != movingTabId) {
+      directlyAbove = displayOrder[i];
+      break;
+    }
+  }
+
+  TabViewItem? prevTab;
+  for (var i = index - 1; i >= 0; i--) {
+    final item = displayOrder[i];
+    if (item.tabId != movingTabId && !item.isFolder) {
+      prevTab = item;
+      break;
+    }
+  }
+
+  TabViewItem? nextTab;
+  for (var i = index + 1; i < displayOrder.length; i++) {
+    final item = displayOrder[i];
+    if (item.tabId != movingTabId && !item.isFolder) {
+      nextTab = item;
+      break;
+    }
+  }
+
+  if (prevTab != null && nextTab != null) {
+    final prevFolder = folderIdByTab[prevTab.tabId];
+    final nextFolder = folderIdByTab[nextTab.tabId];
+    if (prevFolder == nextFolder) {
+      return TabScopeChange.toScope(
+        spaceUuid: spaceUuid,
+        folderId: prevFolder,
+      );
+    }
+  }
+
+  final folderRowAbove = directlyAbove?.folderItem;
+  if (folderRowAbove != null) {
+    return TabScopeChange.toScope(
+      spaceUuid: spaceUuid,
+      folderId: folderRowAbove.folderId,
+    );
+  }
+
+  final currentFolder = folderIdByTab[movingTabId];
+  if (currentFolder == null) {
+    return const TabScopeChange.unchanged();
+  }
+  return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: null);
 }
 
 String? _parentScope(TabViewItem item) => item.childItem?.parentId;
