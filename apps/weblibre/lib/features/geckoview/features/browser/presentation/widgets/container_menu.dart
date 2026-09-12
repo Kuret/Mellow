@@ -28,14 +28,12 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/select_folder_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
@@ -45,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -125,7 +122,8 @@ class ContainerMenu extends HookConsumerWidget {
     final controller = this.controller ?? useMenuController();
 
     final container = this.container;
-    final contextualIdentity = container?.metadata.contextualIdentity;
+    // Every container is its own Gecko cookie jar: the contextId is the id.
+    final contextualIdentity = container?.id;
 
     Future<void> closeTabs({
       bool includeRegular = true,
@@ -149,8 +147,8 @@ class ContainerMenu extends HookConsumerWidget {
     }
 
     final canEdit = enabled && container != null;
-    // Non-null exactly when the clear-data item should show: it wipes a Gecko
-    // storage partition, which only an isolated container has.
+    // Non-null exactly when the clear-data item should show: it wipes the
+    // container's Gecko storage partition.
     final clearDataContextId = enableClearData ? contextualIdentity : null;
     final hasTrailingSection =
         clearDataContextId != null || enableEdit && container != null;

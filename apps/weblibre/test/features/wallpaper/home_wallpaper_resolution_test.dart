@@ -20,7 +20,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/home_wallpaper.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
@@ -28,24 +28,20 @@ import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/wallpaper/domain/services/wallpaper_store.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
 
-ContainerData _container({
+ContainerLocalData _local({
   String? wallpaperFile,
   double? wallpaperBlur,
   double? wallpaperDim,
 }) {
-  return ContainerData(
-    id: 'container',
-    color: const Color(0xFF112233),
-    orderKey: 'a',
-    metadata: ContainerMetadata.withDefaults(
-      wallpaper: wallpaperFile == null
-          ? null
-          : WallpaperOverride.withDefaults(
-              file: wallpaperFile,
-              blur: wallpaperBlur,
-              dim: wallpaperDim,
-            ),
-    ),
+  return ContainerLocalData(
+    containerId: 'container',
+    wallpaper: wallpaperFile == null
+        ? null
+        : WallpaperOverride.withDefaults(
+            file: wallpaperFile,
+            blur: wallpaperBlur,
+            dim: wallpaperDim,
+          ).toStored(),
   );
 }
 
@@ -65,7 +61,7 @@ void main() {
         resolveHomeWallpaper(
           store: store,
           settings: GeneralSettings.withDefaults(),
-          container: _container(),
+          local: _local(),
         ),
         isNull,
       );
@@ -79,7 +75,7 @@ void main() {
           homeWallpaperBlur: 8,
           homeWallpaperDim: 0.5,
         ),
-        container: _container(),
+        local: _local(),
       );
 
       expect(p.basename(resolved!.file.path), 'profile.png');
@@ -93,7 +89,7 @@ void main() {
         settings: GeneralSettings.withDefaults(
           homeWallpaperFile: 'profile.png',
         ),
-        container: null,
+        local: null,
       );
 
       expect(p.basename(resolved!.file.path), 'profile.png');
@@ -105,7 +101,7 @@ void main() {
         settings: GeneralSettings.withDefaults(
           homeWallpaperFile: 'profile.png',
         ),
-        container: _container(
+        local: _local(
           wallpaperFile: 'container.png',
           wallpaperBlur: 12,
           wallpaperDim: 0.2,
@@ -125,7 +121,7 @@ void main() {
           homeWallpaperBlur: 6,
           homeWallpaperDim: 0.4,
         ),
-        container: _container(wallpaperFile: 'container.png'),
+        local: _local(wallpaperFile: 'container.png'),
       );
 
       expect(p.basename(resolved!.file.path), 'container.png');
@@ -137,7 +133,7 @@ void main() {
       final resolved = resolveHomeWallpaper(
         store: store,
         settings: GeneralSettings.withDefaults(),
-        container: _container(wallpaperFile: 'container.png'),
+        local: _local(wallpaperFile: 'container.png'),
       );
 
       expect(p.basename(resolved!.file.path), 'container.png');
@@ -174,16 +170,25 @@ void main() {
       expect(restored.dim, isNull);
     });
 
-    test('travels inside the metadata it is stored in', () {
-      final metadata = ContainerMetadata.withDefaults(
-        wallpaper: WallpaperOverride(file: 'container.png', blur: 4),
+    test('travels inside the local row it is stored in', () {
+      final override = WallpaperOverride(file: 'container.png', blur: 4);
+      final local = ContainerLocalData(
+        containerId: 'container',
+        wallpaper: override.toStored(),
       );
 
-      final restored = ContainerMetadata.fromJson(
-        jsonDecode(jsonEncode(metadata.toJson())) as Map<String, dynamic>,
+      final restored = ContainerLocalData.fromJson(
+        jsonDecode(jsonEncode(local.toJson())) as Map<String, dynamic>,
       );
 
-      expect(restored.wallpaper, metadata.wallpaper);
+      expect(WallpaperOverride.fromStored(restored.wallpaper), override);
+    });
+
+    test('an absent or unreadable stored override reads as none', () {
+      expect(WallpaperOverride.fromStored(null), isNull);
+      expect(WallpaperOverride.fromStored(''), isNull);
+      expect(WallpaperOverride.fromStored('not json'), isNull);
+      expect(WallpaperOverride.fromStored('[]'), isNull);
     });
   });
 

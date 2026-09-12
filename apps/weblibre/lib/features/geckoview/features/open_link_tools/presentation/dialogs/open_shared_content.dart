@@ -249,7 +249,7 @@ class OpenSharedContent extends HookConsumerWidget {
           return;
         }
 
-        final contextId = selectedContainer.value?.metadata.contextualIdentity;
+        final contextId = selectedContainer.value?.id;
 
         await GeckoBrowserService().openInCustomTab(
           url: parsedUrl,

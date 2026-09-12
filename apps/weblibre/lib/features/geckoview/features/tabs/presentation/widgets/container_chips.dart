@@ -38,51 +38,35 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
-ContainerColorPalette _palette(
-  BuildContext context,
-  Color color, {
-  bool useCustomColor = false,
-}) {
-  return ContainerColors.palette(
-    context,
-    color,
-    useCustomColor: useCustomColor,
-  );
-}
-
 Color _chipColor(
   BuildContext context,
-  Color color,
-  bool isSelected, {
-  bool useCustomColor = false,
-}) {
-  final palette = _palette(context, color, useCustomColor: useCustomColor);
+  ContainerData? container,
+  bool isSelected,
+) {
+  final palette = containerPalette(context, container);
   return isSelected ? palette.selectedBackgroundColor : palette.backgroundColor;
 }
 
 BorderSide _chipSide(
   BuildContext context,
-  Color color,
-  bool isSelected, {
-  bool useCustomColor = false,
-}) {
-  final palette = _palette(context, color, useCustomColor: useCustomColor);
+  ContainerData? container,
+  bool isSelected,
+) {
+  final palette = containerPalette(context, container);
   return isSelected ? palette.selectedBorderSide : palette.borderSide;
 }
 
 InlineCountBadge _countBadge(
   BuildContext context,
-  Color color,
-  int count, {
-  bool useCustomColor = false,
-}) {
-  final palette = _palette(context, color, useCustomColor: useCustomColor);
+  ContainerData? container,
+  int count,
+) {
+  final palette = containerPalette(context, container);
   return InlineCountBadge(
     count: count,
     backgroundColor: palette.badgeBackgroundColor,
@@ -154,19 +138,11 @@ class _UnassignedContainerChip extends ConsumerWidget {
       labelPadding: const EdgeInsets.only(left: 6),
       label: SizedBox(
         height: 20,
-        child: Center(
-          child: _countBadge(
-            context,
-            Theme.of(context).colorScheme.primary,
-            tabCount,
-          ),
-        ),
+        child: Center(child: _countBadge(context, null, tabCount)),
       ),
-      color: WidgetStatePropertyAll(
-        _chipColor(context, Theme.of(context).colorScheme.primary, selected),
-      ),
+      color: WidgetStatePropertyAll(_chipColor(context, null, selected)),
       selected: selected,
-      side: _chipSide(context, Theme.of(context).colorScheme.primary, selected),
+      side: _chipSide(context, null, selected),
       showCheckmark: false,
       onSelected: (value) {
         if (value) {
@@ -193,13 +169,11 @@ class _SyncedTabsChip extends ConsumerWidget {
     return FilterChip(
       avatar: const Icon(Icons.devices_other),
       label: count > 0
-          ? _countBadge(context, Theme.of(context).colorScheme.primary, count)
+          ? _countBadge(context, null, count)
           : const SizedBox.shrink(),
-      color: WidgetStatePropertyAll(
-        _chipColor(context, Theme.of(context).colorScheme.primary, selected),
-      ),
+      color: WidgetStatePropertyAll(_chipColor(context, null, selected)),
       selected: selected,
-      side: _chipSide(context, Theme.of(context).colorScheme.primary, selected),
+      side: _chipSide(context, null, selected),
       showCheckmark: false,
       onSelected: (value) {
         if (value) {
@@ -240,14 +214,8 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return FilterChip(
           avatar: const Icon(MdiIcons.autoFix),
           label: Text(data!.length.toString()),
-          color: WidgetStatePropertyAll(
-            _chipColor(context, Theme.of(context).colorScheme.primary, false),
-          ),
-          side: _chipSide(
-            context,
-            Theme.of(context).colorScheme.primary,
-            false,
-          ),
+          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
+          side: _chipSide(context, null, false),
           showCheckmark: false,
           onSelected: (_) async {
             await const ContainerDraftRoute().push(context);
@@ -266,14 +234,8 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return FilterChip(
           avatar: const Icon(MdiIcons.autoFix),
           label: const Skeletonizer(child: Text('0')),
-          color: WidgetStatePropertyAll(
-            _chipColor(context, Theme.of(context).colorScheme.primary, false),
-          ),
-          side: _chipSide(
-            context,
-            Theme.of(context).colorScheme.primary,
-            false,
-          ),
+          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
+          side: _chipSide(context, null, false),
           showCheckmark: false,
           onSelected: null,
         );
@@ -491,18 +453,10 @@ class ContainerChips extends HookConsumerWidget {
                         cacheExtent: 500,
                         itemId: (container) => container.id,
                         decoration: SelectableChipDecoration(
-                          color: (container, isSelected) => _chipColor(
-                            context,
-                            container.color,
-                            isSelected,
-                            useCustomColor: container.metadata.useCustomColor,
-                          ),
-                          side: (container, isSelected) => _chipSide(
-                            context,
-                            container.color,
-                            isSelected,
-                            useCustomColor: container.metadata.useCustomColor,
-                          ),
+                          color: (container, isSelected) =>
+                              _chipColor(context, container, isSelected),
+                          side: (container, isSelected) =>
+                              _chipSide(context, container, isSelected),
                         ),
                         itemAvatar: (container) {
                           final isSelected =
@@ -527,13 +481,7 @@ class ContainerChips extends HookConsumerWidget {
                             container,
                             isSelected,
                             trailing: count != null && count > 0
-                                ? _countBadge(
-                                    context,
-                                    container.color,
-                                    count,
-                                    useCustomColor:
-                                        container.metadata.useCustomColor,
-                                  )
+                                ? _countBadge(context, container, count)
                                 : null,
                           );
                         },

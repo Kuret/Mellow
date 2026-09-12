@@ -19,37 +19,24 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/custom_color_picker_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 
-typedef ColorPickerResult = ({Color color, bool useCustomColor});
+/// Picks one of Firefox's nine contextual-identity colour keywords.
+///
+/// Pops the chosen keyword (`FirefoxContainerColor.keyword`) or null when
+/// cancelled. [FirefoxContainerColor.toolbar] has no colour of its own and is
+/// drawn as an outlined swatch in the theme's `onSurfaceVariant`.
+class FirefoxContainerColorPicker extends HookWidget {
+  final String initialColorKey;
 
-class ColorPickerDialog extends HookWidget {
-  final Color initialColor;
-  final bool initialUseCustomColor;
-
-  const ColorPickerDialog(
-    this.initialColor, {
-    this.initialUseCustomColor = false,
-    super.key,
-  });
+  const FirefoxContainerColorPicker({required this.initialColorKey, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = useState<Color>(initialColor);
-    final useCustom = useState<bool>(initialUseCustomColor);
-
-    Future<void> openCustomPicker() async {
-      final result = await showDialog<Color?>(
-        context: context,
-        builder: (_) => CustomColorPickerDialog(selectedColor.value),
-      );
-      if (result != null) {
-        selectedColor.value = result;
-        useCustom.value = true;
-      }
-    }
+    final selected = useState(
+      FirefoxContainerColor.fromKeyword(initialColorKey),
+    );
 
     return AlertDialog(
       titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
@@ -62,25 +49,35 @@ class ColorPickerDialog extends HookWidget {
         vertical: 24.0,
       ),
       title: const Text('Select Color'),
-      content: _ContainerColorGrid(
-        selectedColor: selectedColor.value,
-        useCustomColor: useCustom.value,
-        onSeedSelected: (color) {
-          selectedColor.value = color;
-          useCustom.value = false;
-        },
-        onCustomTapped: openCustomPicker,
+      content: SizedBox(
+        width: 320,
+        child: GridView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: FirefoxContainerColor.values.length,
+          itemBuilder: (context, index) {
+            final value = FirefoxContainerColor.values[index];
+            return FirefoxContainerColorSwatch(
+              color: value,
+              isSelected: value == selected.value,
+              onTap: () => selected.value = value,
+            );
+          },
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop<ColorPickerResult?>(context),
+          onPressed: () => Navigator.pop<String?>(context),
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () => Navigator.pop<ColorPickerResult?>(context, (
-            color: selectedColor.value,
-            useCustomColor: useCustom.value,
-          )),
+          onPressed: () =>
+              Navigator.pop<String?>(context, selected.value.keyword),
           child: const Text('Select'),
         ),
       ],
@@ -88,132 +85,55 @@ class ColorPickerDialog extends HookWidget {
   }
 }
 
-class _ContainerColorGrid extends StatelessWidget {
-  const _ContainerColorGrid({
-    required this.selectedColor,
-    required this.useCustomColor,
-    required this.onSeedSelected,
-    required this.onCustomTapped,
-  });
-
-  final Color selectedColor;
-  final bool useCustomColor;
-  final ValueChanged<Color> onSeedSelected;
-  final VoidCallback onCustomTapped;
-
-  @override
-  Widget build(BuildContext context) {
-    final itemCount = containerSeedColors.length + 1;
-    return SizedBox(
-      width: 320,
-      child: GridView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 6,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-        ),
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          if (index == containerSeedColors.length) {
-            return _CustomSwatch(
-              isSelected: useCustomColor,
-              selectedColor: selectedColor,
-              onTap: onCustomTapped,
-            );
-          }
-          final seed = containerSeedColors[index];
-          final palette = ContainerColors.palette(context, seed);
-          final isSelected =
-              !useCustomColor && seed.toARGB32() == selectedColor.toARGB32();
-          return _Swatch(
-            displayColor: palette.containerColor,
-            checkColor: palette.onContainerColor,
-            isSelected: isSelected,
-            onTap: () => onSeedSelected(seed),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _Swatch extends StatelessWidget {
-  const _Swatch({
-    required this.displayColor,
-    required this.checkColor,
+/// One swatch of the Firefox colour vocabulary. Coloured keywords render as
+/// their seeded container colour; [FirefoxContainerColor.toolbar] as an outline
+/// only, because it follows the theme rather than carrying a colour.
+class FirefoxContainerColorSwatch extends StatelessWidget {
+  const FirefoxContainerColorSwatch({
+    required this.color,
     required this.isSelected,
     required this.onTap,
+    super.key,
   });
 
-  final Color displayColor;
-  final Color checkColor;
+  final FirefoxContainerColor color;
   final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkResponse(
-      onTap: onTap,
-      radius: 28,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: displayColor,
-          shape: BoxShape.circle,
-          border: isSelected
-              ? Border.all(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  width: 2,
-                )
-              : null,
-        ),
-        child: isSelected
-            ? Icon(Icons.check, size: 20, color: checkColor)
-            : const SizedBox.expand(),
-      ),
-    );
-  }
-}
-
-class _CustomSwatch extends StatelessWidget {
-  const _CustomSwatch({
-    required this.isSelected,
-    required this.selectedColor,
-    required this.onTap,
-  });
-
-  final bool isSelected;
-  final Color selectedColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final palette = isSelected
-        ? ContainerColors.palette(context, selectedColor, useCustomColor: true)
-        : null;
-    return InkResponse(
-      onTap: onTap,
-      radius: 28,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: palette?.containerColor ?? Colors.transparent,
-          border: Border.all(
-            color: isSelected
-                ? colorScheme.onSurface
-                : colorScheme.outline.withValues(alpha: 0.5),
-            width: 2,
+    final seed = color.color;
+    final palette = seed == null
+        ? null
+        : ContainerColors.palette(context, seed);
+
+    return Tooltip(
+      message: color.keyword,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 28,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: palette?.containerColor ?? Colors.transparent,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected
+                  ? colorScheme.onSurface
+                  : (palette == null
+                        ? colorScheme.onSurfaceVariant
+                        : Colors.transparent),
+              width: 2,
+            ),
           ),
+          child: isSelected
+              ? Icon(
+                  Icons.check,
+                  size: 20,
+                  color: palette?.onContainerColor ?? colorScheme.onSurface,
+                )
+              : const SizedBox.expand(),
         ),
-        child: isSelected
-            ? Icon(Icons.check, size: 20, color: palette!.onContainerColor)
-            : Icon(
-                Icons.colorize,
-                size: 18,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              ),
       ),
     );
   }

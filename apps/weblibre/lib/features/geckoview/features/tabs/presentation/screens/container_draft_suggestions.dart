@@ -183,8 +183,9 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                                   ),
                                 )
                                 .value ??
-                            selectedContainer.value?.topic
-                      : selectedContainer.value?.topic,
+                            selectedContainer.value?.topic ??
+                            ''
+                      : selectedContainer.value?.topic ?? '',
                 );
 
                 if (!context.mounted) return;

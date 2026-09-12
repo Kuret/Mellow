@@ -20,9 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 
 class ContainerListTile extends HookWidget {
   final ContainerData container;
@@ -38,11 +37,7 @@ class ContainerListTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = ContainerColors.palette(
-      context,
-      container.color,
-      useCustomColor: container.metadata.useCustomColor,
-    );
+    final palette = containerPalette(context, container);
 
     return ListTileTheme(
       selectedColor: palette.onContainerColor,
@@ -52,7 +47,7 @@ class ContainerListTile extends HookWidget {
         leading: CircleAvatar(
           backgroundColor: palette.avatarBackgroundColor,
           foregroundColor: palette.avatarForegroundColor,
-          child: Icon(resolveContainerIcon(container.metadata.iconData)),
+          child: Icon(container.icon.icon),
         ),
         title: ContainerTitle(container: container),
         onTap: onTap,
