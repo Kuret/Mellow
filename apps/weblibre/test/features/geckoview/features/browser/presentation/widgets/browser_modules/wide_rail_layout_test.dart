@@ -290,12 +290,20 @@ void main() {
                       builder: (context, ref, _) {
                         final tab = ref.watch(selectedTabProvider);
                         final count = tab == 'tab-2' ? 8 : 1;
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (var i = 0; i < count; i++)
-                              const SizedBox(width: 48, height: 40),
-                          ],
+                        // Shaped like the real bars: a row that scrolls
+                        // inside whatever width the rail gives it.
+                        return SizedBox(
+                          height: 40,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                for (var i = 0; i < count; i++)
+                                  const SizedBox(width: 48, height: 40),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -362,7 +370,7 @@ void main() {
                       builder: (context, ref, _) {
                         final tab = ref.watch(selectedTabProvider);
                         final count = tab == 'tab-2' ? 3 : 1;
-                        return Column(
+                        return Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             for (var i = 0; i < count; i++)

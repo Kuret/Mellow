@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -248,53 +246,41 @@ class WideRailToolbarRow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (buttons.isEmpty) return const SizedBox.shrink();
 
-    // One run, always. The children are composite bars — the switcher row,
-    // the pinned add-on bar — whose width changes with the tab (an add-on
-    // enabled here, a primary action unavailable there). A Wrap would flip to
-    // a second run when they stopped fitting, doubling the row's height,
-    // pushing the contextual strip up and leaving the half-empty run looking
-    // like a gap above the spaces. A fixed height cannot do that: the row
-    // spreads its buttons when they fit and scrolls when they do not.
+    // One run, always, every child laid out against a share of the rail's
+    // width. The children are composite bars — the switcher row, the pinned
+    // add-on bar — whose width changes with the tab (an add-on enabled here,
+    // a primary action unavailable there), and a bar sizes itself to the
+    // width it is offered.
+    //
+    // What must not happen, in either direction: a Wrap flips to a second run
+    // when the bars stop fitting, doubling the row's height and pushing the
+    // contextual strip up; a horizontal scroll view or a FittedBox hands the
+    // bars *unbounded* width, which a bar that fills its width cannot lay out
+    // against at all, and an empty row is the same gap by another route.
+    // So neither: a plain Row, fixed height, loose-flexible children whose
+    // width is bounded and whose height is clamped to one target.
     return SizedBox(
       height: rowHeight,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 4.0,
-              vertical: verticalPadding,
-            ),
-            child: ConstrainedBox(
-              // Fills the rail when the buttons are narrower than it, so
-              // `spaceEvenly` has room to spread them; wider than that the
-              // scroll view takes over.
-              constraints: BoxConstraints(
-                minWidth: math.max(0.0, constraints.maxWidth - 8.0),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  for (final button in buttons)
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: targetSize,
-                        minHeight: targetHeight,
-                        maxHeight: targetHeight,
-                      ),
-                      child: Center(
-                        widthFactor: 1.0,
-                        heightFactor: 1.0,
-                        child: FittedBox(fit: BoxFit.scaleDown, child: button),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 4.0,
+          vertical: verticalPadding,
+        ),
+        child: ClipRect(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              for (final button in buttons)
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: targetHeight),
+                    child: button,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

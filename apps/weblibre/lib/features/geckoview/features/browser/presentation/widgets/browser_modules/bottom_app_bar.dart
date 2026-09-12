@@ -493,7 +493,17 @@ class BrowserTabBar extends HookConsumerWidget {
               selectedTabId: selectedTabId,
               displayedSheet: displayedSheet,
             ),
-            ...actions,
+            // The add-on bar is a rigid row of however many add-ons the tab
+            // pinned; in the rail's share of one row it has to scroll rather
+            // than overflow. The switcher row already scrolls itself.
+            for (final action in actions)
+              if (action is PinnedAddonBar)
+                const SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: PinnedAddonBar(),
+                )
+              else
+                action,
           ],
         ),
         spaces: const SpaceIconRail(),
