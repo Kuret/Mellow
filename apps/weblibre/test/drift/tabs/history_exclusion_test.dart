@@ -56,9 +56,7 @@ void main() {
     final rows = await db.tabDao.historyExclusionTabs().get();
 
     expect(rows.single.excluded, isTrue);
-    expect(await db.containerDao.excludedHistoryContextIds().get(), [
-      'plain',
-    ]);
+    expect(await db.containerDao.excludedHistoryContextIds().get(), ['plain']);
   });
 
   test('reports contextIds of excluded containers', () async {

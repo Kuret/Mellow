@@ -19,23 +19,16 @@
  */
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 
-Future<void> _addContainer(TabDatabase db, String id) {
-  return db.containerDao.addContainer(
-    ContainerData(
-      id: id,
-      name: id,
-      color: Colors.blue,
-      orderKey: id,
-      metadata: ContainerMetadata.withDefaults(contextualIdentity: id),
-    ),
+Future<void> _addSpace(TabDatabase db, String uuid) {
+  return db.spaceDao.insertSpace(
+    SpaceData(uuid: uuid, name: uuid, orderIndex: 0),
   );
 }
 
@@ -44,14 +37,14 @@ Future<void> _addContainer(TabDatabase db, String id) {
 Future<void> _addTab(
   TabDatabase db,
   String id, {
-  String? containerId,
+  String? spaceUuid,
   required int minuteOfUse,
 }) async {
   await db.tabDao.insertTab(
     id,
     source: TabSource.manual,
     parentId: const Value(null),
-    containerId: Value(containerId),
+    spaceUuid: Value(spaceUuid),
   );
   await db.tabDao.touchTab(
     id,
@@ -113,49 +106,49 @@ void main() {
     });
   });
 
-  group('getContainerTabsFifo', () {
-    test('stays within the requested container', () async {
-      await _addContainer(db, 'a');
-      await _addContainer(db, 'b');
-      await _addTab(db, 'other-container', containerId: 'b', minuteOfUse: 9);
-      await _addTab(db, 'wanted', containerId: 'a', minuteOfUse: 1);
+  group('getSpaceTabsFifo', () {
+    test('stays within the requested space', () async {
+      await _addSpace(db, 'a');
+      await _addSpace(db, 'b');
+      await _addTab(db, 'other-space', spaceUuid: 'b', minuteOfUse: 9);
+      await _addTab(db, 'wanted', spaceUuid: 'a', minuteOfUse: 1);
 
-      final tabs = await db.tabDao.getContainerTabsFifo('a', limit: 1).get();
+      final tabs = await db.tabDao.getSpaceTabsFifo('a', limit: 1).get();
 
       expect(tabs.single.id, 'wanted');
     });
 
-    test('skips the closing tab within a container', () async {
-      await _addContainer(db, 'a');
-      await _addTab(db, 'closing', containerId: 'a', minuteOfUse: 9);
-      await _addTab(db, 'survivor', containerId: 'a', minuteOfUse: 1);
+    test('skips the closing tab within a space', () async {
+      await _addSpace(db, 'a');
+      await _addTab(db, 'closing', spaceUuid: 'a', minuteOfUse: 9);
+      await _addTab(db, 'survivor', spaceUuid: 'a', minuteOfUse: 1);
 
       final tabs = await db.tabDao
-          .getContainerTabsFifo('a', limit: 1, excludedTabIds: {'closing'})
+          .getSpaceTabsFifo('a', limit: 1, excludedTabIds: {'closing'})
           .get();
 
       expect(tabs.single.id, 'survivor');
     });
 
-    test('a null container means unassigned, not any container', () async {
-      await _addContainer(db, 'a');
-      await _addTab(db, 'in-container', containerId: 'a', minuteOfUse: 9);
+    test('a null space means unassigned, not any space', () async {
+      await _addSpace(db, 'a');
+      await _addTab(db, 'in-space', spaceUuid: 'a', minuteOfUse: 9);
       await _addTab(db, 'unassigned', minuteOfUse: 1);
 
-      final tabs = await db.tabDao.getContainerTabsFifo(null, limit: 1).get();
+      final tabs = await db.tabDao.getSpaceTabsFifo(null, limit: 1).get();
 
       expect(tabs.single.id, 'unassigned');
     });
 
-    test('skips the closing tab in the unassigned container', () async {
+    test('skips the closing tab in the unassigned space', () async {
       // Closing the last unassigned tab must not resume that same tab, nor
-      // fall through into a container.
-      await _addContainer(db, 'a');
-      await _addTab(db, 'in-container', containerId: 'a', minuteOfUse: 5);
+      // fall through into a space.
+      await _addSpace(db, 'a');
+      await _addTab(db, 'in-space', spaceUuid: 'a', minuteOfUse: 5);
       await _addTab(db, 'closing', minuteOfUse: 9);
 
       final tabs = await db.tabDao
-          .getContainerTabsFifo(null, limit: 1, excludedTabIds: {'closing'})
+          .getSpaceTabsFifo(null, limit: 1, excludedTabIds: {'closing'})
           .get();
 
       expect(tabs, isEmpty);

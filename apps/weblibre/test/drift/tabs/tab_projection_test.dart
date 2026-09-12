@@ -20,13 +20,13 @@
 import 'package:drift/drift.dart'
     show ApplyInterceptor, QueryExecutor, QueryInterceptor, Value, Variable;
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 
 /// Columns no query that merely *lists* tabs may read.
 ///
@@ -95,13 +95,17 @@ void main() {
     );
   });
 
+  // Drift's query builder quotes identifiers (`FROM "tab"`); the raw SQL in
+  // `definitions.drift` macros does not (`FROM tab AS t`). Both read `tab`.
+  final fromTabPattern = RegExp(r'FROM\s+"?tab"?(\s|$)');
+
   /// The statement [run] issued against `tab`, with its bound arguments.
   Future<_RecordedSelect> selectOf(Future<void> Function() run) async {
     recorded.selects.clear();
     await run();
 
     return recorded.selects.singleWhere(
-      (select) => select.sql.contains('FROM "tab"'),
+      (select) => fromTabPattern.hasMatch(select.sql),
     );
   }
 
@@ -117,9 +121,9 @@ void main() {
       _expectNoContentColumns(await sqlOf(db.tabDao.getTabsFifo().get));
     });
 
-    test('getContainerTabsFifo selects no content columns', () async {
+    test('getSpaceTabsFifo selects no content columns', () async {
       _expectNoContentColumns(
-        await sqlOf(db.tabDao.getContainerTabsFifo('work').get),
+        await sqlOf(db.tabDao.getSpaceTabsFifo('work').get),
       );
     });
 
@@ -175,21 +179,24 @@ void main() {
             'EXPLAIN QUERY PLAN ${select.sql}',
             // `Variable<Object>` accepts a null value fine; only the type
             // argument has a non-nullable bound.
-            variables: [
-              for (final arg in select.args) Variable<Object>(arg as Object),
-            ],
+            variables: [for (final arg in select.args) Variable<Object>(arg)],
           )
           .get();
 
       return rows.map((row) => row.data['detail'] as String).join('\n');
     }
 
-    Future<void> addTab(String id, {String? containerId}) async {
+    Future<void> addTab(
+      String id, {
+      String? containerId,
+      String? spaceUuid,
+    }) async {
       await db.tabDao.insertTab(
         id,
         source: TabSource.manual,
         parentId: const Value(null),
         containerId: Value(containerId),
+        spaceUuid: Value(spaceUuid),
       );
       await db.tabDao.touchTab(id, timestamp: DateTime(2026, 8, 1, 12));
     }
@@ -228,26 +235,27 @@ void main() {
     });
 
     test(
-      'getContainerTabsData walks idx_tab_container_order instead of sorting',
+      'scopeSiblings walks idx_tab_scope_order instead of sorting',
       () async {
-        await db.containerDao.addContainer(
-          ContainerData(
-            id: 'work',
-            name: 'work',
-            color: Colors.blue,
-            orderKey: 'work',
-            metadata: ContainerMetadata.withDefaults(
-              contextualIdentity: 'work',
-            ),
-          ),
+        // Ordering moved from being container-scoped to space-scoped (PLAN
+        // §6.6); `idx_tab_scope_order` is the index that now has to carry it.
+        await db.spaceDao.insertSpace(
+          SpaceData(uuid: 'work', name: 'work', orderIndex: 0),
         );
-        await addTab('a', containerId: 'work');
+        await addTab('a', spaceUuid: 'work');
 
         final detail = await plan(
-          await selectOf(db.containerDao.getContainerTabsData('work').get),
+          await selectOf(
+            () => db.tabDao
+                .scopeSiblings(
+                  TabOrderScope.normal(spaceUuid: 'work'),
+                  parentId: null,
+                )
+                .get(),
+          ),
         );
 
-        expect(detail, contains('idx_tab_container_order'));
+        expect(detail, contains('idx_tab_scope_order'));
         expect(detail, isNot(contains('USE TEMP B-TREE FOR ORDER BY')));
       },
     );

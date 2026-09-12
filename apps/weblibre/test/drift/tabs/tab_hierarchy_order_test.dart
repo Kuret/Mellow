@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
@@ -9,6 +8,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 
 void main() {
   late TabDatabase db;
@@ -52,18 +52,21 @@ void main() {
     ]);
   });
 
-  test('setTabParent leaves cross-container descendants in place', () async {
-    await _insertContainers(db, const [
-      _ContainerFixture('home', 'home-context'),
-      _ContainerFixture('work', 'work-context'),
-    ]);
+  test('setTabParent leaves cross-space descendants in place', () async {
+    await _insertSpaces(db, const ['home', 'work']);
     await _insertTabs(db, const [
-      _TabFixture('parent', containerId: 'home'),
-      _TabFixture('moving', containerId: 'home'),
-      _TabFixture('moving-child', parentId: 'moving', containerId: 'home'),
-      _TabFixture('foreign-child', parentId: 'moving', containerId: 'work'),
-      _TabFixture('work-root', containerId: 'work'),
+      _TabFixture('parent', spaceUuid: 'home'),
+      _TabFixture('moving', spaceUuid: 'home'),
+      _TabFixture('moving-child', parentId: 'moving', spaceUuid: 'home'),
+      _TabFixture('foreign-child', spaceUuid: 'work'),
+      _TabFixture('work-root', spaceUuid: 'work'),
     ]);
+    // insertTab/reorderTabs both enforce F1 (a child always adopts its
+    // parent's space), so only a direct write can put 'foreign-child' under
+    // 'moving' while it stays in another space.
+    await db.customStatement(
+      "UPDATE tab SET parent_id = 'moving' WHERE id = 'foreign-child'",
+    );
     final foreignOrderKey = await _orderKeyOf(db, 'foreign-child');
 
     final moved = await db.tabDao.setTabParent(
@@ -72,7 +75,7 @@ void main() {
     );
 
     expect(moved, isTrue);
-    expect(await _orderedTabIdsInContainer(db, 'home'), [
+    expect(await _orderedTabIdsInSpace(db, 'home'), [
       'parent',
       'moving',
       'moving-child',
@@ -82,14 +85,14 @@ void main() {
         .getSingleOrNull();
     expect(foreignChild, isNotNull);
     expect(foreignChild!.parentId, 'moving');
-    expect(foreignChild.containerId, 'work');
+    expect(foreignChild.spaceUuid, 'work');
     expect(foreignChild.orderKey, foreignOrderKey);
   });
 
   test('setTabParent detects cycles through another container', () async {
     await _insertContainers(db, const [
-      _ContainerFixture('home', 'home-context'),
-      _ContainerFixture('work', 'work-context'),
+      _ContainerFixture('home'),
+      _ContainerFixture('work'),
     ]);
     await _insertTabs(db, const [
       _TabFixture('moving', containerId: 'home'),
@@ -155,24 +158,26 @@ void main() {
   );
 
   test(
-    'moveTabAmongSiblings uses the rendered cross-container root scope',
+    'moveTabAmongSiblings uses the rendered cross-space root scope',
     () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('home', 'home-context'),
-        _ContainerFixture('work', 'work-context'),
-      ]);
+      await _insertSpaces(db, const ['home', 'work']);
       await _insertTabs(db, const [
-        _TabFixture('opener', containerId: 'home'),
-        _TabFixture('work-first', containerId: 'work'),
-        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
-        _TabFixture(
-          'reopened-child',
-          parentId: 'reopened',
-          containerId: 'work',
-        ),
-        _TabFixture('work-last', containerId: 'work'),
-        _TabFixture('foreign-child', parentId: 'reopened', containerId: 'home'),
+        _TabFixture('opener', spaceUuid: 'home'),
+        _TabFixture('work-first', spaceUuid: 'work'),
+        _TabFixture('reopened', spaceUuid: 'work'),
+        _TabFixture('reopened-child', parentId: 'reopened', spaceUuid: 'work'),
+        _TabFixture('work-last', spaceUuid: 'work'),
+        _TabFixture('foreign-child', spaceUuid: 'home'),
       ]);
+      // 'reopened' stores a parent in 'home' but is drawn as a root of
+      // 'work' — F1 is enforced on every DAO path, so only a direct write can
+      // create that shape.
+      await db.customStatement(
+        "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+      );
+      await db.customStatement(
+        "UPDATE tab SET parent_id = 'reopened' WHERE id = 'foreign-child'",
+      );
       final foreignOrderKey = await _orderKeyOf(db, 'foreign-child');
 
       final moved = await db.tabDao.moveTabAmongSiblings(
@@ -181,7 +186,7 @@ void main() {
       );
 
       expect(moved, isTrue);
-      expect(await _orderedTabIdsInContainer(db, 'work'), [
+      expect(await _orderedTabIdsInSpace(db, 'work'), [
         'work-first',
         'work-last',
         'reopened',
@@ -246,8 +251,8 @@ void main() {
 
   test('engine parent seeding keeps cross-container parents', () async {
     await _insertContainers(db, const [
-      _ContainerFixture('parent-container', 'parent-context'),
-      _ContainerFixture('child-container', 'child-context'),
+      _ContainerFixture('parent-container'),
+      _ContainerFixture('child-container'),
     ]);
     await _insertTabs(db, const [
       _TabFixture(
@@ -265,7 +270,7 @@ void main() {
     final seeded = await db.tabDao.seedParentFromEngineState(
       childId: 'child',
       parentId: 'gecko-parent',
-      contextId: 'child-context',
+      contextId: 'child-container',
     );
 
     final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
@@ -278,8 +283,8 @@ void main() {
 
   test('content-state sync keeps cross-container parents', () async {
     await _insertContainers(db, const [
-      _ContainerFixture('parent-container', 'parent-context'),
-      _ContainerFixture('child-container', 'child-context'),
+      _ContainerFixture('parent-container'),
+      _ContainerFixture('child-container'),
     ]);
     await _insertTabs(db, const [
       _TabFixture(
@@ -298,7 +303,7 @@ void main() {
       'child': _tabState(
         'child',
         parentId: 'gecko-parent',
-        contextId: 'child-context',
+        contextId: 'child-container',
       ),
     });
 
@@ -309,66 +314,59 @@ void main() {
     expect(child.source, TabSource.manual);
   });
 
-  test(
-    'a cross-container child is a local root in its own container view',
-    () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('parent-container', 'parent-context'),
-        _ContainerFixture('child-container', 'child-context'),
-      ]);
-      await _insertTabs(db, const [
-        _TabFixture('opener', containerId: 'parent-container'),
-        _TabFixture(
-          'reopened',
-          parentId: 'opener',
-          containerId: 'child-container',
-        ),
-      ]);
-
-      final childContainerRows = await db.definitionsDrift
-          .tabsWithRootAndDepth(containerId: 'child-container')
-          .get();
-
-      expect(childContainerRows.map((row) => row.id), ['reopened']);
-      expect(childContainerRows.single.rootId, 'reopened');
-      expect(childContainerRows.single.depth, 0);
-
-      // The opener's own container keeps its tree — the tab that was pulled
-      // into another container neither joins it nor takes it over.
-      final openerTrees = await db.definitionsDrift
-          .tabTrees(containerId: 'parent-container', skipContainerCheck: false)
-          .get();
-
-      expect(openerTrees.map((tree) => tree.rootTabId), ['opener']);
-      expect(openerTrees.single.latestTabId, 'opener');
-      expect(openerTrees.single.totalTabs, 1);
-
-      final reopenedTrees = await db.definitionsDrift
-          .tabTrees(containerId: 'child-container', skipContainerCheck: false)
-          .get();
-
-      expect(reopenedTrees.map((tree) => tree.rootTabId), ['reopened']);
-      expect(reopenedTrees.single.totalTabs, 1);
-    },
-  );
-
-  test('unscoped tab trees still span every container', () async {
-    await _insertContainers(db, const [
-      _ContainerFixture('parent-container', 'parent-context'),
-      _ContainerFixture('child-container', 'child-context'),
-    ]);
+  test('a cross-space child is a local root in its own space view', () async {
+    // Ordering is now scoped by space, not container (PLAN §6.6), so a
+    // child stored under another space is the shape hierarchical views
+    // must treat as a local root there. `insertTab`/`reorderTabs` both
+    // enforce F1 (a child always adopts its parent's space), so the only
+    // way to model such a row is a direct write — the same shape a stale
+    // migration or engine takeover could otherwise leave behind.
+    await _insertSpaces(db, const ['parent-space', 'child-space']);
     await _insertTabs(db, const [
-      _TabFixture('opener', containerId: 'parent-container'),
-      _TabFixture(
-        'reopened',
-        parentId: 'opener',
-        containerId: 'child-container',
-      ),
+      _TabFixture('opener', spaceUuid: 'parent-space'),
+      _TabFixture('reopened', spaceUuid: 'child-space'),
     ]);
+    await db.customStatement(
+      "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+    );
 
-    final trees = await db.definitionsDrift
-        .tabTrees(containerId: null, skipContainerCheck: true)
+    final childSpaceRows = await db.tabDao
+        .tabsWithRootAndDepth('child-space')
         .get();
+
+    expect(childSpaceRows.map((row) => row.id), ['reopened']);
+    expect(childSpaceRows.single.rootId, 'reopened');
+    expect(childSpaceRows.single.depth, 0);
+
+    // The opener's own space keeps its tree — the tab that was pulled
+    // into another space neither joins it nor takes it over.
+    final openerTrees = await db.tabDao
+        .tabTrees('parent-space', skipSpaceCheck: false)
+        .get();
+
+    expect(openerTrees.map((tree) => tree.rootTabId), ['opener']);
+    expect(openerTrees.single.latestTabId, 'opener');
+    expect(openerTrees.single.totalTabs, 1);
+
+    final reopenedTrees = await db.tabDao
+        .tabTrees('child-space', skipSpaceCheck: false)
+        .get();
+
+    expect(reopenedTrees.map((tree) => tree.rootTabId), ['reopened']);
+    expect(reopenedTrees.single.totalTabs, 1);
+  });
+
+  test('unscoped tab trees still span every space', () async {
+    await _insertSpaces(db, const ['parent-space', 'child-space']);
+    await _insertTabs(db, const [
+      _TabFixture('opener', spaceUuid: 'parent-space'),
+      _TabFixture('reopened', spaceUuid: 'child-space'),
+    ]);
+    await db.customStatement(
+      "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+    );
+
+    final trees = await db.tabDao.tabTrees(null, skipSpaceCheck: true).get();
 
     expect(trees.map((tree) => tree.rootTabId).toSet(), {'opener'});
     expect(trees.map((tree) => tree.totalTabs).toSet(), {2});
@@ -377,20 +375,18 @@ void main() {
   test(
     'content-state sync validates parent against same-batch container repairs',
     () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('container', 'context'),
-      ]);
+      await _insertContainers(db, const [_ContainerFixture('container')]);
       await _insertTabs(db, const [
         _TabFixture('gecko-parent', source: TabSource.addedEvent),
         _TabFixture('child', source: TabSource.addedEvent),
       ]);
 
       await db.tabDao.updateTabs(null, {
-        'gecko-parent': _tabState('gecko-parent', contextId: 'context'),
+        'gecko-parent': _tabState('gecko-parent', contextId: 'container'),
         'child': _tabState(
           'child',
           parentId: 'gecko-parent',
-          contextId: 'context',
+          contextId: 'container',
         ),
       });
 
@@ -463,7 +459,10 @@ void main() {
       expect(unresolvedChild!.parentId, isNull);
       expect(unresolvedChild.source, TabSource.addedEvent);
 
-      await db.tabDao.syncTabs(retainTabIds: const ['late-parent', 'child']);
+      await db.tabDao.syncTabs(
+        engineTabIds: const ['late-parent', 'child'],
+        defaultSpaceUuid: null,
+      );
 
       final resolvedChild = await db.tabDao
           .getTabDataById('child')
@@ -600,7 +599,10 @@ void main() {
       _TabFixture('child', parentId: 'parent'),
     ]);
 
-    await db.tabDao.syncTabs(retainTabIds: const ['parent', 'child']);
+    await db.tabDao.syncTabs(
+      engineTabIds: const ['parent', 'child'],
+      defaultSpaceUuid: null,
+    );
 
     final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
     expect(child, isNotNull);
@@ -625,8 +627,8 @@ void main() {
     'deleting the throwaway tab of a container hand-off keeps the opener reachable',
     () async {
       await _insertContainers(db, const [
-        _ContainerFixture('parent-container', 'parent-context'),
-        _ContainerFixture('child-container', 'child-context'),
+        _ContainerFixture('parent-container'),
+        _ContainerFixture('child-container'),
       ]);
       // The shape the site-assignment listener produces: a link is followed
       // into a container-assigned site, the blocked tab is thrown away and the
@@ -656,40 +658,32 @@ void main() {
     },
   );
 
-  test('subtree collection stops at the container boundary', () async {
-    await _insertContainers(db, const [
-      _ContainerFixture('parent-container', 'parent-context'),
-      _ContainerFixture('child-container', 'child-context'),
-    ]);
+  test('subtree collection stops at the space boundary', () async {
+    await _insertSpaces(db, const ['parent-space', 'child-space']);
     await _insertTabs(db, const [
-      _TabFixture('opener', containerId: 'parent-container'),
-      _TabFixture(
-        'local-child',
-        parentId: 'opener',
-        containerId: 'parent-container',
-      ),
-      _TabFixture(
-        'reopened',
-        parentId: 'opener',
-        containerId: 'child-container',
-      ),
+      _TabFixture('opener', spaceUuid: 'parent-space'),
+      _TabFixture('local-child', parentId: 'opener', spaceUuid: 'parent-space'),
+      _TabFixture('reopened', spaceUuid: 'child-space'),
       _TabFixture(
         'reopened-child',
         parentId: 'reopened',
-        containerId: 'child-container',
+        spaceUuid: 'child-space',
       ),
     ]);
+    // Only a direct write can put 'reopened' under 'opener' while keeping it
+    // in another space — insertTab/reorderTabs both enforce F1.
+    await db.customStatement(
+      "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+    );
 
-    final scoped = await db.definitionsDrift
-        .unorderedContainerTabDescendants(tabId: 'opener')
-        .get();
+    final scoped = await db.tabDao.unorderedScopeTabDescendants('opener').get();
 
     expect(scoped.map((row) => row.id).toSet(), {'opener', 'local-child'});
 
-    // The seed's own container is what bounds the walk, so starting at the
+    // The seed's own space is what bounds the walk, so starting at the
     // reopened tab still yields its whole subtree over there.
-    final scopedFromReopened = await db.definitionsDrift
-        .unorderedContainerTabDescendants(tabId: 'reopened')
+    final scopedFromReopened = await db.tabDao
+        .unorderedScopeTabDescendants('reopened')
         .get();
 
     expect(scopedFromReopened.map((row) => row.id).toSet(), {
@@ -711,58 +705,50 @@ void main() {
   });
 
   test(
-    'closing a parent leaves a cross-container child in its own order',
+    'closing a parent leaves a cross-space child in its own order',
     () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('parent-container', 'parent-context'),
-        _ContainerFixture('child-container', 'child-context'),
-      ]);
+      await _insertSpaces(db, const ['parent-space', 'child-space']);
       await _insertTabs(db, const [
-        _TabFixture('closing', containerId: 'parent-container'),
-        _TabFixture(
-          'foreign-child',
-          parentId: 'closing',
-          containerId: 'child-container',
-        ),
-        _TabFixture('foreign-sibling', containerId: 'child-container'),
+        _TabFixture('closing', spaceUuid: 'parent-space'),
+        _TabFixture('foreign-child', spaceUuid: 'child-space'),
+        _TabFixture('foreign-sibling', spaceUuid: 'child-space'),
       ]);
+      await db.customStatement(
+        "UPDATE tab SET parent_id = 'closing' WHERE id = 'foreign-child'",
+      );
 
       final orderKeyBefore = await _orderKeyOf(db, 'foreign-child');
 
       await db.tabDao.preservePromotedChildOrderOnClose(const ['closing']);
 
-      // `order_key` only orders tabs within one container; re-slotting the
-      // child into the closing tab's list would drop a foreign rank into it.
+      // `order_key` only orders tabs within one space; re-slotting the child
+      // into the closing tab's list would drop a foreign rank into it.
       expect(await _orderKeyOf(db, 'foreign-child'), orderKeyBefore);
     },
   );
 
   test(
-    'closing a tab with an out-of-container parent hands its slot to its child',
+    'closing a tab with an out-of-space parent hands its slot to its child',
     () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('home', 'home-context'),
-        _ContainerFixture('work', 'work-context'),
-      ]);
+      await _insertSpaces(db, const ['home', 'work']);
       // `reopened` stores a parent in `home` but is drawn as a root of `work`,
       // between the two plain roots — that rendered scope is the slot its
       // promoted child has to inherit.
       await _insertTabs(db, const [
-        _TabFixture('opener', containerId: 'home'),
-        _TabFixture('work-first', containerId: 'work'),
-        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
-        _TabFixture(
-          'reopened-child',
-          parentId: 'reopened',
-          containerId: 'work',
-        ),
-        _TabFixture('work-last', containerId: 'work'),
+        _TabFixture('opener', spaceUuid: 'home'),
+        _TabFixture('work-first', spaceUuid: 'work'),
+        _TabFixture('reopened', spaceUuid: 'work'),
+        _TabFixture('reopened-child', parentId: 'reopened', spaceUuid: 'work'),
+        _TabFixture('work-last', spaceUuid: 'work'),
       ]);
+      await db.customStatement(
+        "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+      );
 
       await db.tabDao.preservePromotedChildOrderOnClose(const ['reopened']);
       await db.customStatement("DELETE FROM tab WHERE id = 'reopened'");
 
-      expect(await _orderedTabIdsInContainer(db, 'work'), [
+      expect(await _orderedTabIdsInSpace(db, 'work'), [
         'work-first',
         'reopened-child',
         'work-last',
@@ -771,25 +757,21 @@ void main() {
   );
 
   test(
-    'a closing parent in another container does not swallow the local pass',
+    'a closing parent in another space does not swallow the local pass',
     () async {
-      await _insertContainers(db, const [
-        _ContainerFixture('home', 'home-context'),
-        _ContainerFixture('work', 'work-context'),
-      ]);
+      await _insertSpaces(db, const ['home', 'work']);
       // The child trails `work-last` in storage, so only an actual re-ranking
       // pass over `work` can put it back into the slot `reopened` vacates.
       await _insertTabs(db, const [
-        _TabFixture('opener', containerId: 'home'),
-        _TabFixture('work-first', containerId: 'work'),
-        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
-        _TabFixture('work-last', containerId: 'work'),
-        _TabFixture(
-          'reopened-child',
-          parentId: 'reopened',
-          containerId: 'work',
-        ),
+        _TabFixture('opener', spaceUuid: 'home'),
+        _TabFixture('work-first', spaceUuid: 'work'),
+        _TabFixture('reopened', spaceUuid: 'work'),
+        _TabFixture('work-last', spaceUuid: 'work'),
+        _TabFixture('reopened-child', parentId: 'reopened', spaceUuid: 'work'),
       ]);
+      await db.customStatement(
+        "UPDATE tab SET parent_id = 'opener' WHERE id = 'reopened'",
+      );
 
       // The opener closes too. Its pass only re-ranks `home`, so `reopened`
       // still has to stand in for its own scope rather than be absorbed.
@@ -801,7 +783,7 @@ void main() {
         "DELETE FROM tab WHERE id IN ('opener', 'reopened')",
       );
 
-      expect(await _orderedTabIdsInContainer(db, 'work'), [
+      expect(await _orderedTabIdsInSpace(db, 'work'), [
         'work-first',
         'reopened-child',
         'work-last',
@@ -815,11 +797,11 @@ Future<String> _orderKeyOf(TabDatabase db, String tabId) async {
   return tab!.orderKey;
 }
 
-Future<List<String>> _orderedTabIdsInContainer(
+Future<List<String>> _orderedTabIdsInSpace(
   TabDatabase db,
-  String containerId,
+  String? spaceUuid,
 ) async {
-  final tabs = await db.containerDao.getContainerTabsData(containerId).get();
+  final tabs = await db.tabDao.getSpaceTabsData(spaceUuid).get();
 
   return (tabs.toList()..sort((a, b) => a.orderKey.compareTo(b.orderKey)))
       .map((tab) => tab.id)
@@ -835,7 +817,16 @@ Future<void> _insertTabs(TabDatabase db, List<_TabFixture> tabs) async {
       source: tab.source,
       parentId: Value(tab.parentId),
       containerId: Value(tab.containerId),
+      spaceUuid: Value(tab.spaceUuid),
       orderKey: Value(orderKeys[index]),
+    );
+  }
+}
+
+Future<void> _insertSpaces(TabDatabase db, List<String> uuids) async {
+  for (final (index, uuid) in uuids.indexed) {
+    await db.spaceDao.insertSpace(
+      SpaceData(uuid: uuid, name: uuid, orderIndex: index),
     );
   }
 }
@@ -849,11 +840,7 @@ Future<void> _insertContainers(
       ContainerData(
         id: container.id,
         name: container.id,
-        color: Colors.blue,
         orderKey: container.id,
-        metadata: ContainerMetadata.withDefaults(
-          contextualIdentity: container.contextId,
-        ),
       ),
     );
   }
@@ -881,21 +868,22 @@ class _TabFixture {
   final String id;
   final String? parentId;
   final String? containerId;
+  final String? spaceUuid;
   final TabSource source;
 
   const _TabFixture(
     this.id, {
     this.parentId,
     this.containerId,
+    this.spaceUuid,
     this.source = TabSource.manual,
   });
 }
 
 class _ContainerFixture {
   final String id;
-  final String contextId;
 
-  const _ContainerFixture(this.id, this.contextId);
+  const _ContainerFixture(this.id);
 }
 
 TabState _tabState(String id, {String? parentId, String? contextId}) {
