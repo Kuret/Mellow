@@ -205,14 +205,15 @@ abstract class _$ForceBrowserHome extends $Notifier<bool> {
 /// Returns `true` when any of the following hold:
 /// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
 /// 1. No tab is selected at all (app just started or all tabs closed).
-/// 2. The selected tab belongs to a different container than the currently
-///    selected container – this implies the user manually switched
-///    containers after selecting a tab, because tab selection automatically
-///    syncs the selected container to match the tab's container.
+/// 2. The selected tab belongs to a different space than the currently
+///    selected space – this implies the user manually switched spaces after
+///    selecting a tab, because tab selection automatically syncs the selected
+///    space to match the tab's space. Tabs without a space (private tabs,
+///    essentials) are visible from every space and never trigger this.
 ///
-/// Condition (2) also implicitly covers the case where the selected
-/// container has zero tabs: if the container has no tabs, the selected tab
-/// (if any) necessarily belongs to a different container.
+/// Condition (2) also implicitly covers the case where the selected space has
+/// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
+/// belongs to a different space.
 
 @ProviderFor(shouldShowBrowserHome)
 final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
@@ -223,14 +224,15 @@ final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
 /// Returns `true` when any of the following hold:
 /// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
 /// 1. No tab is selected at all (app just started or all tabs closed).
-/// 2. The selected tab belongs to a different container than the currently
-///    selected container – this implies the user manually switched
-///    containers after selecting a tab, because tab selection automatically
-///    syncs the selected container to match the tab's container.
+/// 2. The selected tab belongs to a different space than the currently
+///    selected space – this implies the user manually switched spaces after
+///    selecting a tab, because tab selection automatically syncs the selected
+///    space to match the tab's space. Tabs without a space (private tabs,
+///    essentials) are visible from every space and never trigger this.
 ///
-/// Condition (2) also implicitly covers the case where the selected
-/// container has zero tabs: if the container has no tabs, the selected tab
-/// (if any) necessarily belongs to a different container.
+/// Condition (2) also implicitly covers the case where the selected space has
+/// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
+/// belongs to a different space.
 
 final class ShouldShowBrowserHomeProvider
     extends $FunctionalProvider<bool, bool, bool>
@@ -241,14 +243,15 @@ final class ShouldShowBrowserHomeProvider
   /// Returns `true` when any of the following hold:
   /// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
   /// 1. No tab is selected at all (app just started or all tabs closed).
-  /// 2. The selected tab belongs to a different container than the currently
-  ///    selected container – this implies the user manually switched
-  ///    containers after selecting a tab, because tab selection automatically
-  ///    syncs the selected container to match the tab's container.
+  /// 2. The selected tab belongs to a different space than the currently
+  ///    selected space – this implies the user manually switched spaces after
+  ///    selecting a tab, because tab selection automatically syncs the selected
+  ///    space to match the tab's space. Tabs without a space (private tabs,
+  ///    essentials) are visible from every space and never trigger this.
   ///
-  /// Condition (2) also implicitly covers the case where the selected
-  /// container has zero tabs: if the container has no tabs, the selected tab
-  /// (if any) necessarily belongs to a different container.
+  /// Condition (2) also implicitly covers the case where the selected space has
+  /// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
+  /// belongs to a different space.
   ShouldShowBrowserHomeProvider._()
     : super(
         from: null,
@@ -283,7 +286,7 @@ final class ShouldShowBrowserHomeProvider
 }
 
 String _$shouldShowBrowserHomeHash() =>
-    r'a2f6c3acac8a640b3a4d9a9468a729802fb6c4f5';
+    r'c4e06b75b41738eeac8347bf48924c03749c0615';
 
 @ProviderFor(selectedContainerTabCount)
 final selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();

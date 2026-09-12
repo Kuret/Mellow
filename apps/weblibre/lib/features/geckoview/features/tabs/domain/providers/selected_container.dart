@@ -25,11 +25,11 @@ import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -187,14 +187,15 @@ class ForceBrowserHome extends _$ForceBrowserHome {
 /// Returns `true` when any of the following hold:
 /// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
 /// 1. No tab is selected at all (app just started or all tabs closed).
-/// 2. The selected tab belongs to a different container than the currently
-///    selected container – this implies the user manually switched
-///    containers after selecting a tab, because tab selection automatically
-///    syncs the selected container to match the tab's container.
+/// 2. The selected tab belongs to a different space than the currently
+///    selected space – this implies the user manually switched spaces after
+///    selecting a tab, because tab selection automatically syncs the selected
+///    space to match the tab's space. Tabs without a space (private tabs,
+///    essentials) are visible from every space and never trigger this.
 ///
-/// Condition (2) also implicitly covers the case where the selected
-/// container has zero tabs: if the container has no tabs, the selected tab
-/// (if any) necessarily belongs to a different container.
+/// Condition (2) also implicitly covers the case where the selected space has
+/// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
+/// belongs to a different space.
 @Riverpod()
 bool shouldShowBrowserHome(Ref ref) {
   if (ref.watch(forceBrowserHomeProvider)) return true;
@@ -204,12 +205,12 @@ bool shouldShowBrowserHome(Ref ref) {
   // No tab selected → always show home.
   if (selectedTab == null) return true;
 
-  final selectedContainer = ref.watch(selectedContainerProvider);
-  final tabContainerId = ref.watch(selectedTabContainerIdProvider);
+  final selectedSpace = ref.watch(selectedSpaceProvider);
+  final tabSpaceUuid = ref.watch(selectedTabSpaceUuidProvider);
 
-  // Once we know the tab's container, compare with the selected container.
-  return switch (tabContainerId) {
-    AsyncData(:final value) => value != selectedContainer,
+  // Once we know the tab's space, compare with the selected space.
+  return switch (tabSpaceUuid) {
+    AsyncData(:final value) => value != null && value != selectedSpace,
     // While loading, keep the current view to avoid flashing.
     _ => false,
   };
