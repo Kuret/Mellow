@@ -254,13 +254,21 @@ class SpacesSyncService extends _$SpacesSyncService {
         keys: keys.bundleFor(spacesCollection),
       );
 
+      // Decided before the fetch flips the flag: the first sync of a device
+      // never projects a tombstone (PLAN §8.6 item 4).
+      final firstSync = !settings.spacesSyncBaselineDone;
       final applied = await _fetchAndApply(session, settings);
       settings = await settingsRepo.fetchSettings();
 
       if (!settings.spacesSyncWritesEnabled) {
         logger.i('spaces sync: uploads disabled by the kill switch');
       } else if (writesBlockedReason == null) {
-        await _upload(session, settings, applied);
+        await _upload(
+          session,
+          settings,
+          applied,
+          tombstonesAllowed: !firstSync,
+        );
       }
 
       state = state.copyWith(
@@ -438,6 +446,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     _Session session,
     GeneralSettings settings,
     Set<String> appliedThisSync, {
+    required bool tombstonesAllowed,
     bool retried = false,
   }) async {
     final db = ref.read(tabDatabaseProvider);
@@ -461,7 +470,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     }
 
     final tombstones = <String>[];
-    if (settings.spacesSyncBaselineDone) {
+    if (tombstonesAllowed) {
       // Tombstones need a reason (PLAN §8.6 item 5): held before, and seen
       // deleted by the user here.
       final deletions = await db.syncStateDao.pendingDeletions();
@@ -536,6 +545,7 @@ class SpacesSyncService extends _$SpacesSyncService {
         session,
         refreshed,
         {...appliedThisSync, ...applied},
+        tombstonesAllowed: tombstonesAllowed,
         retried: true,
       );
     }
