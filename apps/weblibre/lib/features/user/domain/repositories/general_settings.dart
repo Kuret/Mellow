@@ -132,6 +132,12 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'homeWallpaperDim': DriftSqlType.double,
   'globalDesktopMode': DriftSqlType.bool,
   'unmountGeckoViewOffRoute': DriftSqlType.bool,
+  'spacesSyncEnabled': DriftSqlType.bool,
+  'spacesSyncWritesEnabled': DriftSqlType.bool,
+  'spacesSyncLastSyncId': DriftSqlType.string,
+  'spacesSyncLastModified': DriftSqlType.double,
+  'spacesSyncBaselineDone': DriftSqlType.bool,
+  'separateEssentials': DriftSqlType.bool,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be

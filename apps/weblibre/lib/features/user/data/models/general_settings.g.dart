@@ -205,6 +205,18 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute);
 
+  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled);
+
+  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled);
+
+  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId);
+
+  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified);
+
+  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone);
+
+  GeneralSettings separateEssentials(bool separateEssentials);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -297,6 +309,12 @@ abstract class _$GeneralSettingsCWProxy {
     bool globalDesktopMode,
     List<String> desktopModeSites,
     bool unmountGeckoViewOffRoute,
+    bool spacesSyncEnabled,
+    bool spacesSyncWritesEnabled,
+    String? spacesSyncLastSyncId,
+    double? spacesSyncLastModified,
+    bool spacesSyncBaselineDone,
+    bool separateEssentials,
   });
 }
 
@@ -667,6 +685,30 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute) =>
       call(unmountGeckoViewOffRoute: unmountGeckoViewOffRoute);
 
+  @override
+  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled) =>
+      call(spacesSyncEnabled: spacesSyncEnabled);
+
+  @override
+  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled) =>
+      call(spacesSyncWritesEnabled: spacesSyncWritesEnabled);
+
+  @override
+  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId) =>
+      call(spacesSyncLastSyncId: spacesSyncLastSyncId);
+
+  @override
+  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified) =>
+      call(spacesSyncLastModified: spacesSyncLastModified);
+
+  @override
+  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone) =>
+      call(spacesSyncBaselineDone: spacesSyncBaselineDone);
+
+  @override
+  GeneralSettings separateEssentials(bool separateEssentials) =>
+      call(separateEssentials: separateEssentials);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -762,6 +804,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
     Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
+    Object? spacesSyncEnabled = const $CopyWithPlaceholder(),
+    Object? spacesSyncWritesEnabled = const $CopyWithPlaceholder(),
+    Object? spacesSyncLastSyncId = const $CopyWithPlaceholder(),
+    Object? spacesSyncLastModified = const $CopyWithPlaceholder(),
+    Object? spacesSyncBaselineDone = const $CopyWithPlaceholder(),
+    Object? separateEssentials = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1251,6 +1299,39 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unmountGeckoViewOffRoute
           // ignore: cast_nullable_to_non_nullable
           : unmountGeckoViewOffRoute as bool,
+      spacesSyncEnabled:
+          spacesSyncEnabled == const $CopyWithPlaceholder() ||
+              spacesSyncEnabled == null
+          ? _value.spacesSyncEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncEnabled as bool,
+      spacesSyncWritesEnabled:
+          spacesSyncWritesEnabled == const $CopyWithPlaceholder() ||
+              spacesSyncWritesEnabled == null
+          ? _value.spacesSyncWritesEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncWritesEnabled as bool,
+      spacesSyncLastSyncId: spacesSyncLastSyncId == const $CopyWithPlaceholder()
+          ? _value.spacesSyncLastSyncId
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncLastSyncId as String?,
+      spacesSyncLastModified:
+          spacesSyncLastModified == const $CopyWithPlaceholder()
+          ? _value.spacesSyncLastModified
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncLastModified as double?,
+      spacesSyncBaselineDone:
+          spacesSyncBaselineDone == const $CopyWithPlaceholder() ||
+              spacesSyncBaselineDone == null
+          ? _value.spacesSyncBaselineDone
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncBaselineDone as bool,
+      separateEssentials:
+          separateEssentials == const $CopyWithPlaceholder() ||
+              separateEssentials == null
+          ? _value.separateEssentials
+          // ignore: cast_nullable_to_non_nullable
+          : separateEssentials as bool,
     );
   }
 }
@@ -1435,6 +1516,12 @@ GeneralSettings _$GeneralSettingsFromJson(
       ?.map((e) => e as String)
       .toList(),
   unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
+  spacesSyncEnabled: json['spacesSyncEnabled'] as bool?,
+  spacesSyncWritesEnabled: json['spacesSyncWritesEnabled'] as bool?,
+  spacesSyncLastSyncId: json['spacesSyncLastSyncId'] as String?,
+  spacesSyncLastModified: (json['spacesSyncLastModified'] as num?)?.toDouble(),
+  spacesSyncBaselineDone: json['spacesSyncBaselineDone'] as bool?,
+  separateEssentials: json['separateEssentials'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1543,6 +1630,12 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,
   'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
+  'spacesSyncEnabled': instance.spacesSyncEnabled,
+  'spacesSyncWritesEnabled': instance.spacesSyncWritesEnabled,
+  'spacesSyncLastSyncId': instance.spacesSyncLastSyncId,
+  'spacesSyncLastModified': instance.spacesSyncLastModified,
+  'spacesSyncBaselineDone': instance.spacesSyncBaselineDone,
+  'separateEssentials': instance.separateEssentials,
 };
 
 const _$ThemeModeEnumMap = {

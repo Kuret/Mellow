@@ -486,6 +486,30 @@ class GeneralSettings with FastEquatable {
   /// is left here is the memory trade this describes.
   final bool unmountGeckoViewOffRoute;
 
+  /// Whether the Zen Spaces sync client runs at all. Inert without a Firefox
+  /// account (PLAN §8).
+  final bool spacesSyncEnabled;
+
+  /// The kill switch (PLAN §8.6 item 6): when off, the spaces client keeps
+  /// reading the collection but uploads nothing.
+  final bool spacesSyncWritesEnabled;
+
+  /// `meta/global.engines.spaces.syncID` last seen; a change resets local
+  /// sync state (PLAN §8.3 item 4).
+  final String? spacesSyncLastSyncId;
+
+  /// The `spaces` collection's last-modified timestamp (seconds) this device
+  /// has fetched up to.
+  final double? spacesSyncLastModified;
+
+  /// Whether a full baseline of the collection has been fetched and applied;
+  /// until then no tombstone is ever uploaded (PLAN §8.6 item 4).
+  final bool spacesSyncBaselineDone;
+
+  /// Local stand-in for Zen's `zen.workspaces.separate-essentials`
+  /// (DESIGN.md OPEN-3).
+  final bool separateEssentials;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -571,6 +595,12 @@ class GeneralSettings with FastEquatable {
     required this.globalDesktopMode,
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
+    required this.spacesSyncEnabled,
+    required this.spacesSyncWritesEnabled,
+    required this.spacesSyncLastSyncId,
+    required this.spacesSyncLastModified,
+    required this.spacesSyncBaselineDone,
+    required this.separateEssentials,
   });
 
   GeneralSettings.withDefaults({
@@ -658,6 +688,12 @@ class GeneralSettings with FastEquatable {
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
+    bool? spacesSyncEnabled,
+    bool? spacesSyncWritesEnabled,
+    this.spacesSyncLastSyncId,
+    this.spacesSyncLastModified,
+    bool? spacesSyncBaselineDone,
+    bool? separateEssentials,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -775,7 +811,11 @@ class GeneralSettings with FastEquatable {
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
-       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
+       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false,
+       spacesSyncEnabled = spacesSyncEnabled ?? true,
+       spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
+       spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
+       separateEssentials = separateEssentials ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -984,5 +1024,11 @@ class GeneralSettings with FastEquatable {
     globalDesktopMode,
     desktopModeSites,
     unmountGeckoViewOffRoute,
+    spacesSyncEnabled,
+    spacesSyncWritesEnabled,
+    spacesSyncLastSyncId,
+    spacesSyncLastModified,
+    spacesSyncBaselineDone,
+    separateEssentials,
   ];
 }
