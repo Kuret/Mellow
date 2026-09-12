@@ -8,9 +8,14 @@ part of 'spaces_projection.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Caches the stateless [SpacesProjection] object, never a projection: each
+/// `project()` call still hits the database (see the file header).
 
 @ProviderFor(spacesProjection)
 final spacesProjectionProvider = SpacesProjectionProvider._();
+
+/// Caches the stateless [SpacesProjection] object, never a projection: each
+/// `project()` call still hits the database (see the file header).
 
 final class SpacesProjectionProvider
     extends
@@ -20,6 +25,8 @@ final class SpacesProjectionProvider
           SpacesProjection
         >
     with $Provider<SpacesProjection> {
+  /// Caches the stateless [SpacesProjection] object, never a projection: each
+  /// `project()` call still hits the database (see the file header).
   SpacesProjectionProvider._()
     : super(
         from: null,
