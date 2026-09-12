@@ -22,6 +22,10 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   $TabDatabase(i0.QueryExecutor e) : super(e);
   $TabDatabaseManager get managers => $TabDatabaseManager(this);
   late final i1.Container container = i1.Container(this);
+  late final i1.ContainerLocal containerLocal = i1.ContainerLocal(this);
+  late final i1.Space space = i1.Space(this);
+  late final i1.TabFolder tabFolder = i1.TabFolder(this);
+  late final i1.TabSplit tabSplit = i1.TabSplit(this);
   late final i1.Tab tab = i1.Tab(this);
   late final i1.ClosedTabTombstone closedTabTombstone = i1.ClosedTabTombstone(
     this,
@@ -34,6 +38,8 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   late final i1.History history = i1.History(this);
   late final i1.HistoryFts historyFts = i1.HistoryFts(this);
   late final i1.VisitContainer visitContainer = i1.VisitContainer(this);
+  late final i1.ForeignRecord foreignRecord = i1.ForeignRecord(this);
+  late final i1.SyncRecordState syncRecordState = i1.SyncRecordState(this);
   late final i2.ContainerDao containerDao = i2.ContainerDao(
     this as i3.TabDatabase,
   );
@@ -54,15 +60,23 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   @override
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     container,
+    containerLocal,
+    space,
+    tabFolder,
+    tabSplit,
     tab,
     closedTabTombstone,
-    i1.idxTabParentContainer,
+    i1.idxTabScopeOrder,
+    i1.idxTabParentSpace,
+    i1.idxTabContainer,
     i1.idxTabTimestamp,
-    i1.idxTabContainerOrder,
+    i1.idxTabFolderParent,
+    i1.idxTabSplitScope,
     captureTab,
     i1.idxCaptureTabCaptureId,
     tabFts,
     i1.tabMaintainParentChainOnDelete,
+    i1.tabChildFollowsParentScope,
     i1.tabAfterInsert,
     i1.tabAfterDelete,
     i1.tabAfterUpdate,
@@ -77,14 +91,61 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     i1.tabToHistoryOnInsert,
     i1.tabToHistoryOnUpdate,
     i1.tabToHistoryOnContainerUpdate,
-    i1.containerToHistoryOnMetadataUpdate,
+    i1.containerLocalToHistoryOnInsert,
+    i1.containerLocalToHistoryOnUpdate,
     visitContainer,
     i1.idxVcCanonical,
     i1.idxVcContainer,
+    foreignRecord,
+    syncRecordState,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>
       const i0.StreamQueryUpdateRules([
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'container',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [
+            i0.TableUpdate('container_local', kind: i0.UpdateKind.delete),
+          ],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'container',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('space', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'space',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab_folder', kind: i0.UpdateKind.delete)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab_folder',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab_folder', kind: i0.UpdateKind.delete)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'space',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab_split', kind: i0.UpdateKind.delete)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab_folder',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab_split', kind: i0.UpdateKind.update)],
+        ),
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(
             'tab',
@@ -97,7 +158,28 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
             'container',
             limitUpdateKind: i0.UpdateKind.delete,
           ),
-          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.delete)],
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'space',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab_folder',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab_split',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
         ),
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(
@@ -110,6 +192,13 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
           on: i0.TableUpdateQuery.onTableName(
             'tab',
             limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab',
+            limitUpdateKind: i0.UpdateKind.update,
           ),
           result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
         ),
@@ -181,7 +270,17 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
         ),
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(
-            'container',
+            'container_local',
+            limitUpdateKind: i0.UpdateKind.insert,
+          ),
+          result: [
+            i0.TableUpdate('history', kind: i0.UpdateKind.delete),
+            i0.TableUpdate('history', kind: i0.UpdateKind.insert),
+          ],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'container_local',
             limitUpdateKind: i0.UpdateKind.update,
           ),
           result: [
@@ -206,6 +305,13 @@ class $TabDatabaseManager {
   $TabDatabaseManager(this._db);
   i1.$ContainerTableManager get container =>
       i1.$ContainerTableManager(_db, _db.container);
+  i1.$ContainerLocalTableManager get containerLocal =>
+      i1.$ContainerLocalTableManager(_db, _db.containerLocal);
+  i1.$SpaceTableManager get space => i1.$SpaceTableManager(_db, _db.space);
+  i1.$TabFolderTableManager get tabFolder =>
+      i1.$TabFolderTableManager(_db, _db.tabFolder);
+  i1.$TabSplitTableManager get tabSplit =>
+      i1.$TabSplitTableManager(_db, _db.tabSplit);
   i1.$TabTableManager get tab => i1.$TabTableManager(_db, _db.tab);
   i1.$ClosedTabTombstoneTableManager get closedTabTombstone =>
       i1.$ClosedTabTombstoneTableManager(_db, _db.closedTabTombstone);
@@ -220,6 +326,10 @@ class $TabDatabaseManager {
       i1.$HistoryFtsTableManager(_db, _db.historyFts);
   i1.$VisitContainerTableManager get visitContainer =>
       i1.$VisitContainerTableManager(_db, _db.visitContainer);
+  i1.$ForeignRecordTableManager get foreignRecord =>
+      i1.$ForeignRecordTableManager(_db, _db.foreignRecord);
+  i1.$SyncRecordStateTableManager get syncRecordState =>
+      i1.$SyncRecordStateTableManager(_db, _db.syncRecordState);
 }
 
 extension DefineFunctions on i9.CommonDatabase {

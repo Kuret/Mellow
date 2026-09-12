@@ -1,33 +1,99 @@
-import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/uri.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_split_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 
 CREATE TABLE container (
-  id TEXT PRIMARY KEY NOT NULL,
-  name TEXT,
-  color INTEGER NOT NULL MAPPED BY `const ColorConverter()`,
+  id TEXT PRIMARY KEY NOT NULL,            -- local id == the Gecko contextId handed to engine sessions
+  sync_guid TEXT UNIQUE,                   -- Zen guid: uuid or builtin-1..4; NULL until first projected
+  name TEXT NOT NULL DEFAULT '',
+  icon_key TEXT NOT NULL DEFAULT 'circle', -- Firefox icon keyword, stored raw as received
+  color_key TEXT NOT NULL DEFAULT 'blue',  -- Firefox colour keyword, stored raw
   order_key TEXT NOT NULL,
-  is_pinned BOOL NOT NULL DEFAULT 0,
-  metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
+  is_pinned BOOL NOT NULL DEFAULT 0
 ) WITH ContainerData;
+
+-- Local-only per-container settings, never synced (Zen has no equivalent).
+-- Split out of `container` so the sync projection of that table stays a
+-- direct mirror of Zen's container record shape.
+CREATE TABLE container_local (
+  container_id TEXT NOT NULL PRIMARY KEY REFERENCES container(id) ON DELETE CASCADE,
+  exclude_from_index BOOL NOT NULL DEFAULT 0,
+  exclude_from_history BOOL NOT NULL DEFAULT 0,
+  clear_data_on_exit BOOL NOT NULL DEFAULT 0,
+  wallpaper TEXT                            -- JSON of WallpaperOverride; plain TEXT for now, the model layer converts
+) WITH ContainerLocalData;
+
+-- A Zen space: the top-level organizational unit for tabs, folders and
+-- splits (PLAN §4, §6.1).
+CREATE TABLE space (
+  uuid TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  icon TEXT,
+  theme TEXT,                               -- opaque JSON, round-tripped verbatim
+  container_id TEXT REFERENCES container(id) ON DELETE SET NULL,
+  order_index INTEGER NOT NULL
+) WITH SpaceData;
+
+-- A nestable grouping of tabs within a space (PLAN §4, §6.1).
+CREATE TABLE tab_folder (
+  id TEXT PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  icon TEXT,
+  space_uuid TEXT REFERENCES space(uuid) ON DELETE CASCADE,
+  parent_folder_id TEXT REFERENCES tab_folder(id) ON DELETE CASCADE,
+  live TEXT,                                -- opaque JSON, round-tripped verbatim
+  is_collapsed BOOL NOT NULL DEFAULT 0,     -- local only, never synced
+  order_key TEXT NOT NULL
+) WITH TabFolderData;
+
+-- A Zen split view: a set of tabs shown side by side in one slot
+-- (PLAN §6.5). Members are `tab` rows with `split_id` set; `split_index` on
+-- those rows is the dense 0..n-1 order within the split.
+CREATE TABLE tab_split (
+  id TEXT PRIMARY KEY NOT NULL,
+  grid_type TEXT NOT NULL DEFAULT 'grid',
+  is_pinned BOOL NOT NULL DEFAULT 0,        -- Zen's split.pinned, round-tripped
+  space_uuid TEXT REFERENCES space(uuid) ON DELETE CASCADE,
+  folder_id TEXT REFERENCES tab_folder(id) ON DELETE SET NULL,
+  order_key TEXT NOT NULL
+) WITH TabSplitData;
 
 CREATE TABLE tab(
   id TEXT PRIMARY KEY NOT NULL,
+  -- NULL = cold tab: no live engine session (PLAN §7.4). Set when the engine
+  -- creates a session for this tab, cleared again on demotion. Never reused
+  -- across tabs while live, hence UNIQUE.
+  engine_tab_id TEXT UNIQUE,
   source ENUM(TabSource) NOT NULL,
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
-  container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
+  -- ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
+  -- the engine's back. Repositories close tabs before deleting a container.
+  container_id TEXT REFERENCES container (id) ON DELETE SET NULL,
+  -- ON DELETE SET NULL for the same reason as container_id above (PLAN §7.3):
+  -- repositories close tabs before deleting a space or folder.
+  space_uuid TEXT REFERENCES space(uuid) ON DELETE SET NULL,
+  folder_id TEXT REFERENCES tab_folder(id) ON DELETE SET NULL,
+  split_id TEXT REFERENCES tab_split(id) ON DELETE SET NULL,
+  split_index INTEGER,
+  -- normal=0, pinned=1, essential=2 (TabShelf). Folded former `is_pinned`
+  -- into this column; essential tabs are always pinned in Zen's model.
+  tab_shelf ENUM(TabShelf) NOT NULL DEFAULT 0,
   order_key TEXT NOT NULL,
   url TEXT MAPPED BY `const UriConverterNullable()`,
   title TEXT,
+  icon_url TEXT,
+  static_label TEXT,
+  has_static_icon BOOL NOT NULL DEFAULT 0,
+  default_container BOOL NOT NULL DEFAULT 0,
   tab_mode ENUM(TabModeDbValue) NOT NULL DEFAULT 0,
-  isolation_context_id TEXT,
-  is_pinned BOOL NOT NULL DEFAULT 0,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,
@@ -41,11 +107,7 @@ CREATE TABLE tab(
   -- recomputation cost is negligible vs. the FTS rewrite it skips.
   content_hash INTEGER GENERATED ALWAYS AS (
     generate_content_hash(title, extracted_content_plain, full_content_plain)
-  ) VIRTUAL,
-  CHECK (
-    (tab_mode = 2 AND isolation_context_id IS NOT NULL) OR
-    (tab_mode != 2 AND isolation_context_id IS NULL)
-  )
+  ) VIRTUAL
 );
 
 CREATE TABLE closed_tab_tombstone(
@@ -53,12 +115,31 @@ CREATE TABLE closed_tab_tombstone(
   closed_at DATETIME NOT NULL
 );
 
--- Composite index used by `tabsWithRootAndDepth` (the seed checks
--- `parent_id IS NULL OR NOT EXISTS(... WHERE p.id = parent_id AND
--- p.container_id IS :container_id)`) and by `lastChildTabId`
--- (`WHERE parent_id = ? AND container_id IS ?`). Without it, both queries
--- degrade to per-row scans on large containers.
-CREATE INDEX idx_tab_parent_container ON tab(parent_id, container_id);
+-- ===========================================================================
+-- Ordering scope (PLAN §6.6).
+--
+-- A tab's ordering scope is (space_uuid, folder_id, tab_shelf), plus container_id
+-- for the essential shelf (essentials are a per-container strip; PLAN §6.4).
+-- Every scoped query takes the four parameters and uses this exact predicate:
+--   t.space_uuid IS :space_uuid AND t.folder_id IS :folder_id
+--   AND t.tab_shelf = :tab_shelf
+--   AND (:tab_shelf != 2 OR t.container_id IS :scope_container_id)
+-- ===========================================================================
+
+-- Serves every scoped ordering query (`leadingOrderKey`, `trailingOrderKey`,
+-- `orderKeyAfterTab`, `orderKeyBeforeTab`, `scopeSiblings`,
+-- `previousTabByOrderKey`/`nextTabByOrderKey`), which all filter on
+-- (space_uuid, folder_id, tab_shelf) and order by order_key.
+CREATE INDEX idx_tab_scope_order ON tab(space_uuid, folder_id, tab_shelf, order_key);
+
+-- Serves `tabTrees` / `tabsWithRootAndDepth`'s boundary check (a tab whose
+-- parent lives in another space or folder starts a tree of its own) and
+-- `lastChildTabId` (`WHERE parent_id = ? AND space_uuid IS ? AND folder_id IS ?`).
+CREATE INDEX idx_tab_parent_space ON tab(parent_id, space_uuid, folder_id);
+
+-- `tabsInContainer` and the essential-shelf queries filter on `container_id`
+-- alone; neither of the composite indexes above has it as a leftmost column.
+CREATE INDEX idx_tab_container ON tab(container_id);
 
 -- `getTabsFifo` / `getContainerTabsFifo` order by `timestamp DESC LIMIT n`, and
 -- the FIFO query is a live stream re-run on every write to `tab` (`touchTab`
@@ -73,10 +154,14 @@ CREATE INDEX idx_tab_parent_container ON tab(parent_id, container_id);
 -- keeps the walk index-only rather than falling back to a sorter for the ties.
 CREATE INDEX idx_tab_timestamp ON tab(timestamp DESC, id DESC);
 
--- `getContainerTabsData` and `containerScopeSiblings` filter on `container_id`
--- and order by `order_key`. `idx_tab_parent_container` cannot serve either:
--- `container_id` is not its leftmost column.
-CREATE INDEX idx_tab_container_order ON tab(container_id, order_key);
+-- Serves `folderChildren` (`WHERE space_uuid IS ? AND parent_folder_id IS ?
+-- ORDER BY order_key`) and the folder-subtree recursive walk in
+-- `folderSubtreeIds`.
+CREATE INDEX idx_tab_folder_parent ON tab_folder(parent_folder_id, space_uuid, order_key);
+
+-- Serves `splitsInScope` (`WHERE space_uuid IS ? AND folder_id IS ?
+-- ORDER BY order_key`).
+CREATE INDEX idx_tab_split_scope ON tab_split(space_uuid, folder_id, order_key);
 
 CREATE TABLE capture_tab (
   tab_id TEXT NOT NULL PRIMARY KEY REFERENCES tab (id) ON DELETE CASCADE,
@@ -112,19 +197,30 @@ CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
   WHERE parent_id = OLD.id;
 END;
 
+-- F1 (PLAN §6.6): a child tab always shares its parent's space and folder.
+-- Only the direct-child level is enforced here — SQLite recursive triggers
+-- are off, so deeper levels (grandchildren etc.) are cascaded by the DAO
+-- (`setTabParent` / the reparenting path), which walks the chain explicitly.
+CREATE TRIGGER tab_child_follows_parent_scope AFTER UPDATE OF space_uuid, folder_id ON tab BEGIN
+  UPDATE tab
+  SET space_uuid = NEW.space_uuid, folder_id = NEW.folder_id
+  WHERE parent_id = NEW.id
+    AND (space_uuid IS NOT NEW.space_uuid OR folder_id IS NOT NEW.folder_id);
+END;
+
 -- Triggers to keep the FTS index up to date.
 CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN
-  INSERT INTO 
-    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain) 
+  INSERT INTO
+    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain)
     VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);
 END;
 CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN
-  INSERT INTO 
-    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain) 
+  INSERT INTO
+    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain)
     VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
 END;
 -- Scoped to FTS-relevant columns so unrelated tab updates (order_key,
--- parent_id, container_id, is_pinned, timestamp, ...) don't trigger a
+-- parent_id, container_id, tab_shelf, timestamp, ...) don't trigger a
 -- full trigram reindex of the row. Additionally gated on content_hash so
 -- rewrites of identical content (page reload re-emitting the same extract)
 -- skip the FTS rewrite. URL changes are caught separately because the hash
@@ -321,24 +417,24 @@ deleteHistoryByCanonicalUrls:
 -- `excludeFromIndex`, so pages from history-excluded containers were indexed.
 --
 -- The two statements are the two halves of
--- `container_to_history_on_metadata_update` — which fires per container — with
--- the `NEW.id` scope widened to every excluded container at once. They must be
--- run in order and both are required: the DELETE spares a URL some other
--- eligible tab still holds, and that spared row would otherwise keep the
+-- `container_local_to_history_on_update` — which fires per container — with
+-- the `NEW.container_id` scope widened to every excluded container at once. They
+-- must be run in order and both are required: the DELETE spares a URL some
+-- other eligible tab still holds, and that spared row would otherwise keep the
 -- *excluded* tab's title and content.
 --
--- They are pinned to the v16 shape of `history`/`tab`/`container`. If a later
--- schema version changes those, freeze this SQL into the migration step rather
--- than letting it drift with the tables (a migration runs against the schema of
--- its own version, not the current one).
+-- They are pinned to the v18 shape of `history`/`tab`/`container_local`. If a
+-- later schema version changes those, freeze this SQL into the migration step
+-- rather than letting it drift with the tables (a migration runs against the
+-- schema of its own version, not the current one).
 -- ===========================================================================
 evictExcludedHistoryPages:
   DELETE FROM history
   WHERE url_canonical IN (
       SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
       FROM tab AS affected
-      INNER JOIN container ON container.id = affected.container_id
-      WHERE json_extract(container.metadata, '$.excludeFromHistory') = 1
+      LEFT JOIN container_local cl ON cl.container_id = affected.container_id
+      WHERE COALESCE(cl.exclude_from_history, 0) = 1
         AND affected.url IS NOT NULL
         AND url_indexable(CAST(affected.url AS TEXT)) = 1
     )
@@ -351,10 +447,9 @@ evictExcludedHistoryPages:
         AND (candidate.tab_mode != 1
              OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
         AND NOT EXISTS (
-          SELECT 1 FROM container
-          WHERE container.id = candidate.container_id
-            AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+          SELECT 1 FROM container_local cl2
+          WHERE cl2.container_id = candidate.container_id
+            AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)
         )
     );
 
@@ -389,18 +484,17 @@ reindexAfterExcludedHistoryEviction:
     AND url_canonical(CAST(candidate.url AS TEXT)) IN (
       SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
       FROM tab AS affected
-      INNER JOIN container ON container.id = affected.container_id
-      WHERE json_extract(container.metadata, '$.excludeFromHistory') = 1
+      LEFT JOIN container_local cl ON cl.container_id = affected.container_id
+      WHERE COALESCE(cl.exclude_from_history, 0) = 1
         AND affected.url IS NOT NULL
         AND url_indexable(CAST(affected.url AS TEXT)) = 1
     )
     AND (candidate.tab_mode != 1
          OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
     AND NOT EXISTS (
-      SELECT 1 FROM container
-      WHERE container.id = candidate.container_id
-        AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-             OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+      SELECT 1 FROM container_local cl2
+      WHERE cl2.container_id = candidate.container_id
+        AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)
     )
     AND NOT EXISTS (
       SELECT 1
@@ -411,10 +505,9 @@ reindexAfterExcludedHistoryEviction:
         AND (newer.tab_mode != 1
              OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
         AND NOT EXISTS (
-          SELECT 1 FROM container
-          WHERE container.id = newer.container_id
-            AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+          SELECT 1 FROM container_local cl3
+          WHERE cl3.container_id = newer.container_id
+            AND (cl3.exclude_from_index = 1 OR cl3.exclude_from_history = 1)
         )
         AND (
           newer.timestamp > candidate.timestamp
@@ -435,13 +528,13 @@ reindexAfterExcludedHistoryEviction:
 -- Tab -> history fan-out. Content triggers fire when content-bearing columns
 -- change AND the content actually changed (content_hash gate). Re-evaluation
 -- triggers fire when indexing eligibility changes without a content update
--- (container assignment or container exclude flag changes). Settings are read
--- from local_index_setting at SQL level so these triggers are the single source
--- of truth for indexing eligibility. tab_mode = 1 is the private tab marker;
--- private tabs are skipped unless `index_private` is enabled. Per-container
--- opt-out lives in container.metadata (JSON): excludeFromIndex, and
--- excludeFromHistory — a container excluded from history recording must not be
--- searchable locally either, or its pages come back through the index (and
+-- (container assignment or container_local exclude flag changes). Settings are
+-- read from local_index_setting at SQL level so these triggers are the single
+-- source of truth for indexing eligibility. tab_mode = 1 is the private tab
+-- marker; private tabs are skipped unless `index_private` is enabled.
+-- Per-container opt-out lives in container_local: exclude_from_index, and
+-- exclude_from_history — a container excluded from history recording must not
+-- be searchable locally either, or its pages come back through the index (and
 -- through any other tab that later opens the same URL). Tabs without a
 -- container fall through (NULL container_id -> no matching row -> indexable).
 -- Re-evaluation must refresh observed_at even when content_hash is unchanged,
@@ -453,10 +546,9 @@ WHEN NEW.url IS NOT NULL
  AND (NEW.tab_mode != 1
       OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
  AND NOT EXISTS (
-   SELECT 1 FROM container
-   WHERE container.id = NEW.container_id
-     AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-          OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+   SELECT 1 FROM container_local cl
+   WHERE cl.container_id = NEW.container_id
+     AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
  )
 BEGIN
   INSERT INTO history (
@@ -503,10 +595,9 @@ WHEN NEW.url IS NOT NULL
  AND (NEW.tab_mode != 1
       OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
  AND NOT EXISTS (
-   SELECT 1 FROM container
-   WHERE container.id = NEW.container_id
-     AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-          OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+   SELECT 1 FROM container_local cl
+   WHERE cl.container_id = NEW.container_id
+     AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
  )
 BEGIN
   INSERT INTO history (
@@ -558,10 +649,9 @@ BEGIN
         AND (candidate.tab_mode != 1
              OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
         AND NOT EXISTS (
-          SELECT 1 FROM container
-          WHERE container.id = candidate.container_id
-            AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+          SELECT 1 FROM container_local cl
+          WHERE cl.container_id = candidate.container_id
+            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
         )
     );
 
@@ -591,10 +681,9 @@ BEGIN
     AND (candidate.tab_mode != 1
          OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
     AND NOT EXISTS (
-      SELECT 1 FROM container
-      WHERE container.id = candidate.container_id
-        AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-             OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+      SELECT 1 FROM container_local cl
+      WHERE cl.container_id = candidate.container_id
+        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
     )
   ORDER BY candidate.timestamp DESC, candidate.rowid DESC
   LIMIT 1
@@ -610,19 +699,20 @@ BEGIN
     observed_count              = history.observed_count + 1;
 END;
 
-CREATE TRIGGER container_to_history_on_metadata_update AFTER UPDATE OF metadata
-ON container
-WHEN COALESCE(json_extract(OLD.metadata, '$.excludeFromIndex') = 1
-              OR json_extract(OLD.metadata, '$.excludeFromHistory') = 1, 0)
-     != COALESCE(json_extract(NEW.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(NEW.metadata, '$.excludeFromHistory') = 1, 0)
+-- Replaces the old `container_to_history_on_metadata_update` (which fired on
+-- `container.metadata` changes). Exclude flags now live in `container_local`,
+-- so the gate fires on that table instead: once for the first row a container
+-- ever gets (INSERT — a container may go a while without local settings), and
+-- again whenever the two flags actually change.
+CREATE TRIGGER container_local_to_history_on_insert AFTER INSERT ON container_local
+WHEN (NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)
  AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
 BEGIN
   DELETE FROM history
   WHERE url_canonical IN (
       SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
       FROM tab AS affected
-      WHERE affected.container_id = NEW.id
+      WHERE affected.container_id = NEW.container_id
         AND affected.url IS NOT NULL
         AND url_indexable(CAST(affected.url AS TEXT)) = 1
     )
@@ -635,10 +725,9 @@ BEGIN
         AND (candidate.tab_mode != 1
              OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
         AND NOT EXISTS (
-          SELECT 1 FROM container
-          WHERE container.id = candidate.container_id
-            AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+          SELECT 1 FROM container_local cl
+          WHERE cl.container_id = candidate.container_id
+            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
         )
     );
 
@@ -667,17 +756,16 @@ BEGIN
     AND url_canonical(CAST(candidate.url AS TEXT)) IN (
       SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
       FROM tab AS affected
-      WHERE affected.container_id = NEW.id
+      WHERE affected.container_id = NEW.container_id
         AND affected.url IS NOT NULL
         AND url_indexable(CAST(affected.url AS TEXT)) = 1
     )
     AND (candidate.tab_mode != 1
          OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
     AND NOT EXISTS (
-      SELECT 1 FROM container
-      WHERE container.id = candidate.container_id
-        AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-             OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+      SELECT 1 FROM container_local cl
+      WHERE cl.container_id = candidate.container_id
+        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
     )
     AND NOT EXISTS (
       SELECT 1
@@ -688,10 +776,105 @@ BEGIN
         AND (newer.tab_mode != 1
              OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
         AND NOT EXISTS (
-          SELECT 1 FROM container
-          WHERE container.id = newer.container_id
-            AND (json_extract(container.metadata, '$.excludeFromIndex') = 1
-                 OR json_extract(container.metadata, '$.excludeFromHistory') = 1)
+          SELECT 1 FROM container_local cl2
+          WHERE cl2.container_id = newer.container_id
+            AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)
+        )
+        AND (
+          newer.timestamp > candidate.timestamp
+          OR (newer.timestamp = candidate.timestamp AND newer.rowid > candidate.rowid)
+        )
+    )
+  ON CONFLICT(url_canonical) DO UPDATE SET
+    title                       = COALESCE(excluded.title, history.title),
+    is_probably_readerable      = excluded.is_probably_readerable,
+    extracted_content_markdown  = excluded.extracted_content_markdown,
+    extracted_content_plain     = excluded.extracted_content_plain,
+    full_content_markdown       = excluded.full_content_markdown,
+    full_content_plain          = excluded.full_content_plain,
+    content_hash                = excluded.content_hash,
+    observed_at                 = excluded.observed_at,
+    observed_count              = history.observed_count + 1;
+END;
+
+CREATE TRIGGER container_local_to_history_on_update AFTER UPDATE OF
+  exclude_from_index, exclude_from_history
+ON container_local
+WHEN (OLD.exclude_from_index = 1 OR OLD.exclude_from_history = 1)
+     != (NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)
+ AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
+BEGIN
+  DELETE FROM history
+  WHERE url_canonical IN (
+      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
+      FROM tab AS affected
+      WHERE affected.container_id = NEW.container_id
+        AND affected.url IS NOT NULL
+        AND url_indexable(CAST(affected.url AS TEXT)) = 1
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tab AS candidate
+      WHERE candidate.url IS NOT NULL
+        AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical
+        AND (candidate.tab_mode != 1
+             OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+        AND NOT EXISTS (
+          SELECT 1 FROM container_local cl
+          WHERE cl.container_id = candidate.container_id
+            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
+        )
+    );
+
+  INSERT INTO history (
+    url_canonical, url_host, url_path, title, is_probably_readerable,
+    extracted_content_markdown, extracted_content_plain,
+    full_content_markdown, full_content_plain,
+    content_hash, observed_at, observed_count
+  )
+  SELECT
+    url_canonical(CAST(candidate.url AS TEXT)),
+    url_host(CAST(candidate.url AS TEXT)),
+    url_path(CAST(candidate.url AS TEXT)),
+    candidate.title,
+    candidate.is_probably_readerable,
+    candidate.extracted_content_markdown,
+    candidate.extracted_content_plain,
+    candidate.full_content_markdown,
+    candidate.full_content_plain,
+    candidate.content_hash,
+    strftime('%s','now') * 1000,
+    1
+  FROM tab AS candidate
+  WHERE candidate.url IS NOT NULL
+    AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+    AND url_canonical(CAST(candidate.url AS TEXT)) IN (
+      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
+      FROM tab AS affected
+      WHERE affected.container_id = NEW.container_id
+        AND affected.url IS NOT NULL
+        AND url_indexable(CAST(affected.url AS TEXT)) = 1
+    )
+    AND (candidate.tab_mode != 1
+         OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+    AND NOT EXISTS (
+      SELECT 1 FROM container_local cl
+      WHERE cl.container_id = candidate.container_id
+        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tab AS newer
+      WHERE newer.url IS NOT NULL
+        AND url_indexable(CAST(newer.url AS TEXT)) = 1
+        AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT))
+        AND (newer.tab_mode != 1
+             OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+        AND NOT EXISTS (
+          SELECT 1 FROM container_local cl2
+          WHERE cl2.container_id = newer.container_id
+            AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)
         )
         AND (
           newer.timestamp > candidate.timestamp
@@ -743,15 +926,33 @@ CREATE TABLE visit_container (
 CREATE INDEX idx_vc_canonical ON visit_container(url_canonical, visit_time);
 CREATE INDEX idx_vc_container ON visit_container(container_id, visit_time DESC);
 
+-- Zen sync bookkeeping (PLAN §8). `foreign_record` mirrors remote records
+-- this device did not author but must round-trip verbatim (unknown record
+-- kinds, or fields WebLibre doesn't yet model). `sync_record_state` tracks
+-- what this device last uploaded, mirroring Zen's `zen-spaces-sync.json`
+-- "uploaded" map, so the next sync only pushes records that actually changed.
+CREATE TABLE foreign_record (
+  id TEXT NOT NULL PRIMARY KEY,
+  kind TEXT NOT NULL,
+  payload TEXT NOT NULL,
+  modified REAL NOT NULL
+);
+
+CREATE TABLE sync_record_state (
+  record_id TEXT NOT NULL PRIMARY KEY,
+  kind TEXT NOT NULL,
+  digest TEXT NOT NULL                       -- base64 SHA-256 of canonical {kind,data}
+);
+
 containersWithCount WITH ContainerDataWithCount:
   SELECT
     container.*,
     tab_agg.tab_count
   FROM container
   LEFT JOIN (
-    SELECT 
-      container_id, 
-      COUNT(*) AS tab_count, 
+    SELECT
+      container_id,
+      COUNT(*) AS tab_count,
       MAX(timestamp) AS last_updated
     FROM tab
     GROUP BY container_id
@@ -818,54 +1019,95 @@ containerOrderKeyBefore(:container_id AS TEXT, :is_pinned AS BOOL):
   FROM ordered_table
   WHERE id = :container_id;
 
-leadingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
+leadingOrderKey(
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL,
+  :bucket AS INTEGER
+):
   SELECT lexo_rank_previous(
-    :bucket, 
+    :bucket,
     (
-      SELECT order_key 
-      FROM tab 
-      WHERE container_id IS :container_id 
-      ORDER BY order_key 
+      SELECT order_key
+      FROM tab
+      WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+        AND tab_shelf = :tab_shelf
+        AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
+      ORDER BY order_key
       LIMIT 1
     )
   );
 
-trailingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
+trailingOrderKey(
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL,
+  :bucket AS INTEGER
+):
   SELECT lexo_rank_next(
-    :bucket, 
+    :bucket,
     (
-      SELECT order_key 
-      FROM tab 
-      WHERE container_id IS :container_id 
-      ORDER BY order_key DESC 
+      SELECT order_key
+      FROM tab
+      WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+        AND tab_shelf = :tab_shelf
+        AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
+      ORDER BY order_key DESC
       LIMIT 1
     )
   );
 
-lastChildTabId(:parent_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
+lastChildTabId(
+  :parent_id AS TEXT,
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL
+):
   SELECT id FROM tab
-  WHERE parent_id = :parent_id AND container_id IS :container_id
+  WHERE parent_id = :parent_id
+    AND space_uuid IS :space_uuid AND folder_id IS :folder_id
+    AND tab_shelf = :tab_shelf
+    AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
   ORDER BY order_key DESC LIMIT 1;
 
-orderKeyAfterTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
+orderKeyAfterTab(
+  :tab_id AS TEXT,
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL
+):
   WITH ordered_table AS (
     SELECT id,
           order_key,
           LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
-    FROM tab 
-    WHERE container_id IS :container_id 
+    FROM tab
+    WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+      AND tab_shelf = :tab_shelf
+      AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
   )
   SELECT lexo_rank_reorder_after(order_key, next_order_key)
   FROM ordered_table
   WHERE id = :tab_id;
 
-orderKeyBeforeTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
+orderKeyBeforeTab(
+  :tab_id AS TEXT,
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL
+):
   WITH ordered_table AS (
     SELECT id,
           order_key,
           LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
-    FROM tab 
-    WHERE container_id IS :container_id 
+    FROM tab
+    WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+      AND tab_shelf = :tab_shelf
+      AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
   )
   SELECT lexo_rank_reorder_before(order_key, prev_order_key)
   FROM ordered_table
@@ -929,16 +1171,16 @@ queryTabsFullContent WITH TabQueryResult:
       t.timestamp DESC
     LIMIT :limit;
 
--- Trees rooted in the requested scope, used by the tree tab view. Pass
--- :skip_container_check to build them across every container instead.
+-- Trees rooted in the requested space, used by the tree tab view. Pass
+-- :skip_space_check to build them across every space instead.
 --
 -- Scoped mode draws the same boundary as `tabsWithRootAndDepth`: a tab whose
--- parent lives in another container starts a tree of its own. A parent may keep
--- children elsewhere (a link followed into a container-assigned site keeps
+-- parent lives in another space starts a tree of its own. A parent may keep
+-- children elsewhere (a link followed into a differently-scoped site keeps
 -- pointing at its opener), and without the boundary such a child would both
 -- inflate the opener's tree and — being the newer tab — take over as its
--- `latest_tab_id`, hiding the opener's tree from its own container's view.
-tabTrees(REQUIRED :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
+-- `latest_tab_id`, hiding the opener's tree from its own space's view.
+tabTrees(REQUIRED :space_uuid AS TEXT OR NULL, :skip_space_check AS BOOL):
   WITH RECURSIVE descendants AS (
     -- Base case: every in-scope tab whose parent is not also in scope
     SELECT
@@ -947,13 +1189,13 @@ tabTrees(REQUIRED :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
       t.timestamp,
       t.id AS root_id
     FROM tab t
-    WHERE (:skip_container_check OR t.container_id IS :container_id)
+    WHERE (:skip_space_check OR t.space_uuid IS :space_uuid)
       AND (
         t.parent_id IS NULL
         OR NOT EXISTS (
           SELECT 1 FROM tab p
           WHERE p.id = t.parent_id
-            AND (:skip_container_check OR p.container_id IS :container_id)
+            AND (:skip_space_check OR p.space_uuid IS :space_uuid)
         )
       )
 
@@ -967,11 +1209,11 @@ tabTrees(REQUIRED :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
       d.root_id
     FROM tab t
     JOIN descendants d ON t.parent_id = d.id
-    WHERE :skip_container_check OR t.container_id IS :container_id
+    WHERE :skip_space_check OR t.space_uuid IS :space_uuid
 ),
 root_stats AS (
     -- Calculate stats for each root
-    SELECT 
+    SELECT
         root_id,
         MAX(timestamp) AS max_timestamp,
         COUNT(*) AS total_children
@@ -979,35 +1221,37 @@ root_stats AS (
     GROUP BY root_id
 )
 -- Get the actual tab records with latest timestamp per root
-SELECT 
-    d.root_id AS root_tab_id, 
-    d.id AS latest_tab_id, 
+SELECT
+    d.root_id AS root_tab_id,
+    d.id AS latest_tab_id,
     d.timestamp AS latest_timestamp,
     rs.total_children AS total_tabs
 FROM descendants d
-JOIN root_stats rs 
-ON 
-  d.root_id = rs.root_id AND 
+JOIN root_stats rs
+ON
+  d.root_id = rs.root_id AND
   d.timestamp = rs.max_timestamp
 ORDER BY d.timestamp DESC;
 
--- Returns each tab in a container together with its (recursive) root id and
+-- Returns each tab in a space together with its (recursive) root id and
 -- depth from that root. Drives the grouped-list rendering path. The provider
 -- handles ordering, filter, and direction.
-tabsWithRootAndDepth(REQUIRED :container_id AS TEXT OR NULL):
-  -- Seed the recursion from every tab in the target container whose parent is
-  -- not also in this container (parent NULL, parent missing, or parent moved
+tabsWithRootAndDepth(REQUIRED :space_uuid AS TEXT OR NULL):
+  -- Seed the recursion from every tab in the target space whose parent is
+  -- not also in this space (parent NULL, parent missing, or parent moved
   -- away). This treats a child whose ancestor lives elsewhere as a *local
-  -- root* rather than dropping it from the grouped view entirely.
+  -- root* rather than dropping it from the grouped view entirely. A parent
+  -- that switched folder within the same space still counts as "in scope"
+  -- here — folder is not part of this boundary, only space is.
   WITH RECURSIVE walk(id, parent_id, order_key, root_id, depth) AS (
     SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth
     FROM tab t
-    WHERE t.container_id IS :container_id
+    WHERE t.space_uuid IS :space_uuid
       AND (
         t.parent_id IS NULL
         OR NOT EXISTS (
           SELECT 1 FROM tab p
-          WHERE p.id = t.parent_id AND p.container_id IS :container_id
+          WHERE p.id = t.parent_id AND p.space_uuid IS :space_uuid
         )
       )
 
@@ -1016,7 +1260,7 @@ tabsWithRootAndDepth(REQUIRED :container_id AS TEXT OR NULL):
     SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1
     FROM tab t
     INNER JOIN walk w ON t.parent_id = w.id
-    WHERE t.container_id IS :container_id
+    WHERE t.space_uuid IS :space_uuid
   )
   SELECT id, parent_id, order_key, root_id, depth FROM walk;
 
@@ -1033,41 +1277,55 @@ tabsWithRootAndDepth(REQUIRED :container_id AS TEXT OR NULL):
 -- entire subtree.
 lastSubtreeTabIdByOrderKey(
   :tab_id AS TEXT,
-  REQUIRED :container_id AS TEXT OR NULL
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL
 ):
   WITH RECURSIVE subtree AS (
     SELECT id, order_key FROM tab
-    WHERE id = :tab_id AND container_id IS :container_id
+    WHERE id = :tab_id
+      AND space_uuid IS :space_uuid AND folder_id IS :folder_id
+      AND tab_shelf = :tab_shelf
+      AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
     UNION ALL
     SELECT t.id, t.order_key
     FROM tab t
     INNER JOIN subtree s ON t.parent_id = s.id
-    WHERE t.container_id IS :container_id
+    WHERE t.space_uuid IS :space_uuid AND t.folder_id IS :folder_id
+      AND t.tab_shelf = :tab_shelf
+      AND (:tab_shelf != 2 OR t.container_id IS :scope_container_id)
   )
   SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1;
 
--- The tabs that render as siblings of :parent_id inside :container_id, in
--- storage order. Pass a null :parent_id for the container's root scope.
+-- The tabs that render as siblings of :parent_id inside the given scope, in
+-- storage order. Pass a null :parent_id for the scope's root.
 --
--- "Render as" is the point. A tab whose stored parent lives in another
--- container is drawn as a local root by `tabsWithRootAndDepth`, so it competes
--- for a slot among its own container's roots even though `parent_id` is set.
--- Matching `parent_id` raw would file it under a scope nothing else belongs to
--- and leave the root scope it is actually drawn in short of members — which is
+-- "Render as" is the point. A tab whose stored parent lives in another scope
+-- is drawn as a local root by `tabsWithRootAndDepth`, so it competes for a
+-- slot among its own scope's roots even though `parent_id` is set. Matching
+-- `parent_id` raw would file it under a scope nothing else belongs to and
+-- leave the root scope it is actually drawn in short of members — which is
 -- how `preservePromotedChildOrderOnClose` ends up with no anchors to rank
 -- promoted children against.
-containerScopeSiblings(
-  REQUIRED :container_id AS TEXT OR NULL,
+scopeSiblings(
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL,
   REQUIRED :parent_id AS TEXT OR NULL
 ):
   SELECT t.id, t.order_key
   FROM tab t
-  WHERE t.container_id IS :container_id
+  WHERE t.space_uuid IS :space_uuid AND t.folder_id IS :folder_id
+    AND t.tab_shelf = :tab_shelf
+    AND (:tab_shelf != 2 OR t.container_id IS :scope_container_id)
     AND (
       CASE
         WHEN EXISTS (
           SELECT 1 FROM tab p
-          WHERE p.id = t.parent_id AND p.container_id IS t.container_id
+          WHERE p.id = t.parent_id
+            AND p.space_uuid IS t.space_uuid AND p.folder_id IS t.folder_id
         ) THEN t.parent_id
         ELSE NULL
       END
@@ -1076,7 +1334,7 @@ containerScopeSiblings(
 
 -- Every descendant of :tab_id, wherever it lives. Cycle detection and the
 -- hierarchy pickers need the whole picture; anything that *closes* a subtree
--- wants `unorderedContainerTabDescendants` instead.
+-- wants `unorderedScopeTabDescendants` instead.
 unorderedTabDescendants:
   WITH RECURSIVE descendants AS (
       SELECT id, parent_id
@@ -1093,22 +1351,22 @@ unorderedTabDescendants:
   SELECT id, parent_id
   FROM descendants;
 
--- As `unorderedTabDescendants`, but the walk stops at the container the seed
--- tab lives in. Bulk-close actions are offered from a container-scoped view and
--- count what that view shows, so they must not reach into a tab that a site
--- assignment moved to another container — that tab is a root of its own there.
-unorderedContainerTabDescendants:
+-- As `unorderedTabDescendants`, but the walk stops at the seed's space and
+-- folder. Bulk-close actions are offered from a scope-scoped view and count
+-- what that view shows, so they must not reach into a tab that was moved to
+-- another space or folder — that tab is a root of its own there.
+unorderedScopeTabDescendants:
   WITH RECURSIVE descendants AS (
-      SELECT id, parent_id, container_id
+      SELECT id, parent_id, space_uuid, folder_id
       FROM tab
       WHERE id = :tab_id
 
       UNION ALL
 
-      SELECT t.id, t.parent_id, t.container_id
+      SELECT t.id, t.parent_id, t.space_uuid, t.folder_id
       FROM tab t
       JOIN descendants d ON t.parent_id = d.id
-      WHERE t.container_id IS d.container_id
+      WHERE t.space_uuid IS d.space_uuid AND t.folder_id IS d.folder_id
   )
   SELECT id, parent_id
   FROM descendants;
@@ -1120,52 +1378,62 @@ previousTabByTimestamp:
     FROM tab
   )
   SELECT prev_tab_id
-  FROM ranked_tabs 
+  FROM ranked_tabs
   WHERE id = :tab_id;
 
-previousTabByOrderKey(:tab_id AS TEXT, :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
+previousTabByOrderKey(
+  :tab_id AS TEXT,
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL,
+  :skip_scope_check AS BOOL
+):
   WITH ranked_tabs AS (
     SELECT id, order_key,
           LAG(id) OVER (ORDER BY order_key) as prev_tab_id
     FROM tab
-    WHERE :skip_container_check OR container_id IS :container_id
+    WHERE :skip_scope_check
+      OR (
+        space_uuid IS :space_uuid AND folder_id IS :folder_id
+        AND tab_shelf = :tab_shelf
+        AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
+      )
   )
   SELECT prev_tab_id
-  FROM ranked_tabs 
+  FROM ranked_tabs
   WHERE id = :tab_id;
 
-nextTabByOrderKey(:tab_id AS TEXT, :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
+nextTabByOrderKey(
+  :tab_id AS TEXT,
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  REQUIRED :scope_container_id AS TEXT OR NULL,
+  :skip_scope_check AS BOOL
+):
   WITH ranked_tabs AS (
     SELECT id, order_key,
           LEAD(id) OVER (ORDER BY order_key) as next_tab_id
     FROM tab
-    WHERE :skip_container_check OR container_id IS :container_id
+    WHERE :skip_scope_check
+      OR (
+        space_uuid IS :space_uuid AND folder_id IS :folder_id
+        AND tab_shelf = :tab_shelf
+        AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
+      )
   )
   SELECT next_tab_id
-  FROM ranked_tabs 
+  FROM ranked_tabs
   WHERE id = :tab_id;
 
-containerByContextualIdentity:
-  SELECT * FROM container
-  WHERE container.metadata ->> '$.contextualIdentity' = :contextId
-  LIMIT 1;
-
-containerIdsByContextualIdentities:
-  SELECT
-    id,
-    CAST(container.metadata ->> '$.contextualIdentity' AS TEXT) AS contextual_identity
-  FROM container
-  WHERE CAST(container.metadata ->> '$.contextualIdentity' AS TEXT) IN :contextIds;
-
 containersToClearOnExit:
-  SELECT container.metadata ->> '$.contextualIdentity' AS contextual_identity
-  FROM container
-  WHERE
-    json_extract(container.metadata, '$.clearDataOnExit') = 1
-    AND container.metadata ->> '$.contextualIdentity' IS NOT NULL;
+  SELECT cl.container_id AS contextual_identity
+  FROM container_local cl
+  WHERE cl.clear_data_on_exit = 1;
 
--- Every tab WebLibre knows about, with its container and whether that container
--- opted out of history recording. Two consumers:
+-- Every tab WebLibre knows about, with its container and whether that
+-- container opted out of history recording. Two consumers:
 --
 --   * the exclude-from-history snapshot replicated to native — the tab is the
 --     key because a container without cookie isolation shares the default Gecko
@@ -1175,34 +1443,140 @@ containersToClearOnExit:
 --   * VisitContainerRecorder, which needs the tab→container mapping in memory to
 --     resolve a visit at the instant it is reported, before an in-flight
 --     container reassignment can rewrite it.
+--
+-- `tab.engine_tab_id` is the key, not `tab.id`: native only ever knows a tab
+-- by its engine session id, and a cold tab (no session, PLAN §7.4) has none
+-- to report here — it isn't a candidate for a native-reported visit yet.
 historyExclusionTabs:
   SELECT
-    tab.id AS tab_id,
+    tab.engine_tab_id AS tab_id,
     tab.container_id AS container_id,
-    COALESCE(json_extract(container.metadata, '$.excludeFromHistory'), 0)
-      AS excluded
+    COALESCE(cl.exclude_from_history, 0) AS excluded
   FROM tab
-  LEFT JOIN container ON container.id = tab.container_id;
+  LEFT JOIN container_local cl ON cl.container_id = tab.container_id
+  WHERE tab.engine_tab_id IS NOT NULL;
 
--- Gecko contextual identities of containers excluded from history. Only cookie-
--- isolated containers have one; native uses it as the fallback before the first
+-- Cookie-isolated containers excluded from history. Only cookie-isolated
+-- containers have one; native uses it as the fallback before the first
 -- tab snapshot arrives (cold start, headless path).
 excludedHistoryContextIds:
-  SELECT container.metadata ->> '$.contextualIdentity' AS context_id
-  FROM container
-  WHERE
-    json_extract(container.metadata, '$.excludeFromHistory') = 1
-    AND container.metadata ->> '$.contextualIdentity' IS NOT NULL;
+  SELECT container_id AS context_id
+  FROM container_local
+  WHERE exclude_from_history = 1;
 
-tabsInIsolationGroup:
-  SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = :contextId;
+-- ===========================================================================
+-- Spaces / folders / splits.
+-- ===========================================================================
 
-allIsolationContextIds:
-  SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL;
+folderChildren(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :parent_folder_id AS TEXT OR NULL):
+  SELECT * FROM tab_folder
+  WHERE space_uuid IS :space_uuid AND parent_folder_id IS :parent_folder_id
+  ORDER BY order_key;
 
-isolatedContextContainerPairs:
-  SELECT DISTINCT t.isolation_context_id, t.container_id
-  FROM tab t
-  WHERE t.tab_mode = 2
-    AND t.isolation_context_id IS NOT NULL
-    AND t.container_id IS NOT NULL;
+folderSubtreeIds:
+  WITH RECURSIVE sub(id) AS (
+    SELECT id FROM tab_folder WHERE id = :folder_id
+    UNION ALL
+    SELECT f.id FROM tab_folder f JOIN sub ON f.parent_folder_id = sub.id
+  )
+  SELECT id FROM sub;
+
+splitsInScope(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT OR NULL):
+  SELECT * FROM tab_split
+  WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+  ORDER BY order_key;
+
+splitMembers:
+  SELECT id, split_index FROM tab WHERE split_id = :split_id ORDER BY split_index;
+
+essentialTabIds(REQUIRED :container_id AS TEXT OR NULL):
+  SELECT id FROM tab
+  WHERE tab_shelf = 2 AND container_id IS :container_id
+  ORDER BY order_key;
+
+-- Slots in a scope's child sequence that are plain tabs (root, not part of a
+-- split, not essential). Combined with `scopeSlotFolders` and
+-- `scopeSlotSplits` — sorted client-side on (shelf DESC, order_key ASC) by
+-- the DAO — this is the local source of Zen's ordered `children` array
+-- (PLAN §4.2, §6.6). Split members are excluded (the split occupies the slot,
+-- PLAN §6.5) and so are essentials.
+scopeSlotTabs(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT OR NULL):
+  SELECT id, order_key, tab_shelf AS shelf FROM tab
+  WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+    AND split_id IS NULL AND tab_shelf IN (0, 1) AND tab_mode = 0
+  ORDER BY tab_shelf DESC, order_key ASC;
+
+-- Folders occupy a slot in their parent scope's child sequence, ranked
+-- alongside normal (non-pinned) tabs.
+scopeSlotFolders(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT OR NULL):
+  SELECT id, order_key FROM tab_folder
+  WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id
+  ORDER BY order_key ASC;
+
+-- Splits occupy a slot in their scope's child sequence; `is_pinned` places
+-- them in the pinned or normal section like a tab's `tab_shelf` would.
+scopeSlotSplits(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT OR NULL):
+  SELECT id, order_key, is_pinned FROM tab_split
+  WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id
+  ORDER BY is_pinned DESC, order_key ASC;
+
+-- Leading/trailing keys across every slot kind in a scope, so a folder or
+-- split can be ranked among tabs.
+scopeLeadingSlotKey(
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  :bucket AS INTEGER
+):
+  SELECT lexo_rank_previous(
+    :bucket,
+    (
+      SELECT MIN(order_key) FROM (
+        SELECT order_key FROM tab
+        WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND tab_shelf = :tab_shelf
+        UNION ALL
+        SELECT order_key FROM tab_folder
+        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 0
+        UNION ALL
+        SELECT order_key FROM tab_split
+        WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND is_pinned = (:tab_shelf = 1)
+      )
+    )
+  );
+
+scopeTrailingSlotKey(
+  REQUIRED :space_uuid AS TEXT OR NULL,
+  REQUIRED :folder_id AS TEXT OR NULL,
+  :tab_shelf AS INTEGER,
+  :bucket AS INTEGER
+):
+  SELECT lexo_rank_next(
+    :bucket,
+    (
+      SELECT MAX(order_key) FROM (
+        SELECT order_key FROM tab
+        WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND tab_shelf = :tab_shelf
+        UNION ALL
+        SELECT order_key FROM tab_folder
+        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 0
+        UNION ALL
+        SELECT order_key FROM tab_split
+        WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND is_pinned = (:tab_shelf = 1)
+      )
+    )
+  );
+
+tabByEngineId:
+  SELECT * FROM tab WHERE engine_tab_id = :engine_tab_id;
+
+coldTabIds:
+  SELECT id FROM tab WHERE engine_tab_id IS NULL AND tab_mode = 0;
+
+liveTabCount:
+  SELECT COUNT(*) AS count FROM tab WHERE engine_tab_id IS NOT NULL;
+
+tabsInSpace(REQUIRED :space_uuid AS TEXT OR NULL):
+  SELECT * FROM tab WHERE space_uuid IS :space_uuid ORDER BY tab_shelf DESC, order_key;
+
+tabsInContainer:
+  SELECT * FROM tab WHERE container_id IS :container_id ORDER BY order_key;
