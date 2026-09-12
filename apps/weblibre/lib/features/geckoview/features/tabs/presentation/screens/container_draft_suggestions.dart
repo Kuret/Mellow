@@ -182,9 +182,10 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                                     EquatableValue(selectedTabs),
                                   ),
                                 )
-                                .value ??
-                            selectedContainer.value?.topic
-                      : selectedContainer.value?.topic,
+                                    .value ??
+                            selectedContainer.value?.topic ??
+                            ''
+                      : selectedContainer.value?.topic ?? '',
                 );
 
                 if (!context.mounted) return;
