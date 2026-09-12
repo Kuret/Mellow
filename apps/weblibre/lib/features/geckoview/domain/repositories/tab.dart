@@ -1156,17 +1156,13 @@ class TabRepository extends _$TabRepository {
   /// row must not be promoted back to live by it. Closed ids are deleted
   /// rather than demoted.
   Future<void> _syncTabs(TabDatabase db, List<String> engineTabIds) async {
-    final skipped = _demoting.toSet()
-      // A session whose row an applied batch already deleted is on its way
-      // out; letting `syncTabs` see it would re-insert the row as a brand new
-      // tab and resurrect what the remote deleted.
-      ..addAll(await db.tabDao.pendingEngineCloseIds());
+    final demoting = _demoting.toSet();
     await db.tabDao.syncTabs(
-      engineTabIds: skipped.isEmpty
+      engineTabIds: demoting.isEmpty
           ? engineTabIds
           : [
               for (final id in engineTabIds)
-                if (!skipped.contains(id)) id,
+                if (!demoting.contains(id)) id,
             ],
       defaultSpaceUuid: ref.read(selectedSpaceProvider),
       closingTabIds: _closing.toSet(),

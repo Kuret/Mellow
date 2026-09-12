@@ -2197,6 +2197,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   }) {
     return db.transaction(() async {
       final engineIds = engineTabIds.toSet();
+      // A session whose row an applied sync batch already deleted is on its
+      // way out; reconciling against it would re-insert the row as a brand
+      // new tab and resurrect what the remote deleted.
+      final queuedForClose = await pendingEngineCloseIds();
+      engineIds.removeAll(queuedForClose);
 
       final liveQuery = selectOnly(db.tab)
         ..addColumns([db.tab.id, db.tab.engineTabId, db.tab.tabMode])
@@ -2269,7 +2274,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           });
         }
 
-        final missing = engineTabIds
+        final missing = engineIds
             .where((id) => !knownIds.contains(id))
             .toSet();
         if (missing.isNotEmpty) {
