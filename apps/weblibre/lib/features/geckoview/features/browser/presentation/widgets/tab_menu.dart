@@ -806,6 +806,13 @@ class _PinTabMenuItem extends ConsumerWidget {
     final isSplitMember = splitId != null && splitSize > 1;
     final showSpaceAndFolderItems =
         !isEssential && !isPrivate && !isSplitMember;
+    // A folder member is pinned by definition (Zen keeps folders in the
+    // pinned section): "Unpin tab" leaves the folder, "Remove from folder"
+    // keeps it pinned at the space root. "Pin tab" makes no sense for a
+    // member, so a row that is somehow in a folder without being pinned
+    // only gets the folder actions.
+    final isFolderMember = folderId != null && !isEssential;
+    final showPinItem = isPinned || !isFolderMember;
     // Unloading (PLAN §7.4) is for live, regular, normal-shelf tabs that are
     // not on screen — the same rule [TabRepository.demoteToCold] enforces.
     final isSelected = ref.watch(selectedTabProvider) == selectedTabId;
@@ -819,18 +826,22 @@ class _PinTabMenuItem extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        MenuItemButton(
-          closeOnActivate: false,
-          onPressed: () async {
-            await _setShelf(ref, isPinned ? TabShelf.normal : TabShelf.pinned);
+        if (showPinItem)
+          MenuItemButton(
+            closeOnActivate: false,
+            onPressed: () async {
+              await _setShelf(
+                ref,
+                isPinned ? TabShelf.normal : TabShelf.pinned,
+              );
 
-            if (context.mounted) {
-              MenuController.maybeOf(context)?.close();
-            }
-          },
-          leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
-          child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
-        ),
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
+            leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
+            child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+          ),
         MenuItemButton(
           closeOnActivate: false,
           onPressed: () async {
