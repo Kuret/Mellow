@@ -154,55 +154,60 @@ void main() {
     expect(await siblings(bNormal, 'a1'), isEmpty);
   });
 
-  test(
-    'scopeChildSlots lists pinned first, then folders, splits and tabs by key',
-    () async {
-      // Rebuild space A's normal shelf with explicit keys so the interleaving
-      // is unambiguous: a1 < folder < split < a2.
-      var rank = LexoRank.middle();
-      final keys = <String>[];
-      for (var i = 0; i < 4; i++) {
-        keys.add(rank.value);
-        rank = rank.genNext();
-      }
-      await (db.tab.update()..where((t) => t.id.equals('a1'))).write(
-        TabCompanion(orderKey: Value(keys[0])),
-      );
-      await (db.tabFolder.update()..where((f) => f.id.equals(folderF))).write(
-        TabFolderCompanion(orderKey: Value(keys[1])),
-      );
-      await seedTab(db, 's1', spaceUuid: spaceA);
-      await seedTab(db, 's2', spaceUuid: spaceA);
-      await db.tabSplitDao.insertSplit(
-        TabSplitData(id: 'split', spaceUuid: spaceA, orderKey: keys[2]),
-      );
-      await db.tabSplitDao.setMembers('split', ['s1', 's2']);
-      await (db.tab.update()..where((t) => t.id.equals('a2'))).write(
-        TabCompanion(orderKey: Value(keys[3])),
-      );
+  test('scopeChildSlots lists the pinned section, folders included, then the '
+      'normal slots by key', () async {
+    // Rebuild space A with explicit keys so the interleaving is
+    // unambiguous. Folders live in the pinned section (Zen), so the pinned
+    // sequence is ap1 < folder < ap2 and the normal one a1 < split < a2.
+    var rank = LexoRank.middle();
+    final keys = <String>[];
+    for (var i = 0; i < 6; i++) {
+      keys.add(rank.value);
+      rank = rank.genNext();
+    }
+    await (db.tab.update()..where((t) => t.id.equals('ap1'))).write(
+      TabCompanion(orderKey: Value(keys[0])),
+    );
+    await (db.tab.update()..where((t) => t.id.equals('ap2'))).write(
+      TabCompanion(orderKey: Value(keys[2])),
+    );
+    await (db.tab.update()..where((t) => t.id.equals('a1'))).write(
+      TabCompanion(orderKey: Value(keys[3])),
+    );
+    await (db.tabFolder.update()..where((f) => f.id.equals(folderF))).write(
+      TabFolderCompanion(orderKey: Value(keys[1])),
+    );
+    await seedTab(db, 's1', spaceUuid: spaceA);
+    await seedTab(db, 's2', spaceUuid: spaceA);
+    await db.tabSplitDao.insertSplit(
+      TabSplitData(id: 'split', spaceUuid: spaceA, orderKey: keys[4]),
+    );
+    await db.tabSplitDao.setMembers('split', ['s1', 's2']);
+    await (db.tab.update()..where((t) => t.id.equals('a2'))).write(
+      TabCompanion(orderKey: Value(keys[5])),
+    );
 
-      final slots = await db.tabDao.scopeChildSlots(spaceA, null);
-      expect(
-        [for (final slot in slots) (slot.kind, slot.id)],
-        [
-          (ScopeSlotKind.tab, 'ap1'),
-          (ScopeSlotKind.tab, 'ap2'),
-          (ScopeSlotKind.tab, 'a1'),
-          (ScopeSlotKind.folder, folderF),
-          (ScopeSlotKind.split, 'split'),
-          (ScopeSlotKind.tab, 'a2'),
-        ],
-      );
-      expect(slots.take(2).every((s) => s.shelf == TabShelf.pinned), isTrue);
-      expect(slots.skip(2).every((s) => s.shelf == TabShelf.normal), isTrue);
-      // Split members and the folder's tabs are not slots of the space root.
-      final ids = slots.map((s) => s.id).toSet();
-      expect(ids, isNot(contains('s1')));
-      expect(ids, isNot(contains('s2')));
-      expect(ids, isNot(contains('f1')));
+    final slots = await db.tabDao.scopeChildSlots(spaceA, null);
+    expect(
+      [for (final slot in slots) (slot.kind, slot.id)],
+      [
+        (ScopeSlotKind.tab, 'ap1'),
+        (ScopeSlotKind.folder, folderF),
+        (ScopeSlotKind.tab, 'ap2'),
+        (ScopeSlotKind.tab, 'a1'),
+        (ScopeSlotKind.split, 'split'),
+        (ScopeSlotKind.tab, 'a2'),
+      ],
+    );
+    expect(slots.take(3).every((s) => s.shelf == TabShelf.pinned), isTrue);
+    expect(slots.skip(3).every((s) => s.shelf == TabShelf.normal), isTrue);
+    // Split members and the folder's tabs are not slots of the space root.
+    final ids = slots.map((s) => s.id).toSet();
+    expect(ids, isNot(contains('s1')));
+    expect(ids, isNot(contains('s2')));
+    expect(ids, isNot(contains('f1')));
 
-      final folderSlots = await db.tabDao.scopeChildSlots(spaceA, folderF);
-      expect([for (final s in folderSlots) s.id], ['f1', 'f2']);
-    },
-  );
+    final folderSlots = await db.tabDao.scopeChildSlots(spaceA, folderF);
+    expect([for (final s in folderSlots) s.id], ['f1', 'f2']);
+  });
 }

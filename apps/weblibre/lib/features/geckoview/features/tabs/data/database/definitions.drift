@@ -1516,10 +1516,11 @@ scopeSlotTabs(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT 
     AND split_id IS NULL AND tab_shelf IN (0, 1) AND tab_mode = 0
   ORDER BY tab_shelf DESC, order_key ASC;
 
--- Folders occupy a slot in their parent scope's child sequence, ranked
--- alongside normal (non-pinned) tabs.
+-- Folders occupy a slot in their parent scope's child sequence. Zen keeps
+-- folders in the pinned section, so they rank alongside pinned tabs
+-- (shelf 1), interleaved by `order_key`.
 scopeSlotFolders(REQUIRED :space_uuid AS TEXT OR NULL, REQUIRED :folder_id AS TEXT OR NULL):
-  SELECT id, order_key FROM tab_folder
+  SELECT id, order_key, 1 AS shelf FROM tab_folder
   WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id
   ORDER BY order_key ASC;
 
@@ -1546,7 +1547,7 @@ scopeLeadingSlotKey(
         WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND tab_shelf = :tab_shelf
         UNION ALL
         SELECT order_key FROM tab_folder
-        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 0
+        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 1
         UNION ALL
         SELECT order_key FROM tab_split
         WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND is_pinned = (:tab_shelf = 1)
@@ -1568,7 +1569,7 @@ scopeTrailingSlotKey(
         WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND tab_shelf = :tab_shelf
         UNION ALL
         SELECT order_key FROM tab_folder
-        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 0
+        WHERE space_uuid IS :space_uuid AND parent_folder_id IS :folder_id AND :tab_shelf = 1
         UNION ALL
         SELECT order_key FROM tab_split
         WHERE space_uuid IS :space_uuid AND folder_id IS :folder_id AND is_pinned = (:tab_shelf = 1)

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 
 import '../data/database/tab_db_test_helpers.dart';
@@ -53,10 +54,13 @@ void main() {
     );
 
     test(
-      "createFolder ranks after the scope's tabs; rename and collapse",
+      "createFolder ranks after the pinned section's slots; rename and collapse",
       () async {
         final h = openRepositoryHarness();
         await seedSpaces(h.db, ['s']);
+        // Folders live in the pinned section: a new one lands after the
+        // space's pinned tabs, wherever the normal tabs are keyed.
+        await seedTab(h.db, 'p', spaceUuid: 's', shelf: TabShelf.pinned);
         await seedTab(h.db, 't', spaceUuid: 's');
         final repo = h.container.read(folderRepositoryProvider.notifier);
 
@@ -64,7 +68,7 @@ void main() {
         expect(folder.name, 'Folder');
         expect(folder.spaceUuid, 's');
         expect(
-          folder.orderKey.compareTo((await summaryOf(h.db, 't')).orderKey),
+          folder.orderKey.compareTo((await summaryOf(h.db, 'p')).orderKey),
           greaterThan(0),
         );
 

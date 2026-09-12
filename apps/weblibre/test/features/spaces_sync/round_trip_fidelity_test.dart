@@ -57,8 +57,9 @@ void main() {
           .read(spacesProjectionProvider)
           .project();
       final space = projected[space1]!.data as ZenSpaceRecord;
-      // The space's children name the root folder, never its members.
-      expect(space.children, ['t1', 't2', 'f1', 'sp1']);
+      // The space's children name the root folder, never its members; the
+      // folder sits in the pinned section, ahead of the normal tabs.
+      expect(space.children, ['t1', 'f1', 't2', 'sp1']);
       final f1 = projected['f1']!.data as ZenFolderRecord;
       expect(f1.children, ['t3', 'f2']);
       final f2 = projected['f2']!.data as ZenFolderRecord;

@@ -469,9 +469,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     skipSpaceCheck: skipSpaceCheck,
   );
 
-  /// The ordered child sequence of `(spaceUuid, folderId)`: pinned slots
-  /// first, then folders, splits and normal tabs interleaved by `order_key`.
-  /// Split members and essentials are not slots (PLAN §6.5, §6.6).
+  /// The ordered child sequence of `(spaceUuid, folderId)`, Zen's
+  /// `#childSequence`: the pinned section first — pinned tabs, folders and
+  /// pinned splits interleaved by `order_key` — then normal tabs and splits
+  /// by `order_key`. Split members and essentials are not slots (PLAN §6.5,
+  /// §6.6).
   Future<List<ScopeSlot>> scopeChildSlots(
     String? spaceUuid,
     String? folderId,
@@ -499,7 +501,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           id: folder.id,
           kind: ScopeSlotKind.folder,
           orderKey: folder.orderKey,
-          shelf: TabShelf.normal,
+          shelf: TabShelf.values[folder.shelf],
         ),
       for (final split in splits)
         ScopeSlot(

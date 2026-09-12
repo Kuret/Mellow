@@ -23,6 +23,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/scope_slot.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
@@ -41,9 +42,7 @@ class FolderRepository extends _$FolderRepository {
   }) async {
     final dao = ref.read(tabDatabaseProvider).tabFolderDao;
     final orderKey = await dao
-        .trailingSlotKey(
-          TabOrderScope.normal(spaceUuid: spaceUuid, folderId: parentFolderId),
-        )
+        .trailingSlotKey(_folderSlotScope(spaceUuid, parentFolderId))
         .getSingle();
     final folder = TabFolderData(
       id: ZenIds.newGroupId(),
@@ -101,10 +100,7 @@ class FolderRepository extends _$FolderRepository {
   }) async {
     final db = ref.read(tabDatabaseProvider);
     final dao = db.tabFolderDao;
-    final scope = TabOrderScope.normal(
-      spaceUuid: spaceUuid,
-      folderId: parentFolderId,
-    );
+    final scope = _folderSlotScope(spaceUuid, parentFolderId);
     final orderKey = await _slotKeyAfter(
       spaceUuid,
       parentFolderId,
@@ -188,3 +184,14 @@ class FolderRepository extends _$FolderRepository {
   @override
   void build() {}
 }
+
+/// The slot scope a folder ranks in. Zen keeps folders in the pinned
+/// section, so a root folder sits among the space's pinned tabs and a nested
+/// one among its parent folder's members (`scopeChildSlots`).
+TabOrderScope _folderSlotScope(String? spaceUuid, String? parentFolderId) =>
+    TabOrderScope(
+      spaceUuid: spaceUuid,
+      folderId: parentFolderId,
+      shelf: TabShelf.pinned,
+      containerId: null,
+    );

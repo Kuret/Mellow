@@ -167,7 +167,9 @@ List<ZenIncoming> roundTripFixture() => [
         'texture': null,
       },
       containerGuid: null,
-      children: ['t1', 't2', 'f1', 'sp1'],
+      // Zen's strip order: the pinned section (pinned tabs, folders, pinned
+      // splits) first, then the normal tabs and splits.
+      children: ['t1', 'f1', 't2', 'sp1'],
     ),
   ),
   record(

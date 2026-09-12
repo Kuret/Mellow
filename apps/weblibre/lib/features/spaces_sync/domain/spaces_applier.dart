@@ -420,11 +420,15 @@ class SpacesApplier {
         final current = await _folders.getFolder(data.folderId);
         final live = data.live == null ? null : jsonEncode(data.live);
         if (current == null) {
+          // Folders live in the pinned section (Zen), so a new one is
+          // appended to its parent scope's pinned slots.
           final orderKey = await _db.tabFolderDao
               .trailingSlotKey(
-                TabOrderScope.normal(
+                TabOrderScope(
                   spaceUuid: data.workspaceUuid,
                   folderId: data.parentFolderId,
+                  shelf: TabShelf.pinned,
+                  containerId: null,
                 ),
               )
               .getSingle();

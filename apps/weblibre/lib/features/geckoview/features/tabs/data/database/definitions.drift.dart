@@ -12413,7 +12413,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
     required String? folderId,
   }) {
     return customSelect(
-      'SELECT id, order_key FROM tab_folder WHERE space_uuid IS ?1 AND parent_folder_id IS ?2 ORDER BY order_key ASC',
+      'SELECT id, order_key, 1 AS shelf FROM tab_folder WHERE space_uuid IS ?1 AND parent_folder_id IS ?2 ORDER BY order_key ASC',
       variables: [
         i0.Variable<String>(spaceUuid),
         i0.Variable<String>(folderId),
@@ -12423,6 +12423,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
       (i0.QueryRow row) => ScopeSlotFoldersResult(
         id: row.read<String>('id'),
         orderKey: row.read<String>('order_key'),
+        shelf: row.read<int>('shelf'),
       ),
     );
   }
@@ -12454,7 +12455,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
     required int tabShelf,
   }) {
     return customSelect(
-      'SELECT lexo_rank_previous(?1, (SELECT MIN(order_key) FROM (SELECT order_key FROM tab WHERE space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 UNION ALL SELECT order_key FROM tab_folder WHERE space_uuid IS ?2 AND parent_folder_id IS ?3 AND ?4 = 0 UNION ALL SELECT order_key FROM tab_split WHERE space_uuid IS ?2 AND folder_id IS ?3 AND is_pinned =(?4 = 1)))) AS _c0',
+      'SELECT lexo_rank_previous(?1, (SELECT MIN(order_key) FROM (SELECT order_key FROM tab WHERE space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 UNION ALL SELECT order_key FROM tab_folder WHERE space_uuid IS ?2 AND parent_folder_id IS ?3 AND ?4 = 1 UNION ALL SELECT order_key FROM tab_split WHERE space_uuid IS ?2 AND folder_id IS ?3 AND is_pinned =(?4 = 1)))) AS _c0',
       variables: [
         i0.Variable<int>(bucket),
         i0.Variable<String>(spaceUuid),
@@ -12472,7 +12473,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
     required int tabShelf,
   }) {
     return customSelect(
-      'SELECT lexo_rank_next(?1, (SELECT MAX(order_key) FROM (SELECT order_key FROM tab WHERE space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 UNION ALL SELECT order_key FROM tab_folder WHERE space_uuid IS ?2 AND parent_folder_id IS ?3 AND ?4 = 0 UNION ALL SELECT order_key FROM tab_split WHERE space_uuid IS ?2 AND folder_id IS ?3 AND is_pinned =(?4 = 1)))) AS _c0',
+      'SELECT lexo_rank_next(?1, (SELECT MAX(order_key) FROM (SELECT order_key FROM tab WHERE space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 UNION ALL SELECT order_key FROM tab_folder WHERE space_uuid IS ?2 AND parent_folder_id IS ?3 AND ?4 = 1 UNION ALL SELECT order_key FROM tab_split WHERE space_uuid IS ?2 AND folder_id IS ?3 AND is_pinned =(?4 = 1)))) AS _c0',
       variables: [
         i0.Variable<int>(bucket),
         i0.Variable<String>(spaceUuid),
@@ -12628,7 +12629,12 @@ class ScopeSlotTabsResult {
 class ScopeSlotFoldersResult {
   final String id;
   final String orderKey;
-  ScopeSlotFoldersResult({required this.id, required this.orderKey});
+  final int shelf;
+  ScopeSlotFoldersResult({
+    required this.id,
+    required this.orderKey,
+    required this.shelf,
+  });
 }
 
 class ScopeSlotSplitsResult {
