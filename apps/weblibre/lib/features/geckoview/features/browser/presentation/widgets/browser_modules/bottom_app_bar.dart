@@ -50,6 +50,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_accordion.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
@@ -61,6 +63,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -459,6 +462,152 @@ class BrowserTabBar extends HookConsumerWidget {
         ? ContainerColors.palette(context, effectiveContainerColor)
         : null;
 
+    void horizontalDragStartHandler(DragStartDetails details) {
+      dragStartPosition.value = details.globalPosition;
+    }
+
+    Future<void> horizontalDragEndHandler(DragEndDetails details) async {
+      final distance = dragStartPosition.value - details.globalPosition;
+      const dismissThreshold = kToolbarHeight * 0.5;
+
+      if (isVertical) {
+        // Rail: horizontal swipe dismisses toward the docked edge, and
+        // the opposite (inward) swipe opens the tab view.
+        // distance = start - end, so a leftward swipe is positive dx.
+        final shouldDismiss = switch (tabBarPosition) {
+          TabBarPosition.left => distance.dx > dismissThreshold,
+          TabBarPosition.right => distance.dx < -dismissThreshold,
+          _ => false,
+        };
+        final shouldShowTabView = switch (tabBarPosition) {
+          TabBarPosition.left => distance.dx < -dismissThreshold,
+          TabBarPosition.right => distance.dx > dismissThreshold,
+          _ => false,
+        };
+        if (shouldDismiss) {
+          dismissToolbar();
+        } else if (shouldShowTabView) {
+          showTabView();
+        }
+      } else {
+        // Horizontal bar: horizontal swipe switches tabs.
+        if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
+          await switchTabsBy(distance.dx);
+        }
+      }
+    }
+
+    void verticalDragStartHandler(DragStartDetails details) {
+      dragStartPosition.value = details.globalPosition;
+    }
+
+    Future<void> verticalDragEndHandler(DragEndDetails details) async {
+      final distance = dragStartPosition.value - details.globalPosition;
+
+      if (isVertical) {
+        // Rail: vertical swipe switches tabs.
+        if (distance.dy.abs() > 50 && distance.dx.abs() < 20) {
+          await switchTabsBy(distance.dy);
+        }
+        return;
+      }
+
+      // Horizontal bar dismiss direction depends on position; the
+      // opposite (inward) swipe opens the tab view:
+      // - Bottom bar: swipe down to dismiss, swipe up for the tab view
+      // - Top bar: swipe up to dismiss, swipe down for the tab view
+      const dismissThreshold = kToolbarHeight * 0.5;
+      final shouldDismiss = switch (tabBarPosition) {
+        TabBarPosition.bottom =>
+          distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+        TabBarPosition.top =>
+          !distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+        _ => false,
+      };
+      final shouldShowTabView = switch (tabBarPosition) {
+        TabBarPosition.bottom =>
+          !distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+        TabBarPosition.top =>
+          distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
+        _ => false,
+      };
+      if (shouldDismiss) {
+        dismissToolbar();
+      } else if (shouldShowTabView) {
+        showTabView();
+      }
+    }
+
+    final actions = <Widget>[
+      PinnedAddonBar(axis: switcherAxis),
+      if (isSmallWebMode)
+        ReaderButton(
+          buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
+            onTap: isLoading
+                ? null
+                : () async {
+                    await ref
+                        .read(readerableScreenControllerProvider.notifier)
+                        .toggleReaderView(!readerActive);
+                  },
+            child: icon,
+          ),
+        ),
+      if (showMainToolbarTabsCount)
+        TabsCountButton(
+          selectedTabId: selectedTabId,
+          displayedSheet: displayedSheet,
+          showLongPressMenu: true,
+        ),
+      if (showMainToolbarNavigationButton)
+        NavigationMenuButton(selectedTabId: selectedTabId),
+    ];
+
+    if (wideRail) {
+      // The wide rail is the Arc/Zen sidebar (PLAN §9 W1): address row on
+      // top, the selected space's shelves filling the height, the toolbar
+      // buttons above the space switcher at the foot. The narrow rail keeps
+      // the rotated icon column below.
+      final uprightTitle = settings.tabBarLayout == TabBarLayout.compact
+          ? CompactAppBarTitle(containerColor: effectiveContainerColor)
+          : AppBarTitle(containerColor: effectiveContainerColor);
+      return WideRailLayout(
+        backgroundColor: effectiveContainerPalette?.surfaceColor,
+        showUrlRow: displayAppBar && showTabTitle,
+        showToolbar: displayAppBar,
+        urlRow: WideRailUrlRow(
+          title: uprightTitle,
+          collapsed: const WideRailCollapsedUrlButton(),
+        ),
+        tabs: const WideRailTabList(),
+        contextualToolbar: showContextualToolbar
+            ? ContextualToolbar(
+                selectedTabId: selectedTabId,
+                displayedSheet: displayedSheet,
+              )
+            : null,
+        toolbar: WideRailToolbarRow(
+          buttons: [
+            // The switcher-bar buttons (new tab, …) sit in the same row as
+            // the main actions: the rail has one toolbar row, not two bars.
+            if (stackingMode != TabBarStackingMode.disabled)
+              QuickSwitcherButtonRow(
+                selectedTabId: selectedTabId,
+                displayedSheet: displayedSheet,
+              ),
+            ...actions,
+          ],
+        ),
+        spaces: const SpaceIconRail(),
+        onHorizontalDragStart: enableGestures
+            ? horizontalDragStartHandler
+            : null,
+        onHorizontalDragEnd: enableGestures ? horizontalDragEndHandler : null,
+        onVerticalDragStart: enableGestures ? verticalDragStartHandler : null,
+        onVerticalDragEnd: enableGestures ? verticalDragEndHandler : null,
+      );
+    }
+
     return BrowserTabBarView(
       axis: switcherAxis,
       railOnLeft: tabBarPosition == TabBarPosition.left,
@@ -469,51 +618,16 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? isVertical && !wideRail
+          ? isVertical
                 ? RailAppBarTitle(
                     quarterTurns: railQuarterTurns,
                     containerColor: effectiveContainerColor,
-                  )
-                : isVertical
-                // A wide rail reads upright, like the horizontal bars, but the
-                // title still has to fit inside railWidth rather than the
-                // horizontal bar's much wider budget.
-                ? ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: resolvedRailWidth),
-                    child: settings.tabBarLayout == TabBarLayout.compact
-                        ? CompactAppBarTitle(
-                            containerColor: effectiveContainerColor,
-                          )
-                        : AppBarTitle(containerColor: effectiveContainerColor),
                   )
                 : settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(containerColor: effectiveContainerColor)
                 : AppBarTitle(containerColor: effectiveContainerColor)
           : null,
-      actions: [
-        PinnedAddonBar(axis: switcherAxis),
-        if (isSmallWebMode)
-          ReaderButton(
-            buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
-              onTap: isLoading
-                  ? null
-                  : () async {
-                      await ref
-                          .read(readerableScreenControllerProvider.notifier)
-                          .toggleReaderView(!readerActive);
-                    },
-              child: icon,
-            ),
-          ),
-        if (showMainToolbarTabsCount)
-          TabsCountButton(
-            selectedTabId: selectedTabId,
-            displayedSheet: displayedSheet,
-            showLongPressMenu: true,
-          ),
-        if (showMainToolbarNavigationButton)
-          NavigationMenuButton(selectedTabId: selectedTabId),
-      ],
+      actions: actions,
       quickTabSwitcher: _wrapQuickTabSwitcherWithButtonRow(
         axis: switcherAxis,
         // The button row lives on the switcher bar; when stacking is disabled
@@ -539,8 +653,8 @@ class BrowserTabBar extends HookConsumerWidget {
             axis: switcherAxis,
           ),
           // Space chips over the selected space's tabs (PLAN §9 W5). The
-          // rail renders the pair as the accordion, which on a wide rail is
-          // the tray's three-shelf structure in a column.
+          // narrow rail renders the pair as the accordion; the wide rail
+          // returned WideRailLayout above.
           TabBarStackingMode.spaceTabs =>
             isVertical
                 ? AccordionQuickTabSwitcher(axis: switcherAxis)
@@ -563,44 +677,21 @@ class BrowserTabBar extends HookConsumerWidget {
                     ],
                   ),
           // History fallback only on the MRU row, so empty-state history
-          // chips don't show twice. On the vertical rail this is only
-          // reached when the rail is wide (effectiveTabBarStackingMode()
-          // degrades twoLevel to accordion on the narrow rail); the two
-          // levels then share the rail's height.
-          TabBarStackingMode.twoLevel =>
-            isVertical
-                ? Column(
-                    children: [
-                      Expanded(
-                        child: QuickTabSwitcher(
-                          quickTabSwitcherMode:
-                              QuickTabSwitcherMode.containerTabs,
-                          enableHistoryFallback: false,
-                          axis: switcherAxis,
-                        ),
-                      ),
-                      Expanded(
-                        child: QuickTabSwitcher(
-                          quickTabSwitcherMode:
-                              QuickTabSwitcherMode.lastUsedTabs,
-                          axis: switcherAxis,
-                        ),
-                      ),
-                    ],
-                  )
-                : const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode:
-                            QuickTabSwitcherMode.containerTabs,
-                        enableHistoryFallback: false,
-                      ),
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-                      ),
-                    ],
-                  ),
+          // chips don't show twice. Never reached on the rail: the narrow
+          // rail degrades twoLevel to accordion (effectiveTabBarStackingMode)
+          // and the wide rail returned WideRailLayout above.
+          TabBarStackingMode.twoLevel => const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              QuickTabSwitcher(
+                quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+                enableHistoryFallback: false,
+              ),
+              QuickTabSwitcher(
+                quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+              ),
+            ],
+          ),
         },
       ),
       contextualToolbar: ContextualToolbar(
@@ -608,90 +699,10 @@ class BrowserTabBar extends HookConsumerWidget {
         displayedSheet: displayedSheet,
         axis: switcherAxis,
       ),
-      onHorizontalDragStart: !enableGestures
-          ? null
-          : (details) {
-              dragStartPosition.value = details.globalPosition;
-            },
-      onHorizontalDragEnd: !enableGestures
-          ? null
-          : (details) async {
-              final distance = dragStartPosition.value - details.globalPosition;
-              const dismissThreshold = kToolbarHeight * 0.5;
-
-              if (isVertical) {
-                // Rail: horizontal swipe dismisses toward the docked edge, and
-                // the opposite (inward) swipe opens the tab view.
-                // distance = start - end, so a leftward swipe is positive dx.
-                final shouldDismiss = switch (tabBarPosition) {
-                  TabBarPosition.left => distance.dx > dismissThreshold,
-                  TabBarPosition.right => distance.dx < -dismissThreshold,
-                  _ => false,
-                };
-                final shouldShowTabView = switch (tabBarPosition) {
-                  TabBarPosition.left => distance.dx < -dismissThreshold,
-                  TabBarPosition.right => distance.dx > dismissThreshold,
-                  _ => false,
-                };
-                if (shouldDismiss) {
-                  dismissToolbar();
-                } else if (shouldShowTabView) {
-                  showTabView();
-                }
-              } else {
-                // Horizontal bar: horizontal swipe switches tabs.
-                if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
-                  await switchTabsBy(distance.dx);
-                }
-              }
-            },
-      onVerticalDragStart: !enableGestures
-          ? null
-          : (details) {
-              dragStartPosition.value = details.globalPosition;
-            },
-      onVerticalDragEnd: !enableGestures
-          ? null
-          : (details) async {
-              final distance = dragStartPosition.value - details.globalPosition;
-
-              if (isVertical) {
-                // Rail: vertical swipe switches tabs.
-                if (distance.dy.abs() > 50 && distance.dx.abs() < 20) {
-                  await switchTabsBy(distance.dy);
-                }
-                return;
-              }
-
-              // Horizontal bar dismiss direction depends on position; the
-              // opposite (inward) swipe opens the tab view:
-              // - Bottom bar: swipe down to dismiss, swipe up for the tab view
-              // - Top bar: swipe up to dismiss, swipe down for the tab view
-              const dismissThreshold = kToolbarHeight * 0.5;
-              final shouldDismiss = switch (tabBarPosition) {
-                TabBarPosition.bottom =>
-                  distance.dy.isNegative &&
-                      distance.dy.abs() > dismissThreshold,
-                TabBarPosition.top =>
-                  !distance.dy.isNegative &&
-                      distance.dy.abs() > dismissThreshold,
-                _ => false,
-              };
-              final shouldShowTabView = switch (tabBarPosition) {
-                TabBarPosition.bottom =>
-                  !distance.dy.isNegative &&
-                      distance.dy.abs() > dismissThreshold,
-                TabBarPosition.top =>
-                  distance.dy.isNegative &&
-                      distance.dy.abs() > dismissThreshold,
-                _ => false,
-              };
-              if (shouldDismiss) {
-                dismissToolbar();
-              } else if (shouldShowTabView) {
-                showTabView();
-              }
-            },
+      onHorizontalDragStart: enableGestures ? horizontalDragStartHandler : null,
+      onHorizontalDragEnd: enableGestures ? horizontalDragEndHandler : null,
+      onVerticalDragStart: enableGestures ? verticalDragStartHandler : null,
+      onVerticalDragEnd: enableGestures ? verticalDragEndHandler : null,
     );
   }
 }
