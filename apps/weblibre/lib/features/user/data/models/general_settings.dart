@@ -756,8 +756,10 @@ class GeneralSettings with FastEquatable {
        ),
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
-       tabListDirection = tabListDirection ?? TabDirection.newestFirst,
-       tabBarDirection = tabBarDirection ?? TabDirection.newestFirst,
+       // Synced order is `order_key` ascending, the desktop's order, so new
+       // installs read the list the way the desktop sidebar shows it.
+       tabListDirection = tabListDirection ?? TabDirection.oldestFirst,
+       tabBarDirection = tabBarDirection ?? TabDirection.oldestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
        backgroundTabOpenAction =
