@@ -47,9 +47,14 @@ import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pw
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
@@ -653,35 +658,221 @@ class _TranslatePageMenuItem extends ConsumerWidget {
   }
 }
 
+/// Pin/essential/space/folder tab-organization actions, all driven off the
+/// tab's own DB row ([watchTabDbDataProvider]) rather than separate providers
+/// per field, since the menu needs [TabSummary.tabShelf], [TabSummary.folderId]
+/// and [TabSummary.spaceUuid] together to decide what to show.
 class _PinTabMenuItem extends ConsumerWidget {
   final String selectedTabId;
 
   const _PinTabMenuItem({required this.selectedTabId});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isPinned = ref.watch(
-      watchPinnedTabIdsProvider.select(
-        (v) => v.value?.contains(selectedTabId) ?? false,
+  Future<void> _setShelf(WidgetRef ref, TabShelf shelf) => ref
+      .read(tabDataRepositoryProvider.notifier)
+      .setShelf(
+        selectedTabId,
+        shelf,
+        activeSpaceUuid: ref.read(selectedSpaceProvider),
+      );
+
+  Future<void> _showMoveToSpaceDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String? currentSpaceUuid,
+  ) async {
+    final spaces = ref.read(watchSpacesProvider).value ?? const <SpaceData>[];
+    final otherSpaces = spaces
+        .where((space) => space.uuid != currentSpaceUuid)
+        .toList();
+
+    final target = await showDialog<SpaceData>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Move to space'),
+        children: [
+          for (final space in otherSpaces)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(dialogContext, space),
+              child: Text(space.name.isEmpty ? 'Space' : space.name),
+            ),
+        ],
       ),
     );
 
-    return MenuItemButton(
-      closeOnActivate: false,
-      onPressed: () async {
-        await ref
-            .read(tabDataRepositoryProvider.notifier)
-            .setPinned(selectedTabId, pinned: !isPinned);
+    if (target != null) {
+      await ref
+          .read(tabDataRepositoryProvider.notifier)
+          .moveTabToSpace(selectedTabId, target.uuid);
+    }
+  }
 
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
-      leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
-      child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+  Future<void> _showMoveToFolderDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String? spaceUuid,
+  ) async {
+    final folders =
+        ref.read(watchFoldersProvider(spaceUuid)).value ??
+        const <TabFolderData>[];
+
+    final choice = await showDialog<Object>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Move to folder'),
+        children: [
+          for (final folder in folders)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(dialogContext, folder),
+              child: Text(folder.name.isEmpty ? 'Folder' : folder.name),
+            ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(dialogContext, _newFolderChoice),
+            child: const Text('New folder…'),
+          ),
+        ],
+      ),
+    );
+
+    if (choice == null) return;
+
+    String? targetFolderId;
+    if (identical(choice, _newFolderChoice)) {
+      if (spaceUuid == null) return;
+
+      final nameController = TextEditingController();
+      final name = context.mounted
+          ? await showDialog<String>(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: const Text('New folder'),
+                content: TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  decoration: const InputDecoration(hintText: 'Folder name'),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.pop(dialogContext, nameController.text),
+                    child: const Text('Create'),
+                  ),
+                ],
+              ),
+            )
+          : null;
+
+      if (name == null) return;
+
+      final folder = await ref
+          .read(folderRepositoryProvider.notifier)
+          .createFolder(spaceUuid, name: name.isEmpty ? 'Folder' : name);
+      targetFolderId = folder.id;
+    } else {
+      targetFolderId = (choice as TabFolderData).id;
+    }
+
+    await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .moveTabToFolder(selectedTabId, targetFolderId);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabData = ref.watch(watchTabDbDataProvider(selectedTabId)).value;
+    final isPinned = tabData?.tabShelf == TabShelf.pinned;
+    final isEssential = tabData?.tabShelf == TabShelf.essential;
+    final folderId = tabData?.folderId;
+    final spaceUuid = tabData?.spaceUuid;
+    final isPrivate = tabData?.tabMode == TabModeDbValue.private;
+    final showSpaceAndFolderItems = !isEssential && !isPrivate;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MenuItemButton(
+          closeOnActivate: false,
+          onPressed: () async {
+            await _setShelf(ref, isPinned ? TabShelf.normal : TabShelf.pinned);
+
+            if (context.mounted) {
+              MenuController.maybeOf(context)?.close();
+            }
+          },
+          leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
+          child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+        ),
+        MenuItemButton(
+          closeOnActivate: false,
+          onPressed: () async {
+            await _setShelf(
+              ref,
+              isEssential ? TabShelf.normal : TabShelf.essential,
+            );
+
+            if (context.mounted) {
+              MenuController.maybeOf(context)?.close();
+            }
+          },
+          leadingIcon: Icon(
+            isEssential ? MdiIcons.starOffOutline : MdiIcons.starOutline,
+          ),
+          child: Text(
+            isEssential ? 'Remove from essentials' : 'Add to essentials',
+          ),
+        ),
+        if (showSpaceAndFolderItems)
+          MenuItemButton(
+            closeOnActivate: false,
+            onPressed: () async {
+              await _showMoveToSpaceDialog(context, ref, spaceUuid);
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
+            leadingIcon: const Icon(MdiIcons.arrowRightBoldOutline),
+            child: const Text('Move to space…'),
+          ),
+        if (showSpaceAndFolderItems)
+          MenuItemButton(
+            closeOnActivate: false,
+            onPressed: () async {
+              await _showMoveToFolderDialog(context, ref, spaceUuid);
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
+            leadingIcon: const Icon(MdiIcons.folderMoveOutline),
+            child: const Text('Move to folder…'),
+          ),
+        if (showSpaceAndFolderItems && folderId != null)
+          MenuItemButton(
+            closeOnActivate: false,
+            onPressed: () async {
+              await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .moveTabToFolder(selectedTabId, null);
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
+            leadingIcon: const Icon(MdiIcons.folderRemoveOutline),
+            child: const Text('Remove from folder'),
+          ),
+      ],
     );
   }
 }
+
+/// Sentinel choice value for the "New folder…" entry in the move-to-folder
+/// dialog, distinct from any real [TabFolderData].
+final Object _newFolderChoice = Object();
 
 class _NavigationButtonsRow extends ConsumerWidget {
   final String selectedTabId;
