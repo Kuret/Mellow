@@ -19,6 +19,62 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 
+/// Why the destructive-batch canary refused an upload (DESIGN "Hardening
+/// against Zen's stale-projection race", defence 5).
+enum SpacesSyncBlockReason {
+  /// The batch would tombstone more of this device's syncable tabs than the
+  /// configured fraction/count allows.
+  tombstoneVolume,
+
+  /// The batch creates a record whose id this device applied a tombstone for
+  /// moments ago — the exact signature of Zen's stale-projection race.
+  resurrection,
+}
+
+/// A refused outgoing batch, kept until the user explicitly retries.
+class SpacesSyncBlockedBatch with FastEquatable {
+  SpacesSyncBlockedBatch({
+    required this.reason,
+    required this.tombstoneCount,
+    required this.limit,
+    required this.sampleIds,
+    required this.at,
+  });
+
+  final SpacesSyncBlockReason reason;
+
+  /// Tombstones the refused batch carried (`0` for a resurrection block, whose
+  /// offending records are creates).
+  final int tombstoneCount;
+
+  /// The volume limit in force when the batch was refused; `0` for a
+  /// resurrection block, which has no limit to compare against.
+  final int limit;
+
+  /// Up to five of the offending record ids, for the log and the settings card.
+  final List<String> sampleIds;
+
+  final DateTime at;
+
+  String get description => switch (reason) {
+    SpacesSyncBlockReason.tombstoneVolume =>
+      'This sync would delete $tombstoneCount items on the desktop, more '
+          'than the $limit allowed in one batch.',
+    SpacesSyncBlockReason.resurrection =>
+      'This sync would re-create ${sampleIds.length} item(s) this device '
+          'just deleted on the desktop.',
+  };
+
+  @override
+  List<Object?> get hashParameters => [
+    reason,
+    tombstoneCount,
+    limit,
+    sampleIds,
+    at,
+  ];
+}
+
 /// What the Zen Spaces sync client last did, for the settings screen.
 class SpacesSyncStatus with FastEquatable {
   SpacesSyncStatus({
@@ -29,6 +85,7 @@ class SpacesSyncStatus with FastEquatable {
     this.engineEnabled,
     this.lastHealedCount = 0,
     this.syncing = false,
+    this.blockedBatch,
   });
 
   /// When the last sync finished without throwing.
@@ -56,6 +113,11 @@ class SpacesSyncStatus with FastEquatable {
 
   final bool syncing;
 
+  /// Set when the destructive-batch canary refused an upload. While it is set
+  /// the client keeps reading but uploads nothing; only
+  /// `SpacesSyncService.retryBlockedBatch()` clears it.
+  final SpacesSyncBlockedBatch? blockedBatch;
+
   SpacesSyncStatus copyWith({
     DateTime? lastSyncAt,
     Object? lastError = _absent,
@@ -64,6 +126,7 @@ class SpacesSyncStatus with FastEquatable {
     bool? engineEnabled,
     int? lastHealedCount,
     bool? syncing,
+    Object? blockedBatch = _absent,
   }) => SpacesSyncStatus(
     lastSyncAt: lastSyncAt ?? this.lastSyncAt,
     lastError: lastError == _absent ? this.lastError : lastError as String?,
@@ -74,6 +137,9 @@ class SpacesSyncStatus with FastEquatable {
     engineEnabled: engineEnabled ?? this.engineEnabled,
     lastHealedCount: lastHealedCount ?? this.lastHealedCount,
     syncing: syncing ?? this.syncing,
+    blockedBatch: blockedBatch == _absent
+        ? this.blockedBatch
+        : blockedBatch as SpacesSyncBlockedBatch?,
   );
 
   static const _absent = Object();
@@ -87,5 +153,6 @@ class SpacesSyncStatus with FastEquatable {
     engineEnabled,
     lastHealedCount,
     syncing,
+    blockedBatch,
   ];
 }
