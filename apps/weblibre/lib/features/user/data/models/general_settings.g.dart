@@ -219,6 +219,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings separateEssentials(bool separateEssentials);
 
+  GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -318,6 +320,7 @@ abstract class _$GeneralSettingsCWProxy {
     double? spacesSyncLastModified,
     bool spacesSyncBaselineDone,
     bool separateEssentials,
+    int spacesSyncApplierVersion,
   });
 }
 
@@ -716,6 +719,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings separateEssentials(bool separateEssentials) =>
       call(separateEssentials: separateEssentials);
 
+  @override
+  GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion) =>
+      call(spacesSyncApplierVersion: spacesSyncApplierVersion);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -818,6 +825,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? spacesSyncLastModified = const $CopyWithPlaceholder(),
     Object? spacesSyncBaselineDone = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
+    Object? spacesSyncApplierVersion = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1345,6 +1353,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.separateEssentials
           // ignore: cast_nullable_to_non_nullable
           : separateEssentials as bool,
+      spacesSyncApplierVersion:
+          spacesSyncApplierVersion == const $CopyWithPlaceholder() ||
+              spacesSyncApplierVersion == null
+          ? _value.spacesSyncApplierVersion
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncApplierVersion as int,
     );
   }
 }
@@ -1536,6 +1550,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   spacesSyncLastModified: (json['spacesSyncLastModified'] as num?)?.toDouble(),
   spacesSyncBaselineDone: json['spacesSyncBaselineDone'] as bool?,
   separateEssentials: json['separateEssentials'] as bool?,
+  spacesSyncApplierVersion: (json['spacesSyncApplierVersion'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1651,6 +1666,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'spacesSyncLastModified': instance.spacesSyncLastModified,
   'spacesSyncBaselineDone': instance.spacesSyncBaselineDone,
   'separateEssentials': instance.separateEssentials,
+  'spacesSyncApplierVersion': instance.spacesSyncApplierVersion,
 };
 
 const _$ThemeModeEnumMap = {

@@ -525,6 +525,11 @@ class GeneralSettings with FastEquatable {
   /// (DESIGN.md OPEN-3).
   final bool separateEssentials;
 
+  /// The `spacesApplierVersion` whose rules every applied record on this
+  /// device follows; a mismatch makes the next sync refetch and re-apply the
+  /// whole collection. `0` until the first sync after the field appeared.
+  final int spacesSyncApplierVersion;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -617,6 +622,7 @@ class GeneralSettings with FastEquatable {
     required this.spacesSyncLastModified,
     required this.spacesSyncBaselineDone,
     required this.separateEssentials,
+    required this.spacesSyncApplierVersion,
   });
 
   GeneralSettings.withDefaults({
@@ -711,6 +717,7 @@ class GeneralSettings with FastEquatable {
     this.spacesSyncLastModified,
     bool? spacesSyncBaselineDone,
     bool? separateEssentials,
+    int? spacesSyncApplierVersion,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -836,7 +843,8 @@ class GeneralSettings with FastEquatable {
        spacesSyncEnabled = spacesSyncEnabled ?? true,
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
-       separateEssentials = separateEssentials ?? true;
+       separateEssentials = separateEssentials ?? true,
+       spacesSyncApplierVersion = spacesSyncApplierVersion ?? 0;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -1061,5 +1069,6 @@ class GeneralSettings with FastEquatable {
     spacesSyncLastModified,
     spacesSyncBaselineDone,
     separateEssentials,
+    spacesSyncApplierVersion,
   ];
 }
