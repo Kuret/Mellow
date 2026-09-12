@@ -194,6 +194,63 @@ void main() {
     },
   );
 
+  testWidgets('caps the grid at two rows and scrolls the rest inside it', (
+    tester,
+  ) async {
+    // 14 essentials on the space's strip: three rows at six columns.
+    final db = openTestTabDatabase();
+    addTearDown(db.close);
+    await seedContainer(db, _containerC);
+    await db.spaceDao.insertSpace(
+      SpaceData(
+        uuid: 'space-c',
+        name: 'C',
+        containerId: _containerC,
+        orderIndex: 0,
+      ),
+    );
+    for (var i = 0; i < 14; i++) {
+      await seedTab(
+        db,
+        'c-$i',
+        containerId: _containerC,
+        shelf: TabShelf.essential,
+      );
+    }
+
+    await _pump(tester, db: db, separateEssentials: true);
+
+    final tiles = find.byType(EssentialTile);
+    expect(tiles, findsNWidgets(14));
+
+    // Two rows of cells tall, not three.
+    final viewport = find.byKey(EssentialsGrid.viewportKey);
+    final viewportHeight = tester.getSize(viewport).height;
+    final cellHeight = tester
+        .getSize(find.byKey(const ValueKey('essential-c-0')))
+        .height;
+    expect(viewportHeight, closeTo(2 * cellHeight + 4, 0.01));
+
+    // Three rows of cells are laid out inside it, so the last row starts
+    // below its bottom edge...
+    final rowTops = {
+      for (final element in tiles.evaluate())
+        tester.getTopLeft(find.byWidget(element.widget)).dy,
+    };
+    expect(rowTops, hasLength(3));
+    final lastRow = find.byKey(const ValueKey('essential-c-12'));
+    final before = tester.getTopLeft(lastRow).dy;
+    expect(before, greaterThan(tester.getBottomLeft(viewport).dy));
+
+    // ...and a drag inside the grid brings it up.
+    await tester.drag(viewport, const Offset(0, -60));
+    await tester.pump();
+
+    expect(tester.getTopLeft(lastRow).dy, lessThan(before));
+
+    await _disposeTree(tester);
+  });
+
   testWidgets('tapping a tile selects the tab', (tester) async {
     final db = await _seed();
     addTearDown(db.close);

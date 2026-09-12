@@ -43,6 +43,11 @@ const essentialsMax = 12;
 /// Columns of the essentials grid at full width: two rows of [essentialsMax].
 const essentialsMaxColumns = 6;
 
+/// Rows of icons the grid lays out before it starts scrolling inside itself.
+/// The strip is pinned above a tab list on every vertical surface, so a space
+/// with many essentials must not be allowed to eat the list.
+const essentialsMaxRows = 2;
+
 /// The ids on the Essentials shelf the current space shows, in strip order
 /// (PLAN §6.4): with `separateEssentials` on, the strip of the selected
 /// space's container (`null` for a space without one — Zen's `default` key);
@@ -89,6 +94,10 @@ List<String>? watchEssentialShelfTabIds(WidgetRef ref) {
 /// the chip close-button mode is `never` here whatever the setting says; the
 /// long-press menu carries every shelf transition. Renders nothing when the
 /// shelf is empty.
+///
+/// The grid wraps to at most [essentialsMaxRows] rows and scrolls inside
+/// itself beyond that: it is pinned above the tab list on the vertical
+/// surfaces, so its height is capped whatever the strip holds.
 class EssentialsGrid extends ConsumerWidget {
   /// Called after a tap selected a tab (the tray closes itself with this).
   final VoidCallback? onSelected;
@@ -100,6 +109,9 @@ class EssentialsGrid extends ConsumerWidget {
 
   /// Whether to draw the "Essentials" section header above the grid.
   final bool showHeader;
+
+  /// The box the grid scrolls inside, capped at [essentialsMaxRows] rows.
+  static const viewportKey = ValueKey('essentials-grid-viewport');
 
   const EssentialsGrid({
     super.key,
@@ -132,21 +144,35 @@ class EssentialsGrid extends ConsumerWidget {
                 1,
                 essentialsMaxColumns,
               );
-              return GridView.count(
-                crossAxisCount: columns,
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-                children: [
-                  for (final tabId in tabIds)
-                    EssentialTile(
-                      key: ValueKey('essential-$tabId'),
-                      tabId: tabId,
-                      onSelected: onSelected,
-                    ),
-                ],
+              const spacing = 4.0;
+              // Square cells, so one row is as tall as a cell is wide.
+              final rowExtent = (width - spacing * (columns - 1)) / columns;
+              final rows = (tabIds.length / columns).ceil();
+              final visibleRows = math.min(rows, essentialsMaxRows);
+              return SizedBox(
+                key: viewportKey,
+                height: visibleRows * rowExtent + (visibleRows - 1) * spacing,
+                child: SingleChildScrollView(
+                  physics: rows > visibleRows
+                      ? const ClampingScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+                  child: GridView.count(
+                    crossAxisCount: columns,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: spacing,
+                    crossAxisSpacing: spacing,
+                    children: [
+                      for (final tabId in tabIds)
+                        EssentialTile(
+                          key: ValueKey('essential-$tabId'),
+                          tabId: tabId,
+                          onSelected: onSelected,
+                        ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
