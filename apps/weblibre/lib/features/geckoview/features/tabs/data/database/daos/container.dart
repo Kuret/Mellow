@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:ui';
-
 import 'package:drift/drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
@@ -26,8 +24,13 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/features/geckoview/features/tabs/data/database/projections/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
+/// Rows of `container` — a Firefox contextual identity mirrored from Zen's
+/// `container` record (PLAN §6.2) — and of `container_local`, the per-container
+/// settings that never sync. A container's Gecko `contextId` is its `id`
+/// (DESIGN.md "D3 refinement"), so there is no separate identity mapping here.
 @DriftAccessor()
 class ContainerDao extends DatabaseAccessor<TabDatabase>
     with $ContainerDaoMixin {
@@ -37,11 +40,12 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return db.container.insertOne(
       ContainerCompanion.insert(
         id: container.id,
+        syncGuid: Value(container.syncGuid),
         name: Value(container.name),
-        color: container.color,
+        iconKey: Value(container.iconKey),
+        colorKey: Value(container.colorKey),
         orderKey: container.orderKey,
         isPinned: Value(container.isPinned),
-        metadata: Value(container.metadata),
       ),
     );
   }
@@ -50,11 +54,12 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return db.container.replaceOne(
       ContainerCompanion(
         id: Value(container.id),
+        syncGuid: Value(container.syncGuid),
         name: Value(container.name),
-        color: Value(container.color),
+        iconKey: Value(container.iconKey),
+        colorKey: Value(container.colorKey),
         orderKey: Value(container.orderKey),
         isPinned: Value(container.isPinned),
-        metadata: Value(container.metadata),
       ),
     );
   }
@@ -75,6 +80,8 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
+  /// `container_local` cascades; tabs get `container_id = NULL` and spaces
+  /// `container_id = NULL`. Repositories close the tabs first (PLAN §7.3).
   Future<void> deleteContainer(String id) {
     return db.container.deleteOne(ContainerCompanion(id: Value(id)));
   }
@@ -83,27 +90,80 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return select(db.container)..where((t) => t.id.equals(id));
   }
 
-  Selectable<Color> getDistinctColors() {
-    final query = db.selectOnly(db.container, distinct: true)
-      ..addColumns([db.container.color])
-      ..where(db.container.color.isNotNull());
+  SingleOrNullSelectable<ContainerData> getBySyncGuid(String syncGuid) {
+    return select(db.container)..where((t) => t.syncGuid.equals(syncGuid));
+  }
 
-    return query.map(
-      (row) => row.readWithConverter<Color?, int>(db.container.color)!,
+  /// Minted on first projection (PLAN §6.2), or set when the desktop's record
+  /// is matched to a local container.
+  Future<void> setSyncGuid(String id, String? syncGuid) {
+    return (update(db.container)..where((c) => c.id.equals(id))).write(
+      ContainerCompanion(syncGuid: Value(syncGuid)),
     );
   }
+
+  Selectable<ContainerDataWithCount> containersWithCount() =>
+      db.definitionsDrift.containersWithCount();
+
+  Selectable<String> containerIdsByLastUpdated() =>
+      db.definitionsDrift.containerIdsByLastUpdated();
+
+  // --- container_local -----------------------------------------------------
+
+  Future<void> upsertLocal(ContainerLocalData local) {
+    return db.containerLocal.insertOne(
+      ContainerLocalCompanion.insert(
+        containerId: local.containerId,
+        excludeFromIndex: Value(local.excludeFromIndex),
+        excludeFromHistory: Value(local.excludeFromHistory),
+        clearDataOnExit: Value(local.clearDataOnExit),
+        wallpaper: Value(local.wallpaper),
+      ),
+      onConflict: DoUpdate(
+        (_) => ContainerLocalCompanion(
+          excludeFromIndex: Value(local.excludeFromIndex),
+          excludeFromHistory: Value(local.excludeFromHistory),
+          clearDataOnExit: Value(local.clearDataOnExit),
+          wallpaper: Value(local.wallpaper),
+        ),
+      ),
+    );
+  }
+
+  SimpleSelectStatement<ContainerLocal, ContainerLocalData> _localById(
+    String containerId,
+  ) =>
+      select(db.containerLocal)
+        ..where((l) => l.containerId.equals(containerId));
+
+  /// A container may go a while without a `container_local` row; absent rows
+  /// read as [ContainerLocalData.defaults].
+  Future<ContainerLocalData> getLocal(String containerId) async {
+    return await _localById(containerId).getSingleOrNull() ??
+        ContainerLocalData.defaults(containerId);
+  }
+
+  Stream<ContainerLocalData> watchLocal(String containerId) {
+    return _localById(containerId).watchSingleOrNull().map(
+      (row) => row ?? ContainerLocalData.defaults(containerId),
+    );
+  }
+
+  /// Only containers that have a row; see [getLocal] for the rest.
+  Stream<List<ContainerLocalData>> watchAllLocal() =>
+      select(db.containerLocal).watch();
+
+  // --- tabs by container ---------------------------------------------------
 
   Selectable<String> getAllTabIds({
     bool includeRegular = true,
     bool includePrivate = true,
-    bool includeIsolated = true,
   }) {
     final query = selectOnly(db.tab)..addColumns([db.tab.id]);
 
     final excludedModes = <TabModeDbValue>[];
     if (!includeRegular) excludedModes.add(TabModeDbValue.regular);
     if (!includePrivate) excludedModes.add(TabModeDbValue.private);
-    if (!includeIsolated) excludedModes.add(TabModeDbValue.isolated);
 
     if (excludedModes.isNotEmpty) {
       query.where(db.tab.tabMode.isNotInValues(excludedModes));
@@ -112,25 +172,22 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return query.map((row) => row.read(db.tab.id)!);
   }
 
+  /// Ids of every tab in [containerId] (`null` = unassigned), in `order_key`
+  /// order — the same rows as `tabsInContainer`, without pulling the content
+  /// columns a `SELECT *` would.
   Selectable<String> getContainerTabIds(
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
-    bool includeIsolated = true,
   }) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
-      ..where(
-        (containerId != null)
-            ? db.tab.containerId.equals(containerId)
-            : db.tab.containerId.isNull(),
-      )
+      ..where(db.tab.containerId.equalsNullable(containerId))
       ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     final excludedModes = <TabModeDbValue>[];
     if (!includeRegular) excludedModes.add(TabModeDbValue.regular);
     if (!includePrivate) excludedModes.add(TabModeDbValue.private);
-    if (!includeIsolated) excludedModes.add(TabModeDbValue.isolated);
 
     if (excludedModes.isNotEmpty) {
       query.where(db.tab.tabMode.isNotInValues(excludedModes));
@@ -139,41 +196,19 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return query.map((row) => row.read(db.tab.id)!);
   }
 
-  /// Every tab of one container, in render order.
+  /// Every tab of one container, in `order_key` order.
   ///
   /// A [TabSummary] rather than a `TabData`: this is watched as a stream, so it
   /// re-runs on every write to `tab`, and no consumer reads a content column.
   Selectable<TabSummary> getContainerTabsData(String? containerId) {
     final query = selectTabSummaries(this, db.tab)
-      ..where(
-        (containerId != null)
-            ? db.tab.containerId.equals(containerId)
-            : db.tab.containerId.isNull(),
-      )
+      ..where(db.tab.containerId.equalsNullable(containerId))
       ..orderBy([OrderingTerm.asc(db.tab.orderKey)]);
 
     return query.map((row) => readTabSummary(row, db.tab));
   }
 
-  SingleSelectable<String> generateLeadingOrderKey(
-    String? containerId, {
-    int bucket = 0,
-  }) {
-    return db.definitionsDrift.leadingOrderKey(
-      bucket: bucket,
-      containerId: containerId,
-    );
-  }
-
-  SingleSelectable<String> generateTrailingOrderKey(
-    String? containerId, {
-    int bucket = 0,
-  }) {
-    return db.definitionsDrift.trailingOrderKey(
-      bucket: bucket,
-      containerId: containerId,
-    );
-  }
+  // --- container ordering --------------------------------------------------
 
   SingleSelectable<String> generateLeadingContainerOrderKey({
     required bool isPinned,
@@ -215,49 +250,17 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  SingleOrNullSelectable<String> getLastChildTabId(
-    String? containerId,
-    String parentId,
-  ) {
-    return db.definitionsDrift.lastChildTabId(
-      containerId: containerId,
-      parentId: parentId,
-    );
-  }
+  // --- history / data clearing gates --------------------------------------
 
-  SingleOrNullSelectable<String> generateOrderKeyAfterTabId(
-    String? containerId,
-    String tabId,
-  ) {
-    return db.definitionsDrift.orderKeyAfterTab(
-      containerId: containerId,
-      tabId: tabId,
-    );
-  }
-
-  SingleSelectable<String> generateOrderKeyBeforeTabId(
-    String? containerId,
-    String tabId,
-  ) {
-    return db.definitionsDrift.orderKeyBeforeTab(
-      containerId: containerId,
-      tabId: tabId,
-    );
-  }
-
-  Selectable<String?> containersToClearOnExit() {
+  /// Containers whose browsing data is wiped when the app exits. The ids are
+  /// the Gecko `contextId`s to clear.
+  Selectable<String> clearDataOnExitContainerIds() {
     return db.definitionsDrift.containersToClearOnExit();
   }
 
-  Selectable<String?> excludedHistoryContextIds() {
+  /// Containers excluded from history; native's fallback before the first
+  /// tab snapshot arrives.
+  Selectable<String> excludedHistoryContextIds() {
     return db.definitionsDrift.excludedHistoryContextIds();
-  }
-
-  SingleOrNullSelectable<ContainerData> getContainerByContextualIdentity(
-    String contextId,
-  ) {
-    return db.definitionsDrift.containerByContextualIdentity(
-      contextId: contextId,
-    );
   }
 }
