@@ -984,17 +984,26 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // chains even when intermediate ancestors fail the filter.
   final byId = {for (final row in tabsWithRoot) row.id: row};
 
-  // Keep the rows the engine lists *or* that are cold (no session, rendered
-  // from the row — PLAN §7.4), never essentials (they have their own strip),
-  // and only those that pass the tab-type / date-range filter. Filtering is
-  // applied to *individual* tabs.
+  // Keep the rows the engine lists, the cold ones (no session, rendered from
+  // the row — PLAN §7.4) and, until the session restore has completed, the
+  // restoring ones (a session id the engine has not reported yet — the
+  // pre-restore placeholder, see `pendingRestoreTabIds`). Never essentials
+  // (they have their own strip), and only rows that pass the tab-type /
+  // date-range filter. Filtering is applied to *individual* tabs. After the
+  // restore a live row the engine does not list is transient: `syncTabs`
+  // demotes or deletes it on the next emission.
+  final restoreComplete = ref.watch(browserRestoreCompleteProvider);
   final available = tabsWithRoot.where((row) {
     final summary = summaryById[row.id];
     if (summary == null || summary.tabShelf == TabShelf.essential) {
       return false;
     }
     if (!summary.isCold && !tabList.value.contains(row.id)) {
-      return false;
+      final restoring =
+          !restoreComplete && summary.tabMode != TabModeDbValue.private;
+      if (!restoring) {
+        return false;
+      }
     }
     return filterOptions.matchesTab(
       tabSortKeys[row.id]?.tabMode ?? TabMode.fromDbValue(summary.tabMode),

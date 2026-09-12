@@ -1,6 +1,7 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
@@ -112,6 +113,7 @@ void main() {
           _space,
         ).overrideWith((ref) => Stream.value(folders)),
         tabListProvider.overrideWith(() => _FakeTabList(live.toList())),
+        browserRestoreCompleteProvider.overrideWith(_Restored.new),
         tabSortKeysProvider.overrideWith(
           (ref) => EquatableValue({
             for (final tab in tabs)
@@ -420,4 +422,10 @@ class _FakeFilterController extends TabViewFilterController {
 class _FakeCollapsedGroups extends CollapsedGroups {
   @override
   Set<String> build() => const {};
+}
+
+/// The restore has completed, so only engine-listed and cold rows render.
+class _Restored extends BrowserRestoreComplete {
+  @override
+  bool build() => true;
 }
