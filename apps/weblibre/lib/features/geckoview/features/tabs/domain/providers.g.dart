@@ -54,9 +54,6 @@ String _$watchContainersWithCountHash() =>
 /// The destinations a container-cycling gesture steps through, in the order
 /// the container chips render them: the unassigned pseudo-container (`null`)
 /// first, then the containers themselves.
-///
-/// Synced tabs and the group-suggestions chip are deliberately left out — they
-/// are not containers, and landing on them mid-swipe would be a dead end.
 
 @ProviderFor(containerCycleOrder)
 final containerCycleOrderProvider = ContainerCycleOrderProvider._();
@@ -64,9 +61,6 @@ final containerCycleOrderProvider = ContainerCycleOrderProvider._();
 /// The destinations a container-cycling gesture steps through, in the order
 /// the container chips render them: the unassigned pseudo-container (`null`)
 /// first, then the containers themselves.
-///
-/// Synced tabs and the group-suggestions chip are deliberately left out — they
-/// are not containers, and landing on them mid-swipe would be a dead end.
 
 final class ContainerCycleOrderProvider
     extends
@@ -79,9 +73,6 @@ final class ContainerCycleOrderProvider
   /// The destinations a container-cycling gesture steps through, in the order
   /// the container chips render them: the unassigned pseudo-container (`null`)
   /// first, then the containers themselves.
-  ///
-  /// Synced tabs and the group-suggestions chip are deliberately left out — they
-  /// are not containers, and landing on them mid-swipe would be a dead end.
   ContainerCycleOrderProvider._()
     : super(
         from: null,
@@ -289,45 +280,6 @@ final class WatchContainerTabIdsFamily extends $Family
   String toString() => r'watchContainerTabIdsProvider';
 }
 
-@ProviderFor(watchTabsFifo)
-final watchTabsFifoProvider = WatchTabsFifoProvider._();
-
-final class WatchTabsFifoProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<List<TabSummary>>,
-          List<TabSummary>,
-          Stream<List<TabSummary>>
-        >
-    with $FutureModifier<List<TabSummary>>, $StreamProvider<List<TabSummary>> {
-  WatchTabsFifoProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'watchTabsFifoProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$watchTabsFifoHash();
-
-  @$internal
-  @override
-  $StreamProviderElement<List<TabSummary>> $createElement(
-    $ProviderPointer pointer,
-  ) => $StreamProviderElement(pointer);
-
-  @override
-  Stream<List<TabSummary>> create(Ref ref) {
-    return watchTabsFifo(ref);
-  }
-}
-
-String _$watchTabsFifoHash() => r'ce84a120f37fe08a1cc193c561e64acd44c949cd';
-
 @ProviderFor(containerTabCount)
 final containerTabCountProvider = ContainerTabCountFamily._();
 
@@ -397,8 +349,417 @@ final class ContainerTabCountFamily extends $Family
   String toString() => r'containerTabCountProvider';
 }
 
+/// Every space by `order_index`.
+
+@ProviderFor(watchSpaces)
+final watchSpacesProvider = WatchSpacesProvider._();
+
+/// Every space by `order_index`.
+
+final class WatchSpacesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SpaceData>>,
+          List<SpaceData>,
+          Stream<List<SpaceData>>
+        >
+    with $FutureModifier<List<SpaceData>>, $StreamProvider<List<SpaceData>> {
+  /// Every space by `order_index`.
+  WatchSpacesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchSpacesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchSpacesHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<SpaceData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<SpaceData>> create(Ref ref) {
+    return watchSpaces(ref);
+  }
+}
+
+String _$watchSpacesHash() => r'12b45a2c4a79162f08320df28d351f1ffee36611';
+
+/// The folders of one space, all nesting levels, by `order_key`.
+
+@ProviderFor(watchFolders)
+final watchFoldersProvider = WatchFoldersFamily._();
+
+/// The folders of one space, all nesting levels, by `order_key`.
+
+final class WatchFoldersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TabFolderData>>,
+          List<TabFolderData>,
+          Stream<List<TabFolderData>>
+        >
+    with
+        $FutureModifier<List<TabFolderData>>,
+        $StreamProvider<List<TabFolderData>> {
+  /// The folders of one space, all nesting levels, by `order_key`.
+  WatchFoldersProvider._({
+    required WatchFoldersFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchFoldersProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchFoldersHash();
+
+  @override
+  String toString() {
+    return r'watchFoldersProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<TabFolderData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<TabFolderData>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchFolders(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchFoldersProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchFoldersHash() => r'd212116a3dc33a99e6bcb296dda507ad59d3eb0b';
+
+/// The folders of one space, all nesting levels, by `order_key`.
+
+final class WatchFoldersFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<TabFolderData>>, String?> {
+  WatchFoldersFamily._()
+    : super(
+        retry: null,
+        name: r'watchFoldersProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The folders of one space, all nesting levels, by `order_key`.
+
+  WatchFoldersProvider call(String? spaceUuid) =>
+      WatchFoldersProvider._(argument: spaceUuid, from: this);
+
+  @override
+  String toString() => r'watchFoldersProvider';
+}
+
+/// Every tab of one space (pinned shelf first, then `order_key`), folders
+/// included. A null [spaceUuid] is the tabs without a space.
+
+@ProviderFor(watchSpaceTabsData)
+final watchSpaceTabsDataProvider = WatchSpaceTabsDataFamily._();
+
+/// Every tab of one space (pinned shelf first, then `order_key`), folders
+/// included. A null [spaceUuid] is the tabs without a space.
+
+final class WatchSpaceTabsDataProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TabSummary>>,
+          List<TabSummary>,
+          Stream<List<TabSummary>>
+        >
+    with $FutureModifier<List<TabSummary>>, $StreamProvider<List<TabSummary>> {
+  /// Every tab of one space (pinned shelf first, then `order_key`), folders
+  /// included. A null [spaceUuid] is the tabs without a space.
+  WatchSpaceTabsDataProvider._({
+    required WatchSpaceTabsDataFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchSpaceTabsDataProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchSpaceTabsDataHash();
+
+  @override
+  String toString() {
+    return r'watchSpaceTabsDataProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<TabSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<TabSummary>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchSpaceTabsData(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchSpaceTabsDataProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchSpaceTabsDataHash() =>
+    r'5ba2136765dc5ecd39a136ffe2f1ae05073bd4ca';
+
+/// Every tab of one space (pinned shelf first, then `order_key`), folders
+/// included. A null [spaceUuid] is the tabs without a space.
+
+final class WatchSpaceTabsDataFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<TabSummary>>, String?> {
+  WatchSpaceTabsDataFamily._()
+    : super(
+        retry: null,
+        name: r'watchSpaceTabsDataProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Every tab of one space (pinned shelf first, then `order_key`), folders
+  /// included. A null [spaceUuid] is the tabs without a space.
+
+  WatchSpaceTabsDataProvider call(String? spaceUuid) =>
+      WatchSpaceTabsDataProvider._(argument: spaceUuid, from: this);
+
+  @override
+  String toString() => r'watchSpaceTabsDataProvider';
+}
+
+@ProviderFor(watchSpaceTabIds)
+final watchSpaceTabIdsProvider = WatchSpaceTabIdsFamily._();
+
+final class WatchSpaceTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          Stream<List<String>>
+        >
+    with $FutureModifier<List<String>>, $StreamProvider<List<String>> {
+  WatchSpaceTabIdsProvider._({
+    required WatchSpaceTabIdsFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchSpaceTabIdsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchSpaceTabIdsHash();
+
+  @override
+  String toString() {
+    return r'watchSpaceTabIdsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<String>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchSpaceTabIds(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchSpaceTabIdsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchSpaceTabIdsHash() => r'7bc7fd5f799e49772f84d91bca0a941d65b40e7f';
+
+final class WatchSpaceTabIdsFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<String>>, String?> {
+  WatchSpaceTabIdsFamily._()
+    : super(
+        retry: null,
+        name: r'watchSpaceTabIdsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchSpaceTabIdsProvider call(String? spaceUuid) =>
+      WatchSpaceTabIdsProvider._(argument: spaceUuid, from: this);
+
+  @override
+  String toString() => r'watchSpaceTabIdsProvider';
+}
+
+@ProviderFor(spaceTabCount)
+final spaceTabCountProvider = SpaceTabCountFamily._();
+
+final class SpaceTabCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  SpaceTabCountProvider._({
+    required SpaceTabCountFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'spaceTabCountProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$spaceTabCountHash();
+
+  @override
+  String toString() {
+    return r'spaceTabCountProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    final argument = this.argument as String?;
+    return spaceTabCount(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SpaceTabCountProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$spaceTabCountHash() => r'7dfd0852e8c4168b6e6265cedb6fd42fbaa2ba4e';
+
+final class SpaceTabCountFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<int>, String?> {
+  SpaceTabCountFamily._()
+    : super(
+        retry: null,
+        name: r'spaceTabCountProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SpaceTabCountProvider call(String? spaceUuid) =>
+      SpaceTabCountProvider._(argument: spaceUuid, from: this);
+
+  @override
+  String toString() => r'spaceTabCountProvider';
+}
+
+@ProviderFor(watchTabsFifo)
+final watchTabsFifoProvider = WatchTabsFifoProvider._();
+
+final class WatchTabsFifoProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TabSummary>>,
+          List<TabSummary>,
+          Stream<List<TabSummary>>
+        >
+    with $FutureModifier<List<TabSummary>>, $StreamProvider<List<TabSummary>> {
+  WatchTabsFifoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchTabsFifoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabsFifoHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<TabSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<TabSummary>> create(Ref ref) {
+    return watchTabsFifo(ref);
+  }
+}
+
+String _$watchTabsFifoHash() => r'ce84a120f37fe08a1cc193c561e64acd44c949cd';
+
+/// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+/// every tree is returned.
+
 @ProviderFor(watchTabTrees)
 final watchTabTreesProvider = WatchTabTreesFamily._();
+
+/// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+/// every tree is returned.
 
 final class WatchTabTreesProvider
     extends
@@ -410,9 +771,11 @@ final class WatchTabTreesProvider
     with
         $FutureModifier<List<TabTreesResult>>,
         $StreamProvider<List<TabTreesResult>> {
+  /// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+  /// every tree is returned.
   WatchTabTreesProvider._({
     required WatchTabTreesFamily super.from,
-    required ContainerFilter super.argument,
+    required (String?, {bool allSpaces}) super.argument,
   }) : super(
          retry: null,
          name: r'watchTabTreesProvider',
@@ -428,7 +791,7 @@ final class WatchTabTreesProvider
   String toString() {
     return r'watchTabTreesProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -439,8 +802,8 @@ final class WatchTabTreesProvider
 
   @override
   Stream<List<TabTreesResult>> create(Ref ref) {
-    final argument = this.argument as ContainerFilter;
-    return watchTabTrees(ref, argument);
+    final argument = this.argument as (String?, {bool allSpaces});
+    return watchTabTrees(ref, argument.$1, allSpaces: argument.allSpaces);
   }
 
   @override
@@ -454,13 +817,16 @@ final class WatchTabTreesProvider
   }
 }
 
-String _$watchTabTreesHash() => r'7565b7c2d8e8128a0a49241200d64f2cf5ece0ca';
+String _$watchTabTreesHash() => r'ba42e8a1172a4fb8d84fee7dc059766f14c336a6';
+
+/// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+/// every tree is returned.
 
 final class WatchTabTreesFamily extends $Family
     with
         $FunctionalFamilyOverride<
           Stream<List<TabTreesResult>>,
-          ContainerFilter
+          (String?, {bool allSpaces})
         > {
   WatchTabTreesFamily._()
     : super(
@@ -471,8 +837,14 @@ final class WatchTabTreesFamily extends $Family
         isAutoDispose: true,
       );
 
-  WatchTabTreesProvider call(ContainerFilter containerFilter) =>
-      WatchTabTreesProvider._(argument: containerFilter, from: this);
+  /// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+  /// every tree is returned.
+
+  WatchTabTreesProvider call(String? spaceUuid, {bool allSpaces = false}) =>
+      WatchTabTreesProvider._(
+        argument: (spaceUuid, allSpaces: allSpaces),
+        from: this,
+      );
 
   @override
   String toString() => r'watchTabTreesProvider';
@@ -537,7 +909,7 @@ final class WatchTabsWithRootAndDepthProvider
 }
 
 String _$watchTabsWithRootAndDepthHash() =>
-    r'dd485f4f60924e90f1f338237401dc95ca7e123f';
+    r'8cf183ea7124e30797b9b6ac52b0c289aae2561c';
 
 final class WatchTabsWithRootAndDepthFamily extends $Family
     with
@@ -554,8 +926,8 @@ final class WatchTabsWithRootAndDepthFamily extends $Family
         isAutoDispose: true,
       );
 
-  WatchTabsWithRootAndDepthProvider call(String? containerId) =>
-      WatchTabsWithRootAndDepthProvider._(argument: containerId, from: this);
+  WatchTabsWithRootAndDepthProvider call(String? spaceUuid) =>
+      WatchTabsWithRootAndDepthProvider._(argument: spaceUuid, from: this);
 
   @override
   String toString() => r'watchTabsWithRootAndDepthProvider';
@@ -825,44 +1197,233 @@ final class WatchContainerTabsDataFamily extends $Family
   String toString() => r'watchContainerTabsDataProvider';
 }
 
-@ProviderFor(watchPinnedTabIds)
-final watchPinnedTabIdsProvider = WatchPinnedTabIdsProvider._();
+/// `tab.id → tab_shelf` for every tab.
 
-final class WatchPinnedTabIdsProvider
+@ProviderFor(watchTabShelves)
+final watchTabShelvesProvider = WatchTabShelvesProvider._();
+
+/// `tab.id → tab_shelf` for every tab.
+
+final class WatchTabShelvesProvider
     extends
         $FunctionalProvider<
-          AsyncValue<Set<String>>,
-          Set<String>,
-          Stream<Set<String>>
+          AsyncValue<Map<String, TabShelf>>,
+          Map<String, TabShelf>,
+          Stream<Map<String, TabShelf>>
         >
-    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
-  WatchPinnedTabIdsProvider._()
+    with
+        $FutureModifier<Map<String, TabShelf>>,
+        $StreamProvider<Map<String, TabShelf>> {
+  /// `tab.id → tab_shelf` for every tab.
+  WatchTabShelvesProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'watchPinnedTabIdsProvider',
+        name: r'watchTabShelvesProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$watchPinnedTabIdsHash();
+  String debugGetCreateSourceHash() => _$watchTabShelvesHash();
 
   @$internal
   @override
-  $StreamProviderElement<Set<String>> $createElement(
+  $StreamProviderElement<Map<String, TabShelf>> $createElement(
     $ProviderPointer pointer,
   ) => $StreamProviderElement(pointer);
 
   @override
-  Stream<Set<String>> create(Ref ref) {
-    return watchPinnedTabIds(ref);
+  Stream<Map<String, TabShelf>> create(Ref ref) {
+    return watchTabShelves(ref);
   }
 }
 
-String _$watchPinnedTabIdsHash() => r'5623faf1a4d90185c718654f4172092e28dd1e54';
+String _$watchTabShelvesHash() => r'bf52b714c0869e117220af317a95ac5e67fb71b9';
+
+/// Ids of the tabs on the pinned shelf; empty until the shelves have loaded.
+
+@ProviderFor(pinnedTabIds)
+final pinnedTabIdsProvider = PinnedTabIdsProvider._();
+
+/// Ids of the tabs on the pinned shelf; empty until the shelves have loaded.
+
+final class PinnedTabIdsProvider
+    extends $FunctionalProvider<Set<String>, Set<String>, Set<String>>
+    with $Provider<Set<String>> {
+  /// Ids of the tabs on the pinned shelf; empty until the shelves have loaded.
+  PinnedTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pinnedTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pinnedTabIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Set<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Set<String> create(Ref ref) {
+    return pinnedTabIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+}
+
+String _$pinnedTabIdsHash() => r'b5f668df2a94b59661011a4e06c2c55fca96cd90';
+
+/// Ids of the tabs on the essential shelf; empty until the shelves have loaded.
+
+@ProviderFor(essentialTabIds)
+final essentialTabIdsProvider = EssentialTabIdsProvider._();
+
+/// Ids of the tabs on the essential shelf; empty until the shelves have loaded.
+
+final class EssentialTabIdsProvider
+    extends $FunctionalProvider<Set<String>, Set<String>, Set<String>>
+    with $Provider<Set<String>> {
+  /// Ids of the tabs on the essential shelf; empty until the shelves have loaded.
+  EssentialTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'essentialTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$essentialTabIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Set<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Set<String> create(Ref ref) {
+    return essentialTabIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+}
+
+String _$essentialTabIdsHash() => r'a67c6caa776a9de0ede8ba4f6989a6ca11790477';
+
+/// The essentials strip of one container (`null` = the unassigned strip), in
+/// `order_key` order.
+
+@ProviderFor(watchEssentialTabIds)
+final watchEssentialTabIdsProvider = WatchEssentialTabIdsFamily._();
+
+/// The essentials strip of one container (`null` = the unassigned strip), in
+/// `order_key` order.
+
+final class WatchEssentialTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          Stream<List<String>>
+        >
+    with $FutureModifier<List<String>>, $StreamProvider<List<String>> {
+  /// The essentials strip of one container (`null` = the unassigned strip), in
+  /// `order_key` order.
+  WatchEssentialTabIdsProvider._({
+    required WatchEssentialTabIdsFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchEssentialTabIdsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchEssentialTabIdsHash();
+
+  @override
+  String toString() {
+    return r'watchEssentialTabIdsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<String>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchEssentialTabIds(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchEssentialTabIdsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchEssentialTabIdsHash() =>
+    r'73c291426e15153160ba0841b907803f449fd10b';
+
+/// The essentials strip of one container (`null` = the unassigned strip), in
+/// `order_key` order.
+
+final class WatchEssentialTabIdsFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<String>>, String?> {
+  WatchEssentialTabIdsFamily._()
+    : super(
+        retry: null,
+        name: r'watchEssentialTabIdsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The essentials strip of one container (`null` = the unassigned strip), in
+  /// `order_key` order.
+
+  WatchEssentialTabIdsProvider call(String? containerId) =>
+      WatchEssentialTabIdsProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'watchEssentialTabIdsProvider';
+}
 
 @ProviderFor(watchTabTimestamps)
 final watchTabTimestampsProvider = WatchTabTimestampsProvider._();
@@ -1021,6 +1582,98 @@ final class WatchContainerDataFamily extends $Family
 
   @override
   String toString() => r'watchContainerDataProvider';
+}
+
+/// The per-device settings of one container; defaults while it has no
+/// `container_local` row.
+
+@ProviderFor(watchContainerLocal)
+final watchContainerLocalProvider = WatchContainerLocalFamily._();
+
+/// The per-device settings of one container; defaults while it has no
+/// `container_local` row.
+
+final class WatchContainerLocalProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ContainerLocalData>,
+          ContainerLocalData,
+          Stream<ContainerLocalData>
+        >
+    with
+        $FutureModifier<ContainerLocalData>,
+        $StreamProvider<ContainerLocalData> {
+  /// The per-device settings of one container; defaults while it has no
+  /// `container_local` row.
+  WatchContainerLocalProvider._({
+    required WatchContainerLocalFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchContainerLocalProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchContainerLocalHash();
+
+  @override
+  String toString() {
+    return r'watchContainerLocalProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<ContainerLocalData> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<ContainerLocalData> create(Ref ref) {
+    final argument = this.argument as String;
+    return watchContainerLocal(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchContainerLocalProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchContainerLocalHash() =>
+    r'dcef5e4560b0f6f486047cf11fb3b7b894e48a9f';
+
+/// The per-device settings of one container; defaults while it has no
+/// `container_local` row.
+
+final class WatchContainerLocalFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<ContainerLocalData>, String> {
+  WatchContainerLocalFamily._()
+    : super(
+        retry: null,
+        name: r'watchContainerLocalProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The per-device settings of one container; defaults while it has no
+  /// `container_local` row.
+
+  WatchContainerLocalProvider call(String containerId) =>
+      WatchContainerLocalProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'watchContainerLocalProvider';
 }
 
 @ProviderFor(watchContainerTabId)

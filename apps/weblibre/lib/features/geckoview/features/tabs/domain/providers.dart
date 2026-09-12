@@ -23,7 +23,11 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/util/tokenized_filter.dart';
@@ -39,9 +43,6 @@ Stream<List<ContainerDataWithCount>> watchContainersWithCount(Ref ref) {
 /// The destinations a container-cycling gesture steps through, in the order
 /// the container chips render them: the unassigned pseudo-container (`null`)
 /// first, then the containers themselves.
-///
-/// Synced tabs and the group-suggestions chip are deliberately left out — they
-/// are not containers, and landing on them mid-swipe would be a dead end.
 @Riverpod()
 List<ContainerData?> containerCycleOrder(Ref ref) {
   final containers = ref.watch(
@@ -79,20 +80,12 @@ Stream<List<String>> watchContainerTabIds(
   ContainerFilter containerFilter,
 ) {
   final db = ref.watch(tabDatabaseProvider);
-
   switch (containerFilter) {
     case ContainerFilterById(:final containerId):
       return db.containerDao.getContainerTabIds(containerId).watch();
     case ContainerFilterDisabled():
       return db.tabDao.getAllTabIds().watch();
   }
-}
-
-@Riverpod(keepAlive: true)
-Stream<List<TabSummary>> watchTabsFifo(Ref ref) {
-  final db = ref.watch(tabDatabaseProvider);
-
-  return db.tabDao.getTabsFifo().watch();
 }
 
 @Riverpod()
@@ -104,34 +97,77 @@ Future<int> containerTabCount(Ref ref, ContainerFilter containerFilter) {
   );
 }
 
+// --- spaces / folders ------------------------------------------------------
+
+/// Every space by `order_index`.
+@Riverpod(keepAlive: true)
+Stream<List<SpaceData>> watchSpaces(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.spaceDao.watchAll();
+}
+
+/// The folders of one space, all nesting levels, by `order_key`.
+@Riverpod()
+Stream<List<TabFolderData>> watchFolders(Ref ref, String? spaceUuid) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabFolderDao.watchInSpace(spaceUuid);
+}
+
+/// Every tab of one space (pinned shelf first, then `order_key`), folders
+/// included. A null [spaceUuid] is the tabs without a space.
+@Riverpod()
+Stream<List<TabSummary>> watchSpaceTabsData(Ref ref, String? spaceUuid) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getSpaceTabsData(spaceUuid).watch();
+}
+
+@Riverpod()
+Stream<List<String>> watchSpaceTabIds(Ref ref, String? spaceUuid) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao
+      .getSpaceTabsData(spaceUuid)
+      .watch()
+      .map((tabs) => [for (final tab in tabs) tab.id]);
+}
+
+@Riverpod()
+Future<int> spaceTabCount(Ref ref, String? spaceUuid) {
+  return ref.watch(
+    watchSpaceTabsDataProvider(spaceUuid).selectAsync((tabs) => tabs.length),
+  );
+}
+
+// --- FIFO --------------------------------------------------------------------
+
+@Riverpod(keepAlive: true)
+Stream<List<TabSummary>> watchTabsFifo(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabsFifo().watch();
+}
+
+// --- trees ---------------------------------------------------------------------
+
+/// Tab trees of one space; with [allSpaces] the space boundary is ignored and
+/// every tree is returned.
 @Riverpod()
 Stream<List<TabTreesResult>> watchTabTrees(
   Ref ref,
-  ContainerFilter containerFilter,
-) {
+  String? spaceUuid, {
+  bool allSpaces = false,
+}) {
   final db = ref.watch(tabDatabaseProvider);
-
-  return switch (containerFilter) {
-    ContainerFilterById(:final containerId) =>
-      db.definitionsDrift
-          .tabTrees(containerId: containerId, skipContainerCheck: false)
-          .watch(),
-    ContainerFilterDisabled() =>
-      db.definitionsDrift
-          .tabTrees(containerId: null, skipContainerCheck: true)
-          .watch(),
-  };
+  return db.tabDao
+      .tabTrees(allSpaces ? null : spaceUuid, skipSpaceCheck: allSpaces)
+      .watch();
 }
 
 @Riverpod()
 Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
   Ref ref,
-  String? containerId,
+  String? spaceUuid,
 ) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.definitionsDrift
-      .tabsWithRootAndDepth(containerId: containerId)
-      .watch();
+  return db.tabDao.tabsWithRootAndDepth(spaceUuid).watch();
 }
 
 /// One tab's row, watched — without its page text.
@@ -164,10 +200,51 @@ Stream<List<TabSummary>> watchContainerTabsData(Ref ref, String? containerId) {
   return db.containerDao.getContainerTabsData(containerId).watch();
 }
 
+// --- shelves -------------------------------------------------------------------
+
+/// `tab.id → tab_shelf` for every tab.
 @Riverpod(keepAlive: true)
-Stream<Set<String>> watchPinnedTabIds(Ref ref) {
+Stream<Map<String, TabShelf>> watchTabShelves(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.getPinnedTabIds().watch().map((ids) => ids.toSet());
+  return db.tabDao.watchShelves();
+}
+
+/// Ids of the tabs on the pinned shelf; empty until the shelves have loaded.
+@Riverpod(keepAlive: true)
+Set<String> pinnedTabIds(Ref ref) {
+  final shelves = ref.watch(
+    watchTabShelvesProvider.select((value) => value.value),
+  );
+  if (shelves == null) {
+    return const {};
+  }
+  return {
+    for (final entry in shelves.entries)
+      if (entry.value == TabShelf.pinned) entry.key,
+  };
+}
+
+/// Ids of the tabs on the essential shelf; empty until the shelves have loaded.
+@Riverpod(keepAlive: true)
+Set<String> essentialTabIds(Ref ref) {
+  final shelves = ref.watch(
+    watchTabShelvesProvider.select((value) => value.value),
+  );
+  if (shelves == null) {
+    return const {};
+  }
+  return {
+    for (final entry in shelves.entries)
+      if (entry.value == TabShelf.essential) entry.key,
+  };
+}
+
+/// The essentials strip of one container (`null` = the unassigned strip), in
+/// `order_key` order.
+@Riverpod()
+Stream<List<String>> watchEssentialTabIds(Ref ref, String? containerId) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.essentialTabIds(containerId).watch();
 }
 
 @Riverpod()
@@ -182,10 +259,20 @@ Stream<Map<String, String>> watchTabOrderKeys(Ref ref) {
   return db.tabDao.getTabOrderKeys().watch().map(Map.fromEntries);
 }
 
+// --- containers ----------------------------------------------------------------
+
 @Riverpod()
 Stream<ContainerData?> watchContainerData(Ref ref, String containerId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.getContainerData(containerId).watchSingleOrNull();
+}
+
+/// The per-device settings of one container; defaults while it has no
+/// `container_local` row.
+@Riverpod()
+Stream<ContainerLocalData> watchContainerLocal(Ref ref, String containerId) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.watchLocal(containerId);
 }
 
 @Riverpod()
