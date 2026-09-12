@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -75,13 +76,13 @@ class BrowserHome extends ConsumerWidget {
     Future<void> viewTabs() => const TabViewRoute().push(context);
 
     Future<void> resumeLastTab() async {
-      final containerId = ref.read(selectedContainerProvider);
+      final spaceUuid = ref.read(selectedSpaceProvider);
       final repository = ref.read(tabRepositoryProvider.notifier);
 
-      // Resume within the container in scope; falling back to the global
-      // "latest tab" would silently jump the user into another container.
-      if (containerId != null) {
-        await repository.resumeLatestContainerTab(containerId);
+      // Resume within the space in scope; falling back to the global
+      // "latest tab" would silently jump the user into another space.
+      if (spaceUuid != null) {
+        await repository.resumeLatestSpaceTab(spaceUuid);
       } else {
         await repository.resumeLatestTab();
       }
@@ -245,9 +246,7 @@ class _HomeHeader extends ConsumerWidget {
           if (container != null) ...[
             const SizedBox(height: 12),
             Text(
-              container.name?.isNotEmpty == true
-                  ? container.name!
-                  : 'Container',
+              container.name.isNotEmpty ? container.name : 'Container',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -289,11 +288,9 @@ class _ContainerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final containerPalette = ContainerColors.palette(
-      context,
-      container.color,
-      useCustomColor: container.metadata.useCustomColor,
-    );
+    final containerColor =
+        container.color.color ?? colorScheme.onSurfaceVariant;
+    final containerPalette = ContainerColors.palette(context, containerColor);
 
     return Container(
       width: 96,
