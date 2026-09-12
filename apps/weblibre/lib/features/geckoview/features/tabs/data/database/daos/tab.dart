@@ -2335,4 +2335,173 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
     return query.map((row) => row.read(db.tab.id)!).get();
   }
+
+  // ---------------------------------------------------------------------------
+  // Zen spaces sync (PLAN §8)
+  // ---------------------------------------------------------------------------
+
+  /// Every `closed_tab_tombstone.tab_id`: the proof a tab was closed by the
+  /// user, which is what lets the sync client project a tombstone for it.
+  Selectable<String> allClosedTabTombstoneIds() {
+    final query = selectOnly(db.closedTabTombstone)
+      ..addColumns([db.closedTabTombstone.tabId]);
+    return query.map((row) => row.read(db.closedTabTombstone.tabId)!);
+  }
+
+  TabOrderScope _scopeForSyncRow({
+    required TabShelf shelf,
+    required String? spaceUuid,
+    required String? folderId,
+    required String? containerId,
+  }) => switch (shelf) {
+    TabShelf.essential => TabOrderScope.essential(containerId),
+    // A pinned tab without a space is an I2 violation; the applier resolves
+    // a space before it gets here, so this only guards the type.
+    TabShelf.pinned when spaceUuid != null => TabOrderScope.pinned(spaceUuid),
+    TabShelf.pinned || TabShelf.normal => TabOrderScope.normal(
+      spaceUuid: spaceUuid,
+      folderId: folderId,
+    ),
+  };
+
+  /// Inserts the row for a tab that arrived through sync: no engine session
+  /// (`engine_tab_id` NULL, PLAN §7.4) and the record's identity fields.
+  /// Essentials get no space or folder (I1). Without [orderKey] the tab is
+  /// appended to its scope.
+  Future<void> insertColdTab({
+    required String id,
+    required Uri? url,
+    required String? title,
+    required String? iconUrl,
+    required String? containerId,
+    required String? spaceUuid,
+    required String? folderId,
+    required TabShelf shelf,
+    required String? staticLabel,
+    required bool hasStaticIcon,
+    required bool defaultContainer,
+    String? orderKey,
+  }) {
+    return db.transaction(() async {
+      final isEssential = shelf == TabShelf.essential;
+      final scopeSpace = isEssential ? null : spaceUuid;
+      final scopeFolder = isEssential ? null : folderId;
+      final scope = _scopeForSyncRow(
+        shelf: shelf,
+        spaceUuid: scopeSpace,
+        folderId: scopeFolder,
+        containerId: containerId,
+      );
+      final key = orderKey ?? await trailingOrderKey(scope).getSingle();
+      await db.tab.insertOne(
+        TabCompanion.insert(
+          id: id,
+          engineTabId: const Value(null),
+          source: TabSource.manual,
+          parentId: const Value(null),
+          containerId: Value(containerId),
+          spaceUuid: Value(scopeSpace),
+          folderId: Value(scopeFolder),
+          tabShelf: Value(shelf),
+          orderKey: key,
+          url: Value(url),
+          title: Value(title),
+          iconUrl: Value(iconUrl),
+          staticLabel: Value(staticLabel),
+          hasStaticIcon: Value(hasStaticIcon),
+          defaultContainer: Value(defaultContainer),
+          tabMode: const Value(TabModeDbValue.regular),
+          timestamp: DateTime.now(),
+        ),
+      );
+    });
+  }
+
+  /// Writes the identity fields a Zen `tab` record carries onto an existing
+  /// row. Placement (shelf, space, folder, order) is handled by [moveToScope];
+  /// the container is a plain column write here because a cookie-jar change
+  /// only takes effect when the tab is next materialised.
+  Future<void> updateTabFromSync(
+    String id, {
+    Value<Uri?> url = const Value.absent(),
+    Value<String?> title = const Value.absent(),
+    Value<String?> iconUrl = const Value.absent(),
+    Value<String?> containerId = const Value.absent(),
+    Value<String?> staticLabel = const Value.absent(),
+    Value<bool> hasStaticIcon = const Value.absent(),
+    Value<bool> defaultContainer = const Value.absent(),
+  }) => _updateByIdStatement(id).write(
+    TabCompanion(
+      url: url,
+      title: title,
+      iconUrl: iconUrl,
+      containerId: containerId,
+      staticLabel: staticLabel,
+      hasStaticIcon: hasStaticIcon,
+      defaultContainer: defaultContainer,
+    ),
+  );
+
+  /// Re-keys the slots of [scope] so [orderedIds] come first, in that order,
+  /// followed by the scope's remaining slots in their current relative order.
+  /// An id may name a tab, a folder or a split; ids not in the scope are
+  /// ignored. Mirrors Zen's `#applyOrdering` for a space's / folder's
+  /// `children` array and the layout's `essentials` lists (PLAN §6.6).
+  ///
+  /// For a space or folder scope this covers both the pinned and the normal
+  /// shelf: they are separate ordering scopes, so one ascending key sequence
+  /// across both keeps every shelf's relative order correct.
+  Future<void> applyScopeOrder(
+    TabOrderScope scope,
+    List<String> orderedIds,
+  ) {
+    return db.transaction(() async {
+      final List<String> current;
+      if (scope.isEssential) {
+        current = await essentialTabIds(scope.containerId).get();
+      } else {
+        final slots = await scopeChildSlots(scope.spaceUuid, scope.folderId);
+        current = [for (final slot in slots) slot.id];
+      }
+      final inScope = current.toSet();
+      final listed = <String>[];
+      final seen = <String>{};
+      for (final id in orderedIds) {
+        if (inScope.contains(id) && seen.add(id)) {
+          listed.add(id);
+        }
+      }
+      final rest = [
+        for (final id in current)
+          if (!seen.contains(id)) id,
+      ];
+      final sequence = [...listed, ...rest];
+      if (sequence.isEmpty) {
+        return;
+      }
+
+      var rank = LexoRank.middle();
+      await batch((batch) {
+        for (final id in sequence) {
+          final key = rank.value;
+          rank = rank.genNext();
+          batch.update(
+            db.tab,
+            TabCompanion(orderKey: Value(key)),
+            where: (t) => t.id.equals(id),
+          );
+          batch.update(
+            db.tabFolder,
+            TabFolderCompanion(orderKey: Value(key)),
+            where: (f) => f.id.equals(id),
+          );
+          batch.update(
+            db.tabSplit,
+            TabSplitCompanion(orderKey: Value(key)),
+            where: (s) => s.id.equals(id),
+          );
+        }
+      });
+    });
+  }
 }
