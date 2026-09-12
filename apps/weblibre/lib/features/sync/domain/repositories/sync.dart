@@ -24,10 +24,8 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/entities/synced_tab_item.dart';
 
@@ -313,7 +311,7 @@ class SyncRepository extends _$SyncRepository {
     final incomingTabs = await _service.drainIncomingTabs();
 
     for (final tab in incomingTabs) {
-      await _openUrlInAssignedContainer(tab.url);
+      await _openUrl(tab.url);
     }
 
     await _refreshTabs();
@@ -321,33 +319,20 @@ class SyncRepository extends _$SyncRepository {
   }
 
   Future<void> openSyncedTab(SyncRemoteTab tab) async {
-    await _openUrlInAssignedContainer(tab.url);
+    await _openUrl(tab.url);
   }
 
-  Future<void> _openUrlInAssignedContainer(String url) async {
+  /// Opens [url] in the selected space; the container follows from the space
+  /// (or the selected container).
+  Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) {
       return;
     }
 
-    final containerRepository = ref.read(containerRepositoryProvider.notifier);
-
-    final containerId = await containerRepository.siteAssignedContainerId(uri);
-
-    final assignedContainer = containerId == null
-        ? null
-        : await containerRepository.getContainerData(containerId);
-
     await ref
         .read(tabRepositoryProvider.notifier)
-        .addTab(
-          url: uri,
-          selectTab: true,
-          tabMode: TabMode.regular,
-          containerSelection: assignedContainer == null
-              ? const TabContainerSelection.unassigned()
-              : TabContainerSelection.specific(assignedContainer),
-        );
+        .addTab(url: uri, selectTab: true, tabMode: TabMode.regular);
   }
 
   @override
