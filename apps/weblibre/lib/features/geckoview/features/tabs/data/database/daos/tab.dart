@@ -2375,19 +2375,23 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     required String? containerId,
   }) => switch (shelf) {
     TabShelf.essential => TabOrderScope.essential(containerId),
-    // A pinned tab without a space is an I2 violation; the applier resolves
-    // a space before it gets here, so this only guards the type.
-    TabShelf.pinned when spaceUuid != null => TabOrderScope.pinned(spaceUuid),
-    TabShelf.pinned || TabShelf.normal => TabOrderScope.normal(
+    // A folder member ranks in its folder on the pinned shelf (Zen keeps
+    // folders in the pinned section); a pinned tab without a folder is in
+    // the space's flat pinned section. The applier resolves a space before
+    // it gets here (I2), so `spaceUuid` is only nullable for the type.
+    TabShelf.pinned || TabShelf.normal => TabOrderScope(
       spaceUuid: spaceUuid,
       folderId: folderId,
+      shelf: shelf,
+      containerId: null,
     ),
   };
 
   /// Inserts the row for a tab that arrived through sync: no engine session
   /// (`engine_tab_id` NULL, PLAN §7.4) and the record's identity fields.
-  /// Essentials get no space or folder (I1). Without [orderKey] the tab is
-  /// appended to its scope.
+  /// Essentials get no space or folder (I1); a pinned tab keeps its
+  /// [folderId] since folder members are pinned. Without [orderKey] the tab
+  /// is appended to its scope.
   Future<void> insertColdTab({
     required String id,
     required Uri? url,

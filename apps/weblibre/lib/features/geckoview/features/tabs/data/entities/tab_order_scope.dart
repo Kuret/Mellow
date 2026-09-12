@@ -26,6 +26,8 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 /// DESIGN.md "Ordering scope").
 ///
 /// - normal / pinned: `(space_uuid, folder_id, shelf)`; [containerId] unused.
+///   A folder member is `(space_uuid, folder_id, pinned)` — see
+///   [TabOrderScope.folder].
 /// - essential: `(NULL, NULL, essential, container_id)` — the per-container
 ///   strip (PLAN §6.4).
 /// - private: `(NULL, NULL, normal)`; private tabs never have a space.
@@ -54,9 +56,19 @@ class TabOrderScope with FastEquatable {
     : shelf = TabShelf.normal,
       containerId = null;
 
+  /// The flat "Pinned" section of a space: pinned tabs outside any folder.
   TabOrderScope.pinned(String this.spaceUuid)
     : folderId = null,
       shelf = TabShelf.pinned,
+      containerId = null;
+
+  /// The members of a folder. In Zen folders live in the pinned section, so
+  /// every folder member is a pinned tab (`folder.addTabs` pins first); the
+  /// folder's own slot order is one sequence across both shelves
+  /// (`scopeChildSlots`), which is why this is the folder scope and
+  /// `TabOrderScope.normal(folderId: …)` only names its sub-folder slots.
+  TabOrderScope.folder({required this.spaceUuid, required String this.folderId})
+    : shelf = TabShelf.pinned,
       containerId = null;
 
   TabOrderScope.essential(this.containerId)
