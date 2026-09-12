@@ -2362,6 +2362,94 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   // Zen spaces sync (PLAN §8)
   // ---------------------------------------------------------------------------
 
+  /// How many tabs the projection would emit: the denominator the upload
+  /// canary measures a batch's deletions against.
+  ///
+  /// Mirrors `SpacesProjection._regularTabs` + `_isSyncable`: regular
+  /// (non-private) tabs with a real URL, essential or filed in a space.
+  Future<int> countSyncableTabs() {
+    final t = db.tab;
+    final count = t.id.count();
+    final query = selectOnly(t)
+      ..addColumns([count])
+      ..where(
+        t.tabMode.equalsValue(TabModeDbValue.regular) &
+            t.url.isNotNull() &
+            t.url.isNotValue('') &
+            t.url.isNotValue('about:blank') &
+            (t.tabShelf.equalsValue(TabShelf.essential) |
+                t.spaceUuid.isNotNull()),
+      );
+    return query.map((row) => row.read(count)!).getSingle();
+  }
+
+  /// Deletes the rows a remote Zen tombstone removed, in the caller's
+  /// transaction.
+  ///
+  /// The applier cannot go through [TabRepository.closeTabsFromSync] any
+  /// more: the whole batch commits atomically, and awaiting a platform
+  /// channel inside a database transaction is not allowed. So the row goes
+  /// here, and a row that still holds an engine session queues a
+  /// `pending_engine_close` for the drain that runs once the transaction has
+  /// committed. No `closed_tab_tombstone` is written — a remote deletion is
+  /// not a local one and must not be echoed back (PLAN §8.6 item 5).
+  Future<void> deleteTabsFromSync(Iterable<String> tabIds) {
+    final ids = tabIds.toSet();
+    if (ids.isEmpty) {
+      return Future.value();
+    }
+    return db.transaction(() async {
+      await preservePromotedChildOrderOnClose(ids);
+
+      final engineIdQuery = selectOnly(db.tab)
+        ..addColumns([db.tab.engineTabId])
+        ..where(db.tab.id.isIn(ids) & db.tab.engineTabId.isNotNull());
+      final engineTabIds = await engineIdQuery
+          .map((row) => row.read(db.tab.engineTabId)!)
+          .get();
+      if (engineTabIds.isNotEmpty) {
+        final requestedAt = DateTime.now();
+        await batch((batch) {
+          for (final engineTabId in engineTabIds) {
+            batch.insert(
+              db.pendingEngineClose,
+              PendingEngineCloseCompanion.insert(
+                engineTabId: engineTabId,
+                requestedAt: requestedAt,
+              ),
+              onConflict: DoUpdate(
+                (_) => PendingEngineCloseCompanion(
+                  requestedAt: Value(requestedAt),
+                ),
+              ),
+            );
+          }
+        });
+      }
+
+      await (db.tab.delete()..where((t) => t.id.isIn(ids))).go();
+    });
+  }
+
+  /// The engine sessions an applied batch left behind, oldest first.
+  Future<List<String>> pendingEngineCloseIds() async {
+    final rows =
+        await (db.pendingEngineClose.select()
+              ..orderBy([(t) => OrderingTerm.asc(t.requestedAt)]))
+            .get();
+    return [for (final row in rows) row.engineTabId];
+  }
+
+  Future<void> deletePendingEngineCloses(Iterable<String> engineTabIds) {
+    final ids = engineTabIds.toSet();
+    if (ids.isEmpty) {
+      return Future.value();
+    }
+    return (db.pendingEngineClose.delete()
+          ..where((t) => t.engineTabId.isIn(ids)))
+        .go();
+  }
+
   /// Every `closed_tab_tombstone.tab_id`: the proof a tab was closed by the
   /// user, which is what lets the sync client project a tombstone for it.
   Selectable<String> allClosedTabTombstoneIds() {
