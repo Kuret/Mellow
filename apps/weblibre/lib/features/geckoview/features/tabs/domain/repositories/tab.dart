@@ -127,8 +127,9 @@ class TabDataRepository extends _$TabDataRepository {
   ///   essentials strip of its own container.
   /// - essential → pinned / normal: the tab lands in [activeSpaceUuid] (the
   ///   default space when none is selected).
-  /// - pinned ↔ normal: the tab keeps its space; a folder is left behind
-  ///   since the pinned shelf has none.
+  /// - pinned ↔ normal: the tab keeps its space and lands at its root. A
+  ///   folder member is pinned by definition (Zen keeps folders in the pinned
+  ///   section), so unpinning one leaves the folder as it does in Zen.
   ///
   /// Returns `false` for unknown tabs and for private tabs asked to leave the
   /// normal shelf.
@@ -169,6 +170,11 @@ class TabDataRepository extends _$TabDataRepository {
   /// Puts [tabId] (with its subtree) into [folderId], or back at the root of
   /// its space when [folderId] is null. The folder's space wins. Essentials
   /// have no folder, so they are refused.
+  ///
+  /// Folders live in the pinned section (Zen's `folder.addTabs` pins first),
+  /// so joining a folder pins the tab and it ranks in [TabOrderScope.folder];
+  /// "remove from folder" keeps it pinned, in the space's flat pinned
+  /// section.
   Future<bool> moveTabToFolder(String tabId, String? folderId) async {
     final db = ref.read(tabDatabaseProvider);
     final tab = await db.tabDao.getTabSummaryById(tabId).getSingleOrNull();
@@ -177,24 +183,31 @@ class TabDataRepository extends _$TabDataRepository {
         tab.tabMode == TabModeDbValue.private) {
       return false;
     }
-    final String? spaceUuid;
+    final TabOrderScope target;
     if (folderId != null) {
       final folder = await db.tabFolderDao.getById(folderId).getSingleOrNull();
       if (folder == null) {
         return false;
       }
-      spaceUuid = folder.spaceUuid;
+      target = TabOrderScope.folder(
+        spaceUuid: folder.spaceUuid,
+        folderId: folderId,
+      );
     } else {
-      spaceUuid = tab.spaceUuid;
+      target = TabOrderScope(
+        spaceUuid: tab.spaceUuid,
+        folderId: null,
+        shelf: tab.tabShelf,
+        containerId: null,
+      );
     }
-    await db.tabDao.moveToScope([
-      tabId,
-    ], TabOrderScope.normal(spaceUuid: spaceUuid, folderId: folderId));
+    await db.tabDao.moveToScope([tabId], target);
     return true;
   }
 
   /// Moves [tabId] (with its subtree) to the root of [spaceUuid], keeping the
-  /// pinned/normal shelf. Essentials have no space, so they are refused.
+  /// pinned/normal shelf; a folder member leaves its folder. Essentials have
+  /// no space, so they are refused.
   Future<bool> moveTabToSpace(String tabId, String spaceUuid) async {
     final dao = ref.read(tabDatabaseProvider).tabDao;
     final tab = await dao.getTabSummaryById(tabId).getSingleOrNull();

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -119,6 +120,30 @@ void main() {
       expect(tab.spaceUuid, 's1');
     });
 
+    test('unpinning a folder member leaves the folder', () async {
+      final h = openRepositoryHarness();
+      await seedSpaces(h.db, ['s1']);
+      final folder = await h.container
+          .read(_folderRepo)
+          .createFolder('s1', name: 'F');
+      await seedTab(
+        h.db,
+        't',
+        spaceUuid: 's1',
+        folderId: folder.id,
+        shelf: TabShelf.pinned,
+      );
+
+      await h.container
+          .read(tabDataRepositoryProvider.notifier)
+          .setShelf('t', TabShelf.normal, activeSpaceUuid: 's1');
+
+      final tab = await summaryOf(h.db, 't');
+      expect(tab.tabShelf, TabShelf.normal);
+      expect(tab.folderId, isNull);
+      expect(tab.spaceUuid, 's1');
+    });
+
     test('a private tab stays on the normal shelf', () async {
       final h = openRepositoryHarness();
       await seedSpaces(h.db, ['s1']);
@@ -157,15 +182,27 @@ void main() {
         await seedTab(h.db, 'e', shelf: TabShelf.essential);
         final repo = h.container.read(tabDataRepositoryProvider.notifier);
 
+        // Joining a folder pins the tab: folders live in the pinned section.
         expect(await repo.moveTabToFolder('t', folder.id), isTrue);
         var tab = await summaryOf(h.db, 't');
         expect(tab.folderId, folder.id);
         expect(tab.spaceUuid, 's2');
+        expect(tab.tabShelf, TabShelf.pinned);
+        expect(
+          await idsInScope(
+            h.db,
+            TabOrderScope.folder(spaceUuid: 's2', folderId: folder.id),
+          ),
+          ['t'],
+        );
 
+        // Leaving the folder keeps it pinned, in the space's pinned section.
         expect(await repo.moveTabToFolder('t', null), isTrue);
         tab = await summaryOf(h.db, 't');
         expect(tab.folderId, isNull);
         expect(tab.spaceUuid, 's2');
+        expect(tab.tabShelf, TabShelf.pinned);
+        expect(await idsInScope(h.db, TabOrderScope.pinned('s2')), ['t']);
 
         expect(await repo.moveTabToFolder('e', folder.id), isFalse);
       },
@@ -177,7 +214,13 @@ void main() {
       final folder = await h.container
           .read(_folderRepo)
           .createFolder('s1', name: 'F');
-      await seedTab(h.db, 't', spaceUuid: 's1', folderId: folder.id);
+      await seedTab(
+        h.db,
+        't',
+        spaceUuid: 's1',
+        folderId: folder.id,
+        shelf: TabShelf.pinned,
+      );
       await seedTab(h.db, 'p', spaceUuid: 's1', shelf: TabShelf.pinned);
       final repo = h.container.read(tabDataRepositoryProvider.notifier);
 
@@ -185,6 +228,7 @@ void main() {
       final tab = await summaryOf(h.db, 't');
       expect(tab.spaceUuid, 's2');
       expect(tab.folderId, isNull);
+      expect(tab.tabShelf, TabShelf.pinned);
 
       expect(await repo.moveTabToSpace('p', 's2'), isTrue);
       final pinned = await summaryOf(h.db, 'p');
