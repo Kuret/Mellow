@@ -531,13 +531,23 @@ class SpacesApplier {
   /// Where the record puts the tab. Essentials have no space or folder (I1);
   /// a regular tab without a `workspaceUuid` lands in the default space (I2)
   /// and re-uploads with it, the way Zen's `noteApplied` self-heals.
-  Future<({String? spaceUuid, String? folderId, TabOrderScope scope})>
+  ///
+  /// Folders live in Zen's pinned section, so a folder member arrives with
+  /// `pinned: true` **and** a `folderId` (`#projectTabs`); the folder wins and
+  /// the tab ranks in [TabOrderScope.folder]. A member that some client left
+  /// unpinned is pinned here, as Zen's `#createTab` → `folder.addTabs` would.
+  /// An unknown folder throws [UnknownFolder] so the record is retried once
+  /// the folder has landed.
+  Future<
+    ({String? spaceUuid, String? folderId, TabShelf shelf, TabOrderScope scope})
+  >
   _placementOf(ZenTabRecord data, String? containerId) async {
     final shelf = _shelfOf(data);
     if (shelf == TabShelf.essential) {
       return (
         spaceUuid: null,
         folderId: null,
+        shelf: shelf,
         scope: TabOrderScope.essential(containerId),
       );
     }
@@ -549,13 +559,6 @@ class SpacesApplier {
       );
       spaceUuid = (await _spaces.ensureDefaultSpace()).uuid;
     }
-    if (shelf == TabShelf.pinned) {
-      return (
-        spaceUuid: spaceUuid,
-        folderId: null,
-        scope: TabOrderScope.pinned(spaceUuid),
-      );
-    }
     final folderId = data.folderId;
     if (folderId != null) {
       final folder = await _folders.getFolder(folderId);
@@ -564,11 +567,32 @@ class SpacesApplier {
       }
       // The folder's space wins, as it does for a local move.
       spaceUuid = folder.spaceUuid ?? spaceUuid;
+      if (shelf == TabShelf.normal) {
+        logger.d(
+          'spaces sync: tab ${data.tabId} is a member of folder $folderId '
+          'but not pinned; pinning it as Zen would',
+        );
+      }
+      return (
+        spaceUuid: spaceUuid,
+        folderId: folderId,
+        shelf: TabShelf.pinned,
+        scope: TabOrderScope.folder(spaceUuid: spaceUuid, folderId: folderId),
+      );
+    }
+    if (shelf == TabShelf.pinned) {
+      return (
+        spaceUuid: spaceUuid,
+        folderId: null,
+        shelf: shelf,
+        scope: TabOrderScope.pinned(spaceUuid),
+      );
     }
     return (
       spaceUuid: spaceUuid,
-      folderId: folderId,
-      scope: TabOrderScope.normal(spaceUuid: spaceUuid, folderId: folderId),
+      folderId: null,
+      shelf: shelf,
+      scope: TabOrderScope.normal(spaceUuid: spaceUuid),
     );
   }
 
@@ -588,7 +612,7 @@ class SpacesApplier {
       containerId: containerId,
       spaceUuid: placement.spaceUuid,
       folderId: placement.folderId,
-      shelf: _shelfOf(data),
+      shelf: placement.shelf,
       staticLabel: data.staticLabel,
       hasStaticIcon: data.hasStaticIcon,
       defaultContainer: data.defaultContainer,
@@ -664,12 +688,12 @@ class SpacesApplier {
           }
           continue;
         }
-        final scope = data.pinned && data.workspaceUuid != null
-            ? TabOrderScope.pinned(data.workspaceUuid!)
-            : TabOrderScope.normal(
-                spaceUuid: data.workspaceUuid,
-                folderId: data.folderId,
-              );
+        final scope = TabOrderScope(
+          spaceUuid: data.workspaceUuid,
+          folderId: data.folderId,
+          shelf: data.pinned ? TabShelf.pinned : TabShelf.normal,
+          containerId: null,
+        );
         final split = TabSplitData(
           id: data.splitId,
           gridType: data.gridType,
@@ -720,8 +744,10 @@ class SpacesApplier {
         if (folder == null) {
           continue;
         }
+        // One sequence across both shelves of the folder: `applyScopeOrder`
+        // re-keys every `(space, folder)` slot regardless of the shelf.
         await _db.tabDao.applyScopeOrder(
-          TabOrderScope.normal(
+          TabOrderScope.folder(
             spaceUuid: folder.spaceUuid,
             folderId: folder.id,
           ),

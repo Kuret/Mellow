@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 
@@ -27,6 +28,137 @@ void main() {
     expect(essential.folderId, isNull);
     expect((await summaryOf(harness.db, 'p1')).tabShelf, TabShelf.pinned);
     expect((await summaryOf(harness.db, 'n1')).tabShelf, TabShelf.normal);
+  });
+
+  test('folder members are pinned tabs that keep their folder', () async {
+    final harness = openApplierHarness();
+
+    final failed = await harness.container
+        .read(spacesApplierProvider)
+        .applyBatch([
+          record(
+            ZenSpaceRecord(
+              uuid: space1,
+              name: 'S',
+              icon: null,
+              theme: null,
+              containerGuid: null,
+              children: ['t4', 't3', 'F'],
+            ),
+          ),
+          record(
+            ZenFolderRecord(
+              folderId: 'F',
+              name: 'F',
+              icon: null,
+              workspaceUuid: space1,
+              parentFolderId: null,
+              live: null,
+              children: ['t1', 'G'],
+            ),
+          ),
+          record(
+            ZenFolderRecord(
+              folderId: 'G',
+              name: 'G',
+              icon: null,
+              workspaceUuid: space1,
+              parentFolderId: 'F',
+              live: null,
+              children: ['t2'],
+            ),
+          ),
+          // Zen projects folder members with `pinned: true` (folders live in
+          // the pinned section).
+          record(
+            tabRecord('t1', pinned: true, workspaceUuid: space1, folderId: 'F'),
+          ),
+          record(
+            tabRecord('t2', pinned: true, workspaceUuid: space1, folderId: 'G'),
+          ),
+          record(tabRecord('t3', workspaceUuid: space1)),
+          record(tabRecord('t4', pinned: true, workspaceUuid: space1)),
+        ], firstSync: true);
+    expect(failed, isEmpty);
+
+    final t1 = await summaryOf(harness.db, 't1');
+    expect(t1.folderId, 'F');
+    expect(t1.tabShelf, TabShelf.pinned);
+    final t2 = await summaryOf(harness.db, 't2');
+    expect(t2.folderId, 'G');
+    expect(t2.tabShelf, TabShelf.pinned);
+    final t3 = await summaryOf(harness.db, 't3');
+    expect(t3.folderId, isNull);
+    expect(t3.tabShelf, TabShelf.normal);
+    final t4 = await summaryOf(harness.db, 't4');
+    expect(t4.folderId, isNull);
+    expect(t4.tabShelf, TabShelf.pinned);
+
+    // The flat pinned section holds only root pinned tabs.
+    expect(await idsInScope(harness.db, TabOrderScope.pinned(space1)), ['t4']);
+    expect(
+      await idsInScope(
+        harness.db,
+        TabOrderScope.folder(spaceUuid: space1, folderId: 'F'),
+      ),
+      ['t1'],
+    );
+    expect(
+      await idsInScope(
+        harness.db,
+        TabOrderScope.folder(spaceUuid: space1, folderId: 'G'),
+      ),
+      ['t2'],
+    );
+  });
+
+  test('a folder member whose folder has not landed is retried', () async {
+    final harness = openApplierHarness();
+    await seedSpaces(harness.db, [space1]);
+
+    final failed = await harness.container
+        .read(spacesApplierProvider)
+        .applyBatch([
+          record(
+            tabRecord(
+              'orphan',
+              pinned: true,
+              workspaceUuid: space1,
+              folderId: 'missing',
+            ),
+          ),
+        ], firstSync: false);
+
+    expect(failed, {'orphan'});
+    expect(await tabIds(harness.db), isNot(contains('orphan')));
+    expect(await harness.db.syncStateDao.getDigest('orphan'), isNull);
+  });
+
+  test('an unpinned folder member is pinned, as Zen would', () async {
+    final harness = openApplierHarness();
+    await seedSpaces(harness.db, [space1]);
+
+    final failed = await harness.container
+        .read(spacesApplierProvider)
+        .applyBatch([
+          record(
+            ZenFolderRecord(
+              folderId: 'F',
+              name: 'F',
+              icon: null,
+              workspaceUuid: space1,
+              parentFolderId: null,
+              live: null,
+              children: const [],
+            ),
+          ),
+          record(tabRecord('m', workspaceUuid: space1, folderId: 'F')),
+        ], firstSync: false);
+    expect(failed, isEmpty);
+
+    final member = await summaryOf(harness.db, 'm');
+    expect(member.folderId, 'F');
+    expect(member.tabShelf, TabShelf.pinned);
   });
 
   test('an unknown container guid fails only that record', () async {
@@ -178,6 +310,48 @@ void main() {
     expect(
       await idsInScope(harness.db, TabOrderScope.normal(spaceUuid: space1)),
       ['c', 'a', 'b', 'unlisted'],
+    );
+  });
+
+  test('a folder children array orders its pinned members', () async {
+    final harness = openApplierHarness();
+    await seedSpaces(harness.db, [space1]);
+    await harness.db.tabFolderDao.insertFolder(
+      TabFolderData(id: 'F', name: 'F', spaceUuid: space1, orderKey: 'f'),
+    );
+    for (final id in ['a', 'b', 'c']) {
+      await seedTab(
+        harness.db,
+        id,
+        spaceUuid: space1,
+        folderId: 'F',
+        shelf: TabShelf.pinned,
+      );
+    }
+
+    final failed = await harness.container
+        .read(spacesApplierProvider)
+        .applyBatch([
+          record(
+            ZenFolderRecord(
+              folderId: 'F',
+              name: 'F',
+              icon: null,
+              workspaceUuid: space1,
+              parentFolderId: null,
+              live: null,
+              children: ['c', 'a'],
+            ),
+          ),
+        ], firstSync: false);
+    expect(failed, isEmpty);
+
+    expect(
+      await idsInScope(
+        harness.db,
+        TabOrderScope.folder(spaceUuid: space1, folderId: 'F'),
+      ),
+      ['c', 'a', 'b'],
     );
   });
 
