@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -25,8 +24,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
@@ -34,7 +33,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/con
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
@@ -79,21 +78,32 @@ class ContainerEditScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final selectedColor = useState(initialContainer.color);
-    final useCustomColor = useState(initialContainer.metadata.useCustomColor);
-    final selectedIcon = useState(initialContainer.metadata.iconData);
-    final contextualIdentity = useState(
-      initialContainer.metadata.contextualIdentity,
-    );
-    final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
-    final excludeFromIndex = useState(
-      initialContainer.metadata.excludeFromIndex,
-    );
-    final excludeFromHistory = useState(
-      initialContainer.metadata.excludeFromHistory,
-    );
+    final colorKey = useState(initialContainer.colorKey);
+    final iconKey = useState(initialContainer.iconKey);
     final isPinned = useState(initialContainer.isPinned);
-    final wallpaper = useState(initialContainer.metadata.wallpaper);
+
+    // The local, never-synced half of the container: privacy flags and the
+    // wallpaper override. A new container starts from the defaults; an
+    // existing one loads its row once and edits a copy of it.
+    final initialLocal = useState(
+      ContainerLocalData.defaults(initialContainer.id),
+    );
+    final local = useState(initialLocal.value);
+    useEffect(() {
+      if (_mode != _DialogMode.edit) return null;
+      var cancelled = false;
+      unawaited(
+        ref
+            .read(containerRepositoryProvider.notifier)
+            .getLocal(initialContainer.id)
+            .then((ContainerLocalData loaded) {
+              if (cancelled) return;
+              initialLocal.value = loaded;
+              local.value = loaded;
+            }),
+      );
+      return () => cancelled = true;
+    }, [initialContainer.id]);
 
     final textController = useTextEditingController(
       text: initialContainer.name,
@@ -101,23 +111,11 @@ class ContainerEditScreen extends HookConsumerWidget {
     useListenable(textController);
 
     ContainerData buildContainer() {
-      final name = textController.text.trim();
       return initialContainer.copyWith(
-        name: name.isNotEmpty ? name : null,
-        color: selectedColor.value,
+        name: textController.text.trim(),
+        colorKey: colorKey.value,
+        iconKey: iconKey.value,
         isPinned: isPinned.value,
-        metadata: initialContainer.metadata
-            .copyWith(
-              contextualIdentity: contextualIdentity.value,
-              iconData: selectedIcon.value,
-              clearDataOnExit:
-                  clearDataOnExit.value && contextualIdentity.value != null,
-              excludeFromIndex: excludeFromIndex.value,
-              excludeFromHistory: excludeFromHistory.value,
-              useCustomColor: useCustomColor.value,
-              wallpaper: wallpaper.value,
-            )
-            .sanitized(),
       );
     }
 
@@ -136,6 +134,9 @@ class ContainerEditScreen extends HookConsumerWidget {
           isPinned: isPinned.value,
         );
       }
+      await repository.setLocal(
+        local.value.copyWith(containerId: container.id),
+      );
       return container;
     }
 
@@ -147,38 +148,35 @@ class ContainerEditScreen extends HookConsumerWidget {
     }
 
     Future<void> openColorPicker() async {
-      final result = await showDialog<ColorPickerResult?>(
+      final result = await showDialog<String?>(
         context: context,
-        builder: (context) => ColorPickerDialog(
-          selectedColor.value,
-          initialUseCustomColor: useCustomColor.value,
+        builder: (context) =>
+            FirefoxContainerColorPicker(initialColorKey: colorKey.value),
+      );
+
+      if (result != null) {
+        colorKey.value = result;
+      }
+    }
+
+    Color seedColor() =>
+        FirefoxContainerColor.fromKeyword(colorKey.value).color ??
+        colorScheme.primary;
+
+    Future<void> openIconPicker() async {
+      final result = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (context) => FirefoxContainerIconPicker(
+          accentColor: seedColor(),
+          selectedIconKey: iconKey.value,
+          onSelected: (key) => Navigator.of(context).pop(key),
         ),
       );
 
       if (result != null) {
-        selectedColor.value = result.color;
-        useCustomColor.value = result.useCustomColor;
-      }
-    }
-
-    Future<void> openIconPicker() async {
-      final icon = await showModalBottomSheet<IconData>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (context) => FractionallySizedBox(
-          heightFactor: 0.92,
-          child: ContainerIconPickerSheet(
-            selectedColor: selectedColor.value,
-            useCustomColor: useCustomColor.value,
-            selectedIcon: resolveContainerIcon(selectedIcon.value),
-            onSelected: (iconData) => Navigator.of(context).pop(iconData),
-          ),
-        ),
-      );
-
-      if (icon != null) {
-        selectedIcon.value = icon;
+        iconKey.value = result;
       }
     }
 
@@ -201,7 +199,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(resolveContainerIcon(selectedIcon.value)),
+                  leading: Icon(
+                    FirefoxContainerIcon.fromKeyword(iconKey.value).icon,
+                  ),
                   title: const Text('Change Icon'),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -231,14 +231,18 @@ class ContainerEditScreen extends HookConsumerWidget {
     final container = buildContainer();
     //Empty copy to create comparable container with same type
     final comparison = initialContainer.copyWith();
-    final previewIcon = resolveContainerIcon(selectedIcon.value);
-    final previewPalette = ContainerColors.palette(
-      context,
-      selectedColor.value,
-      useCustomColor: useCustomColor.value,
-    );
+    final isDirty =
+        container != comparison || local.value != initialLocal.value;
+    final previewIcon = FirefoxContainerIcon.fromKeyword(iconKey.value).icon;
+    final previewPalette = ContainerColors.palette(context, seedColor());
+    final wallpaper = WallpaperOverride.fromStored(local.value.wallpaper);
+
+    void setWallpaper(WallpaperOverride? override) {
+      local.value = local.value.copyWith(wallpaper: override?.toStored());
+    }
+
     return PopScope(
-      canPop: container == comparison,
+      canPop: !isDirty,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
@@ -379,7 +383,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                           leading: const Icon(MdiIcons.imageOutline),
                           title: const Text('Wallpaper'),
                           subtitle: Text(
-                            wallpaper.value != null
+                            wallpaper != null
                                 ? 'Shown on home while this container is '
                                       'selected'
                                 : 'Uses the wallpaper from settings',
@@ -398,15 +402,13 @@ class ContainerEditScreen extends HookConsumerWidget {
                                     generalSettingsWithDefaultsProvider,
                                   );
 
-                                  final override = wallpaper.value;
-
                                   return WallpaperEditor(
-                                    fileName: override?.file,
+                                    fileName: wallpaper?.file,
                                     blur:
-                                        override?.blur ??
+                                        wallpaper?.blur ??
                                         settings.homeWallpaperBlur,
                                     dim:
-                                        override?.dim ??
+                                        wallpaper?.dim ??
                                         settings.homeWallpaperDim,
                                     emptyDescription:
                                         'This container falls back to the '
@@ -416,21 +418,24 @@ class ContainerEditScreen extends HookConsumerWidget {
                                     // override, so a later pick starts from
                                     // whatever the profile does now rather
                                     // than from a setting made months ago.
-                                    onFileChanged: (fileName) =>
-                                        wallpaper.value = fileName == null
-                                        ? null
-                                        : WallpaperOverride(
-                                            file: fileName,
-                                            blur: override?.blur,
-                                            dim: override?.dim,
-                                          ),
+                                    onFileChanged: (fileName) => setWallpaper(
+                                      fileName == null
+                                          ? null
+                                          : WallpaperOverride(
+                                              file: fileName,
+                                              blur: wallpaper?.blur,
+                                              dim: wallpaper?.dim,
+                                            ),
+                                    ),
                                     // The sliders are disabled without a
                                     // wallpaper, so there is always an
                                     // override to amend here.
-                                    onBlurChanged: (value) => wallpaper.value =
-                                        override?.copyWith(blur: value),
-                                    onDimChanged: (value) => wallpaper.value =
-                                        override?.copyWith(dim: value),
+                                    onBlurChanged: (value) => setWallpaper(
+                                      wallpaper?.copyWith(blur: value),
+                                    ),
+                                    onDimChanged: (value) => setWallpaper(
+                                      wallpaper?.copyWith(dim: value),
+                                    ),
                                   );
                                 },
                               ),
@@ -455,56 +460,49 @@ class ContainerEditScreen extends HookConsumerWidget {
                     clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
-                        SwitchListTile.adaptive(
-                          value: contextualIdentity.value != null,
-                          title: const Text('Cookie Isolation'),
-                          secondary: const Icon(MdiIcons.cookieLock),
-                          onChanged: (_mode == _DialogMode.create)
-                              ? (value) {
-                                  contextualIdentity.value = value
-                                      ? initialContainer
-                                                .metadata
-                                                .contextualIdentity ??
-                                            uuid.v4()
-                                      : null;
-
-                                  if (!value && clearDataOnExit.value) {
-                                    clearDataOnExit.value = false;
-                                  }
-                                }
-                              : null,
+                        // Isolation is intrinsic: the container id is its
+                        // Gecko cookie jar, so there is nothing to switch.
+                        const ListTile(
+                          leading: Icon(MdiIcons.cookieLock),
+                          title: Text('Cookie Isolation'),
+                          subtitle: Text(
+                            'Every container keeps its own cookies and site '
+                            'data, separate from other containers.',
+                          ),
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
-                          value: clearDataOnExit.value,
+                          value: local.value.clearDataOnExit,
                           title: const Text('Clear Data on Exit'),
                           subtitle: const Text(
                             "Clear cookies and site data for this container's "
-                            'regular tabs when the app closes. Isolated tabs '
+                            'regular tabs when the app closes. Private tabs '
                             'keep separate data.',
                           ),
                           secondary: const Icon(MdiIcons.databaseRemove),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  clearDataOnExit.value = value;
-                                }
-                              : null,
+                          onChanged: (value) {
+                            local.value = local.value.copyWith(
+                              clearDataOnExit: value,
+                            );
+                          },
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
-                          value: excludeFromIndex.value,
+                          value: local.value.excludeFromIndex,
                           title: const Text('Exclude from Search Index'),
                           subtitle: const Text(
                             'Skip pages in this container from the local search index',
                           ),
                           secondary: const Icon(MdiIcons.magnifyRemoveOutline),
                           onChanged: (value) {
-                            excludeFromIndex.value = value;
+                            local.value = local.value.copyWith(
+                              excludeFromIndex: value,
+                            );
                           },
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
-                          value: excludeFromHistory.value,
+                          value: local.value.excludeFromHistory,
                           title: const Text('Exclude from History'),
                           subtitle: const Text(
                             "Don't record new visits from this container's "
@@ -513,7 +511,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                           ),
                           secondary: const Icon(MdiIcons.incognito),
                           onChanged: (value) {
-                            excludeFromHistory.value = value;
+                            local.value = local.value.copyWith(
+                              excludeFromHistory: value,
+                            );
                           },
                         ),
                       ],
