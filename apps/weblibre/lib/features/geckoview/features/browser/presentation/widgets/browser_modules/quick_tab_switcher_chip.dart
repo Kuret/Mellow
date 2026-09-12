@@ -82,8 +82,7 @@ class QuickTabSwitcherItem with FastEquatable {
     final (tab, container) = state;
 
     return QuickTabSwitcherItem(
-      color: container?.color,
-      useCustomColor: container?.metadata.useCustomColor ?? false,
+      color: container?.color.color,
       id: tab.id,
       isActive: tab.id == selectedTabId,
       title: sandboxSourceUri != null && tab.title.isEmpty

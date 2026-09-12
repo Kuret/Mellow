@@ -57,7 +57,7 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/wid
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -231,22 +231,13 @@ class BrowserSideRail extends ConsumerWidget {
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
         selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final useCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
+      ).select((data) => data.value?.color.color),
     );
     final effectiveContainerColor = (showContainerUi && containerColor != null)
         ? containerColor
         : null;
     final tintColor = effectiveContainerColor != null
-        ? ContainerColors.palette(
-            context,
-            effectiveContainerColor,
-            useCustomColor: useCustomColor,
-          ).surfaceColor
+        ? ContainerColors.palette(context, effectiveContainerColor).surfaceColor
         : Theme.of(context).colorScheme.surfaceContainer;
 
     return ColoredBox(
@@ -378,12 +369,7 @@ class BrowserTabBar extends HookConsumerWidget {
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
         selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final containerUseCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
+      ).select((data) => data.value?.color.color),
     );
 
     final stackingMode = settings.effectiveTabBarStackingMode();
@@ -465,14 +451,8 @@ class BrowserTabBar extends HookConsumerWidget {
             displayedSheet is! ViewTabsSheet)
         ? containerColor
         : null;
-    final effectiveUseCustomColor =
-        effectiveContainerColor != null && containerUseCustomColor;
     final effectiveContainerPalette = effectiveContainerColor != null
-        ? ContainerColors.palette(
-            context,
-            effectiveContainerColor,
-            useCustomColor: effectiveUseCustomColor,
-          )
+        ? ContainerColors.palette(context, effectiveContainerColor)
         : null;
 
     return BrowserTabBarView(
@@ -489,7 +469,6 @@ class BrowserTabBar extends HookConsumerWidget {
                 ? RailAppBarTitle(
                     quarterTurns: railQuarterTurns,
                     containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
                   )
                 : isVertical
                 // A wide rail reads upright, like the horizontal bars, but the
@@ -500,21 +479,17 @@ class BrowserTabBar extends HookConsumerWidget {
                     child: settings.tabBarLayout == TabBarLayout.compact
                         ? CompactAppBarTitle(
                             containerColor: effectiveContainerColor,
-                            useCustomColor: effectiveUseCustomColor,
                           )
                         : AppBarTitle(
                             containerColor: effectiveContainerColor,
-                            useCustomColor: effectiveUseCustomColor,
                           ),
                   )
                 : settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(
                     containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
                   )
                 : AppBarTitle(
                     containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
                   )
           : null,
       actions: [
@@ -952,16 +927,16 @@ class QuickTabSwitcher extends HookConsumerWidget {
       ),
     );
     final showHierarchicalTabs = hierarchyGlyphs > 0;
-    final selectedContainerId = ref.watch(selectedContainerProvider);
-    final hierarchyContainerId =
+    final selectedSpaceUuid = ref.watch(selectedSpaceProvider);
+    final hierarchySpaceUuid =
         quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs
-        ? selectedContainerId
+        ? selectedSpaceUuid
         : null;
 
     final tabDepthById = ref
         .watch(
           groupedTabListItemsProvider(
-            containerId: hierarchyContainerId,
+            spaceUuid: hierarchySpaceUuid,
             scope: TabListScope.presentation,
           ).select((value) {
             return EquatableValue(<String, int>{
@@ -973,11 +948,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         )
         .value;
 
-    final pinnedTabIds = ref.watch(
-      watchPinnedTabIdsProvider.select(
-        (value) => value.value ?? const <String>{},
-      ),
-    );
+    final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
     final restoreComplete = ref.watch(browserRestoreCompleteProvider);
     final nativeTabIds = ref
         .watch(
@@ -1111,6 +1082,9 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   tabListDirection: tabBarDirection,
                   hierarchical: false,
                   sortPinnedFirst: sortPinnedFirst,
+                  folderIdByTab: const {},
+                  splitMembers: const {},
+                  spaceUuid: selectedSpaceUuid,
                 );
                 if (result == null) {
                   if (context.mounted) {

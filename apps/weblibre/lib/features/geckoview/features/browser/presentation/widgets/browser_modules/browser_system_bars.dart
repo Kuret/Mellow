@@ -61,23 +61,14 @@ class BrowserSystemBars extends HookConsumerWidget {
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
         selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final useCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
+      ).select((data) => data.value?.color.color),
     );
 
     final effectiveContainerColor = (showContainerUi && containerColor != null)
         ? containerColor
         : null;
     final palette = effectiveContainerColor != null
-        ? ContainerColors.palette(
-            context,
-            effectiveContainerColor,
-            useCustomColor: useCustomColor,
-          )
+        ? ContainerColors.palette(context, effectiveContainerColor)
         : null;
 
     // Mirror the tab bar's surfaceContainer fallback so the inset regions stay
