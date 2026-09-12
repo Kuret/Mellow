@@ -26,14 +26,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
@@ -50,12 +47,12 @@ enum _TrayGestureIntent { pan, pinch }
 /// tray follows the fingers directly but springs back smoothly.
 typedef _FollowOffset = ({double distance, bool animated});
 
-/// The container a swipe in progress would land on, and how close it is to
+/// The space a swipe in progress would land on, and how close it is to
 /// committing: 0 when the swipe has only just been recognised, 1 once letting
 /// go would switch. [armed] is that same threshold, kept separately so the
 /// indicator can latch its "release now" look (and its haptic) exactly once.
 typedef _SwipeTarget = ({
-  ContainerData? container,
+  SpaceData space,
   ContainerCycleDirection direction,
   double progress,
   bool armed,
@@ -143,13 +140,14 @@ class TabTrayGestures extends HookConsumerWidget {
       ),
     );
 
-    // Watched rather than read on release so the container stream is warm when
+    // Watched rather than read on release so the space stream is warm when
     // a swipe ends — a cold read right after startup can still be loading.
-    final cycleOrder = ref.watch(containerCycleOrderProvider);
+    final cycleOrder =
+        ref.watch(watchSpacesProvider).value ?? const <SpaceData>[];
     final canSwitchContainer = containerUiEnabled && cycleOrder.length >= 2;
 
     final cycleIds = useMemoized(
-      () => cycleOrder.map((container) => container?.id).toList(),
+      () => cycleOrder.map((space) => space.uuid).toList(),
       [cycleOrder],
     );
 
@@ -186,7 +184,7 @@ class TabTrayGestures extends HookConsumerWidget {
 
       final index = adjacentContainerIndex(
         cycleIds,
-        ref.read(selectedContainerProvider),
+        ref.read(selectedSpaceProvider),
         direction,
       );
       if (index == null) {
@@ -200,17 +198,17 @@ class TabTrayGestures extends HookConsumerWidget {
           );
 
       return (
-        container: cycleOrder[index],
+        space: cycleOrder[index],
         direction: direction,
         progress: progress,
         armed: progress >= 1.0,
       );
     }
 
-    Future<void> switchContainer(ContainerCycleDirection direction) async {
+    void switchContainer(ContainerCycleDirection direction) {
       final index = adjacentContainerIndex(
         cycleIds,
-        ref.read(selectedContainerProvider),
+        ref.read(selectedSpaceProvider),
         direction,
       );
       if (index == null) {
@@ -219,19 +217,13 @@ class TabTrayGestures extends HookConsumerWidget {
 
       unawaited(HapticFeedback.lightImpact());
 
-      // Swiping out of the synced list lands on a container, so the tray has to
+      // Swiping out of the synced list lands on a space, so the tray has to
       // come back to the local scope with it — same as tapping a chip.
       ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
 
-      final container = cycleOrder[index];
-      if (container == null) {
-        ref.read(selectedContainerProvider.notifier).clearContainer();
-        return;
-      }
-
-      await ref
-          .read(selectedContainerProvider.notifier)
-          .setContainerId(container.id);
+      ref
+          .read(selectedSpaceProvider.notifier)
+          .setSpace(cycleOrder[index].uuid);
     }
 
     void cycleViewMode({required bool expand}) {
@@ -326,14 +318,12 @@ class TabTrayGestures extends HookConsumerWidget {
             return;
           }
 
-          // Dragging the tray left brings the next container in from the right,
+          // Dragging the tray left brings the next space in from the right,
           // the direction the chip row runs.
-          unawaited(
-            switchContainer(
-              distance < 0
-                  ? ContainerCycleDirection.next
-                  : ContainerCycleDirection.previous,
-            ),
+          switchContainer(
+            distance < 0
+                ? ContainerCycleDirection.next
+                : ContainerCycleDirection.previous,
           );
         case _TrayGestureIntent.pinch:
           final scale = lastScale.value;
@@ -427,14 +417,13 @@ class TabTrayGestures extends HookConsumerWidget {
   }
 }
 
-/// The container a two-finger swipe is heading for, shown over the tray while
+/// The space a two-finger swipe is heading for, shown over the tray while
 /// the fingers are down.
 ///
-/// Reuses the container chip's avatar and label so the thing under the fingers
-/// looks like the chip the swipe is moving to, and takes the container's own
-/// palette so the colour reads before the name does. The outline thickens once
-/// the swipe is [_SwipeTarget.armed], which is the only state worth spelling
-/// out: below it, letting go does nothing.
+/// Spaces have no per-item colour of their own, so this always uses the
+/// theme's default (primary) colours rather than a container palette. The
+/// outline thickens once the swipe is [_SwipeTarget.armed], which is the only
+/// state worth spelling out: below it, letting go does nothing.
 class _SwipeTargetIndicator extends StatelessWidget {
   final _SwipeTarget target;
 
@@ -443,27 +432,18 @@ class _SwipeTargetIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final container = target.container;
-    final palette = container.mapNotNull(
-      (container) => ContainerColors.palette(
-        context,
-        container.color,
-        useCustomColor: container.metadata.useCustomColor,
-      ),
-    );
-
-    final foregroundColor =
-        palette?.selectedForegroundColor ?? colorScheme.onSurface;
+    final foregroundColor = colorScheme.onPrimaryContainer;
     final borderSide = target.armed
-        ? palette?.selectedBorderSide ??
-              BorderSide(color: colorScheme.primary, width: 2)
-        : palette?.borderSide ?? BorderSide(color: colorScheme.outlineVariant);
+        ? BorderSide(color: colorScheme.primary, width: 2)
+        : BorderSide(color: colorScheme.outlineVariant);
+
+    final displayName = target.space.name.isEmpty
+        ? 'Space'
+        : target.space.name;
 
     return DecoratedBox(
       decoration: ShapeDecoration(
-        color:
-            palette?.selectedBackgroundColor ??
-            colorScheme.surfaceContainerHigh,
+        color: colorScheme.primaryContainer,
         shape: StadiumBorder(side: borderSide),
         shadows: target.armed ? kElevationToShadow[3] : kElevationToShadow[1],
       ),
@@ -481,24 +461,23 @@ class _SwipeTargetIndicator extends StatelessWidget {
               color: foregroundColor,
             ),
             const SizedBox(width: 10),
-            if (container == null) ...[
-              Icon(MdiIcons.folderHidden, size: 18, color: foregroundColor),
-              const SizedBox(width: 8),
-              Text(
-                'Unassigned',
+            Icon(
+              MdiIcons.viewDashboardOutline,
+              size: 18,
+              color: foregroundColor,
+            ),
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: Text(
+                displayName,
                 style: TextStyle(
                   color: foregroundColor,
                   fontWeight: FontWeight.w700,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ] else ...[
-              ?buildContainerChipAvatar(context, container, true),
-              const SizedBox(width: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 220),
-                child: buildContainerChipLabel(context, container, true),
-              ),
-            ],
+            ),
           ],
         ),
       ),

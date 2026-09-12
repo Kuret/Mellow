@@ -23,32 +23,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
 
-/// [SelectedContainer] without its persistence and tab-selection listeners, so
+/// [SelectedSpace] without its persistence and tab-selection listeners, so
 /// the gesture layer can be exercised without a database.
-class _TestSelectedContainer extends SelectedContainer {
-  _TestSelectedContainer(this._initialContainerId);
+class _TestSelectedSpace extends SelectedSpace {
+  _TestSelectedSpace(this._uuid);
 
-  final String? _initialContainerId;
-
-  @override
-  String? build() => _initialContainerId;
+  final String? _uuid;
 
   @override
-  Future<SetContainerResult> setContainerId(
-    String id, {
-    bool Function()? shouldApply,
-  }) async {
-    state = id;
-    return SetContainerResult.success;
-  }
+  String? build() => _uuid;
 }
 
 /// [TabsViewModeController] without persistence.
@@ -61,10 +52,8 @@ class _TestTabsViewModeController extends TabsViewModeController {
   TabsViewMode build() => _initialMode;
 }
 
-// Named, because an unnamed container makes the chip label fall back to the
-// AI-topic providers, which want a database.
-ContainerData _container(String id) =>
-    ContainerData(id: id, name: id, color: Colors.blue, orderKey: id);
+SpaceData _space(String uuid) =>
+    SpaceData(uuid: uuid, name: uuid, orderIndex: 0);
 
 /// The tray content stands in for the tab list: it scrolls vertically and its
 /// items claim horizontal drags, exactly the two gestures the multitouch layer
@@ -88,8 +77,8 @@ class _FakeTray extends StatelessWidget {
 
 Future<void> _pumpTray(
   WidgetTester tester, {
-  required List<ContainerData?> cycleOrder,
-  String? selectedContainerId,
+  required List<SpaceData> cycleOrder,
+  String? selectedSpaceUuid,
   TabsViewMode viewMode = TabsViewMode.list,
   VoidCallback? onItemHorizontalDrag,
 }) async {
@@ -102,9 +91,9 @@ Future<void> _pumpTray(
         effectiveTabsTrayScopeProvider.overrideWith(
           (ref) => TabsTrayScope.local,
         ),
-        containerCycleOrderProvider.overrideWith((ref) => cycleOrder),
-        selectedContainerProvider.overrideWith(
-          () => _TestSelectedContainer(selectedContainerId),
+        watchSpacesProvider.overrideWith((ref) => Stream.value(cycleOrder)),
+        selectedSpaceProvider.overrideWith(
+          () => _TestSelectedSpace(selectedSpaceUuid),
         ),
         tabsViewModeControllerProvider.overrideWith(
           () => _TestTabsViewModeController(viewMode),
@@ -190,79 +179,81 @@ Future<void> _pinch(
 }
 
 void main() {
-  group('two-finger container swipe', () {
-    testWidgets('dragging left selects the next container', (tester) async {
+  group('two-finger space swipe', () {
+    testWidgets('dragging left selects the next space', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await _twoFingerDrag(tester, const Offset(-120, 0));
 
-      expect(_containerOf(tester).read(selectedContainerProvider), 'shopping');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'shopping');
     });
 
-    testWidgets('dragging right selects the previous container', (
+    testWidgets('dragging right selects the previous space', (
       tester,
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'shopping',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'shopping',
       );
 
       await _twoFingerDrag(tester, const Offset(120, 0));
 
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
-    testWidgets('wraps onto the unassigned pseudo-container', (tester) async {
+    testWidgets('wraps around to the first space in the cycle', (
+      tester,
+    ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'shopping',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'shopping',
       );
 
       await _twoFingerDrag(tester, const Offset(-120, 0));
 
-      expect(_containerOf(tester).read(selectedContainerProvider), isNull);
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'other');
     });
 
     testWidgets('a short drag is not enough to commit', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       // Far enough to be recognised as a swipe, well short of the commit
       // distance, and slow enough not to count as a fling.
       await _twoFingerDrag(tester, const Offset(-30, 0), steps: 6);
 
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
     testWidgets('a two-finger vertical drag switches nothing', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await _twoFingerDrag(tester, const Offset(0, -160));
 
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
-    testWidgets('a fast swipe switches container without closing a tab', (
+    testWidgets('a fast swipe switches space without closing a tab', (
       tester,
     ) async {
       var itemDrags = 0;
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
         onItemHorizontalDrag: () => itemDrags++,
       );
 
@@ -272,7 +263,7 @@ void main() {
       await _twoFingerDrag(tester, const Offset(-160, 0), steps: 3);
 
       expect(itemDrags, 0);
-      expect(_containerOf(tester).read(selectedContainerProvider), 'shopping');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'shopping');
     });
 
     testWidgets('leaves two-finger vertical drags to the tab list', (
@@ -280,14 +271,14 @@ void main() {
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await _twoFingerDrag(tester, const Offset(0, -160));
 
       expect(_scrollOffset(tester), greaterThan(0.0));
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
     testWidgets('leaves an uneven two-finger vertical drag to the tab list', (
@@ -295,8 +286,8 @@ void main() {
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
         viewMode: TabsViewMode.list,
       );
 
@@ -331,8 +322,8 @@ void main() {
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       // A trackpad reports one pan/zoom pointer that *counts* as two fingers,
@@ -355,7 +346,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_scrollOffset(tester), greaterThan(0.0));
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
     testWidgets('leaves single-finger swipe-to-close to the tab item', (
@@ -364,8 +355,8 @@ void main() {
       var itemDrags = 0;
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
         onItemHorizontalDrag: () => itemDrags++,
       );
 
@@ -373,7 +364,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(itemDrags, 1);
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
     testWidgets('leaves single-finger scrolling to the tab list', (
@@ -381,8 +372,8 @@ void main() {
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await tester.drag(find.text('tab 1'), const Offset(0, -120));
@@ -394,20 +385,24 @@ void main() {
     testWidgets('does nothing when there is only one destination', (
       tester,
     ) async {
-      await _pumpTray(tester, cycleOrder: [null], selectedContainerId: null);
+      await _pumpTray(
+        tester,
+        cycleOrder: [_space('solo')],
+        selectedSpaceUuid: 'solo',
+      );
 
       await _twoFingerDrag(tester, const Offset(-120, 0));
 
-      expect(_containerOf(tester).read(selectedContainerProvider), isNull);
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'solo');
     });
   });
 
   group('swipe target indicator', () {
-    testWidgets('names the container the swipe is heading for', (tester) async {
+    testWidgets('names the space the swipe is heading for', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       final gestures = await _twoFingerDrag(
@@ -421,13 +416,13 @@ void main() {
       await _release(tester, gestures);
     });
 
-    testWidgets('names the unassigned destination when wrapping', (
+    testWidgets('names the first space when wrapping past the end', (
       tester,
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'shopping',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'shopping',
       );
 
       final gestures = await _twoFingerDrag(
@@ -436,7 +431,7 @@ void main() {
         release: false,
       );
 
-      expect(find.text('Unassigned'), findsOneWidget);
+      expect(find.text('other'), findsOneWidget);
 
       await _release(tester, gestures);
     });
@@ -444,8 +439,8 @@ void main() {
     testWidgets('points the other way when swiping back', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'shopping',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'shopping',
       );
 
       final gestures = await _twoFingerDrag(
@@ -463,8 +458,8 @@ void main() {
     testWidgets('stays hidden during a pinch', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await _pinch(tester, 100);
@@ -475,8 +470,8 @@ void main() {
     testWidgets('is gone once the gesture ends', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
       );
 
       await _twoFingerDrag(tester, const Offset(-100, 0));
@@ -491,7 +486,7 @@ void main() {
     testWidgets('pinching apart moves to the less dense mode', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work')],
+        cycleOrder: [_space('other'), _space('work')],
         viewMode: TabsViewMode.grid,
       );
 
@@ -506,7 +501,7 @@ void main() {
     testWidgets('pinching together moves to the denser mode', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work')],
+        cycleOrder: [_space('other'), _space('work')],
         viewMode: TabsViewMode.list,
       );
 
@@ -523,7 +518,7 @@ void main() {
     ) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work')],
+        cycleOrder: [_space('other'), _space('work')],
         viewMode: TabsViewMode.grid,
       );
 
@@ -535,17 +530,17 @@ void main() {
       );
     });
 
-    testWidgets('a pinch never switches container', (tester) async {
+    testWidgets('a pinch never switches space', (tester) async {
       await _pumpTray(
         tester,
-        cycleOrder: [null, _container('work'), _container('shopping')],
-        selectedContainerId: 'work',
+        cycleOrder: [_space('other'), _space('work'), _space('shopping')],
+        selectedSpaceUuid: 'work',
         viewMode: TabsViewMode.grid,
       );
 
       await _pinch(tester, 100);
 
-      expect(_containerOf(tester).read(selectedContainerProvider), 'work');
+      expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
   });
 }
