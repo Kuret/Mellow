@@ -27,7 +27,11 @@ import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/sync_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_folder.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_split.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.steps.dart';
@@ -37,7 +41,17 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
-  daos: [ContainerDao, TabDao, CaptureTabDao, HistoryDao, VisitContainerDao],
+  daos: [
+    ContainerDao,
+    TabDao,
+    SpaceDao,
+    TabFolderDao,
+    TabSplitDao,
+    SyncStateDao,
+    CaptureTabDao,
+    HistoryDao,
+    VisitContainerDao,
+  ],
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override

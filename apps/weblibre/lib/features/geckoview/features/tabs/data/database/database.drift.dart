@@ -9,14 +9,22 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/database
     as i3;
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart'
     as i4;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart'
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/space.dart'
     as i5;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart'
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_folder.dart'
     as i6;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart'
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_split.dart'
     as i7;
-import 'package:drift/internal/modular.dart' as i8;
-import 'package:sqlite3/common.dart' as i9;
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/sync_state.dart'
+    as i8;
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart'
+    as i9;
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart'
+    as i10;
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart'
+    as i11;
+import 'package:drift/internal/modular.dart' as i12;
+import 'package:sqlite3/common.dart' as i13;
 
 abstract class $TabDatabase extends i0.GeneratedDatabase {
   $TabDatabase(i0.QueryExecutor e) : super(e);
@@ -44,14 +52,24 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     this as i3.TabDatabase,
   );
   late final i4.TabDao tabDao = i4.TabDao(this as i3.TabDatabase);
-  late final i5.CaptureTabDao captureTabDao = i5.CaptureTabDao(
+  late final i5.SpaceDao spaceDao = i5.SpaceDao(this as i3.TabDatabase);
+  late final i6.TabFolderDao tabFolderDao = i6.TabFolderDao(
     this as i3.TabDatabase,
   );
-  late final i6.HistoryDao historyDao = i6.HistoryDao(this as i3.TabDatabase);
-  late final i7.VisitContainerDao visitContainerDao = i7.VisitContainerDao(
+  late final i7.TabSplitDao tabSplitDao = i7.TabSplitDao(
     this as i3.TabDatabase,
   );
-  i1.DefinitionsDrift get definitionsDrift => i8.ReadDatabaseContainer(
+  late final i8.SyncStateDao syncStateDao = i8.SyncStateDao(
+    this as i3.TabDatabase,
+  );
+  late final i9.CaptureTabDao captureTabDao = i9.CaptureTabDao(
+    this as i3.TabDatabase,
+  );
+  late final i10.HistoryDao historyDao = i10.HistoryDao(this as i3.TabDatabase);
+  late final i11.VisitContainerDao visitContainerDao = i11.VisitContainerDao(
+    this as i3.TabDatabase,
+  );
+  i1.DefinitionsDrift get definitionsDrift => i12.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -332,7 +350,7 @@ class $TabDatabaseManager {
       i1.$SyncRecordStateTableManager(_db, _db.syncRecordState);
 }
 
-extension DefineFunctions on i9.CommonDatabase {
+extension DefineFunctions on i13.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
@@ -346,7 +364,7 @@ extension DefineFunctions on i9.CommonDatabase {
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i9.AllowedArgumentCount(2),
+      argumentCount: const i13.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -355,7 +373,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i9.AllowedArgumentCount(2),
+      argumentCount: const i13.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -364,7 +382,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i9.AllowedArgumentCount(2),
+      argumentCount: const i13.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -373,7 +391,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i9.AllowedArgumentCount(2),
+      argumentCount: const i13.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -382,14 +400,14 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'generate_content_hash',
-      argumentCount: const i9.AllowedArgumentCount(0),
+      argumentCount: const i13.AllowedArgumentCount(0),
       function: (args) {
         return generateContentHash();
       },
     );
     createFunction(
       functionName: 'url_indexable',
-      argumentCount: const i9.AllowedArgumentCount(1),
+      argumentCount: const i13.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlIndexable(arg0);
@@ -397,7 +415,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'url_canonical',
-      argumentCount: const i9.AllowedArgumentCount(1),
+      argumentCount: const i13.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlCanonical(arg0);
@@ -405,7 +423,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'url_host',
-      argumentCount: const i9.AllowedArgumentCount(1),
+      argumentCount: const i13.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlHost(arg0);
@@ -413,7 +431,7 @@ extension DefineFunctions on i9.CommonDatabase {
     );
     createFunction(
       functionName: 'url_path',
-      argumentCount: const i9.AllowedArgumentCount(1),
+      argumentCount: const i13.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlPath(arg0);
