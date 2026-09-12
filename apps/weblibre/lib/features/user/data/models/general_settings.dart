@@ -46,6 +46,11 @@ const defaultUiScaleFactor = 1.0;
 const defaultMaxLiveTabs = 25;
 const minMaxLiveTabs = 5;
 const maxMaxLiveTabs = 100;
+/// Defaults of the destructive-batch canary (DESIGN "Hardening against Zen's
+/// stale-projection race", defence 5).
+const defaultSpacesSyncMaxTombstoneFraction = 0.2;
+const defaultSpacesSyncMaxTombstoneCount = 25;
+
 const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
 const uiScaleFactorStep = 0.05;
@@ -519,6 +524,17 @@ class GeneralSettings with FastEquatable {
   /// Which edge the side rail docks to on wide viewports. See [RailSide].
   final RailSide railSide;
 
+  /// Destructive-batch canary (DESIGN "Hardening against Zen's stale-projection
+  /// race", defence 5): the largest share of the syncable tabs one sync may
+  /// tombstone before the whole upload is refused and surfaced to the user.
+  /// Clamped to 0..1.
+  final double spacesSyncMaxTombstoneFraction;
+
+  /// The absolute companion to [spacesSyncMaxTombstoneFraction]: the effective
+  /// limit is the smaller of the two, so a huge tab count cannot turn 20 % into
+  /// a harmless-looking number. Clamped to >= 0.
+  final int spacesSyncMaxTombstoneCount;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -617,6 +633,8 @@ class GeneralSettings with FastEquatable {
     required this.separateEssentials,
     required this.spacesSyncApplierVersion,
     required this.railSide,
+    required this.spacesSyncMaxTombstoneFraction,
+    required this.spacesSyncMaxTombstoneCount,
   });
 
   GeneralSettings.withDefaults({
@@ -715,6 +733,8 @@ class GeneralSettings with FastEquatable {
     bool? separateEssentials,
     int? spacesSyncApplierVersion,
     RailSide? railSide,
+    double? spacesSyncMaxTombstoneFraction,
+    int? spacesSyncMaxTombstoneCount,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -849,7 +869,14 @@ class GeneralSettings with FastEquatable {
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
        separateEssentials = separateEssentials ?? true,
        spacesSyncApplierVersion = spacesSyncApplierVersion ?? 0,
-       railSide = railSide ?? RailSide.left;
+       railSide = railSide ?? RailSide.left,
+       spacesSyncMaxTombstoneFraction =
+           (spacesSyncMaxTombstoneFraction ??
+                   defaultSpacesSyncMaxTombstoneFraction)
+               .clamp(0.0, 1.0),
+       spacesSyncMaxTombstoneCount =
+           (spacesSyncMaxTombstoneCount ?? defaultSpacesSyncMaxTombstoneCount)
+               .clamp(0, 1 << 30);
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -1076,5 +1103,7 @@ class GeneralSettings with FastEquatable {
     separateEssentials,
     spacesSyncApplierVersion,
     railSide,
+    spacesSyncMaxTombstoneFraction,
+    spacesSyncMaxTombstoneCount,
   ];
 }

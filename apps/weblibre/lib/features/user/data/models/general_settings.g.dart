@@ -229,6 +229,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings railSide(RailSide railSide);
 
+  GeneralSettings spacesSyncMaxTombstoneFraction(
+    double spacesSyncMaxTombstoneFraction,
+  );
+
+  GeneralSettings spacesSyncMaxTombstoneCount(int spacesSyncMaxTombstoneCount);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -332,6 +338,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool separateEssentials,
     int spacesSyncApplierVersion,
     RailSide railSide,
+    double spacesSyncMaxTombstoneFraction,
+    int spacesSyncMaxTombstoneCount,
   });
 }
 
@@ -741,6 +749,16 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings railSide(RailSide railSide) => call(railSide: railSide);
 
+  @override
+  GeneralSettings spacesSyncMaxTombstoneFraction(
+    double spacesSyncMaxTombstoneFraction,
+  ) => call(spacesSyncMaxTombstoneFraction: spacesSyncMaxTombstoneFraction);
+
+  @override
+  GeneralSettings spacesSyncMaxTombstoneCount(
+    int spacesSyncMaxTombstoneCount,
+  ) => call(spacesSyncMaxTombstoneCount: spacesSyncMaxTombstoneCount);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -847,6 +865,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? spacesSyncApplierVersion = const $CopyWithPlaceholder(),
     Object? railSide = const $CopyWithPlaceholder(),
+    Object? spacesSyncMaxTombstoneFraction = const $CopyWithPlaceholder(),
+    Object? spacesSyncMaxTombstoneCount = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1384,6 +1404,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.railSide
           // ignore: cast_nullable_to_non_nullable
           : railSide as RailSide,
+      spacesSyncMaxTombstoneFraction:
+          spacesSyncMaxTombstoneFraction == const $CopyWithPlaceholder() ||
+              spacesSyncMaxTombstoneFraction == null
+          ? _value.spacesSyncMaxTombstoneFraction
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncMaxTombstoneFraction as double,
+      spacesSyncMaxTombstoneCount:
+          spacesSyncMaxTombstoneCount == const $CopyWithPlaceholder() ||
+              spacesSyncMaxTombstoneCount == null
+          ? _value.spacesSyncMaxTombstoneCount
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncMaxTombstoneCount as int,
     );
   }
 }
@@ -1577,6 +1609,10 @@ GeneralSettings _$GeneralSettingsFromJson(
   separateEssentials: json['separateEssentials'] as bool?,
   spacesSyncApplierVersion: (json['spacesSyncApplierVersion'] as num?)?.toInt(),
   railSide: $enumDecodeNullable(_$RailSideEnumMap, json['railSide']),
+  spacesSyncMaxTombstoneFraction:
+      (json['spacesSyncMaxTombstoneFraction'] as num?)?.toDouble(),
+  spacesSyncMaxTombstoneCount: (json['spacesSyncMaxTombstoneCount'] as num?)
+      ?.toInt(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1694,6 +1730,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'separateEssentials': instance.separateEssentials,
   'spacesSyncApplierVersion': instance.spacesSyncApplierVersion,
   'railSide': _$RailSideEnumMap[instance.railSide]!,
+  'spacesSyncMaxTombstoneFraction': instance.spacesSyncMaxTombstoneFraction,
+  'spacesSyncMaxTombstoneCount': instance.spacesSyncMaxTombstoneCount,
 };
 
 const _$ThemeModeEnumMap = {
