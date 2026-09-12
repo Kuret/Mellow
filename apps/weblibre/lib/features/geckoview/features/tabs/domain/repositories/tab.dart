@@ -26,132 +26,191 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 
 part 'tab.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabDataRepository extends _$TabDataRepository {
+  /// Moves [tabId] into [targetContainer].
+  ///
+  /// A container's Gecko `contextId` is its id, so a container change is
+  /// always a cookie-jar change: the tab is recreated in the new context
+  /// (cold tabs merely get the new `container_id`; they pick the jar up when
+  /// materialised). [replacementUrl] overrides the URL the recreated tab
+  /// loads; left null for manual moves, which keep the tab's current page.
   Future<void> assignContainer(
     String tabId,
     ContainerData targetContainer, {
     bool closeOldTab = true,
-    // When the reassignment is driven by a navigation to a site assigned to
-    // [targetContainer] (see the site-assignment listener), the recreated tab
-    // must load that requested URL rather than the tab's current URL. The
-    // current URL can be a stale origin page (e.g. the search result the link
-    // was opened from) when the assignment fires before the navigation
-    // commits. Left null for manual moves (drag/drop, menu), which keep the
-    // tab on its current page.
     Uri? replacementUrl,
   }) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
-
     final currentContainerData = await getTabContainerData(tabId);
 
-    // The tab is already in the target container, so there is nothing to
-    // reconcile. This guards against churn when an async assignment races a
-    // move that already landed the tab in [targetContainer] (recreating it
-    // here would spawn a redundant tab and re-trigger its load).
+    // Already there: recreating would spawn a redundant tab and re-trigger
+    // its load when an async assignment races a move that already landed.
     if (currentContainerData?.id == targetContainer.id) {
       return;
     }
 
-    final sameContext =
-        targetContainer.metadata.contextualIdentity ==
-        currentContainerData?.metadata.contextualIdentity;
-
-    // A pure regrouping (no navigation) can stay in place when the Gecko
-    // context is unchanged — this is the manual-move case (drag/drop, menu),
-    // which passes no [replacementUrl] and keeps the tab on its current page.
-    //
-    // An assignment-driven move ([replacementUrl] set) must send the tab to the
-    // requested site. Reloading in place on the origin tab is unreliable after
-    // an app-link "open in app" cancel (the engine session is left in a state
-    // where the load never commits), so we recreate the tab in that case even
-    // when the context is unchanged. The fresh session loads the URL reliably.
-    if (sameContext && replacementUrl == null) {
+    if (tabState == null) {
       await ref
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: targetContainer.id);
-    } else {
-      if (tabState != null) {
-        // Resolved before the close, while the row is still around.
-        //
-        // A tab that survives the move is itself the opener of the replacement:
-        // the user navigated from it into a site that belongs elsewhere, so
-        // closing the replacement has to lead back to it — across the container
-        // boundary (#530). When the old tab goes away instead, the replacement
-        // takes over its place in the hierarchy.
-        final parentId = closeOldTab
-            ? (await getTabDataById(tabId))?.parentId
-            : tabId;
-
-        if (closeOldTab) {
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-        }
-
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: replacementUrl ?? tabState.url,
-              tabMode: tabState.tabMode,
-              containerSelection: TabContainerSelection.specific(
-                targetContainer,
-              ),
-              parentId: parentId,
-              selectTab: selectedTabId == tabState.id,
-              // Assignment-driven navigation is classified in its assigned context
-              // like any other load; the app-links fallback re-entry map (§2.7)
-              // covers the redirect loop the old delegate bypass used to guard.
-              flags: LoadUrlFlags.NONE,
-            );
-      }
+      return;
     }
+
+    // Resolved before the close, while the row is still around.
+    //
+    // A tab that survives the move is itself the opener of the replacement:
+    // the user navigated from it into a site that belongs elsewhere, so
+    // closing the replacement has to lead back to it — across the container
+    // boundary (#530). When the old tab goes away instead, the replacement
+    // takes over its place in the hierarchy.
+    final parentId = closeOldTab
+        ? (await getTabDataById(tabId))?.parentId
+        : tabId;
+    if (closeOldTab) {
+      await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+    }
+    await ref
+        .read(tabRepositoryProvider.notifier)
+        .addTab(
+          url: replacementUrl ?? tabState.url,
+          tabMode: tabState.tabMode,
+          containerSelection: TabContainerSelection.specific(targetContainer),
+          parentId: parentId,
+          selectTab: selectedTabId == tabState.id,
+          flags: LoadUrlFlags.NONE,
+        );
   }
 
   Future<void> unassignContainer(String tabId) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
-
     final currentContainerData = await getTabContainerData(tabId);
 
-    if (currentContainerData?.metadata.contextualIdentity == null) {
+    if (currentContainerData == null || tabState == null) {
       return ref
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: null);
-    } else {
-      if (tabState != null) {
-        // The replacement stands in for the tab being retired, so it inherits
-        // its place in the hierarchy — read before the row disappears.
-        final parentId = (await getTabDataById(tabId))?.parentId;
-
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: tabState.url,
-              tabMode: tabState.tabMode,
-              containerSelection: const TabContainerSelection.unassigned(),
-              parentId: parentId,
-              selectTab: selectedTabId == tabState.id,
-            );
-      }
     }
+
+    // The replacement stands in for the tab being retired, so it inherits
+    // its place in the hierarchy — read before the row disappears.
+    final parentId = (await getTabDataById(tabId))?.parentId;
+    await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+    await ref
+        .read(tabRepositoryProvider.notifier)
+        .addTab(
+          url: tabState.url,
+          tabMode: tabState.tabMode,
+          containerSelection: const TabContainerSelection.unassigned(),
+          parentId: parentId,
+          selectTab: selectedTabId == tabState.id,
+        );
   }
 
-  Future<void> setPinned(String tabId, {required bool pinned}) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .setPinned(tabId, pinned: pinned);
+  /// Moves [tabId] onto [shelf] with Zen's semantics (PLAN §6.4):
+  ///
+  /// - → essential: the tab leaves its space and folder; it ranks in the
+  ///   essentials strip of its own container.
+  /// - essential → pinned / normal: the tab lands in [activeSpaceUuid] (the
+  ///   default space when none is selected).
+  /// - pinned ↔ normal: the tab keeps its space; a folder is left behind
+  ///   since the pinned shelf has none.
+  ///
+  /// Returns `false` for unknown tabs and for private tabs asked to leave the
+  /// normal shelf.
+  Future<bool> setShelf(
+    String tabId,
+    TabShelf shelf, {
+    required String? activeSpaceUuid,
+  }) async {
+    final dao = ref.read(tabDatabaseProvider).tabDao;
+    final tab = await dao.getTabSummaryById(tabId).getSingleOrNull();
+    if (tab == null) {
+      return false;
+    }
+    if (tab.tabShelf == shelf) {
+      return true;
+    }
+
+    final TabOrderScope target;
+    switch (shelf) {
+      case TabShelf.essential:
+        target = TabOrderScope.essential(tab.containerId);
+      case TabShelf.pinned:
+      case TabShelf.normal:
+        final spaceUuid =
+            (tab.tabShelf == TabShelf.essential ? null : tab.spaceUuid) ??
+            activeSpaceUuid ??
+            (await ref
+                    .read(spaceRepositoryProvider.notifier)
+                    .ensureDefaultSpace())
+                .uuid;
+        target = shelf == TabShelf.pinned
+            ? TabOrderScope.pinned(spaceUuid)
+            : TabOrderScope.normal(spaceUuid: spaceUuid);
+    }
+    return dao.setShelf(tabId, shelf, target: target);
+  }
+
+  /// Puts [tabId] (with its subtree) into [folderId], or back at the root of
+  /// its space when [folderId] is null. The folder's space wins. Essentials
+  /// have no folder, so they are refused.
+  Future<bool> moveTabToFolder(String tabId, String? folderId) async {
+    final db = ref.read(tabDatabaseProvider);
+    final tab = await db.tabDao.getTabSummaryById(tabId).getSingleOrNull();
+    if (tab == null ||
+        tab.tabShelf == TabShelf.essential ||
+        tab.tabMode == TabModeDbValue.private) {
+      return false;
+    }
+    final String? spaceUuid;
+    if (folderId != null) {
+      final folder = await db.tabFolderDao.getById(folderId).getSingleOrNull();
+      if (folder == null) {
+        return false;
+      }
+      spaceUuid = folder.spaceUuid;
+    } else {
+      spaceUuid = tab.spaceUuid;
+    }
+    await db.tabDao.moveToScope(
+      [tabId],
+      TabOrderScope.normal(spaceUuid: spaceUuid, folderId: folderId),
+    );
+    return true;
+  }
+
+  /// Moves [tabId] (with its subtree) to the root of [spaceUuid], keeping the
+  /// pinned/normal shelf. Essentials have no space, so they are refused.
+  Future<bool> moveTabToSpace(String tabId, String spaceUuid) async {
+    final dao = ref.read(tabDatabaseProvider).tabDao;
+    final tab = await dao.getTabSummaryById(tabId).getSingleOrNull();
+    if (tab == null ||
+        tab.tabShelf == TabShelf.essential ||
+        tab.tabMode == TabModeDbValue.private) {
+      return false;
+    }
+    await dao.moveToScope(
+      [tabId],
+      tab.tabShelf == TabShelf.pinned
+          ? TabOrderScope.pinned(spaceUuid)
+          : TabOrderScope.normal(spaceUuid: spaceUuid),
+    );
+    return true;
   }
 
   Future<void> reorderTabs({
@@ -159,6 +218,7 @@ class TabDataRepository extends _$TabDataRepository {
     required String? previousTabId,
     required String? nextTabId,
     TabParentChange parentChange = const TabParentChange.unchanged(),
+    TabScopeChange scopeChange = const TabScopeChange.unchanged(),
   }) {
     return ref
         .read(tabDatabaseProvider)
@@ -168,7 +228,22 @@ class TabDataRepository extends _$TabDataRepository {
           previousTabId: previousTabId,
           nextTabId: nextTabId,
           parentChange: parentChange,
+          scopeChange: scopeChange,
         );
+  }
+
+  /// Moves the subtrees rooted at [rootTabIds] into [target]; a split member
+  /// among the roots brings its whole split along.
+  Future<void> moveToScope(
+    List<String> rootTabIds,
+    TabOrderScope target, {
+    String? afterId,
+    String? beforeId,
+  }) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .moveToScope(rootTabIds, target, afterId: afterId, beforeId: beforeId);
   }
 
   Future<bool> setTabParent({
@@ -217,7 +292,6 @@ class TabDataRepository extends _$TabDataRepository {
         .containerDao
         .getAllTabIds(includeRegular: false)
         .get();
-
     return tabIds.length;
   }
 
@@ -260,9 +334,20 @@ class TabDataRepository extends _$TabDataRepository {
     return tabIds;
   }
 
-  Future<int> closeAllTabsByHost(String? containerId, String host) async {
-    final tabs = await getContainerTabsData(containerId);
+  /// Closes every tab of [spaceUuid] (all shelves in the space, folders
+  /// included) through the engine.
+  Future<List<String>> closeSpaceTabs(String? spaceUuid) async {
+    final tabs = await getSpaceTabsData(spaceUuid);
+    final tabIds = [for (final tab in tabs) tab.id];
+    if (tabIds.isNotEmpty) {
+      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+    }
+    return tabIds;
+  }
 
+  /// Closes the tabs of [spaceUuid] whose URL host is [host].
+  Future<int> closeAllTabsByHost(String? spaceUuid, String host) async {
+    final tabs = await getSpaceTabsData(spaceUuid);
     final filtered = tabs
         .where((tab) => tab.url?.host == host)
         .map((tab) => tab.id)
@@ -283,11 +368,29 @@ class TabDataRepository extends _$TabDataRepository {
         .getSingleOrNull();
   }
 
+  Future<TabSummary?> getTabSummaryById(String tabId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabSummaryById(tabId)
+        .getSingleOrNull();
+  }
+
   Future<List<TabSummary>> getContainerTabsData(String? containerId) {
     return ref
         .read(tabDatabaseProvider)
         .containerDao
         .getContainerTabsData(containerId)
+        .get();
+  }
+
+  /// Every tab of one space, pinned shelf first, then by `order_key`. A null
+  /// [spaceUuid] yields the tabs without a space (private tabs, essentials).
+  Future<List<TabSummary>> getSpaceTabsData(String? spaceUuid) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getSpaceTabsData(spaceUuid)
         .get();
   }
 
@@ -322,57 +425,51 @@ class TabDataRepository extends _$TabDataRepository {
         .definitionsDrift
         .unorderedTabDescendants(tabId: tabId)
         .get();
-
     return Map.fromEntries(
       results.map((pair) => MapEntry(pair.id, pair.parentId)),
     );
   }
 
-  /// [getTabDescendants] stopped at the seed tab's container boundary.
+  /// [getTabDescendants] stopped at the seed tab's ordering-scope boundary
+  /// (space, folder, shelf).
   ///
   /// What the bulk-close actions operate on: they are offered from a
-  /// container-scoped view whose counts exclude a child that was reopened in
-  /// another container, so closing must exclude it too.
+  /// scoped view whose counts exclude a child that was moved elsewhere, so
+  /// closing must exclude it too.
   Future<Map<String, String?>> getContainerTabDescendants(String tabId) async {
     final results = await ref
         .read(tabDatabaseProvider)
-        .definitionsDrift
-        .unorderedContainerTabDescendants(tabId: tabId)
+        .tabDao
+        .unorderedScopeTabDescendants(tabId)
         .get();
-
     return Map.fromEntries(
       results.map((pair) => MapEntry(pair.id, pair.parentId)),
     );
   }
 
+  /// The tabs of [containerId] that pass the tray's active filter. Cold tabs
+  /// count: they close and move as plain rows.
   Future<List<String>> getFilteredTabIds(String? containerId) async {
     final db = ref.read(tabDatabaseProvider);
     final filterOptions = ref.read(tabViewFilterControllerProvider);
     final tabStates = ref.read(tabStatesProvider);
 
-    // Get all tab IDs in this container from DB
-    final containerTabIds = await db.containerDao
-        .getContainerTabIds(containerId)
-        .get();
+    final tabs = await db.containerDao.getContainerTabsData(containerId).get();
+    if (tabs.isEmpty) return const [];
+    if (!filterOptions.hasActiveFilter) {
+      return [for (final tab in tabs) tab.id];
+    }
 
-    // Only keep tabs that exist in the engine
-    final candidateIds = containerTabIds
-        .where((id) => tabStates.containsKey(id))
+    return tabs
+        .where((tab) {
+          final state = tabStates[tab.id];
+          return filterOptions.matchesTab(
+            state?.tabMode ?? TabMode.fromDbValue(tab.tabMode),
+            tab.timestamp,
+          );
+        })
+        .map((tab) => tab.id)
         .toList();
-
-    if (candidateIds.isEmpty) return const [];
-
-    if (!filterOptions.hasActiveFilter) return candidateIds;
-
-    // Only fetch timestamps when date filtering is active
-    final timestamps = filterOptions.effectiveDateRange != null
-        ? Map.fromEntries(await db.tabDao.getTabTimestamps().get())
-        : null;
-
-    return candidateIds.where((id) {
-      final state = tabStates[id];
-      return filterOptions.matchesTab(state?.tabMode, timestamps?[id]);
-    }).toList();
   }
 
   Future<int> deleteUnassignedTabsOlderThan(DateTime threshold) async {
