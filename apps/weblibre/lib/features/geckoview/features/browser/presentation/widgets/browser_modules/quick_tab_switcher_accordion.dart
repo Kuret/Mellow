@@ -36,9 +36,13 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -227,6 +231,73 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       );
     }
 
+    // The wide rail renders the tray's three shelves (PLAN §6.4) inside the
+    // expanded space: the Essentials grid, the pinned chips under their
+    // label, then the main list with folder headers and indented contents.
+    // The narrow rail has no room for any of that and stays a flat run.
+    final essentialIds = wideRail
+        ? (watchEssentialShelfTabIds(ref) ?? const <String>[])
+        : const <String>[];
+    final orderedItems = wideRail
+        ? ref
+              .watch(
+                visibleTabListItemsProvider(
+                  spaceUuid: selectedSpaceUuid,
+                  scope: TabListScope.presentation,
+                ),
+              )
+              .value
+        : const <TabListItemEntity>[];
+
+    List<_AccordionEntry> expandedEntries() {
+      if (!wideRail) {
+        return [for (final item in expandedItems) _AccordionEntry.tab(item)];
+      }
+      final itemById = {for (final item in expandedItems) item.id: item};
+      final pinned = <_AccordionEntry>[];
+      final normal = <_AccordionEntry>[];
+      final seen = <String>{};
+      var rootIndent = 0;
+      for (final entity in orderedItems) {
+        switch (entity) {
+          case TabListFolderItem():
+            normal.add(_AccordionEntry.folder(entity));
+          case TabListTabItem():
+            final item = itemById[entity.tabId];
+            if (item == null) continue;
+            // Folder depth indents the row; a tree child sits under its
+            // root's indent and draws its own hierarchy glyph.
+            final indent = switch (entity) {
+              TabListStandaloneItem(:final depth) => depth,
+              TabListParentGroup(:final depth) => depth,
+              TabListChildItem() => rootIndent,
+            };
+            if (entity is! TabListChildItem) {
+              rootIndent = indent;
+            }
+            seen.add(item.id);
+            (entity.shelf == TabShelf.pinned ? pinned : normal).add(
+              _AccordionEntry.tab(item, indent: indent),
+            );
+        }
+      }
+      // Rows the shared order does not list yet (pre-restore placeholders)
+      // still get a chip.
+      for (final item in expandedItems) {
+        if (!seen.contains(item.id)) {
+          normal.add(_AccordionEntry.tab(item));
+        }
+      }
+      return [
+        if (essentialIds.isNotEmpty) const _AccordionEntry.essentials(),
+        if (pinned.isNotEmpty) const _AccordionEntry.label('Pinned'),
+        ...pinned,
+        if (pinned.isNotEmpty || essentialIds.isNotEmpty)
+          const _AccordionEntry.label('Tabs'),
+        ...normal,
+      ];
+    }
+
     final entries = <_AccordionEntry>[
       for (final space in spaces) ...[
         _AccordionEntry.header(
@@ -234,8 +305,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           tabCount: ref.watch(spaceTabCountProvider(space.uuid)).value ?? 0,
           isExpanded: space.uuid == selectedSpaceUuid,
         ),
-        if (space.uuid == selectedSpaceUuid)
-          ...expandedItems.map(_AccordionEntry.tab),
+        if (space.uuid == selectedSpaceUuid) ...expandedEntries(),
       ],
     ];
 
@@ -251,10 +321,10 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             !isExpanded
                 ? _TrayPosition.none
                 : (i + 1 < entries.length &&
-                          entries[i + 1] is _AccordionTabEntry
+                          entries[i + 1] is! _AccordionHeaderEntry
                       ? _TrayPosition.start
                       : _TrayPosition.solo),
-          _AccordionTabEntry() =>
+          _ =>
             (i + 1 >= entries.length || entries[i + 1] is _AccordionHeaderEntry)
                 ? _TrayPosition.end
                 : _TrayPosition.middle,
@@ -312,7 +382,11 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             : const EdgeInsets.symmetric(horizontal: 4.0),
         child: SizedBox(
           height: isVertical ? double.maxFinite : 48,
-          width: isVertical ? 48 : double.maxFinite,
+          // A wide rail hands the whole rail width to the shelves; the
+          // narrow rail keeps its 48px icon column.
+          width: isVertical
+              ? (wideRail ? double.maxFinite : 48)
+              : double.maxFinite,
           child: FadingScroll(
             controller: scrollController,
             fadingSize: 15,
@@ -333,10 +407,22 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                       entry: entry,
                       // The narrow rail can't fit the space title; show the
                       // icon avatar + count badge only.
-                      showTitle: !isVertical,
+                      showTitle: !isVertical || wideRail,
                       onSelected: () => selectSpace(entry.space.uuid),
                     ),
-                    _AccordionTabEntry(:final item) => buildTabChip(item),
+                    _AccordionTabEntry(:final item, :final indent) => Padding(
+                      padding: EdgeInsets.only(left: 12.0 * indent),
+                      child: buildTabChip(item),
+                    ),
+                    _AccordionEssentialsEntry() => const EssentialsGrid(
+                      showHeader: false,
+                      tileSize: 40,
+                      padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                    ),
+                    _AccordionLabelEntry(:final label) => _ShelfLabel(label),
+                    _AccordionFolderEntry(:final folder) => _FolderChip(
+                      folder: folder,
+                    ),
                   };
 
                   return KeyedSubtree(
@@ -347,6 +433,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                       position: trayPositions[index],
                       fill: trayFill,
                       axis: axis,
+                      wide: wideRail,
                       child: child,
                     ),
                   );
@@ -369,9 +456,45 @@ sealed class _AccordionEntry {
     required bool isExpanded,
   }) = _AccordionHeaderEntry;
 
-  factory _AccordionEntry.tab(QuickTabSwitcherItem item) = _AccordionTabEntry;
+  factory _AccordionEntry.tab(QuickTabSwitcherItem item, {int indent}) =
+      _AccordionTabEntry;
+
+  const factory _AccordionEntry.essentials() = _AccordionEssentialsEntry;
+
+  const factory _AccordionEntry.label(String label) = _AccordionLabelEntry;
+
+  factory _AccordionEntry.folder(TabListFolderItem folder) =
+      _AccordionFolderEntry;
 
   String get id;
+}
+
+/// The Essentials grid of the expanded space (wide rail only).
+class _AccordionEssentialsEntry extends _AccordionEntry {
+  const _AccordionEssentialsEntry();
+
+  @override
+  String get id => 'essentials';
+}
+
+/// A shelf label ("Pinned", "Tabs") inside the expanded space.
+class _AccordionLabelEntry extends _AccordionEntry {
+  final String label;
+
+  const _AccordionLabelEntry(this.label);
+
+  @override
+  String get id => 'label-$label';
+}
+
+/// A folder header inside the expanded space; its contents follow, indented.
+class _AccordionFolderEntry extends _AccordionEntry {
+  final TabListFolderItem folder;
+
+  const _AccordionFolderEntry(this.folder);
+
+  @override
+  String get id => 'folder-${folder.folderId}';
 }
 
 /// A space group header chip.
@@ -393,10 +516,96 @@ class _AccordionHeaderEntry extends _AccordionEntry {
 class _AccordionTabEntry extends _AccordionEntry {
   final QuickTabSwitcherItem item;
 
-  const _AccordionTabEntry(this.item);
+  /// Folder nesting depth, drawn as a left inset on the wide rail.
+  final int indent;
+
+  const _AccordionTabEntry(this.item, {this.indent = 0});
 
   @override
   String get id => 'tab-${item.id}';
+}
+
+/// Small shelf label on the wide rail, matching the tray's section headers.
+class _ShelfLabel extends StatelessWidget {
+  final String label;
+
+  const _ShelfLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 2),
+        child: Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Folder header chip on the wide rail: the folder's contents follow it,
+/// indented one level. Tapping collapses or expands the folder, as the
+/// tray's folder rows do.
+class _FolderChip extends ConsumerWidget {
+  final TabListFolderItem folder;
+
+  const _FolderChip({required this.folder});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.only(left: 12.0 * folder.depth),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FilterChip(
+          avatar: Icon(
+            folder.isCollapsed
+                ? MdiIcons.folderOutline
+                : MdiIcons.folderOpenOutline,
+            size: 18,
+            color: scheme.onSurfaceVariant,
+          ),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  folder.name.isEmpty ? 'Folder' : folder.name,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (folder.childCount > 0) ...[
+                const SizedBox(width: 6),
+                InlineCountBadge(
+                  count: folder.childCount,
+                  backgroundColor: scheme.secondaryContainer,
+                  foregroundColor: scheme.onSecondaryContainer,
+                ),
+              ],
+            ],
+          ),
+          selected: false,
+          showCheckmark: false,
+          side: BorderSide.none,
+          onSelected: (_) {
+            unawaited(
+              ref
+                  .read(folderRepositoryProvider.notifier)
+                  .setCollapsed(folder.folderId, !folder.isCollapsed),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
 
 /// Space group header, rendered as a plain neutral chip. The fill is the
@@ -435,7 +644,7 @@ class _AccordionHeaderChip extends StatelessWidget {
           )
         : null;
 
-    final iconAvatar = Icon(MdiIcons.viewDashboardOutline, color: foreground);
+    final iconAvatar = SpaceIcon(icon: space.icon, size: 20, color: foreground);
 
     final side = BorderSide(width: 2, color: fill);
     final shape = RoundedRectangleBorder(
@@ -514,11 +723,16 @@ class _TraySlice extends StatelessWidget {
   final Widget child;
   final Axis axis;
 
+  /// Wide rail: the slice spans the rail instead of the 44px icon column,
+  /// and its content aligns to the leading edge.
+  final bool wide;
+
   const _TraySlice({
     required this.position,
     required this.fill,
     required this.child,
     this.axis = Axis.horizontal,
+    this.wide = false,
   });
 
   /// Corner radius of the chips, matched by the tray so it hugs the first and
@@ -572,15 +786,17 @@ class _TraySlice extends StatelessWidget {
             ),
       child: SizedBox(
         height: isVertical ? null : 44.0,
-        width: isVertical ? 44.0 : null,
+        width: isVertical && !wide ? 44.0 : null,
         child: Container(
           decoration: BoxDecoration(color: fill, borderRadius: borderRadius),
           // A small inset so the first/last chip get the same breathing room
           // from the tray edge as the inter-chip seam gaps.
           padding: isVertical
-              ? const EdgeInsets.symmetric(vertical: 4.0)
+              ? EdgeInsets.symmetric(vertical: 4.0, horizontal: wide ? 4.0 : 0)
               : const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Center(child: child),
+          child: wide
+              ? Align(alignment: Alignment.centerLeft, child: child)
+              : Center(child: child),
         ),
       ),
     );
