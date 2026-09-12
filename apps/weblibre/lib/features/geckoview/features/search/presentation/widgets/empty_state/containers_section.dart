@@ -21,8 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
 
+/// The tab list (and new tabs) are scoped by space now, not by container —
+/// [onContainerSelected] is kept only so this still fits the shared
+/// [ModuleSurfaceCallbacks] wiring; picking a space here (via [SpaceChips])
+/// is what actually decides where a new tab lands.
 class ContainersSection extends StatelessWidget {
   final void Function(ContainerDataWithCount container) onContainerSelected;
 
@@ -31,27 +35,16 @@ class ContainersSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SearchModuleSection(
-      title: 'Containers',
+      title: 'Spaces',
       moduleType: SearchModuleType.containers,
       totalCount: 1,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [
             if (!isCollapsed)
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ContainerChips(
-                    selectedContainer: null,
-                    onSelected: (container) {
-                      if (container != null) {
-                        onContainerSelected(container);
-                      }
-                    },
-                    onDeleted: null,
-                    displayMenu: false,
-                    showUnassignedChip: false,
-                    enableDragAndDrop: false,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SpaceChips(),
                 ),
               ),
           ],

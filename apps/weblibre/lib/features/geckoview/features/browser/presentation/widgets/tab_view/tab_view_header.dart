@@ -34,7 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -55,52 +55,37 @@ class _TabFilters extends ConsumerWidget {
       ),
     );
 
-    final selectedContainer = ref.watch(
-      selectedContainerDataProvider.select((value) => value.value),
-    );
-
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final syncedTabCountAsync = ref.watch(syncedTabsTotalCountProvider);
+    final showSyncedChip =
+        isAuthenticated && tabsViewMode != TabsViewMode.tree;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ContainerChips(
-          showGroupSuggestions: switch (tabsViewMode) {
-            TabsViewMode.list || TabsViewMode.grid => true,
-            TabsViewMode.tree => false,
-          },
-          enableDragAndDrop: switch (tabsViewMode) {
-            TabsViewMode.list || TabsViewMode.grid => true,
-            TabsViewMode.tree => false,
-          },
-          showSyncedChip: isAuthenticated && tabsViewMode != TabsViewMode.tree,
-          syncedChipSelected: isSyncedScope,
-          syncedTabCount: syncedTabCountAsync.when(
-            data: (count) => count,
-            loading: () => 0,
-            error: (_, _) => 0,
-          ),
-          onSyncedChipSelected: () {
-            ref.read(tabsTrayScopeControllerProvider.notifier).showSynced();
-          },
-          selectedContainer: selectedContainer,
-          onSelected: (container) async {
-            ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
-
-            if (container != null) {
-              await ref
-                  .read(selectedContainerProvider.notifier)
-                  .setContainerId(container.id);
-            } else {
-              ref.read(selectedContainerProvider.notifier).clearContainer();
-            }
-          },
-          onDeleted: (container) {
-            ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
-            ref.read(selectedContainerProvider.notifier).clearContainer();
-          },
-          enableContextMenu: true,
+        Row(
+          children: [
+            const Expanded(child: SpaceChips()),
+            if (showSyncedChip) ...[
+              const SizedBox(width: 8),
+              FilterChip(
+                avatar: const Icon(Icons.sync, size: 18),
+                label: Text(
+                  syncedTabCountAsync.when(
+                    data: (count) => count > 0 ? 'Synced ($count)' : 'Synced',
+                    loading: () => 'Synced',
+                    error: (_, _) => 'Synced',
+                  ),
+                ),
+                selected: isSyncedScope,
+                onSelected: (_) {
+                  ref
+                      .read(tabsTrayScopeControllerProvider.notifier)
+                      .showSynced();
+                },
+              ),
+            ],
+          ],
         ),
         if (isSyncedScope) ...[
           const SizedBox(height: 8),
