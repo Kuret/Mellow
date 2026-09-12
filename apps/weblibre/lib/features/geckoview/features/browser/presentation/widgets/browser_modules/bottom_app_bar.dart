@@ -386,10 +386,9 @@ class BrowserTabBar extends HookConsumerWidget {
     final switcherAxis = tabBarPosition.axis;
     // Left rail reads bottom-to-top, right rail top-to-bottom.
     final railQuarterTurns = tabBarPosition == TabBarPosition.left ? 3 : 1;
-    // railWidth (the widget field) is already the caller-resolved effective
-    // width — see effectiveRailWidth — so this needs no extra viewport check.
-    final resolvedRailWidth = railWidth ?? sideRailWidth;
-    final wideRail = isVertical && resolvedRailWidth >= minWideRailWidth;
+    // Every side rail is the expanded rail now; the browser only asks for
+    // one on a wide viewport.
+    final wideRail = isVertical;
 
     final dragStartPosition = useRef(Offset.zero);
 
@@ -903,6 +902,10 @@ Widget _wrapQuickTabSwitcherWithButtonRow({
   );
 }
 
+/// Approximate width a chip spends on everything except its title on the
+/// rail — the favicon, its padding and the chip's own insets.
+const _railChipChromeWidth = 48.0;
+
 class QuickTabSwitcher extends HookConsumerWidget {
   final QuickTabSwitcherMode quickTabSwitcherMode;
 
@@ -929,15 +932,15 @@ class QuickTabSwitcher extends HookConsumerWidget {
       ),
     );
     final railWidth = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => effectiveRailWidth(railWidth: s.railWidth),
+      ),
     );
     // Titles can't fit the narrow vertical rail; force icon-only chips there
-    // unless the rail has been widened enough to show them (isWideRail).
-    final wideRail = isWideRail(
-      isVertical: axis == Axis.vertical,
-      railWidth: railWidth,
-      viewportWidth: MediaQuery.sizeOf(context).width,
-    );
+    // unless the viewport is wide enough for the expanded rail.
+    final wideRail =
+        axis == Axis.vertical &&
+        isWideViewport(MediaQuery.sizeOf(context).width);
     final showTitles = (axis != Axis.vertical || wideRail) && showTitlesSetting;
     final titleMaxWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -949,7 +952,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final titleMaxWidth = wideRail
         ? titleMaxWidthSetting.clamp(
             0.0,
-            (railWidth - railChipChromeWidth).clamp(0.0, double.infinity),
+            (railWidth - _railChipChromeWidth).clamp(0.0, double.infinity),
           )
         : titleMaxWidthSetting;
     final closeButtonMode = ref.watch(

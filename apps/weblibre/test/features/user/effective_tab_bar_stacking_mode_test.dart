@@ -38,19 +38,9 @@ void main() {
       expect(
         settings(
           position: TabBarPosition.left,
-          railWidth: minWideRailWidth,
+          railWidth: minRailWidth,
         ).effectiveTabBarStackingMode(viewportWidth: 1000),
         TabBarStackingMode.twoLevel,
-      );
-    });
-
-    test('degrades twoLevel to accordion on a narrow vertical rail', () {
-      expect(
-        settings(
-          position: TabBarPosition.right,
-          railWidth: minWideRailWidth - 1,
-        ).effectiveTabBarStackingMode(viewportWidth: 1000),
-        TabBarStackingMode.accordion,
       );
     });
 
@@ -69,11 +59,11 @@ void main() {
       },
     );
 
-    test('without a viewport only railWidth decides', () {
+    test('without a viewport keeps twoLevel', () {
       expect(
         settings(
           position: TabBarPosition.left,
-          railWidth: minWideRailWidth,
+          railWidth: minRailWidth,
         ).effectiveTabBarStackingMode(),
         TabBarStackingMode.twoLevel,
       );

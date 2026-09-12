@@ -64,12 +64,13 @@ const minQuickTabSwitcherTitleWidth = 32.0;
 const maxQuickTabSwitcherTitleWidth = 128.0;
 const quickTabSwitcherTitleWidthStep = 8.0;
 
-/// Width (logical px) of the vertical tab bar side rail. The default matches
-/// [kToolbarHeight] so a fresh install looks identical to before this setting
-/// existed; values above [minWideRailWidth] widen the rail enough to show
-/// chip titles upright instead of forcing icon-only chips.
-const defaultRailWidth = kToolbarHeight;
-const minRailWidth = 56.0;
+/// Width (logical px) of the side rail on wide viewports. The rail is always
+/// the expanded Arc/Zen-style sidebar — address row, shelves, toolbar, space
+/// switcher — so it needs room for a favicon and a title side by side;
+/// [minRailWidth] is the least that reads. A stored value below it (from the
+/// days of an icon-only rail) is clamped up on read, see [effectiveRailWidth].
+const defaultRailWidth = 260.0;
+const minRailWidth = 160.0;
 const maxRailWidth = 320.0;
 const railWidthStep = 8.0;
 
@@ -153,51 +154,23 @@ enum TabBarPosition {
 /// [TabBarPosition], which only places the narrow-viewport compact bar.
 enum RailSide { left, right }
 
-/// Minimum [GeneralSettings.railWidth] at which the vertical rail is wide
-/// enough to show a chip title upright, instead of collapsing to icon-only
-/// chips.
-const minWideRailWidth = 120.0;
-
-/// Viewport width, in logical px, below which the vertical rail always
-/// collapses to icon-only regardless of [GeneralSettings.railWidth] — phones
-/// in portrait, where a wide rail would eat too much of the content area.
-/// Tablets, landscape and foldables clear this and get the wide rail.
+/// Viewport width, in logical px, from which the browser lays its chrome out
+/// as the side rail ([RailSide]) instead of the compact horizontal bar
+/// ([TabBarPosition]): tablets, landscape and unfolded foldables clear it;
+/// phones in portrait and folded foldables get the bar. Decided per frame
+/// from the viewport, so rotating or unfolding switches live.
 const narrowRailViewportBreakpoint = 600.0;
 
-/// Whether the vertical side rail is wide enough to show upright titles
-/// instead of icon-only chips: [isVertical] (the tab bar position is left or
-/// right), [railWidth] clears [minWideRailWidth], and [viewportWidth] is not
-/// narrow (see [narrowRailViewportBreakpoint]).
-bool isWideRail({
-  required bool isVertical,
-  required double railWidth,
-  required double viewportWidth,
-}) =>
-    isVertical &&
-    railWidth >= minWideRailWidth &&
+/// Whether a viewport of [viewportWidth] gets the side rail layout.
+bool isWideViewport(double viewportWidth) =>
     viewportWidth >= narrowRailViewportBreakpoint;
 
-/// Approximate width (logical px) a quick tab switcher chip spends on
-/// everything except its title on the vertical rail — the favicon, its
-/// padding, and the chip's own horizontal insets. Used to clamp the title so
-/// it fits inside [GeneralSettings.railWidth] rather than overflowing it.
-const railChipChromeWidth = 48.0;
-
-/// Effective content width of the vertical side rail: [railWidth] when
-/// [isWideRail] holds, [defaultRailWidth] (== [kToolbarHeight]) otherwise —
-/// the width the rail always used before this setting existed.
-double effectiveRailWidth({
-  required bool isVertical,
-  required double railWidth,
-  required double viewportWidth,
-}) =>
-    isWideRail(
-      isVertical: isVertical,
-      railWidth: railWidth,
-      viewportWidth: viewportWidth,
-    )
-    ? railWidth
-    : defaultRailWidth;
+/// Content width of the side rail: [railWidth] clamped into
+/// [minRailWidth]..[maxRailWidth]. The lower bound rose when the icon-only
+/// rail was retired, so a stored width from before then is pulled up to the
+/// least the expanded rail can show.
+double effectiveRailWidth({required double railWidth}) =>
+    railWidth.clamp(minRailWidth, maxRailWidth);
 
 enum TabBarLayout { withTitle, compact }
 
@@ -981,11 +954,7 @@ class GeneralSettings with FastEquatable {
 
     if (tabBarPosition.isVertical &&
         mode == TabBarStackingMode.twoLevel &&
-        !isWideRail(
-          isVertical: true,
-          railWidth: railWidth,
-          viewportWidth: viewportWidth ?? double.infinity,
-        )) {
+        !isWideViewport(viewportWidth ?? double.infinity)) {
       mode = TabBarStackingMode.accordion;
     }
 

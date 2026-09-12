@@ -269,11 +269,7 @@ class _TabBar extends HookConsumerWidget {
     final railWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
     );
-    final railWidth = effectiveRailWidth(
-      isVertical: tabBarPosition.isVertical,
-      railWidth: railWidthSetting,
-      viewportWidth: MediaQuery.sizeOf(context).width,
-    );
+    final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
 
     // Return the toolbar widget - parent handles animation.
     // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
@@ -979,11 +975,7 @@ class BrowserScreen extends HookConsumerWidget {
     final railWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.railWidth),
     );
-    final railWidth = effectiveRailWidth(
-      isVertical: isRail,
-      railWidth: railWidthSetting,
-      viewportWidth: MediaQuery.sizeOf(context).width,
-    );
+    final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
 
     final autoHideTabBar =
         !isSmallWebActive &&

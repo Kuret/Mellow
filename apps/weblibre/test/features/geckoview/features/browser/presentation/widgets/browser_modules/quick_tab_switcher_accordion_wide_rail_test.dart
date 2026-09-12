@@ -204,22 +204,6 @@ void main() {
     await _disposeTree(tester);
   });
 
-  testWidgets('hides the tab title on a narrow vertical rail', (tester) async {
-    final db = await _memoryDatabaseWithOneTab(title: tabTitle);
-    addTearDown(db.close);
-
-    await _pumpAccordion(
-      tester,
-      db: db,
-      railWidth: minRailWidth,
-      viewportWidth: 900,
-    );
-
-    expect(find.text(tabTitle), findsNothing);
-
-    await _disposeTree(tester);
-  });
-
   testWidgets(
     'hides the tab title on a wide railWidth when the viewport itself is '
     'narrow (a phone in portrait)',

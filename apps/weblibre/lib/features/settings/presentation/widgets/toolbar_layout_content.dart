@@ -479,19 +479,14 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                       "container's tabs expanded inline",
                     ),
                   ),
-                  // Two stacked rows don't fit the narrow vertical side rail,
-                  // where the mode degrades to Accordion; hide the option
-                  // there to avoid a no-op choice. A wide rail keeps both.
-                  if (!settings.tabBarPosition.isVertical ||
-                      settings.railWidth >= minWideRailWidth)
-                    const RadioListTile.adaptive(
-                      value: TabBarStackingMode.twoLevel,
-                      title: Text('Two Rows'),
-                      subtitle: Text(
-                        'Tabs of the selected container on top, recently used '
-                        'tabs below',
-                      ),
+                  const RadioListTile.adaptive(
+                    value: TabBarStackingMode.twoLevel,
+                    title: Text('Two Rows'),
+                    subtitle: Text(
+                      'Tabs of the selected container on top, recently used '
+                      'tabs below',
                     ),
+                  ),
                 ],
                 const RadioListTile.adaptive(
                   value: TabBarStackingMode.disabled,

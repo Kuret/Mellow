@@ -318,7 +318,8 @@ void main() {
           tester.element(find.byType(WideRailLayout)),
         );
         (container.read(selectedTabProvider.notifier) as _SettableSelectedTab)
-            .selected = 'tab-2';
+                .selected =
+            'tab-2';
         await tester.pump();
 
         final toolbarAfter = tester.getRect(
@@ -380,7 +381,7 @@ void main() {
       expect(find.text('host'), findsOneWidget);
       expect(find.byIcon(Icons.search), findsNothing);
 
-      await tester.pumpWidget(urlRow(minWideRailWidth));
+      await tester.pumpWidget(urlRow(WideRailUrlRow.collapseWidth - 8));
       expect(find.text('host'), findsNothing);
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
@@ -493,21 +494,6 @@ void main() {
   });
 
   group('narrow rail', () {
-    test('a rail below minWideRailWidth is never wide', () {
-      expect(
-        isWideRail(
-          isVertical: true,
-          railWidth: minWideRailWidth - railWidthStep,
-          viewportWidth: 900,
-        ),
-        isFalse,
-      );
-      expect(
-        isWideRail(isVertical: true, railWidth: 200, viewportWidth: 900),
-        isTrue,
-      );
-    });
-
     testWidgets('still renders the rotated title', (tester) async {
       final tabState = TabState.$default(
         'preview-tab',

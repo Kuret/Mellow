@@ -53,6 +53,10 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// space renders as a header chip and the selected space is
 /// "expanded" — its tabs appear inline right after its header. Tapping
 /// another header selects that space, collapsing the previous group.
+/// Approximate width a chip spends on everything except its title on the
+/// rail — the favicon, its padding and the chip's own insets.
+const _railChipChromeWidth = 48.0;
+
 class AccordionQuickTabSwitcher extends HookConsumerWidget {
   const AccordionQuickTabSwitcher({super.key, this.axis = Axis.horizontal});
 
@@ -77,15 +81,14 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       ),
     );
     final railWidth = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => effectiveRailWidth(railWidth: s.railWidth),
+      ),
     );
     // Titles can't fit the narrow vertical rail; force icon-only chips there
-    // unless the rail has been widened enough to show them (isWideRail).
-    final wideRail = isWideRail(
-      isVertical: isVertical,
-      railWidth: railWidth,
-      viewportWidth: MediaQuery.sizeOf(context).width,
-    );
+    // unless the viewport is wide enough for the expanded rail.
+    final wideRail =
+        isVertical && isWideViewport(MediaQuery.sizeOf(context).width);
     final showTitles = (!isVertical || wideRail) && showTitlesSetting;
     final hierarchyGlyphs = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -102,7 +105,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     final titleMaxWidth = wideRail
         ? titleMaxWidthSetting.clamp(
             0.0,
-            (railWidth - railChipChromeWidth).clamp(0.0, double.infinity),
+            (railWidth - _railChipChromeWidth).clamp(0.0, double.infinity),
           )
         : titleMaxWidthSetting;
     final closeButtonMode = ref.watch(

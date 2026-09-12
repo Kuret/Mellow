@@ -128,12 +128,10 @@ class TabBarPreviewCard extends HookWidget {
   static const _kWideRailPreviewHeight = 320.0;
   static const _kCompactWideRailPreviewHeight = 200.0;
 
-  /// Mirrors isWideRail, but ignores the viewport breakpoint: the preview
-  /// shows what the configured railWidth looks like regardless of the
-  /// settings screen's own current width.
+  /// Every side rail is the expanded rail; the preview shows it at the
+  /// configured railWidth regardless of the settings screen's own width.
   static bool isWideRailPreview(GeneralSettings settings) =>
-      settings.tabBarPosition.isVertical &&
-      settings.railWidth >= minWideRailWidth;
+      settings.tabBarPosition.isVertical;
 
   static double railPreviewHeight(
     GeneralSettings settings, {
@@ -231,10 +229,7 @@ class TabBarPreviewCard extends HookWidget {
       final titleMaxWidth = wideRail && axis == Axis.vertical
           ? settings.quickTabSwitcherTitleWidth.clamp(
               0.0,
-              (settings.railWidth - railChipChromeWidth).clamp(
-                0.0,
-                double.infinity,
-              ),
+              (settings.railWidth - 48.0).clamp(0.0, double.infinity),
             )
           : settings.quickTabSwitcherTitleWidth;
       return QuickTabSwitcherView(
