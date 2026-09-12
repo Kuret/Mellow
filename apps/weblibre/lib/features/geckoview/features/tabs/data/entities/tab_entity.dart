@@ -90,14 +90,18 @@ class TabListStandaloneItem extends TabListTabItem {
   @override
   final String? spaceUuid;
 
+  /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
+  final int depth;
+
   TabListStandaloneItem({
     required this.tabId,
     required this.orderKey,
     required this.spaceUuid,
+    this.depth = 0,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid];
+  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid, depth];
 }
 
 class TabListParentGroup extends TabListTabItem {
@@ -109,15 +113,25 @@ class TabListParentGroup extends TabListTabItem {
   final String? spaceUuid;
   final int childCount;
 
+  /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
+  final int depth;
+
   TabListParentGroup({
     required this.tabId,
     required this.orderKey,
     required this.spaceUuid,
     required this.childCount,
+    this.depth = 0,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid, childCount];
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    spaceUuid,
+    childCount,
+    depth,
+  ];
 }
 
 class TabListChildItem extends TabListTabItem {
