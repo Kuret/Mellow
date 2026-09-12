@@ -789,7 +789,23 @@ class _PinTabMenuItem extends ConsumerWidget {
     final folderId = tabData?.folderId;
     final spaceUuid = tabData?.spaceUuid;
     final isPrivate = tabData?.tabMode == TabModeDbValue.private;
-    final showSpaceAndFolderItems = !isEssential && !isPrivate;
+    // A split member moves with its split (PLAN §6.5 rule 2), so the
+    // per-tab space/folder moves are replaced by an info row.
+    final splitId = tabData?.splitId;
+    final splitSize = splitId == null
+        ? 0
+        : ref.watch(
+            watchSpaceTabsDataProvider(spaceUuid).select(
+              (value) =>
+                  value.value
+                      ?.where((summary) => summary.splitId == splitId)
+                      .length ??
+                  0,
+            ),
+          );
+    final isSplitMember = splitId != null && splitSize > 1;
+    final showSpaceAndFolderItems =
+        !isEssential && !isPrivate && !isSplitMember;
     // Unloading (PLAN §7.4) is for live, regular, normal-shelf tabs that are
     // not on screen — the same rule [TabRepository.demoteToCold] enforces.
     final isSelected = ref.watch(selectedTabProvider) == selectedTabId;
@@ -848,6 +864,12 @@ class _PinTabMenuItem extends ConsumerWidget {
             },
             leadingIcon: const Icon(MdiIcons.snowflakeVariant),
             child: const Text('Unload tab'),
+          ),
+        if (isSplitMember)
+          MenuItemButton(
+            onPressed: null,
+            leadingIcon: const Icon(MdiIcons.viewSplitVertical),
+            child: Text('Split view ($splitSize tabs)'),
           ),
         if (showSpaceAndFolderItems)
           MenuItemButton(
