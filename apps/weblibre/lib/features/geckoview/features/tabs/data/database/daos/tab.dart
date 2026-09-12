@@ -2383,6 +2383,23 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return query.map((row) => row.read(count)!).getSingle();
   }
 
+  /// Of [tabIds], the ones the projection could ever have uploaded.
+  ///
+  /// A private tab never leaves the device (I3), so noting its close in the
+  /// deletion ledger would only put an id on the wire that no record ever
+  /// carried.
+  Future<List<String>> syncableTabIdsAmong(Iterable<String> tabIds) {
+    final ids = tabIds.toSet();
+    if (ids.isEmpty) {
+      return Future.value(const <String>[]);
+    }
+    final t = db.tab;
+    final query = selectOnly(t)
+      ..addColumns([t.id])
+      ..where(t.id.isIn(ids) & t.tabMode.equalsValue(TabModeDbValue.regular));
+    return query.map((row) => row.read(t.id)!).get();
+  }
+
   /// Deletes the rows a remote Zen tombstone removed, in the caller's
   /// transaction.
   ///

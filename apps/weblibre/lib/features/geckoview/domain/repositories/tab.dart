@@ -940,6 +940,13 @@ class TabRepository extends _$TabRepository {
       final db = ref.read(tabDatabaseProvider);
       if (recordTombstones) {
         await db.tabDao.addClosedTabTombstones(tabIds);
+        // The witnessed deletion the sync client projects a tombstone from
+        // (PLAN §8.6 item 5), written at the moment of the close rather than
+        // derived later from a diff. `closed_tab_tombstone` stays the 5-second
+        // undo buffer it always was.
+        for (final tabId in await db.tabDao.syncableTabIdsAmong(tabIds)) {
+          await db.syncStateDao.recordDeletion(tabId, 'tab');
+        }
       }
 
       for (final tabId in tabIds) {
@@ -987,11 +994,13 @@ class TabRepository extends _$TabRepository {
     return _closeTabsInternal(tabIds, recordTombstones: true);
   }
 
-  Future<void> _clearTombstonesForCurrentTabs(List<String> tabIds) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .deleteClosedTabTombstones(tabIds);
+  /// Undoes the bookkeeping of a close for tabs that are live again: the undo
+  /// buffer entry, and the deletion ledger entry that would otherwise become
+  /// an outgoing tombstone for a tab nobody closed.
+  Future<void> _clearTombstonesForCurrentTabs(List<String> tabIds) async {
+    final db = ref.read(tabDatabaseProvider);
+    await db.tabDao.deleteClosedTabTombstones(tabIds);
+    await db.syncStateDao.clearDeletions(tabIds);
   }
 
   Future<void> _preservePromotedChildOrderOnClose(List<String> tabIds) {
