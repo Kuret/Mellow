@@ -66,6 +66,12 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _MaxLiveTabsSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Separate essentials per container',
+        subtitle: 'Each container keeps its own Essentials strip',
+        keywords: ['essentials', 'pinned', 'spaces', 'containers', 'zen'],
+        child: _SeparateEssentialsTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Show Container UI',
         subtitle: 'Show container selectors, menus, and management',
         keywords: ['containers'],
@@ -620,6 +626,38 @@ class _CreateChildTabsTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.createChildTabsOption(value),
+            );
+      },
+    );
+  }
+}
+
+/// Zen's `zen.workspaces.separate-essentials` (PLAN §6.4): whether the
+/// Essentials strip is keyed on the current space's container or shared by
+/// every space.
+class _SeparateEssentialsTile extends ConsumerWidget {
+  const _SeparateEssentialsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final separateEssentials = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Separate essentials per container'),
+      subtitle: const Text(
+        'A space shows the essentials of its own container, as on the Zen '
+        'desktop; off, every space shows all essentials',
+      ),
+      secondary: const Icon(MdiIcons.starBoxMultipleOutline),
+      value: separateEssentials,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.separateEssentials(value),
             );
       },
     );
