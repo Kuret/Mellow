@@ -167,6 +167,11 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
   return service;
 }
 
+/// The engine's tab API. A provider rather than a bare constructor so tests
+/// can stand in a fake engine for [TabRepository].
+@Riverpod(keepAlive: true)
+GeckoTabService geckoTabService(Ref ref) => GeckoTabService();
+
 @Riverpod(keepAlive: true)
 GeckoEventService eventService(Ref ref) {
   final service = GeckoEventService.setUp();

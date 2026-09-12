@@ -145,6 +145,19 @@ Stream<List<TabSummary>> watchTabsFifo(Ref ref) {
   return db.tabDao.getTabsFifo().watch();
 }
 
+// --- liveness ----------------------------------------------------------------
+
+/// Ids of the regular tabs without an engine session (PLAN §7.4). Watched by
+/// the surfaces that draw rows from engine state, to tell a cold row from one
+/// still restoring.
+@Riverpod(keepAlive: true)
+Stream<EquatableValue<Set<String>>> watchColdTabIds(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.coldTabIds().watch().map(
+    (ids) => EquatableValue(ids.toSet()),
+  );
+}
+
 // --- trees ---------------------------------------------------------------------
 
 /// Tab trees of one space; with [allSpaces] the space boundary is ignored and

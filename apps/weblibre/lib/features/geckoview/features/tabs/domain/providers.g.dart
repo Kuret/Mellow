@@ -752,6 +752,58 @@ final class WatchTabsFifoProvider
 
 String _$watchTabsFifoHash() => r'ce84a120f37fe08a1cc193c561e64acd44c949cd';
 
+/// Ids of the regular tabs without an engine session (PLAN §7.4). Watched by
+/// the surfaces that draw rows from engine state, to tell a cold row from one
+/// still restoring.
+
+@ProviderFor(watchColdTabIds)
+final watchColdTabIdsProvider = WatchColdTabIdsProvider._();
+
+/// Ids of the regular tabs without an engine session (PLAN §7.4). Watched by
+/// the surfaces that draw rows from engine state, to tell a cold row from one
+/// still restoring.
+
+final class WatchColdTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<EquatableValue<Set<String>>>,
+          EquatableValue<Set<String>>,
+          Stream<EquatableValue<Set<String>>>
+        >
+    with
+        $FutureModifier<EquatableValue<Set<String>>>,
+        $StreamProvider<EquatableValue<Set<String>>> {
+  /// Ids of the regular tabs without an engine session (PLAN §7.4). Watched by
+  /// the surfaces that draw rows from engine state, to tell a cold row from one
+  /// still restoring.
+  WatchColdTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchColdTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchColdTabIdsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<EquatableValue<Set<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<EquatableValue<Set<String>>> create(Ref ref) {
+    return watchColdTabIds(ref);
+  }
+}
+
+String _$watchColdTabIdsHash() => r'54ffcfd832c37dbaa429c9dfe33b7ac0b5be2851';
+
 /// Tab trees of one space; with [allSpaces] the space boundary is ignored and
 /// every tree is returned.
 

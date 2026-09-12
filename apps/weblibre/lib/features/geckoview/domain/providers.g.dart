@@ -57,6 +57,56 @@ final class SelectionActionServiceProvider
 String _$selectionActionServiceHash() =>
     r'c2cdd69d3dc4c2fe4bb54658d76ca26efb5bfc74';
 
+/// The engine's tab API. A provider rather than a bare constructor so tests
+/// can stand in a fake engine for [TabRepository].
+
+@ProviderFor(geckoTabService)
+final geckoTabServiceProvider = GeckoTabServiceProvider._();
+
+/// The engine's tab API. A provider rather than a bare constructor so tests
+/// can stand in a fake engine for [TabRepository].
+
+final class GeckoTabServiceProvider
+    extends
+        $FunctionalProvider<GeckoTabService, GeckoTabService, GeckoTabService>
+    with $Provider<GeckoTabService> {
+  /// The engine's tab API. A provider rather than a bare constructor so tests
+  /// can stand in a fake engine for [TabRepository].
+  GeckoTabServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'geckoTabServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$geckoTabServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeckoTabService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GeckoTabService create(Ref ref) {
+    return geckoTabService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeckoTabService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeckoTabService>(value),
+    );
+  }
+}
+
+String _$geckoTabServiceHash() => r'4345489a15b4595062e2003ab3d848502a4f92da';
+
 @ProviderFor(eventService)
 final eventServiceProvider = EventServiceProvider._();
 
