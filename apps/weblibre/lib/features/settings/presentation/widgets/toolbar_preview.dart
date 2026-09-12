@@ -27,9 +27,12 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
@@ -74,13 +77,8 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   double get _headerHeight => compact ? 0.0 : _kHeaderHeight;
 
-  /// Fixed preview height for the vertical rail (the rail flows along the
-  /// height, so it can't be derived from stacked section heights).
-  static const _kRailPreviewHeight = 220.0;
-  static const _kCompactRailPreviewHeight = 140.0;
-
   double get _contentHeight => settings.tabBarPosition.isVertical
-      ? (compact ? _kCompactRailPreviewHeight : _kRailPreviewHeight)
+      ? TabBarPreviewCard.railPreviewHeight(settings, compact: compact)
       : _baseHeight + _toolbarHeight;
 
   @override
@@ -121,6 +119,32 @@ class TabBarPreviewCard extends HookWidget {
 
   final GeneralSettings settings;
   final bool compact;
+
+  /// Fixed preview height for the vertical rail (the rail flows along the
+  /// height, so it can't be derived from stacked section heights). The wide
+  /// rail stacks four blocks, so it needs more room to show them all.
+  static const _kRailPreviewHeight = 220.0;
+  static const _kCompactRailPreviewHeight = 140.0;
+  static const _kWideRailPreviewHeight = 320.0;
+  static const _kCompactWideRailPreviewHeight = 200.0;
+
+  /// Mirrors isWideRail, but ignores the viewport breakpoint: the preview
+  /// shows what the configured railWidth looks like regardless of the
+  /// settings screen's own current width.
+  static bool isWideRailPreview(GeneralSettings settings) =>
+      settings.tabBarPosition.isVertical &&
+      settings.railWidth >= minWideRailWidth;
+
+  static double railPreviewHeight(
+    GeneralSettings settings, {
+    required bool compact,
+  }) {
+    final wide = isWideRailPreview(settings);
+    if (compact) {
+      return wide ? _kCompactWideRailPreviewHeight : _kCompactRailPreviewHeight;
+    }
+    return wide ? _kWideRailPreviewHeight : _kRailPreviewHeight;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -200,12 +224,7 @@ class TabBarPreviewCard extends HookWidget {
       ScrollController scrollController, {
       Axis axis = Axis.horizontal,
     }) {
-      // Mirrors isWideRail, but ignores the viewport breakpoint: this preview
-      // shows what the configured railWidth looks like regardless of the
-      // settings screen's own current width.
-      final wideRail =
-          settings.tabBarPosition.isVertical &&
-          settings.railWidth >= minWideRailWidth;
+      final wideRail = isWideRailPreview(settings);
       final showTitles =
           (axis != Axis.vertical || wideRail) &&
           settings.quickTabSwitcherShowTitles;
@@ -373,36 +392,87 @@ class TabBarPreviewCard extends HookWidget {
     );
 
     final isRailPreview = settings.tabBarPosition.isVertical;
-    final isWideRailPreview =
-        isRailPreview && settings.railWidth >= minWideRailWidth;
 
-    final railToolbar = BrowserTabBarView(
-      axis: Axis.vertical,
-      railOnLeft: settings.tabBarPosition == TabBarPosition.left,
-      showMainToolbar: true,
-      showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      displayAppBar: true,
-      displayQuickTabSwitcher: true,
-      backgroundColor:
-          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
-      title: isWideRailPreview
-          ? ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: settings.railWidth),
-              child: settings.tabBarLayout == TabBarLayout.compact
+    // Static stand-ins for the wide rail's shelves and space switcher: the
+    // live widgets need the tab and space tables the preview does not have.
+    Widget buildWideRailTabs() {
+      final closeMode = settings.quickTabSwitcherCloseButtonMode;
+      return ListView(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        children: [
+          WideRailTabRowView(
+            icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
+            title: 'News',
+            isActive: true,
+            onTap: () {},
+            onClose: closeMode.showsFor(isActive: true) ? () {} : null,
+          ),
+          WideRailTabRowView(
+            icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
+            title: 'Docs',
+            isActive: false,
+            depth: 1,
+            onTap: () {},
+            onClose: closeMode.showsFor(isActive: false) ? () {} : null,
+          ),
+        ],
+      );
+    }
+
+    final railToolbar = isWideRailPreview(settings)
+        ? WideRailLayout(
+            backgroundColor:
+                previewContainerPalette?.surfaceColor ??
+                colorScheme.surfaceContainer,
+            urlRow: WideRailUrlRow(
+              title: settings.tabBarLayout == TabBarLayout.compact
                   ? _CompactPreviewTitle(tabState: previewTabState)
                   : _RegularPreviewTitle(tabState: previewTabState),
-            )
-          : _RailPreviewTitle(
+              collapsed: const Icon(Icons.search),
+            ),
+            tabs: buildWideRailTabs(),
+            contextualToolbar: settings.tabBarShowContextualBar
+                ? buildContextualToolbar()
+                : null,
+            toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
+            spaces: const SpaceIconRailView(
+              entries: [
+                SpaceIconRailEntry(
+                  id: 'work',
+                  icon: null,
+                  name: 'Work',
+                  selected: true,
+                ),
+                SpaceIconRailEntry(
+                  id: 'personal',
+                  icon: null,
+                  name: 'Personal',
+                  selected: false,
+                ),
+              ],
+            ),
+          )
+        : BrowserTabBarView(
+            axis: Axis.vertical,
+            railOnLeft: settings.tabBarPosition == TabBarPosition.left,
+            showMainToolbar: true,
+            showContextualToolbar: settings.tabBarShowContextualBar,
+            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+            displayAppBar: true,
+            displayQuickTabSwitcher: true,
+            backgroundColor:
+                previewContainerPalette?.surfaceColor ??
+                colorScheme.surfaceContainer,
+            title: _RailPreviewTitle(
               tabState: previewTabState,
               quarterTurns: settings.tabBarPosition == TabBarPosition.left
                   ? 3
                   : 1,
             ),
-      actions: mainToolbarActions,
-      quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
-      contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
-    );
+            actions: mainToolbarActions,
+            quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
+            contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
+          );
 
     final pageContentBox = Container(
       width: double.infinity,
@@ -428,7 +498,7 @@ class TabBarPreviewCard extends HookWidget {
       final railOnLeft = settings.tabBarPosition == TabBarPosition.left;
       previewContent = Container(
         clipBehavior: Clip.antiAlias,
-        height: compact ? 140 : 220,
+        height: railPreviewHeight(settings, compact: compact),
         decoration: BoxDecoration(
           color: compact
               ? colorScheme.surface.withValues(alpha: 0.7)
