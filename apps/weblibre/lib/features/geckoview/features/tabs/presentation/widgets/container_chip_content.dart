@@ -19,30 +19,38 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 
-Widget? buildContainerChipAvatar(
+/// The colour a container is themed from: its Firefox colour keyword, or the
+/// theme primary for `toolbar` (and unknown keywords), which has no colour of
+/// its own and follows the theme.
+Color containerSeedColor(BuildContext context, ContainerData? container) {
+  return container?.color.color ?? Theme.of(context).colorScheme.primary;
+}
+
+/// The Material 3 roles every container surface draws with, seeded from
+/// [containerSeedColor].
+ContainerColorPalette containerPalette(
+  BuildContext context,
+  ContainerData? container,
+) {
+  return ContainerColors.palette(context, containerSeedColor(context, container));
+}
+
+Widget buildContainerChipAvatar(
   BuildContext context,
   ContainerData container,
   bool isSelected, {
   double size = 18,
 }) {
-  final palette = ContainerColors.palette(
-    context,
-    container.color,
-    useCustomColor: container.metadata.useCustomColor,
-  );
+  final palette = containerPalette(context, container);
 
-  return chipContainerIcon(container.metadata.iconData).mapNotNull(
-    (iconData) => Icon(
-      iconData,
-      size: size,
-      color: isSelected ? palette.selectedAvatarColor : palette.avatarColor,
-    ),
+  return Icon(
+    container.icon.icon,
+    size: size,
+    color: isSelected ? palette.selectedAvatarColor : palette.avatarColor,
   );
 }
 
@@ -52,11 +60,7 @@ Widget buildContainerChipLabel(
   bool isSelected, {
   Widget? trailing,
 }) {
-  final palette = ContainerColors.palette(
-    context,
-    container.color,
-    useCustomColor: container.metadata.useCustomColor,
-  );
+  final palette = containerPalette(context, container);
   final foregroundColor = isSelected
       ? palette.selectedForegroundColor
       : palette.foregroundColor;

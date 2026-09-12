@@ -26,7 +26,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// A compact container selector that displays only the currently selected
@@ -59,13 +58,8 @@ class CompactContainerSelector extends ConsumerWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final isSelected = selectedContainer != null;
-    final accentColor = selectedContainer?.color ?? colorScheme.primary;
     final showSelectedHighlight = isSelected && emphasizeSelection;
-    final palette = ContainerColors.palette(
-      context,
-      accentColor,
-      useCustomColor: selectedContainer?.metadata.useCustomColor ?? false,
-    );
+    final palette = containerPalette(context, selectedContainer);
 
     return GestureDetector(
       onLongPress: isSelected

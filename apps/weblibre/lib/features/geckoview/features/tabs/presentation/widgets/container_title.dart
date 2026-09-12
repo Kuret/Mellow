@@ -37,7 +37,7 @@ class ContainerTitle extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (container.name.isNotEmpty) {
       return Text(
-        container.name!,
+        container.name,
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       );
