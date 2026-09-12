@@ -67,9 +67,9 @@ void main() {
   group('buildTabViewReorderResult (flat)', () {
     test('plain reorder moves a single tab between its new neighbours', () {
       final items = [
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
-        TabViewItem.standalone(tabId: 'c'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'c'),
       ];
 
       final result = build(visibleItems: items, oldIndex: 0, newIndex: 1);
@@ -94,7 +94,7 @@ void main() {
             childCount: 0,
           ),
         ),
-        TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'a'),
       ];
 
       final result = build(visibleItems: items, oldIndex: 0, newIndex: 1);
@@ -104,9 +104,9 @@ void main() {
 
     test('dropping a tab between two tabs of the same folder scopes to it', () {
       final items = [
-        TabViewItem.standalone(tabId: 'x'),
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
       ];
 
       final result = build(
@@ -136,7 +136,7 @@ void main() {
       );
       final items = [
         TabViewItem.folder(folderItem: folderItem),
-        TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.standalone(tabId: 'x'),
       ];
 
       final result = build(
@@ -157,8 +157,8 @@ void main() {
     test('dropping back at the root reports a scope change away from a '
         'folder', () {
       final items = [
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'x'),
       ];
 
       final result = build(
@@ -178,11 +178,11 @@ void main() {
 
     test('dragging a split member brings its siblings along in order', () {
       final items = [
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
-        TabViewItem.standalone(tabId: 'split-1'),
-        TabViewItem.standalone(tabId: 'split-2'),
-        TabViewItem.standalone(tabId: 'c'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'split-1'),
+        const TabViewItem.standalone(tabId: 'split-2'),
+        const TabViewItem.standalone(tabId: 'c'),
       ];
 
       final result = build(
@@ -204,10 +204,10 @@ void main() {
 
     test('dragging the primary split member moves every sibling with it', () {
       final items = [
-        TabViewItem.standalone(tabId: 'split-1'),
-        TabViewItem.standalone(tabId: 'split-2'),
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'split-1'),
+        const TabViewItem.standalone(tabId: 'split-2'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
       ];
 
       final result = build(
@@ -230,9 +230,9 @@ void main() {
   group('buildTabViewReorderResult (hierarchical)', () {
     test('drop-into-folder scope change also applies with hierarchy on', () {
       final items = [
-        TabViewItem.standalone(tabId: 'x'),
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
       ];
 
       final result = build(
@@ -254,10 +254,10 @@ void main() {
 
     test('split siblings ride along with a hierarchical drag too', () {
       final items = [
-        TabViewItem.standalone(tabId: 'split-1'),
-        TabViewItem.standalone(tabId: 'split-2'),
-        TabViewItem.standalone(tabId: 'a'),
-        TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.standalone(tabId: 'split-1'),
+        const TabViewItem.standalone(tabId: 'split-2'),
+        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.standalone(tabId: 'b'),
       ];
 
       final result = build(

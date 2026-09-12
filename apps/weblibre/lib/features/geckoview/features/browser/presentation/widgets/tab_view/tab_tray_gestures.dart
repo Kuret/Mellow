@@ -221,7 +221,7 @@ class TabTrayGestures extends HookConsumerWidget {
       // come back to the local scope with it — same as tapping a chip.
       ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
 
-      ref.read(selectedSpaceProvider.notifier).setSpace(cycleOrder[index].uuid);
+      ref.read(selectedSpaceProvider.notifier).space = cycleOrder[index].uuid;
     }
 
     void cycleViewMode({required bool expand}) {

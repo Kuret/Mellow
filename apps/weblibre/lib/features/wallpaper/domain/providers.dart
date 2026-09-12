@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';

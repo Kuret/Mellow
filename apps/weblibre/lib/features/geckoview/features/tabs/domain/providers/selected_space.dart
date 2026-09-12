@@ -51,7 +51,10 @@ class SelectedSpace extends _$SelectedSpace {
     return ref.read(spaceRepositoryProvider.notifier).getSpace(uuid);
   }
 
-  void setSpace(String uuid) {
+  /// The selected space's uuid; `null` while none is selected yet.
+  String? get space => state;
+
+  set space(String? uuid) {
     state = uuid;
   }
 

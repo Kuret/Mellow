@@ -113,7 +113,7 @@ HistoryExclusionSnapshot _buildSnapshot(
     }
     knownTabIds.add(tabId);
     tabContainerIds[tabId] = tab.containerId;
-    if (tab.excluded != 0) {
+    if (tab.excluded) {
       excludedTabIds.add(tabId);
     }
   }

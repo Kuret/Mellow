@@ -10,10 +10,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';

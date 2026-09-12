@@ -26,7 +26,7 @@ void main() {
     });
 
     test(
-      'deleteFolder closes the subtree\'s tabs first, then cascades',
+      "deleteFolder closes the subtree's tabs first, then cascades",
       () async {
         final h = openRepositoryHarness();
         await seedSpaces(h.db, ['s']);
@@ -53,7 +53,7 @@ void main() {
     );
 
     test(
-      'createFolder ranks after the scope\'s tabs; rename and collapse',
+      "createFolder ranks after the scope's tabs; rename and collapse",
       () async {
         final h = openRepositoryHarness();
         await seedSpaces(h.db, ['s']);

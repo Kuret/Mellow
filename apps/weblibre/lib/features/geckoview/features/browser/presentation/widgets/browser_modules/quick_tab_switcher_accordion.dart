@@ -169,7 +169,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     );
 
     void selectSpace(String spaceUuid) {
-      ref.read(selectedSpaceProvider.notifier).setSpace(spaceUuid);
+      ref.read(selectedSpaceProvider.notifier).space = spaceUuid;
     }
 
     Widget buildTabChip(QuickTabSwitcherItem item) {

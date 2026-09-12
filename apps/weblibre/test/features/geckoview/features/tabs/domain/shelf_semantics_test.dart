@@ -146,7 +146,7 @@ void main() {
 
   group('TabDataRepository folder and space moves', () {
     test(
-      'moveTabToFolder takes the folder\'s space, refuses essentials',
+      "moveTabToFolder takes the folder's space, refuses essentials",
       () async {
         final h = openRepositoryHarness();
         await seedSpaces(h.db, ['s1', 's2']);

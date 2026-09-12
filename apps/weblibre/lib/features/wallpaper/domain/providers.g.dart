@@ -53,9 +53,10 @@ String _$wallpaperStoreHash() => r'1ee1636c844531bf0ef984e0740dfbabcbbd523f';
 /// The wallpaper to draw behind the home surface right now, or null when there
 /// is none.
 ///
-/// The selected container's own wallpaper wins over the profile-wide one; its
-/// blur and dim fall back to the profile's values when unset, so a container
-/// that only wants a different picture does not have to restate the treatment.
+/// The selected container's own wallpaper (kept in its local, never-synced
+/// row) wins over the profile-wide one; its blur and dim fall back to the
+/// profile's values when unset, so a container that only wants a different
+/// picture does not have to restate the treatment.
 
 @ProviderFor(resolvedHomeWallpaper)
 final resolvedHomeWallpaperProvider = ResolvedHomeWallpaperProvider._();
@@ -63,9 +64,10 @@ final resolvedHomeWallpaperProvider = ResolvedHomeWallpaperProvider._();
 /// The wallpaper to draw behind the home surface right now, or null when there
 /// is none.
 ///
-/// The selected container's own wallpaper wins over the profile-wide one; its
-/// blur and dim fall back to the profile's values when unset, so a container
-/// that only wants a different picture does not have to restate the treatment.
+/// The selected container's own wallpaper (kept in its local, never-synced
+/// row) wins over the profile-wide one; its blur and dim fall back to the
+/// profile's values when unset, so a container that only wants a different
+/// picture does not have to restate the treatment.
 
 final class ResolvedHomeWallpaperProvider
     extends $FunctionalProvider<HomeWallpaper?, HomeWallpaper?, HomeWallpaper?>
@@ -73,9 +75,10 @@ final class ResolvedHomeWallpaperProvider
   /// The wallpaper to draw behind the home surface right now, or null when there
   /// is none.
   ///
-  /// The selected container's own wallpaper wins over the profile-wide one; its
-  /// blur and dim fall back to the profile's values when unset, so a container
-  /// that only wants a different picture does not have to restate the treatment.
+  /// The selected container's own wallpaper (kept in its local, never-synced
+  /// row) wins over the profile-wide one; its blur and dim fall back to the
+  /// profile's values when unset, so a container that only wants a different
+  /// picture does not have to restate the treatment.
   ResolvedHomeWallpaperProvider._()
     : super(
         from: null,
@@ -110,7 +113,7 @@ final class ResolvedHomeWallpaperProvider
 }
 
 String _$resolvedHomeWallpaperHash() =>
-    r'd8510f49d8911ed78981e1adc0f5201a40461498';
+    r'101fbf193aa6b91ccd4b9a2b10448475fc2372a0';
 
 /// Deletes wallpapers nothing points at any more.
 ///
@@ -172,7 +175,7 @@ final class WallpaperSweeperProvider
   }
 }
 
-String _$wallpaperSweeperHash() => r'ad06884d37124c39dd50407b0cc924c395ec3dc3';
+String _$wallpaperSweeperHash() => r'7e75942359681ea991a5557169b28780ecc97bdc';
 
 /// Deletes wallpapers nothing points at any more.
 ///

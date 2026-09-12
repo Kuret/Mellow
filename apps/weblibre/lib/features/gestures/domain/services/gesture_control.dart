@@ -39,8 +39,8 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -267,7 +267,7 @@ class GestureControlService extends _$GestureControlService {
     if (index == null) return;
 
     final space = spaces[index];
-    ref.read(selectedSpaceProvider.notifier).setSpace(space.uuid);
+    ref.read(selectedSpaceProvider.notifier).space = space.uuid;
 
     if (!ref.mounted) return;
 

@@ -58,7 +58,7 @@ class SpaceChips extends ConsumerWidget {
               final created = await ref
                   .read(spaceRepositoryProvider.notifier)
                   .createSpace();
-              ref.read(selectedSpaceProvider.notifier).setSpace(created.uuid);
+              ref.read(selectedSpaceProvider.notifier).space = created.uuid;
             },
           ),
         ],
@@ -80,12 +80,12 @@ class _SpaceChip extends ConsumerWidget {
     return GestureDetector(
       onLongPress: () => _openMenu(context, ref),
       child: ChoiceChip(
-        avatar: Icon(MdiIcons.viewDashboardOutline, size: 18),
+        avatar: const Icon(MdiIcons.viewDashboardOutline, size: 18),
         label: Text(_displayName),
         selected: selected,
         onSelected: (value) {
           if (value) {
-            ref.read(selectedSpaceProvider.notifier).setSpace(space.uuid);
+            ref.read(selectedSpaceProvider.notifier).space = space.uuid;
           }
         },
       ),
@@ -108,7 +108,7 @@ class _SpaceChip extends ConsumerWidget {
             ),
             Offset.zero & overlay.size,
           )
-        : const RelativeRect.fromLTRB(0, 0, 0, 0);
+        : RelativeRect.fill;
 
     final action = await showMenu<String>(
       context: context,
@@ -215,7 +215,7 @@ class _SpaceChip extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete \'$_displayName\'?'),
+        title: Text("Delete '$_displayName'?"),
         content: Text('$tabCount tabs will be closed.'),
         actions: [
           TextButton(
@@ -234,13 +234,14 @@ class _SpaceChip extends ConsumerWidget {
       return;
     }
 
-    try {
-      await ref.read(spaceRepositoryProvider.notifier).deleteSpace(space.uuid);
-    } on StateError {
-      // The last remaining space can't be deleted; nothing to do here, the
-      // menu already hides delete once only one space is left, but the
-      // count could have changed between opening the menu and confirming.
+    // The last remaining space can't be deleted. The menu already hides
+    // delete once only one space is left, but the count could have changed
+    // between opening the menu and confirming.
+    final repository = ref.read(spaceRepositoryProvider.notifier);
+    if ((await repository.getAllSpaces()).length <= 1) {
+      return;
     }
+    await repository.deleteSpace(space.uuid);
   }
 }
 
