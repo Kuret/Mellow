@@ -24,6 +24,14 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_enti
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
+// [TabScopeToSpecific] has no value equality, so a direct `==` comparison
+// against a runtime-constructed instance (as opposed to the same `const`
+// literal) always fails on identity. Compare the fields instead.
+Matcher scopedTo({required String? spaceUuid, required String? folderId}) =>
+    isA<TabScopeToSpecific>()
+        .having((change) => change.spaceUuid, 'spaceUuid', spaceUuid)
+        .having((change) => change.folderId, 'folderId', folderId);
+
 void main() {
   TabViewReorderResult? build({
     required List<TabViewItem> visibleItems,
@@ -52,6 +60,10 @@ void main() {
     );
   }
 
+  // `newIndex` follows the app's reorderable surfaces: it is the slot in the
+  // list *after* the moving item has been taken out (post-removal), so moving
+  // the first of three items to the end is `oldIndex: 0, newIndex: 2` and
+  // placing it between the other two is `newIndex: 1`.
   group('buildTabViewReorderResult (flat)', () {
     test('plain reorder moves a single tab between its new neighbours', () {
       final items = [
@@ -60,7 +72,7 @@ void main() {
         TabViewItem.standalone(tabId: 'c'),
       ];
 
-      final result = build(visibleItems: items, oldIndex: 0, newIndex: 2);
+      final result = build(visibleItems: items, oldIndex: 0, newIndex: 1);
 
       expect(result, isNotNull);
       expect(result!.movingTabIds, ['a']);
@@ -108,7 +120,7 @@ void main() {
       expect(result, isNotNull);
       expect(
         result!.scopeChange,
-        const TabScopeChange.toScope(spaceUuid: 'space-1', folderId: 'f1'),
+        scopedTo(spaceUuid: 'space-1', folderId: 'f1'),
       );
     });
 
@@ -138,7 +150,7 @@ void main() {
       expect(result, isNotNull);
       expect(
         result!.scopeChange,
-        const TabScopeChange.toScope(spaceUuid: 'space-1', folderId: 'f1'),
+        scopedTo(spaceUuid: 'space-1', folderId: 'f1'),
       );
     });
 
@@ -160,7 +172,7 @@ void main() {
       expect(result, isNotNull);
       expect(
         result!.scopeChange,
-        const TabScopeChange.toScope(spaceUuid: 'space-1', folderId: null),
+        scopedTo(spaceUuid: 'space-1', folderId: null),
       );
     });
 
@@ -176,7 +188,7 @@ void main() {
       final result = build(
         visibleItems: items,
         oldIndex: 0,
-        newIndex: 4,
+        newIndex: 3,
         splitMembers: const {
           'split-1': ['split-1', 'split-2'],
           'split-2': ['split-1', 'split-2'],
@@ -201,7 +213,7 @@ void main() {
       final result = build(
         visibleItems: items,
         oldIndex: 0,
-        newIndex: 3,
+        newIndex: 2,
         splitMembers: const {
           'split-1': ['split-1', 'split-2'],
           'split-2': ['split-1', 'split-2'],
@@ -236,7 +248,7 @@ void main() {
       expect(result!.parentChange, const TabParentChange.unchanged());
       expect(
         result.scopeChange,
-        const TabScopeChange.toScope(spaceUuid: 'space-1', folderId: 'f1'),
+        scopedTo(spaceUuid: 'space-1', folderId: 'f1'),
       );
     });
 
@@ -251,7 +263,7 @@ void main() {
       final result = build(
         visibleItems: items,
         oldIndex: 0,
-        newIndex: 3,
+        newIndex: 2,
         hierarchical: true,
         splitMembers: const {
           'split-1': ['split-1', 'split-2'],

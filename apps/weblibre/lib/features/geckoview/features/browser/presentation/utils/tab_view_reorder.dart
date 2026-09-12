@@ -61,13 +61,14 @@ class TabViewReorderResult {
 /// Folder rows ([FolderTabViewItem]) are never draggable: a reorder whose
 /// moving item is a folder returns `null`.
 ///
-/// Scope anchor rule (folder the moving block lands in): find the nearest
-/// non-folder tab neighbours above/below the drop slot (skipping folder rows
-/// entirely) — if both sit in the same folder, drop into that folder. Else,
-/// if the row immediately above the drop slot (folder or not) is a folder
-/// row, drop into that folder. Otherwise the block moves to the space root,
-/// which is only reported as a change (`toScope(folderId: null)`) when the
-/// moving root did not already sit at the root.
+/// Scope anchor rule (folder the moving block lands in): if the row directly
+/// above the drop slot is a folder row, the block drops into that folder.
+/// Otherwise, find the nearest non-folder tab neighbours above/below the drop
+/// slot (skipping folder rows entirely): if both exist and share a folder,
+/// drop into that folder; if only one exists, drop into its folder; if
+/// neither exists, the block moves to the space root. The result is only
+/// reported as a change when the resolved folder differs from the moving
+/// root's current folder — otherwise `TabScopeChange.unchanged()`.
 TabViewReorderResult? buildTabViewReorderResult({
   required List<TabViewItem> visibleItems,
   required List<TabsWithRootAndDepthResult> treeRows,
@@ -98,6 +99,9 @@ TabViewReorderResult? buildTabViewReorderResult({
   final reordered = visibleItems.toList();
   final movingItem = reordered.removeAt(oldIndex);
 
+  // `newIndex` is already post-removal: every reorderable surface in the app
+  // (the tray list and grid, the tab bar chips) normalises Flutter's raw
+  // `onReorder` index before calling here — see `onReorderItem`.
   final insertIndex = newIndex.clamp(0, reordered.length);
   reordered.insert(insertIndex, movingItem);
 
@@ -399,45 +403,49 @@ TabScopeChange _computeScopeChange({
     }
   }
 
-  TabViewItem? prevTab;
-  for (var i = index - 1; i >= 0; i--) {
-    final item = displayOrder[i];
-    if (item.tabId != movingTabId && !item.isFolder) {
-      prevTab = item;
-      break;
-    }
-  }
-
-  TabViewItem? nextTab;
-  for (var i = index + 1; i < displayOrder.length; i++) {
-    final item = displayOrder[i];
-    if (item.tabId != movingTabId && !item.isFolder) {
-      nextTab = item;
-      break;
-    }
-  }
-
-  if (prevTab != null && nextTab != null) {
-    final prevFolder = folderIdByTab[prevTab.tabId];
-    final nextFolder = folderIdByTab[nextTab.tabId];
-    if (prevFolder == nextFolder) {
-      return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: prevFolder);
-    }
-  }
-
+  String? resolvedFolder;
   final folderRowAbove = directlyAbove?.folderItem;
   if (folderRowAbove != null) {
-    return TabScopeChange.toScope(
-      spaceUuid: spaceUuid,
-      folderId: folderRowAbove.folderId,
-    );
+    // Dropping right under a folder header puts the tab into that folder,
+    // regardless of what the nearest tab neighbours below belong to.
+    resolvedFolder = folderRowAbove.folderId;
+  } else {
+    TabViewItem? prevTab;
+    for (var i = index - 1; i >= 0; i--) {
+      final item = displayOrder[i];
+      if (item.tabId != movingTabId && !item.isFolder) {
+        prevTab = item;
+        break;
+      }
+    }
+
+    TabViewItem? nextTab;
+    for (var i = index + 1; i < displayOrder.length; i++) {
+      final item = displayOrder[i];
+      if (item.tabId != movingTabId && !item.isFolder) {
+        nextTab = item;
+        break;
+      }
+    }
+
+    if (prevTab != null && nextTab != null) {
+      final prevFolder = folderIdByTab[prevTab.tabId];
+      final nextFolder = folderIdByTab[nextTab.tabId];
+      resolvedFolder = prevFolder == nextFolder ? prevFolder : null;
+    } else if (prevTab != null) {
+      resolvedFolder = folderIdByTab[prevTab.tabId];
+    } else if (nextTab != null) {
+      resolvedFolder = folderIdByTab[nextTab.tabId];
+    } else {
+      resolvedFolder = null;
+    }
   }
 
   final currentFolder = folderIdByTab[movingTabId];
-  if (currentFolder == null) {
+  if (resolvedFolder == currentFolder) {
     return const TabScopeChange.unchanged();
   }
-  return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: null);
+  return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: resolvedFolder);
 }
 
 String? _parentScope(TabViewItem item) => item.childItem?.parentId;
