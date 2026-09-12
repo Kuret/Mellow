@@ -20,9 +20,11 @@
 // Mirrors the record model of Zen Browser's ZenSpacesSync (MPL-2.0), src/zen/sync/, commit 22961e9.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -63,6 +65,15 @@ const _tokenExpiryMargin = Duration(seconds: 60);
 /// server caps the list at 100.
 const _healFetchChunk = 100;
 
+/// How far back the resurrection canary looks: a create for an id this device
+/// applied a tombstone for inside this window is the exact signature of Zen's
+/// stale-projection race (DESIGN "Hardening against Zen's stale-projection
+/// race", defence 5).
+const _resurrectionWindow = Duration(minutes: 10);
+
+/// `applied_tombstone` rows older than this are pruned once per run.
+const _appliedTombstoneRetention = Duration(hours: 1);
+
 /// Thrown when the outgoing batch fails [validateOutgoingBatch]: nothing
 /// leaves the device (PLAN §8.6 item 2).
 class OutgoingBatchRejected implements Exception {
@@ -91,6 +102,40 @@ class _Decoded {
   final double? newestModified;
 }
 
+/// The outbound half of one run, computed in a single pass off the live
+/// database (never a cached projection — see `spaces_projection.dart`).
+class _Outgoing {
+  _Outgoing({
+    required this.projected,
+    required this.stored,
+    required this.digests,
+    required this.changed,
+    required this.tombstones,
+    required this.vanished,
+  });
+
+  /// Every record the database projects right now.
+  final Map<String, ZenCleartext> projected;
+
+  /// The digests the server last acknowledged, by record id.
+  final Map<String, ({String kind, String digest})> stored;
+
+  /// Digest per projected id, so a successful upload can be stamped without
+  /// re-projecting.
+  final Map<String, String> digests;
+
+  /// Records whose content differs from [stored] — creates and modifications.
+  final List<ZenCleartext> changed;
+
+  /// Deletions justified by the `deleted_record` ledger. Empty on the first
+  /// sync of a device (PLAN §8.6 item 4).
+  final List<String> tombstones;
+
+  /// Ids we hold a digest for that the projection no longer emits and the
+  /// ledger never recorded: a mapping bug here, never a deletion to ship.
+  final List<String> vanished;
+}
+
 /// Everything one sync run needs after the handshake.
 class _Session {
   _Session({required this.client, required this.keys});
@@ -107,6 +152,14 @@ class _Session {
 class SpacesSyncService extends _$SpacesSyncService {
   final _lock = Lock();
   var _rerunRequested = false;
+
+  /// Re-entrancy counter for the apply mutex (DESIGN defence 2): non-zero
+  /// while an inbound batch is being applied through [_guardApply].
+  var _applyDepth = 0;
+
+  /// Set for the duration of [retryBlockedBatch]'s forced run: the volume
+  /// half of the canary is skipped, the resurrection half never is.
+  var _bypassVolumeCheck = false;
   SyncToken? _token;
   Timer? _periodic;
   StreamSubscription<void>? _localChanges;
@@ -298,15 +351,34 @@ class SpacesSyncService extends _$SpacesSyncService {
       final applied = await _fetchAndApply(session, settings);
       settings = await settingsRepo.fetchSettings();
 
+      // The canary only looks at a recent window; keep the ledger small.
+      await ref
+          .read(tabDatabaseProvider)
+          .syncStateDao
+          .pruneAppliedTombstones(
+            DateTime.now().subtract(_appliedTombstoneRetention),
+          );
+
       var healed = 0;
+      final blocked = state.blockedBatch;
       if (settings.spacesSyncWritesEnabled && writesBlockedReason == null) {
-        _healAttempts.clear();
-        await _upload(
-          session,
-          settings,
-          applied,
-          tombstonesAllowed: !firstSync,
-        );
+        if (blocked != null && !_bypassVolumeCheck) {
+          // A refused batch stays refused: a scheduled run must not quietly
+          // ship what the canary caught. Reading carries on.
+          logger.w(
+            'spaces sync: upload paused since ${blocked.at} '
+            '(${blocked.reason.name}, ${blocked.tombstoneCount} tombstones); '
+            'reading only until the user retries',
+          );
+        } else {
+          _healAttempts.clear();
+          await _upload(
+            session,
+            settings,
+            applied,
+            tombstonesAllowed: !firstSync,
+          );
+        }
       } else {
         if (!settings.spacesSyncWritesEnabled) {
           logger.i('spaces sync: uploads disabled by the kill switch');
@@ -404,6 +476,41 @@ class SpacesSyncService extends _$SpacesSyncService {
         );
   }
 
+  /* Mark: apply mutex */
+
+  /// Whether an inbound batch is being applied right now.
+  bool get _applying => _applyDepth > 0;
+
+  /// Runs an [SpacesApplier.applyBatch] call with [_applying] set — the apply
+  /// mutex of DESIGN defence 2. Every apply this service makes goes through
+  /// here, and the outbound diff refuses to run while it is set, so a diff can
+  /// never read a half-applied database the way Zen's cached projection does.
+  Future<Set<String>> _guardedApply(
+    List<ZenIncoming> records, {
+    required bool firstSync,
+  }) async {
+    _applyDepth++;
+    try {
+      return await ref
+          .read(spacesApplierProvider)
+          .applyBatch(records, firstSync: firstSync);
+    } finally {
+      _applyDepth--;
+    }
+  }
+
+  /// Test seam for the apply mutex: runs [body] as if an inbound batch were
+  /// being applied, so a test can prove the outbound diff refuses.
+  @visibleForTesting
+  Future<T> debugWhileApplying<T>(Future<T> Function() body) async {
+    _applyDepth++;
+    try {
+      return await body();
+    } finally {
+      _applyDepth--;
+    }
+  }
+
   /* Mark: incoming */
 
   /// Fetches what changed since the last run (everything, on the first),
@@ -451,9 +558,7 @@ class SpacesSyncService extends _$SpacesSyncService {
 
     final failed = records.isEmpty
         ? <String>{}
-        : await ref
-              .read(spacesApplierProvider)
-              .applyBatch(records, firstSync: firstSync);
+        : await _guardedApply(records, firstSync: firstSync);
     await store.writeFailedIds(failed);
 
     await ref
@@ -520,7 +625,6 @@ class SpacesSyncService extends _$SpacesSyncService {
     final projection = await projectionSource.project();
     final stored = await db.syncStateDao.allDigests();
     final deletions = await db.syncStateDao.pendingDeletions();
-    final closedTabs = await db.tabDao.allClosedTabTombstoneIds().get();
 
     String? localDigestOf(Map<String, ZenCleartext> records, String id) {
       final record = records[id];
@@ -548,7 +652,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     }
     // Deleted here: these project nothing, so they diverge above already;
     // listed again so the intent is explicit.
-    for (final id in deletions.keys.followedBy(closedTabs)) {
+    for (final id in deletions.keys) {
       if (stored.containsKey(id) && !_healAttempts.containsKey(id)) {
         divergent.add(id);
       }
@@ -578,9 +682,7 @@ class SpacesSyncService extends _$SpacesSyncService {
       return 0;
     }
 
-    final failed = await ref
-        .read(spacesApplierProvider)
-        .applyBatch(decoded.records, firstSync: false);
+    final failed = await _guardedApply(decoded.records, firstSync: false);
     final healed = <String>{};
     for (final record in decoded.records) {
       if (record is ZenIncomingTombstone) {
@@ -592,7 +694,6 @@ class SpacesSyncService extends _$SpacesSyncService {
       }
     }
     await db.syncStateDao.clearDeletions(healed);
-    await db.tabDao.deleteClosedTabTombstones(healed);
 
     final after = await projectionSource.project();
     final storedAfter = await db.syncStateDao.allDigests();
@@ -640,16 +741,36 @@ class SpacesSyncService extends _$SpacesSyncService {
 
   /* Mark: outgoing */
 
-  Future<void> _upload(
-    _Session session,
-    GeneralSettings settings,
+  /// What this run would upload: the live projection diffed against the
+  /// digests the server acknowledged, plus the tombstones the deletion ledger
+  /// justifies.
+  ///
+  /// Returns `null` when an inbound apply is in flight. The assertion throws
+  /// in debug; in release the upload is abandoned for the run rather than
+  /// computed against a half-applied database — the failure Zen ships
+  /// (DESIGN defence 2).
+  Future<_Outgoing?> _computeOutgoing(
     Set<String> appliedThisSync, {
     required bool tombstonesAllowed,
-    bool retried = false,
   }) async {
+    assert(
+      !_applying,
+      'outbound diff computed while an inbound batch is being applied',
+    );
+    if (_applying) {
+      logger.e(
+        'spaces sync: outbound diff requested while an inbound batch is '
+        'being applied; upload abandoned for this run',
+      );
+      return null;
+    }
+
     final db = ref.read(tabDatabaseProvider);
+    // Straight off the database on every call; never a cached or delayed
+    // projection (see the header of spaces_projection.dart).
     final projected = await ref.read(spacesProjectionProvider).project();
     final stored = await db.syncStateDao.allDigests();
+    final deletions = await db.syncStateDao.pendingDeletions();
 
     final changed = <ZenCleartext>[];
     final digests = <String, String>{};
@@ -664,22 +785,170 @@ class SpacesSyncService extends _$SpacesSyncService {
       }
     }
 
+    // Tombstones come from the explicit ledger written at deletion time, never
+    // from `stored - projected` (DESIGN defence 4, PLAN §8.6 item 5). An id must
+    // also have a stored digest (we previously held it) and be absent from the
+    // current projection.
     final tombstones = <String>[];
-    if (tombstonesAllowed) {
-      // Tombstones need a reason (PLAN §8.6 item 5): held before, and seen
-      // deleted by the user here.
-      final deletions = await db.syncStateDao.pendingDeletions();
-      final closedTabs = (await db.tabDao.allClosedTabTombstoneIds().get())
-          .toSet();
-      for (final id in stored.keys) {
-        if (projected.containsKey(id) || appliedThisSync.contains(id)) {
-          continue;
-        }
-        if (deletions.containsKey(id) || closedTabs.contains(id)) {
-          tombstones.add(id);
-        }
+    for (final id in deletions.keys) {
+      if (appliedThisSync.contains(id) ||
+          projected.containsKey(id) ||
+          !stored.containsKey(id)) {
+        continue;
       }
+      tombstones.add(id);
     }
+
+    // Held before, gone from the projection, and nobody recorded a deletion:
+    // that is a bug in our own mapping, so say so instead of deleting the
+    // user's tabs on the desktop.
+    final vanished = [
+      for (final id in stored.keys)
+        if (!projected.containsKey(id) &&
+            !appliedThisSync.contains(id) &&
+            !deletions.containsKey(id))
+          id,
+    ];
+    if (vanished.isNotEmpty) {
+      logger.w(
+        'spaces sync: ${vanished.length} records vanished from the projection '
+        'with no recorded deletion (${vanished.take(5).join(', ')})',
+      );
+    }
+
+    return _Outgoing(
+      projected: projected,
+      stored: stored,
+      digests: digests,
+      changed: changed,
+      tombstones: tombstonesAllowed ? tombstones : const [],
+      vanished: vanished,
+    );
+  }
+
+  /// The destructive-batch canary (DESIGN defence 5). Returns the block to
+  /// record, or `null` to let [outgoing] through.
+  Future<SpacesSyncBlockedBatch?> _canary(
+    _Outgoing outgoing,
+    GeneralSettings settings,
+  ) async {
+    final db = ref.read(tabDatabaseProvider);
+
+    // Resurrection: a create for an id this device applied a tombstone for
+    // moments ago. Never bypassed — no user intent produces this shape, only
+    // a stale projection does.
+    final recentlyTombstoned = await db.syncStateDao.appliedTombstonesSince(
+      DateTime.now().subtract(_resurrectionWindow),
+    );
+    final resurrected = [
+      for (final record in outgoing.changed)
+        if (!outgoing.stored.containsKey(record.id) &&
+            recentlyTombstoned.containsKey(record.id))
+          record.id,
+    ];
+    if (resurrected.isNotEmpty) {
+      return SpacesSyncBlockedBatch(
+        reason: SpacesSyncBlockReason.resurrection,
+        tombstoneCount: outgoing.tombstones.length,
+        limit: 0,
+        sampleIds: resurrected.take(5).toList(),
+        at: DateTime.now(),
+      );
+    }
+
+    if (outgoing.tombstones.isEmpty || _bypassVolumeCheck) {
+      return null;
+    }
+    final syncableTabs = await db.tabDao.countSyncableTabs();
+    final limit = min(
+      (settings.spacesSyncMaxTombstoneFraction * syncableTabs).floor(),
+      settings.spacesSyncMaxTombstoneCount,
+    );
+    if (outgoing.tombstones.length <= limit) {
+      return null;
+    }
+    return SpacesSyncBlockedBatch(
+      reason: SpacesSyncBlockReason.tombstoneVolume,
+      tombstoneCount: outgoing.tombstones.length,
+      limit: limit,
+      sampleIds: outgoing.tombstones.take(5).toList(),
+      at: DateTime.now(),
+    );
+  }
+
+  /// Test seam for the outbound half of a run: the diff [_upload] would
+  /// compute, without the network. `null` mirrors [_computeOutgoing] refusing
+  /// because an apply is in flight.
+  @visibleForTesting
+  Future<
+    ({List<String> changed, List<String> tombstones, List<String> vanished})?
+  >
+  debugComputeOutgoing({
+    Set<String> appliedThisSync = const {},
+    bool tombstonesAllowed = true,
+  }) async {
+    final outgoing = await _computeOutgoing(
+      appliedThisSync,
+      tombstonesAllowed: tombstonesAllowed,
+    );
+    if (outgoing == null) {
+      return null;
+    }
+    return (
+      changed: [for (final record in outgoing.changed) record.id],
+      tombstones: outgoing.tombstones,
+      vanished: outgoing.vanished,
+    );
+  }
+
+  /// Clears a canary block and forces one run whose *volume* check is
+  /// skipped. The resurrection check still applies: nothing the user can ask
+  /// for makes re-creating a record this device just deleted correct.
+  Future<void> retryBlockedBatch() async {
+    if (state.blockedBatch == null) {
+      return;
+    }
+    state = state.copyWith(blockedBatch: null);
+    _bypassVolumeCheck = true;
+    try {
+      await sync(reason: 'retry-blocked-batch');
+    } finally {
+      _bypassVolumeCheck = false;
+    }
+  }
+
+  Future<void> _upload(
+    _Session session,
+    GeneralSettings settings,
+    Set<String> appliedThisSync, {
+    required bool tombstonesAllowed,
+    bool retried = false,
+  }) async {
+    final db = ref.read(tabDatabaseProvider);
+    final outgoing = await _computeOutgoing(
+      appliedThisSync,
+      tombstonesAllowed: tombstonesAllowed,
+    );
+    if (outgoing == null) {
+      return;
+    }
+    final projected = outgoing.projected;
+    final digests = outgoing.digests;
+    final changed = outgoing.changed;
+    final tombstones = outgoing.tombstones;
+
+    // A batch is refused whole: the safe-looking half does not go either.
+    if (await _canary(outgoing, settings) case final blocked?) {
+      logger.e(
+        'spaces sync: upload refused by the destructive-batch canary '
+        '(${blocked.reason.name}): ${tombstones.length} tombstones, '
+        '${changed.length} changed records, limit ${blocked.limit}, '
+        'ids ${blocked.sampleIds.join(', ')}',
+      );
+      state = state.copyWith(blockedBatch: blocked);
+      return;
+    }
+    state = state.copyWith(blockedBatch: null);
 
     if (changed.isEmpty && tombstones.isEmpty) {
       return;
@@ -867,10 +1136,7 @@ class SpacesSyncService extends _$SpacesSyncService {
             'records: ${result.failed}',
           );
         }
-        await ref.read(spacesApplierProvider).applyBatch([
-          ...live,
-          ...unknown,
-        ], firstSync: false);
+        await _guardedApply([...live, ...unknown], firstSync: false);
         if (result.modified case final modified?) {
           await settingsRepo.updateSettings(
             (current) => current.copyWith.spacesSyncLastModified(modified),
