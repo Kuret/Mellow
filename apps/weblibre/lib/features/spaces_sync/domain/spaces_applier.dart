@@ -21,6 +21,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/uuid.dart';
@@ -149,34 +150,64 @@ class SpacesApplier {
       );
     }
 
-    for (final record in incoming.unknown) {
-      try {
-        await _db.syncStateDao.upsertForeign(
-          record.id,
-          kind: record.kind,
-          payload: jsonEncode(record.rawData),
-          modified: DateTime.now().millisecondsSinceEpoch / 1000,
-        );
-      } catch (e, s) {
-        fail(record.id, e, s);
+    // Rows and digests commit together or not at all. Zen's bug (gh-15380)
+    // is exactly this window left open: it stamps its uploaded snapshot
+    // beside an apply the projection has not caught up with yet, and reads
+    // the skew back as real change. A crash between the rows and the stamp
+    // would leave us in the same state, so there is no between.
+    //
+    // Nothing in here may await a platform channel: a tab whose row a remote
+    // tombstone deletes queues its session in `pending_engine_close` and the
+    // engine is asked to close it after the commit. Repository calls that
+    // open their own transaction are fine — drift nests them as savepoints.
+    await _db.transaction(() async {
+      for (final record in incoming.unknown) {
+        try {
+          await _db.syncStateDao.upsertForeign(
+            record.id,
+            kind: record.kind,
+            payload: jsonEncode(record.rawData),
+            modified: DateTime.now().millisecondsSinceEpoch / 1000,
+          );
+        } catch (e, s) {
+          fail(record.id, e, s);
+        }
       }
+
+      final remainingTombstones = await _applyContainers(incoming, fail);
+      final removals = await _routeTombstones(remainingTombstones);
+      await _deleteTabs(removals.tabs, fail);
+      await _deleteSplits(removals.splits, fail);
+      await _applySpaces(incoming.spaces, fail);
+      await _applyFolders(incoming.folders, fail);
+      await _applyTabs(incoming.tabs, fail);
+      await _applySplits(incoming.splits, fail);
+      await _deleteFolders(removals.folders, fail);
+      await _deleteSpaces(removals.spaces, fail);
+      await _applyOrdering(incoming, fail);
+
+      final hook = debugAfterApply;
+      if (hook != null) {
+        await hook();
+      }
+
+      await _noteApplied(records, failed);
+    });
+
+    // The rows are gone and the digests say so; the sessions those rows held
+    // are the only thing left, and they stay on disk until this succeeds.
+    if ((await _db.tabDao.pendingEngineCloseIds()).isNotEmpty) {
+      await _tabs.drainPendingEngineCloses();
     }
 
-    final remainingTombstones = await _applyContainers(incoming, fail);
-    final removals = await _routeTombstones(remainingTombstones);
-    await _deleteTabs(removals.tabs, fail);
-    await _deleteSplits(removals.splits, fail);
-    await _applySpaces(incoming.spaces, fail);
-    await _applyFolders(incoming.folders, fail);
-    await _applyTabs(incoming.tabs, fail);
-    await _applySplits(incoming.splits, fail);
-    await _deleteFolders(removals.folders, fail);
-    await _deleteSpaces(removals.spaces, fail);
-    await _applyOrdering(incoming, fail);
-
-    await _noteApplied(records, failed);
     return failed;
   }
+
+  /// Test seam: run at the very end of the apply transaction, just before the
+  /// digests are stamped. Throwing from it is how the atomicity test proves
+  /// rows and digests roll back together.
+  @visibleForTesting
+  Future<void> Function()? debugAfterApply;
 
   _Incoming _sort(List<ZenIncoming> records) {
     final incoming = _Incoming();
@@ -320,7 +351,7 @@ class SpacesApplier {
       return;
     }
     try {
-      await _tabs.closeTabsFromSync(ids);
+      await _db.tabDao.deleteTabsFromSync(ids);
     } catch (e, s) {
       for (final id in ids) {
         fail(id, e, s);
@@ -389,7 +420,7 @@ class SpacesApplier {
         // Tabs go without a closed_tab_tombstone so they are not echoed back.
         final tabs = await _db.tabDao.getSpaceTabsData(uuid).get();
         if (tabs.isNotEmpty) {
-          await _tabs.closeTabsFromSync([for (final tab in tabs) tab.id]);
+          await _db.tabDao.deleteTabsFromSync([for (final tab in tabs) tab.id]);
         }
         await _spaces.deleteSpace(uuid);
       } catch (e, s) {
@@ -498,7 +529,7 @@ class SpacesApplier {
         }
         final tabIds = await _folders.tabIdsInFolder(id);
         if (tabIds.isNotEmpty) {
-          await _tabs.closeTabsFromSync(tabIds);
+          await _db.tabDao.deleteTabsFromSync(tabIds);
         }
         await _folders.deleteFolder(id);
       } catch (e, s) {
@@ -839,6 +870,10 @@ class SpacesApplier {
           await dao.deleteDigest(id);
           await dao.deleteForeign(id);
           await dao.clearDeletions([id]);
+          // The ledger the upload canary reads: an id we tombstoned moments
+          // ago turning up as a create is the skew signature, not a user
+          // action (Zen gh-15380).
+          await dao.recordAppliedTombstone(id);
         case ZenIncomingUnknownKind(:final id, :final kind, :final rawData):
           if (failed.contains(id)) continue;
           if (rawData is Map) {

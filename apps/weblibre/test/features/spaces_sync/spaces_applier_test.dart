@@ -278,7 +278,7 @@ void main() {
 
       expect(failed, isEmpty);
       expect(await tabIds(harness.db), isNot(contains('gone')));
-      expect(harness.tabs.closedFromSync, ['gone']);
+      expect(harness.tabs.drainedEngineCloses, ['gone']);
       expect(await harness.db.tabDao.allClosedTabTombstoneIds().get(), isEmpty);
       expect(await harness.db.syncStateDao.getDigest('gone'), isNull);
     },
@@ -418,7 +418,7 @@ void main() {
       isNull,
     );
     expect(await tabIds(harness.db), ['in1']);
-    expect(harness.tabs.closedFromSync, ['in2']);
+    expect(harness.tabs.drainedEngineCloses, ['in2']);
     expect(await harness.db.tabDao.allClosedTabTombstoneIds().get(), isEmpty);
     // The applier's own delete is not a user deletion to echo back.
     expect(await harness.db.syncStateDao.pendingDeletions(), isEmpty);

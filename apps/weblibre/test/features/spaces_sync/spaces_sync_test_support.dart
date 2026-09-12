@@ -25,7 +25,8 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 
 /// A [TabRepository] whose closes are plain row deletes: `closeTabs` records
-/// the closed-tab tombstones the real one does, `closeTabsFromSync` does not.
+/// the closed-tab tombstone and the deletion-ledger entry the real one does,
+/// `closeTabsFromSync` records neither.
 class FakeSyncTabRepository extends TabRepository {
   final closedFromSync = <String>[];
 
@@ -36,6 +37,11 @@ class FakeSyncTabRepository extends TabRepository {
   Future<void> closeTabs(List<String> tabIds) async {
     final db = ref.read(tabDatabaseProvider);
     await db.tabDao.addClosedTabTombstones(tabIds);
+    // The real repository notes the witnessed deletion here too; that ledger
+    // entry, not the undo buffer, is what the upload path projects from.
+    for (final tabId in await db.tabDao.syncableTabIdsAmong(tabIds)) {
+      await db.syncStateDao.recordDeletion(tabId, 'tab');
+    }
     await (db.tab.delete()..where((t) => t.id.isIn(tabIds))).go();
   }
 
@@ -47,6 +53,18 @@ class FakeSyncTabRepository extends TabRepository {
     closedFromSync.addAll(tabIds);
     final db = ref.read(tabDatabaseProvider);
     await (db.tab.delete()..where((t) => t.id.isIn(tabIds))).go();
+  }
+
+  /// The engine sessions the applier queued while its transaction was open,
+  /// drained without an engine.
+  final drainedEngineCloses = <String>[];
+
+  @override
+  Future<void> drainPendingEngineCloses() async {
+    final db = ref.read(tabDatabaseProvider);
+    final pending = await db.tabDao.pendingEngineCloseIds();
+    drainedEngineCloses.addAll(pending);
+    await db.tabDao.deletePendingEngineCloses(pending);
   }
 }
 
