@@ -1251,6 +1251,10 @@ final class FilteredTabPreviewsFamily extends $Family
 /// setting applies — see [TabListScope]. Both scopes run the same grouping,
 /// so a tab's place relative to its parent never depends on who is asking.
 ///
+/// [ignoreDirection] renders storage order (`order_key` ascending, the order
+/// the desktop sidebar shows) whatever the direction setting says; the wide
+/// rail mirrors the desktop and asks for it.
+///
 /// Returns `null` when the input data is not yet available (loading).
 
 @ProviderFor(groupedTabListItems)
@@ -1267,6 +1271,10 @@ final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
 /// [scope] decides which of the tray's controls take part and which direction
 /// setting applies — see [TabListScope]. Both scopes run the same grouping,
 /// so a tab's place relative to its parent never depends on who is asking.
+///
+/// [ignoreDirection] renders storage order (`order_key` ascending, the order
+/// the desktop sidebar shows) whatever the direction setting says; the wide
+/// rail mirrors the desktop and asks for it.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1290,10 +1298,15 @@ final class GroupedTabListItemsProvider
   /// setting applies — see [TabListScope]. Both scopes run the same grouping,
   /// so a tab's place relative to its parent never depends on who is asking.
   ///
+  /// [ignoreDirection] renders storage order (`order_key` ascending, the order
+  /// the desktop sidebar shows) whatever the direction setting says; the wide
+  /// rail mirrors the desktop and asks for it.
+  ///
   /// Returns `null` when the input data is not yet available (loading).
   GroupedTabListItemsProvider._({
     required GroupedTabListItemsFamily super.from,
-    required ({String? spaceUuid, TabListScope scope}) super.argument,
+    required ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
+    super.argument,
   }) : super(
          retry: null,
          name: r'groupedTabListItemsProvider',
@@ -1320,11 +1333,14 @@ final class GroupedTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
+    final argument =
+        this.argument
+            as ({String? spaceUuid, TabListScope scope, bool ignoreDirection});
     return groupedTabListItems(
       ref,
       spaceUuid: argument.spaceUuid,
       scope: argument.scope,
+      ignoreDirection: argument.ignoreDirection,
     );
   }
 
@@ -1349,7 +1365,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'e7d5455366f1182eefdaf59dcf3c7cc4ed9bfef2';
+    r'78eeb77c4eeddb16cb68377f7bf4b02fb9fbdd57';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
@@ -1363,13 +1379,17 @@ String _$groupedTabListItemsHash() =>
 /// setting applies — see [TabListScope]. Both scopes run the same grouping,
 /// so a tab's place relative to its parent never depends on who is asking.
 ///
+/// [ignoreDirection] renders storage order (`order_key` ascending, the order
+/// the desktop sidebar shows) whatever the direction setting says; the wide
+/// rail mirrors the desktop and asks for it.
+///
 /// Returns `null` when the input data is not yet available (loading).
 
 final class GroupedTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? spaceUuid, TabListScope scope})
+          ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
         > {
   GroupedTabListItemsFamily._()
     : super(
@@ -1392,13 +1412,22 @@ final class GroupedTabListItemsFamily extends $Family
   /// setting applies — see [TabListScope]. Both scopes run the same grouping,
   /// so a tab's place relative to its parent never depends on who is asking.
   ///
+  /// [ignoreDirection] renders storage order (`order_key` ascending, the order
+  /// the desktop sidebar shows) whatever the direction setting says; the wide
+  /// rail mirrors the desktop and asks for it.
+  ///
   /// Returns `null` when the input data is not yet available (loading).
 
   GroupedTabListItemsProvider call({
     required String? spaceUuid,
     required TabListScope scope,
+    bool ignoreDirection = false,
   }) => GroupedTabListItemsProvider._(
-    argument: (spaceUuid: spaceUuid, scope: scope),
+    argument: (
+      spaceUuid: spaceUuid,
+      scope: scope,
+      ignoreDirection: ignoreDirection,
+    ),
     from: this,
   );
 
@@ -1414,7 +1443,10 @@ final class GroupedTabListItemsFamily extends $Family
 /// but always in [TabListScope.presentation] — the quick tab switcher and the
 /// tab bar are single strips of chips that draw hierarchy as an indent glyph
 /// rather than as position, so a pinned tab belongs at the front there whether
-/// or not it happens to sit under a parent.
+/// or not it happens to sit under a parent. Folder members are the exception:
+/// they are pinned tabs by construction (PLAN §6.4) but stay under their
+/// folder row, which is where the eye looks for them; only the space's root
+/// pinned tabs float.
 ///
 /// This is the single order every non-tray surface reads: the switcher, the tab
 /// bar and sequential tab navigation all take the presentation scope, so
@@ -1432,7 +1464,10 @@ final visibleTabListItemsProvider = VisibleTabListItemsFamily._();
 /// but always in [TabListScope.presentation] — the quick tab switcher and the
 /// tab bar are single strips of chips that draw hierarchy as an indent glyph
 /// rather than as position, so a pinned tab belongs at the front there whether
-/// or not it happens to sit under a parent.
+/// or not it happens to sit under a parent. Folder members are the exception:
+/// they are pinned tabs by construction (PLAN §6.4) but stay under their
+/// folder row, which is where the eye looks for them; only the space's root
+/// pinned tabs float.
 ///
 /// This is the single order every non-tray surface reads: the switcher, the tab
 /// bar and sequential tab navigation all take the presentation scope, so
@@ -1455,7 +1490,10 @@ final class VisibleTabListItemsProvider
   /// but always in [TabListScope.presentation] — the quick tab switcher and the
   /// tab bar are single strips of chips that draw hierarchy as an indent glyph
   /// rather than as position, so a pinned tab belongs at the front there whether
-  /// or not it happens to sit under a parent.
+  /// or not it happens to sit under a parent. Folder members are the exception:
+  /// they are pinned tabs by construction (PLAN §6.4) but stay under their
+  /// folder row, which is where the eye looks for them; only the space's root
+  /// pinned tabs float.
   ///
   /// This is the single order every non-tray surface reads: the switcher, the tab
   /// bar and sequential tab navigation all take the presentation scope, so
@@ -1463,7 +1501,8 @@ final class VisibleTabListItemsProvider
   /// swipe.
   VisibleTabListItemsProvider._({
     required VisibleTabListItemsFamily super.from,
-    required ({String? spaceUuid, TabListScope scope}) super.argument,
+    required ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
+    super.argument,
   }) : super(
          retry: null,
          name: r'visibleTabListItemsProvider',
@@ -1490,11 +1529,14 @@ final class VisibleTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
+    final argument =
+        this.argument
+            as ({String? spaceUuid, TabListScope scope, bool ignoreDirection});
     return visibleTabListItems(
       ref,
       spaceUuid: argument.spaceUuid,
       scope: argument.scope,
+      ignoreDirection: argument.ignoreDirection,
     );
   }
 
@@ -1519,7 +1561,7 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'd494c09304bbcf8ea8202505c312655b87506609';
+    r'468e8f51b2ec1c511912f582260b04a9838b3629';
 
 /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
 /// plus the flat post-processing: where there are no visible groups to keep
@@ -1529,7 +1571,10 @@ String _$visibleTabListItemsHash() =>
 /// but always in [TabListScope.presentation] — the quick tab switcher and the
 /// tab bar are single strips of chips that draw hierarchy as an indent glyph
 /// rather than as position, so a pinned tab belongs at the front there whether
-/// or not it happens to sit under a parent.
+/// or not it happens to sit under a parent. Folder members are the exception:
+/// they are pinned tabs by construction (PLAN §6.4) but stay under their
+/// folder row, which is where the eye looks for them; only the space's root
+/// pinned tabs float.
 ///
 /// This is the single order every non-tray surface reads: the switcher, the tab
 /// bar and sequential tab navigation all take the presentation scope, so
@@ -1540,7 +1585,7 @@ final class VisibleTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? spaceUuid, TabListScope scope})
+          ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
         > {
   VisibleTabListItemsFamily._()
     : super(
@@ -1559,7 +1604,10 @@ final class VisibleTabListItemsFamily extends $Family
   /// but always in [TabListScope.presentation] — the quick tab switcher and the
   /// tab bar are single strips of chips that draw hierarchy as an indent glyph
   /// rather than as position, so a pinned tab belongs at the front there whether
-  /// or not it happens to sit under a parent.
+  /// or not it happens to sit under a parent. Folder members are the exception:
+  /// they are pinned tabs by construction (PLAN §6.4) but stay under their
+  /// folder row, which is where the eye looks for them; only the space's root
+  /// pinned tabs float.
   ///
   /// This is the single order every non-tray surface reads: the switcher, the tab
   /// bar and sequential tab navigation all take the presentation scope, so
@@ -1569,8 +1617,13 @@ final class VisibleTabListItemsFamily extends $Family
   VisibleTabListItemsProvider call({
     required String? spaceUuid,
     required TabListScope scope,
+    bool ignoreDirection = false,
   }) => VisibleTabListItemsProvider._(
-    argument: (spaceUuid: spaceUuid, scope: scope),
+    argument: (
+      spaceUuid: spaceUuid,
+      scope: scope,
+      ignoreDirection: ignoreDirection,
+    ),
     from: this,
   );
 

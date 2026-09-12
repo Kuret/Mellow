@@ -50,8 +50,10 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// The selected space's three shelves (PLAN §6.4) as full-width rows on the
 /// wide vertical rail: the Essentials icon grid, the pinned section — pinned
 /// tabs as compact rows and folder headers with their members indented by
-/// depth — then the main list of normal tabs. Scrolls along the rail and
-/// keeps the active tab in view.
+/// depth — then the main list of normal tabs. The rail mirrors the desktop
+/// sidebar, so it always renders storage order (`order_key` ascending)
+/// regardless of the tab direction setting. Scrolls along the rail and keeps
+/// the active tab in view.
 ///
 /// Reordering is left to the tab tray, which already has the drag targets;
 /// the rail only switches, closes (per [TabChipCloseButtonMode]) and offers
@@ -73,6 +75,7 @@ class WideRailTabList extends HookConsumerWidget {
           visibleTabListItemsProvider(
             spaceUuid: selectedSpaceUuid,
             scope: TabListScope.presentation,
+            ignoreDirection: true,
           ),
         )
         .value;

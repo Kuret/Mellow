@@ -160,11 +160,13 @@ void main() {
   }
 
   Future<List<TabListItemEntity>> readVisible(
-    ProviderContainer container,
-  ) async {
+    ProviderContainer container, {
+    bool ignoreDirection = false,
+  }) async {
     final provider = visibleTabListItemsProvider(
       spaceUuid: _space,
       scope: TabListScope.presentation,
+      ignoreDirection: ignoreDirection,
     );
     container.listen(provider, (_, _) {}, fireImmediately: true);
     for (var i = 0; i < 8; i++) {
@@ -301,6 +303,22 @@ void main() {
         '[F:1]@0',
         'm@1',
         'n@0',
+      ]);
+    },
+  );
+
+  test(
+    'ignoreDirection renders order_key ascending under newestFirst',
+    () async {
+      final container = makeContainer(
+        tabs: const [_Tab('b', 'b'), _Tab('a', 'a'), _Tab('c', 'c')],
+        direction: TabDirection.newestFirst,
+      );
+      expect((await readVisible(container)).map(label), ['c@0', 'b@0', 'a@0']);
+      expect((await readVisible(container, ignoreDirection: true)).map(label), [
+        'a@0',
+        'b@0',
+        'c@0',
       ]);
     },
   );

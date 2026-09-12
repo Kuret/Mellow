@@ -905,12 +905,17 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
 /// setting applies — see [TabListScope]. Both scopes run the same grouping,
 /// so a tab's place relative to its parent never depends on who is asking.
 ///
+/// [ignoreDirection] renders storage order (`order_key` ascending, the order
+/// the desktop sidebar shows) whatever the direction setting says; the wide
+/// rail mirrors the desktop and asks for it.
+///
 /// Returns `null` when the input data is not yet available (loading).
 @Riverpod()
 EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   Ref ref, {
   required String? spaceUuid,
   required TabListScope scope,
+  bool ignoreDirection = false,
 }) {
   final tabsWithRoot = ref.watch(
     watchTabsWithRootAndDepthProvider(spaceUuid).select((value) => value.value),
@@ -953,11 +958,13 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     ),
   );
   final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-  final direction = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (s) => scope.isTray ? s.tabListDirection : s.tabBarDirection,
-    ),
-  );
+  final direction = ignoreDirection
+      ? TabDirection.oldestFirst
+      : ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) => scope.isTray ? s.tabListDirection : s.tabBarDirection,
+          ),
+        );
   // Collapsing is a tray gesture on tray rows: outside it there is nothing to
   // expand a hidden row back open with, so folded descendants would be
   // unreachable rather than merely tucked away.
@@ -1399,9 +1406,16 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   Ref ref, {
   required String? spaceUuid,
   required TabListScope scope,
+  bool ignoreDirection = false,
 }) {
   final groupedItems = ref
-      .watch(groupedTabListItemsProvider(spaceUuid: spaceUuid, scope: scope))
+      .watch(
+        groupedTabListItemsProvider(
+          spaceUuid: spaceUuid,
+          scope: scope,
+          ignoreDirection: ignoreDirection,
+        ),
+      )
       .value;
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
   final flattenPinned =

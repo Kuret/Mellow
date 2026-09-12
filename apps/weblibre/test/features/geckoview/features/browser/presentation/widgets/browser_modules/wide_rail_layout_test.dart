@@ -23,6 +23,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod/misc.dart' show Override;
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
@@ -41,8 +42,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -79,9 +82,14 @@ class _NoIconGenericWebsiteService extends GenericWebsiteService {
   Future<BrowserIcon?> getCachedIcon(Uri url) async => null;
 }
 
-class _EmptyTabList extends TabList {
+/// The engine lists [ids]: rows the grouped list keeps as live tabs.
+class _TabListOf extends TabList {
+  _TabListOf(this.ids);
+
+  final List<String> ids;
+
   @override
-  EquatableValue<List<String>> build() => EquatableValue(const []);
+  EquatableValue<List<String>> build() => EquatableValue(ids);
 }
 
 class _DefaultTabViewFilterController extends TabViewFilterController {
@@ -89,7 +97,17 @@ class _DefaultTabViewFilterController extends TabViewFilterController {
   TabViewFilterOptions build() => TabViewFilterOptions.withDefaults();
 }
 
-Future<TabDatabase> _memoryDatabaseWithOneTab({required String title}) async {
+Future<TabDatabase> _memoryDatabaseWithOneTab({required String title}) =>
+    _memoryDatabaseWithTabs([(id: 'tab-1', title: title)]);
+
+/// One space holding [tabs] in storage order (ascending order_key), each
+/// optionally pinned or filed in the folder [folderId].
+Future<TabDatabase> _memoryDatabaseWithTabs(
+  List<({String id, String title})> tabs, {
+  Set<String> pinned = const {},
+  String? folderId,
+  Set<String> inFolder = const {},
+}) async {
   final db = TabDatabase(
     NativeDatabase.memory(
       setup: (database) {
@@ -99,17 +117,67 @@ Future<TabDatabase> _memoryDatabaseWithOneTab({required String title}) async {
     ),
   );
   await db.spaceDao.insertSpace(SpaceData(uuid: 'space-1', orderIndex: 0));
-  await db.tabDao.insertTab(
-    'tab-1',
-    source: TabSource.manual,
-    parentId: const Value(null),
-    spaceUuid: const Value('space-1'),
-    url: Value(Uri.parse('https://example.com')),
-    title: Value(title),
-    tabMode: const Value(TabMode.regular),
-  );
+  if (folderId != null) {
+    await db.tabFolderDao.insertFolder(
+      TabFolderData(
+        id: folderId,
+        name: 'Folder',
+        spaceUuid: 'space-1',
+        orderKey: 'f',
+      ),
+    );
+  }
+  for (final tab in tabs) {
+    final filed = inFolder.contains(tab.id);
+    await db.tabDao.insertTab(
+      tab.id,
+      source: TabSource.manual,
+      parentId: const Value(null),
+      spaceUuid: const Value('space-1'),
+      folderId: Value(filed ? folderId : null),
+      shelf: pinned.contains(tab.id) || filed
+          ? TabShelf.pinned
+          : TabShelf.normal,
+      url: Value(Uri.parse('https://example.com/${tab.id}')),
+      title: Value(tab.title),
+      tabMode: const Value(TabMode.regular),
+    );
+  }
   return db;
 }
+
+/// The provider tree a [WideRailTabList] needs on top of [db], with the tabs
+/// unrestored so titles come from the database rows.
+List<Override> _railOverrides(
+  TabDatabase db, {
+  required double railWidth,
+  TabDirection direction = TabDirection.oldestFirst,
+  List<String> liveTabIds = const [],
+}) => [
+  tabDatabaseProvider.overrideWith((ref) => db),
+  generalSettingsWithDefaultsProvider.overrideWith(
+    (ref) => GeneralSettings.withDefaults(
+      tabBarPosition: TabBarPosition.left,
+      railWidth: railWidth,
+      tabListDirection: direction,
+      tabBarDirection: direction,
+    ),
+  ),
+  watchSpacesProvider.overrideWith(
+    (ref) => Stream.value(<SpaceData>[
+      SpaceData(uuid: 'space-1', name: 'Space', orderIndex: 0),
+    ]),
+  ),
+  selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
+  selectedTabProvider.overrideWith(_NoSelectedTab.new),
+  tabStatesProvider.overrideWith(_EmptyTabStates.new),
+  browserRestoreCompleteProvider.overrideWith(_NotRestored.new),
+  genericWebsiteServiceProvider.overrideWith(_NoIconGenericWebsiteService.new),
+  tabViewFilterControllerProvider.overrideWith(
+    _DefaultTabViewFilterController.new,
+  ),
+  tabListProvider.overrideWith(() => _TabListOf(liveTabIds)),
+];
 
 Widget _railBox({
   required double railWidth,
@@ -244,31 +312,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            tabDatabaseProvider.overrideWith((ref) => db),
-            generalSettingsWithDefaultsProvider.overrideWith(
-              (ref) => GeneralSettings.withDefaults(
-                tabBarPosition: TabBarPosition.left,
-                railWidth: railWidth,
-              ),
-            ),
-            watchSpacesProvider.overrideWith(
-              (ref) => Stream.value(<SpaceData>[
-                SpaceData(uuid: 'space-1', name: 'Space', orderIndex: 0),
-              ]),
-            ),
-            selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
-            selectedTabProvider.overrideWith(_NoSelectedTab.new),
-            tabStatesProvider.overrideWith(_EmptyTabStates.new),
-            browserRestoreCompleteProvider.overrideWith(_NotRestored.new),
-            genericWebsiteServiceProvider.overrideWith(
-              _NoIconGenericWebsiteService.new,
-            ),
-            tabViewFilterControllerProvider.overrideWith(
-              _DefaultTabViewFilterController.new,
-            ),
-            tabListProvider.overrideWith(_EmptyTabList.new),
-          ],
+          overrides: _railOverrides(db, railWidth: railWidth),
           child: _railBox(
             railWidth: railWidth,
             viewportWidth: 900,
@@ -282,6 +326,81 @@ void main() {
       final row = find.byType(WideRailTabRowView);
       expect(row, findsOneWidget);
       expect(tester.getSize(row).width, railWidth);
+
+      await _disposeTree(tester);
+    });
+
+    testWidgets('renders storage order even under newestFirst', (tester) async {
+      final db = await _memoryDatabaseWithTabs([
+        (id: 'tab-1', title: 'First'),
+        (id: 'tab-2', title: 'Second'),
+      ]);
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: _railOverrides(
+            db,
+            railWidth: railWidth,
+            direction: TabDirection.newestFirst,
+            liveTabIds: const ['tab-1', 'tab-2'],
+          ),
+          child: _railBox(
+            railWidth: railWidth,
+            viewportWidth: 900,
+            child: const WideRailTabList(),
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      // The rail mirrors the desktop sidebar: order_key ascending, so the
+      // first tab stays above the second whatever the direction setting.
+      expect(
+        tester.getTopLeft(find.text('First')).dy,
+        lessThan(tester.getTopLeft(find.text('Second')).dy),
+      );
+
+      await _disposeTree(tester);
+    });
+
+    testWidgets('a folder alone puts up the Pinned header', (tester) async {
+      final db = await _memoryDatabaseWithTabs(
+        [(id: 'tab-1', title: 'Member'), (id: 'tab-2', title: 'Loose')],
+        folderId: 'folder-1',
+        inFolder: {'tab-1'},
+      );
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: _railOverrides(
+            db,
+            railWidth: railWidth,
+            liveTabIds: const ['tab-1', 'tab-2'],
+          ),
+          child: _railBox(
+            railWidth: railWidth,
+            viewportWidth: 900,
+            child: const WideRailTabList(),
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      // No root pinned tab, but the folder lives in the pinned section: its
+      // header, the folder row and its member come before the main list.
+      expect(find.text('Pinned'), findsOneWidget);
+      expect(find.text('Tabs'), findsOneWidget);
+      final pinnedY = tester.getTopLeft(find.text('Pinned')).dy;
+      final folderY = tester.getTopLeft(find.text('Folder')).dy;
+      final memberY = tester.getTopLeft(find.text('Member')).dy;
+      final tabsY = tester.getTopLeft(find.text('Tabs')).dy;
+      final looseY = tester.getTopLeft(find.text('Loose')).dy;
+      expect(pinnedY, lessThan(folderY));
+      expect(folderY, lessThan(memberY));
+      expect(memberY, lessThan(tabsY));
+      expect(tabsY, lessThan(looseY));
 
       await _disposeTree(tester);
     });
