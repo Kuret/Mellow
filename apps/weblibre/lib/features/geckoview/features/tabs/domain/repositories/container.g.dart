@@ -54,7 +54,7 @@ final class ContainerRepositoryProvider
 }
 
 String _$containerRepositoryHash() =>
-    r'88e0e4756addf4e63c0c81fa7c7f972c77d1b429';
+    r'20b86d63543c6506d42524425cbef8280e1deec0';
 
 /// Containers are Firefox contextual identities (PLAN §6.2). A container's
 /// Gecko `contextId` is its `id` (DESIGN.md "D3 refinement"); the per-device
