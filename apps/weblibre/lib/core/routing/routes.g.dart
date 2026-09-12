@@ -18,6 +18,9 @@ List<RouteBase> get $appRoutes => [
   $historyRoute,
   $profileListRoute,
   $settingsRoute,
+  $spaceListRoute,
+  $spaceCreateRoute,
+  $spaceEditRoute,
 ];
 
 RouteBase get $aboutRoute => GoRouteData.$route(
@@ -2557,6 +2560,93 @@ mixin $DesktopModeSitesRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/desktop_mode_sites');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $spaceListRoute => GoRouteData.$route(
+  path: '/spaces',
+  name: 'SpaceListRoute',
+  hasOverriddenOnExit: false,
+  factory: $SpaceListRoute._fromState,
+);
+
+mixin $SpaceListRoute on GoRouteData {
+  static SpaceListRoute _fromState(GoRouterState state) =>
+      const SpaceListRoute();
+
+  @override
+  String get location => GoRouteData.$location('/spaces');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $spaceCreateRoute => GoRouteData.$route(
+  path: '/space/new',
+  name: 'SpaceCreateRoute',
+  hasOverriddenOnExit: false,
+  factory: $SpaceCreateRoute._fromState,
+);
+
+mixin $SpaceCreateRoute on GoRouteData {
+  static SpaceCreateRoute _fromState(GoRouterState state) =>
+      const SpaceCreateRoute();
+
+  @override
+  String get location => GoRouteData.$location('/space/new');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $spaceEditRoute => GoRouteData.$route(
+  path: '/space/:uuid/edit',
+  name: 'SpaceEditRoute',
+  hasOverriddenOnExit: false,
+  factory: $SpaceEditRoute._fromState,
+);
+
+mixin $SpaceEditRoute on GoRouteData {
+  static SpaceEditRoute _fromState(GoRouterState state) =>
+      SpaceEditRoute(uuid: state.pathParameters['uuid']!);
+
+  SpaceEditRoute get _self => this as SpaceEditRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/space/${Uri.encodeComponent(_self.uuid)}/edit');
 
   @override
   void go(BuildContext context) => context.go(location);

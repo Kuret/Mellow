@@ -63,6 +63,8 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_edit.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_list.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_settings_screen.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
@@ -122,6 +124,7 @@ part 'routes.g.dart';
 part 'routes.history.dart';
 part 'routes.profiles.dart';
 part 'routes.settings.dart';
+part 'routes.spaces.dart';
 
 @TypedGoRoute<AboutRoute>(name: 'AboutRoute', path: '/about')
 class AboutRoute extends GoRouteData with $AboutRoute {
