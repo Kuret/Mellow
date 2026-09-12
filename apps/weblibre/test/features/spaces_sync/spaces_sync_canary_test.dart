@@ -65,9 +65,7 @@ class SlowApplier extends SpacesApplier {
 Future<List<String>> logsDuring(Future<void> Function() body) async {
   loggerMemory.buffer.clear();
   await body();
-  return [
-    for (final event in loggerMemory.buffer) event.lines.join('\n'),
-  ];
+  return [for (final event in loggerMemory.buffer) event.lines.join('\n')];
 }
 
 Iterable<Map<String, Object?>> uploadedTombstones(FakeSyncServer server) =>
@@ -153,48 +151,45 @@ void main() {
   });
 
   group('tombstones come from the ledger', () {
-    test(
-      'a record missing from the projection with no ledger entry is not '
-      'a deletion',
-      () async {
-        final harness = await settledHarness();
-        final service = serviceOf(harness);
+    test('a record missing from the projection with no ledger entry is not '
+        'a deletion', () async {
+      final harness = await settledHarness();
+      final service = serviceOf(harness);
 
-        // A digest for an id nothing projects and nobody deleted: the
-        // signature of a mapping bug on our side.
-        await harness.db.syncStateDao.putDigest('phantom', 'space', 'stale');
+      // A digest for an id nothing projects and nobody deleted: the
+      // signature of a mapping bug on our side.
+      await harness.db.syncStateDao.putDigest('phantom', 'space', 'stale');
 
-        late final ({
-          List<String> changed,
-          List<String> tombstones,
-          List<String> vanished,
-        })
-        outgoing;
-        final lines = await logsDuring(() async {
-          outgoing = (await service.debugComputeOutgoing())!;
-        });
+      late final ({
+        List<String> changed,
+        List<String> tombstones,
+        List<String> vanished,
+      })
+      outgoing;
+      final lines = await logsDuring(() async {
+        outgoing = (await service.debugComputeOutgoing())!;
+      });
 
-        expect(outgoing.tombstones, isEmpty);
-        expect(outgoing.vanished, ['phantom']);
-        expect(
-          lines,
-          contains(
-            allOf(
-              contains(
-                '1 records vanished from the projection with no recorded '
-                'deletion',
-              ),
-              contains('phantom'),
+      expect(outgoing.tombstones, isEmpty);
+      expect(outgoing.vanished, ['phantom']);
+      expect(
+        lines,
+        contains(
+          allOf(
+            contains(
+              '1 records vanished from the projection with no recorded '
+              'deletion',
             ),
+            contains('phantom'),
           ),
-        );
+        ),
+      );
 
-        // And a full run uploads nothing for it either.
-        final postsBefore = harness.server.postCount;
-        await service.sync(reason: 'after-phantom');
-        expect(harness.server.postCount, postsBefore);
-      },
-    );
+      // And a full run uploads nothing for it either.
+      final postsBefore = harness.server.postCount;
+      await service.sync(reason: 'after-phantom');
+      expect(harness.server.postCount, postsBefore);
+    });
 
     test('a ledger entry for an id we never held is not a deletion', () async {
       final harness = await settledHarness();
@@ -231,13 +226,15 @@ void main() {
     }
 
     test('a batch tombstoning 30 % of the tabs is refused whole', () async {
-      final harness = await settledHarness(tabs: 10);
+      final harness = await settledHarness(tabs: 60);
       final service = serviceOf(harness);
       final postsBefore = harness.server.postCount;
 
-      await deleteTabs(harness.db, ['t0', 't1', 't2']);
-      // 7 tabs left: min(floor(0.2 * 7), 25) = 1 allowed, 3 requested.
-      expect(await harness.db.tabDao.countSyncableTabs(), 7);
+      final deleted = [for (var i = 0; i < 18; i++) 't$i'];
+      await deleteTabs(harness.db, deleted);
+      // 42 tabs left: max(5, min(floor(0.2 * 42), 25)) = 8 allowed,
+      // 18 requested — a batch that would clear out a third of the sidebar.
+      expect(await harness.db.tabDao.countSyncableTabs(), 42);
 
       await service.sync(reason: 'destructive');
 
@@ -246,9 +243,10 @@ void main() {
           .blockedBatch;
       expect(blocked, isNotNull);
       expect(blocked!.reason, SpacesSyncBlockReason.tombstoneVolume);
-      expect(blocked.tombstoneCount, 3);
-      expect(blocked.limit, 1);
-      expect(blocked.sampleIds, containsAll(['t0', 't1', 't2']));
+      expect(blocked.tombstoneCount, 18);
+      expect(blocked.limit, 8);
+      expect(blocked.sampleIds, hasLength(5));
+      expect(deleted, containsAll(blocked.sampleIds));
 
       // Nothing left the device — not the tombstones, not the space record
       // that also changed. A batch is refused as a whole.

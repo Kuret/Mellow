@@ -71,6 +71,11 @@ const _healFetchChunk = 100;
 /// race", defence 5).
 const _resurrectionWindow = Duration(minutes: 10);
 
+/// Tombstones always allowed in one batch regardless of the fraction, so
+/// closing a handful of tabs on a device that only holds a handful never
+/// needs an "Upload anyway".
+const _minTombstoneAllowance = 5;
+
 /// `applied_tombstone` rows older than this are pruned once per run.
 const _appliedTombstoneRetention = Duration(hours: 1);
 
@@ -860,9 +865,16 @@ class SpacesSyncService extends _$SpacesSyncService {
       return null;
     }
     final syncableTabs = await db.tabDao.countSyncableTabs();
-    final limit = min(
-      (settings.spacesSyncMaxTombstoneFraction * syncableTabs).floor(),
-      settings.spacesSyncMaxTombstoneCount,
+    // The fraction guards against a runaway batch, but on a small device it
+    // lands below everyday use: at 12 tabs a 20 % limit is 2, so closing
+    // three tabs would pause the upload. The floor keeps ordinary tidying
+    // quiet while a batch that clears out a whole sidebar still trips.
+    final limit = max(
+      _minTombstoneAllowance,
+      min(
+        (settings.spacesSyncMaxTombstoneFraction * syncableTabs).floor(),
+        settings.spacesSyncMaxTombstoneCount,
+      ),
     );
     if (outgoing.tombstones.length <= limit) {
       return null;
