@@ -169,10 +169,14 @@ class Section extends MultiSliver {
                                case final container?)
                              Chip(
                                avatar: CircleAvatar(
-                                 backgroundColor: container.color,
+                                 backgroundColor:
+                                     container.color.color ??
+                                     Theme.of(
+                                       context,
+                                     ).colorScheme.onSurfaceVariant,
                                  radius: 8,
                                ),
-                               label: Text(container.name ?? 'Container'),
+                               label: Text(_containerLabel(container)),
                              ),
                        ],
                      ),
@@ -275,7 +279,7 @@ class HistoryScreen extends HookConsumerWidget {
           title: const Text('Clear Container History'),
           content: Text(
             'Delete all browsing history recorded for '
-            '"${container.name ?? 'Container'}"? The visits are removed from '
+            '"${_containerLabel(container)}"? The visits are removed from '
             'history.',
           ),
           actions: [
@@ -382,7 +386,7 @@ class HistoryScreen extends HookConsumerWidget {
               // active, clear only that container's history; otherwise fall
               // back to the full delete-browsing-data sheet.
               tooltip: filterContainer != null
-                  ? 'Clear "${filterContainer.name ?? 'Container'}" history'
+                  ? 'Clear "${_containerLabel(filterContainer)}" history'
                   : null,
               onPressed: () async {
                 if (filterContainer != null) {
@@ -505,19 +509,21 @@ class HistoryScreen extends HookConsumerWidget {
                             historyFilter.containerId == container.id
                                 ? Icons.radio_button_checked
                                 : Icons.radio_button_unchecked,
-                            color: container.color,
+                            color:
+                                container.color.color ??
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           onPressed: () {
                             ref
                                 .read(historyVisitsFilterProvider.notifier)
                                 .setContainer(container.id);
                           },
-                          child: Text(container.name ?? 'Container'),
+                          child: Text(_containerLabel(container)),
                         ),
                     ],
                     child: Text(
                       filterContainer != null
-                          ? 'Container: ${filterContainer.name ?? 'Container'}'
+                          ? 'Container: ${_containerLabel(filterContainer)}'
                           : 'Filter Container',
                     ),
                   ),
@@ -679,3 +685,8 @@ class HistoryScreen extends HookConsumerWidget {
     );
   }
 }
+
+/// Containers may carry an empty name (Firefox allows it); show a placeholder
+/// rather than an empty chip.
+String _containerLabel(ContainerData container) =>
+    container.name.isNotEmpty ? container.name : 'Container';
