@@ -20,7 +20,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -82,23 +81,14 @@ class WideRailTabList extends HookConsumerWidget {
     final hasEssentials =
         (watchEssentialShelfTabIds(ref) ?? const <String>[]).isNotEmpty;
 
-    // Tabs the shared order does not list yet (pre-restore placeholders)
-    // still get a row, as they get a chip on the quick tab switcher.
-    final spaceTabIds = ref
-        .watch(
-          selectedSpaceTabStatesWithContainerProvider.select(
-            (value) =>
-                EquatableValue([for (final state in value.value) state.$1.id]),
-          ),
-        )
-        .value;
-
     // The shared order leads with the pinned section — root pinned tabs and
     // folders with their contents — and its first root normal tab opens the
     // main list.
+    // Every row of the space is in the shared order already — cold and
+    // pre-restore rows included — so nothing is appended behind it: a member
+    // of a collapsed folder is deliberately absent, not missing.
     final pinned = <_RailEntry>[];
     final normal = <_RailEntry>[];
-    final seen = <String>{};
     var inPinnedSection = true;
     for (final item in items) {
       if (inPinnedSection &&
@@ -112,21 +102,7 @@ class WideRailTabList extends HookConsumerWidget {
         case TabListFolderItem():
           section.add(_RailFolderEntry(item));
         case TabListTabItem():
-          seen.add(item.tabId);
           section.add(_RailTabEntry(item));
-      }
-    }
-    for (final tabId in spaceTabIds) {
-      if (seen.add(tabId)) {
-        normal.add(
-          _RailTabEntry(
-            TabListStandaloneItem(
-              tabId: tabId,
-              orderKey: '',
-              spaceUuid: selectedSpaceUuid,
-            ),
-          ),
-        );
       }
     }
     final entries = <_RailEntry>[

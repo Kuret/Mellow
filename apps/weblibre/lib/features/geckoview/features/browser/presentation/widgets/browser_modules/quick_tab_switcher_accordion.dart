@@ -259,7 +259,6 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       // opens the main list.
       final pinned = <_AccordionEntry>[];
       final normal = <_AccordionEntry>[];
-      final seen = <String>{};
       var rootIndent = 0;
       var inPinnedSection = true;
       for (final entity in orderedItems) {
@@ -286,15 +285,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             if (entity is! TabListChildItem) {
               rootIndent = indent;
             }
-            seen.add(item.id);
             section.add(_AccordionEntry.tab(item, indent: indent));
-        }
-      }
-      // Rows the shared order does not list yet (pre-restore placeholders)
-      // still get a chip.
-      for (final item in expandedItems) {
-        if (!seen.contains(item.id)) {
-          normal.add(_AccordionEntry.tab(item));
         }
       }
       return [
