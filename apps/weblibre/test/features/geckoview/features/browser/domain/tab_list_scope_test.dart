@@ -8,9 +8,13 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -43,6 +47,30 @@ TabsWithRootAndDepthResult _row({
   depth: depth,
 );
 
+TabSummary _summary(
+  TabsWithRootAndDepthResult row, {
+  required TabShelf shelf,
+}) => TabSummary(
+  id: row.id,
+  engineTabId: row.id,
+  source: TabSource.manual,
+  parentId: row.parentId,
+  containerId: null,
+  spaceUuid: null,
+  folderId: null,
+  splitId: null,
+  splitIndex: null,
+  tabShelf: shelf,
+  orderKey: row.orderKey,
+  url: Uri.parse('https://${row.id}.example'),
+  title: row.id,
+  iconUrl: null,
+  staticLabel: null,
+  tabMode: TabModeDbValue.regular,
+  isProbablyReaderable: null,
+  timestamp: DateTime(2024),
+);
+
 TabSortKeys _sortKeys(String title, {TabMode mode = const RegularTabMode()}) =>
     TabSortKeys(
       tabMode: mode,
@@ -65,6 +93,17 @@ void main() {
         watchTabsWithRootAndDepthProvider(
           null,
         ).overrideWith((ref) => Stream.value(rows ?? _rows)),
+        watchSpaceTabsDataProvider(null).overrideWith(
+          (ref) => Stream.value([
+            for (final row in rows ?? _rows)
+              _summary(
+                row,
+                shelf: pinned.contains(row.id)
+                    ? TabShelf.pinned
+                    : TabShelf.normal,
+              ),
+          ]),
+        ),
         tabListProvider.overrideWith(
           () => _FakeTabList((rows ?? _rows).map((row) => row.id).toList()),
         ),
@@ -79,7 +118,9 @@ void main() {
                 },
           ),
         ),
-        watchPinnedTabIdsProvider.overrideWith((ref) => Stream.value(pinned)),
+        watchTabShelvesProvider.overrideWith(
+          (ref) => Stream.value({for (final id in pinned) id: TabShelf.pinned}),
+        ),
         watchTabTimestampsProvider.overrideWith(
           (ref) => Stream.value(const <String, DateTime>{}),
         ),
@@ -98,7 +139,7 @@ void main() {
         collapsedGroupsProvider.overrideWith(
           () => _FakeCollapsedGroups(collapsed),
         ),
-        selectedContainerProvider.overrideWith(() => _FakeSelectedContainer()),
+        selectedSpaceProvider.overrideWith(() => _FakeSelectedSpace()),
       ],
     );
     addTearDown(container.dispose);
@@ -111,12 +152,17 @@ void main() {
     TabListScope scope,
   ) async {
     final provider = visibleTabListItemsProvider(
-      containerId: null,
+      spaceUuid: null,
       scope: scope,
     );
     container.listen(provider, (_, _) {}, fireImmediately: true);
     await Future<void>.delayed(Duration.zero);
-    return container.read(provider).value.map((item) => item.tabId).toList();
+    return container
+        .read(provider)
+        .value
+        .whereType<TabListTabItem>()
+        .map((item) => item.tabId)
+        .toList();
   }
 
   Future<List<String>?> readNavigationOrder(ProviderContainer container) async {
@@ -303,7 +349,7 @@ class _FakeCollapsedGroups extends CollapsedGroups {
   Set<String> build() => collapsed;
 }
 
-class _FakeSelectedContainer extends SelectedContainer {
+class _FakeSelectedSpace extends SelectedSpace {
   @override
   String? build() => null;
 }
