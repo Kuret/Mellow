@@ -40,8 +40,13 @@ class HomeWallpaperBackdrop extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The resolved edge: the rail's side on a wide viewport, the compact
+    // bar's edge on a narrow one — the same call browser.dart lays out by.
+    final viewportWidth = MediaQuery.sizeOf(context).width;
     final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.chromeEdge(viewportWidth: viewportWidth),
+      ),
     );
 
     return WallpaperBackdrop(
