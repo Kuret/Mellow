@@ -202,7 +202,7 @@ List<ZenIncoming> roundTripFixture() => [
         'provider': 'rss',
         'config': {'url': 'https://example.org/feed', 'limit': 10},
       },
-      children: const [],
+      children: ['t8', 't9'],
     ),
   ),
   record(
@@ -220,6 +220,8 @@ List<ZenIncoming> roundTripFixture() => [
     tabRecord(
       't3',
       title: 'Three',
+      // Folder members are pinned: Zen keeps folders in the pinned section.
+      pinned: true,
       workspaceUuid: space1,
       folderId: 'f1',
       containerGuid: 'builtin-2',
@@ -237,6 +239,25 @@ List<ZenIncoming> roundTripFixture() => [
   ),
   record(tabRecord('t5', title: 'Left', workspaceUuid: space1)),
   record(tabRecord('t6', title: 'Right', workspaceUuid: space1)),
+  // Two pinned members of the nested folder f2 (parent f1).
+  record(
+    tabRecord(
+      't8',
+      title: 'Feed A',
+      pinned: true,
+      workspaceUuid: space1,
+      folderId: 'f2',
+    ),
+  ),
+  record(
+    tabRecord(
+      't9',
+      title: 'Feed B',
+      pinned: true,
+      workspaceUuid: space1,
+      folderId: 'f2',
+    ),
+  ),
   record(
     tabRecord(
       't7',

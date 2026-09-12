@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 
+import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 import 'spaces_sync_test_support.dart';
 
 /// PLAN §8.6 item 1: every record kind survives apply → project with
@@ -35,6 +37,39 @@ void main() {
       );
     }
   });
+
+  test(
+    'folder members stay in their folder, out of the space children',
+    () async {
+      final harness = openApplierHarness();
+      await harness.container
+          .read(spacesApplierProvider)
+          .applyBatch(roundTripFixture(), firstSync: true);
+
+      for (final id in ['t8', 't9']) {
+        final member = await summaryOf(harness.db, id);
+        expect(member.folderId, 'f2', reason: id);
+        expect(member.tabShelf, TabShelf.pinned, reason: id);
+      }
+      expect((await summaryOf(harness.db, 't3')).folderId, 'f1');
+
+      final projected = await harness.container
+          .read(spacesProjectionProvider)
+          .project();
+      final space = projected[space1]!.data as ZenSpaceRecord;
+      // The space's children name the root folder, never its members.
+      expect(space.children, ['t1', 't2', 'f1', 'sp1']);
+      final f1 = projected['f1']!.data as ZenFolderRecord;
+      expect(f1.children, ['t3', 'f2']);
+      final f2 = projected['f2']!.data as ZenFolderRecord;
+      expect(f2.children, ['t8', 't9']);
+      for (final id in ['t3', 't8', 't9']) {
+        final tab = projected[id]!.data as ZenTabRecord;
+        expect(tab.pinned, isTrue, reason: id);
+        expect(tab.folderId, isNotNull, reason: id);
+      }
+    },
+  );
 
   test('applying the same batch twice changes nothing', () async {
     final harness = openApplierHarness();
