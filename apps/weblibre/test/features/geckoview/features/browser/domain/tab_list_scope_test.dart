@@ -1,6 +1,7 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
@@ -104,6 +105,7 @@ void main() {
               ),
           ]),
         ),
+        browserRestoreCompleteProvider.overrideWith(_Restored.new),
         tabListProvider.overrideWith(
           () => _FakeTabList((rows ?? _rows).map((row) => row.id).toList()),
         ),
@@ -357,4 +359,10 @@ class _FakeCollapsedGroups extends CollapsedGroups {
 class _FakeSelectedSpace extends SelectedSpace {
   @override
   String? build() => null;
+}
+
+/// The restore has completed, so only engine-listed and cold rows render.
+class _Restored extends BrowserRestoreComplete {
+  @override
+  bool build() => true;
 }
