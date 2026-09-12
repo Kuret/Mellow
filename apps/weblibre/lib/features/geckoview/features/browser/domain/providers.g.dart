@@ -706,7 +706,121 @@ final class SelectedSpaceTabStatesWithContainerProvider
 }
 
 String _$selectedSpaceTabStatesWithContainerHash() =>
-    r'a69940bfaa4f2ed76ffbeedf8c396f97b09619d2';
+    r'46272edca7ca84e4933425fc98ca49f53d115af2';
+
+/// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+/// and the rail slide between spaces, and the outgoing space keeps rendering
+/// its own tabs while it leaves.
+
+@ProviderFor(spaceTabStatesWithContainer)
+final spaceTabStatesWithContainerProvider =
+    SpaceTabStatesWithContainerFamily._();
+
+/// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+/// and the rail slide between spaces, and the outgoing space keeps rendering
+/// its own tabs while it leaves.
+
+final class SpaceTabStatesWithContainerProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>
+        >
+    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
+  /// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+  /// and the rail slide between spaces, and the outgoing space keeps rendering
+  /// its own tabs while it leaves.
+  SpaceTabStatesWithContainerProvider._({
+    required SpaceTabStatesWithContainerFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'spaceTabStatesWithContainerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$spaceTabStatesWithContainerHash();
+
+  @override
+  String toString() {
+    return r'spaceTabStatesWithContainerProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return spaceTabStatesWithContainer(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<TabStateWithContainer>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
+            value,
+          ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SpaceTabStatesWithContainerProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$spaceTabStatesWithContainerHash() =>
+    r'75e34225494a657b143d103360023e054af959aa';
+
+/// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+/// and the rail slide between spaces, and the outgoing space keeps rendering
+/// its own tabs while it leaves.
+
+final class SpaceTabStatesWithContainerFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabStateWithContainer>>,
+          String?
+        > {
+  SpaceTabStatesWithContainerFamily._()
+    : super(
+        retry: null,
+        name: r'spaceTabStatesWithContainerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+  /// and the rail slide between spaces, and the outgoing space keeps rendering
+  /// its own tabs while it leaves.
+
+  SpaceTabStatesWithContainerProvider call(String? spaceUuid) =>
+      SpaceTabStatesWithContainerProvider._(argument: spaceUuid, from: this);
+
+  @override
+  String toString() => r'spaceTabStatesWithContainerProvider';
+}
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();

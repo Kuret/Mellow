@@ -293,8 +293,18 @@ EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
 @Riverpod()
 EquatableValue<List<TabStateWithContainer>> selectedSpaceTabStatesWithContainer(
   Ref ref,
+) => ref.watch(
+  spaceTabStatesWithContainerProvider(ref.watch(selectedSpaceProvider)),
+);
+
+/// [selectedSpaceTabStatesWithContainerProvider] for any one space. The bar
+/// and the rail slide between spaces, and the outgoing space keeps rendering
+/// its own tabs while it leaves.
+@Riverpod()
+EquatableValue<List<TabStateWithContainer>> spaceTabStatesWithContainer(
+  Ref ref,
+  String? spaceUuid,
 ) {
-  final spaceUuid = ref.watch(selectedSpaceProvider);
   final containerData = ref
       .watch(watchContainersWithCountProvider.select((value) => value.value))
       .mapNotNull(

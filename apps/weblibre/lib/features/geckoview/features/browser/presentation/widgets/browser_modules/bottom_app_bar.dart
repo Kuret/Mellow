@@ -543,7 +543,10 @@ class _RailSpaceTabs extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final spaceUuid = ref.watch(selectedSpaceProvider);
     return SpaceSwipeDetector(
-      child: SpaceSlide(spaceUuid: spaceUuid, child: const WideRailTabList()),
+      child: SpaceSlide(
+        spaceUuid: spaceUuid,
+        child: WideRailTabList(spaceUuid: spaceUuid),
+      ),
     );
   }
 }

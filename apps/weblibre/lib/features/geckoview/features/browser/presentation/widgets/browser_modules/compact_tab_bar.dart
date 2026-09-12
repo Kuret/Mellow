@@ -161,7 +161,7 @@ class _CompactChipStrip extends HookConsumerWidget {
         .value;
     final stateById = {
       for (final state
-          in ref.watch(selectedSpaceTabStatesWithContainerProvider).value)
+          in ref.watch(spaceTabStatesWithContainerProvider(spaceUuid)).value)
         state.$1.id: state,
     };
     // Members of a folder collapsed in storage are absent from the grouped

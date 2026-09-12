@@ -58,11 +58,16 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// the rail only switches, closes (per [TabChipCloseButtonMode]) and offers
 /// the long-press tab menu.
 class WideRailTabList extends HookConsumerWidget {
-  const WideRailTabList({super.key});
+  const WideRailTabList({super.key, this.spaceUuid});
+
+  /// The space to list; the selected space when null. The rail passes the
+  /// space explicitly so the outgoing list keeps showing its own space while
+  /// it slides away.
+  final String? spaceUuid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedSpaceUuid = ref.watch(selectedSpaceProvider);
+    final selectedSpaceUuid = spaceUuid ?? ref.watch(selectedSpaceProvider);
     final selectedTabId = ref.watch(selectedTabProvider);
     final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -143,7 +148,9 @@ class WideRailTabList extends HookConsumerWidget {
         return false;
       },
       child: ListView.builder(
-        key: const PageStorageKey('wide_rail_tab_list'),
+        // Per space: while the list slides between spaces two are on
+        // screen, and each keeps its own scroll offset.
+        key: PageStorageKey('wide_rail_tab_list_$selectedSpaceUuid'),
         controller: scrollController,
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         itemCount: entries.length,
@@ -161,6 +168,7 @@ class WideRailTabList extends HookConsumerWidget {
             ),
             _RailTabEntry(:final item) => _RailTabRow(
               item: item,
+              spaceUuid: selectedSpaceUuid,
               isActive: item.tabId == selectedTabId,
               closeButtonMode: closeButtonMode,
             ),
@@ -223,11 +231,13 @@ class _RailTabEntry extends _RailEntry {
 /// [closeButtonMode] and carry the long-press tab menu.
 class _RailTabRow extends ConsumerWidget {
   final TabListTabItem item;
+  final String? spaceUuid;
   final bool isActive;
   final TabChipCloseButtonMode closeButtonMode;
 
   const _RailTabRow({
     required this.item,
+    required this.spaceUuid,
     required this.isActive,
     required this.closeButtonMode,
   });
@@ -267,6 +277,7 @@ class _RailTabRow extends ConsumerWidget {
           )
         : WideRailTabRow(
             tabId: tabId,
+            spaceUuid: spaceUuid,
             isActive: isActive,
             depth: depth,
             childCount: childCount,
@@ -286,6 +297,9 @@ class _RailTabRow extends ConsumerWidget {
 /// A main-list row on the wide rail, resolved from the tab's state.
 class WideRailTabRow extends ConsumerWidget {
   final String tabId;
+
+  /// The space the row's list shows; see [WideRailTabList.spaceUuid].
+  final String? spaceUuid;
   final bool isActive;
 
   /// Folder (and tree) nesting depth, drawn as a left inset.
@@ -299,6 +313,7 @@ class WideRailTabRow extends ConsumerWidget {
   const WideRailTabRow({
     super.key,
     required this.tabId,
+    required this.spaceUuid,
     required this.isActive,
     this.depth = 0,
     this.childCount = 0,
@@ -313,7 +328,7 @@ class WideRailTabRow extends ConsumerWidget {
     // restoring ones.
     final tabState =
         ref.watch(
-          selectedSpaceTabStatesWithContainerProvider.select(
+          spaceTabStatesWithContainerProvider(spaceUuid).select(
             (value) => value.value
                 .firstWhereOrNull((state) => state.$1.id == tabId)
                 ?.$1,
