@@ -18,212 +18,140 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
-final List<ContainerIconOption> _mdiContainerIconOptions = List.unmodifiable([
-  for (final iconData in MdiIcons.values)
-    if (iconData.mdiMetadata case final metadata?)
-      ContainerIconOption(
-        iconData: iconData,
-        name: metadata.name,
-        searchText: [
-          metadata.name,
-          ...?metadata.tags,
-          ...?metadata.styles,
-        ].join(' ').toLowerCase(),
-      ),
-]);
-
-class ContainerIconPickerSheet extends HookWidget {
-  const ContainerIconPickerSheet({
-    required this.selectedColor,
-    required this.selectedIcon,
+/// Picks one of Firefox's thirteen contextual-identity icon keywords.
+///
+/// Calls [onSelected] with the chosen keyword (`FirefoxContainerIcon.keyword`).
+class FirefoxContainerIconPicker extends StatelessWidget {
+  const FirefoxContainerIconPicker({
+    required this.accentColor,
+    required this.selectedIconKey,
     required this.onSelected,
-    this.useCustomColor = false,
     super.key,
   });
 
-  final Color selectedColor;
-  final IconData selectedIcon;
-  final bool useCustomColor;
-  final ValueChanged<IconData> onSelected;
+  /// Seed for the preview and selection highlight; the container's colour, or
+  /// the theme primary when it follows the toolbar.
+  final Color accentColor;
+  final String selectedIconKey;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = ContainerColors.palette(
-      context,
-      selectedColor,
-      useCustomColor: useCustomColor,
-    );
-    final searchController = useTextEditingController();
-    useListenable(searchController);
-
-    final query = searchController.text.trim().toLowerCase();
-    final filteredIcons = useMemoized(() {
-      if (query.isEmpty) {
-        return _mdiContainerIconOptions;
-      }
-
-      return _mdiContainerIconOptions
-          .where((icon) => icon.searchText.contains(query))
-          .toList(growable: false);
-    }, [query]);
+    final palette = ContainerColors.palette(context, accentColor);
+    final selectedIcon = FirefoxContainerIcon.fromKeyword(selectedIconKey);
 
     return Material(
       color: theme.colorScheme.surface,
       child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          child: Column(
-            children: [
-              const SheetDragHandle(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Choose Icon',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          Text(
-                            '${filteredIcons.length} mdi icons',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: palette.avatarBackgroundColor,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: palette.outlineColor,
-                          width: 2,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SheetDragHandle(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Choose Icon',
+                          style: theme.textTheme.titleMedium,
                         ),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Icon(
-                        selectedIcon,
-                        color: palette.avatarForegroundColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: SearchBar(
-                  controller: searchController,
-                  hintText: 'Search MDI icons',
-                  leading: const Icon(Icons.search),
-                  trailing: [
-                    if (searchController.text.isNotEmpty)
-                      IconButton(
-                        onPressed: searchController.clear,
-                        icon: const Icon(Icons.close),
-                      ),
-                  ],
-                  elevation: const WidgetStatePropertyAll(0),
-                  backgroundColor: WidgetStatePropertyAll(
-                    theme.colorScheme.surfaceContainerHigh,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: filteredIcons.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No icons found.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
+                        Text(
+                          'Shared with Firefox containers',
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                      )
-                    : LayoutBuilder(
-                        builder: (context, constraints) {
-                          final columnCount = (constraints.maxWidth / 76)
-                              .floor()
-                              .clamp(4, 7);
-
-                          return GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: columnCount,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                ),
-                            itemCount: filteredIcons.length,
-                            itemBuilder: (context, index) {
-                              final option = filteredIcons[index];
-                              final isSelected =
-                                  option.iconData == selectedIcon;
-
-                              return Tooltip(
-                                message: option.name,
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(18),
-                                    onTap: () => onSelected(option.iconData),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 160,
-                                      ),
-                                      curve: Curves.easeInOut,
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? palette.surfaceHighColor
-                                            : theme
-                                                  .colorScheme
-                                                  .surfaceContainer,
-                                        borderRadius: BorderRadius.circular(18),
-                                        border: isSelected
-                                            ? Border.all(
-                                                color: palette.outlineColor,
-                                                width: 2,
-                                              )
-                                            : Border.all(
-                                                color: theme
-                                                    .colorScheme
-                                                    .outlineVariant
-                                                    .withValues(alpha: 0.35),
-                                              ),
-                                      ),
-                                      child: Icon(
-                                        option.iconData,
-                                        color: isSelected
-                                            ? palette.avatarForegroundColor
-                                            : theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                      ],
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: palette.avatarBackgroundColor,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: palette.outlineColor,
+                        width: 2,
                       ),
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      selectedIcon.icon,
+                      color: palette.avatarForegroundColor,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Flexible(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final columnCount = (constraints.maxWidth / 76)
+                      .floor()
+                      .clamp(4, 7);
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columnCount,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: FirefoxContainerIcon.values.length,
+                    itemBuilder: (context, index) {
+                      final option = FirefoxContainerIcon.values[index];
+                      final isSelected = option == selectedIcon;
+
+                      return Tooltip(
+                        message: option.keyword,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(18),
+                            onTap: () => onSelected(option.keyword),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 160),
+                              curve: Curves.easeInOut,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? palette.surfaceHighColor
+                                    : theme.colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(18),
+                                border: isSelected
+                                    ? Border.all(
+                                        color: palette.outlineColor,
+                                        width: 2,
+                                      )
+                                    : Border.all(
+                                        color: theme.colorScheme.outlineVariant
+                                            .withValues(alpha: 0.35),
+                                      ),
+                              ),
+                              child: Icon(
+                                option.icon,
+                                color: isSelected
+                                    ? palette.avatarForegroundColor
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
