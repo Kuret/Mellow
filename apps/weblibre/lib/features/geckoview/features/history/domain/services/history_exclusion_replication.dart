@@ -105,10 +105,16 @@ HistoryExclusionSnapshot _buildSnapshot(
   final tabContainerIds = <String, String?>{};
 
   for (final tab in tabs) {
-    knownTabIds.add(tab.tabId);
-    tabContainerIds[tab.tabId] = tab.containerId;
+    // The query emits `engine_tab_id` and filters cold rows out, so this is
+    // only nullable in the generated type.
+    final tabId = tab.tabId;
+    if (tabId == null) {
+      continue;
+    }
+    knownTabIds.add(tabId);
+    tabContainerIds[tabId] = tab.containerId;
     if (tab.excluded != 0) {
-      excludedTabIds.add(tab.tabId);
+      excludedTabIds.add(tabId);
     }
   }
 
