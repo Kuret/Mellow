@@ -424,16 +424,121 @@ final class ContainerTabStatesFamily extends $Family
   String toString() => r'containerTabStatesProvider';
 }
 
-/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
-/// the session restore completed (afterwards a missing native state means
-/// the tab is gone, not pending).
+/// Whether a tab row has an engine session behind it — see [TabPresence].
+///
+/// Live as soon as the engine reports state; cold when the row says so
+/// (`engine_tab_id IS NULL`); restoring in between.
+
+@ProviderFor(tabPresence)
+final tabPresenceProvider = TabPresenceFamily._();
+
+/// Whether a tab row has an engine session behind it — see [TabPresence].
+///
+/// Live as soon as the engine reports state; cold when the row says so
+/// (`engine_tab_id IS NULL`); restoring in between.
+
+final class TabPresenceProvider
+    extends $FunctionalProvider<TabPresence, TabPresence, TabPresence>
+    with $Provider<TabPresence> {
+  /// Whether a tab row has an engine session behind it — see [TabPresence].
+  ///
+  /// Live as soon as the engine reports state; cold when the row says so
+  /// (`engine_tab_id IS NULL`); restoring in between.
+  TabPresenceProvider._({
+    required TabPresenceFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabPresenceProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabPresenceHash();
+
+  @override
+  String toString() {
+    return r'tabPresenceProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<TabPresence> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabPresence create(Ref ref) {
+    final argument = this.argument as String;
+    return tabPresence(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabPresence value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabPresence>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabPresenceProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$tabPresenceHash() => r'046e32ee98b94b166872285ab3ce2df47c86ca33';
+
+/// Whether a tab row has an engine session behind it — see [TabPresence].
+///
+/// Live as soon as the engine reports state; cold when the row says so
+/// (`engine_tab_id IS NULL`); restoring in between.
+
+final class TabPresenceFamily extends $Family
+    with $FunctionalFamilyOverride<TabPresence, String> {
+  TabPresenceFamily._()
+    : super(
+        retry: null,
+        name: r'tabPresenceProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether a tab row has an engine session behind it — see [TabPresence].
+  ///
+  /// Live as soon as the engine reports state; cold when the row says so
+  /// (`engine_tab_id IS NULL`); restoring in between.
+
+  TabPresenceProvider call(String tabId) =>
+      TabPresenceProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'tabPresenceProvider';
+}
+
+/// Ids of DB-cached live tabs whose native state hasn't arrived yet. Empty
+/// once the session restore completed (afterwards a live row without native
+/// state is on its way to being demoted, not pending). Cold rows are not
+/// pending either: they render as placeholders for good — see
+/// [tabPresenceProvider].
 
 @ProviderFor(pendingRestoreTabIds)
 final pendingRestoreTabIdsProvider = PendingRestoreTabIdsProvider._();
 
-/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
-/// the session restore completed (afterwards a missing native state means
-/// the tab is gone, not pending).
+/// Ids of DB-cached live tabs whose native state hasn't arrived yet. Empty
+/// once the session restore completed (afterwards a live row without native
+/// state is on its way to being demoted, not pending). Cold rows are not
+/// pending either: they render as placeholders for good — see
+/// [tabPresenceProvider].
 
 final class PendingRestoreTabIdsProvider
     extends
@@ -443,9 +548,11 @@ final class PendingRestoreTabIdsProvider
           EquatableValue<Set<String>>
         >
     with $Provider<EquatableValue<Set<String>>> {
-  /// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
-  /// the session restore completed (afterwards a missing native state means
-  /// the tab is gone, not pending).
+  /// Ids of DB-cached live tabs whose native state hasn't arrived yet. Empty
+  /// once the session restore completed (afterwards a live row without native
+  /// state is on its way to being demoted, not pending). Cold rows are not
+  /// pending either: they render as placeholders for good — see
+  /// [tabPresenceProvider].
   PendingRestoreTabIdsProvider._()
     : super(
         from: null,
@@ -481,7 +588,7 @@ final class PendingRestoreTabIdsProvider
 }
 
 String _$pendingRestoreTabIdsHash() =>
-    r'aec6faa53b47530f855aa765e694b06f62e05df3';
+    r'94ae740b08dbdf592df4f8502f8988a4e2888c56';
 
 @ProviderFor(fifoTabStates)
 final fifoTabStatesProvider = FifoTabStatesProvider._();
@@ -533,13 +640,21 @@ final class FifoTabStatesProvider
   }
 }
 
-String _$fifoTabStatesHash() => r'c53752d54062be5b6514c7dba04553717cc421b2';
+String _$fifoTabStatesHash() => r'8d5f507f144ba9672e33f951d56969bc8db11bcf';
 
-@ProviderFor(selectedContainerTabStatesWithContainer)
-final selectedContainerTabStatesWithContainerProvider =
-    SelectedContainerTabStatesWithContainerProvider._();
+/// The selected space's tabs (pinned and normal shelves) with their
+/// containers, in the order the quick tab switcher and the tab bar draw them.
+/// Cold and restoring rows render as placeholders.
 
-final class SelectedContainerTabStatesWithContainerProvider
+@ProviderFor(selectedSpaceTabStatesWithContainer)
+final selectedSpaceTabStatesWithContainerProvider =
+    SelectedSpaceTabStatesWithContainerProvider._();
+
+/// The selected space's tabs (pinned and normal shelves) with their
+/// containers, in the order the quick tab switcher and the tab bar draw them.
+/// Cold and restoring rows render as placeholders.
+
+final class SelectedSpaceTabStatesWithContainerProvider
     extends
         $FunctionalProvider<
           EquatableValue<List<TabStateWithContainer>>,
@@ -547,12 +662,15 @@ final class SelectedContainerTabStatesWithContainerProvider
           EquatableValue<List<TabStateWithContainer>>
         >
     with $Provider<EquatableValue<List<TabStateWithContainer>>> {
-  SelectedContainerTabStatesWithContainerProvider._()
+  /// The selected space's tabs (pinned and normal shelves) with their
+  /// containers, in the order the quick tab switcher and the tab bar draw them.
+  /// Cold and restoring rows render as placeholders.
+  SelectedSpaceTabStatesWithContainerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'selectedContainerTabStatesWithContainerProvider',
+        name: r'selectedSpaceTabStatesWithContainerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
@@ -560,7 +678,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 
   @override
   String debugGetCreateSourceHash() =>
-      _$selectedContainerTabStatesWithContainerHash();
+      _$selectedSpaceTabStatesWithContainerHash();
 
   @$internal
   @override
@@ -570,7 +688,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 
   @override
   EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
-    return selectedContainerTabStatesWithContainer(ref);
+    return selectedSpaceTabStatesWithContainer(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -587,8 +705,8 @@ final class SelectedContainerTabStatesWithContainerProvider
   }
 }
 
-String _$selectedContainerTabStatesWithContainerHash() =>
-    r'fa0704da36c068fa4585175807d9da7cbee0b70e';
+String _$selectedSpaceTabStatesWithContainerHash() =>
+    r'a69940bfaa4f2ed76ffbeedf8c396f97b09619d2';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -660,7 +778,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'f61847bd68385e799384adfa5bfe735544fedbf5';
+    r'ada81a2ae9d2af9cfe6a17566b10e6812f3a5cc7';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -988,7 +1106,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'9ecc25526622644109b346538b8cefb296145847';
+    r'e2dcbff7c67bf11bbc7ba683388b8f1c4484b7ef';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -1175,7 +1293,7 @@ final class GroupedTabListItemsProvider
   /// Returns `null` when the input data is not yet available (loading).
   GroupedTabListItemsProvider._({
     required GroupedTabListItemsFamily super.from,
-    required ({String? containerId, TabListScope scope}) super.argument,
+    required ({String? spaceUuid, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'groupedTabListItemsProvider',
@@ -1202,11 +1320,10 @@ final class GroupedTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument =
-        this.argument as ({String? containerId, TabListScope scope});
+    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
     return groupedTabListItems(
       ref,
-      containerId: argument.containerId,
+      spaceUuid: argument.spaceUuid,
       scope: argument.scope,
     );
   }
@@ -1232,7 +1349,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'a231614ae43e3c7c2171c76208767e3f7e657345';
+    r'160c156ff209cf3eaa04a67ab1f0f2891025c399';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
@@ -1252,7 +1369,7 @@ final class GroupedTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? containerId, TabListScope scope})
+          ({String? spaceUuid, TabListScope scope})
         > {
   GroupedTabListItemsFamily._()
     : super(
@@ -1278,10 +1395,10 @@ final class GroupedTabListItemsFamily extends $Family
   /// Returns `null` when the input data is not yet available (loading).
 
   GroupedTabListItemsProvider call({
-    required String? containerId,
+    required String? spaceUuid,
     required TabListScope scope,
   }) => GroupedTabListItemsProvider._(
-    argument: (containerId: containerId, scope: scope),
+    argument: (spaceUuid: spaceUuid, scope: scope),
     from: this,
   );
 
@@ -1346,7 +1463,7 @@ final class VisibleTabListItemsProvider
   /// swipe.
   VisibleTabListItemsProvider._({
     required VisibleTabListItemsFamily super.from,
-    required ({String? containerId, TabListScope scope}) super.argument,
+    required ({String? spaceUuid, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'visibleTabListItemsProvider',
@@ -1373,11 +1490,10 @@ final class VisibleTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument =
-        this.argument as ({String? containerId, TabListScope scope});
+    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
     return visibleTabListItems(
       ref,
-      containerId: argument.containerId,
+      spaceUuid: argument.spaceUuid,
       scope: argument.scope,
     );
   }
@@ -1403,7 +1519,7 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'df52784bf71442e7f3c76b665e7a343276d78cf2';
+    r'd494c09304bbcf8ea8202505c312655b87506609';
 
 /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
 /// plus the flat post-processing: where there are no visible groups to keep
@@ -1424,7 +1540,7 @@ final class VisibleTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? containerId, TabListScope scope})
+          ({String? spaceUuid, TabListScope scope})
         > {
   VisibleTabListItemsFamily._()
     : super(
@@ -1451,10 +1567,10 @@ final class VisibleTabListItemsFamily extends $Family
   /// swipe.
 
   VisibleTabListItemsProvider call({
-    required String? containerId,
+    required String? spaceUuid,
     required TabListScope scope,
   }) => VisibleTabListItemsProvider._(
-    argument: (containerId: containerId, scope: scope),
+    argument: (spaceUuid: spaceUuid, scope: scope),
     from: this,
   );
 
@@ -1669,4 +1785,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'b12d52fa5733aa93a414e934aa8813e78ae7cf89';
+    r'bac0dd53a3a27d7db81cb2e72bf9cbc31133d585';

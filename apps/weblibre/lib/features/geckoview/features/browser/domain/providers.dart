@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
@@ -41,10 +42,12 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -180,27 +183,57 @@ EquatableValue<Map<String, TabState>> containerTabStates(
   });
 }
 
-/// Synthesizes a placeholder [TabState] from a cached DB row for tabs the
-/// native session restore hasn't delivered yet. `TabIcon` falls back to the
-/// URL-cached favicon when [TabState.icon] is null, so placeholder chips
-/// still render with proper icons and titles.
+/// Synthesizes a placeholder [TabState] from a cached DB row for tabs without
+/// engine state: cold tabs (PLAN §7.4) and, before the session restore has
+/// completed, tabs whose native state has not arrived yet. `TabIcon` falls
+/// back to the URL-cached favicon when [TabState.icon] is null, so placeholder
+/// chips still render with proper icons and titles.
 TabState _placeholderTabState(TabSummary tab) {
   return TabState.$default(tab.id).copyWith(
     url: tab.url ?? TabState.defaultUrl,
-    title: tab.title ?? '',
+    title: tab.staticLabel ?? tab.title ?? '',
     parentId: tab.parentId,
     tabMode: TabMode.fromDbValue(tab.tabMode),
   );
 }
 
-/// Whether [tab] may be shown as a pre-restore placeholder. Private tabs are
-/// never session-restored, so their rows must not produce dangling chips.
+/// Whether [tab] may be shown as a placeholder. Private tabs are never
+/// session-restored and never cold, so their rows must not produce dangling
+/// chips.
 bool _canShowAsPlaceholder(TabSummary tab) =>
     tab.tabMode != TabModeDbValue.private;
 
-/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
-/// the session restore completed (afterwards a missing native state means
-/// the tab is gone, not pending).
+/// Whether [tab] renders from its row rather than from engine state: cold, or
+/// still restoring.
+bool _showsAsPlaceholder(TabSummary tab, {required bool restoreComplete}) =>
+    _canShowAsPlaceholder(tab) && (tab.isCold || !restoreComplete);
+
+/// Whether a tab row has an engine session behind it — see [TabPresence].
+///
+/// Live as soon as the engine reports state; cold when the row says so
+/// (`engine_tab_id IS NULL`); restoring in between.
+@Riverpod()
+TabPresence tabPresence(Ref ref, String tabId) {
+  final hasState = ref.watch(
+    tabStatesProvider.select((states) => states.containsKey(tabId)),
+  );
+  if (hasState) {
+    return TabPresence.live;
+  }
+  final isCold = ref.watch(
+    watchTabDbDataProvider(tabId).select((value) => value.value?.isCold),
+  );
+  if (isCold ?? false) {
+    return TabPresence.cold;
+  }
+  return TabPresence.restoring;
+}
+
+/// Ids of DB-cached live tabs whose native state hasn't arrived yet. Empty
+/// once the session restore completed (afterwards a live row without native
+/// state is on its way to being demoted, not pending). Cold rows are not
+/// pending either: they render as placeholders for good — see
+/// [tabPresenceProvider].
 @Riverpod()
 EquatableValue<Set<String>> pendingRestoreTabIds(Ref ref) {
   final restoreComplete = ref.watch(browserRestoreCompleteProvider);
@@ -217,7 +250,9 @@ EquatableValue<Set<String>> pendingRestoreTabIds(Ref ref) {
 
   return EquatableValue({
     for (final tab in dbTabs)
-      if (_canShowAsPlaceholder(tab) && !nativeTabIds.value.contains(tab.id))
+      if (_canShowAsPlaceholder(tab) &&
+          !tab.isCold &&
+          !nativeTabIds.value.contains(tab.id))
         tab.id,
   });
 }
@@ -233,13 +268,12 @@ EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
   final sortedTabs = ref.watch(
     watchTabsFifoProvider.select((value) => value.value),
   );
-
   final tabStates = ref.watch(tabStatesProvider);
-  final placeholdersActive = !ref.watch(browserRestoreCompleteProvider);
+  final restoreComplete = ref.watch(browserRestoreCompleteProvider);
 
   TabState? stateFor(TabSummary tab) =>
       tabStates[tab.id] ??
-      (placeholdersActive && _canShowAsPlaceholder(tab)
+      (_showsAsPlaceholder(tab, restoreComplete: restoreComplete)
           ? _placeholderTabState(tab)
           : null);
 
@@ -256,15 +290,14 @@ EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
   ]);
 }
 
+/// The selected space's tabs (pinned and normal shelves) with their
+/// containers, in the order the quick tab switcher and the tab bar draw them.
+/// Cold and restoring rows render as placeholders.
 @Riverpod()
-EquatableValue<List<TabStateWithContainer>>
-selectedContainerTabStatesWithContainer(Ref ref) {
-  final filter = ref.watch(
-    selectedContainerProvider.select(
-      (value) => ContainerFilterById(containerId: value),
-    ),
-  );
-
+EquatableValue<List<TabStateWithContainer>> selectedSpaceTabStatesWithContainer(
+  Ref ref,
+) {
+  final spaceUuid = ref.watch(selectedSpaceProvider);
   final containerData = ref
       .watch(watchContainersWithCountProvider.select((value) => value.value))
       .mapNotNull(
@@ -272,42 +305,19 @@ selectedContainerTabStatesWithContainer(Ref ref) {
       );
 
   final tabStates = ref.watch(tabStatesProvider);
-  final placeholdersActive = !ref.watch(browserRestoreCompleteProvider);
-  final selectedContainerTabsData = placeholdersActive
-      ? ref.watch(
-              watchContainerTabsDataProvider(
-                filter.containerId,
-              ).select((value) => value.value),
-            ) ??
-            const <TabSummary>[]
-      : const <TabSummary>[];
-  final sortedTabs = placeholdersActive
-      ? [
-          for (final tab in selectedContainerTabsData)
-            DefaultTabEntity(
-              tabId: tab.id,
-              orderKey: tab.orderKey,
-              containerId: tab.containerId,
-            ),
-        ]
-      : ref.watch(
-          containerTabEntitiesProvider(filter).select((value) => value.value),
-        );
-  final tabDataById = placeholdersActive
-      ? {for (final tab in selectedContainerTabsData) tab.id: tab}
-      : const <String, TabSummary>{};
+  final restoreComplete = ref.watch(browserRestoreCompleteProvider);
 
-  TabState? stateForEntity(String tabId) {
-    final state = tabStates[tabId];
-    if (state != null) {
-      return state;
-    }
-    final tabData = tabDataById[tabId];
-    if (tabData != null && _canShowAsPlaceholder(tabData)) {
-      return _placeholderTabState(tabData);
-    }
-    return null;
-  }
+  final spaceTabs =
+      ref.watch(
+        watchSpaceTabsDataProvider(spaceUuid).select((value) => value.value),
+      ) ??
+      const <TabSummary>[];
+
+  TabState? stateFor(TabSummary tab) =>
+      tabStates[tab.id] ??
+      (_showsAsPlaceholder(tab, restoreComplete: restoreComplete)
+          ? _placeholderTabState(tab)
+          : null);
 
   // The single order every non-tray surface shares. It already carries the tab
   // bar direction, hierarchy grouping and pinned-first handling, so none of
@@ -316,28 +326,30 @@ selectedContainerTabStatesWithContainer(Ref ref) {
   final orderedItems = ref
       .watch(
         visibleTabListItemsProvider(
-          containerId: filter.containerId,
+          spaceUuid: spaceUuid,
           scope: TabListScope.presentation,
         ),
       )
       .value;
+  final groupedOrder = <String, int>{};
+  for (var i = 0; i < orderedItems.length; i++) {
+    if (orderedItems[i] case TabListTabItem(:final tabId)) {
+      groupedOrder[tabId] = i;
+    }
+  }
 
-  final groupedOrder = {
-    for (var i = 0; i < orderedItems.length; i++) orderedItems[i].tabId: i,
-  };
-  final orderKeyById = {
-    for (final tabEntity in sortedTabs) tabEntity.tabId: tabEntity.orderKey,
-  };
+  final orderKeyById = {for (final tab in spaceTabs) tab.id: tab.orderKey};
 
   var items = [
-    for (final tabEntity in sortedTabs)
-      if (stateForEntity(tabEntity.tabId) case final state?)
-        (
-          state,
-          tabEntity.containerId.mapNotNull(
-            (containerId) => containerData?[containerId],
+    for (final tab in spaceTabs)
+      if (tab.tabShelf != TabShelf.essential)
+        if (stateFor(tab) case final state?)
+          (
+            state,
+            tab.containerId.mapNotNull(
+              (containerId) => containerData?[containerId],
+            ),
           ),
-        ),
   ];
 
   items.sort((a, b) {
@@ -348,7 +360,6 @@ selectedContainerTabStatesWithContainer(Ref ref) {
     }
     if (aIndex != null) return -1;
     if (bIndex != null) return 1;
-
     return (orderKeyById[a.$1.id] ?? '').compareTo(orderKeyById[b.$1.id] ?? '');
   });
 
@@ -358,11 +369,7 @@ selectedContainerTabStatesWithContainer(Ref ref) {
   // tabs out of place until restore completes. Once the shared order exists it
   // has already partitioned them, and re-partitioning a partitioned list is a
   // no-op — so this can never pull the switcher away from it.
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
+  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
   final sortPinnedFirst = ref.watch(
     tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
   );
@@ -387,14 +394,10 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
   final tabStates = switch (mode) {
     QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
     QuickTabSwitcherMode.containerTabs =>
-      ref.watch(selectedContainerTabStatesWithContainerProvider).value,
+      ref.watch(selectedSpaceTabStatesWithContainerProvider).value,
   };
 
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
+  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
   final sortPinnedFirst = ref.watch(
     tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
   );
@@ -710,8 +713,16 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
 
   // Tree mode: no filtering/sorting, return as-is
   if (groupTrees && tabSearchResults == null) {
+    // Trees are space-scoped; a container filter narrows the selected
+    // space's trees, no filter spans every space.
+    final treesSpaceUuid = containerFilter is ContainerFilterDisabled
+        ? null
+        : ref.watch(selectedSpaceProvider);
     final trees = ref.watch(
-      watchTabTreesProvider(containerFilter).select(
+      watchTabTreesProvider(
+        treesSpaceUuid,
+        allSpaces: containerFilter is ContainerFilterDisabled,
+      ).select(
         (value) => EquatableValue(
           value.value?.map((tree) {
                 // Find the container ID for the latest tab
@@ -748,11 +759,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
 
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
 
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
+  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
 
   // Only pull timestamps from DB when date filtering/sorting is active
   final needsTimestamps =
@@ -880,25 +887,44 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
 @Riverpod()
 EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   Ref ref, {
-  required String? containerId,
+  required String? spaceUuid,
   required TabListScope scope,
 }) {
   final tabsWithRoot = ref.watch(
     watchTabsWithRootAndDepthProvider(
-      containerId,
+      spaceUuid,
     ).select((value) => value.value),
   );
   if (tabsWithRoot == null) {
     return EquatableValue(const []);
   }
 
+  // The rows' shelf, folder, split and liveness — the tree CTE carries only
+  // the hierarchy.
+  final summaries = ref.watch(
+    watchSpaceTabsDataProvider(spaceUuid).select((value) => value.value),
+  );
+  if (summaries == null) {
+    return EquatableValue(const []);
+  }
+  final summaryById = {for (final tab in summaries) tab.id: tab};
+
+  final folders = spaceUuid == null
+      ? const <TabFolderData>[]
+      : ref.watch(
+              watchFoldersProvider(spaceUuid).select((value) => value.value),
+            ) ??
+            const <TabFolderData>[];
+
   final tabList = ref.watch(tabListProvider);
+
   // Narrow projection instead of the whole `Map<String, TabState>`: this
   // provider does a graph walk plus several sorts, and it feeds the always
   // visible quick tab switcher's depth map. It only reads the tab mode (for
   // filtering) and the title/url (for sorting) — none of which change more
   // often than once per navigation.
   final tabSortKeys = ref.watch(tabSortKeysProvider).value;
+
   // Reduced before it is compared, so the presentation scope does not rebuild
   // when the user changes a tray control that cannot affect it.
   final filterOptions = ref.watch(
@@ -906,11 +932,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       (options) => scope.isTray ? options : options.toPresentationScope(),
     ),
   );
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
+  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
   final direction = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (s) => scope.isTray ? s.tabListDirection : s.tabBarDirection,
@@ -935,17 +957,23 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // chains even when intermediate ancestors fail the filter.
   final byId = {for (final row in tabsWithRoot) row.id: row};
 
-  // Filter to tabs that exist in the engine session list and pass the
-  // tab-type / date-range filter. Filtering is applied to *individual* tabs.
-  final available = tabsWithRoot
-      .where((row) => tabList.value.contains(row.id))
-      .where(
-        (row) => filterOptions.matchesTab(
-          tabSortKeys[row.id]?.tabMode,
-          tabTimestamps?[row.id],
-        ),
-      )
-      .toList();
+  // Keep the rows the engine lists *or* that are cold (no session, rendered
+  // from the row — PLAN §7.4), never essentials (they have their own strip),
+  // and only those that pass the tab-type / date-range filter. Filtering is
+  // applied to *individual* tabs.
+  final available = tabsWithRoot.where((row) {
+    final summary = summaryById[row.id];
+    if (summary == null || summary.tabShelf == TabShelf.essential) {
+      return false;
+    }
+    if (!summary.isCold && !tabList.value.contains(row.id)) {
+      return false;
+    }
+    return filterOptions.matchesTab(
+      tabSortKeys[row.id]?.tabMode ?? TabMode.fromDbValue(summary.tabMode),
+      tabTimestamps?[row.id],
+    );
+  }).toList();
 
   if (available.isEmpty) {
     return EquatableValue(const []);
@@ -1010,6 +1038,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   for (final entry in byRoot.entries) {
     final rootMember = entry.value.firstWhere((r) => r.row.id == entry.key);
     final root = rootMember.row;
+    final summary = summaryById[root.id]!;
     final sortKeys = tabSortKeys[root.id];
     final timestamp = tabTimestamps?[root.id];
     groupRecords.add(
@@ -1018,13 +1047,20 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         rootOrderKey: root.orderKey,
         root: rootMember,
         members: entry.value,
-        isPinned: pinnedTabIds.contains(root.id),
+        shelf: summary.tabShelf,
+        folderId: summary.folderId,
+        splitId: summary.splitId,
+        splitIndex: summary.splitIndex ?? 0,
         titleKey:
             sortField == SortField.titleAsc || sortField == SortField.titleDesc
-            ? (sortKeys?.titleOrAuthority ?? '').toLowerCase()
+            ? (sortKeys?.titleOrAuthority ??
+                      summary.staticLabel ??
+                      summary.title ??
+                      '')
+                  .toLowerCase()
             : null,
         urlKey: sortField == SortField.urlAsc || sortField == SortField.urlDesc
-            ? (sortKeys?.url ?? '')
+            ? (sortKeys?.url ?? summary.url?.toString() ?? '')
             : null,
         dateKey:
             sortField == SortField.dateAsc || sortField == SortField.dateDesc
@@ -1034,11 +1070,33 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     );
   }
 
-  groupRecords.sort((a, b) {
-    if (filterOptions.sortPinnedFirst && a.isPinned != b.isPinned) {
-      return a.isPinned ? -1 : 1;
+  // Split members occupy one slot (PLAN §6.5): rank every member at the
+  // split's first member and let `splitIndex` order them within it.
+  final firstKeyBySplit = <String, String>{};
+  for (final group in groupRecords) {
+    final splitId = group.splitId;
+    if (splitId == null) continue;
+    final current = firstKeyBySplit[splitId];
+    if (current == null || group.rootOrderKey.compareTo(current) < 0) {
+      firstKeyBySplit[splitId] = group.rootOrderKey;
     }
+  }
+  for (final group in groupRecords) {
+    final splitId = group.splitId;
+    if (splitId != null) {
+      group.slotKey = firstKeyBySplit[splitId]!;
+    }
+  }
 
+  int compareStorage(_TabGroupRecord a, _TabGroupRecord b) {
+    final cmp = a.slotKey.compareTo(b.slotKey);
+    if (cmp != 0) return cmp;
+    final splitCmp = a.splitIndex.compareTo(b.splitIndex);
+    if (splitCmp != 0) return splitCmp;
+    return a.rootOrderKey.compareTo(b.rootOrderKey);
+  }
+
+  int compareGroups(_TabGroupRecord a, _TabGroupRecord b) {
     if (sortField != null) {
       final cmp = switch (sortField) {
         SortField.titleAsc => a.titleKey!.compareTo(b.titleKey!),
@@ -1050,47 +1108,52 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       };
       if (cmp != 0) return cmp;
     }
+    return compareStorage(a, b);
+  }
 
-    return a.rootOrderKey.compareTo(b.rootOrderKey);
-  });
-
-  // Direction applies to the order of root groups here. Sibling order below
-  // each parent is handled during recursive flattening.
-  // When no explicit sortField is active, oldest-first is the natural
-  // order_key ASC; newest-first reverses the group list. Pinned and
-  // unpinned partitions are reversed independently so pinned-first stays
-  // intact while still flipping the relative order within each partition.
-  if (sortField == null && direction == TabDirection.newestFirst) {
-    if (filterOptions.sortPinnedFirst) {
-      final pinned = groupRecords.where((g) => g.isPinned).toList()
-        ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
-      final unpinned = groupRecords.where((g) => !g.isPinned).toList()
-        ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
-      groupRecords
-        ..clear()
-        ..addAll(pinned)
-        ..addAll(unpinned);
-    } else {
-      final reversed = groupRecords.reversed.toList();
-      groupRecords
-        ..clear()
-        ..addAll(reversed);
+  // Direction applies to the order of slots within a scope. When no explicit
+  // sortField is active, oldest-first is the natural order_key ASC and
+  // newest-first reverses the sequence — except that split members keep their
+  // `splitIndex` order, so a reversed run of members is put back.
+  List<_ScopeSlot> applyDirection(List<_ScopeSlot> slots) {
+    if (sortField != null || direction != TabDirection.newestFirst) {
+      return slots;
     }
+    final reversed = slots.reversed.toList();
+    var runStart = 0;
+    while (runStart < reversed.length) {
+      final splitId = reversed[runStart].splitId;
+      var runEnd = runStart + 1;
+      if (splitId != null) {
+        while (runEnd < reversed.length && reversed[runEnd].splitId == splitId) {
+          runEnd++;
+        }
+        if (runEnd - runStart > 1) {
+          final run = reversed.sublist(runStart, runEnd)
+            ..sort((a, b) => a.splitIndex.compareTo(b.splitIndex));
+          reversed.replaceRange(runStart, runEnd, run);
+        }
+      }
+      runStart = runEnd;
+    }
+    return reversed;
   }
 
   // Flatten according to expansion state.
   final result = <TabListItemEntity>[];
-  for (final group in groupRecords) {
+
+  void emitGroup(_TabGroupRecord group, int folderDepth) {
     if (group.members.length == 1) {
       final only = group.root.row;
       result.add(
         TabListStandaloneItem(
           tabId: only.id,
           orderKey: only.orderKey,
-          containerId: containerId,
+          spaceUuid: spaceUuid,
+          depth: folderDepth,
         ),
       );
-      continue;
+      return;
     }
 
     final root = group.root.row;
@@ -1098,13 +1161,14 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       TabListParentGroup(
         tabId: root.id,
         orderKey: root.orderKey,
-        containerId: containerId,
+        spaceUuid: spaceUuid,
         childCount: group.members.length - 1,
+        depth: folderDepth,
       ),
     );
 
     if (collapsedGroups.contains(root.id)) {
-      continue;
+      return;
     }
 
     final childrenByVisibleParent = <String, List<_GroupedRow>>{};
@@ -1112,7 +1176,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       if (member.row.id == root.id) {
         continue;
       }
-
       final visibleParentId = _nearestVisibleParentId(
         member.row,
         root.id,
@@ -1130,6 +1193,11 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     // insertion order. When `sortPinnedFirst` is true, pinned children are
     // sorted before unpinned siblings within each parent group.
     for (final children in childrenByVisibleParent.values) {
+      int cmp(_GroupedRow a, _GroupedRow b) =>
+          a.row.orderKey.compareTo(b.row.orderKey);
+      final directionCmp = direction == TabDirection.newestFirst
+          ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)
+          : cmp;
       if (filterOptions.sortPinnedFirst) {
         final pinned = children
             .where((c) => pinnedTabIds.contains(c.row.id))
@@ -1137,11 +1205,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         final unpinned = children
             .where((c) => !pinnedTabIds.contains(c.row.id))
             .toList();
-        int cmp(_GroupedRow a, _GroupedRow b) =>
-            a.row.orderKey.compareTo(b.row.orderKey);
-        final directionCmp = direction == TabDirection.newestFirst
-            ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)
-            : cmp;
         pinned.sort(directionCmp);
         unpinned.sort(directionCmp);
         children
@@ -1149,10 +1212,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           ..addAll(pinned)
           ..addAll(unpinned);
       } else {
-        children.sort((a, b) {
-          final cmp = a.row.orderKey.compareTo(b.row.orderKey);
-          return direction == TabDirection.newestFirst ? -cmp : cmp;
-        });
+        children.sort(directionCmp);
       }
     }
 
@@ -1166,10 +1226,10 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           TabListChildItem(
             tabId: child.id,
             orderKey: child.orderKey,
-            containerId: containerId,
+            spaceUuid: spaceUuid,
             parentId: parentId,
             rootId: root.id,
-            depth: member.depth,
+            depth: member.depth + folderDepth,
             childCount: grandchildren.length,
           ),
         );
@@ -1183,6 +1243,97 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 
     addChildren(root.id);
   }
+
+  // The pinned shelf comes first (PLAN §6.4), in its own storage order.
+  final pinnedGroups =
+      groupRecords.where((g) => g.shelf == TabShelf.pinned).toList()
+        ..sort(compareGroups);
+  for (final slot in applyDirection([
+    for (final group in pinnedGroups) _ScopeSlot.ofGroup(group),
+  ])) {
+    emitGroup(slot.group!, 0);
+  }
+
+  final normalGroups = groupRecords
+      .where((g) => g.shelf != TabShelf.pinned)
+      .toList();
+
+  if (sortField != null) {
+    // An explicit title/URL/date sort is a flat list: folders have no
+    // position in it, so their tabs are listed at the root.
+    normalGroups.sort(compareGroups);
+    for (final group in normalGroups) {
+      emitGroup(group, 0);
+    }
+    return EquatableValue(result);
+  }
+
+  // The normal shelf: folders and root groups interleaved by `order_key`
+  // within each folder scope, a folder's contents indented below it.
+  final folderById = {for (final folder in folders) folder.id: folder};
+  final groupsByFolder = <String?, List<_TabGroupRecord>>{};
+  for (final group in normalGroups) {
+    final folderId = folderById.containsKey(group.folderId)
+        ? group.folderId
+        : null;
+    groupsByFolder.putIfAbsent(folderId, () => []).add(group);
+  }
+  final foldersByParent = <String?, List<TabFolderData>>{};
+  for (final folder in folders) {
+    final parentId = folderById.containsKey(folder.parentFolderId)
+        ? folder.parentFolderId
+        : null;
+    foldersByParent.putIfAbsent(parentId, () => []).add(folder);
+  }
+
+  int countTabsIn(String folderId) {
+    var count = 0;
+    for (final group in groupsByFolder[folderId] ?? const <_TabGroupRecord>[]) {
+      count += group.members.length;
+    }
+    for (final child in foldersByParent[folderId] ?? const <TabFolderData>[]) {
+      count += countTabsIn(child.id);
+    }
+    return count;
+  }
+
+  final emittedFolders = <String>{};
+  void emitScope(String? folderId, int depth) {
+    final slots = <_ScopeSlot>[
+      for (final group in groupsByFolder[folderId] ?? const <_TabGroupRecord>[])
+        _ScopeSlot.ofGroup(group),
+      for (final folder in foldersByParent[folderId] ?? const <TabFolderData>[])
+        if (emittedFolders.add(folder.id)) _ScopeSlot.ofFolder(folder),
+    ]..sort((a, b) {
+      final cmp = a.orderKey.compareTo(b.orderKey);
+      if (cmp != 0) return cmp;
+      return a.splitIndex.compareTo(b.splitIndex);
+    });
+    for (final slot in applyDirection(slots)) {
+      final group = slot.group;
+      if (group != null) {
+        emitGroup(group, depth);
+        continue;
+      }
+      final folder = slot.folder!;
+      result.add(
+        TabListFolderItem(
+          folderId: folder.id,
+          orderKey: folder.orderKey,
+          spaceUuid: spaceUuid,
+          name: folder.name,
+          isCollapsed: folder.isCollapsed,
+          depth: depth,
+          childCount: countTabsIn(folder.id),
+        ),
+      );
+      if (!folder.isCollapsed) {
+        emitScope(folder.id, depth + 1);
+      }
+    }
+  }
+
+  emitScope(null, 0);
 
   return EquatableValue(result);
 }
@@ -1204,15 +1355,12 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 @Riverpod()
 EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   Ref ref, {
-  required String? containerId,
+  required String? spaceUuid,
   required TabListScope scope,
 }) {
   final groupedItems = ref
-      .watch(
-        groupedTabListItemsProvider(containerId: containerId, scope: scope),
-      )
+      .watch(groupedTabListItemsProvider(spaceUuid: spaceUuid, scope: scope))
       .value;
-
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
   final flattenPinned =
       filterOptions.sortPinnedFirst &&
@@ -1221,15 +1369,12 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
     return EquatableValue(groupedItems);
   }
 
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
-
+  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
+  bool isPinned(TabListItemEntity item) =>
+      item is TabListTabItem && pinnedTabIds.contains(item.tabId);
   return EquatableValue([
-    ...groupedItems.where((item) => pinnedTabIds.contains(item.tabId)),
-    ...groupedItems.where((item) => !pinnedTabIds.contains(item.tabId)),
+    ...groupedItems.where(isPinned),
+    ...groupedItems.where((item) => !isPinned(item)),
   ]);
 }
 
@@ -1287,57 +1432,50 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// alive too.
 @Riverpod(keepAlive: true)
 EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
-  final crossContainers = ref.watch(
+  final crossSpaces = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (settings) => settings.effectiveSequentialTabNavigationCrossContainers,
     ),
   );
 
-  final List<String?> containerIds;
-
-  if (crossContainers) {
-    final containers = ref.watch(
-      watchContainersWithCountProvider.select((value) => value.value),
+  final List<String?> spaceUuids;
+  if (crossSpaces) {
+    final spaces = ref.watch(
+      watchSpacesProvider.select((value) => value.value),
     );
-    if (containers == null) {
+    if (spaces == null) {
       return EquatableValue(null);
     }
-
-    containerIds = <String?>[
-      null,
-      for (final container in containers)
-        if ((container.tabCount ?? 0) > 0) container.id,
-    ];
+    // The space-less bucket (private tabs) first, then the spaces in order.
+    spaceUuids = <String?>[null, for (final space in spaces) space.uuid];
   } else {
-    containerIds = <String?>[ref.watch(selectedContainerProvider)];
+    spaceUuids = <String?>[ref.watch(selectedSpaceProvider)];
   }
 
   final order = <String>[];
-  for (final containerId in containerIds) {
-    // Holding these auto-disposed per-container queries open is the documented
-    // price of a cross-container order that must answer a synchronous read at
+  for (final spaceUuid in spaceUuids) {
+    // Holding these auto-disposed per-space queries open is the documented
+    // price of a cross-space order that must answer a synchronous read at
     // the moment of the swipe (see above).
     // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
     final hasTreeData = ref.watch(
       watchTabsWithRootAndDepthProvider(
-        containerId,
+        spaceUuid,
       ).select((value) => value.hasValue),
     );
     if (!hasTreeData) {
       return EquatableValue(null);
     }
-
     // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
     final visibleItems = ref
         .watch(
           visibleTabListItemsProvider(
-            containerId: containerId,
+            spaceUuid: spaceUuid,
             scope: TabListScope.presentation,
           ),
         )
         .value;
-
-    order.addAll(visibleItems.map((item) => item.tabId));
+    order.addAll(visibleItems.whereType<TabListTabItem>().map((i) => i.tabId));
   }
 
   return EquatableValue(order);
@@ -1385,19 +1523,51 @@ class _TabGroupRecord {
   final String rootOrderKey;
   final _GroupedRow root;
   final List<_GroupedRow> members;
-  final bool isPinned;
+  final TabShelf shelf;
+  final String? folderId;
+  final String? splitId;
+  final int splitIndex;
   final String? titleKey;
   final String? urlKey;
   final DateTime? dateKey;
+
+  /// Storage rank of the group's slot: its root's `order_key`, or — for a
+  /// split member — the split's first member's key, so members stay adjacent.
+  String slotKey;
 
   _TabGroupRecord({
     required this.rootId,
     required this.rootOrderKey,
     required this.root,
     required this.members,
-    required this.isPinned,
+    required this.shelf,
+    required this.folderId,
+    required this.splitId,
+    required this.splitIndex,
     required this.titleKey,
     required this.urlKey,
     required this.dateKey,
-  });
+  }) : slotKey = rootOrderKey;
+
+  bool get isPinned => shelf == TabShelf.pinned;
+}
+
+/// One entry of a scope's child sequence: a tab group or a folder.
+class _ScopeSlot {
+  final String orderKey;
+  final int splitIndex;
+  final _TabGroupRecord? group;
+  final TabFolderData? folder;
+
+  _ScopeSlot.ofGroup(_TabGroupRecord this.group)
+    : orderKey = group.slotKey,
+      splitIndex = group.splitIndex,
+      folder = null;
+
+  _ScopeSlot.ofFolder(TabFolderData this.folder)
+    : orderKey = folder.orderKey,
+      splitIndex = 0,
+      group = null;
+
+  String? get splitId => group?.splitId;
 }
