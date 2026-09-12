@@ -56,6 +56,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// Top-left expand/collapse toggle for grid cells. Returns null for any
@@ -801,6 +802,8 @@ class ViewTabGridWidget extends HookConsumerWidget {
                     tabsViewMode: TabsViewMode.grid,
                   ),
             ),
+            // The Essentials shelf above the grid, as in the list (PLAN §6.4).
+            SliverToBoxAdapter(child: EssentialsGrid(onSelected: onClose)),
           ],
           body: _TabGridView(
             scrollController: scrollController,

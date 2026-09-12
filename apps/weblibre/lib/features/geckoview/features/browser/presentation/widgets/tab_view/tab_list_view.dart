@@ -33,11 +33,15 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/compact_tab_row.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
@@ -46,6 +50,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -54,6 +59,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
@@ -226,6 +232,10 @@ class _TabDraggable extends HookConsumerWidget {
   final Widget? groupToggle;
   final int depth;
 
+  /// Pinned-shelf rendering: a [CompactTabRow] instead of the preview card.
+  final bool compact;
+  final SplitMembership? split;
+
   const _TabDraggable({
     required this.tabId,
     required this.onClose,
@@ -234,6 +244,8 @@ class _TabDraggable extends HookConsumerWidget {
     this.suggestedContainerId,
     this.groupToggle,
     this.depth = 0,
+    this.compact = false,
+    this.split,
   });
 
   @override
@@ -254,34 +266,63 @@ class _TabDraggable extends HookConsumerWidget {
     );
 
     // Cache the tab widget to avoid rebuilding
-    final tab = useMemoized(() {
-      return (suggestedContainerId != null)
-          ? SuggestedSingleListTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onTap: () async {
-                final containerData = await ref
-                    .read(containerRepositoryProvider.notifier)
-                    .getContainerData(suggestedContainerId!);
+    final tab = useMemoized(
+      () {
+        if (suggestedContainerId != null) {
+          return SuggestedSingleListTabPreview(
+            key: ValueKey(tabId),
+            tabId: tabId,
+            activeTabId: activeTab,
+            onTap: () async {
+              final containerData = await ref
+                  .read(containerRepositoryProvider.notifier)
+                  .getContainerData(suggestedContainerId!);
 
-                if (containerData != null) {
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .assignContainer(tabId, containerData);
-                }
-              },
-            )
-          : SingleListTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onClose: onClose,
-              sourceSearchQuery: sourceSearchQuery,
-              groupToggle: groupToggle,
-              depth: depth,
-            );
-    }, [tabId, activeTab, suggestedContainerId, groupToggle, depth]);
+              if (containerData != null) {
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .assignContainer(tabId, containerData);
+              }
+            },
+          );
+        }
+        if (compact) {
+          return CompactTabRow(
+            key: ValueKey(tabId),
+            tabId: tabId,
+            isActive: tabId == activeTab,
+            split: split,
+            onTap: () async {
+              //Close first to avoid rebuilds
+              onClose();
+              if (tabId != activeTab) {
+                await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+              }
+            },
+            onClose: () => closeTabWithConfirmationAndUndo(context, ref, tabId),
+          );
+        }
+        return SingleListTabPreview(
+          key: ValueKey(tabId),
+          tabId: tabId,
+          activeTabId: activeTab,
+          onClose: onClose,
+          sourceSearchQuery: sourceSearchQuery,
+          groupToggle: groupToggle,
+          depth: depth,
+          split: split,
+        );
+      },
+      [
+        tabId,
+        activeTab,
+        suggestedContainerId,
+        groupToggle,
+        depth,
+        compact,
+        split,
+      ],
+    );
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -307,6 +348,40 @@ class _TabDraggable extends HookConsumerWidget {
   }
 }
 
+/// One row of the sectioned tray list: a shelf header or a tab/folder row
+/// (PLAN §6.4). Headers are rendered but never reordered; item rows keep
+/// their index into the flat `primaryRows` the reorder logic works on.
+sealed class _ShelfRow {
+  const _ShelfRow();
+
+  String get key;
+}
+
+class _ShelfHeaderRow extends _ShelfRow {
+  final String title;
+
+  /// The shelf a row dropped right below this header lands on.
+  final TabShelf shelf;
+
+  const _ShelfHeaderRow(this.title, this.shelf);
+
+  @override
+  String get key => 'shelf-header-${shelf.name}';
+}
+
+class _ShelfItemRow extends _ShelfRow {
+  final TabViewItem item;
+  final int primaryIndex;
+
+  /// Whether the row sits in the pinned section and renders compact.
+  final bool pinned;
+
+  const _ShelfItemRow(this.item, this.primaryIndex, {required this.pinned});
+
+  @override
+  String get key => item.tabId;
+}
+
 class _TabListView extends HookConsumerWidget {
   final ScrollController scrollController;
   final bool tabsReorderable;
@@ -319,6 +394,14 @@ class _TabListView extends HookConsumerWidget {
   });
 
   static const _itemHeight = 86.0;
+  static const _pinnedRowHeight = CompactTabRow.defaultHeight + 4.0;
+  static const _headerHeight = ShelfSectionHeader.height;
+
+  static double _heightOf(_ShelfRow row) => switch (row) {
+    _ShelfHeaderRow() => _headerHeight,
+    _ShelfItemRow(:final pinned, :final item) =>
+      pinned && !item.isFolder ? _pinnedRowHeight : _itemHeight,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -403,17 +486,26 @@ class _TabListView extends HookConsumerWidget {
       for (final summary in spaceTabSummaries) summary.id: summary.folderId,
     };
     final splitMembers = <String, List<String>>{};
+    final splitByTab = <String, SplitMembership>{};
     final membersBySplitId = <String, List<TabSummary>>{};
     for (final summary in spaceTabSummaries) {
       final splitId = summary.splitId;
       if (splitId == null) continue;
       membersBySplitId.putIfAbsent(splitId, () => []).add(summary);
     }
-    for (final members in membersBySplitId.values) {
+    for (final MapEntry(key: splitId, value: members)
+        in membersBySplitId.entries) {
       members.sort((a, b) => (a.splitIndex ?? 0).compareTo(b.splitIndex ?? 0));
       final ids = [for (final member in members) member.id];
-      for (final id in ids) {
+      for (final (index, id) in ids.indexed) {
         splitMembers[id] = ids;
+        if (ids.length > 1) {
+          splitByTab[id] = SplitMembership(
+            splitId: splitId,
+            index: index,
+            count: ids.length,
+          );
+        }
       }
     }
 
@@ -455,20 +547,62 @@ class _TabListView extends HookConsumerWidget {
       primaryRows = [
         for (final item in visibleItems.value)
           switch (item) {
-            TabListStandaloneItem(:final tabId, :final depth) =>
-              TabViewItem.standalone(tabId: tabId, depth: depth),
+            TabListStandaloneItem(:final tabId, :final depth, :final shelf) =>
+              TabViewItem.standalone(tabId: tabId, depth: depth, shelf: shelf),
             final TabListParentGroup g =>
               showHierarchicalTabs
                   ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(tabId: g.tabId, depth: g.depth),
+                  : TabViewItem.standalone(
+                      tabId: g.tabId,
+                      depth: g.depth,
+                      shelf: g.shelf,
+                    ),
             final TabListChildItem c =>
               showHierarchicalTabs
                   ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(tabId: c.tabId, depth: c.depth),
+                  : TabViewItem.standalone(
+                      tabId: c.tabId,
+                      depth: c.depth,
+                      shelf: c.shelf,
+                    ),
             final TabListFolderItem f => TabViewItem.folder(folderItem: f),
           },
       ];
     }
+
+    // Section the list by shelf (PLAN §6.4): the pinned rows the grouping
+    // provider already leads with become a compact "Pinned" section, the rest
+    // the main list. A child row belongs to its root's section, so a pinned
+    // subtree stays together. Search results are one flat list.
+    final sectioned = !hasActiveSearch;
+    var pinnedCount = 0;
+    if (sectioned) {
+      final pinnedRootIds = {
+        for (final row in primaryRows)
+          if (row.shelf == TabShelf.pinned && row.childItem == null) row.tabId,
+      };
+      while (pinnedCount < primaryRows.length) {
+        final row = primaryRows[pinnedCount];
+        final child = row.childItem;
+        final inPinned =
+            row.shelf == TabShelf.pinned ||
+            (child != null && pinnedRootIds.contains(child.rootId));
+        if (!inPinned) break;
+        pinnedCount++;
+      }
+    }
+    // While reordering, an empty pinned section still shows its header so a
+    // row can be dragged into it.
+    final showPinnedSection = sectioned && (pinnedCount > 0 || reorderEnabled);
+
+    final displayRows = <_ShelfRow>[
+      if (showPinnedSection) const _ShelfHeaderRow('Pinned', TabShelf.pinned),
+      for (var i = 0; i < pinnedCount; i++)
+        _ShelfItemRow(primaryRows[i], i, pinned: true),
+      if (showPinnedSection) const _ShelfHeaderRow('Tabs', TabShelf.normal),
+      for (var i = pinnedCount; i < primaryRows.length; i++)
+        _ShelfItemRow(primaryRows[i], i, pinned: false),
+    ];
 
     final tabSuggestionsEnabled = ref.watch(
       persistedBoolProvider(PersistedBoolKey.tabSuggestions),
@@ -479,25 +613,31 @@ class _TabListView extends HookConsumerWidget {
         : EquatableValue(<TabEntity>[]);
 
     final itemCount =
-        primaryRows.length +
+        displayRows.length +
         //Limit to 3 sugegstions for now
         math.min<int>(suggestedTabEntities.value.length, 3);
-    final displayItemCount = reorderEnabled ? primaryRows.length : itemCount;
+    final displayItemCount = reorderEnabled ? displayRows.length : itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && activeTab != null) {
-          final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
+          final index = displayRows.indexWhere(
+            (row) => row is _ShelfItemRow && row.item.tabId == activeTab,
+          );
 
           if (index > -1) {
             final viewportDimension =
                 scrollController.position.viewportDimension;
-            final tabStart = index * _itemHeight;
+            var tabStart = 0.0;
+            for (var i = 0; i < index; i++) {
+              tabStart += _heightOf(displayRows[i]);
+            }
+            final rowHeight = _heightOf(displayRows[index]);
 
             final targetOffset =
-                (tabStart - viewportDimension / 2 + _itemHeight / 2).clamp(
+                (tabStart - viewportDimension / 2 + rowHeight / 2).clamp(
                   0.0,
                   scrollController.position.maxScrollExtent,
                 );
@@ -518,7 +658,29 @@ class _TabListView extends HookConsumerWidget {
       });
 
       return null;
-    }, [activeTab, primaryRows.length]);
+    }, [activeTab, displayRows.length]);
+
+    Widget buildHeader(_ShelfHeaderRow row) {
+      return SizedBox(
+        key: Key(row.key),
+        height: _headerHeight,
+        child: ShelfSectionHeader(title: row.title),
+      );
+    }
+
+    Widget buildTabRow(_ShelfItemRow row) {
+      final item = row.item;
+      return _TabDraggable(
+        tabId: item.tabId,
+        onClose: onClose,
+        sourceSearchQuery: item.sourceSearchQuery,
+        height: _heightOf(row),
+        groupToggle: row.pinned ? null : _listGroupToggleFor(item),
+        depth: _depthFor(item),
+        compact: row.pinned,
+        split: splitByTab[item.tabId],
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -527,49 +689,45 @@ class _TabListView extends HookConsumerWidget {
               padding: const EdgeInsets.only(bottom: 56),
               controller: scrollController,
               itemCount: displayItemCount,
-              itemExtent: _itemHeight,
               itemBuilder: (context, index) {
-                if (index < primaryRows.length) {
-                  final row = primaryRows[index];
+                if (index < displayRows.length) {
+                  final row = displayRows[index];
+                  switch (row) {
+                    case _ShelfHeaderRow():
+                      return buildHeader(row);
+                    case _ShelfItemRow(:final item):
+                      if (item.isFolder) {
+                        return CustomDraggable(
+                          key: Key(item.tabId),
+                          child: _FolderRow(
+                            folderItem: item.folderItem!,
+                            height: _itemHeight,
+                          ),
+                        );
+                      }
 
-                  if (row.isFolder) {
-                    return CustomDraggable(
-                      key: Key(row.tabId),
-                      child: _FolderRow(
-                        folderItem: row.folderItem!,
-                        height: _itemHeight,
-                      ),
-                    );
+                      final tab = CustomDraggable(
+                        key: Key(item.tabId),
+                        data: TabDragData(item.tabId),
+                        child: buildTabRow(row),
+                      );
+
+                      return TabDropTarget(
+                        targetTabId: item.tabId,
+                        child: TabContextMenuDraggable(
+                          tabId: item.tabId,
+                          data: tab.data! as TabDragData,
+                          feedbackSize: Size(
+                            MediaQuery.of(context).size.width,
+                            _heightOf(row),
+                          ),
+                          child: tab.child,
+                        ),
+                      );
                   }
-
-                  final tab = CustomDraggable(
-                    key: Key(row.tabId),
-                    data: TabDragData(row.tabId),
-                    child: _TabDraggable(
-                      tabId: row.tabId,
-                      onClose: onClose,
-                      sourceSearchQuery: row.sourceSearchQuery,
-                      height: _itemHeight,
-                      groupToggle: _listGroupToggleFor(row),
-                      depth: _depthFor(row),
-                    ),
-                  );
-
-                  return TabDropTarget(
-                    targetTabId: row.tabId,
-                    child: TabContextMenuDraggable(
-                      tabId: row.tabId,
-                      data: tab.data! as TabDragData,
-                      feedbackSize: Size(
-                        MediaQuery.of(context).size.width,
-                        _itemHeight,
-                      ),
-                      child: tab.child,
-                    ),
-                  );
                 }
 
-                final suggestedIndex = index - primaryRows.length;
+                final suggestedIndex = index - displayRows.length;
                 final entity = suggestedTabEntities.value[suggestedIndex];
                 final tab = CustomDraggable(
                   key: Key('suggested_${entity.tabId}'),
@@ -591,27 +749,67 @@ class _TabListView extends HookConsumerWidget {
               scrollController: scrollController,
               padding: const EdgeInsets.only(bottom: 56),
               itemCount: displayItemCount,
-              itemExtent: _itemHeight,
               // Drag handles are supplied per item so the drag arms later than
               // the long-press context menu, and so the non-reorderable
-              // suggestion rows don't get one at all.
+              // header rows don't get one at all.
               buildDefaultDragHandles: false,
               onReorderStart: (index) {
                 ref.read(willAcceptDropProvider.notifier).clear();
               },
               onReorderItem: (oldIndex, newIndex) async {
-                //Suggestions are at the end and not reorderable, so skip
-                if (oldIndex >= primaryRows.length) {
+                if (oldIndex >= displayRows.length) {
                   return;
+                }
+                final moving = displayRows[oldIndex];
+                if (moving is! _ShelfItemRow) {
+                  return;
+                }
+
+                // Display indices → the flat primary rows the reorder logic
+                // walks: headers are skipped, and the shelf the drop lands on
+                // is the nearest header above the slot.
+                final remaining = displayRows.toList()..removeAt(oldIndex);
+                final insertAt = newIndex.clamp(0, remaining.length);
+                var primaryNewIndex = 0;
+                TabShelf? targetShelf;
+                for (var i = 0; i < insertAt; i++) {
+                  switch (remaining[i]) {
+                    case _ShelfItemRow():
+                      primaryNewIndex++;
+                    case _ShelfHeaderRow(:final shelf):
+                      targetShelf = shelf;
+                  }
+                }
+
+                var effectivePinnedTabIds = pinnedTabIds;
+                final movingTabId = moving.item.tabId;
+                if (showPinnedSection &&
+                    targetShelf != null &&
+                    !moving.item.isFolder &&
+                    targetShelf != moving.item.shelf) {
+                  // Crossing a section changes the shelf (PLAN §6.4). The row
+                  // lands at the end of its new shelf; the reorder below then
+                  // puts it where it was dropped.
+                  final changed = await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .setShelf(
+                        movingTabId,
+                        targetShelf,
+                        activeSpaceUuid: spaceUuid,
+                      );
+                  if (!changed) return;
+                  effectivePinnedTabIds = targetShelf == TabShelf.pinned
+                      ? {...pinnedTabIds, movingTabId}
+                      : ({...pinnedTabIds}..remove(movingTabId));
                 }
 
                 final result = buildTabViewReorderResult(
                   visibleItems: primaryRows,
                   treeRows: treeRows,
                   collapsedGroups: collapsedGroups,
-                  pinnedTabIds: pinnedTabIds,
-                  oldIndex: oldIndex,
-                  newIndex: newIndex,
+                  pinnedTabIds: effectivePinnedTabIds,
+                  oldIndex: moving.primaryIndex,
+                  newIndex: primaryNewIndex,
                   tabListDirection: tabListDirection,
                   hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
@@ -633,56 +831,38 @@ class _TabListView extends HookConsumerWidget {
                     );
               },
               itemBuilder: (context, index) {
-                if (index < primaryRows.length) {
-                  final row = primaryRows[index];
+                final row = displayRows[index];
+                switch (row) {
+                  case _ShelfHeaderRow():
+                    return buildHeader(row);
+                  case _ShelfItemRow(:final item):
+                    if (item.isFolder) {
+                      return CustomDraggable(
+                        key: Key(item.tabId),
+                        child: ReorderableHoldDragListener(
+                          index: index,
+                          enabled: false,
+                          child: _FolderRow(
+                            folderItem: item.folderItem!,
+                            height: _itemHeight,
+                          ),
+                        ),
+                      );
+                    }
 
-                  if (row.isFolder) {
                     return CustomDraggable(
-                      key: Key(row.tabId),
+                      key: Key(item.tabId),
+                      data: TabDragData(item.tabId),
                       child: ReorderableHoldDragListener(
                         index: index,
-                        enabled: false,
-                        child: _FolderRow(
-                          folderItem: row.folderItem!,
-                          height: _itemHeight,
+                        child: TabContextMenuDraggable(
+                          tabId: item.tabId,
+                          feedbackSize: Size.zero,
+                          externalDrag: true,
+                          child: buildTabRow(row),
                         ),
                       ),
                     );
-                  }
-
-                  return CustomDraggable(
-                    key: Key(row.tabId),
-                    data: TabDragData(row.tabId),
-                    child: ReorderableHoldDragListener(
-                      index: index,
-                      child: TabContextMenuDraggable(
-                        tabId: row.tabId,
-                        feedbackSize: Size.zero,
-                        externalDrag: true,
-                        child: _TabDraggable(
-                          tabId: row.tabId,
-                          onClose: onClose,
-                          sourceSearchQuery: row.sourceSearchQuery,
-                          height: _itemHeight,
-                          groupToggle: _listGroupToggleFor(row),
-                          depth: _depthFor(row),
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  final suggestedIndex = index - primaryRows.length;
-                  final entity = suggestedTabEntities.value[suggestedIndex];
-
-                  return CustomDraggable(
-                    key: Key('suggested_${entity.tabId}'),
-                    child: _TabDraggable(
-                      tabId: entity.tabId,
-                      onClose: onClose,
-                      suggestedContainerId: containerId,
-                      height: _itemHeight,
-                    ),
-                  );
                 }
               },
             ),
@@ -813,6 +993,10 @@ class ViewTabListWidget extends HookConsumerWidget {
                     tabsViewMode: TabsViewMode.list,
                   ),
             ),
+            // The Essentials shelf sits above the scrolling list, the way
+            // Zen keeps its strip at the top of the sidebar (PLAN §6.4).
+            if (!isSyncedScope)
+              SliverToBoxAdapter(child: EssentialsGrid(onSelected: onClose)),
           ],
           body: _TabListView(
             scrollController: scrollController,
