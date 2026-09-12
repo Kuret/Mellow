@@ -133,6 +133,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'globalDesktopMode': DriftSqlType.bool,
   'unmountGeckoViewOffRoute': DriftSqlType.bool,
   'maxLiveTabs': DriftSqlType.int,
+  'separateEssentials': DriftSqlType.bool,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be

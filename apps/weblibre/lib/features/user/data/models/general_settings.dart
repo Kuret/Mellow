@@ -86,7 +86,7 @@ enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 /// Row kind rendered inside the quick tab switcher bar. [TabBarStackingMode]
 /// decides which row(s) are shown; this enum identifies a single row.
-enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
+enum QuickTabSwitcherMode { lastUsedTabs, containerTabs, spaceTabs }
 
 /// Layout of the quick tab switcher bar. Merges the former
 /// "show tab switcher bar" toggle and [QuickTabSwitcherMode] selection.
@@ -94,12 +94,16 @@ enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
 /// [accordion] renders all containers as header chips with the selected
 /// container's tabs expanded inline. [twoLevel] stacks a container-tabs row
 /// on top of a recently-used row. [disabled] hides the bar entirely.
+/// [spaceTabs] puts a row of space chips above the selected space's tab
+/// chips (PLAN §9 W5); on a wide rail the second row becomes the three-shelf
+/// structure the tray renders.
 enum TabBarStackingMode {
   lastUsedTabs,
   containerTabs,
   accordion,
   twoLevel,
   disabled,
+  spaceTabs,
 }
 
 enum TabIntentOpenSetting { regular, private, ask }
@@ -494,6 +498,11 @@ class GeneralSettings with FastEquatable {
   /// [defaultMaxLiveTabs].
   final int maxLiveTabs;
 
+  /// Zen's `zen.workspaces.separate-essentials` (PLAN §6.4, DESIGN OPEN-3):
+  /// with it on, the Essentials strip is keyed on the current space's
+  /// container; with it off, every essential shows in every space.
+  final bool separateEssentials;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -580,6 +589,7 @@ class GeneralSettings with FastEquatable {
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
     required this.maxLiveTabs,
+    required this.separateEssentials,
   });
 
   GeneralSettings.withDefaults({
@@ -668,6 +678,7 @@ class GeneralSettings with FastEquatable {
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
     int? maxLiveTabs,
+    bool? separateEssentials,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -789,7 +800,8 @@ class GeneralSettings with FastEquatable {
        maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
          minMaxLiveTabs,
          maxMaxLiveTabs,
-       );
+       ),
+       separateEssentials = separateEssentials ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -892,11 +904,20 @@ class GeneralSettings with FastEquatable {
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
   /// degrades to accordion (the default mode, which has a vertical form) on the
-  /// narrow vertical rail, where two stacked chip lists have no room.
-  TabBarStackingMode effectiveTabBarStackingMode() {
+  /// *narrow* vertical rail, where two stacked chip lists have no room; a wide
+  /// rail ([isWideRail]) keeps both levels. [viewportWidth] feeds the
+  /// wide-rail check; left unset, only [railWidth] decides — the way the
+  /// toolbar preview judges it.
+  TabBarStackingMode effectiveTabBarStackingMode({double? viewportWidth}) {
     var mode = tabBarStackingMode;
 
-    if (tabBarPosition.isVertical && mode == TabBarStackingMode.twoLevel) {
+    if (tabBarPosition.isVertical &&
+        mode == TabBarStackingMode.twoLevel &&
+        !isWideRail(
+          isVertical: true,
+          railWidth: railWidth,
+          viewportWidth: viewportWidth ?? double.infinity,
+        )) {
       mode = TabBarStackingMode.accordion;
     }
 
@@ -999,5 +1020,6 @@ class GeneralSettings with FastEquatable {
     desktopModeSites,
     unmountGeckoViewOffRoute,
     maxLiveTabs,
+    separateEssentials,
   ];
 }

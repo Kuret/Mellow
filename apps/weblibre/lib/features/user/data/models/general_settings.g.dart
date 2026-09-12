@@ -207,6 +207,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings maxLiveTabs(int maxLiveTabs);
 
+  GeneralSettings separateEssentials(bool separateEssentials);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -300,6 +302,7 @@ abstract class _$GeneralSettingsCWProxy {
     List<String> desktopModeSites,
     bool unmountGeckoViewOffRoute,
     int maxLiveTabs,
+    bool separateEssentials,
   });
 }
 
@@ -674,6 +677,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings maxLiveTabs(int maxLiveTabs) =>
       call(maxLiveTabs: maxLiveTabs);
 
+  @override
+  GeneralSettings separateEssentials(bool separateEssentials) =>
+      call(separateEssentials: separateEssentials);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -770,6 +777,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? desktopModeSites = const $CopyWithPlaceholder(),
     Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
+    Object? separateEssentials = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1264,6 +1272,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.maxLiveTabs
           // ignore: cast_nullable_to_non_nullable
           : maxLiveTabs as int,
+      separateEssentials:
+          separateEssentials == const $CopyWithPlaceholder() ||
+              separateEssentials == null
+          ? _value.separateEssentials
+          // ignore: cast_nullable_to_non_nullable
+          : separateEssentials as bool,
     );
   }
 }
@@ -1449,6 +1463,7 @@ GeneralSettings _$GeneralSettingsFromJson(
       .toList(),
   unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
+  separateEssentials: json['separateEssentials'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1558,6 +1573,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'desktopModeSites': instance.desktopModeSites,
   'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
   'maxLiveTabs': instance.maxLiveTabs,
+  'separateEssentials': instance.separateEssentials,
 };
 
 const _$ThemeModeEnumMap = {
@@ -1654,6 +1670,7 @@ const _$TabBarStackingModeEnumMap = {
   TabBarStackingMode.accordion: 'accordion',
   TabBarStackingMode.twoLevel: 'twoLevel',
   TabBarStackingMode.disabled: 'disabled',
+  TabBarStackingMode.spaceTabs: 'spaceTabs',
 };
 
 const _$TabChipCloseButtonModeEnumMap = {
