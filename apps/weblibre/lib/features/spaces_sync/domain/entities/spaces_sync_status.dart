@@ -27,6 +27,7 @@ class SpacesSyncStatus with FastEquatable {
     this.writesBlockedReason,
     this.engineVersionSeen,
     this.engineEnabled,
+    this.lastHealedCount = 0,
     this.syncing = false,
   });
 
@@ -48,6 +49,11 @@ class SpacesSyncStatus with FastEquatable {
   /// `null` until the first sync has looked.
   final bool? engineEnabled;
 
+  /// How many records the last sync re-applied from the desktop because
+  /// uploads were off and this device had diverged from them (the read-only
+  /// heal); `0` when uploads are on or nothing had diverged.
+  final int lastHealedCount;
+
   final bool syncing;
 
   SpacesSyncStatus copyWith({
@@ -56,6 +62,7 @@ class SpacesSyncStatus with FastEquatable {
     Object? writesBlockedReason = _absent,
     int? engineVersionSeen,
     bool? engineEnabled,
+    int? lastHealedCount,
     bool? syncing,
   }) => SpacesSyncStatus(
     lastSyncAt: lastSyncAt ?? this.lastSyncAt,
@@ -65,6 +72,7 @@ class SpacesSyncStatus with FastEquatable {
         : writesBlockedReason as String?,
     engineVersionSeen: engineVersionSeen ?? this.engineVersionSeen,
     engineEnabled: engineEnabled ?? this.engineEnabled,
+    lastHealedCount: lastHealedCount ?? this.lastHealedCount,
     syncing: syncing ?? this.syncing,
   );
 
@@ -77,6 +85,7 @@ class SpacesSyncStatus with FastEquatable {
     writesBlockedReason,
     engineVersionSeen,
     engineEnabled,
+    lastHealedCount,
     syncing,
   ];
 }

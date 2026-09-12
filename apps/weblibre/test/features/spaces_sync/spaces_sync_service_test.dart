@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -370,6 +371,111 @@ void main() {
       expect(harness.settings.current.spacesSyncBaselineDone, isTrue);
     },
   );
+  Iterable<http.Request> idFetches(FakeSyncServer server) => server.fetches
+      .where((request) => request.url.queryParameters.containsKey('ids'));
+
+  test(
+    'with uploads off, records deleted here are healed from the desktop',
+    () async {
+      final server = serverWithRemoteState();
+      final harness = await ServiceHarness.open(
+        server: server,
+        initialSettings: settledSettings(server, writesEnabled: false),
+      );
+      await seedLocalState(harness);
+      await storeServerDigests(harness);
+      // The user deleted the desktop's space on the phone and closed its
+      // tab: both would be tombstones if uploads were on.
+      await harness.db.syncStateDao.recordDeletion(remoteSpace, 'space');
+      await harness.db.tabDao.addClosedTabTombstones(['rt1']);
+
+      await harness.container
+          .read(spacesSyncServiceProvider.notifier)
+          .sync(reason: 'test');
+
+      final status = harness.container.read(spacesSyncServiceProvider);
+      expect(status.lastError, isNull);
+      expect(server.postCount, 0);
+      // The space, its tab and the layout (which projected differently
+      // without the space) came back from the desktop.
+      expect(status.lastHealedCount, 3);
+      expect(
+        await harness.db.spaceDao.getByUuid(remoteSpace).getSingleOrNull(),
+        isNotNull,
+      );
+      expect(await tabIds(harness.db), contains('rt1'));
+      expect(idFetches(server), isNotEmpty);
+      // The deletion notes are settled: switching uploads back on must not
+      // tombstone what the desktop still has.
+      expect(
+        await harness.db.syncStateDao.pendingDeletions(),
+        isNot(contains(remoteSpace)),
+      );
+      expect(
+        await harness.db.tabDao.allClosedTabTombstoneIds().get(),
+        isNot(contains('rt1')),
+      );
+
+      // Settled: the next run has nothing to heal.
+      await harness.container
+          .read(spacesSyncServiceProvider.notifier)
+          .sync(reason: 'again');
+      expect(
+        harness.container.read(spacesSyncServiceProvider).lastHealedCount,
+        0,
+      );
+    },
+  );
+
+  test('a record the desktop no longer has stays deleted', () async {
+    final server = serverWithRemoteState();
+    final harness = await ServiceHarness.open(
+      server: server,
+      initialSettings: settledSettings(server, writesEnabled: false),
+    );
+    await seedLocalState(harness);
+    await storeServerDigests(harness);
+    await harness.db.syncStateDao.putDigest('gone', 'tab', 'stale');
+    await harness.db.tabDao.addClosedTabTombstones(['gone']);
+
+    await harness.container
+        .read(spacesSyncServiceProvider.notifier)
+        .sync(reason: 'test');
+
+    expect(await tabIds(harness.db), isNot(contains('gone')));
+    // Not healed, so the note stays until uploads are on again.
+    expect(
+      await harness.db.tabDao.allClosedTabTombstoneIds().get(),
+      contains('gone'),
+    );
+  });
+
+  test('with uploads on, the heal pass does not run', () async {
+    final server = serverWithRemoteState();
+    final harness = await ServiceHarness.open(
+      server: server,
+      initialSettings: settledSettings(server),
+    );
+    await seedLocalState(harness);
+    await storeServerDigests(harness);
+    await harness.db.syncStateDao.recordDeletion(remoteSpace, 'space');
+
+    await harness.container
+        .read(spacesSyncServiceProvider.notifier)
+        .sync(reason: 'test');
+
+    // The local deletion wins through the digest diff instead.
+    expect(idFetches(server), isEmpty);
+    expect(
+      harness.container.read(spacesSyncServiceProvider).lastHealedCount,
+      0,
+    );
+    expect(
+      uploadedTombstones(server).map((r) => r['id']),
+      contains(remoteSpace),
+    );
+  });
+
   test('the kill switch blocks uploads', () async {
     final harness = await ServiceHarness.open(
       server: serverWithRemoteState(),

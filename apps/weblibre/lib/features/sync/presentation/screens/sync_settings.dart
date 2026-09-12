@@ -536,6 +536,8 @@ class SyncSettingsScreen extends HookConsumerWidget {
       if (status.engineEnabled == false)
         'Zen Spaces sync is not enabled on the desktop yet',
       if (status.writesBlockedReason case final reason?) reason,
+      if (status.lastHealedCount > 0)
+        'Restored ${status.lastHealedCount} items from the desktop',
       if (status.lastError case final error?) 'Last error: $error',
     ];
     return lines.join('\n');

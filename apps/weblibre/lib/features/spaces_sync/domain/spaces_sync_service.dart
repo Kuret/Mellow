@@ -59,6 +59,10 @@ const _periodicInterval = Duration(minutes: 1);
 const _localChangeDebounce = Duration(seconds: 3);
 const _tokenExpiryMargin = Duration(seconds: 60);
 
+/// Ids per `?ids=` request when the heal pass refetches by id: the storage
+/// server caps the list at 100.
+const _healFetchChunk = 100;
+
 /// Thrown when the outgoing batch fails [validateOutgoingBatch]: nothing
 /// leaves the device (PLAN §8.6 item 2).
 class OutgoingBatchRejected implements Exception {
@@ -70,6 +74,21 @@ class OutgoingBatchRejected implements Exception {
   String toString() =>
       'outgoing batch refused: ${violations.take(5).join('; ')}'
       '${violations.length > 5 ? ' (+${violations.length - 5} more)' : ''}';
+}
+
+/// The decrypted contents of one fetch.
+class _Decoded {
+  _Decoded({
+    required this.records,
+    required this.cleartexts,
+    required this.newestModified,
+  });
+
+  final List<ZenIncoming> records;
+  final List<Map<String, Object?>> cleartexts;
+
+  /// The largest `modified` among the fetched BSOs, if any carried one.
+  final double? newestModified;
 }
 
 /// Everything one sync run needs after the handshake.
@@ -92,6 +111,15 @@ class SpacesSyncService extends _$SpacesSyncService {
   Timer? _periodic;
   StreamSubscription<void>? _localChanges;
   var _foreground = true;
+
+  /// What the heal pass last re-applied per id — the remote digest it applied
+  /// and the local projection's digest afterwards (`null` when the id still
+  /// projected nothing). A record that still diverges the same way after a
+  /// re-apply cannot converge in read-only mode (a live tab projecting its
+  /// own title, the layout listing a local-only space) and is left alone
+  /// until either side changes; without this the pass would refetch it every
+  /// minute.
+  final _healAttempts = <String, ({String remote, String? local})>{};
 
   @override
   SpacesSyncStatus build() {
@@ -270,15 +298,20 @@ class SpacesSyncService extends _$SpacesSyncService {
       final applied = await _fetchAndApply(session, settings);
       settings = await settingsRepo.fetchSettings();
 
-      if (!settings.spacesSyncWritesEnabled) {
-        logger.i('spaces sync: uploads disabled by the kill switch');
-      } else if (writesBlockedReason == null) {
+      var healed = 0;
+      if (settings.spacesSyncWritesEnabled && writesBlockedReason == null) {
+        _healAttempts.clear();
         await _upload(
           session,
           settings,
           applied,
           tombstonesAllowed: !firstSync,
         );
+      } else {
+        if (!settings.spacesSyncWritesEnabled) {
+          logger.i('spaces sync: uploads disabled by the kill switch');
+        }
+        healed = await _healFromRemote(session);
       }
 
       state = state.copyWith(
@@ -287,6 +320,7 @@ class SpacesSyncService extends _$SpacesSyncService {
         writesBlockedReason: writesBlockedReason,
         engineVersionSeen: engine.version,
         engineEnabled: true,
+        lastHealedCount: healed,
       );
     } on SyncAuthException catch (e, s) {
       // The Hawk token expired mid-run; the next run fetches a fresh one.
@@ -401,32 +435,18 @@ class SpacesSyncService extends _$SpacesSyncService {
       }
     }
 
-    final records = <ZenIncoming>[];
-    final cleartexts = <Map<String, Object?>>[];
-    double? newest = fetched.lastModified;
-    for (final bso in bsos.values) {
-      try {
-        final payload = jsonDecode(bso.payload) as Map<String, Object?>;
-        final cleartext = await _decrypt(session, payload);
-        cleartexts.add(cleartext);
-        records.add(ZenRecordCodec.decode(cleartext));
-      } catch (e, s) {
-        logger.e(
-          'spaces sync: record ${bso.id} could not be decrypted; skipped',
-          error: e,
-          stackTrace: s,
-        );
-      }
-      final modified = bso.modified;
-      if (modified != null && (newest == null || modified > newest)) {
-        newest = modified;
-      }
+    final decoded = await _decode(session, bsos.values);
+    final records = decoded.records;
+    var newest = fetched.lastModified;
+    if (decoded.newestModified case final modified?
+        when newest == null || modified > newest) {
+      newest = modified;
     }
 
     if (firstSync) {
       // The escape hatch: the whole collection as it was before this
       // profile ever wrote to it (PLAN §8.6 item 7).
-      await store.write(cleartexts);
+      await store.write(decoded.cleartexts);
     }
 
     final failed = records.isEmpty
@@ -449,6 +469,148 @@ class SpacesSyncService extends _$SpacesSyncService {
       for (final record in records)
         if (!failed.contains(_idOf(record))) _idOf(record),
     };
+  }
+
+  /// Decrypts and decodes [bsos]; a record that fails to decrypt is logged
+  /// and skipped.
+  Future<_Decoded> _decode(_Session session, Iterable<Bso> bsos) async {
+    final records = <ZenIncoming>[];
+    final cleartexts = <Map<String, Object?>>[];
+    double? newest;
+    for (final bso in bsos) {
+      try {
+        final payload = jsonDecode(bso.payload) as Map<String, Object?>;
+        final cleartext = await _decrypt(session, payload);
+        cleartexts.add(cleartext);
+        records.add(ZenRecordCodec.decode(cleartext));
+      } catch (e, s) {
+        logger.e(
+          'spaces sync: record ${bso.id} could not be decrypted; skipped',
+          error: e,
+          stackTrace: s,
+        );
+      }
+      final modified = bso.modified;
+      if (modified != null && (newest == null || modified > newest)) {
+        newest = modified;
+      }
+    }
+    return _Decoded(
+      records: records,
+      cleartexts: cleartexts,
+      newestModified: newest,
+    );
+  }
+
+  /// Read-only mode makes the desktop authoritative. While uploads are off a
+  /// record this device changed or deleted locally is never re-fetched —
+  /// `newer=` only returns what changed remotely — so the local divergence
+  /// would stick until the record happened to change on the desktop.
+  ///
+  /// Refetches by id every record whose stored digest no longer matches the
+  /// local projection (including records deleted here, which project
+  /// nothing) and re-applies what the server returns; ids the server no
+  /// longer has are genuinely gone remotely and stay gone. Healed ids lose
+  /// their local deletion notes so they do not turn into tombstones once
+  /// uploads are switched back on. Returns the number of live records
+  /// re-applied.
+  Future<int> _healFromRemote(_Session session) async {
+    final db = ref.read(tabDatabaseProvider);
+    final projectionSource = ref.read(spacesProjectionProvider);
+    final projection = await projectionSource.project();
+    final stored = await db.syncStateDao.allDigests();
+    final deletions = await db.syncStateDao.pendingDeletions();
+    final closedTabs = await db.tabDao.allClosedTabTombstoneIds().get();
+
+    String? localDigestOf(Map<String, ZenCleartext> records, String id) {
+      final record = records[id];
+      return record == null
+          ? null
+          : recordDigest(record.kind, record.data.toJson());
+    }
+
+    final localDigests = <String, String?>{};
+    final divergent = <String>{};
+    for (final entry in stored.entries) {
+      final local = localDigestOf(projection, entry.key);
+      localDigests[entry.key] = local;
+      if (local == entry.value.digest) {
+        continue;
+      }
+      final previous = _healAttempts[entry.key];
+      if (previous != null &&
+          previous.remote == entry.value.digest &&
+          previous.local == local) {
+        // Re-applied before and nothing moved since: structural divergence.
+        continue;
+      }
+      divergent.add(entry.key);
+    }
+    // Deleted here: these project nothing, so they diverge above already;
+    // listed again so the intent is explicit.
+    for (final id in deletions.keys.followedBy(closedTabs)) {
+      if (stored.containsKey(id) && !_healAttempts.containsKey(id)) {
+        divergent.add(id);
+      }
+    }
+    if (divergent.isEmpty) {
+      return 0;
+    }
+
+    final ids = divergent.toList();
+    final bsos = <Bso>[];
+    for (var start = 0; start < ids.length; start += _healFetchChunk) {
+      final chunk = ids.skip(start).take(_healFetchChunk);
+      final fetched = await session.client.fetchCollection(
+        spacesCollection,
+        ids: chunk,
+      );
+      bsos.addAll(fetched.records);
+    }
+    final decoded = await _decode(session, bsos);
+    // Gone remotely: remembered so they are not asked for again until the
+    // local side moves.
+    final returned = {for (final record in decoded.records) _idOf(record)};
+    for (final id in divergent.difference(returned)) {
+      _healAttempts[id] = (remote: stored[id]!.digest, local: localDigests[id]);
+    }
+    if (decoded.records.isEmpty) {
+      return 0;
+    }
+
+    final failed = await ref
+        .read(spacesApplierProvider)
+        .applyBatch(decoded.records, firstSync: false);
+    final healed = <String>{};
+    for (final record in decoded.records) {
+      if (record is ZenIncomingTombstone) {
+        continue;
+      }
+      final id = _idOf(record);
+      if (!failed.contains(id)) {
+        healed.add(id);
+      }
+    }
+    await db.syncStateDao.clearDeletions(healed);
+    await db.tabDao.deleteClosedTabTombstones(healed);
+
+    final after = await projectionSource.project();
+    final storedAfter = await db.syncStateDao.allDigests();
+    for (final id in returned) {
+      if (failed.contains(id)) {
+        continue;
+      }
+      final remote = storedAfter[id]?.digest;
+      if (remote != null) {
+        _healAttempts[id] = (remote: remote, local: localDigestOf(after, id));
+      } else {
+        _healAttempts.remove(id);
+      }
+    }
+    logger.i(
+      'spaces sync: healed ${healed.length} records from remote (uploads off)',
+    );
+    return healed.length;
   }
 
   static String _idOf(ZenIncoming record) => switch (record) {
