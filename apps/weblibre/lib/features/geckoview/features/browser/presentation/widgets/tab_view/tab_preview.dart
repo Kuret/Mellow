@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -130,6 +131,9 @@ class GridTabPreview extends HookConsumerWidget {
   /// nesting level at a glance.
   final int depth;
 
+  /// Set when the tab is a split member (PLAN §6.5): badges the favicon.
+  final SplitMembership? split;
+
   const GridTabPreview({
     required this.tabId,
     required this.isActive,
@@ -142,6 +146,7 @@ class GridTabPreview extends HookConsumerWidget {
     this.trailingChild,
     this.groupToggle,
     this.depth = 0,
+    this.split,
     super.key,
   });
 
@@ -216,12 +221,19 @@ class GridTabPreview extends HookConsumerWidget {
                     )
                   else
                     Center(
-                      child: isCold
-                          ? ColdTabBadge(
-                              size: 48,
-                              child: TabIcon(tabState: tabState, iconSize: 48),
-                            )
-                          : TabIcon(tabState: tabState, iconSize: 48),
+                      child: SplitBadgeOverlay(
+                        split: split,
+                        size: 48,
+                        child: isCold
+                            ? ColdTabBadge(
+                                size: 48,
+                                child: TabIcon(
+                                  tabState: tabState,
+                                  iconSize: 48,
+                                ),
+                              )
+                            : TabIcon(tabState: tabState, iconSize: 48),
+                      ),
                     ),
                   // Close button overlay
                   if (onDelete != null ||
@@ -449,6 +461,10 @@ class ListTabPreview extends HookConsumerWidget {
   /// (vertical bar + L-stub) on the leading edge of the tile.
   final int depth;
 
+  /// Set when the tab is a split member (PLAN §6.5): adds the split badge to
+  /// the favicon and the accent bar the members share.
+  final SplitMembership? split;
+
   const ListTabPreview({
     required this.tabId,
     required this.isActive,
@@ -460,6 +476,7 @@ class ListTabPreview extends HookConsumerWidget {
     this.trailingChild,
     this.groupToggle,
     this.depth = 0,
+    this.split,
     super.key,
   });
 
@@ -562,7 +579,7 @@ class ListTabPreview extends HookConsumerWidget {
             padding: const EdgeInsets.only(left: 12.0, top: 10.0, bottom: 10.0),
             child: Row(
               children: [
-                leadingWidget,
+                SplitBadgeOverlay(split: split, size: 32, child: leadingWidget),
                 const SizedBox(width: 14.0),
                 Expanded(
                   child: Column(
@@ -661,9 +678,12 @@ class ListTabPreview extends HookConsumerWidget {
       ),
     );
     // A cold tab is dimmed: no session behind it until it is tapped.
-    final card = isCold
-        ? Opacity(opacity: ColdTabBadge.opacity, child: content)
-        : content;
+    final card = SplitAccentBar(
+      split: split,
+      child: isCold
+          ? Opacity(opacity: ColdTabBadge.opacity, child: content)
+          : content,
+    );
 
     if (depth <= 0) {
       return card;
@@ -777,6 +797,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
 
   final Widget? groupToggle;
   final int depth;
+  final SplitMembership? split;
 
   const SingleGridTabPreview({
     required this.tabId,
@@ -787,6 +808,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
     this.onBeforeDelete,
     this.groupToggle,
     this.depth = 0,
+    this.split,
     super.key,
   });
 
@@ -808,6 +830,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
         showPinBadge: true,
         groupToggle: groupToggle,
         depth: depth,
+        split: split,
         onTap: () async {
           if (tabId != activeTabId) {
             // Offer to locate the match within the page instead of opening
@@ -933,6 +956,7 @@ class SingleListTabPreview extends HookConsumerWidget {
 
   final Widget? groupToggle;
   final int depth;
+  final SplitMembership? split;
 
   const SingleListTabPreview({
     required this.tabId,
@@ -943,6 +967,7 @@ class SingleListTabPreview extends HookConsumerWidget {
     this.onBeforeDelete,
     this.groupToggle,
     this.depth = 0,
+    this.split,
     super.key,
   });
 
@@ -960,6 +985,7 @@ class SingleListTabPreview extends HookConsumerWidget {
         showPinBadge: true,
         groupToggle: groupToggle,
         depth: depth,
+        split: split,
         onTap: () async {
           if (tabId != activeTabId) {
             // Offer to locate the match within the page instead of opening
