@@ -1,8 +1,12 @@
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 
 void main() {
   late TabDatabase db;
@@ -32,7 +36,7 @@ void main() {
     final rows = await db.tabDao.historyExclusionTabs().get();
 
     expect(
-      {for (final row in rows) row.tabId: row.excluded != 0},
+      {for (final row in rows) row.tabId: row.excluded},
       {
         'excluded-tab': true,
         'recorded-tab': false,
@@ -42,39 +46,27 @@ void main() {
     );
   });
 
-  test('excludes a container without cookie isolation', () async {
-    // The invariant this replaced tied exclude-from-history to a Gecko
-    // contextId, which left plain containers unable to use the setting at all.
-    await _insertContainer(
-      db,
-      'no-isolation',
-      excludeFromHistory: true,
-      contextualIdentity: null,
-    );
-    await _insertTab(db, id: 'tab', containerId: 'no-isolation');
+  test('excludes a container regardless of pinning', () async {
+    // Every container's Gecko contextId is simply its own id now (no
+    // separate cookie-isolation identity), so a plain container can use
+    // exclude-from-history just like any other.
+    await _insertContainer(db, 'plain', excludeFromHistory: true);
+    await _insertTab(db, id: 'tab', containerId: 'plain');
 
     final rows = await db.tabDao.historyExclusionTabs().get();
 
-    expect(rows.single.excluded, isNot(0));
-    expect(await db.containerDao.excludedHistoryContextIds().get(), isEmpty);
+    expect(rows.single.excluded, isTrue);
+    expect(await db.containerDao.excludedHistoryContextIds().get(), [
+      'plain',
+    ]);
   });
 
-  test('reports contextIds of excluded cookie-isolated containers', () async {
-    await _insertContainer(
-      db,
-      'isolated-excluded',
-      excludeFromHistory: true,
-      contextualIdentity: 'context-a',
-    );
-    await _insertContainer(
-      db,
-      'isolated-recorded',
-      excludeFromHistory: false,
-      contextualIdentity: 'context-b',
-    );
+  test('reports contextIds of excluded containers', () async {
+    await _insertContainer(db, 'isolated-excluded', excludeFromHistory: true);
+    await _insertContainer(db, 'isolated-recorded', excludeFromHistory: false);
 
     expect(await db.containerDao.excludedHistoryContextIds().get(), [
-      'context-a',
+      'isolated-excluded',
     ]);
   });
 
@@ -107,10 +99,9 @@ void main() {
 
     expect(await _indexedCanonicals(db), ['https://example.com/tab']);
 
-    await db.customStatement('UPDATE container SET metadata = ? WHERE id = ?', [
-      '{"excludeFromHistory":true}',
-      'container',
-    ]);
+    await db.containerDao.upsertLocal(
+      ContainerLocalData(containerId: 'container', excludeFromHistory: true),
+    );
 
     expect(await _indexedCanonicals(db), isEmpty);
   });
@@ -120,7 +111,10 @@ void main() {
     await _insertContainer(db, 'recorded', excludeFromHistory: false);
     await _insertTab(db, id: 'tab', containerId: 'recorded');
 
-    expect((await db.tabDao.historyExclusionTabs().get()).single.excluded, 0);
+    expect(
+      (await db.tabDao.historyExclusionTabs().get()).single.excluded,
+      isFalse,
+    );
 
     await db.customStatement(
       "UPDATE tab SET container_id = 'excluded' WHERE id = 'tab'",
@@ -128,7 +122,7 @@ void main() {
 
     expect(
       (await db.tabDao.historyExclusionTabs().get()).single.excluded,
-      isNot(0),
+      isTrue,
     );
   });
 }
@@ -159,17 +153,12 @@ Future<void> _insertContainer(
   TabDatabase db,
   String id, {
   required bool excludeFromHistory,
-  String? contextualIdentity,
-}) {
-  final metadata = contextualIdentity == null
-      ? '{"excludeFromHistory":$excludeFromHistory}'
-      : '{"excludeFromHistory":$excludeFromHistory,'
-            '"contextualIdentity":"$contextualIdentity"}';
-
-  return db.customStatement(
-    'INSERT INTO container (id, color, order_key, is_pinned, metadata) '
-    'VALUES (?, 0, ?, 0, ?)',
-    [id, id, metadata],
+}) async {
+  await db.containerDao.addContainer(
+    ContainerData(id: id, name: id, orderKey: id),
+  );
+  await db.containerDao.upsertLocal(
+    ContainerLocalData(containerId: id, excludeFromHistory: excludeFromHistory),
   );
 }
 
@@ -178,9 +167,11 @@ Future<void> _insertTab(
   required String id,
   required String? containerId,
 }) {
-  return db.customStatement(
-    'INSERT INTO tab (id, source, container_id, order_key, url, timestamp) '
-    'VALUES (?, 2, ?, ?, ?, 1)',
-    [id, containerId, id, 'https://example.com/$id'],
+  return db.tabDao.insertTab(
+    id,
+    source: TabSource.manual,
+    parentId: const Value.absent(),
+    containerId: Value(containerId),
+    url: Value(Uri.parse('https://example.com/$id')),
   );
 }

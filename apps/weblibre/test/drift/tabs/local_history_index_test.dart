@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 
 void main() {
   late TabDatabase db;
@@ -183,11 +185,12 @@ Future<void> _insertContainer(
   TabDatabase db,
   String id, {
   required bool excludeFromIndex,
-}) {
-  return db.customStatement(
-    'INSERT INTO container (id, color, order_key, is_pinned, metadata) '
-    "VALUES (?, 0, ?, 0, ?)",
-    [id, id, '{"excludeFromIndex":$excludeFromIndex}'],
+}) async {
+  await db.containerDao.addContainer(
+    ContainerData(id: id, name: id, orderKey: id),
+  );
+  await db.containerDao.upsertLocal(
+    ContainerLocalData(containerId: id, excludeFromIndex: excludeFromIndex),
   );
 }
 
@@ -196,10 +199,9 @@ Future<void> _updateContainerExclude(
   String id, {
   required bool excludeFromIndex,
 }) {
-  return db.customStatement('UPDATE container SET metadata = ? WHERE id = ?', [
-    '{"excludeFromIndex":$excludeFromIndex}',
-    id,
-  ]);
+  return db.containerDao.upsertLocal(
+    ContainerLocalData(containerId: id, excludeFromIndex: excludeFromIndex),
+  );
 }
 
 Future<void> _insertTab(
