@@ -54,6 +54,15 @@ ContainerData _draft() =>
 
 Finder _switchTile(String title) => find.widgetWithText(SwitchListTile, title);
 
+/// Taps the switch tile titled [title], scrolling it into the 600 px test
+/// viewport first: the lower tiles of the form sit below it.
+Future<void> _tapSwitch(WidgetTester tester, String title) async {
+  final tile = _switchTile(title);
+  await tester.ensureVisible(tile);
+  await tester.pumpAndSettle();
+  await tester.tap(tile);
+}
+
 bool _switchValue(WidgetTester tester, String title) =>
     tester.widget<SwitchListTile>(_switchTile(title)).value;
 
@@ -86,8 +95,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), ' Work ');
-    await tester.tap(_switchTile('Clear Data on Exit'));
-    await tester.tap(_switchTile('Exclude from History'));
+    await _tapSwitch(tester, 'Clear Data on Exit');
+    await _tapSwitch(tester, 'Exclude from History');
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.check));
     await tester.pumpAndSettle();
@@ -172,7 +181,7 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(_switchTile('Exclude from Search Index'));
+    await _tapSwitch(tester, 'Exclude from Search Index');
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.check));
     await tester.pumpAndSettle();
