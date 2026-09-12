@@ -21,12 +21,14 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/home_wallpaper.dart';
+import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 import 'package:weblibre/features/wallpaper/domain/services/wallpaper_store.dart';
 
 part 'providers.g.dart';
@@ -39,21 +41,28 @@ WallpaperStore wallpaperStore(Ref ref) {
 /// The wallpaper to draw behind the home surface right now, or null when there
 /// is none.
 ///
-/// The selected container's own wallpaper wins over the profile-wide one; its
-/// blur and dim fall back to the profile's values when unset, so a container
-/// that only wants a different picture does not have to restate the treatment.
+/// The selected container's own wallpaper (kept in its local, never-synced
+/// row) wins over the profile-wide one; its blur and dim fall back to the
+/// profile's values when unset, so a container that only wants a different
+/// picture does not have to restate the treatment.
 @Riverpod()
 HomeWallpaper? resolvedHomeWallpaper(Ref ref) {
   final settings = ref.watch(generalSettingsWithDefaultsProvider);
-  final container = ref.watch(
-    selectedContainerDataProvider.select((value) => value.value),
-  );
+  final containerId = ref.watch(selectedContainerProvider);
+  final local = containerId == null ? null : _watchLocal(ref, containerId);
 
   return resolveHomeWallpaper(
     store: ref.watch(wallpaperStoreProvider),
     settings: settings,
-    container: container,
+    local: local,
   );
+}
+
+ContainerLocalData? _watchLocal(Ref ref, String containerId) {
+  final AsyncValue<ContainerLocalData> local = ref.watch(
+    watchContainerLocalProvider(containerId),
+  );
+  return local.value;
 }
 
 /// Deletes wallpapers nothing points at any more.
@@ -75,16 +84,19 @@ class WallpaperSweeper extends _$WallpaperSweeper {
         .read(generalSettingsRepositoryProvider.notifier)
         .fetchSettings();
 
-    final containers = await ref
-        .read(containerRepositoryProvider.notifier)
-        .getAllContainersWithCount();
+    final containerRepository = ref.read(containerRepositoryProvider.notifier);
+    final containers = await containerRepository.getAllContainersWithCount();
 
     final referenced = <String>{
       if (settings.homeWallpaperFile != null) settings.homeWallpaperFile!,
-      for (final container in containers)
-        if (container.metadata.wallpaper != null)
-          container.metadata.wallpaper!.file,
     };
+    for (final container in containers) {
+      final local = await containerRepository.getLocal(container.id);
+      final override = WallpaperOverride.fromStored(local.wallpaper);
+      if (override != null) {
+        referenced.add(override.file);
+      }
+    }
 
     final deleted = await ref
         .read(wallpaperStoreProvider)
@@ -101,9 +113,9 @@ class WallpaperSweeper extends _$WallpaperSweeper {
 HomeWallpaper? resolveHomeWallpaper({
   required WallpaperStore store,
   required GeneralSettings settings,
-  required ContainerData? container,
+  required ContainerLocalData? local,
 }) {
-  final override = container?.metadata.wallpaper;
+  final override = WallpaperOverride.fromStored(local?.wallpaper);
 
   if (override != null) {
     return HomeWallpaper(

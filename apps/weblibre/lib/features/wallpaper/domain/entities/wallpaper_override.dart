@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -54,7 +56,7 @@ class WallpaperOverride with FastEquatable {
   /// a value out of a hand-edited database must not be able to hand either one
   /// something invalid. The clamp cannot live in the primary constructor
   /// because copy_with_extension_gen requires its parameters to be initialising
-  /// formals — the same reason [ContainerMetadata] normalizes this way.
+  /// formals — the same reason `ContainerLocalData` stays a plain row.
   WallpaperOverride.withDefaults({
     required String file,
     double? blur,
@@ -67,6 +69,22 @@ class WallpaperOverride with FastEquatable {
 
   factory WallpaperOverride.fromJson(Map<String, dynamic> json) =>
       _$WallpaperOverrideFromJson(json);
+
+  /// Decodes the raw JSON text a `container_local.wallpaper` column holds;
+  /// null (no override) and malformed text both read as no override.
+  static WallpaperOverride? fromStored(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      return WallpaperOverride.fromJson(decoded);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// The inverse of [fromStored]: the text to keep in the local row.
+  String toStored() => jsonEncode(toJson());
 
   Map<String, dynamic> toJson() => _$WallpaperOverrideToJson(this);
 
