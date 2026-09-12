@@ -40,8 +40,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -177,11 +179,14 @@ class GestureControlService extends _$GestureControlService {
       case GestureAction.lastUsedTab:
         await tabRepository.selectPreviouslyOpenedTab(tabId);
       case GestureAction.togglePinTab:
-        final pinned =
-            ref.read(watchPinnedTabIdsProvider).value?.contains(tabId) ?? false;
+        final pinned = ref.read(pinnedTabIdsProvider).contains(tabId);
         await ref
             .read(tabDataRepositoryProvider.notifier)
-            .setPinned(tabId, pinned: !pinned);
+            .setShelf(
+              tabId,
+              pinned ? TabShelf.normal : TabShelf.pinned,
+              activeSpaceUuid: ref.read(selectedSpaceProvider),
+            );
       case GestureAction.nextContainer:
         await _switchContainer(ContainerCycleDirection.next);
       case GestureAction.previousContainer:
@@ -245,47 +250,30 @@ class GestureControlService extends _$GestureControlService {
     }
   }
 
-  /// Moves the selection one container along the chip order, wrapping at the
-  /// ends, and resumes that container's most recently used tab.
-  ///
-  /// Resuming a tab is what makes this useful from web content: leaving the
-  /// selected tab behind in another container would only ever land on the home
-  /// screen (see [shouldShowBrowserHome]), which is still what happens when the
-  /// target container has no tabs left.
-  ///
-  /// Unlike the tray's two-finger swipe this cannot offer to start the
-  /// container's proxy — a stroke gesture has no context to host the dialog —
-  /// so it relies on [SelectedContainer.setContainerId] refusing a container
-  /// whose routing is not ready, like the quick tab switcher does.
+  /// Steps the selected space one position through the space list and
+  /// resumes that space's latest tab, like the tray swipe does.
   Future<void> _switchContainer(ContainerCycleDirection direction) async {
-    // Containers are hidden entirely when their UI is off, and stepping through
-    // them would move browsing state the user cannot see.
+    // Spaces are hidden entirely when the container UI is off, and stepping
+    // through them would move browsing state the user cannot see.
     if (!ref.read(generalSettingsWithDefaultsProvider).showContainerUi) return;
 
-    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-    final cycleOrder = ref.read(containerCycleOrderProvider);
+    final spaces = ref.read(watchSpacesProvider).value;
+    if (spaces == null || spaces.length < 2) return;
     final index = adjacentContainerIndex(
-      cycleOrder.map((container) => container?.id).toList(),
-      ref.read(selectedContainerProvider),
+      spaces.map((space) => space.uuid).toList(),
+      ref.read(selectedSpaceProvider),
       direction,
     );
     if (index == null) return;
 
-    final container = cycleOrder[index];
-    if (container == null) {
-      ref.read(selectedContainerProvider.notifier).clearContainer();
-    } else {
-      final result = await ref
-          .read(selectedContainerProvider.notifier)
-          .setContainerId(container.id);
-      if (result == SetContainerResult.failed) return;
-    }
+    final space = spaces[index];
+    ref.read(selectedSpaceProvider.notifier).setSpace(space.uuid);
 
     if (!ref.mounted) return;
 
     await ref
         .read(tabRepositoryProvider.notifier)
-        .resumeLatestContainerTab(container?.id);
+        .resumeLatestSpaceTab(space.uuid);
   }
 
   /// Adds the current page to bookmarks, or removes it if already bookmarked,
