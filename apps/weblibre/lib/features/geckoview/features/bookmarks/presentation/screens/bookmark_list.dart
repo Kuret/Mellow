@@ -1074,7 +1074,7 @@ class BookmarkListScreen extends HookConsumerWidget {
         await GeckoBrowserService().openInCustomTab(
           url: url,
           private: false,
-          contextId: container?.metadata.contextualIdentity,
+          contextId: container?.id,
         );
     }
   }

@@ -125,7 +125,8 @@ class ContainerMenu extends HookConsumerWidget {
     final controller = this.controller ?? useMenuController();
 
     final container = this.container;
-    final contextualIdentity = container?.metadata.contextualIdentity;
+    // Every container is its own Gecko cookie jar: the contextId is the id.
+    final contextualIdentity = container?.id;
 
     Future<void> closeTabs({
       bool includeRegular = true,
@@ -149,8 +150,8 @@ class ContainerMenu extends HookConsumerWidget {
     }
 
     final canEdit = enabled && container != null;
-    // Non-null exactly when the clear-data item should show: it wipes a Gecko
-    // storage partition, which only an isolated container has.
+    // Non-null exactly when the clear-data item should show: it wipes the
+    // container's Gecko storage partition.
     final clearDataContextId = enableClearData ? contextualIdentity : null;
     final hasTrailingSection =
         clearDataContextId != null || enableEdit && container != null;
