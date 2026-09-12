@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
@@ -126,6 +127,11 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           ),
         )
         .value;
+    final coldTabIds =
+        ref
+            .watch(watchColdTabIdsProvider.select((value) => value.value))
+            ?.value ??
+        const <String>{};
     final tabDepthById = ref
         .watch(
           groupedTabListItemsProvider(
@@ -151,8 +157,11 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             sandboxSourceUri: parseSandboxSource(
               sandboxCaptureMap[state.$1.id],
             ),
-            isPlaceholder:
-                !restoreComplete && !nativeTabIds.contains(state.$1.id),
+            presence: nativeTabIds.contains(state.$1.id)
+                ? TabPresence.live
+                : coldTabIds.contains(state.$1.id) || restoreComplete
+                ? TabPresence.cold
+                : TabPresence.restoring,
           ),
         )
         .toList();
@@ -179,7 +188,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       // stays available via the long-press menu.
       final canClose =
           !isVertical &&
-          !item.isPlaceholder &&
+          !item.isRestoring &&
           closeButtonMode.showsFor(isActive: item.isActive);
 
       final chip = QuickTabSwitcherChip(
@@ -212,7 +221,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
 
       return wrapQuickTabSwitcherChipWithMenu(
         itemId: item.id,
-        enabled: !item.isPlaceholder,
+        enabled: !item.isRestoring,
         enablePinTab: true,
         child: chip,
       );

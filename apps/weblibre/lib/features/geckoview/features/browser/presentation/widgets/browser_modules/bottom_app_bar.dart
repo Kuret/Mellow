@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
@@ -951,6 +952,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
           ),
         )
         .value;
+    final coldTabIds =
+        ref
+            .watch(watchColdTabIdsProvider.select((value) => value.value))
+            ?.value ??
+        const <String>{};
     final tabItems = tabStates.value
         .map(
           (state) => QuickTabSwitcherItem.tab(
@@ -959,17 +965,21 @@ class QuickTabSwitcher extends HookConsumerWidget {
             pinnedTabIds: pinnedTabIds,
             tabDepthById: tabDepthById,
             sandboxSourceUri: sandboxSourceUris[state.$1.id],
-            isPlaceholder:
-                !restoreComplete && !nativeTabIds.contains(state.$1.id),
+            presence: nativeTabIds.contains(state.$1.id)
+                ? TabPresence.live
+                : coldTabIds.contains(state.$1.id) || restoreComplete
+                ? TabPresence.cold
+                : TabPresence.restoring,
           ),
         )
         .toList();
-    // Reorder is disabled while placeholders are present: the engine doesn't
-    // know those tabs yet, so a reorder couldn't be applied consistently.
+    // Reorder is disabled while restoring placeholders are present: the
+    // engine doesn't know those tabs yet, so a reorder couldn't be applied
+    // consistently. Cold tabs reorder as rows.
     final reorderEnabled =
         quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs &&
         canManualReorder &&
-        !tabItems.any((item) => item.isPlaceholder);
+        !tabItems.any((item) => item.isRestoring);
     final historyItems = (historySuggestions ?? [])
         .map(
           (visit) =>
@@ -1169,7 +1179,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       !_isVertical &&
       onCloseItem != null &&
       !item.isHistory &&
-      !item.isPlaceholder &&
+      !item.isRestoring &&
       closeButtonMode.showsFor(isActive: item.isActive);
 
   bool get _isVertical => axis == Axis.vertical;
@@ -1265,9 +1275,9 @@ class QuickTabSwitcherView extends StatelessWidget {
           key: ValueKey(item.id),
           child: ReorderableHoldDragListener(
             index: index,
-            // Placeholders aren't backed by a native session yet, so they
-            // can't be reordered.
-            enabled: !item.isPlaceholder,
+            // Restoring placeholders aren't backed by a native session yet,
+            // so they can't be reordered; cold tabs reorder as rows.
+            enabled: !item.isRestoring,
             child: TabContextMenuDraggable(
               tabId: item.id,
               externalDrag: true,
@@ -1288,7 +1298,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   }) {
     return wrapQuickTabSwitcherChipWithMenu(
       itemId: item.id,
-      enabled: !item.isPlaceholder,
+      enabled: !item.isRestoring,
       enablePinTab: enablePinTabInMenu,
       child: child,
     );

@@ -24,7 +24,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
@@ -47,10 +49,13 @@ class QuickTabSwitcherItem with FastEquatable {
   final Uri url;
   final Widget avatar;
 
-  /// True while the tab is only known from the local DB cache and the native
-  /// session restore hasn't delivered its state yet. Placeholders cannot be
-  /// closed or reordered.
-  final bool isPlaceholder;
+  /// Whether the tab has an engine session behind it. A [TabPresence.restoring]
+  /// tab cannot be closed or reordered yet; a [TabPresence.cold] one renders
+  /// dimmed with a snowflake badge and materialises when tapped (PLAN §7.4).
+  final TabPresence presence;
+
+  bool get isRestoring => presence == TabPresence.restoring;
+  bool get isCold => presence == TabPresence.cold;
 
   QuickTabSwitcherItem({
     required this.color,
@@ -65,7 +70,7 @@ class QuickTabSwitcherItem with FastEquatable {
     this.useCustomColor = false,
     this.isSandbox = false,
     this.depth = 0,
-    this.isPlaceholder = false,
+    this.presence = TabPresence.live,
   });
 
   /// Builds a switcher entry for an open tab. [sandboxSourceUri] is the
@@ -77,7 +82,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required Set<String> pinnedTabIds,
     required Map<String, int> tabDepthById,
     required Uri? sandboxSourceUri,
-    bool isPlaceholder = false,
+    TabPresence presence = TabPresence.live,
   }) {
     final (tab, container) = state;
 
@@ -95,7 +100,7 @@ class QuickTabSwitcherItem with FastEquatable {
       depth: tabDepthById[tab.id] ?? 0,
       url: sandboxSourceUri ?? tab.url,
       avatar: TabIcon(tabState: tab, iconSize: 20),
-      isPlaceholder: isPlaceholder,
+      presence: presence,
     );
   }
 
@@ -134,7 +139,7 @@ class QuickTabSwitcherItem with FastEquatable {
     title,
     url,
     avatar,
-    isPlaceholder,
+    presence,
   ];
 }
 
@@ -223,10 +228,13 @@ Widget buildQuickTabSwitcherChipLabel(
   final hasTitle = item.isHistory || showTitles;
   final isNested = item.depth > 0 && hierarchyGlyphs > 0;
   final showInlineDepth = isNested && !isVertical;
-  final avatar = (isNested && isVertical)
+  final nestedAvatar = (isNested && isVertical)
       ? _RailDepthAvatar(depth: item.depth, child: item.avatar)
       : item.avatar;
-  final row = Row(
+  final avatar = item.isCold
+      ? ColdTabBadge(size: 20, child: nestedAvatar)
+      : nestedAvatar;
+  final labelRow = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
       if (showInlineDepth)
@@ -284,6 +292,10 @@ Widget buildQuickTabSwitcherChipLabel(
     ],
   );
 
+  // A cold tab is dimmed: no session behind it until it is tapped.
+  final row = item.isCold
+      ? Opacity(opacity: ColdTabBadge.opacity, child: labelRow)
+      : labelRow;
   return item.color.mapNotNull(
         (color) => DefaultTextStyle.merge(
           style: TextStyle(
