@@ -262,6 +262,82 @@ void main() {
     );
 
     testWidgets(
+      'keeps the toolbar one run tall when the selected tab widens it past '
+      'the rail',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              selectedTabProvider.overrideWith(_SettableSelectedTab.new),
+            ],
+            child: _railBox(
+              railWidth: railWidth,
+              viewportWidth: 900,
+              child: WideRailLayout(
+                urlRow: const SizedBox(height: 56, width: double.infinity),
+                tabs: const SizedBox.expand(),
+                contextualToolbar: const SizedBox(
+                  height: 40,
+                  width: double.infinity,
+                ),
+                toolbar: WideRailToolbarRow(
+                  buttons: [
+                    // Stands in for the pinned add-on bar: one composite child
+                    // whose width follows the tab. Wide enough on tab-2 to
+                    // overflow the rail, which is what used to open a second
+                    // run and push the contextual strip up.
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final tab = ref.watch(selectedTabProvider);
+                        final count = tab == 'tab-2' ? 8 : 1;
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (var i = 0; i < count; i++)
+                              const SizedBox(width: 48, height: 40),
+                          ],
+                        );
+                      },
+                    ),
+                    const Icon(Icons.menu),
+                  ],
+                ),
+                spaces: const SizedBox(height: 56, width: double.infinity),
+              ),
+            ),
+          ),
+        );
+
+        final toolbarBefore = tester.getRect(
+          find.byKey(WideRailLayout.toolbarKey),
+        );
+        final spacesBefore = tester.getRect(
+          find.byKey(WideRailLayout.spacesKey),
+        );
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(WideRailLayout)),
+        );
+        (container.read(selectedTabProvider.notifier) as _SettableSelectedTab)
+                .selected =
+            'tab-2';
+        await tester.pump();
+
+        final toolbarAfter = tester.getRect(
+          find.byKey(WideRailLayout.toolbarKey),
+        );
+        expect(toolbarAfter.height, WideRailToolbarRow.rowHeight);
+        expect(toolbarAfter, toolbarBefore);
+        expect(
+          tester.getRect(find.byKey(WideRailLayout.spacesKey)),
+          spacesBefore,
+        );
+        // Nothing opened up between the strip and the toolbar either.
+        expect(toolbarAfter.top, tester.getRect(_contextualStrip).bottom);
+      },
+    );
+
+    testWidgets(
       'keeps the toolbar and the spaces rows in place when the selected tab '
       'changes what a toolbar button contains',
       (tester) async {
@@ -329,11 +405,7 @@ void main() {
         expect(spacesAfter, spacesBefore);
         expect(toolbarAfter.bottom, spacesAfter.top);
         // One run: both targets side by side, spanning the rail.
-        expect(
-          toolbarAfter.height,
-          WideRailToolbarRow.targetHeight +
-              2 * WideRailToolbarRow.verticalPadding,
-        );
+        expect(toolbarAfter.height, WideRailToolbarRow.rowHeight);
         expect(toolbarAfter.width, railWidth);
       },
     );
@@ -490,3 +562,12 @@ void main() {
     });
   });
 }
+
+/// The stand-in contextual strip of the overflow test: the 40-tall box the
+/// layout wraps in its own ClipRect.
+final _contextualStrip = find.byWidgetPredicate(
+  (widget) =>
+      widget is SizedBox &&
+      widget.height == 40 &&
+      widget.width == double.infinity,
+);
