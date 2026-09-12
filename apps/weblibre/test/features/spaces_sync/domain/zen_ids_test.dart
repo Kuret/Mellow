@@ -75,10 +75,7 @@ void main() {
       expect(ZenIds.isBuiltinContainerGuid('builtin-0'), isFalse);
       expect(ZenIds.isBuiltinContainerGuid('builtin-5'), isFalse);
       expect(ZenIds.isBuiltinContainerGuid('builtin-'), isFalse);
-      expect(
-        ZenIds.isBuiltinContainerGuid(ZenIds.newContainerGuid()),
-        isFalse,
-      );
+      expect(ZenIds.isBuiltinContainerGuid(ZenIds.newContainerGuid()), isFalse);
     });
   });
 }
