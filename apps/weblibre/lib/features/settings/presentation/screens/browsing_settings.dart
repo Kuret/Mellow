@@ -107,12 +107,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _DoubleBackCloseTabTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Tab Bar Swipe Behavior',
-        subtitle: 'Choose what horizontal swipes on the tab bar do',
-        keywords: ['gestures', 'swipe'],
-        child: _TabBarSwipeBehaviorSection(),
-      ),
-      SettingsEntryDefinition(
         title: 'Sequential Tab Navigation',
         subtitle: 'Choose where stepping through tabs in order ends',
         keywords: [
@@ -756,63 +750,6 @@ class _BackgroundTabOpenSection extends HookConsumerWidget {
                   value: BackgroundTabOpenAction.switchImmediately,
                   title: Text('Switch Immediately'),
                   subtitle: Text('Jump straight to the newly opened tab'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
-  const _TabBarSwipeBehaviorSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarSwipeAction = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarSwipeAction),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab Bar Swipe Behavior'),
-            leading: Icon(MdiIcons.gestureSwipeHorizontal),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: tabBarSwipeAction,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarSwipeAction(value),
-                    );
-              }
-            },
-            child: const Column(
-              children: [
-                RadioListTile.adaptive(
-                  value: TabBarSwipeAction.switchLastOpened,
-                  title: Text('Switch to Last Used Tab'),
-                  subtitle: Text(
-                    'Swipe to toggle between current and previously opened tab',
-                  ),
-                ),
-                RadioListTile.adaptive(
-                  value: TabBarSwipeAction.navigateOrderedTabs,
-                  title: Text('Navigate Sequential Tabs'),
-                  subtitle: Text(
-                    'Swipe left/right to move through tabs in order',
-                  ),
                 ),
               ],
             ),
