@@ -1365,7 +1365,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'78eeb77c4eeddb16cb68377f7bf4b02fb9fbdd57';
+    r'43c81c1995e3efc01e395ef07ea723a1bc33416c';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
