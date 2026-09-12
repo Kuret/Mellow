@@ -485,7 +485,6 @@ class _CloneTabExpansion extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),

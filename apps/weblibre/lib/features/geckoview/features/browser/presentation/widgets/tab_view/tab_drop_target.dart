@@ -135,7 +135,7 @@ class TabDropTarget extends HookConsumerWidget {
       if (context.mounted) {
         showInfoMessage(
           context,
-          'Created container "${result.name ?? 'New Container'}"',
+          'Created container "${result.name.isEmpty ? 'New Container' : result.name}"',
         );
       }
     }
