@@ -329,6 +329,8 @@ class SyncSettingsScreen extends HookConsumerWidget {
             ],
             child: Column(
               children: [
+                if (spacesStatus.blockedBatch case final blocked?)
+                  _BlockedBatchCard(blocked: blocked),
                 SwitchListTile.adaptive(
                   title: const Text('Sync Zen Spaces'),
                   subtitle: const Text(
@@ -809,6 +811,92 @@ class SyncSettingsScreen extends HookConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+
+/// Surfaces a batch the destructive-batch canary refused (DESIGN "Hardening
+/// against Zen's stale-projection race", defence 5). Uploads stay paused until
+/// the user says otherwise, so this has to be impossible to miss.
+class _BlockedBatchCard extends ConsumerWidget {
+  const _BlockedBatchCard({required this.blocked});
+
+  final SpacesSyncBlockedBatch blocked;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final headline = switch (blocked.reason) {
+      SpacesSyncBlockReason.tombstoneVolume =>
+        'Upload paused: this sync would delete ${blocked.tombstoneCount} of '
+            'your tabs on the desktop',
+      SpacesSyncBlockReason.resurrection =>
+        'Upload paused: this sync would bring back tabs you just closed',
+    };
+    return Card(
+      margin: const EdgeInsets.all(8),
+      color: scheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.warning_amber, color: scheme.onErrorContainer),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    headline,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              blocked.description,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onErrorContainer,
+              ),
+            ),
+            if (blocked.sampleIds.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Affected records: ${blocked.sampleIds.join(', ')}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: scheme.onErrorContainer,
+                ),
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              'Nothing has been uploaded since ${timeago.format(blocked.at)}. '
+              'Reading from the desktop continues.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onErrorContainer,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                onPressed: () async {
+                  await ref
+                      .read(spacesSyncServiceProvider.notifier)
+                      .retryBlockedBatch();
+                },
+                child: const Text('Upload anyway'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
