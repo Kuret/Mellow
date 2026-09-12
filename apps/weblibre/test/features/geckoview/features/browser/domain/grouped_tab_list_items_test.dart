@@ -206,6 +206,32 @@ void main() {
     ]);
   });
 
+  test('pinned folder members render inside their folder', () async {
+    // Zen's projection: folder members are pinned tabs with a folder_id.
+    // The flat Pinned section holds only root pinned tabs; the folder's
+    // members and sub-folders form one order_key sequence below the folder.
+    final container = makeContainer(
+      tabs: const [
+        _Tab('t4', 'a', shelf: TabShelf.pinned),
+        _Tab('t1', 'a', shelf: TabShelf.pinned, folderId: 'F'),
+        _Tab('t2', 'a', shelf: TabShelf.pinned, folderId: 'G'),
+        _Tab('t3', 'c'),
+      ],
+      folders: [
+        _folder('F', 'b'),
+        _folder('G', 'b', parentFolderId: 'F'),
+      ],
+    );
+    expect((await read(container)).map(label), [
+      't4@0',
+      '[F:2]@0',
+      't1@1',
+      '[G:1]@1',
+      't2@2',
+      't3@0',
+    ]);
+  });
+
   test('a collapsed folder hides its contents', () async {
     final container = makeContainer(
       tabs: const [

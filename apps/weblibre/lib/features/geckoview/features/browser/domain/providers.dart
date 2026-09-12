@@ -1273,9 +1273,18 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     addChildren(root.id);
   }
 
-  // The pinned shelf comes first (PLAN §6.4), in its own storage order.
+  // Folder membership comes before the shelf (PLAN §6.4): Zen keeps folders
+  // in the pinned section, so every folder member is a pinned tab with a
+  // `folder_id`, and the flat "Pinned" section holds only the pinned tabs of
+  // the space's root.
+  final folderById = {for (final folder in folders) folder.id: folder};
+  String? folderOf(_TabGroupRecord group) =>
+      folderById.containsKey(group.folderId) ? group.folderId : null;
+
   final pinnedGroups =
-      groupRecords.where((g) => g.shelf == TabShelf.pinned).toList()
+      groupRecords
+          .where((g) => g.shelf == TabShelf.pinned && folderOf(g) == null)
+          .toList()
         ..sort(compareGroups);
   for (final slot in applyDirection([
     for (final group in pinnedGroups) _ScopeSlot.ofGroup(group),
@@ -1284,7 +1293,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   }
 
   final normalGroups = groupRecords
-      .where((g) => g.shelf != TabShelf.pinned)
+      .where((g) => g.shelf != TabShelf.pinned || folderOf(g) != null)
       .toList();
 
   if (sortField != null) {
@@ -1297,15 +1306,12 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     return EquatableValue(result);
   }
 
-  // The normal shelf: folders and root groups interleaved by `order_key`
-  // within each folder scope, a folder's contents indented below it.
-  final folderById = {for (final folder in folders) folder.id: folder};
+  // The normal section: root groups and root folders interleaved by
+  // `order_key`; inside a folder its members (either shelf) and sub-folders
+  // form one `order_key` sequence, indented below the folder row.
   final groupsByFolder = <String?, List<_TabGroupRecord>>{};
   for (final group in normalGroups) {
-    final folderId = folderById.containsKey(group.folderId)
-        ? group.folderId
-        : null;
-    groupsByFolder.putIfAbsent(folderId, () => []).add(group);
+    groupsByFolder.putIfAbsent(folderOf(group), () => []).add(group);
   }
   final foldersByParent = <String?, List<TabFolderData>>{};
   for (final folder in folders) {
