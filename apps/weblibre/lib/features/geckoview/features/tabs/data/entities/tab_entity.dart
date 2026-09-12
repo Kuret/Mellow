@@ -76,6 +76,10 @@ class SearchResultTabEntity extends TabEntity {
 sealed class TabListItemEntity with FastEquatable {
   String get orderKey;
   String? get spaceUuid;
+
+  /// Nesting depth from the space root: +1 per enclosing folder and, for a
+  /// tree child, +1 per visible ancestor. `0` marks a root row.
+  int get depth;
 }
 
 /// A [TabListItemEntity] that is a tab (as opposed to a folder).
@@ -97,6 +101,7 @@ class TabListStandaloneItem extends TabListTabItem {
   final String? spaceUuid;
 
   /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
+  @override
   final int depth;
   @override
   final TabShelf shelf;
@@ -129,6 +134,7 @@ class TabListParentGroup extends TabListTabItem {
   final int childCount;
 
   /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
+  @override
   final int depth;
   @override
   final TabShelf shelf;
@@ -162,6 +168,7 @@ class TabListChildItem extends TabListTabItem {
   final String? spaceUuid;
   final String parentId;
   final String rootId;
+  @override
   final int depth;
   final int childCount;
   @override
@@ -202,6 +209,7 @@ class TabListFolderItem extends TabListItemEntity {
   final String? spaceUuid;
   final String name;
   final bool isCollapsed;
+  @override
   final int depth;
   final int childCount;
 

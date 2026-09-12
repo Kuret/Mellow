@@ -254,14 +254,25 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         return [for (final item in expandedItems) _AccordionEntry.tab(item)];
       }
       final itemById = {for (final item in expandedItems) item.id: item};
+      // The shared order leads with the pinned section — root pinned tabs
+      // and folders with their contents — and its first root normal tab
+      // opens the main list.
       final pinned = <_AccordionEntry>[];
       final normal = <_AccordionEntry>[];
       final seen = <String>{};
       var rootIndent = 0;
+      var inPinnedSection = true;
       for (final entity in orderedItems) {
+        if (inPinnedSection &&
+            entity is TabListTabItem &&
+            entity.depth == 0 &&
+            entity.shelf != TabShelf.pinned) {
+          inPinnedSection = false;
+        }
+        final section = inPinnedSection ? pinned : normal;
         switch (entity) {
           case TabListFolderItem():
-            normal.add(_AccordionEntry.folder(entity));
+            section.add(_AccordionEntry.folder(entity));
           case TabListTabItem():
             final item = itemById[entity.tabId];
             if (item == null) continue;
@@ -276,9 +287,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
               rootIndent = indent;
             }
             seen.add(item.id);
-            (entity.shelf == TabShelf.pinned ? pinned : normal).add(
-              _AccordionEntry.tab(item, indent: indent),
-            );
+            section.add(_AccordionEntry.tab(item, indent: indent));
         }
       }
       // Rows the shared order does not list yet (pre-restore placeholders)

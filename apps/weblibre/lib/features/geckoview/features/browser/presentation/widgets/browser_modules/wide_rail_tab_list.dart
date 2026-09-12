@@ -48,9 +48,10 @@ import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 /// The selected space's three shelves (PLAN §6.4) as full-width rows on the
-/// wide vertical rail: the Essentials icon grid, the pinned tabs as compact
-/// rows, then the main list with folder headers and their members indented
-/// by depth. Scrolls along the rail and keeps the active tab in view.
+/// wide vertical rail: the Essentials icon grid, the pinned section — pinned
+/// tabs as compact rows and folder headers with their members indented by
+/// depth — then the main list of normal tabs. Scrolls along the rail and
+/// keeps the active tab in view.
 ///
 /// Reordering is left to the tab tray, which already has the drag targets;
 /// the rail only switches, closes (per [TabChipCloseButtonMode]) and offers
@@ -89,18 +90,27 @@ class WideRailTabList extends HookConsumerWidget {
         )
         .value;
 
+    // The shared order leads with the pinned section — root pinned tabs and
+    // folders with their contents — and its first root normal tab opens the
+    // main list.
     final pinned = <_RailEntry>[];
     final normal = <_RailEntry>[];
     final seen = <String>{};
+    var inPinnedSection = true;
     for (final item in items) {
+      if (inPinnedSection &&
+          item is TabListTabItem &&
+          item.depth == 0 &&
+          item.shelf != TabShelf.pinned) {
+        inPinnedSection = false;
+      }
+      final section = inPinnedSection ? pinned : normal;
       switch (item) {
         case TabListFolderItem():
-          normal.add(_RailFolderEntry(item));
+          section.add(_RailFolderEntry(item));
         case TabListTabItem():
           seen.add(item.tabId);
-          (item.shelf == TabShelf.pinned ? pinned : normal).add(
-            _RailTabEntry(item),
-          );
+          section.add(_RailTabEntry(item));
       }
     }
     for (final tabId in spaceTabIds) {
@@ -228,8 +238,9 @@ class _RailTabEntry extends _RailEntry {
   String get id => 'tab-${item.tabId}';
 }
 
-/// One tab row of the rail: the tray's [CompactTabRow] on the pinned shelf,
-/// [WideRailTabRow] on the main list. Both switch on tap, close per
+/// One tab row of the rail: the tray's [CompactTabRow] for a root pinned
+/// tab, [WideRailTabRow] (indented by depth) for everything else — folder
+/// members and tree children included. Both switch on tap, close per
 /// [closeButtonMode] and carry the long-press tab menu.
 class _RailTabRow extends ConsumerWidget {
   final TabListTabItem item;
@@ -268,7 +279,7 @@ class _RailTabRow extends ConsumerWidget {
       TabListChildItem(:final depth, :final childCount) => (depth, childCount),
     };
 
-    final row = item.shelf == TabShelf.pinned
+    final row = item.shelf == TabShelf.pinned && depth == 0
         ? CompactTabRow(
             tabId: tabId,
             isActive: isActive,

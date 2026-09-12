@@ -159,6 +159,20 @@ void main() {
     return container.read(provider).value;
   }
 
+  Future<List<TabListItemEntity>> readVisible(
+    ProviderContainer container,
+  ) async {
+    final provider = visibleTabListItemsProvider(
+      spaceUuid: _space,
+      scope: TabListScope.presentation,
+    );
+    container.listen(provider, (_, _) {}, fireImmediately: true);
+    for (var i = 0; i < 8; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    return container.read(provider).value;
+  }
+
   String label(TabListItemEntity item) => switch (item) {
     TabListStandaloneItem(:final tabId, :final depth) => '$tabId@$depth',
     TabListParentGroup(:final tabId, :final depth) => '$tabId+@$depth',
@@ -194,14 +208,15 @@ void main() {
         _folder('N', 'z', parentFolderId: 'F'),
       ],
     );
+    // Folders live in the pinned section, ahead of the normal tabs.
     expect((await read(container)).map(label), [
-      'a@0',
       '[F:4]@0',
       'f1@1',
       'f2+@1',
       'f2c>@2',
       '[N:1]@1',
       'n1@2',
+      'a@0',
       'c@0',
     ]);
   });
@@ -241,8 +256,54 @@ void main() {
       ],
       folders: [_folder('F', 'b', collapsed: true)],
     );
-    expect((await read(container)).map(label), ['a@0', '[F:1]@0', 'c@0']);
+    expect((await read(container)).map(label), ['[F:1]@0', 'a@0', 'c@0']);
   });
+
+  test(
+    'folders sit in the Pinned section among root pinned tabs by order_key',
+    () async {
+      final container = makeContainer(
+        tabs: const [
+          _Tab('n1', 'b'),
+          _Tab('p2', 'd', shelf: TabShelf.pinned),
+          _Tab('f1', 'x', shelf: TabShelf.pinned, folderId: 'F'),
+          _Tab('p1', 'a', shelf: TabShelf.pinned),
+        ],
+        folders: [_folder('F', 'c')],
+      );
+      // Zen's strip: pinned tabs and folders interleaved by order_key, the
+      // folder followed by its members; the normal tabs after all of them.
+      expect((await read(container)).map(label), [
+        'p1@0',
+        '[F:1]@0',
+        'f1@1',
+        'p2@0',
+        'n1@0',
+      ]);
+    },
+  );
+
+  test(
+    'presentation flattening keeps folder members under their folder',
+    () async {
+      final container = makeContainer(
+        tabs: const [
+          _Tab('m', 'a', shelf: TabShelf.pinned, folderId: 'F'),
+          _Tab('n', 'b'),
+          _Tab('p', 'c', shelf: TabShelf.pinned),
+        ],
+        folders: [_folder('F', 'b')],
+      );
+      // Only the root pinned tab floats to the front; the folder's pinned
+      // member stays below its folder row.
+      expect((await readVisible(container)).map(label), [
+        'p@0',
+        '[F:1]@0',
+        'm@1',
+        'n@0',
+      ]);
+    },
+  );
 
   test('cold rows are listed, live rows the engine lost are not', () async {
     final container = makeContainer(

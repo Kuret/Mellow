@@ -1275,42 +1275,37 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 
   // Folder membership comes before the shelf (PLAN §6.4): Zen keeps folders
   // in the pinned section, so every folder member is a pinned tab with a
-  // `folder_id`, and the flat "Pinned" section holds only the pinned tabs of
-  // the space's root.
+  // `folder_id`. A space's "Pinned" section is therefore its root pinned
+  // tabs and its root folders — each folder followed by its contents —
+  // interleaved by `order_key` exactly as on the desktop strip
+  // (`#childSequence`); the normal section holds the root normal tabs only.
   final folderById = {for (final folder in folders) folder.id: folder};
   String? folderOf(_TabGroupRecord group) =>
       folderById.containsKey(group.folderId) ? group.folderId : null;
 
-  final pinnedGroups =
-      groupRecords
-          .where((g) => g.shelf == TabShelf.pinned && folderOf(g) == null)
-          .toList()
-        ..sort(compareGroups);
-  for (final slot in applyDirection([
-    for (final group in pinnedGroups) _ScopeSlot.ofGroup(group),
-  ])) {
-    emitGroup(slot.group!, 0);
-  }
-
-  final normalGroups = groupRecords
+  final rootPinnedGroups = groupRecords
+      .where((g) => g.shelf == TabShelf.pinned && folderOf(g) == null)
+      .toList();
+  final otherGroups = groupRecords
       .where((g) => g.shelf != TabShelf.pinned || folderOf(g) != null)
       .toList();
 
   if (sortField != null) {
     // An explicit title/URL/date sort is a flat list: folders have no
-    // position in it, so their tabs are listed at the root.
-    normalGroups.sort(compareGroups);
-    for (final group in normalGroups) {
+    // position in it, so their tabs are listed at the root, after the
+    // root pinned tabs.
+    rootPinnedGroups.sort(compareGroups);
+    otherGroups.sort(compareGroups);
+    for (final group in rootPinnedGroups.followedBy(otherGroups)) {
       emitGroup(group, 0);
     }
     return EquatableValue(result);
   }
 
-  // The normal section: root groups and root folders interleaved by
-  // `order_key`; inside a folder its members (either shelf) and sub-folders
-  // form one `order_key` sequence, indented below the folder row.
+  // Inside a folder its members (either shelf) and sub-folders form one
+  // `order_key` sequence, indented below the folder row.
   final groupsByFolder = <String?, List<_TabGroupRecord>>{};
-  for (final group in normalGroups) {
+  for (final group in otherGroups) {
     groupsByFolder.putIfAbsent(folderOf(group), () => []).add(group);
   }
   final foldersByParent = <String?, List<TabFolderData>>{};
@@ -1333,20 +1328,20 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   }
 
   final emittedFolders = <String>{};
-  void emitScope(String? folderId, int depth) {
-    final slots =
-        <_ScopeSlot>[
-          for (final group
-              in groupsByFolder[folderId] ?? const <_TabGroupRecord>[])
-            _ScopeSlot.ofGroup(group),
-          for (final folder
-              in foldersByParent[folderId] ?? const <TabFolderData>[])
-            if (emittedFolders.add(folder.id)) _ScopeSlot.ofFolder(folder),
-        ]..sort((a, b) {
-          final cmp = a.orderKey.compareTo(b.orderKey);
-          if (cmp != 0) return cmp;
-          return a.splitIndex.compareTo(b.splitIndex);
-        });
+  List<_ScopeSlot> folderSlots(String? parentId) => [
+    for (final folder in foldersByParent[parentId] ?? const <TabFolderData>[])
+      if (emittedFolders.add(folder.id)) _ScopeSlot.ofFolder(folder),
+  ];
+  List<_ScopeSlot> groupSlots(Iterable<_TabGroupRecord> groups) => [
+    for (final group in groups) _ScopeSlot.ofGroup(group),
+  ];
+
+  void emitSlots(List<_ScopeSlot> slots, int depth) {
+    slots.sort((a, b) {
+      final cmp = a.orderKey.compareTo(b.orderKey);
+      if (cmp != 0) return cmp;
+      return a.splitIndex.compareTo(b.splitIndex);
+    });
     for (final slot in applyDirection(slots)) {
       final group = slot.group;
       if (group != null) {
@@ -1366,12 +1361,18 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         ),
       );
       if (!folder.isCollapsed) {
-        emitScope(folder.id, depth + 1);
+        emitSlots([
+          ...groupSlots(groupsByFolder[folder.id] ?? const []),
+          ...folderSlots(folder.id),
+        ], depth + 1);
       }
     }
   }
 
-  emitScope(null, 0);
+  // The pinned section: root pinned tabs and root folders.
+  emitSlots([...groupSlots(rootPinnedGroups), ...folderSlots(null)], 0);
+  // The normal section: root normal tabs.
+  emitSlots(groupSlots(groupsByFolder[null] ?? const []), 0);
 
   return EquatableValue(result);
 }
@@ -1384,7 +1385,10 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 /// but always in [TabListScope.presentation] — the quick tab switcher and the
 /// tab bar are single strips of chips that draw hierarchy as an indent glyph
 /// rather than as position, so a pinned tab belongs at the front there whether
-/// or not it happens to sit under a parent.
+/// or not it happens to sit under a parent. Folder members are the exception:
+/// they are pinned tabs by construction (PLAN §6.4) but stay under their
+/// folder row, which is where the eye looks for them; only the space's root
+/// pinned tabs float.
 ///
 /// This is the single order every non-tray surface reads: the switcher, the tab
 /// bar and sequential tab navigation all take the presentation scope, so
@@ -1408,12 +1412,22 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   }
 
   final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-  bool isPinned(TabListItemEntity item) =>
-      item is TabListTabItem && pinnedTabIds.contains(item.tabId);
-  return EquatableValue([
-    ...groupedItems.where(isPinned),
-    ...groupedItems.where((item) => !isPinned(item)),
-  ]);
+  // A root folder row (depth 0) opens a folder; the next root row of any kind
+  // closes it. Rows in between are the folder's contents and never float.
+  final floating = <TabListItemEntity>[];
+  final rest = <TabListItemEntity>[];
+  var insideFolder = false;
+  for (final item in groupedItems) {
+    if (item.depth == 0) {
+      insideFolder = item is TabListFolderItem;
+    }
+    final floats =
+        !insideFolder &&
+        item is TabListTabItem &&
+        pinnedTabIds.contains(item.tabId);
+    (floats ? floating : rest).add(item);
+  }
+  return EquatableValue([...floating, ...rest]);
 }
 
 /// Flat tab id order used by sequential tab navigation: the tab bar swipe

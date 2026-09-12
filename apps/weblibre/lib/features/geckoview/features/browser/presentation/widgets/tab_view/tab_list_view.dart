@@ -572,8 +572,9 @@ class _TabListView extends HookConsumerWidget {
 
     // Section the list by shelf (PLAN §6.4): the pinned rows the grouping
     // provider already leads with become a compact "Pinned" section, the rest
-    // the main list. A child row belongs to its root's section, so a pinned
-    // subtree stays together. Search results are one flat list.
+    // the main list. Folders live in the pinned section too (their members
+    // are pinned tabs), and a child row belongs to its root's section, so a
+    // pinned subtree stays together. Search results are one flat list.
     final sectioned = !hasActiveSearch;
     var pinnedCount = 0;
     if (sectioned) {
@@ -586,6 +587,7 @@ class _TabListView extends HookConsumerWidget {
         final child = row.childItem;
         final inPinned =
             row.shelf == TabShelf.pinned ||
+            row.isFolder ||
             (child != null && pinnedRootIds.contains(child.rootId));
         if (!inPinned) break;
         pinnedCount++;
