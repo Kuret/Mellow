@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -27,15 +26,22 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
+/// Pinned header showing both layouts the browser picks from by viewport
+/// width: the compact bar of narrow screens and the side rail of wide ones.
+/// [compact] puts the two side by side (the settings screens pin this header,
+/// so it has to stay short); otherwise they stack inside a card.
 class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   const TabBarPreviewHeaderDelegate({
     required this.settings,
@@ -44,48 +50,20 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 
-  static const _kPreviewBaseHeight = 90.0;
-  static const _kCompactPreviewBaseHeight = 42.0;
-  static const _kHeaderHeight = 72.0;
-
   final GeneralSettings settings;
   final Color? backgroundColor;
   final bool compact;
   final EdgeInsets padding;
 
-  double get _toolbarHeight {
-    var height = kToolbarHeight;
-
-    if (settings.tabBarShowContextualBar) {
-      height += BrowserTabBar.contextualToolabarHeight;
-    }
-
-    final quickTabSwitcherRows = switch (settings
-        .effectiveTabBarStackingMode()) {
-      TabBarStackingMode.disabled => 0,
-      TabBarStackingMode.twoLevel => 2,
-      TabBarStackingMode.spaceTabs when !settings.tabBarPosition.isVertical =>
-        2,
-      _ => 1,
-    };
-
-    return height + BrowserTabBar.quickTabSwitcherHeight * quickTabSwitcherRows;
-  }
-
-  double get _baseHeight =>
-      compact ? _kCompactPreviewBaseHeight : _kPreviewBaseHeight;
-
-  double get _headerHeight => compact ? 0.0 : _kHeaderHeight;
-
-  double get _contentHeight => settings.tabBarPosition.isVertical
-      ? TabBarPreviewCard.railPreviewHeight(settings, compact: compact)
-      : _baseHeight + _toolbarHeight;
+  double get _contentHeight => compact
+      ? TabBarPreviewCard.compactHeight(settings)
+      : TabBarPreviewCard.stackedHeight(settings);
 
   @override
-  double get minExtent => _contentHeight + _headerHeight + padding.vertical;
+  double get minExtent => _contentHeight + padding.vertical;
 
   @override
-  double get maxExtent => _contentHeight + _headerHeight + padding.vertical;
+  double get maxExtent => _contentHeight + padding.vertical;
 
   @override
   Widget build(
@@ -110,7 +88,7 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class TabBarPreviewCard extends HookWidget {
+class TabBarPreviewCard extends StatelessWidget {
   const TabBarPreviewCard({
     super.key,
     required this.settings,
@@ -120,35 +98,58 @@ class TabBarPreviewCard extends HookWidget {
   final GeneralSettings settings;
   final bool compact;
 
-  /// Fixed preview height for the vertical rail (the rail flows along the
-  /// height, so it can't be derived from stacked section heights). The wide
-  /// rail stacks four blocks, so it needs more room to show them all.
-  static const _kRailPreviewHeight = 220.0;
-  static const _kCompactRailPreviewHeight = 140.0;
-  static const _kWideRailPreviewHeight = 320.0;
-  static const _kCompactWideRailPreviewHeight = 200.0;
+  static const wideScreensLabel = 'Wide screens';
+  static const narrowScreensLabel = 'Narrow screens';
 
-  /// Every side rail is the expanded rail; the preview shows it at the
-  /// configured railWidth regardless of the settings screen's own width.
-  static bool isWideRailPreview(GeneralSettings settings) =>
-      settings.tabBarPosition.isVertical;
+  static const _kLabelHeight = 20.0;
+  static const _kPageContentHeight = 72.0;
+  static const _kCompactPageContentHeight = 40.0;
+  static const _kHeaderHeight = 72.0;
+  static const _kGap = 8.0;
 
-  static double railPreviewHeight(
+  /// The wide preview is drawn at this logical size and scaled to fit, so
+  /// the rail keeps its configured proportion to the page whatever the
+  /// settings screen's own width.
+  static const _kWideCanvasWidth = 640.0;
+  static const _kWideCanvasHeight = 300.0;
+
+  /// The compact bar's chrome: the address row, one switcher row and, when
+  /// on, the contextual strip.
+  static double toolbarHeight(GeneralSettings settings) {
+    var height = kToolbarHeight + BrowserTabBar.quickTabSwitcherHeight;
+    if (settings.tabBarShowContextualBar) {
+      height += BrowserTabBar.contextualToolabarHeight;
+    }
+    return height;
+  }
+
+  /// Height of the narrow-screen preview box (content plus its border).
+  static double narrowPreviewHeight(
     GeneralSettings settings, {
     required bool compact,
-  }) {
-    final wide = isWideRailPreview(settings);
-    if (compact) {
-      return wide ? _kCompactWideRailPreviewHeight : _kCompactRailPreviewHeight;
-    }
-    return wide ? _kWideRailPreviewHeight : _kRailPreviewHeight;
-  }
+  }) =>
+      (compact ? _kCompactPageContentHeight : _kPageContentHeight) +
+      toolbarHeight(settings) +
+      2;
+
+  /// Both previews side by side under their labels.
+  static double compactHeight(GeneralSettings settings) =>
+      _kLabelHeight + narrowPreviewHeight(settings, compact: true);
+
+  /// The card: header, then the two previews stacked under their labels.
+  static double stackedHeight(GeneralSettings settings) =>
+      _kHeaderHeight +
+      _kLabelHeight +
+      narrowPreviewHeight(settings, compact: false) +
+      _kGap +
+      _kLabelHeight +
+      _kWideCanvasHeight +
+      8.0;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final quickTabsController = useScrollController();
-    final quickTabsSecondRowController = useScrollController();
+    final textTheme = Theme.of(context).textTheme;
     final showMainToolbarActionButtons = !settings.tabBarShowContextualBar;
 
     final previewTabState = TabState.$default('preview-tab').copyWith(
@@ -161,48 +162,11 @@ class TabBarPreviewCard extends HookWidget {
       ),
     );
 
-    final previewQuickItems = <QuickTabSwitcherItem>[
-      QuickTabSwitcherItem(
-        id: 'regular-preview-tab',
-        isActive: true,
-        title: 'News',
-        tabMode: TabMode.regular,
-        isHistory: false,
-        isPinned:
-            settings.effectiveTabBarStackingMode() ==
-            TabBarStackingMode.containerTabs,
-        url: Uri.parse('https://example.com/news'),
-        color: settings.showContainerUi ? colorScheme.primary : null,
-        avatar: const Icon(MdiIcons.web, size: 20),
-      ),
-      QuickTabSwitcherItem(
-        id: 'private-preview-tab',
-        isActive: false,
-        title: 'Private',
-        tabMode: TabMode.private,
-        isHistory: false,
-        isPinned: false,
-        depth: 1,
-        url: Uri.parse('https://example.com/private'),
-        color: null,
-        avatar: const Icon(MdiIcons.web, size: 20),
-      ),
-      if (settings.quickTabSwitcherShowHistorySuggestions)
-        QuickTabSwitcherItem(
-          id: 'history-preview-tab',
-          isActive: false,
-          title: 'Search',
-          tabMode: TabMode.regular,
-          isHistory: true,
-          isPinned: false,
-          url: Uri.parse('https://search.example.com'),
-          color: null,
-          avatar: const Icon(MdiIcons.web, size: 20),
-        ),
-    ];
     final previewContainerPalette = settings.showContainerUi
         ? ContainerColors.palette(context, colorScheme.primary)
         : null;
+    final chromeColor =
+        previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer;
 
     final tabCountButton = TabsCountButtonView(
       isActive: false,
@@ -218,102 +182,8 @@ class TabBarPreviewCard extends HookWidget {
       },
     );
 
-    Widget buildQuickTabSwitcherRow(
-      ScrollController scrollController, {
-      Axis axis = Axis.horizontal,
-    }) {
-      final wideRail = isWideRailPreview(settings);
-      final showTitles =
-          (axis != Axis.vertical || wideRail) &&
-          settings.quickTabSwitcherShowTitles;
-      final titleMaxWidth = wideRail && axis == Axis.vertical
-          ? settings.quickTabSwitcherTitleWidth.clamp(
-              0.0,
-              (settings.railWidth - 48.0).clamp(0.0, double.infinity),
-            )
-          : settings.quickTabSwitcherTitleWidth;
-      return QuickTabSwitcherView(
-        availableItems: previewQuickItems,
-        activeItem: previewQuickItems.firstWhere((item) => item.isActive),
-        scrollController: scrollController,
-        axis: axis,
-        showTitles: showTitles,
-        hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
-        titleMaxWidth: titleMaxWidth,
-        closeButtonMode: settings.quickTabSwitcherCloseButtonMode,
-        enablePinTabInMenu: false,
-        onSelected: (_) async {},
-        onCloseItem: (_) async {},
-      );
-    }
-
-    // Static stand-in for the space chip row of [TabBarStackingMode.spaceTabs]:
-    // the live row needs the space table, which the preview does not have.
-    Widget buildSpaceChipsRow({Axis axis = Axis.horizontal}) {
-      final chips = [
-        for (final (name, selected) in const [
-          ('Work', true),
-          ('Personal', false),
-        ])
-          Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: ChoiceChip(
-              avatar: const Icon(MdiIcons.viewDashboardOutline, size: 18),
-              label: Text(name),
-              selected: selected,
-              onSelected: (_) {},
-            ),
-          ),
-      ];
-      return SizedBox(
-        height: axis == Axis.vertical
-            ? null
-            : BrowserTabBar.quickTabSwitcherHeight,
-        width: axis == Axis.vertical
-            ? BrowserTabBar.quickTabSwitcherHeight
-            : null,
-        child: SingleChildScrollView(
-          scrollDirection: axis,
-          child: axis == Axis.vertical
-              ? Column(mainAxisSize: MainAxisSize.min, children: chips)
-              : Row(mainAxisSize: MainAxisSize.min, children: chips),
-        ),
-      );
-    }
-
-    Widget buildQuickTabSwitcher({Axis axis = Axis.horizontal}) {
-      // The accordion preview reuses the single-row layout; container header
-      // chips need live container data that the static preview doesn't have.
-      final mode = settings.effectiveTabBarStackingMode();
-      if (mode == TabBarStackingMode.spaceTabs) {
-        final tabs = buildQuickTabSwitcherRow(quickTabsController, axis: axis);
-        return axis == Axis.vertical
-            ? Column(
-                children: [
-                  buildSpaceChipsRow(axis: axis),
-                  Expanded(child: tabs),
-                ],
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [buildSpaceChipsRow(), tabs],
-              );
-      }
-      if (mode == TabBarStackingMode.twoLevel) {
-        final rows = [
-          buildQuickTabSwitcherRow(quickTabsController, axis: axis),
-          buildQuickTabSwitcherRow(quickTabsSecondRowController, axis: axis),
-        ];
-        return axis == Axis.vertical
-            ? Column(children: [for (final row in rows) Expanded(child: row)])
-            : Column(mainAxisSize: MainAxisSize.min, children: rows);
-      }
-      return buildQuickTabSwitcherRow(quickTabsController, axis: axis);
-    }
-
-    Widget buildContextualToolbar({Axis axis = Axis.horizontal}) {
+    Widget buildContextualToolbar() {
       return ContextualToolbarView(
-        axis: axis,
         buttons: [
           NavigateBackButtonView(
             canGoBack: true,
@@ -338,140 +208,13 @@ class TabBarPreviewCard extends HookWidget {
       if (showMainToolbarActionButtons) NavigationMenuButtonView(onTap: () {}),
     ];
 
-    final showQuickTabSwitcherBar =
-        settings.effectiveTabBarStackingMode() != TabBarStackingMode.disabled;
+    Widget title() => settings.tabBarLayout == TabBarLayout.compact
+        ? _CompactPreviewTitle(tabState: previewTabState)
+        : _RegularPreviewTitle(tabState: previewTabState);
 
-    final bottomCombinedToolbar = BrowserTabBarView(
-      showMainToolbar: true,
-      showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      displayAppBar: true,
-      displayQuickTabSwitcher: true,
-      backgroundColor:
-          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
-      title: settings.tabBarLayout == TabBarLayout.compact
-          ? _CompactPreviewTitle(tabState: previewTabState)
-          : _RegularPreviewTitle(tabState: previewTabState),
-      actions: mainToolbarActions,
-      quickTabSwitcher: buildQuickTabSwitcher(),
-      contextualToolbar: buildContextualToolbar(),
-    );
-
-    final topMainToolbar = BrowserTabBarView(
-      showMainToolbar: true,
-      showContextualToolbar: false,
-      showQuickTabSwitcherBar: false,
-      displayAppBar: true,
-      displayQuickTabSwitcher: false,
-      backgroundColor:
-          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
-      title: settings.tabBarLayout == TabBarLayout.compact
-          ? _CompactPreviewTitle(tabState: previewTabState)
-          : _RegularPreviewTitle(tabState: previewTabState),
-      actions: mainToolbarActions,
-      quickTabSwitcher: const SizedBox.shrink(),
-      contextualToolbar: const SizedBox.shrink(),
-    );
-
-    final topBottomToolbar = BrowserTabBarView(
-      showMainToolbar: false,
-      showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      displayAppBar: false,
-      displayQuickTabSwitcher: true,
-      backgroundColor: colorScheme.surfaceContainer,
-      title: null,
-      actions: const [],
-      quickTabSwitcher: buildQuickTabSwitcher(),
-      contextualToolbar: buildContextualToolbar(),
-    );
-
-    final isRailPreview = settings.tabBarPosition.isVertical;
-
-    // Static stand-ins for the wide rail's shelves and space switcher: the
-    // live widgets need the tab and space tables the preview does not have.
-    Widget buildWideRailTabs() {
-      final closeMode = settings.quickTabSwitcherCloseButtonMode;
-      return ListView(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        children: [
-          WideRailTabRowView(
-            icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
-            title: 'News',
-            isActive: true,
-            onTap: () {},
-            onClose: closeMode.showsFor(isActive: true) ? () {} : null,
-          ),
-          WideRailTabRowView(
-            icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
-            title: 'Docs',
-            isActive: false,
-            depth: 1,
-            onTap: () {},
-            onClose: closeMode.showsFor(isActive: false) ? () {} : null,
-          ),
-        ],
-      );
-    }
-
-    final railToolbar = isWideRailPreview(settings)
-        ? WideRailLayout(
-            backgroundColor:
-                previewContainerPalette?.surfaceColor ??
-                colorScheme.surfaceContainer,
-            urlRow: WideRailUrlRow(
-              title: settings.tabBarLayout == TabBarLayout.compact
-                  ? _CompactPreviewTitle(tabState: previewTabState)
-                  : _RegularPreviewTitle(tabState: previewTabState),
-              collapsed: const Icon(Icons.search),
-            ),
-            tabs: buildWideRailTabs(),
-            contextualToolbar: settings.tabBarShowContextualBar
-                ? buildContextualToolbar()
-                : null,
-            toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
-            spaces: const SpaceIconRailView(
-              entries: [
-                SpaceIconRailEntry(
-                  id: 'work',
-                  icon: null,
-                  name: 'Work',
-                  selected: true,
-                ),
-                SpaceIconRailEntry(
-                  id: 'personal',
-                  icon: null,
-                  name: 'Personal',
-                  selected: false,
-                ),
-              ],
-            ),
-          )
-        : BrowserTabBarView(
-            axis: Axis.vertical,
-            railOnLeft: settings.tabBarPosition == TabBarPosition.left,
-            showMainToolbar: true,
-            showContextualToolbar: settings.tabBarShowContextualBar,
-            showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-            displayAppBar: true,
-            displayQuickTabSwitcher: true,
-            backgroundColor:
-                previewContainerPalette?.surfaceColor ??
-                colorScheme.surfaceContainer,
-            title: _RailPreviewTitle(
-              tabState: previewTabState,
-              quarterTurns: settings.tabBarPosition == TabBarPosition.left
-                  ? 3
-                  : 1,
-            ),
-            actions: mainToolbarActions,
-            quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
-            contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
-          );
-
-    final pageContentBox = Container(
+    Widget pageContent({double? height}) => Container(
       width: double.infinity,
-      height: double.infinity,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: compact
@@ -481,57 +224,191 @@ class TabBarPreviewCard extends HookWidget {
           horizontal: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
-      child: Text(
-        'Page Content',
-        style: Theme.of(context).textTheme.labelMedium,
+      child: Text('Page Content', style: textTheme.labelMedium),
+    );
+
+    BoxDecoration frame() => BoxDecoration(
+      color: compact
+          ? colorScheme.surface.withValues(alpha: 0.7)
+          : colorScheme.surface,
+      border: Border.all(color: colorScheme.outlineVariant),
+      borderRadius: BorderRadius.circular(4),
+    );
+
+    // --- Narrow screens: the compact bar at the configured edge. ---------
+
+    final compactBar = _CompactBarPreview(settings: settings);
+    final position = settings.effectiveTabBarPosition;
+    final pageHeight = compact
+        ? _kCompactPageContentHeight
+        : _kPageContentHeight;
+
+    final Widget narrowPreview;
+    if (position == TabBarPosition.top) {
+      narrowPreview = Column(
+        children: [
+          BrowserTabBarView(
+            showMainToolbar: true,
+            showContextualToolbar: false,
+            showQuickTabSwitcherBar: false,
+            displayAppBar: true,
+            displayQuickTabSwitcher: false,
+            backgroundColor: chromeColor,
+            title: title(),
+            actions: mainToolbarActions,
+            quickTabSwitcher: const SizedBox.shrink(),
+            contextualToolbar: const SizedBox.shrink(),
+          ),
+          pageContent(height: pageHeight),
+          BrowserTabBarView(
+            showMainToolbar: false,
+            showContextualToolbar: settings.tabBarShowContextualBar,
+            showQuickTabSwitcherBar: true,
+            displayAppBar: false,
+            displayQuickTabSwitcher: true,
+            backgroundColor: colorScheme.surfaceContainer,
+            title: null,
+            actions: const [],
+            quickTabSwitcher: compactBar,
+            contextualToolbar: buildContextualToolbar(),
+          ),
+        ],
+      );
+    } else {
+      narrowPreview = Column(
+        children: [
+          pageContent(height: pageHeight),
+          BrowserTabBarView(
+            showMainToolbar: true,
+            showContextualToolbar: settings.tabBarShowContextualBar,
+            showQuickTabSwitcherBar: true,
+            displayAppBar: true,
+            displayQuickTabSwitcher: true,
+            backgroundColor: chromeColor,
+            title: title(),
+            actions: mainToolbarActions,
+            quickTabSwitcher: compactBar,
+            contextualToolbar: buildContextualToolbar(),
+          ),
+        ],
+      );
+    }
+    final narrowBox = Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: frame(),
+      child: narrowPreview,
+    );
+
+    // --- Wide screens: the rail on the configured side. -------------------
+
+    final railWidth = effectiveRailWidth(railWidth: settings.railWidth);
+    final closeMode = settings.quickTabSwitcherCloseButtonMode;
+    final rail = SizedBox(
+      width: railWidth,
+      child: WideRailLayout(
+        backgroundColor: chromeColor,
+        urlRow: WideRailUrlRow(
+          title: title(),
+          collapsed: const Icon(Icons.search),
+        ),
+        tabs: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          children: [
+            WideRailTabRowView(
+              icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
+              title: 'News',
+              isActive: true,
+              onTap: () {},
+              onClose: closeMode.showsFor(isActive: true) ? () {} : null,
+            ),
+            WideRailTabRowView(
+              icon: const Icon(MdiIcons.web, size: WideRailTabRowView.iconSize),
+              title: 'Docs',
+              isActive: false,
+              depth: 1,
+              onTap: () {},
+              onClose: closeMode.showsFor(isActive: false) ? () {} : null,
+            ),
+          ],
+        ),
+        contextualToolbar: settings.tabBarShowContextualBar
+            ? buildContextualToolbar()
+            : null,
+        toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
+        spaces: const SpaceIconRailView(
+          entries: [
+            SpaceIconRailEntry(
+              id: 'work',
+              icon: null,
+              name: 'Work',
+              selected: true,
+            ),
+            SpaceIconRailEntry(
+              id: 'personal',
+              icon: null,
+              name: 'Personal',
+              selected: false,
+            ),
+          ],
+        ),
+      ),
+    );
+    final wideCanvas = Container(
+      width: _kWideCanvasWidth,
+      height: _kWideCanvasHeight,
+      clipBehavior: Clip.antiAlias,
+      decoration: frame(),
+      child: Row(
+        children: settings.railSide == RailSide.left
+            ? [rail, Expanded(child: pageContent())]
+            : [Expanded(child: pageContent()), rail],
+      ),
+    );
+    final wideBox = FittedBox(
+      fit: BoxFit.contain,
+      alignment: Alignment.topCenter,
+      child: wideCanvas,
+    );
+
+    Widget label(String text) => SizedBox(
+      height: _kLabelHeight,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: textTheme.labelMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
       ),
     );
 
-    final Widget previewContent;
-    if (isRailPreview) {
-      final rail = SizedBox(width: settings.railWidth, child: railToolbar);
-      final railOnLeft = settings.tabBarPosition == TabBarPosition.left;
-      previewContent = Container(
-        clipBehavior: Clip.antiAlias,
-        height: railPreviewHeight(settings, compact: compact),
-        decoration: BoxDecoration(
-          color: compact
-              ? colorScheme.surface.withValues(alpha: 0.7)
-              : colorScheme.surface,
-          border: Border.all(color: colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Row(
-          children: railOnLeft
-              ? [rail, Expanded(child: pageContentBox)]
-              : [Expanded(child: pageContentBox), rail],
-        ),
-      );
-    } else {
-      previewContent = Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: compact
-              ? colorScheme.surface.withValues(alpha: 0.7)
-              : colorScheme.surface,
-          border: Border.all(color: colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          children: [
-            if (settings.tabBarPosition == TabBarPosition.top) topMainToolbar,
-            SizedBox(height: compact ? 40 : 72, child: pageContentBox),
-            if (settings.tabBarPosition == TabBarPosition.top)
-              topBottomToolbar
-            else
-              bottomCombinedToolbar,
-          ],
-        ),
-      );
-    }
-
     if (compact) {
-      return previewContent;
+      final previewHeight = narrowPreviewHeight(settings, compact: true);
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                label(narrowScreensLabel),
+                SizedBox(height: previewHeight, child: narrowBox),
+              ],
+            ),
+          ),
+          const SizedBox(width: _kGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                label(wideScreensLabel),
+                SizedBox(height: previewHeight, child: wideBox),
+              ],
+            ),
+          ),
+        ],
+      );
     }
 
     return Card(
@@ -542,17 +419,145 @@ class TabBarPreviewCard extends HookWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ListTile(
-              title: Text('Live Preview'),
-              subtitle: Text(
-                'Reflects your current toolbar and layout settings',
+            const SizedBox(
+              height: _kHeaderHeight,
+              child: ListTile(
+                title: Text('Live Preview'),
+                subtitle: Text(
+                  'Reflects your current toolbar and layout settings',
+                ),
+                leading: Icon(MdiIcons.televisionGuide),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
               ),
-              leading: Icon(MdiIcons.televisionGuide),
-              contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
             ),
-            previewContent,
+            label(narrowScreensLabel),
+            narrowBox,
+            const SizedBox(height: _kGap),
+            label(wideScreensLabel),
+            SizedBox(height: _kWideCanvasHeight, child: wideBox),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Static stand-in for [CompactTabBar]: the space indicator, two Essentials
+/// squares, the divider, a folder chip and two tab chips. The live bar needs
+/// the tab and space tables, which the preview does not have.
+class _CompactBarPreview extends StatelessWidget {
+  const _CompactBarPreview({required this.settings});
+
+  final GeneralSettings settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final items = <QuickTabSwitcherItem>[
+      QuickTabSwitcherItem(
+        id: 'regular-preview-tab',
+        isActive: true,
+        title: 'News',
+        tabMode: TabMode.regular,
+        isHistory: false,
+        isPinned: false,
+        url: Uri.parse('https://example.com/news'),
+        color: settings.showContainerUi ? scheme.primary : null,
+        avatar: const Icon(MdiIcons.web, size: 20),
+      ),
+      QuickTabSwitcherItem(
+        id: 'private-preview-tab',
+        isActive: false,
+        title: 'Private',
+        tabMode: TabMode.private,
+        isHistory: false,
+        isPinned: false,
+        depth: 1,
+        url: Uri.parse('https://example.com/private'),
+        color: null,
+        avatar: const Icon(MdiIcons.web, size: 20),
+      ),
+    ];
+    final decoration = buildQuickTabSwitcherChipDecoration(
+      context,
+      showTitles: settings.quickTabSwitcherShowTitles,
+      hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
+    );
+
+    Widget essential() => Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Center(
+        child: Container(
+          width: compactEssentialSize,
+          height: compactEssentialSize,
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: const Icon(MdiIcons.web, size: 16),
+        ),
+      ),
+    );
+
+    return SizedBox(
+      height: CompactTabBar.height,
+      child: Row(
+        children: [
+          const SpaceIndicatorView(
+            icon: null,
+            name: 'Work',
+            index: 0,
+            count: 2,
+          ),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              children: [
+                essential(),
+                essential(),
+                const Padding(
+                  padding: EdgeInsets.only(left: 2.0, right: 6.0),
+                  child: VerticalDivider(width: 1, indent: 12, endIndent: 12),
+                ),
+                const Center(
+                  child: CompactFolderChip(
+                    name: 'Reading',
+                    childCount: 3,
+                    expanded: false,
+                  ),
+                ),
+                for (final item in items)
+                  Center(
+                    child: QuickTabSwitcherChip(
+                      item: item,
+                      isSelected: item.isActive,
+                      selectedBorderColor: scheme.primary,
+                      decoration: decoration,
+                      label: buildQuickTabSwitcherChipLabel(
+                        context,
+                        item,
+                        isSelected: item.isActive,
+                        showTitles: settings.quickTabSwitcherShowTitles,
+                        hierarchyGlyphs:
+                            settings.quickTabSwitcherHierarchyGlyphs,
+                        titleMaxWidth: settings.quickTabSwitcherTitleWidth,
+                      ),
+                      padding: const EdgeInsets.only(right: 8.0),
+                      onTap: () async {},
+                      onDelete:
+                          settings.quickTabSwitcherCloseButtonMode.showsFor(
+                            isActive: item.isActive,
+                          )
+                          ? () async {}
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -591,27 +596,6 @@ class _CompactPreviewTitle extends StatelessWidget {
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
       tabIcon: const Icon(MdiIcons.web, size: 24),
-    );
-  }
-}
-
-class _RailPreviewTitle extends StatelessWidget {
-  const _RailPreviewTitle({required this.tabState, required this.quarterTurns});
-
-  final TabState tabState;
-  final int quarterTurns;
-
-  @override
-  Widget build(BuildContext context) {
-    return RailAppBarTitleView(
-      tabState: tabState,
-      quarterTurns: quarterTurns,
-      isTabTunneled: false,
-      siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
-      onSiteSettingsTap: _noop,
-      onTitleTap: _noop,
-      tabIcon: const Icon(MdiIcons.web, size: 24),
-      longPressUrlCopy: false,
     );
   }
 }

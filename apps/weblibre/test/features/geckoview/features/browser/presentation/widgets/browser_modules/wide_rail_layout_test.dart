@@ -35,9 +35,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
@@ -490,52 +487,6 @@ void main() {
       expect(tabsY, lessThan(looseY));
 
       await _disposeTree(tester);
-    });
-  });
-
-  group('narrow rail', () {
-    testWidgets('still renders the rotated title', (tester) async {
-      final tabState = TabState.$default(
-        'preview-tab',
-      ).copyWith(url: Uri.parse('https://weblibre.eu/docs'), title: 'WebLibre');
-
-      await tester.pumpWidget(
-        _railBox(
-          railWidth: defaultRailWidth,
-          viewportWidth: 900,
-          child: BrowserTabBarView(
-            axis: Axis.vertical,
-            showMainToolbar: true,
-            showContextualToolbar: false,
-            showQuickTabSwitcherBar: false,
-            displayAppBar: true,
-            displayQuickTabSwitcher: false,
-            backgroundColor: null,
-            title: RailAppBarTitleView(
-              tabState: tabState,
-              quarterTurns: 3,
-              isTabTunneled: false,
-              siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
-              onSiteSettingsTap: () {},
-              onTitleTap: () {},
-              tabIcon: const Icon(Icons.public, size: 24),
-              longPressUrlCopy: false,
-            ),
-            actions: const [],
-            quickTabSwitcher: const SizedBox.shrink(),
-            contextualToolbar: const SizedBox.shrink(),
-          ),
-        ),
-      );
-
-      expect(find.byType(WideRailLayout), findsNothing);
-      final rotated = tester.widget<RotatedBox>(
-        find.descendant(
-          of: find.byType(RailAppBarTitleView),
-          matching: find.byType(RotatedBox),
-        ),
-      );
-      expect(rotated.quarterTurns, 3);
     });
   });
 }

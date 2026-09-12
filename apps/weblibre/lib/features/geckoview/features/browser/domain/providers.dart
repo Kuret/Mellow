@@ -19,7 +19,6 @@
  */
 import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,14 +28,12 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -382,171 +379,6 @@ EquatableValue<List<TabStateWithContainer>> selectedSpaceTabStatesWithContainer(
   }
 
   return EquatableValue(items);
-}
-
-@Riverpod()
-EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
-  Ref ref,
-  QuickTabSwitcherMode mode,
-) {
-  final selectedTabId = ref.watch(selectedTabProvider);
-
-  final tabStates = switch (mode) {
-    QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
-    QuickTabSwitcherMode.containerTabs || QuickTabSwitcherMode.spaceTabs =>
-      ref.watch(selectedSpaceTabStatesWithContainerProvider).value,
-  };
-
-  final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-  final sortPinnedFirst = ref.watch(
-    tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
-  );
-
-  return EquatableValue(switch (mode) {
-    QuickTabSwitcherMode.lastUsedTabs => () {
-      final filtered = tabStates
-          .where((state) => state.$1.id != selectedTabId)
-          .toList();
-      // Always show MRU-first regardless of tabBarDirection.
-      if (sortPinnedFirst && pinnedTabIds.isNotEmpty) {
-        final pinned = filtered
-            .where((s) => pinnedTabIds.contains(s.$1.id))
-            .toList();
-        final unpinned = filtered
-            .where((s) => !pinnedTabIds.contains(s.$1.id))
-            .toList();
-        return [...pinned, ...unpinned];
-      }
-      return filtered;
-    }(),
-    QuickTabSwitcherMode.containerTabs ||
-    QuickTabSwitcherMode.spaceTabs => tabStates,
-  });
-}
-
-@Riverpod()
-Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
-  Ref ref,
-  QuickTabSwitcherMode mode,
-) async {
-  final showHistorySuggestions = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.quickTabSwitcherShowHistorySuggestions,
-    ),
-  );
-
-  if (!showHistorySuggestions) {
-    return [];
-  }
-
-  final hasTabStates = ref.watch(
-    quickTabSwitcherTabStatesProvider(
-      mode,
-    ).select((value) => value.value.isNotEmpty),
-  );
-  if (hasTabStates) {
-    return [];
-  }
-
-  return ref
-      .read(historyRepositoryProvider.notifier)
-      .getVisitsPaginated(count: 25);
-}
-
-/// Whether a single switcher row of [mode] has anything to render
-/// (open tabs, or history suggestions as fallback).
-AsyncValue<bool> _quickTabSwitcherRowHasResults(
-  Ref ref,
-  QuickTabSwitcherMode mode,
-) {
-  final hasResults = ref.watch(
-    quickTabSwitcherTabStatesProvider(
-      mode,
-    ).select((value) => value.value.isNotEmpty),
-  );
-
-  if (hasResults) {
-    return const AsyncValue.data(true);
-  }
-
-  return ref
-      .watch(quickTabSwitcherHistorySuggestionsProvider(mode))
-      .whenData((visits) => visits.isNotEmpty);
-}
-
-/// Number of 48px rows the quick tab switcher bar currently occupies.
-/// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
-@Riverpod()
-AsyncValue<int> quickTabSwitcherRowCount(Ref ref) {
-  final stackingMode = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveTabBarStackingMode(),
-    ),
-  );
-
-  switch (stackingMode) {
-    case TabBarStackingMode.disabled:
-      return const AsyncValue.data(0);
-    case TabBarStackingMode.lastUsedTabs:
-      return _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.lastUsedTabs,
-      ).whenData((hasResults) => hasResults ? 1 : 0);
-    case TabBarStackingMode.containerTabs:
-      return _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.containerTabs,
-      ).whenData((hasResults) => hasResults ? 1 : 0);
-    case TabBarStackingMode.accordion:
-      final hasContainers = ref.watch(
-        watchContainersWithCountProvider.select(
-          (value) => value.value?.isNotEmpty ?? false,
-        ),
-      );
-      if (hasContainers) {
-        return const AsyncValue.data(1);
-      }
-      return _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.containerTabs,
-      ).whenData((hasResults) => hasResults ? 1 : 0);
-    case TabBarStackingMode.spaceTabs:
-      // The space chip row always has the selected space to show; the rail
-      // renders the pair as one column (the accordion), so it counts one.
-      final isVertical = ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (settings) => settings.tabBarPosition.isVertical,
-        ),
-      );
-      if (isVertical) {
-        return const AsyncValue.data(1);
-      }
-      final hasSpaces = ref.watch(
-        watchSpacesProvider.select((value) => value.value?.isNotEmpty ?? false),
-      );
-      if (hasSpaces) {
-        return const AsyncValue.data(2);
-      }
-      return _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.spaceTabs,
-      ).whenData((hasResults) => hasResults ? 1 : 0);
-    case TabBarStackingMode.twoLevel:
-      final containerRow = _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.containerTabs,
-      );
-      final mruRow = _quickTabSwitcherRowHasResults(
-        ref,
-        QuickTabSwitcherMode.lastUsedTabs,
-      );
-      // The bar shows both rows whenever either has content; an empty row
-      // renders blank within its slot.
-      return containerRow.whenData(
-        (hasContainerTabs) =>
-            (hasContainerTabs || (mruRow.value ?? false)) ? 2 : 0,
-      );
-  }
 }
 
 @Riverpod()

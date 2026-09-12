@@ -41,7 +41,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -73,6 +72,13 @@ import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+
+/// The edge a rail docked to [side] occupies, in the edge vocabulary the
+/// layout layers share with the compact bar.
+TabBarPosition _railEdge(RailSide side) => switch (side) {
+  RailSide.left => TabBarPosition.left,
+  RailSide.right => TabBarPosition.right,
+};
 
 class _AnimatedToolbar extends HookWidget {
   final bool visible;
@@ -292,7 +298,9 @@ class _TabBar extends HookConsumerWidget {
         suppressMainToolbar: suppressMainToolbar,
       ),
       TabBarPosition.left || TabBarPosition.right => BrowserSideRail(
-        position: tabBarPosition,
+        side: tabBarPosition == TabBarPosition.left
+            ? RailSide.left
+            : RailSide.right,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
@@ -657,7 +665,9 @@ class _SideRailToolbarLayer extends StatelessWidget {
       sheetDisplayed: sheetDisplayed,
       tabInFullScreen: tabInFullScreen,
       child: BrowserSideRail(
-        position: tabBarPosition,
+        side: tabBarPosition == TabBarPosition.left
+            ? RailSide.left
+            : RailSide.right,
         showContextualToolbar: showContextualToolbar,
         railWidth: railWidth,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
@@ -948,11 +958,27 @@ class BrowserScreen extends HookConsumerWidget {
       smallWebModeControllerProvider.select((value) => value != null),
     );
 
+    // The chrome follows the viewport, not a setting alone: a wide viewport
+    // (tablets, landscape, unfolded foldables) gets the side rail on the
+    // configured side, a narrow one the compact bar at the configured edge.
+    // MediaQuery.sizeOf rebuilds this on rotation and unfolding, so the
+    // layout switches live. Auto-hide is not supported on the rail; it is
+    // reserved via a plain content offset and dismissed only by gesture.
+    final isRail =
+        !isSmallWebActive && isWideViewport(MediaQuery.sizeOf(context).width);
+    final railSide = ref.watch(
+      generalSettingsWithDefaultsProvider.select((value) => value.railSide),
+    );
+    // The resolved edge of the chrome. [TabBarPosition] doubles as the edge
+    // type for the layers below: its (legacy) left/right values name the
+    // rail's edge, top/bottom the compact bar's.
     final tabBarPosition = isSmallWebActive
         ? TabBarPosition.top
+        : isRail
+        ? _railEdge(railSide)
         : ref.watch(
             generalSettingsWithDefaultsProvider.select(
-              (value) => value.tabBarPosition,
+              (value) => value.effectiveTabBarPosition,
             ),
           );
 
@@ -964,13 +990,8 @@ class BrowserScreen extends HookConsumerWidget {
           ),
         );
 
-    final quickTabSwitcherRowCount = isSmallWebActive
-        ? 0
-        : ref.watch(quickTabSwitcherRowCountProvider).value ?? 0;
-
-    // Vertical side rail (left/right). Auto-hide is not supported on the rail;
-    // it is reserved via a plain content offset and dismissed only by gesture.
-    final isRail = tabBarPosition.isVertical;
+    // The compact bar is one row, always; the rail has no bar row at all.
+    final quickTabSwitcherRowCount = isSmallWebActive ? 0 : 1;
 
     final railWidthSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.railWidth),
