@@ -18,21 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 /// A horizontal row of switch chips, one per [SpaceData], replacing the old
 /// per-container chip row now that the tab list is scoped by space rather
 /// than by container.
 ///
-/// Deliberately plain — a later workstream restyles this row. Tapping a chip
-/// selects that space; long-pressing opens a menu to rename the space,
-/// change its container, or delete it. A trailing "+" chip creates a new
-/// space and selects it.
+/// Tapping a chip selects that space; long-pressing opens a menu to edit
+/// (name, icon, container — the `SpaceEditScreen`) or delete it. A trailing
+/// "+" chip opens the editor for a new space, which selects it on save.
 class SpaceChips extends ConsumerWidget {
   const SpaceChips({super.key});
 
@@ -54,12 +54,8 @@ class SpaceChips extends ConsumerWidget {
           ActionChip(
             avatar: const Icon(Icons.add, size: 18),
             label: const Text('New space'),
-            onPressed: () async {
-              final created = await ref
-                  .read(spaceRepositoryProvider.notifier)
-                  .createSpace();
-              ref.read(selectedSpaceProvider.notifier).space = created.uuid;
-            },
+            tooltip: 'New space',
+            onPressed: () => const SpaceCreateRoute().push(context),
           ),
         ],
       ),
@@ -80,7 +76,7 @@ class _SpaceChip extends ConsumerWidget {
     return GestureDetector(
       onLongPress: () => _openMenu(context, ref),
       child: ChoiceChip(
-        avatar: const Icon(MdiIcons.viewDashboardOutline, size: 18),
+        avatar: SpaceIcon(icon: space.icon, size: 18),
         label: Text(_displayName),
         selected: selected,
         onSelected: (value) {
@@ -113,10 +109,13 @@ class _SpaceChip extends ConsumerWidget {
     final action = await showMenu<String>(
       context: context,
       position: position,
-      items: const [
-        PopupMenuItem<String>(value: 'rename', child: Text('Rename')),
-        PopupMenuItem<String>(value: 'container', child: Text('Set container')),
-        PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+      items: [
+        const PopupMenuItem<String>(value: 'edit', child: Text('Edit space…')),
+        PopupMenuItem<String>(
+          value: 'delete',
+          enabled: spaceCount > 1,
+          child: const Text('Delete'),
+        ),
       ],
     );
 
@@ -125,78 +124,13 @@ class _SpaceChip extends ConsumerWidget {
     }
 
     switch (action) {
-      case 'rename':
-        await _showRenameDialog(context, ref);
-      case 'container':
-        await _showContainerPickerDialog(context, ref);
+      case 'edit':
+        await SpaceEditRoute(uuid: space.uuid).push(context);
       case 'delete':
         if (spaceCount <= 1) {
           return;
         }
         await _showDeleteConfirmation(context, ref);
-    }
-  }
-
-  Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController(text: space.name);
-    final newName = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename space'),
-        content: TextField(controller: controller, autofocus: true),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
-    );
-
-    if (newName != null) {
-      await ref
-          .read(spaceRepositoryProvider.notifier)
-          .renameSpace(space.uuid, newName);
-    }
-  }
-
-  Future<void> _showContainerPickerDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final containers =
-        ref.read(watchContainersWithCountProvider).value ?? const [];
-
-    // Wrapped so a dismissed dialog (null) is distinguishable from
-    // explicitly picking "No container" (a pick whose containerId is null).
-    final pick = await showDialog<_ContainerPick>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Set container'),
-        children: [
-          SimpleDialogOption(
-            onPressed: () =>
-                Navigator.of(context).pop(const _ContainerPick(null)),
-            child: const Text('No container'),
-          ),
-          for (final container in containers)
-            SimpleDialogOption(
-              onPressed: () =>
-                  Navigator.of(context).pop(_ContainerPick(container.id)),
-              child: Text(container.name),
-            ),
-        ],
-      ),
-    );
-
-    if (pick != null) {
-      await ref
-          .read(spaceRepositoryProvider.notifier)
-          .setSpaceContainer(space.uuid, pick.containerId);
     }
   }
 
@@ -243,12 +177,4 @@ class _SpaceChip extends ConsumerWidget {
     }
     await repository.deleteSpace(space.uuid);
   }
-}
-
-/// A confirmed container choice from the "Set container" dialog, wrapping a
-/// nullable containerId so it can be told apart from a dismissed dialog.
-class _ContainerPick {
-  final String? containerId;
-
-  const _ContainerPick(this.containerId);
 }
