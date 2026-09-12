@@ -36,7 +36,12 @@ FakeSyncServer serverWithRemoteState() {
   server.put(
     ZenCleartext(
       id: 'rt1',
-      data: tabRecord('rt1', title: 'Remote', pinned: true, workspaceUuid: remoteSpace),
+      data: tabRecord(
+        'rt1',
+        title: 'Remote',
+        pinned: true,
+        workspaceUuid: remoteSpace,
+      ),
     ).toJson(),
   );
   server.put(
@@ -60,109 +65,132 @@ Iterable<Map<String, Object?>> uploadedTombstones(FakeSyncServer server) =>
     server.uploads.expand((batch) => batch).where((r) => r['deleted'] == true);
 
 void main() {
-  test('the first sync applies remote state and uploads no tombstones', () async {
-    final harness = await ServiceHarness.open(
-      server: serverWithRemoteState(),
-      initialSettings: GeneralSettings.withDefaults(
-        spacesSyncLastSyncId: 'spaces-sync-1',
-      ),
-    );
-    await seedLocalState(harness);
-    // A stale digest with a matching deletion note: exactly what would
-    // become a tombstone on any later sync, and must not on the first.
-    await harness.db.syncStateDao.putDigest('ghost', 'space', 'stale');
-    await harness.db.syncStateDao.recordDeletion('ghost', 'space');
+  test(
+    'the first sync applies remote state and uploads no tombstones',
+    () async {
+      final harness = await ServiceHarness.open(
+        server: serverWithRemoteState(),
+        initialSettings: GeneralSettings.withDefaults(
+          spacesSyncLastSyncId: 'spaces-sync-1',
+        ),
+      );
+      await seedLocalState(harness);
+      // A stale digest with a matching deletion note: exactly what would
+      // become a tombstone on any later sync, and must not on the first.
+      await harness.db.syncStateDao.putDigest('ghost', 'space', 'stale');
+      await harness.db.syncStateDao.recordDeletion('ghost', 'space');
 
-    final service = harness.container.read(spacesSyncServiceProvider.notifier);
-    await service.sync(reason: 'test');
+      final service = harness.container.read(
+        spacesSyncServiceProvider.notifier,
+      );
+      await service.sync(reason: 'test');
 
-    final status = harness.container.read(spacesSyncServiceProvider);
-    expect(status.lastError, isNull);
-    expect(status.engineEnabled, isTrue);
-    expect(status.writesBlockedReason, isNull);
+      final status = harness.container.read(spacesSyncServiceProvider);
+      expect(status.lastError, isNull);
+      expect(status.engineEnabled, isTrue);
+      expect(status.writesBlockedReason, isNull);
 
-    // Remote applied: the desktop's space and its cold pinned tab.
-    expect(
-      await harness.db.spaceDao.getByUuid(remoteSpace).getSingleOrNull(),
-      isNotNull,
-    );
-    expect((await summaryOf(harness.db, 'rt1')).isCold, isTrue);
+      // Remote applied: the desktop's space and its cold pinned tab.
+      expect(
+        await harness.db.spaceDao.getByUuid(remoteSpace).getSingleOrNull(),
+        isNotNull,
+      );
+      expect((await summaryOf(harness.db, 'rt1')).isCold, isTrue);
 
-    // Local-only records uploaded as creates; nothing applied this sync is
-    // re-uploaded; no tombstone at all.
-    expect(harness.server.postCount, 1);
-    final ids = uploadedIds(harness.server).toSet();
-    expect(ids, containsAll([space1, 'local1']));
-    expect(ids, isNot(contains(remoteSpace)));
-    expect(ids, isNot(contains('rt1')));
-    expect(ids, isNot(contains('layout')));
-    expect(uploadedTombstones(harness.server), isEmpty);
+      // Local-only records uploaded as creates; nothing applied this sync is
+      // re-uploaded; no tombstone at all.
+      expect(harness.server.postCount, 1);
+      final ids = uploadedIds(harness.server).toSet();
+      expect(ids, containsAll([space1, 'local1']));
+      expect(ids, isNot(contains(remoteSpace)));
+      expect(ids, isNot(contains('rt1')));
+      expect(ids, isNot(contains('layout')));
+      expect(uploadedTombstones(harness.server), isEmpty);
 
-    // Bookkeeping.
-    expect(harness.settings.current.spacesSyncBaselineDone, isTrue);
-    expect(harness.settings.current.spacesSyncLastModified, harness.server.collectionModified);
-    final snapshots = harness.snapshotDir
-        .listSync()
-        .whereType<File>()
-        .where((file) => file.path.contains('snapshot-'))
-        .toList();
-    expect(snapshots, hasLength(1));
-    final snapshot = jsonDecode(await snapshots.single.readAsString()) as List;
-    expect(snapshot.map((r) => (r as Map)['id']), containsAll([remoteSpace, 'rt1', 'layout']));
-  });
+      // Bookkeeping.
+      expect(harness.settings.current.spacesSyncBaselineDone, isTrue);
+      expect(
+        harness.settings.current.spacesSyncLastModified,
+        harness.server.collectionModified,
+      );
+      final snapshots = harness.snapshotDir
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.contains('snapshot-'))
+          .toList();
+      expect(snapshots, hasLength(1));
+      final snapshot =
+          jsonDecode(await snapshots.single.readAsString()) as List;
+      expect(
+        snapshot.map((r) => (r as Map)['id']),
+        containsAll([remoteSpace, 'rt1', 'layout']),
+      );
+    },
+  );
 
-  test('later syncs upload only changed digests; applied ids leave the outgoing set', () async {
-    final harness = await ServiceHarness.open(server: serverWithRemoteState());
-    await seedLocalState(harness);
-    final service = harness.container.read(spacesSyncServiceProvider.notifier);
-    await service.sync(reason: 'first');
-    expect(harness.server.postCount, 1);
+  test(
+    'later syncs upload only changed digests; applied ids leave the outgoing set',
+    () async {
+      final harness = await ServiceHarness.open(
+        server: serverWithRemoteState(),
+      );
+      await seedLocalState(harness);
+      final service = harness.container.read(
+        spacesSyncServiceProvider.notifier,
+      );
+      await service.sync(reason: 'first');
+      expect(harness.server.postCount, 1);
 
-    // The desktop's layout applied on the first sync and left the outgoing
-    // set; now that this device's space is in the local layout too, the
-    // divergence re-uploads exactly that record (Zen's self-healing).
-    await service.sync(reason: 'heal');
-    expect(harness.server.postCount, 2);
-    expect(harness.server.uploads.last.map((r) => r['id']), ['layout']);
+      // The desktop's layout applied on the first sync and left the outgoing
+      // set; now that this device's space is in the local layout too, the
+      // divergence re-uploads exactly that record (Zen's self-healing).
+      await service.sync(reason: 'heal');
+      expect(harness.server.postCount, 2);
+      expect(harness.server.uploads.last.map((r) => r['id']), ['layout']);
 
-    // Nothing changed anywhere: no upload.
-    await service.sync(reason: 'idle');
-    expect(harness.server.postCount, 2);
+      // Nothing changed anywhere: no upload.
+      await service.sync(reason: 'idle');
+      expect(harness.server.postCount, 2);
 
-    // A local rename: only that record.
-    await harness.container
-        .read(spaceRepositoryProvider.notifier)
-        .renameSpace(space1, 'Renamed');
-    await service.sync(reason: 'local-change');
-    expect(harness.server.postCount, 3);
-    expect(harness.server.uploads.last.map((r) => r['id']), [space1]);
-    expect(
-      (harness.server.uploads.last.single['data']! as Map)['name'],
-      'Renamed',
-    );
+      // A local rename: only that record.
+      await harness.container
+          .read(spaceRepositoryProvider.notifier)
+          .renameSpace(space1, 'Renamed');
+      await service.sync(reason: 'local-change');
+      expect(harness.server.postCount, 3);
+      expect(harness.server.uploads.last.map((r) => r['id']), [space1]);
+      expect(
+        (harness.server.uploads.last.single['data']! as Map)['name'],
+        'Renamed',
+      );
 
-    // The desktop retitles our live tab: the record applies (incoming always
-    // wins) and, having been applied this sync, is not re-uploaded even
-    // though the live row still projects its own title.
-    harness.server.put(
-      ZenCleartext(
-        id: 'local1',
-        data: tabRecord('local1', title: 'Desktop title', workspaceUuid: space1),
-      ).toJson(),
-    );
-    final uploadsBefore = harness.server.uploads.length;
-    await service.sync(reason: 'remote-change');
-    final uploadedNow = harness.server.uploads
-        .skip(uploadsBefore)
-        .expand((batch) => batch)
-        .map((r) => r['id']);
-    expect(uploadedNow, isNot(contains('local1')));
-    expect((await summaryOf(harness.db, 'local1')).title, 'local1');
+      // The desktop retitles our live tab: the record applies (incoming always
+      // wins) and, having been applied this sync, is not re-uploaded even
+      // though the live row still projects its own title.
+      harness.server.put(
+        ZenCleartext(
+          id: 'local1',
+          data: tabRecord(
+            'local1',
+            title: 'Desktop title',
+            workspaceUuid: space1,
+          ),
+        ).toJson(),
+      );
+      final uploadsBefore = harness.server.uploads.length;
+      await service.sync(reason: 'remote-change');
+      final uploadedNow = harness.server.uploads
+          .skip(uploadsBefore)
+          .expand((batch) => batch)
+          .map((r) => r['id']);
+      expect(uploadedNow, isNot(contains('local1')));
+      expect((await summaryOf(harness.db, 'local1')).title, 'local1');
 
-    // The divergence surfaces on the next diff instead (self-healing).
-    await service.sync(reason: 'heal');
-    expect(harness.server.uploads.last.map((r) => r['id']), ['local1']);
-  });
+      // The divergence surfaces on the next diff instead (self-healing).
+      await service.sync(reason: 'heal');
+      expect(harness.server.uploads.last.map((r) => r['id']), ['local1']);
+    },
+  );
 
   test('engine version 4 blocks writes but keeps reading', () async {
     final server = serverWithRemoteState()..engineVersion = 4;
@@ -193,7 +221,10 @@ void main() {
         .read(spacesSyncServiceProvider.notifier)
         .sync(reason: 'test');
 
-    expect(harness.container.read(spacesSyncServiceProvider).engineEnabled, isFalse);
+    expect(
+      harness.container.read(spacesSyncServiceProvider).engineEnabled,
+      isFalse,
+    );
     expect(harness.server.postCount, 0);
     expect(harness.server.fetches, isEmpty);
     expect(
@@ -220,7 +251,10 @@ void main() {
     expect(harness.settings.current.spacesSyncBaselineDone, isTrue);
     // Everything local re-uploaded as creates, nothing tombstoned.
     final lastUpload = harness.server.uploads.last.map((r) => r['id']).toSet();
-    expect(lastUpload, containsAll([space1, 'local1', remoteSpace, 'rt1', 'layout']));
+    expect(
+      lastUpload,
+      containsAll([space1, 'local1', remoteSpace, 'rt1', 'layout']),
+    );
     expect(uploadedTombstones(harness.server), isEmpty);
   });
 
@@ -261,7 +295,9 @@ void main() {
   test('the kill switch blocks uploads', () async {
     final harness = await ServiceHarness.open(
       server: serverWithRemoteState(),
-      initialSettings: GeneralSettings.withDefaults(spacesSyncWritesEnabled: false),
+      initialSettings: GeneralSettings.withDefaults(
+        spacesSyncWritesEnabled: false,
+      ),
     );
     await seedLocalState(harness);
 
@@ -322,32 +358,41 @@ void main() {
     expect(status.lastError, contains('workspaceUuid'));
   });
 
-  test('tombstones are uploaded only for held records the user deleted', () async {
-    final harness = await ServiceHarness.open(server: serverWithRemoteState());
-    await seedLocalState(harness);
-    await seedSpaces(harness.db, [space2]);
-    await seedTab(harness.db, 'closeme', spaceUuid: space2);
-    final service = harness.container.read(spacesSyncServiceProvider.notifier);
-    await service.sync(reason: 'first');
-    expect(uploadedIds(harness.server), containsAll([space2, 'closeme']));
+  test(
+    'tombstones are uploaded only for held records the user deleted',
+    () async {
+      final harness = await ServiceHarness.open(
+        server: serverWithRemoteState(),
+      );
+      await seedLocalState(harness);
+      await seedSpaces(harness.db, [space2]);
+      await seedTab(harness.db, 'closeme', spaceUuid: space2);
+      final service = harness.container.read(
+        spacesSyncServiceProvider.notifier,
+      );
+      await service.sync(reason: 'first');
+      expect(uploadedIds(harness.server), containsAll([space2, 'closeme']));
 
-    // The user closes a tab (tombstone) and deletes a space (ledger); a
-    // third record simply vanishes with no reason and must not be echoed.
-    await harness.container
-        .read(tabRepositoryProvider.notifier)
-        .closeTabs(['closeme']);
-    await harness.container
-        .read(spaceRepositoryProvider.notifier)
-        .deleteSpace(space2);
-    await (harness.db.tab.delete()..where((t) => t.id.equals('local1'))).go();
+      // The user closes a tab (tombstone) and deletes a space (ledger); a
+      // third record simply vanishes with no reason and must not be echoed.
+      await harness.container.read(tabRepositoryProvider.notifier).closeTabs([
+        'closeme',
+      ]);
+      await harness.container
+          .read(spaceRepositoryProvider.notifier)
+          .deleteSpace(space2);
+      await (harness.db.tab.delete()..where((t) => t.id.equals('local1'))).go();
 
-    await service.sync(reason: 'deletions');
+      await service.sync(reason: 'deletions');
 
-    final tombstones = uploadedTombstones(harness.server).map((r) => r['id']).toSet();
-    expect(tombstones, {space2, 'closeme'});
-    expect(await harness.db.syncStateDao.getDigest(space2), isNull);
-    expect(await harness.db.syncStateDao.getDigest('closeme'), isNull);
-    expect(await harness.db.syncStateDao.getDigest('local1'), isNotNull);
-    expect(await harness.db.syncStateDao.pendingDeletions(), isEmpty);
-  });
+      final tombstones = uploadedTombstones(
+        harness.server,
+      ).map((r) => r['id']).toSet();
+      expect(tombstones, {space2, 'closeme'});
+      expect(await harness.db.syncStateDao.getDigest(space2), isNull);
+      expect(await harness.db.syncStateDao.getDigest('closeme'), isNull);
+      expect(await harness.db.syncStateDao.getDigest('local1'), isNotNull);
+      expect(await harness.db.syncStateDao.pendingDeletions(), isEmpty);
+    },
+  );
 }

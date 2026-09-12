@@ -158,7 +158,10 @@ List<ZenIncoming> roundTripFixture() => [
       theme: {
         'type': 'gradient',
         'gradientColors': [
-          {'c': [12, 34, 56], 'isCustom': false},
+          {
+            'c': [12, 34, 56],
+            'isCustom': false,
+          },
         ],
         'opacity': 0.5,
         'texture': null,
@@ -322,7 +325,8 @@ class FakeSyncServer {
   bool omitMetaGlobal = false;
 
   /// id → (cleartext, modified seconds)
-  final records = <String, ({Map<String, Object?> cleartext, double modified})>{};
+  final records =
+      <String, ({Map<String, Object?> cleartext, double modified})>{};
   double collectionModified = 1000;
 
   /// Every POST body decrypted, one list per request.
@@ -407,10 +411,7 @@ class FakeSyncServer {
       );
     }
     if (path.endsWith('/info/collections')) {
-      return http.Response(
-        jsonEncode({'spaces': collectionModified}),
-        200,
-      );
+      return http.Response(jsonEncode({'spaces': collectionModified}), 200);
     }
     if (path.endsWith('/storage/spaces') && request.method == 'GET') {
       final newer = double.tryParse(request.url.queryParameters['newer'] ?? '');
@@ -522,11 +523,10 @@ class ServiceHarness {
       overrides: [
         tabDatabaseProvider.overrideWithValue(db),
         tabRepositoryProvider.overrideWith(() => tabs),
-        spacesSyncHttpClientProvider.overrideWith(
-          (ref) => fakeServer.client(),
-        ),
+        spacesSyncHttpClientProvider.overrideWith((ref) => fakeServer.client()),
         spacesSyncCredentialsProvider.overrideWith(
-          (ref) => () async => testCredentials(),
+          (ref) =>
+              () async => testCredentials(),
         ),
         syncIsAuthenticatedProvider.overrideWith((ref) => authenticated),
         generalSettingsRepositoryProvider.overrideWith(() => settings),

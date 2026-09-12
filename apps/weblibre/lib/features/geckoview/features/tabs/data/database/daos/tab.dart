@@ -2451,10 +2451,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   /// For a space or folder scope this covers both the pinned and the normal
   /// shelf: they are separate ordering scopes, so one ascending key sequence
   /// across both keeps every shelf's relative order correct.
-  Future<void> applyScopeOrder(
-    TabOrderScope scope,
-    List<String> orderedIds,
-  ) {
+  Future<void> applyScopeOrder(TabOrderScope scope, List<String> orderedIds) {
     return db.transaction(() async {
       final List<String> current;
       if (scope.isEssential) {

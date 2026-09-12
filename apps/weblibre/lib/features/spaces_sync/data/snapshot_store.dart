@@ -127,9 +127,7 @@ class SnapshotStore {
     }
     try {
       final decoded = jsonDecode(await _failedFile.readAsString());
-      return {
-        for (final id in decoded as List) id as String,
-      };
+      return {for (final id in decoded as List) id as String};
     } on FormatException {
       return {};
     }

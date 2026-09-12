@@ -107,8 +107,7 @@ class SpacesApplier {
   ContainerRepository get _containers =>
       _ref.read(containerRepositoryProvider.notifier);
   SpaceRepository get _spaces => _ref.read(spaceRepositoryProvider.notifier);
-  FolderRepository get _folders =>
-      _ref.read(folderRepositoryProvider.notifier);
+  FolderRepository get _folders => _ref.read(folderRepositoryProvider.notifier);
   TabRepository get _tabs => _ref.read(tabRepositoryProvider.notifier);
 
   /// Applies [records]; returns the ids that failed (retried on a later
@@ -294,8 +293,7 @@ class SpacesApplier {
     for (final id in ids) {
       if (await _db.tabDao.getTabSummaryById(id).getSingleOrNull() != null) {
         routed.tabs.add(id);
-      } else if (await _db.tabFolderDao.getById(id).getSingleOrNull() !=
-          null) {
+      } else if (await _db.tabFolderDao.getById(id).getSingleOrNull() != null) {
         routed.folders.add(id);
       } else if (await _db.tabSplitDao.getById(id).getSingleOrNull() != null) {
         routed.splits.add(id);
@@ -404,7 +402,9 @@ class SpacesApplier {
       final seen = {id};
       var depth = 0;
       var parent = parents[id];
-      while (parent != null && parents.containsKey(parent) && seen.add(parent)) {
+      while (parent != null &&
+          parents.containsKey(parent) &&
+          seen.add(parent)) {
         depth++;
         parent = parents[parent];
       }
@@ -627,9 +627,13 @@ class SpacesApplier {
     final currentScope = TabOrderScope.forTab(tab);
     if (currentScope != placement.scope) {
       if (data.essential && tab.tabShelf != TabShelf.essential) {
-        logger.i('spaces sync: incoming record promotes tab ${tab.id} to essential');
+        logger.i(
+          'spaces sync: incoming record promotes tab ${tab.id} to essential',
+        );
       } else if (!data.essential && tab.tabShelf == TabShelf.essential) {
-        logger.w('spaces sync: incoming record demotes essential tab ${tab.id}');
+        logger.w(
+          'spaces sync: incoming record demotes essential tab ${tab.id}',
+        );
       }
       await _db.tabDao.moveToScope([tab.id], placement.scope);
     }

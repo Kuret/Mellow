@@ -77,42 +77,80 @@ void main() {
     expect(tab.title, 'Cold');
   });
 
-  test('a live normal tab keeps its live url; pinned and cold retarget', () async {
-    final harness = openApplierHarness();
-    await seedSpaces(harness.db, [space1]);
-    await seedTab(harness.db, 'live', spaceUuid: space1);
-    await seedTab(harness.db, 'pinned', spaceUuid: space1, shelf: TabShelf.pinned);
-    await harness.container.read(spacesApplierProvider).applyBatch([
-      record(tabRecord('cold', url: 'https://old.example/', workspaceUuid: space1)),
-    ], firstSync: false);
+  test(
+    'a live normal tab keeps its live url; pinned and cold retarget',
+    () async {
+      final harness = openApplierHarness();
+      await seedSpaces(harness.db, [space1]);
+      await seedTab(harness.db, 'live', spaceUuid: space1);
+      await seedTab(
+        harness.db,
+        'pinned',
+        spaceUuid: space1,
+        shelf: TabShelf.pinned,
+      );
+      await harness.container.read(spacesApplierProvider).applyBatch([
+        record(
+          tabRecord('cold', url: 'https://old.example/', workspaceUuid: space1),
+        ),
+      ], firstSync: false);
 
-    await harness.container.read(spacesApplierProvider).applyBatch([
-      record(tabRecord('live', url: 'https://remote.example/', title: 'R', workspaceUuid: space1)),
-      record(tabRecord('pinned', url: 'https://remote.example/', pinned: true, workspaceUuid: space1)),
-      record(tabRecord('cold', url: 'https://new.example/', workspaceUuid: space1)),
-    ], firstSync: false);
+      await harness.container.read(spacesApplierProvider).applyBatch([
+        record(
+          tabRecord(
+            'live',
+            url: 'https://remote.example/',
+            title: 'R',
+            workspaceUuid: space1,
+          ),
+        ),
+        record(
+          tabRecord(
+            'pinned',
+            url: 'https://remote.example/',
+            pinned: true,
+            workspaceUuid: space1,
+          ),
+        ),
+        record(
+          tabRecord('cold', url: 'https://new.example/', workspaceUuid: space1),
+        ),
+      ], firstSync: false);
 
-    expect((await summaryOf(harness.db, 'live')).url.toString(), 'https://live.example/');
-    expect((await summaryOf(harness.db, 'pinned')).url.toString(), 'https://remote.example/');
-    expect((await summaryOf(harness.db, 'cold')).url.toString(), 'https://new.example/');
-  });
+      expect(
+        (await summaryOf(harness.db, 'live')).url.toString(),
+        'https://live.example/',
+      );
+      expect(
+        (await summaryOf(harness.db, 'pinned')).url.toString(),
+        'https://remote.example/',
+      );
+      expect(
+        (await summaryOf(harness.db, 'cold')).url.toString(),
+        'https://new.example/',
+      );
+    },
+  );
 
-  test('a tab tombstone closes the row without a closed_tab_tombstone', () async {
-    final harness = openApplierHarness();
-    await seedSpaces(harness.db, [space1]);
-    await seedTab(harness.db, 'gone', spaceUuid: space1);
-    await harness.db.syncStateDao.putDigest('gone', 'tab', 'digest');
+  test(
+    'a tab tombstone closes the row without a closed_tab_tombstone',
+    () async {
+      final harness = openApplierHarness();
+      await seedSpaces(harness.db, [space1]);
+      await seedTab(harness.db, 'gone', spaceUuid: space1);
+      await harness.db.syncStateDao.putDigest('gone', 'tab', 'digest');
 
-    final failed = await harness.container
-        .read(spacesApplierProvider)
-        .applyBatch([ZenIncomingTombstone('gone')], firstSync: false);
+      final failed = await harness.container
+          .read(spacesApplierProvider)
+          .applyBatch([ZenIncomingTombstone('gone')], firstSync: false);
 
-    expect(failed, isEmpty);
-    expect(await tabIds(harness.db), isNot(contains('gone')));
-    expect(harness.tabs.closedFromSync, ['gone']);
-    expect(await harness.db.tabDao.allClosedTabTombstoneIds().get(), isEmpty);
-    expect(await harness.db.syncStateDao.getDigest('gone'), isNull);
-  });
+      expect(failed, isEmpty);
+      expect(await tabIds(harness.db), isNot(contains('gone')));
+      expect(harness.tabs.closedFromSync, ['gone']);
+      expect(await harness.db.tabDao.allClosedTabTombstoneIds().get(), isEmpty);
+      expect(await harness.db.syncStateDao.getDigest('gone'), isNull);
+    },
+  );
 
   test('children arrays re-key the scope order', () async {
     final harness = openApplierHarness();
@@ -181,7 +219,10 @@ void main() {
         .applyBatch([ZenIncomingTombstone(space1)], firstSync: false);
 
     expect(failed, isEmpty);
-    expect(await harness.db.spaceDao.getByUuid(space1).getSingleOrNull(), isNotNull);
+    expect(
+      await harness.db.spaceDao.getByUuid(space1).getSingleOrNull(),
+      isNotNull,
+    );
     expect(await tabIds(harness.db), ['keep']);
     // Acknowledged anyway: the local copy revives it remotely on the next
     // diff.
@@ -194,11 +235,14 @@ void main() {
     await seedTab(harness.db, 'in2', spaceUuid: space2);
     await seedTab(harness.db, 'in1', spaceUuid: space1);
 
-    await harness.container
-        .read(spacesApplierProvider)
-        .applyBatch([ZenIncomingTombstone(space2)], firstSync: false);
+    await harness.container.read(spacesApplierProvider).applyBatch([
+      ZenIncomingTombstone(space2),
+    ], firstSync: false);
 
-    expect(await harness.db.spaceDao.getByUuid(space2).getSingleOrNull(), isNull);
+    expect(
+      await harness.db.spaceDao.getByUuid(space2).getSingleOrNull(),
+      isNull,
+    );
     expect(await tabIds(harness.db), ['in1']);
     expect(harness.tabs.closedFromSync, ['in2']);
     expect(await harness.db.tabDao.allClosedTabTombstoneIds().get(), isEmpty);
@@ -214,9 +258,9 @@ void main() {
       rawData: {'a': 1},
     );
 
-    await harness.container
-        .read(spacesApplierProvider)
-        .applyBatch([unknown], firstSync: false);
+    await harness.container.read(spacesApplierProvider).applyBatch([
+      unknown,
+    ], firstSync: false);
 
     final foreign = await harness.db.syncStateDao.allForeign();
     expect(foreign.single.id, 'x9');

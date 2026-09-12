@@ -281,7 +281,11 @@ class SpacesSyncService extends _$SpacesSyncService {
     } on SyncAuthException catch (e, s) {
       // The Hawk token expired mid-run; the next run fetches a fresh one.
       _token = null;
-      logger.w('spaces sync: storage rejected the token', error: e, stackTrace: s);
+      logger.w(
+        'spaces sync: storage rejected the token',
+        error: e,
+        stackTrace: s,
+      );
       state = state.copyWith(lastError: 'Sync credentials expired; retrying');
     } catch (e, s) {
       logger.e('spaces sync: run failed', error: e, stackTrace: s);
@@ -328,7 +332,10 @@ class SpacesSyncService extends _$SpacesSyncService {
         .read(generalSettingsRepositoryProvider.notifier)
         .updateSettings(
           (current) => current
-              .copyWith(spacesSyncLastSyncId: syncId, spacesSyncBaselineDone: false)
+              .copyWith(
+                spacesSyncLastSyncId: syncId,
+                spacesSyncBaselineDone: false,
+              )
               .copyWith
               .spacesSyncLastModified(null),
         );
@@ -459,10 +466,7 @@ class SpacesSyncService extends _$SpacesSyncService {
       if (appliedThisSync.contains(entry.key)) {
         continue;
       }
-      final digest = recordDigest(
-        entry.value.kind,
-        entry.value.data.toJson(),
-      );
+      final digest = recordDigest(entry.value.kind, entry.value.data.toJson());
       digests[entry.key] = digest;
       if (stored[entry.key]?.digest != digest) {
         changed.add(entry.value);
@@ -575,8 +579,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     final ids = <String>{};
     ids.addAll(await db.tabDao.getAllTabIds().get());
     ids.addAll(
-      (await (db.selectOnly(db.tabFolder)..addColumns([db.tabFolder.id]))
-              .get())
+      (await (db.selectOnly(db.tabFolder)..addColumns([db.tabFolder.id])).get())
           .map((row) => row.read(db.tabFolder.id)!),
     );
     ids.addAll(
@@ -606,9 +609,7 @@ class SpacesSyncService extends _$SpacesSyncService {
   /// its own divergence on the next run. Gated by the kill switch.
   Future<void> restoreSnapshot(SpacesSnapshot snapshot) {
     return _lock.synchronized(() async {
-      final settingsRepo = ref.read(
-        generalSettingsRepositoryProvider.notifier,
-      );
+      final settingsRepo = ref.read(generalSettingsRepositoryProvider.notifier);
       final settings = await settingsRepo.fetchSettings();
       if (!settings.spacesSyncWritesEnabled) {
         state = state.copyWith(
@@ -675,9 +676,10 @@ class SpacesSyncService extends _$SpacesSyncService {
             'records: ${result.failed}',
           );
         }
-        await ref
-            .read(spacesApplierProvider)
-            .applyBatch([...live, ...unknown], firstSync: false);
+        await ref.read(spacesApplierProvider).applyBatch([
+          ...live,
+          ...unknown,
+        ], firstSync: false);
         if (result.modified case final modified?) {
           await settingsRepo.updateSettings(
             (current) => current.copyWith.spacesSyncLastModified(modified),
@@ -689,7 +691,11 @@ class SpacesSyncService extends _$SpacesSyncService {
         );
         state = state.copyWith(lastSyncAt: DateTime.now(), lastError: null);
       } catch (e, s) {
-        logger.e('spaces sync: snapshot restore failed', error: e, stackTrace: s);
+        logger.e(
+          'spaces sync: snapshot restore failed',
+          error: e,
+          stackTrace: s,
+        );
         state = state.copyWith(lastError: e.toString());
       } finally {
         state = state.copyWith(syncing: false);

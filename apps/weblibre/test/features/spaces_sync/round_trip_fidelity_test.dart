@@ -44,7 +44,10 @@ void main() {
         .read(spacesProjectionProvider)
         .project();
 
-    final failed = await applier.applyBatch(roundTripFixture(), firstSync: false);
+    final failed = await applier.applyBatch(
+      roundTripFixture(),
+      firstSync: false,
+    );
     expect(failed, isEmpty);
     final second = await harness.container
         .read(spacesProjectionProvider)
