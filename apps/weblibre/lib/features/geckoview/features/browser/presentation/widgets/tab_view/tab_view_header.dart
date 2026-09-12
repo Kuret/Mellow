@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
+import 'package:weblibre/features/user/domain/presentation/widgets/active_profile_chip.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
@@ -64,6 +65,9 @@ class _TabFilters extends ConsumerWidget {
       children: [
         Row(
           children: [
+            // The active profile stays in view above the shelves (PLAN §7.5).
+            const ActiveProfileChip(compact: true),
+            const SizedBox(width: 8),
             const Expanded(child: SpaceChips()),
             if (showSyncedChip) ...[
               const SizedBox(width: 8),

@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/widgets/active_profile_chip.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -253,6 +254,9 @@ class _HomeHeader extends ConsumerWidget {
               ),
             ),
           ],
+          // Which profile this is, unmistakably (PLAN §7.5).
+          const SizedBox(height: 12),
+          const ActiveProfileChip(),
         ],
       ),
     );
