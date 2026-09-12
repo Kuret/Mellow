@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/core/routing/tab_type.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 void main() {

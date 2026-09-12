@@ -79,8 +79,6 @@ class BrowserRoute extends GoRouteData with $BrowserRoute {
   }
 }
 
-enum TabType { regular, private, child }
-
 class SearchRoute extends GoRouteData with $SearchRoute {
   static const String emptySearchText = ' ';
 
