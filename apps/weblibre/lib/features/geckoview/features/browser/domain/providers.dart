@@ -393,7 +393,7 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
 
   final tabStates = switch (mode) {
     QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
-    QuickTabSwitcherMode.containerTabs =>
+    QuickTabSwitcherMode.containerTabs || QuickTabSwitcherMode.spaceTabs =>
       ref.watch(selectedSpaceTabStatesWithContainerProvider).value,
   };
 
@@ -419,7 +419,8 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       }
       return filtered;
     }(),
-    QuickTabSwitcherMode.containerTabs => tabStates,
+    QuickTabSwitcherMode.containerTabs ||
+    QuickTabSwitcherMode.spaceTabs => tabStates,
   });
 }
 
@@ -508,6 +509,27 @@ AsyncValue<int> quickTabSwitcherRowCount(Ref ref) {
       return _quickTabSwitcherRowHasResults(
         ref,
         QuickTabSwitcherMode.containerTabs,
+      ).whenData((hasResults) => hasResults ? 1 : 0);
+    case TabBarStackingMode.spaceTabs:
+      // The space chip row always has the selected space to show; the rail
+      // renders the pair as one column (the accordion), so it counts one.
+      final isVertical = ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (settings) => settings.tabBarPosition.isVertical,
+        ),
+      );
+      if (isVertical) {
+        return const AsyncValue.data(1);
+      }
+      final hasSpaces = ref.watch(
+        watchSpacesProvider.select((value) => value.value?.isNotEmpty ?? false),
+      );
+      if (hasSpaces) {
+        return const AsyncValue.data(2);
+      }
+      return _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.spaceTabs,
       ).whenData((hasResults) => hasResults ? 1 : 0);
     case TabBarStackingMode.twoLevel:
       final containerRow = _quickTabSwitcherRowHasResults(
@@ -1141,6 +1163,11 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // Flatten according to expansion state.
   final result = <TabListItemEntity>[];
 
+  // A row's own shelf, for the surfaces that section the list; a child that
+  // the tree query lists under a pinned root still reports its own row.
+  TabShelf shelfOf(String tabId) =>
+      summaryById[tabId]?.tabShelf ?? TabShelf.normal;
+
   void emitGroup(_TabGroupRecord group, int folderDepth) {
     if (group.members.length == 1) {
       final only = group.root.row;
@@ -1150,6 +1177,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           orderKey: only.orderKey,
           spaceUuid: spaceUuid,
           depth: folderDepth,
+          shelf: group.shelf,
         ),
       );
       return;
@@ -1163,11 +1191,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         spaceUuid: spaceUuid,
         childCount: group.members.length - 1,
         depth: folderDepth,
-  // A row's own shelf, for the surfaces that section the list; a child that
-  // the tree query lists under a pinned root still reports its own row.
-  TabShelf shelfOf(String tabId) =>
-      summaryById[tabId]?.tabShelf ?? TabShelf.normal;
-
+        shelf: group.shelf,
       ),
     );
 
@@ -1177,7 +1201,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 
     final childrenByVisibleParent = <String, List<_GroupedRow>>{};
     for (final member in group.members) {
-          shelf: group.shelf,
       if (member.row.id == root.id) {
         continue;
       }
@@ -1191,7 +1214,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           .putIfAbsent(visibleParentId, () => [])
           .add(member);
     }
-        shelf: group.shelf,
 
     // Children are sorted by storage `order_key` (optionally reversed for
     // newest-first) — even when an explicit `sortField` is active. The
@@ -1237,6 +1259,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
             rootId: root.id,
             depth: member.depth + folderDepth,
             childCount: grandchildren.length,
+            shelf: shelfOf(child.id),
           ),
         );
         // Respect per-node collapse: collapsing an intermediate child hides
@@ -1259,7 +1282,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   ])) {
     emitGroup(slot.group!, 0);
   }
-            shelf: shelfOf(child.id),
 
   final normalGroups = groupRecords
       .where((g) => g.shelf != TabShelf.pinned)

@@ -61,6 +61,8 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
         .effectiveTabBarStackingMode()) {
       TabBarStackingMode.disabled => 0,
       TabBarStackingMode.twoLevel => 2,
+      TabBarStackingMode.spaceTabs when !settings.tabBarPosition.isVertical =>
+        2,
       _ => 1,
     };
 
@@ -231,11 +233,59 @@ class TabBarPreviewCard extends HookWidget {
       );
     }
 
+    // Static stand-in for the space chip row of [TabBarStackingMode.spaceTabs]:
+    // the live row needs the space table, which the preview does not have.
+    Widget buildSpaceChipsRow({Axis axis = Axis.horizontal}) {
+      final chips = [
+        for (final (name, selected) in const [
+          ('Work', true),
+          ('Personal', false),
+        ])
+          Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: ChoiceChip(
+              avatar: const Icon(MdiIcons.viewDashboardOutline, size: 18),
+              label: Text(name),
+              selected: selected,
+              onSelected: (_) {},
+            ),
+          ),
+      ];
+      return SizedBox(
+        height: axis == Axis.vertical
+            ? null
+            : BrowserTabBar.quickTabSwitcherHeight,
+        width: axis == Axis.vertical
+            ? BrowserTabBar.quickTabSwitcherHeight
+            : null,
+        child: SingleChildScrollView(
+          scrollDirection: axis,
+          child: axis == Axis.vertical
+              ? Column(mainAxisSize: MainAxisSize.min, children: chips)
+              : Row(mainAxisSize: MainAxisSize.min, children: chips),
+        ),
+      );
+    }
+
     Widget buildQuickTabSwitcher({Axis axis = Axis.horizontal}) {
       // The accordion preview reuses the single-row layout; container header
       // chips need live container data that the static preview doesn't have.
-      if (settings.effectiveTabBarStackingMode() ==
-          TabBarStackingMode.twoLevel) {
+      final mode = settings.effectiveTabBarStackingMode();
+      if (mode == TabBarStackingMode.spaceTabs) {
+        final tabs = buildQuickTabSwitcherRow(quickTabsController, axis: axis);
+        return axis == Axis.vertical
+            ? Column(
+                children: [
+                  buildSpaceChipsRow(axis: axis),
+                  Expanded(child: tabs),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [buildSpaceChipsRow(), tabs],
+              );
+      }
+      if (mode == TabBarStackingMode.twoLevel) {
         final rows = [
           buildQuickTabSwitcherRow(quickTabsController, axis: axis),
           buildQuickTabSwitcherRow(quickTabsSecondRowController, axis: axis),

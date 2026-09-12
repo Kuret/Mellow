@@ -457,6 +457,14 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                   title: Text('Recently Used Tabs'),
                   subtitle: Text('Recently used tabs across all containers'),
                 ),
+                const RadioListTile.adaptive(
+                  value: TabBarStackingMode.spaceTabs,
+                  title: Text('Spaces'),
+                  subtitle: Text(
+                    "Space chips on top, the selected space's tabs below; "
+                    'a wide side rail shows essentials, pinned and tabs',
+                  ),
+                ),
                 if (settings.showContainerUi) ...[
                   const RadioListTile.adaptive(
                     value: TabBarStackingMode.containerTabs,
@@ -472,9 +480,10 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                     ),
                   ),
                   // Two stacked rows don't fit the narrow vertical side rail,
-                  // where the mode degrades to Container Tabs; hide the option
-                  // for left/right positions to avoid a no-op choice.
-                  if (!settings.tabBarPosition.isVertical)
+                  // where the mode degrades to Accordion; hide the option
+                  // there to avoid a no-op choice. A wide rail keeps both.
+                  if (!settings.tabBarPosition.isVertical ||
+                      settings.railWidth >= minWideRailWidth)
                     const RadioListTile.adaptive(
                       value: TabBarStackingMode.twoLevel,
                       title: Text('Two Rows'),

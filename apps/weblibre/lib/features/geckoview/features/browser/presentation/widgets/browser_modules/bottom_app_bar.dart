@@ -60,6 +60,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -373,7 +374,9 @@ class BrowserTabBar extends HookConsumerWidget {
       ).select((data) => data.value?.color.color),
     );
 
-    final stackingMode = settings.effectiveTabBarStackingMode();
+    final stackingMode = settings.effectiveTabBarStackingMode(
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
 
     final tabBarPosition = settings.tabBarPosition;
     final isVertical = tabBarPosition.isVertical;
@@ -535,22 +538,69 @@ class BrowserTabBar extends HookConsumerWidget {
           TabBarStackingMode.accordion => AccordionQuickTabSwitcher(
             axis: switcherAxis,
           ),
+          // Space chips over the selected space's tabs (PLAN §9 W5). The
+          // rail renders the pair as the accordion, which on a wide rail is
+          // the tray's three-shelf structure in a column.
+          TabBarStackingMode.spaceTabs =>
+            isVertical
+                ? AccordionQuickTabSwitcher(axis: switcherAxis)
+                : const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: BrowserTabBar.quickTabSwitcherHeight,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 6.0,
+                          ),
+                          child: SpaceChips(),
+                        ),
+                      ),
+                      QuickTabSwitcher(
+                        quickTabSwitcherMode: QuickTabSwitcherMode.spaceTabs,
+                      ),
+                    ],
+                  ),
           // History fallback only on the MRU row, so empty-state history
-          // chips don't show twice. Only reached on the horizontal bar:
-          // effectiveTabBarStackingMode() degrades twoLevel to containerTabs
-          // on the narrow vertical rail, where two stacked rows don't fit.
-          TabBarStackingMode.twoLevel => const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              QuickTabSwitcher(
-                quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
-                enableHistoryFallback: false,
-              ),
-              QuickTabSwitcher(
-                quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-              ),
-            ],
-          ),
+          // chips don't show twice. On the vertical rail this is only
+          // reached when the rail is wide (effectiveTabBarStackingMode()
+          // degrades twoLevel to accordion on the narrow rail); the two
+          // levels then share the rail's height.
+          TabBarStackingMode.twoLevel =>
+            isVertical
+                ? Column(
+                    children: [
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.containerTabs,
+                          enableHistoryFallback: false,
+                          axis: switcherAxis,
+                        ),
+                      ),
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.lastUsedTabs,
+                          axis: switcherAxis,
+                        ),
+                      ),
+                    ],
+                  )
+                : const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QuickTabSwitcher(
+                        quickTabSwitcherMode:
+                            QuickTabSwitcherMode.containerTabs,
+                        enableHistoryFallback: false,
+                      ),
+                      QuickTabSwitcher(
+                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+                      ),
+                    ],
+                  ),
         },
       ),
       contextualToolbar: ContextualToolbar(
