@@ -103,9 +103,10 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.release
+            // Release keys come from the KEY_* environment (CI). A local build
+            // without them falls back to the debug keystore so `flutter build
+            // apk --release` still produces an installable APK.
+            signingConfig = System.getenv("KEY_PATH") ? signingConfigs.release : signingConfigs.debug
 
             shrinkResources = !project.hasProperty("disableOptimization")
             minifyEnabled = !project.hasProperty("disableOptimization")

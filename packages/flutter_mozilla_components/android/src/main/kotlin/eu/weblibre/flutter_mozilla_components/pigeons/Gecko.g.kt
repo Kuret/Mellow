@@ -1252,7 +1252,12 @@ data class AddTabParams (
   val source: SourceValue,
   val private: Boolean,
   val historyMetadata: HistoryMetadataKey? = null,
-  val additionalHeaders: Map<String, String>? = null
+  val additionalHeaders: Map<String, String>? = null,
+  /**
+   * Caller-chosen tab id. If null, a random id is generated as before.
+   * If a tab with this id already exists, the call fails.
+   */
+  val tabId: String? = null
 )
  {
   companion object {
@@ -1266,7 +1271,8 @@ data class AddTabParams (
       val private = pigeonVar_list[6] as Boolean
       val historyMetadata = pigeonVar_list[7] as HistoryMetadataKey?
       val additionalHeaders = pigeonVar_list[8] as Map<String, String>?
-      return AddTabParams(url, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders)
+      val tabId = pigeonVar_list[9] as String?
+      return AddTabParams(url, startLoading, parentId, flags, contextId, source, private, historyMetadata, additionalHeaders, tabId)
     }
   }
   fun toList(): List<Any?> {
@@ -1280,6 +1286,7 @@ data class AddTabParams (
       private,
       historyMetadata,
       additionalHeaders,
+      tabId,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -1290,7 +1297,7 @@ data class AddTabParams (
       return true
     }
     val other = other as AddTabParams
-    return GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.startLoading, other.startLoading) && GeckoPigeonUtils.deepEquals(this.parentId, other.parentId) && GeckoPigeonUtils.deepEquals(this.flags, other.flags) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.source, other.source) && GeckoPigeonUtils.deepEquals(this.private, other.private) && GeckoPigeonUtils.deepEquals(this.historyMetadata, other.historyMetadata) && GeckoPigeonUtils.deepEquals(this.additionalHeaders, other.additionalHeaders)
+    return GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.startLoading, other.startLoading) && GeckoPigeonUtils.deepEquals(this.parentId, other.parentId) && GeckoPigeonUtils.deepEquals(this.flags, other.flags) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.source, other.source) && GeckoPigeonUtils.deepEquals(this.private, other.private) && GeckoPigeonUtils.deepEquals(this.historyMetadata, other.historyMetadata) && GeckoPigeonUtils.deepEquals(this.additionalHeaders, other.additionalHeaders) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId)
   }
 
   override fun hashCode(): Int {
@@ -1304,10 +1311,11 @@ data class AddTabParams (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.private)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.historyMetadata)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.additionalHeaders)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
     return result
   }
   override fun toString(): String {
-    return "AddTabParams(url=$url, startLoading=$startLoading, parentId=$parentId, flags=$flags, contextId=$contextId, source=$source, private=$private, historyMetadata=$historyMetadata, additionalHeaders=$additionalHeaders)"
+    return "AddTabParams(url=$url, startLoading=$startLoading, parentId=$parentId, flags=$flags, contextId=$contextId, source=$source, private=$private, historyMetadata=$historyMetadata, additionalHeaders=$additionalHeaders, tabId=$tabId)"
   }
 }
 
@@ -4697,6 +4705,73 @@ data class SyncDeviceTabs (
   }
 }
 
+/**
+ * Credentials for a Dart-side Sync 1.5 client, derived from the native
+ * FxA account's OAuth session. Null fields are never returned; instead
+ * [GeckoSyncApi.getSyncCredentials] itself returns null when no account is
+ * signed in or the credentials aren't (yet) available.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SyncCredentials (
+  /** OAuth token for scope https://identity.mozilla.com/apps/oldsync */
+  val accessToken: String,
+  /** OAuthScopedKey.kid, sent as the X-KeyID header. */
+  val keyId: String,
+  /** OAuthScopedKey.k: base64url-encoded, 64 bytes when decoded. */
+  val syncKeyBase64Url: String,
+  /**
+   * Effective token server: the app's override if configured, else the
+   * account's default token server endpoint.
+   */
+  val tokenServerUrl: String,
+  val expiresAtEpochSeconds: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SyncCredentials {
+      val accessToken = pigeonVar_list[0] as String
+      val keyId = pigeonVar_list[1] as String
+      val syncKeyBase64Url = pigeonVar_list[2] as String
+      val tokenServerUrl = pigeonVar_list[3] as String
+      val expiresAtEpochSeconds = pigeonVar_list[4] as Long
+      return SyncCredentials(accessToken, keyId, syncKeyBase64Url, tokenServerUrl, expiresAtEpochSeconds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      accessToken,
+      keyId,
+      syncKeyBase64Url,
+      tokenServerUrl,
+      expiresAtEpochSeconds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SyncCredentials
+    return GeckoPigeonUtils.deepEquals(this.accessToken, other.accessToken) && GeckoPigeonUtils.deepEquals(this.keyId, other.keyId) && GeckoPigeonUtils.deepEquals(this.syncKeyBase64Url, other.syncKeyBase64Url) && GeckoPigeonUtils.deepEquals(this.tokenServerUrl, other.tokenServerUrl) && GeckoPigeonUtils.deepEquals(this.expiresAtEpochSeconds, other.expiresAtEpochSeconds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.accessToken)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.keyId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.syncKeyBase64Url)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tokenServerUrl)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.expiresAtEpochSeconds)
+    return result
+  }
+  override fun toString(): String {
+    return "SyncCredentials(accessToken=$accessToken, keyId=$keyId, syncKeyBase64Url=$syncKeyBase64Url, tokenServerUrl=$tokenServerUrl, expiresAtEpochSeconds=$expiresAtEpochSeconds)"
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class GeckoPref (
   val name: String,
@@ -6683,28 +6758,30 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
       1 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
       2 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return PwaIcon.fromList(wrapped as List<Any?>)
       3 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
       4 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
       5 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ShareTarget.fromList(wrapped as List<Any?>)
       6 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
       7 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return PwaManifest.fromList(wrapped as List<Any?>)
       8 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
       9 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return GestureConfig.fromList(wrapped as List<Any?>)
       10 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return PushDistributor.fromList(wrapped as List<Any?>)
       11 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      12 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7250,97 +7327,97 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          SyncCredentials.fromList(it)
         }
       }
       237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MlProgressData.fromList(it)
+          GeckoPref.fromList(it)
         }
       }
       238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          MlProgressData.fromList(it)
         }
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkImportNode.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInsertTreeResult.fromList(it)
+          BookmarkImportNode.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          BookmarkInsertTreeResult.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          SitePermissions.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkTarget.fromList(it)
+          TrackingProtectionException.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProtectedTargetPattern.fromList(it)
+          AppLinkTarget.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeAppLinkRule.fromList(it)
+          ProtectedTargetPattern.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeContextAppLinkPolicy.fromList(it)
+          NativeAppLinkRule.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPolicySnapshot.fromList(it)
+          NativeContextAppLinkPolicy.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPromptRequest.fromList(it)
+          AppLinkPolicySnapshot.fromList(it)
         }
       }
       255.toByte() -> {
@@ -7781,139 +7858,144 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(235)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is SyncCredentials -> {
         stream.write(236)
         writeValue(stream, value.toList())
       }
-      is MlProgressData -> {
+      is GeckoPref -> {
         stream.write(237)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is MlProgressData -> {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is ContainerSiteAssignment -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ProxyLoadError -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is GeckoHeader -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoFetchRequest -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchResponse -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is BookmarkImportNode -> {
+      is BookmarkNode -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is BookmarkImportNode -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkInsertTreeResult -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInfo -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is SitePermissions -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is AppLinkTarget -> {
+      is TrackingProtectionException -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is ProtectedTargetPattern -> {
+      is AppLinkTarget -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is NativeAppLinkRule -> {
+      is ProtectedTargetPattern -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is NativeAppLinkRule -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeContextAppLinkPolicy -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is AppLinkPromptRequest -> {
+      is AppLinkPolicySnapshot -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPromptRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is AppLinkResolutionResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is PwaIcon -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is ShareTargetFiles -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetParams -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ExternalApplicationResource -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is PwaManifest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is SandboxCaptureEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is PushDistributor -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is PushStatus -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -8090,6 +8172,11 @@ interface GeckoBrowserApi {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoSyncApi {
   fun getAccountInfo(callback: (Result<SyncAccountInfo>) -> Unit)
+  /**
+   * Returns credentials for a Dart Sync 1.5 client, or null when no
+   * account is signed in.
+   */
+  fun getSyncCredentials(callback: (Result<SyncCredentials?>) -> Unit)
   fun beginAuthentication(callback: (Result<Unit>) -> Unit)
   fun beginPairingAuthentication(pairingUrl: String, callback: (Result<Unit>) -> Unit)
   fun logout(callback: (Result<Unit>) -> Unit)
@@ -8118,6 +8205,24 @@ interface GeckoSyncApi {
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             api.getAccountInfo{ result: Result<SyncAccountInfo> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSyncApi.getSyncCredentials$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.getSyncCredentials{ result: Result<SyncCredentials?> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))
@@ -8993,7 +9098,7 @@ interface GeckoTabsApi {
   fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
-  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean): String
+  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean, tabId: String?): String
   fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?, excludeFromHistory: Boolean): List<String>
   fun removeAllTabs(recoverable: Boolean)
   fun removeTabs(ids: List<String>)
@@ -9105,8 +9210,9 @@ interface GeckoTabsApi {
             val historyMetadataArg = args[8] as HistoryMetadataKey?
             val additionalHeadersArg = args[9] as Map<String, String>?
             val excludeFromHistoryArg = args[10] as Boolean
+            val tabIdArg = args[11] as String?
             val wrapped: List<Any?> = try {
-              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg))
+              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg, tabIdArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

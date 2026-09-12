@@ -71,6 +71,10 @@ class GeckoTabService {
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
     bool excludeFromHistory = false,
+
+    /// Caller-chosen tab id. If null, a random id is generated as before.
+    /// If a tab with this id already exists, the call fails.
+    String? tabId,
   }) {
     return _api.addTab(
       url: (url ?? Uri.parse('about:blank')).toString(),
@@ -84,6 +88,7 @@ class GeckoTabService {
       historyMetadata: historyMetadata,
       additionalHeaders: additionalHeaders,
       excludeFromHistory: excludeFromHistory,
+      tabId: tabId,
     );
   }
 

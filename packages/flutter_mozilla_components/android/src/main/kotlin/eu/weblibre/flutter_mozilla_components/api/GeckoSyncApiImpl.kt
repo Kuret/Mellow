@@ -9,6 +9,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.SyncDeviceTabs
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineValue
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncIncomingTab
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncRemoteTab
+import eu.weblibre.flutter_mozilla_components.pigeons.SyncCredentials
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +38,10 @@ class GeckoSyncApiImpl : GeckoSyncApi {
          * stalled-retry symptom below silently returns.
          */
         private const val IMMEDIATE_SYNC_WORK_NAME = "Immediate"
+
+        /** Used only if the account itself cannot report its token server endpoint. */
+        private const val FALLBACK_TOKEN_SERVER_URL =
+            "https://token.services.mozilla.com/1.0/sync/1.5"
     }
 
     private val components by lazy {
@@ -59,6 +64,37 @@ class GeckoSyncApiImpl : GeckoSyncApi {
                 runCatching { components.backgroundServices.awaitStarted() }
 
                 components.backgroundServices.currentAccountInfo()
+            }.fold(
+                onSuccess = { callback(Result.success(it)) },
+                onFailure = { callback(Result.failure(it)) },
+            )
+        }
+    }
+
+    override fun getSyncCredentials(callback: (Result<SyncCredentials?>) -> Unit) {
+        coroutineScope.launch {
+            runCatching {
+                components.backgroundServices.awaitStarted()
+                val account = components.backgroundServices.accountManager.authenticatedAccount()
+                    ?: return@runCatching null
+
+                val token = account.getAccessToken(SCOPE_SYNC) ?: return@runCatching null
+                val key = token.key ?: return@runCatching null
+
+                // The app's own token-server override wins; otherwise fall back to
+                // whatever the account itself reports, and finally the well-known
+                // production endpoint if even that isn't available.
+                val tokenServerUrl = components.backgroundServices.effectiveTokenServerOverride
+                    ?: runCatching { account.getTokenServerEndpointURL() }.getOrNull()
+                    ?: FALLBACK_TOKEN_SERVER_URL
+
+                SyncCredentials(
+                    accessToken = token.token,
+                    keyId = key.kid,
+                    syncKeyBase64Url = key.k,
+                    tokenServerUrl = tokenServerUrl,
+                    expiresAtEpochSeconds = token.expiresAt,
+                )
             }.fold(
                 onSuccess = { callback(Result.success(it)) },
                 onFailure = { callback(Result.failure(it)) },

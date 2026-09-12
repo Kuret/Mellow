@@ -137,6 +137,10 @@ class AddTabParams {
   final HistoryMetadataKey? historyMetadata;
   final Map<String, String>? additionalHeaders;
 
+  /// Caller-chosen tab id. If null, a random id is generated as before.
+  /// If a tab with this id already exists, the call fails.
+  final String? tabId;
+
   const AddTabParams({
     required this.url,
     required this.startLoading,
@@ -147,6 +151,7 @@ class AddTabParams {
     required this.private,
     this.historyMetadata,
     this.additionalHeaders,
+    this.tabId,
   });
 }
 
@@ -1504,10 +1509,44 @@ class SyncDeviceTabs {
   });
 }
 
+/// Credentials for a Dart-side Sync 1.5 client, derived from the native
+/// FxA account's OAuth session. Null fields are never returned; instead
+/// [GeckoSyncApi.getSyncCredentials] itself returns null when no account is
+/// signed in or the credentials aren't (yet) available.
+class SyncCredentials {
+  /// OAuth token for scope https://identity.mozilla.com/apps/oldsync
+  final String accessToken;
+
+  /// OAuthScopedKey.kid, sent as the X-KeyID header.
+  final String keyId;
+
+  /// OAuthScopedKey.k: base64url-encoded, 64 bytes when decoded.
+  final String syncKeyBase64Url;
+
+  /// Effective token server: the app's override if configured, else the
+  /// account's default token server endpoint.
+  final String tokenServerUrl;
+
+  final int expiresAtEpochSeconds;
+
+  SyncCredentials({
+    required this.accessToken,
+    required this.keyId,
+    required this.syncKeyBase64Url,
+    required this.tokenServerUrl,
+    required this.expiresAtEpochSeconds,
+  });
+}
+
 @HostApi()
 abstract class GeckoSyncApi {
   @async
   SyncAccountInfo getAccountInfo();
+
+  /// Returns credentials for a Dart Sync 1.5 client, or null when no
+  /// account is signed in.
+  @async
+  SyncCredentials? getSyncCredentials();
 
   @async
   void beginAuthentication();
@@ -1728,6 +1767,10 @@ abstract class GeckoTabsApi {
     /// history. Applied before the tab starts loading, so the first visit can't
     /// outrun the exclusion snapshot Dart pushes once the tab is persisted.
     required bool excludeFromHistory,
+
+    /// Caller-chosen tab id. If null, a random id is generated as before.
+    /// If a tab with this id already exists, the call fails.
+    String? tabId,
   });
 
   List<String> addMultipleTabs({
