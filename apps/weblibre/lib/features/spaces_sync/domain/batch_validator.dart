@@ -115,6 +115,10 @@ BatchValidationResult validateOutgoingBatch(
       case ZenContainerRecord():
         break;
 
+      case ZenForeignRecord():
+        // Another client's record, re-emitted verbatim: nothing to check.
+        break;
+
       case ZenSpaceRecord(:final children, :final containerGuid):
         for (final childId in children) {
           checkChildId(record.id, childId);

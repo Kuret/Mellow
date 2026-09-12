@@ -407,6 +407,36 @@ final class ZenLayoutRecord extends ZenRecordData {
   List<Object?> get hashParameters => [spaces, essentials];
 }
 
+/// A record of a kind this client does not model (a newer Zen), held
+/// verbatim in `foreign_record` and re-emitted unchanged so a round-trip
+/// through this device never drops another client's data (PLAN §6.5).
+///
+/// Never decoded from the wire directly — [ZenRecordCodec.decode] routes
+/// unknown kinds to [ZenIncomingUnknownKind]; the projection builds one of
+/// these from the stored payload.
+final class ZenForeignRecord extends ZenRecordData {
+  ZenForeignRecord({
+    required this.recordId,
+    required this.kind,
+    required this.rawData,
+  });
+
+  @override
+  final String recordId;
+
+  @override
+  final String kind;
+
+  /// The undecoded `data` object, exactly as received.
+  final Map<String, Object?> rawData;
+
+  @override
+  Map<String, Object?> toJson() => rawData;
+
+  @override
+  List<Object?> get hashParameters => [recordId, kind, rawData];
+}
+
 /// The decrypted, decoded payload of one Sync BSO for the `spaces`
 /// collection: `{"id":..,"kind":..,"data":{...}}`.
 class ZenCleartext with FastEquatable {

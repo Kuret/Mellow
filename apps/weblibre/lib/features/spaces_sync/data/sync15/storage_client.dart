@@ -339,11 +339,14 @@ class SyncStorageClient {
     };
   }
 
-  /// `GET {base}/storage/{collection}?full=1[&newer=][&limit=]`, following
-  /// `X-Weave-Next-Offset` until the server stops sending one.
+  /// `GET {base}/storage/{collection}?full=1[&newer=][&ids=][&limit=]`,
+  /// following `X-Weave-Next-Offset` until the server stops sending one.
+  /// [ids] restricts the fetch to those records (how previously failed
+  /// records are re-fetched, the way Firefox's `previousFailed` works).
   Future<FetchResult> fetchCollection(
     String collection, {
     double? newer,
+    Iterable<String>? ids,
     int limit = 1000,
   }) async {
     final records = <Bso>[];
@@ -354,6 +357,9 @@ class SyncStorageClient {
       final query = <String, String>{'full': '1'};
       if (newer != null) {
         query['newer'] = newer.toStringAsFixed(2);
+      }
+      if (ids != null) {
+        query['ids'] = ids.join(',');
       }
       if (limit > 0) {
         query['limit'] = '$limit';
