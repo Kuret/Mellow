@@ -153,7 +153,7 @@ void main() {
   ) async {
     final provider = visibleTabListItemsProvider(spaceUuid: null, scope: scope);
     container.listen(provider, (_, _) {}, fireImmediately: true);
-    await Future<void>.delayed(Duration.zero);
+    await _settle();
     return container
         .read(provider)
         .value
@@ -168,7 +168,7 @@ void main() {
       (_, _) {},
       fireImmediately: true,
     );
-    await Future<void>.delayed(Duration.zero);
+    await _settle();
     return container.read(sequentialTabNavigationOrderProvider).value;
   }
 
@@ -317,6 +317,14 @@ void main() {
       );
     });
   });
+}
+
+/// The grouped list chains several stream providers (tree rows, then the
+/// rows' summaries); each hop is delivered on a later event-loop turn.
+Future<void> _settle() async {
+  for (var i = 0; i < 8; i++) {
+    await Future<void>.delayed(Duration.zero);
+  }
 }
 
 class _FakeTabList extends TabList {

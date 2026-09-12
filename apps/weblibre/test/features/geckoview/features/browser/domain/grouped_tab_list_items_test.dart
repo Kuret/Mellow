@@ -151,7 +151,11 @@ void main() {
       scope: TabListScope.tray,
     );
     container.listen(provider, (_, _) {}, fireImmediately: true);
-    await Future<void>.delayed(Duration.zero);
+    // The provider chains stream providers (tree rows, then their summaries
+    // and folders); each hop is delivered on a later event-loop turn.
+    for (var i = 0; i < 8; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
     return container.read(provider).value;
   }
 
