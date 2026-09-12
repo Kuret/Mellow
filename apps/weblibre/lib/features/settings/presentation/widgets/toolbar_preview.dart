@@ -163,19 +163,6 @@ class TabBarPreviewCard extends HookWidget {
         color: null,
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
-      if (settings.showIsolatedTabUi)
-        QuickTabSwitcherItem(
-          id: 'isolated-preview-tab',
-          isActive: false,
-          title: 'Bank',
-          tabMode: TabMode.isolated('preview-isolated-context'),
-          isHistory: false,
-          isPinned: false,
-          depth: 3,
-          url: Uri.parse('https://example.com/bank'),
-          color: null,
-          avatar: const Icon(MdiIcons.web, size: 20),
-        ),
       if (settings.quickTabSwitcherShowHistorySuggestions)
         QuickTabSwitcherItem(
           id: 'history-preview-tab',
@@ -235,7 +222,6 @@ class TabBarPreviewCard extends HookWidget {
         scrollController: scrollController,
         axis: axis,
         showTitles: showTitles,
-        showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
         titleMaxWidth: titleMaxWidth,
         closeButtonMode: settings.quickTabSwitcherCloseButtonMode,

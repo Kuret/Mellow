@@ -22,7 +22,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -131,18 +130,6 @@ class _StorageContainer extends _StorageOption {
   const _StorageContainer({required this.label, required this.contextId});
 }
 
-class _StorageInheritIsolated extends _StorageOption {
-  @override
-  final String contextId;
-  const _StorageInheritIsolated(this.contextId);
-}
-
-class _StorageNewIsolated extends _StorageOption {
-  @override
-  final String contextId;
-  _StorageNewIsolated() : contextId = newIsolatedContextId();
-}
-
 class _InstallConfigSheet extends HookConsumerWidget {
   final String defaultName;
   final Uri url;
@@ -174,16 +161,9 @@ class _InstallConfigSheet extends HookConsumerWidget {
       () {
         final list = <_StorageOption>[const _StorageDefault()];
 
-        // If the current tab is in an isolated context, offer to inherit it.
-        if (isIsolatedContextId(tabContextId)) {
-          list.add(_StorageInheritIsolated(tabContextId!));
-        }
-
-        // If a regular (non-isolated) container is active, offer it.
+        // If a container is active, offer it.
         final containerContextId = containerData?.metadata.contextualIdentity;
-        if (containerData != null &&
-            containerContextId != null &&
-            !isIsolatedContextId(containerContextId)) {
+        if (containerData != null && containerContextId != null) {
           list.add(
             _StorageContainer(
               label: containerData.name ?? 'Container',
@@ -192,7 +172,6 @@ class _InstallConfigSheet extends HookConsumerWidget {
           );
         }
 
-        list.add(_StorageNewIsolated());
         return list;
       },
       [
@@ -206,7 +185,6 @@ class _InstallConfigSheet extends HookConsumerWidget {
     final defaultIndex = useMemoized(() {
       for (var i = 0; i < options.length; i++) {
         final o = options[i];
-        if (o is _StorageInheritIsolated) return i;
         if (o is _StorageContainer) return i;
       }
       return 0;
@@ -352,16 +330,6 @@ class _StorageTile extends StatelessWidget {
         'Container "$label"',
         'Shares cookies and data with the selected container.',
         Icons.folder_outlined,
-      ),
-      _StorageInheritIsolated() => (
-        'Inherit current isolated context',
-        'Shares storage with the currently open isolated session.',
-        Icons.link,
-      ),
-      _StorageNewIsolated() => (
-        'New isolated context',
-        'Creates a fresh storage jar just for this installation.',
-        Icons.shield_outlined,
       ),
     };
 

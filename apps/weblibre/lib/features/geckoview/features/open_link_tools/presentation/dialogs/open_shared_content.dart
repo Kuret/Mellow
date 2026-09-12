@@ -38,7 +38,6 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/presentatio
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
@@ -87,25 +86,9 @@ class OpenSharedContent extends HookConsumerWidget {
       ),
     );
 
-    // If the intent carried an isolated context, preselect the isolated tab
-    // type and preserve the existing context id so opening doesn't mint a
-    // fresh one.
-    final carriedIsolatedContextId = useMemoized(
-      () => isIsolatedContextId(contextId) ? contextId : null,
-      [contextId],
-    );
+    final selectedTabType = useState(defaultTabType);
 
-    final selectedTabType = useState(
-      carriedIsolatedContextId != null ? TabType.isolated : defaultTabType,
-    );
-
-    TabMode resolveTabMode() {
-      if (selectedTabType.value == TabType.isolated &&
-          carriedIsolatedContextId != null) {
-        return TabMode.isolated(carriedIsolatedContextId);
-      }
-      return TabMode.fromTabType(selectedTabType.value);
-    }
+    TabMode resolveTabMode() => TabMode.fromTabType(selectedTabType.value);
 
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
@@ -148,8 +131,7 @@ class OpenSharedContent extends HookConsumerWidget {
           // Priority: explicit intent container (PWA shortcut) > site
           // assignment for the URL > mode default.
           if (containerMode == IntentContainerMode.specific &&
-              contextId != null &&
-              !isIsolatedContextId(contextId)) {
+              contextId != null) {
             resolved = await containerRepo.getContainerByContextualIdentity(
               contextId!,
             );
@@ -267,9 +249,7 @@ class OpenSharedContent extends HookConsumerWidget {
           return;
         }
 
-        final contextId = tabMode is IsolatedTabMode
-            ? tabMode.isolationContextId
-            : selectedContainer.value?.metadata.contextualIdentity;
+        final contextId = selectedContainer.value?.metadata.contextualIdentity;
 
         await GeckoBrowserService().openInCustomTab(
           url: parsedUrl,
@@ -437,13 +417,9 @@ class OpenSharedContent extends HookConsumerWidget {
                     final tabTypeSwitcher = AnimatedTabTypeSwitcher(
                       selected: selectedTabType.value,
                       onChanged: (value) => selectedTabType.value = value,
-                      showIsolatedOption:
-                          settings.showIsolatedTabUi ||
-                          carriedIsolatedContextId != null,
                       selectedBackgroundColor: switch (selectedTabType.value) {
                         TabType.regular => null,
                         TabType.private => appColors.privateSelectionOverlay,
-                        TabType.isolated => appColors.isolatedSelectionOverlay,
                         TabType.child => null,
                       },
                     );

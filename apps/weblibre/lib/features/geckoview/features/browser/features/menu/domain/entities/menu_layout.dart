@@ -118,7 +118,6 @@ enum MenuItemType {
   cloneTab,
   cloneRegularTab,
   clonePrivateTab,
-  cloneIsolatedTab,
 
   export,
   copyAsMarkdown,
@@ -170,7 +169,6 @@ enum MenuItemType {
     cloneTab => 'Clone Tab',
     cloneRegularTab => 'Regular',
     clonePrivateTab => 'Private',
-    cloneIsolatedTab => 'Isolated',
     export => 'Export',
     copyAsMarkdown => 'Copy as Markdown',
     exportAsMarkdown => 'Export as Markdown',
@@ -221,7 +219,6 @@ enum MenuItemType {
     cloneTab => MdiIcons.contentDuplicate,
     cloneRegularTab => MdiIcons.tab,
     clonePrivateTab => MdiIcons.dominoMask,
-    cloneIsolatedTab => MdiIcons.snowflake,
     export => MdiIcons.fileExport,
     // ignore: deprecated_member_use
     copyAsMarkdown => MdiIcons.languageMarkdownOutline,
@@ -337,7 +334,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
         items: [
           MenuItemDefault(MenuItemType.cloneRegularTab),
           MenuItemDefault(MenuItemType.clonePrivateTab),
-          MenuItemDefault(MenuItemType.cloneIsolatedTab),
         ],
       ),
       MenuItemDefault(

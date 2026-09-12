@@ -325,10 +325,6 @@ class TabViewHeader extends HookConsumerWidget {
                                       MdiIcons.dominoMask,
                                       appColors.privateTabPurple,
                                     ),
-                                    TabTypeFilter.isolatedOnly => (
-                                      MdiIcons.snowflake,
-                                      appColors.isolatedTabTeal,
-                                    ),
                                   };
 
                                   return MenuItemButton(

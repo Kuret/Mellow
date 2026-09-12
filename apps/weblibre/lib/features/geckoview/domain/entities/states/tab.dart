@@ -65,15 +65,14 @@ class TabState extends WebPageInfo {
   );
 
   final TabMode tabMode;
-  String? get isolationContextId => tabMode.isolationContextId;
 
   /// Whether the engine has reported this tab's content state.
   ///
   /// Icons, security info and readerable state all seed an entry from
-  /// [TabState.$default], which claims a regular, non-isolated tab sitting at
+  /// [TabState.$default], which claims a regular tab sitting at
   /// [defaultUrl]. Those defaults are fine to render, but a caller that acts on
   /// the tab's identity — reopening it in another container, say — would carry
-  /// a private or isolated tab over as a regular one. It has to wait for the
+  /// a private tab over as a regular one. It has to wait for the
   /// content event instead; see `TabStates.awaitContentState`.
   ///
   /// Unlike the other fields here this one only ever flips once per tab, so it

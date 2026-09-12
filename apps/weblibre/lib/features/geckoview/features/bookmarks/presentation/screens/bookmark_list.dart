@@ -1037,11 +1037,9 @@ class BookmarkListScreen extends HookConsumerWidget {
         }
       case BookmarkOpenSetting.regular:
       case BookmarkOpenSetting.private:
-      case BookmarkOpenSetting.isolated:
         final effective = settings.effectiveBookmarkOpenSetting;
         final tabMode = switch (effective) {
           BookmarkOpenSetting.private => TabMode.private,
-          BookmarkOpenSetting.isolated => TabMode.newIsolated(),
           _ => TabMode.regular,
         };
 
@@ -1051,9 +1049,7 @@ class BookmarkListScreen extends HookConsumerWidget {
               url: url,
               tabMode: tabMode,
               selectTab: true,
-              containerSelection: effective == BookmarkOpenSetting.isolated
-                  ? const TabContainerSelection.unassigned()
-                  : const TabContainerSelection.useSelected(),
+              containerSelection: const TabContainerSelection.useSelected(),
             );
 
         if (context.mounted) {

@@ -1699,22 +1699,6 @@ class _Browser extends HookConsumerWidget {
 
     final overlayBuilder = ref.watch(overlayControllerProvider);
 
-    Future<bool> confirmIsolatedTabCloseIfNeeded(String tabId) async {
-      final allStates = ref.read(tabStatesProvider);
-      final tabState = allStates[tabId];
-      final contextId = tabState?.isolationContextId;
-
-      if (contextId == null) return true;
-
-      final groupCount = allStates.values
-          .where((state) => state.isolationContextId == contextId)
-          .length;
-
-      if (groupCount > 1 || !context.mounted) return groupCount > 1;
-
-      return ui_helper.confirmIsolatedTabClose(context);
-    }
-
     return DragTarget<TabDragData>(
       onMove: (details) {
         ref
@@ -1726,9 +1710,6 @@ class _Browser extends HookConsumerWidget {
       },
       onAcceptWithDetails: (details) async {
         ref.read(willAcceptDropProvider.notifier).clear();
-        if (!await confirmIsolatedTabCloseIfNeeded(details.data.tabId)) {
-          return;
-        }
 
         await ref
             .read(tabRepositoryProvider.notifier)
@@ -1873,10 +1854,6 @@ class _Browser extends HookConsumerWidget {
                         .read(tabRepositoryProvider.notifier)
                         .clearBackPromptBehavior(tabState.id);
                   } else if (tabState != null) {
-                    if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
-                      return true;
-                    }
-
                     await ref
                         .read(tabRepositoryProvider.notifier)
                         .closeTab(tabState.id);
@@ -1910,10 +1887,6 @@ class _Browser extends HookConsumerWidget {
                     lastBackButtonPress.value = null;
 
                     if (tabState != null && tabCount > 1) {
-                      if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
-                        return true;
-                      }
-
                       await ref
                           .read(tabRepositoryProvider.notifier)
                           .closeTab(tabState.id);

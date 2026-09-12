@@ -133,7 +133,11 @@ extension $TabViewFilterOptionsCopyWith on TabViewFilterOptions {
 TabViewFilterOptions _$TabViewFilterOptionsFromJson(
   Map<String, dynamic> json,
 ) => TabViewFilterOptions(
-  tabTypeFilter: $enumDecode(_$TabTypeFilterEnumMap, json['tabTypeFilter']),
+  tabTypeFilter: $enumDecode(
+    _$TabTypeFilterEnumMap,
+    json['tabTypeFilter'],
+    unknownValue: TabTypeFilter.all,
+  ),
   sortType: $enumDecode(_$TabSortTypeEnumMap, json['sortType']),
   sortPinnedFirst: json['sortPinnedFirst'] as bool,
   showHierarchicalTabs: json['showHierarchicalTabs'] as bool? ?? true,
@@ -161,7 +165,6 @@ const _$TabTypeFilterEnumMap = {
   TabTypeFilter.all: 'all',
   TabTypeFilter.regularOnly: 'regularOnly',
   TabTypeFilter.privateOnly: 'privateOnly',
-  TabTypeFilter.isolatedOnly: 'isolatedOnly',
 };
 
 const _$TabSortTypeEnumMap = {

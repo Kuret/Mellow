@@ -124,19 +124,12 @@ class ContainerMenu extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = this.controller ?? useMenuController();
 
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showIsolatedTabUi,
-      ),
-    );
-
     final container = this.container;
     final contextualIdentity = container?.metadata.contextualIdentity;
 
     Future<void> closeTabs({
       bool includeRegular = true,
       bool includePrivate = true,
-      bool includeIsolated = true,
     }) async {
       final closed = await ref
           .read(tabDataRepositoryProvider.notifier)
@@ -144,7 +137,6 @@ class ContainerMenu extends HookConsumerWidget {
             scopeContainerId,
             includeRegular: includeRegular,
             includePrivate: includePrivate,
-            includeIsolated: includeIsolated,
           );
 
       if (context.mounted) {
@@ -242,53 +234,12 @@ class ContainerMenu extends HookConsumerWidget {
                           context,
                         );
                         if (result == true) {
-                          await closeTabs(
-                            includeRegular: false,
-                            includeIsolated: false,
-                          );
+                          await closeTabs(includeRegular: false);
                         }
                       }
                     : null,
                 child: const Text('Private Tabs'),
               ),
-              if (showIsolatedTabUi)
-                MenuItemButton(
-                  leadingIcon: Icon(
-                    MdiIcons.snowflake,
-                    color: AppColors.of(context).isolatedTabTeal,
-                  ),
-                  onPressed: enabled
-                      ? () async {
-                          // Count the distinct isolation groups that will be
-                          // destroyed so the confirmation can name them.
-                          final isolatedContextIds = ref
-                              .read(tabStatesProvider)
-                              .values
-                              .where(
-                                (state) =>
-                                    state.tabMode is IsolatedTabMode &&
-                                    state.isolationContextId != null,
-                              )
-                              .map((state) => state.isolationContextId!)
-                              .toSet();
-
-                          if (isolatedContextIds.isNotEmpty) {
-                            final confirmed = await ui_helper
-                                .confirmIsolatedTabClose(
-                                  context,
-                                  groupCount: isolatedContextIds.length,
-                                );
-                            if (!confirmed) return;
-                          }
-
-                          await closeTabs(
-                            includeRegular: false,
-                            includePrivate: false,
-                          );
-                        }
-                      : null,
-                  child: const Text('Isolated Tabs'),
-                ),
               if (enableCloseFilteredTabs)
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.filterOutline),
@@ -303,14 +254,6 @@ class ContainerMenu extends HookConsumerWidget {
                               .getFilteredTabIds(scopeContainerId);
 
                           if (filteredIds.isEmpty || !context.mounted) return;
-
-                          if (!await confirmBulkTabCloseIfNeeded(
-                            context,
-                            ref,
-                            filteredIds,
-                          )) {
-                            return;
-                          }
 
                           await ref
                               .read(tabRepositoryProvider.notifier)
@@ -490,9 +433,7 @@ Future<void> _clearContainerData(
                 private: tab.tabMode == TabModeDbValue.private,
                 flags: LoadUrlFlags.NONE.toValue(),
                 source: Internal.newTab.toValue(),
-                contextId: tab.tabMode == TabModeDbValue.isolated
-                    ? tab.isolationContextId ?? contextualIdentity
-                    : contextualIdentity,
+                contextId: contextualIdentity,
               );
             }).toList(),
             containerSelection: TabContainerSelection.specific(container),

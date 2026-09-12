@@ -51,15 +51,6 @@ class TabDataRepository extends _$TabDataRepository {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
 
-    // Isolated tabs: always do DB-only assignment (never recreate/recontext)
-    if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-      await ref
-          .read(tabDatabaseProvider)
-          .tabDao
-          .assignContainer(tabId, containerId: targetContainer.id);
-      return;
-    }
-
     final currentContainerData = await getTabContainerData(tabId);
 
     // The tab is already in the target container, so there is nothing to
@@ -127,15 +118,6 @@ class TabDataRepository extends _$TabDataRepository {
   Future<void> unassignContainer(String tabId) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
-
-    // Isolated tabs: always do DB-only unassignment (never recreate/recontext)
-    if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-      await ref
-          .read(tabDatabaseProvider)
-          .tabDao
-          .assignContainer(tabId, containerId: null);
-      return;
-    }
 
     final currentContainerData = await getTabContainerData(tabId);
 
@@ -233,7 +215,7 @@ class TabDataRepository extends _$TabDataRepository {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .containerDao
-        .getAllTabIds(includeRegular: false, includeIsolated: false)
+        .getAllTabIds(includeRegular: false)
         .get();
 
     return tabIds.length;
@@ -242,16 +224,11 @@ class TabDataRepository extends _$TabDataRepository {
   Future<int> closeAllTabs({
     bool includeRegular = true,
     bool includePrivate = true,
-    bool includeIsolated = true,
   }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .containerDao
-        .getAllTabIds(
-          includeRegular: includeRegular,
-          includePrivate: includePrivate,
-          includeIsolated: includeIsolated,
-        )
+        .getAllTabIds(includeRegular: includeRegular, includePrivate: includePrivate)
         .get();
 
     if (tabIds.isNotEmpty) {
@@ -265,7 +242,6 @@ class TabDataRepository extends _$TabDataRepository {
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
-    bool includeIsolated = true,
   }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
@@ -274,7 +250,6 @@ class TabDataRepository extends _$TabDataRepository {
           containerId,
           includeRegular: includeRegular,
           includePrivate: includePrivate,
-          includeIsolated: includeIsolated,
         )
         .get();
 

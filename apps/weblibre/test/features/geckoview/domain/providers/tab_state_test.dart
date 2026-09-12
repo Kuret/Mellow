@@ -78,7 +78,6 @@ void main() {
   for (final seed in ['security', 'icon', 'readerable']) {
     for (final (name, mode, contextId, isPrivate) in [
       ('a private', TabMode.private, 'private-context', true),
-      ('an isolated', TabMode.isolated('iso1_test'), 'iso1_test', false),
       ('a regular', TabMode.regular, null, false),
     ]) {
       test('$seed state does not stand in for $name tab', () async {

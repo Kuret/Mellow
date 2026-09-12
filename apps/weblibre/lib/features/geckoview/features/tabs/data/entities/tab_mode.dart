@@ -19,15 +19,13 @@
  */
 
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 
-/// Persisted tab privacy/isolation mode.
+/// Persisted tab privacy mode.
 ///
 /// Values map to integer values stored in the `tab_mode` column:
 /// - 0 = regular
 /// - 1 = private
-/// - 2 = isolated
-enum TabModeDbValue { regular, private, isolated }
+enum TabModeDbValue { regular, private }
 
 sealed class TabMode {
   static const TabMode regular = RegularTabMode();
@@ -35,44 +33,25 @@ sealed class TabMode {
 
   const TabMode();
 
-  factory TabMode.isolated(String isolationContextId) =>
-      IsolatedTabMode(isolationContextId);
-
-  factory TabMode.newIsolated() => IsolatedTabMode(newIsolatedContextId());
-
   factory TabMode.fromTabType(TabType tabType) => switch (tabType) {
     TabType.private => TabMode.private,
-    TabType.isolated => TabMode.newIsolated(),
     _ => TabMode.regular,
   };
 
   TabModeDbValue toDbValue() => switch (this) {
     RegularTabMode() => TabModeDbValue.regular,
     PrivateTabMode() => TabModeDbValue.private,
-    IsolatedTabMode() => TabModeDbValue.isolated,
-  };
-
-  String? get isolationContextId => switch (this) {
-    IsolatedTabMode(:final isolationContextId) => isolationContextId,
-    _ => null,
   };
 
   TabType toTabType() => switch (this) {
     RegularTabMode() => TabType.regular,
     PrivateTabMode() => TabType.private,
-    IsolatedTabMode() => TabType.isolated,
   };
 
-  factory TabMode.fromDbValue(
-    TabModeDbValue dbValue, {
-    required String? isolationContextId,
-  }) {
+  factory TabMode.fromDbValue(TabModeDbValue dbValue) {
     return switch (dbValue) {
       TabModeDbValue.regular => regular,
       TabModeDbValue.private => private,
-      TabModeDbValue.isolated when isolationContextId != null =>
-        TabMode.isolated(isolationContextId),
-      TabModeDbValue.isolated => regular,
     };
   }
 
@@ -80,13 +59,11 @@ sealed class TabMode {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is TabMode &&
-        other.toDbValue() == toDbValue() &&
-        other.isolationContextId == isolationContextId;
+    return other is TabMode && other.toDbValue() == toDbValue();
   }
 
   @override
-  int get hashCode => Object.hash(toDbValue(), isolationContextId);
+  int get hashCode => toDbValue().hashCode;
 }
 
 final class RegularTabMode extends TabMode {
@@ -95,11 +72,4 @@ final class RegularTabMode extends TabMode {
 
 final class PrivateTabMode extends TabMode {
   const PrivateTabMode();
-}
-
-final class IsolatedTabMode extends TabMode {
-  @override
-  final String isolationContextId;
-
-  const IsolatedTabMode(this.isolationContextId);
 }

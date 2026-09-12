@@ -142,14 +142,6 @@ class _TabTreePreview extends HookConsumerWidget {
                     .getContainerTabDescendants(entity.rootId);
                 if (!context.mounted) return;
 
-                if (!await confirmBulkTabCloseIfNeeded(
-                  context,
-                  ref,
-                  tabs.keys,
-                )) {
-                  return;
-                }
-
                 await ref
                     .read(tabRepositoryProvider.notifier)
                     .closeTabs(tabs.keys.toList());

@@ -41,12 +41,6 @@ class TabCreationMenu extends HookConsumerWidget {
         (value) => value.createChildTabsOption,
       ),
     );
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.showIsolatedTabUi,
-      ),
-    );
-
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) {
@@ -78,17 +72,6 @@ class TabCreationMenu extends HookConsumerWidget {
           ),
           child: const Text('Add Private Tab'),
         ),
-        if (showIsolatedTabUi)
-          MenuItemButton(
-            onPressed: () async {
-              await const SearchRoute(tabType: TabType.isolated).push(context);
-            },
-            leadingIcon: Icon(
-              MdiIcons.snowflake,
-              color: AppColors.of(context).isolatedTabTeal,
-            ),
-            child: const Text('Add Isolated Tab'),
-          ),
       ],
       child: child,
     );

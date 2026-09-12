@@ -37,13 +37,13 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
       SettingsEntryDefinition(
         title: 'New Tab Default',
         subtitle: 'Choose the default type for manually created tabs',
-        keywords: ['regular', 'private', 'isolated'],
+        keywords: ['regular', 'private'],
         child: _NewTabDefaultSection(),
       ),
       SettingsEntryDefinition(
         title: 'Small Web Tab Default',
         subtitle: 'Choose the tab type used when entering Small Web',
-        keywords: ['regular', 'private', 'isolated'],
+        keywords: ['regular', 'private'],
         child: _SmallWebTabDefaultSection(),
       ),
       SettingsEntryDefinition(
@@ -63,12 +63,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         subtitle: 'Show container selectors, menus, and management',
         keywords: ['containers'],
         child: _ShowContainerUiTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Isolated Tab UI',
-        subtitle: 'Show isolated-tab creation options in the UI',
-        keywords: ['isolated tabs'],
-        child: _ShowIsolatedTabUiTile(),
       ),
       SettingsEntryDefinition(
         title: 'Create Child Tabs',
@@ -198,7 +192,7 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
       SettingsEntryDefinition(
         title: 'Bookmark Open Behavior',
         subtitle: 'Choose how tapping a bookmark opens it',
-        keywords: ['bookmarks', 'open', 'custom tab', 'isolated'],
+        keywords: ['bookmarks', 'open', 'custom tab'],
         child: _BookmarkOpenBehaviorSection(),
       ),
     ],
@@ -259,17 +253,6 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                         : appColors.privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  ButtonSegment(
-                    value: TabType.isolated,
-                    label: const Text('Isolated'),
-                    icon: Icon(
-                      MdiIcons.snowflake,
-                      color: defaultCreateTabType == TabType.isolated
-                          ? null
-                          : appColors.isolatedTabTeal,
-                    ),
-                  ),
               ],
               selected: {defaultCreateTabType},
               onSelectionChanged: (value) async {
@@ -286,9 +269,6 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabType.child => null,
-                TabType.isolated => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
-                ),
               },
             ),
           ),
@@ -338,17 +318,6 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
                         : appColors.privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  ButtonSegment(
-                    value: TabType.isolated,
-                    label: const Text('Isolated'),
-                    icon: Icon(
-                      MdiIcons.snowflake,
-                      color: smallWebTabType == TabType.isolated
-                          ? null
-                          : appColors.isolatedTabTeal,
-                    ),
-                  ),
               ],
               selected: {smallWebTabType},
               onSelectionChanged: (value) async {
@@ -365,9 +334,6 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabType.child => null,
-                TabType.isolated => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
-                ),
               },
             ),
           ),
@@ -432,18 +398,6 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                     color: AppColors.of(context).privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  RadioListTile.adaptive(
-                    value: TabIntentOpenSetting.isolated,
-                    title: const Text('Isolated'),
-                    subtitle: const Text(
-                      'Open external links in an isolated tab',
-                    ),
-                    secondary: Icon(
-                      MdiIcons.snowflake,
-                      color: AppColors.of(context).isolatedTabTeal,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -516,18 +470,6 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
                   ),
                   secondary: Icon(MdiIcons.applicationOutline),
                 ),
-                if (settings.showIsolatedTabUi)
-                  RadioListTile.adaptive(
-                    value: BookmarkOpenSetting.isolated,
-                    title: const Text('Isolated'),
-                    subtitle: const Text(
-                      'Open the bookmark in an isolated tab',
-                    ),
-                    secondary: Icon(
-                      MdiIcons.snowflake,
-                      color: AppColors.of(context).isolatedTabTeal,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -717,55 +659,6 @@ class _ShowContainerUiTile extends HookConsumerWidget {
   }
 }
 
-class _ShowIsolatedTabUiTile extends HookConsumerWidget {
-  const _ShowIsolatedTabUiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Isolated Tab UI'),
-      subtitle: const Text('Show isolated-tab creation options in the UI'),
-      secondary: Icon(
-        MdiIcons.snowflake,
-        color: AppColors.of(context).isolatedTabTeal,
-      ),
-      value: showIsolatedTabUi,
-      onChanged: (value) async {
-        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
-          currentSettings,
-        ) {
-          var updated = currentSettings.copyWith.showIsolatedTabUi(value);
-          if (!value &&
-              updated.storedDefaultCreateTabType == TabType.isolated) {
-            updated = updated.copyWith.storedDefaultCreateTabType(
-              TabType.regular,
-            );
-          }
-          if (!value &&
-              updated.tabIntentOpenSetting == TabIntentOpenSetting.isolated) {
-            updated = updated.copyWith.tabIntentOpenSetting(
-              TabIntentOpenSetting.ask,
-            );
-          }
-          if (!value && updated.smallWebTabType == TabType.isolated) {
-            updated = updated.copyWith.smallWebTabType(TabType.private);
-          }
-          if (!value &&
-              updated.bookmarkOpenSetting == BookmarkOpenSetting.isolated) {
-            updated = updated.copyWith.bookmarkOpenSetting(
-              BookmarkOpenSetting.ask,
-            );
-          }
-          return updated;
-        });
-      },
-    );
-  }
-}
 
 class _BackgroundTabOpenSection extends HookConsumerWidget {
   const _BackgroundTabOpenSection();

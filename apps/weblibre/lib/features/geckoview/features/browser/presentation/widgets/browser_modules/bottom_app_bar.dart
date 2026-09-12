@@ -888,9 +888,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
-    );
     final showTitlesSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherShowTitles,
@@ -1071,7 +1068,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
         activeItemKey: activeItemKey.value,
         axis: axis,
         showTitles: showTitles,
-        showIsolatedTabUi: showIsolatedTabUi,
         hierarchyGlyphs: hierarchyGlyphs,
         titleMaxWidth: titleMaxWidth,
         closeButtonMode: closeButtonMode,
@@ -1148,7 +1144,6 @@ class QuickTabSwitcherView extends StatelessWidget {
     this.scrollKey,
     this.activeItemKey,
     required this.showTitles,
-    required this.showIsolatedTabUi,
     this.hierarchyGlyphs = defaultQuickTabSwitcherHierarchyGlyphs,
     this.titleMaxWidth = defaultQuickTabSwitcherTitleWidth,
     this.closeButtonMode = TabChipCloseButtonMode.activeTabOnly,
@@ -1169,7 +1164,6 @@ class QuickTabSwitcherView extends StatelessWidget {
   final Key? scrollKey;
   final GlobalKey? activeItemKey;
   final bool showTitles;
-  final bool showIsolatedTabUi;
 
   /// Max inline chevron glyphs on a chip's depth indicator before collapsing
   /// into an icon + count badge. A value of 0 hides the indicator entirely.
@@ -1354,7 +1348,6 @@ class QuickTabSwitcherView extends StatelessWidget {
       item,
       isSelected: isSelected,
       showTitles: showTitles,
-      showIsolatedTabUi: showIsolatedTabUi,
       hierarchyGlyphs: hierarchyGlyphs,
       titleMaxWidth: titleMaxWidth,
       isVertical: _isVertical,

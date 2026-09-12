@@ -216,12 +216,6 @@ class CloneTabMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.showIsolatedTabUi,
-      ),
-    );
-
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) {
@@ -245,17 +239,6 @@ class CloneTabMenu extends HookConsumerWidget {
               : () => _cloneTabAsPrivate(context, ref, selectedTabId!),
           child: const Text('Clone as Private'),
         ),
-        if (showIsolatedTabUi)
-          MenuItemButton(
-            leadingIcon: Icon(
-              MdiIcons.snowflake,
-              color: AppColors.of(context).isolatedTabTeal,
-            ),
-            onPressed: selectedTabId == null
-                ? null
-                : () => _cloneTabAsIsolated(context, ref, selectedTabId!),
-            child: const Text('Clone as Isolated'),
-          ),
       ],
       child: child,
     );
@@ -331,19 +314,6 @@ Future<void> _cloneTabAsPrivate(
   return _cloneTabAsMode(context, ref, selectedTabId, mode: TabMode.private);
 }
 
-Future<void> _cloneTabAsIsolated(
-  BuildContext context,
-  WidgetRef ref,
-  String selectedTabId,
-) {
-  return _cloneTabAsMode(
-    context,
-    ref,
-    selectedTabId,
-    mode: TabMode.newIsolated(),
-  );
-}
-
 Future<void> _cloneTabAsMode(
   BuildContext context,
   WidgetRef ref,
@@ -395,14 +365,6 @@ Future<void> _cloneTabAsMode(
                   : TabContainerSelection.specific(containerData),
               selectTab: false,
             ),
-    IsolatedTabMode() => await repo.addTab(
-      tabMode: TabMode.newIsolated(),
-      url: cloneUrl,
-      containerSelection: containerData == null
-          ? const TabContainerSelection.unassigned()
-          : TabContainerSelection.specific(containerData),
-      selectTab: false,
-    ),
   };
 
   if (context.mounted) {

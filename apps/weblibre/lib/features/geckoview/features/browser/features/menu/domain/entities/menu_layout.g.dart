@@ -45,7 +45,6 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.cloneTab: 'cloneTab',
   MenuItemType.cloneRegularTab: 'cloneRegularTab',
   MenuItemType.clonePrivateTab: 'clonePrivateTab',
-  MenuItemType.cloneIsolatedTab: 'cloneIsolatedTab',
   MenuItemType.export: 'export',
   MenuItemType.copyAsMarkdown: 'copyAsMarkdown',
   MenuItemType.exportAsMarkdown: 'exportAsMarkdown',

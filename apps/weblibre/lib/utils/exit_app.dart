@@ -40,11 +40,10 @@ Future<void> exitApp(
   logger.i(restart ? 'Preparing restart' : 'Preparing exit');
 
   // 1. Close private tabs (clears browsing data for private contexts).
-  //    Isolated tabs are persistent and should survive app exit.
   try {
     await container
         .read(tabDataRepositoryProvider.notifier)
-        .closeAllTabs(includeRegular: false, includeIsolated: false);
+        .closeAllTabs(includeRegular: false);
     logger.i('Private tabs closed');
   } catch (e, st) {
     logger.e('Failed to close tabs', error: e, stackTrace: st);

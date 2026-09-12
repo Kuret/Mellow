@@ -206,13 +206,6 @@ class CompactAppBarTitleView extends StatelessWidget {
                       size: 16,
                     ),
                     const SizedBox(width: 4),
-                  ] else if (tabState.tabMode is IsolatedTabMode) ...[
-                    Icon(
-                      MdiIcons.snowflake,
-                      color: appColors.isolatedTabTeal,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
                   ],
                   if (isTabTunneled) ...[
                     const Icon(MdiIcons.tunnelOutline, size: 16),
@@ -451,13 +444,6 @@ class AppBarTitleView extends StatelessWidget {
                           size: 14,
                         ),
                         const SizedBox(width: 4),
-                      ] else if (tabState.tabMode is IsolatedTabMode) ...[
-                        Icon(
-                          MdiIcons.snowflake,
-                          color: appColors.isolatedTabTeal,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
                       ],
                       if (isTabTunneled) ...[
                         const Icon(MdiIcons.tunnelOutline, size: 14),
@@ -677,13 +663,6 @@ class RailAppBarTitleView extends StatelessWidget {
                       Icon(
                         MdiIcons.dominoMask,
                         color: appColors.privateTabPurple,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                    ] else if (tabState.tabMode is IsolatedTabMode) ...[
-                      Icon(
-                        MdiIcons.snowflake,
-                        color: appColors.isolatedTabTeal,
                         size: 16,
                       ),
                       const SizedBox(width: 4),

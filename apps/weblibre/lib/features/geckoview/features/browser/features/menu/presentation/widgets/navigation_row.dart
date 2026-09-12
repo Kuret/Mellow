@@ -189,23 +189,6 @@ class MenuNavigationRow extends HookConsumerWidget {
             icon: MdiIcons.tabMinus,
             label: 'Close Tab',
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId));
-              if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-                final allStates = ref.read(tabStatesProvider);
-                final groupCount = allStates.values
-                    .where(
-                      (s) =>
-                          s.isolationContextId == tabState.isolationContextId,
-                    )
-                    .length;
-                if (groupCount <= 1 && context.mounted) {
-                  final confirmed = await ui_helper.confirmIsolatedTabClose(
-                    context,
-                  );
-                  if (!confirmed) return;
-                }
-              }
-
               await ref
                   .read(tabRepositoryProvider.notifier)
                   .closeTab(selectedTabId);

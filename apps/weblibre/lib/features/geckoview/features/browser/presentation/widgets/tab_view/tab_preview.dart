@@ -45,27 +45,6 @@ import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-Future<bool> _confirmIsolatedTabCloseIfNeeded(
-  BuildContext context,
-  WidgetRef ref,
-  String tabId,
-) async {
-  final allStates = ref.read(tabStatesProvider);
-  final tabState = allStates[tabId];
-  final contextId = tabState?.isolationContextId;
-
-  if (contextId == null) return true;
-
-  final groupCount = allStates.values
-      .where((state) => state.isolationContextId == contextId)
-      .length;
-
-  if (groupCount > 1) return true;
-  if (!context.mounted) return false;
-
-  return ui_helper.confirmIsolatedTabClose(context);
-}
-
 class GridTabItemContainer extends StatelessWidget {
   final bool isActive;
   final TabMode tabMode;
@@ -87,7 +66,6 @@ class GridTabItemContainer extends StatelessWidget {
 
     final bgColor = switch (tabMode) {
       PrivateTabMode() => appColors.privateTabBackground.withAlpha(80),
-      IsolatedTabMode() => appColors.isolatedTabBackground.withAlpha(80),
       RegularTabMode() => colorScheme.surfaceContainerHigh,
     };
 
@@ -199,7 +177,6 @@ class GridTabPreview extends HookConsumerWidget {
 
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
-      IsolatedTabMode() => appColors.isolatedTabForeground,
       RegularTabMode() => null,
     };
 
@@ -209,17 +186,11 @@ class GridTabPreview extends HookConsumerWidget {
         Colors.white,
         0.4,
       )!,
-      IsolatedTabMode() => Color.lerp(
-        appColors.isolatedTabTeal,
-        Colors.white,
-        0.4,
-      )!,
       RegularTabMode() => colorScheme.onSurfaceVariant,
     };
 
     final (modeBadgeIcon, modeBadgeColor) = switch (tabState.tabMode) {
       PrivateTabMode() => (MdiIcons.dominoMask, appColors.privateTabPurple),
-      IsolatedTabMode() => (MdiIcons.snowflake, appColors.isolatedTabTeal),
       RegularTabMode() => (null, null),
     };
 
@@ -527,29 +498,21 @@ class ListTabPreview extends HookConsumerWidget {
 
     final listBgColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabBackground.withAlpha(80),
-      IsolatedTabMode() => appColors.isolatedTabBackground.withAlpha(80),
       RegularTabMode() when isActive => colorScheme.primary.withAlpha(20),
       RegularTabMode() => Colors.transparent,
     };
     final listTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
-      IsolatedTabMode() => appColors.isolatedTabForeground,
       RegularTabMode() => null,
     };
     final (modeBadgeIcon, modeBadgeColor) = switch (tabState.tabMode) {
       PrivateTabMode() => (MdiIcons.dominoMask, appColors.privateTabPurple),
-      IsolatedTabMode() => (MdiIcons.snowflake, appColors.isolatedTabTeal),
       RegularTabMode() => (null, null),
     };
 
     final subtitleColor = switch (tabState.tabMode) {
       PrivateTabMode() => Color.lerp(
         appColors.privateTabPurple,
-        Colors.white,
-        0.4,
-      )!,
-      IsolatedTabMode() => Color.lerp(
-        appColors.isolatedTabTeal,
         Colors.white,
         0.4,
       )!,
@@ -888,9 +851,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
         onDelete: () async {
           onBeforeDelete?.call();
 
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            return;
-          }
 
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
@@ -917,10 +877,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
       },
       onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            draggedDistance.value = 0.0;
-            return;
-          }
 
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
@@ -1053,9 +1009,6 @@ class SingleListTabPreview extends HookConsumerWidget {
         onDelete: () async {
           onBeforeDelete?.call();
 
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            return;
-          }
 
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
@@ -1082,10 +1035,6 @@ class SingleListTabPreview extends HookConsumerWidget {
       },
       onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            draggedDistance.value = 0.0;
-            return;
-          }
 
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 

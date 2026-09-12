@@ -31,8 +31,7 @@ part 'tab_view_filter_options.g.dart';
 enum TabTypeFilter {
   all('All Tabs'),
   regularOnly('Regular'),
-  privateOnly('Private'),
-  isolatedOnly('Isolated');
+  privateOnly('Private');
 
   final String label;
 
@@ -42,7 +41,6 @@ enum TabTypeFilter {
     all => true,
     regularOnly => tabMode is RegularTabMode,
     privateOnly => tabMode is PrivateTabMode,
-    isolatedOnly => tabMode is IsolatedTabMode,
   };
 }
 
@@ -84,6 +82,7 @@ enum TabQuickInterval {
 @JsonSerializable()
 @CopyWith()
 class TabViewFilterOptions with FastEquatable {
+  @JsonKey(unknownEnumValue: TabTypeFilter.all)
   final TabTypeFilter tabTypeFilter;
   final TabSortType sortType;
   final bool sortPinnedFirst;

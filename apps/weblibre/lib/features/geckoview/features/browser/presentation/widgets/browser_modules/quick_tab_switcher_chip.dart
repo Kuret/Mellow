@@ -200,8 +200,7 @@ buildQuickTabSwitcherChipDecoration(
             !item.isPinned &&
             !item.isSandbox &&
             (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
-            item.tabMode is! PrivateTabMode &&
-            item.tabMode is! IsolatedTabMode)
+            item.tabMode is! PrivateTabMode)
         ? EdgeInsets.zero
         : null,
     canDelete: canDelete,
@@ -214,7 +213,6 @@ Widget buildQuickTabSwitcherChipLabel(
   QuickTabSwitcherItem item, {
   required bool isSelected,
   required bool showTitles,
-  required bool showIsolatedTabUi,
   required int hierarchyGlyphs,
   required double titleMaxWidth,
   // On the narrow vertical rail the leading depth pill has no room beside the
@@ -252,16 +250,7 @@ Widget buildQuickTabSwitcherChipLabel(
           constraints: BoxConstraints(maxWidth: titleMaxWidth),
           child: Text(item.title),
         ),
-      if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Icon(
-            MdiIcons.snowflake,
-            color: appColors.isolatedTabTeal,
-            size: 20,
-          ),
-        )
-      else if (item.tabMode is PrivateTabMode)
+      if (item.tabMode is PrivateTabMode)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Icon(

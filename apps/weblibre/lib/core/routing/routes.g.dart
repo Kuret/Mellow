@@ -887,7 +887,6 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
-  TabType.isolated: 'isolated',
 };
 
 mixin $TabViewRoute on GoRouteData {

@@ -86,9 +86,6 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       viewportWidth: MediaQuery.sizeOf(context).width,
     );
     final showTitles = (!isVertical || wideRail) && showTitlesSetting;
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
-    );
     final hierarchyGlyphs = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherHierarchyGlyphs,
@@ -218,7 +215,6 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           item,
           isSelected: isSelected,
           showTitles: showTitles,
-          showIsolatedTabUi: showIsolatedTabUi,
           hierarchyGlyphs: hierarchyGlyphs,
           titleMaxWidth: titleMaxWidth,
           isVertical: isVertical,

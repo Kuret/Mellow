@@ -77,7 +77,6 @@ class OpenInNewTab extends HookConsumerWidget {
     final alternativeTypes = <TabType>[
       TabType.regular,
       TabType.private,
-      if (settings.showIsolatedTabUi) TabType.isolated,
     ]..remove(currentTabMode.toTabType());
 
     return ListTile(
@@ -112,18 +111,15 @@ class OpenInNewTab extends HookConsumerWidget {
 
 IconData _iconFor(TabType type) => switch (type) {
   TabType.private => MdiIcons.dominoMask,
-  TabType.isolated => MdiIcons.snowflake,
   _ => MdiIcons.tab,
 };
 
 Color? _colorFor(BuildContext context, TabType type) => switch (type) {
   TabType.private => AppColors.of(context).privateTabPurple,
-  TabType.isolated => AppColors.of(context).isolatedTabTeal,
   _ => null,
 };
 
 String _labelFor(TabType type) => switch (type) {
   TabType.private => 'New private tab',
-  TabType.isolated => 'New isolated tab',
   _ => 'New regular tab',
 };

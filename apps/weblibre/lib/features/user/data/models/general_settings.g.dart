@@ -43,8 +43,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showContainerUi(bool showContainerUi);
 
-  GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi);
-
   GeneralSettings showSearchCloseButton(bool showSearchCloseButton);
 
   GeneralSettings homeTarget(HomeTarget homeTarget);
@@ -231,7 +229,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool createChildTabsOption,
     bool enableLocalAiFeatures,
     bool showContainerUi,
-    bool showIsolatedTabUi,
     bool showSearchCloseButton,
     HomeTarget homeTarget,
     String? homeTargetUrl,
@@ -375,10 +372,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showContainerUi(bool showContainerUi) =>
       call(showContainerUi: showContainerUi);
-
-  @override
-  GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi) =>
-      call(showIsolatedTabUi: showIsolatedTabUi);
 
   @override
   GeneralSettings showSearchCloseButton(bool showSearchCloseButton) =>
@@ -699,7 +692,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
-    Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
     Object? showSearchCloseButton = const $CopyWithPlaceholder(),
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
@@ -862,12 +854,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showContainerUi
           // ignore: cast_nullable_to_non_nullable
           : showContainerUi as bool,
-      showIsolatedTabUi:
-          showIsolatedTabUi == const $CopyWithPlaceholder() ||
-              showIsolatedTabUi == null
-          ? _value.showIsolatedTabUi
-          // ignore: cast_nullable_to_non_nullable
-          : showIsolatedTabUi as bool,
       showSearchCloseButton:
           showSearchCloseButton == const $CopyWithPlaceholder() ||
               showSearchCloseButton == null
@@ -1311,7 +1297,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   createChildTabsOption: json['createChildTabsOption'] as bool?,
   enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
   showContainerUi: json['showContainerUi'] as bool?,
-  showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
   showSearchCloseButton: json['showSearchCloseButton'] as bool?,
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
   homeTargetUrl: json['homeTargetUrl'] as String?,
@@ -1326,6 +1311,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
+    unknownValue: TabType.regular,
   ),
   tabListDirection: $enumDecodeNullable(
     _$TabDirectionEnumMap,
@@ -1338,10 +1324,12 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
+    unknownValue: TabIntentOpenSetting.regular,
   ),
   bookmarkOpenSetting: $enumDecodeNullable(
     _$BookmarkOpenSettingEnumMap,
     json['bookmarkOpenSetting'],
+    unknownValue: BookmarkOpenSetting.regular,
   ),
   backgroundTabOpenAction: $enumDecodeNullable(
     _$BackgroundTabOpenActionEnumMap,
@@ -1414,6 +1402,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   smallWebTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['smallWebTabType'],
+    unknownValue: TabType.regular,
   ),
   tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
   unshortenerEnabled: json['unshortenerEnabled'] as bool?,
@@ -1473,7 +1462,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'createChildTabsOption': instance.createChildTabsOption,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
-  'showIsolatedTabUi': instance.showIsolatedTabUi,
   'showSearchCloseButton': instance.showSearchCloseButton,
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
   'homeTargetUrl': instance.homeTargetUrl,
@@ -1603,7 +1591,6 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
-  TabType.isolated: 'isolated',
 };
 
 const _$TabDirectionEnumMap = {
@@ -1614,14 +1601,12 @@ const _$TabDirectionEnumMap = {
 const _$TabIntentOpenSettingEnumMap = {
   TabIntentOpenSetting.regular: 'regular',
   TabIntentOpenSetting.private: 'private',
-  TabIntentOpenSetting.isolated: 'isolated',
   TabIntentOpenSetting.ask: 'ask',
 };
 
 const _$BookmarkOpenSettingEnumMap = {
   BookmarkOpenSetting.regular: 'regular',
   BookmarkOpenSetting.private: 'private',
-  BookmarkOpenSetting.isolated: 'isolated',
   BookmarkOpenSetting.customTab: 'customTab',
   BookmarkOpenSetting.ask: 'ask',
 };

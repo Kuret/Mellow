@@ -47,7 +47,6 @@ import 'package:weblibre/presentation/widgets/sliver_center_on_underflow.dart';
 TabMode _tabModeFor(TabType tabType) => switch (tabType) {
   TabType.regular || TabType.child => TabMode.regular,
   TabType.private => TabMode.private,
-  TabType.isolated => TabMode.newIsolated(),
 };
 
 /// The browser home: what fills the viewport when no tab is selected, or when

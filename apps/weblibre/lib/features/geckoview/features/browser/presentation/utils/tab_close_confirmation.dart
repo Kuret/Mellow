@@ -19,50 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-
-int countIsolatedGroupsRemovedByClosingTabs(
-  WidgetRef ref,
-  Iterable<String> tabIds,
-) {
-  final idsToClose = tabIds.toSet();
-  if (idsToClose.isEmpty) return 0;
-
-  final allStates = ref.read(tabStatesProvider);
-  final isolatedCloseCounts = <String, int>{};
-
-  for (final tabId in idsToClose) {
-    final contextId = allStates[tabId]?.isolationContextId;
-    if (contextId != null) {
-      isolatedCloseCounts.update(
-        contextId,
-        (count) => count + 1,
-        ifAbsent: () => 1,
-      );
-    }
-  }
-
-  return isolatedCloseCounts.entries.where((entry) {
-    final totalInGroup = allStates.values
-        .where((state) => state.isolationContextId == entry.key)
-        .length;
-    return totalInGroup == entry.value;
-  }).length;
-}
-
-Future<bool> confirmBulkTabCloseIfNeeded(
-  BuildContext context,
-  WidgetRef ref,
-  Iterable<String> tabIds,
-) async {
-  final groupsToDelete = countIsolatedGroupsRemovedByClosingTabs(ref, tabIds);
-  if (groupsToDelete <= 0) return true;
-  if (!context.mounted) return false;
-
-  return ui_helper.confirmIsolatedTabClose(context, groupCount: groupsToDelete);
-}
 
 Future<bool> closeTabsWithConfirmation(
   BuildContext context,
@@ -73,13 +30,6 @@ Future<bool> closeTabsWithConfirmation(
   if (idsToClose.isEmpty) return false;
 
   final tabRepository = ref.read(tabRepositoryProvider.notifier);
-
-  if (!await confirmBulkTabCloseIfNeeded(context, ref, idsToClose)) {
-    return false;
-  }
-  if (!context.mounted) {
-    return false;
-  }
 
   await tabRepository.closeTabs(idsToClose);
   return true;

@@ -292,40 +292,6 @@ class TabMenu extends HookConsumerWidget {
                   }
                 },
               ),
-              if (settings.showIsolatedTabUi)
-                MenuItemButton(
-                  leadingIcon: Icon(
-                    MdiIcons.snowflake,
-                    color: AppColors.of(context).isolatedTabTeal,
-                  ),
-                  child: const Text('Isolated'),
-                  onPressed: () async {
-                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                    final containerData = await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .getTabContainerData(selectedTabId);
-
-                    final cloneUrl =
-                        ref.read(
-                          sandboxSourceUriForTabProvider(tabId: tabState.id),
-                        ) ??
-                        tabState.url;
-                    final tabId = await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: cloneUrl,
-                          tabMode: TabMode.newIsolated(),
-                          containerSelection: containerData == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(containerData),
-                          selectTab: false,
-                        );
-
-                    if (context.mounted) {
-                      handleBackgroundTabOpened(context, ref, tabId);
-                    }
-                  },
-                ),
             ],
             leadingIcon: const Icon(MdiIcons.contentDuplicate),
             child: const Text('Clone Tab'),

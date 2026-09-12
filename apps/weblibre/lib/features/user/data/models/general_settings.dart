@@ -97,12 +97,12 @@ enum TabBarStackingMode {
   disabled,
 }
 
-enum TabIntentOpenSetting { regular, private, isolated, ask }
+enum TabIntentOpenSetting { regular, private, ask }
 
 /// Determines what happens when a bookmark is tapped in the bookmark list.
 /// [ask] shows the "open in..." sheet (today's behavior, and the default);
 /// the other values open the bookmark directly with no intermediate prompt.
-enum BookmarkOpenSetting { regular, private, isolated, customTab, ask }
+enum BookmarkOpenSetting { regular, private, customTab, ask }
 
 /// What happens after an action opens a new tab in the background — context
 /// menu "open in new tab"/"open in container", tab cloning, and the contextual
@@ -284,7 +284,6 @@ class GeneralSettings with FastEquatable {
   final bool createChildTabsOption;
   final bool enableLocalAiFeatures;
   final bool showContainerUi;
-  final bool showIsolatedTabUi;
 
   /// Whether the search / new-tab page shows a leading close button so it can
   /// be dismissed without a system back button or back gesture (e.g. on e-ink
@@ -328,14 +327,19 @@ class GeneralSettings with FastEquatable {
   /// colours directly on top of the image, so in a light theme the image has to
   /// be washed *lighter* for those to stay readable.
   final double homeWallpaperDim;
-  @JsonKey(name: 'defaultCreateTabType')
+  @JsonKey(
+    name: 'defaultCreateTabType',
+    unknownEnumValue: TabType.regular,
+  )
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
   final TabDirection tabBarDirection;
+  @JsonKey(unknownEnumValue: TabIntentOpenSetting.regular)
   final TabIntentOpenSetting tabIntentOpenSetting;
 
   /// Determines what happens when a bookmark is tapped. See
   /// [BookmarkOpenSetting] and [effectiveBookmarkOpenSetting].
+  @JsonKey(unknownEnumValue: BookmarkOpenSetting.regular)
   final BookmarkOpenSetting bookmarkOpenSetting;
 
   /// What happens after a tab is opened in the background. See
@@ -390,6 +394,7 @@ class GeneralSettings with FastEquatable {
   final bool urlCleanerAutoUpdate;
   final int? urlCleanerLastCheckEpochMs;
   final bool urlCleanerLastUpdateWasAuto;
+  @JsonKey(unknownEnumValue: TabType.regular)
   final TabType smallWebTabType;
   final bool tabBarLongPressUrlCopy;
   final bool unshortenerEnabled;
@@ -498,7 +503,6 @@ class GeneralSettings with FastEquatable {
     required this.createChildTabsOption,
     required this.enableLocalAiFeatures,
     required this.showContainerUi,
-    required this.showIsolatedTabUi,
     required this.showSearchCloseButton,
     required this.homeTarget,
     required this.homeTargetUrl,
@@ -586,7 +590,6 @@ class GeneralSettings with FastEquatable {
     bool? createChildTabsOption,
     bool? enableLocalAiFeatures,
     bool? showContainerUi,
-    bool? showIsolatedTabUi,
     bool? showSearchCloseButton,
     HomeTarget? homeTarget,
     this.homeTargetUrl,
@@ -671,7 +674,6 @@ class GeneralSettings with FastEquatable {
        createChildTabsOption = createChildTabsOption ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        showContainerUi = showContainerUi ?? true,
-       showIsolatedTabUi = showIsolatedTabUi ?? true,
        showSearchCloseButton = showSearchCloseButton ?? false,
        // Defaults to `home`, which is exactly what the browser did before this
        // setting existed. Anything else would change startup for every user.
@@ -776,6 +778,22 @@ class GeneralSettings with FastEquatable {
        unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
+    // The isolated tab mode was removed; map any previously persisted
+    // `isolated` values for these settings back to `regular` so old profiles
+    // still decode.
+    // TODO: Drop this fallback once enough releases have shipped that
+    // rolling back to a version with isolated tabs is no longer a concern.
+    for (final key in const [
+      'defaultCreateTabType',
+      'smallWebTabType',
+      'tabIntentOpenSetting',
+      'bookmarkOpenSetting',
+    ]) {
+      if (json[key] == 'isolated') {
+        json[key] = 'regular';
+      }
+    }
+
     // Migrate legacy `newTabPosition` setting to direction settings.
     // Old `first` (new tabs at top) → newestFirst; `end` → oldestFirst.
     // TODO: Drop this fallback (and the `newTabPosition` row in the user
@@ -825,35 +843,14 @@ class GeneralSettings with FastEquatable {
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
-  TabType get effectiveDefaultCreateTabType {
-    if (!showIsolatedTabUi && storedDefaultCreateTabType == TabType.isolated) {
-      return TabType.regular;
-    }
-    return storedDefaultCreateTabType;
-  }
+  TabType get effectiveDefaultCreateTabType => storedDefaultCreateTabType;
 
-  TabType get effectiveSmallWebTabType {
-    if (!showIsolatedTabUi && smallWebTabType == TabType.isolated) {
-      return TabType.private;
-    }
-    return smallWebTabType;
-  }
+  TabType get effectiveSmallWebTabType => smallWebTabType;
 
-  TabIntentOpenSetting get effectiveTabIntentOpenSetting {
-    if (!showIsolatedTabUi &&
-        tabIntentOpenSetting == TabIntentOpenSetting.isolated) {
-      return TabIntentOpenSetting.ask;
-    }
-    return tabIntentOpenSetting;
-  }
+  TabIntentOpenSetting get effectiveTabIntentOpenSetting =>
+      tabIntentOpenSetting;
 
-  BookmarkOpenSetting get effectiveBookmarkOpenSetting {
-    if (!showIsolatedTabUi &&
-        bookmarkOpenSetting == BookmarkOpenSetting.isolated) {
-      return BookmarkOpenSetting.ask;
-    }
-    return bookmarkOpenSetting;
-  }
+  BookmarkOpenSetting get effectiveBookmarkOpenSetting => bookmarkOpenSetting;
 
   /// Keeping sequential navigation inside one container only means something
   /// while the user can switch containers at all: with the container UI hidden
@@ -919,7 +916,6 @@ class GeneralSettings with FastEquatable {
     createChildTabsOption,
     enableLocalAiFeatures,
     showContainerUi,
-    showIsolatedTabUi,
     showSearchCloseButton,
     homeTarget,
     homeTargetUrl,

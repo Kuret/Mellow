@@ -58,7 +58,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_term_suggestions_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
@@ -107,21 +106,8 @@ class SearchScreen extends HookConsumerWidget {
     );
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
-    final initialTabType =
-        !settings.showIsolatedTabUi && tabType == TabType.isolated
-        ? TabType.regular
-        : tabType;
-
-    final selectedTabType = useState(initialTabType);
+    final selectedTabType = useState(tabType);
     final currentTabTabType = ref.watch(selectedTabTypeProvider);
-
-    useEffect(() {
-      if (!settings.showIsolatedTabUi &&
-          selectedTabType.value == TabType.isolated) {
-        selectedTabType.value = TabType.regular;
-      }
-      return null;
-    }, [settings.showIsolatedTabUi]);
 
     final selectedContainer = ref.watch(
       selectedContainerDataProvider.select((value) => value.value),
@@ -141,13 +127,8 @@ class SearchScreen extends HookConsumerWidget {
         : switch (selectedTabType.value) {
             TabType.regular => TabMode.regular,
             TabType.private => TabMode.private,
-            TabType.isolated => TabMode.newIsolated(),
             TabType.child => switch (currentTabTabType) {
               TabType.private => TabMode.private,
-              TabType.isolated => TabMode.isolated(
-                ref.watch(selectedTabStateProvider)?.isolationContextId ??
-                    newIsolatedContextId(),
-              ),
               _ => TabMode.regular,
             },
           };
@@ -723,23 +704,16 @@ class SearchScreen extends HookConsumerWidget {
                                           });
                                     },
                                     showChildOption: createChildTabsOption,
-                                    showIsolatedOption:
-                                        settings.showIsolatedTabUi,
                                     selectedBackgroundColor:
                                         switch (selectedTabType.value) {
                                           TabType.regular => null,
                                           TabType.private =>
                                             appColors.privateSelectionOverlay,
-                                          TabType.isolated =>
-                                            appColors.isolatedSelectionOverlay,
                                           TabType.child =>
                                             switch (currentTabTabType) {
                                               TabType.private =>
                                                 appColors
                                                     .privateSelectionOverlay,
-                                              TabType.isolated =>
-                                                appColors
-                                                    .isolatedSelectionOverlay,
                                               _ => null,
                                             },
                                         },

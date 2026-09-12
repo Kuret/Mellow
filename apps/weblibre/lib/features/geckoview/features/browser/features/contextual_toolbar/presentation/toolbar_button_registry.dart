@@ -240,7 +240,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       'Add Regular Tab',
       'Add Child Tab',
       'Add Private Tab',
-      'Add Isolated Tab',
     ],
     builder: (scope, context, ref) => scope.isPreview
         ? AddTabButtonView(onPressed: () {}, onLongPress: () {})
@@ -254,7 +253,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       'Add Regular Tab',
       'Add Child Tab',
       'Add Private Tab',
-      'Add Isolated Tab',
     ],
     builder: (scope, context, ref) => scope.isPreview
         ? TabsCountButtonView(
@@ -456,11 +454,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: duplicateTabToolbarButtonSpec,
     label: 'Duplicate Tab',
     icon: MdiIcons.contentDuplicate,
-    longPressActions: [
-      'Clone as Regular',
-      'Clone as Private',
-      'Clone as Isolated',
-    ],
+    longPressActions: ['Clone as Regular', 'Clone as Private'],
     isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return scope.isPreview
@@ -688,18 +682,6 @@ Future<void> _closeTab(
   String? selectedTabId,
 ) async {
   if (selectedTabId == null) return;
-
-  final tabState = ref.read(tabStateProvider(selectedTabId));
-  if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-    final allStates = ref.read(tabStatesProvider);
-    final groupCount = allStates.values
-        .where((s) => s.isolationContextId == tabState.isolationContextId)
-        .length;
-    if (groupCount <= 1 && context.mounted) {
-      final confirmed = await ui_helper.confirmIsolatedTabClose(context);
-      if (!confirmed) return;
-    }
-  }
 
   await ref.read(tabRepositoryProvider.notifier).closeTab(selectedTabId);
 

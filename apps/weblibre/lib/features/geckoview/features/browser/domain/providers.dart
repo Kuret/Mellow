@@ -189,10 +189,7 @@ TabState _placeholderTabState(TabSummary tab) {
     url: tab.url ?? TabState.defaultUrl,
     title: tab.title ?? '',
     parentId: tab.parentId,
-    tabMode: TabMode.fromDbValue(
-      tab.tabMode,
-      isolationContextId: tab.isolationContextId,
-    ),
+    tabMode: TabMode.fromDbValue(tab.tabMode),
   );
 }
 

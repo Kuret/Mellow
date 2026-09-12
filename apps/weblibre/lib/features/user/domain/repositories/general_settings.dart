@@ -59,7 +59,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'createChildTabsOption': DriftSqlType.bool,
   'enableLocalAiFeatures': DriftSqlType.bool,
   'showContainerUi': DriftSqlType.bool,
-  'showIsolatedTabUi': DriftSqlType.bool,
   'defaultCreateTabType': DriftSqlType.string,
   // Legacy: superseded by tabListDirection/tabBarDirection.
   'newTabPosition': DriftSqlType.string,

@@ -431,20 +431,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                           const route = SearchRoute(tabType: TabType.private);
 
                           await router.push(route.location);
-                        } else if (type == 'new_isolated_tab') {
-                          final settings = ref.read(
-                            generalSettingsWithDefaultsProvider,
-                          );
-                          if (!settings.showIsolatedTabUi) {
-                            return;
-                          }
-
-                          lastAction = DateTime.now();
-
-                          final router = await ref.read(routerProvider.future);
-                          const route = SearchRoute(tabType: TabType.isolated);
-
-                          await router.push(route.location);
                         } else {
                           throw UnimplementedError(
                             'Unknown quick action shortcut type',
@@ -453,9 +439,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       }
                     });
 
-                    final settings = ref.read(
-                      generalSettingsWithDefaultsProvider,
-                    );
                     await quickActions.setShortcutItems([
                       const ShortcutItem(
                         type: 'new_tab',
@@ -467,12 +450,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         localizedTitle: 'New Private Tab',
                         icon: 'mdi_icon_domino_mask',
                       ),
-                      if (settings.showIsolatedTabUi)
-                        const ShortcutItem(
-                          type: 'new_isolated_tab',
-                          localizedTitle: 'New Isolated Tab',
-                          icon: 'mdi_icon_snowflake',
-                        ),
                     ]);
                   }
                 },
@@ -586,28 +563,22 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           switch (settings.effectiveTabIntentOpenSetting) {
             case TabIntentOpenSetting.regular:
             case TabIntentOpenSetting.private:
-            case TabIntentOpenSetting.isolated:
               await ref
                   .read(engineReadyStateProvider.notifier)
                   .waitUntilReady();
 
               final tabMode = switch (settings.effectiveTabIntentOpenSetting) {
                 TabIntentOpenSetting.private => TabMode.private,
-                TabIntentOpenSetting.isolated => TabMode.newIsolated(),
                 _ => TabMode.regular,
               };
 
               switch (sharedContent) {
                 case SharedUrl():
-                  final containerSelection =
-                      settings.effectiveTabIntentOpenSetting ==
-                          TabIntentOpenSetting.isolated
-                      ? const TabContainerSelection.unassigned()
-                      : await _resolveContainerSelection(
-                          ref,
-                          sharedContent.contextId,
-                          sharedContent.containerMode,
-                        );
+                  final containerSelection = await _resolveContainerSelection(
+                    ref,
+                    sharedContent.contextId,
+                    sharedContent.containerMode,
+                  );
 
                   await ref
                       .read(tabRepositoryProvider.notifier)
