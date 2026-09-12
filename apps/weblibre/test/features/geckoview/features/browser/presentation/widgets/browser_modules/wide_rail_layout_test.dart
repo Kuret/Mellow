@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:drift/native.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +60,16 @@ class _EmptyTabStates extends TabStates {
 class _NoSelectedTab extends SelectedTab {
   @override
   String? build() => null;
+}
+
+/// [SelectedTab] without its native listeners, switchable from the test.
+class _SettableSelectedTab extends SelectedTab {
+  @override
+  String? build() => 'tab-1';
+
+  String? get selected => state;
+
+  set selected(String? tabId) => state = tabId;
 }
 
 class _TestSelectedSpace extends SelectedSpace {
@@ -251,6 +261,82 @@ void main() {
         for (final block in [urlRow, tabs, toolbar, spaces]) {
           expect(block.width, railWidth);
         }
+      },
+    );
+
+    testWidgets(
+      'keeps the toolbar and the spaces rows in place when the selected tab '
+      'changes what a toolbar button contains',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              selectedTabProvider.overrideWith(_SettableSelectedTab.new),
+            ],
+            child: _railBox(
+              railWidth: railWidth,
+              viewportWidth: 900,
+              child: WideRailLayout(
+                urlRow: const SizedBox(height: 56, width: double.infinity),
+                tabs: const SizedBox.expand(),
+                toolbar: WideRailToolbarRow(
+                  buttons: [
+                    const Icon(Icons.add),
+                    // Stands in for a button whose own layout follows the
+                    // selected tab — the pinned add-on bar once stacked one
+                    // icon per add-on enabled on that tab.
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final tab = ref.watch(selectedTabProvider);
+                        final count = tab == 'tab-2' ? 3 : 1;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (var i = 0; i < count; i++)
+                              const SizedBox(width: 24, height: 40),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                spaces: const SizedBox(height: 56, width: double.infinity),
+              ),
+            ),
+          ),
+        );
+
+        final toolbarBefore = tester.getRect(
+          find.byKey(WideRailLayout.toolbarKey),
+        );
+        final spacesBefore = tester.getRect(
+          find.byKey(WideRailLayout.spacesKey),
+        );
+        expect(toolbarBefore.bottom, spacesBefore.top);
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(WideRailLayout)),
+        );
+        (container.read(selectedTabProvider.notifier) as _SettableSelectedTab)
+            .selected = 'tab-2';
+        await tester.pump();
+
+        final toolbarAfter = tester.getRect(
+          find.byKey(WideRailLayout.toolbarKey),
+        );
+        final spacesAfter = tester.getRect(
+          find.byKey(WideRailLayout.spacesKey),
+        );
+        expect(toolbarAfter, toolbarBefore);
+        expect(spacesAfter, spacesBefore);
+        expect(toolbarAfter.bottom, spacesAfter.top);
+        // One run: both targets side by side, spanning the rail.
+        expect(
+          toolbarAfter.height,
+          WideRailToolbarRow.targetHeight +
+              2 * WideRailToolbarRow.verticalPadding,
+        );
+        expect(toolbarAfter.width, railWidth);
       },
     );
 

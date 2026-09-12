@@ -59,8 +59,14 @@ class WideRailLayout extends StatelessWidget {
   final Widget tabs;
 
   /// Optional contextual toolbar strip, sitting between the shelves and the
-  /// main toolbar row.
+  /// main toolbar row. Takes height only while it has content, and never
+  /// more than [contextualToolbarMaxHeight].
   final Widget? contextualToolbar;
+
+  /// Cap on the contextual strip: one row of toolbar buttons. Mirrors the
+  /// horizontal bar's `BrowserTabBar.contextualToolabarHeight` (54), with a
+  /// little slack so the buttons are never clipped.
+  static const contextualToolbarMaxHeight = 56.0;
 
   /// Block 3: the main toolbar buttons.
   final Widget toolbar;
@@ -101,7 +107,16 @@ class WideRailLayout extends StatelessWidget {
             Expanded(
               child: KeyedSubtree(key: tabsKey, child: tabs),
             ),
-            if (contextualToolbar != null) contextualToolbar!,
+            // Bounded so a strip that grows (a button with its own padding,
+            // an unexpected vertical layout) can only ever push the tabs up,
+            // never open a gap between the toolbar and the spaces.
+            if (contextualToolbar != null)
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: contextualToolbarMaxHeight,
+                ),
+                child: ClipRect(child: contextualToolbar),
+              ),
             Visibility(
               visible: showToolbar,
               maintainState: true,
@@ -195,8 +210,20 @@ class WideRailCollapsedUrlButton extends ConsumerWidget {
 }
 
 /// The main toolbar buttons of the wide rail in one horizontal row, spread
-/// evenly; when they do not fit the rail width they wrap onto a second row
-/// rather than scrolling or clipping. Each button sits in a 48dp target.
+/// evenly across the rail; when they do not fit the rail width they wrap
+/// onto a second row rather than scrolling or clipping. Each button sits in
+/// a target at least [targetSize] wide and exactly [targetHeight] tall, so
+/// the row's height is decided by how many runs it needs, not by what a
+/// button happens to contain — a button that lays itself out vertically (the
+/// pinned add-on bar once did, with one icon per enabled add-on of the
+/// selected tab) is scaled down instead of stretching the run and pushing
+/// the row up the rail.
+///
+/// The targets shrink-wrap their button. A plain [Center] under a [Wrap]
+/// takes the whole rail width (the wrap hands it a bounded width), which put
+/// every button on a run of its own: the "row" was a column as tall as it
+/// had buttons, and grew or shrank with the selected tab as buttons came and
+/// went.
 class WideRailToolbarRow extends StatelessWidget {
   const WideRailToolbarRow({super.key, required this.buttons});
 
@@ -204,26 +231,46 @@ class WideRailToolbarRow extends StatelessWidget {
 
   static const targetSize = 48.0;
 
+  /// Height of every target; a `ToolbarButton` with its own vertical padding
+  /// is 54, anything taller is scaled down to fit.
+  static const targetHeight = 56.0;
+
+  /// Vertical padding around the runs.
+  static const verticalPadding = 2.0;
+
   @override
   Widget build(BuildContext context) {
     if (buttons.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-      child: Wrap(
-        alignment: WrapAlignment.spaceEvenly,
-        runAlignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          for (final button in buttons)
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: targetSize,
-                minHeight: targetSize,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4.0,
+        vertical: verticalPadding,
+      ),
+      // Full width, or the wrap shrink-wraps its runs and spaceEvenly has
+      // nothing to spread across.
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          alignment: WrapAlignment.spaceEvenly,
+          runAlignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            for (final button in buttons)
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: targetSize,
+                  minHeight: targetHeight,
+                  maxHeight: targetHeight,
+                ),
+                child: Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: FittedBox(fit: BoxFit.scaleDown, child: button),
+                ),
               ),
-              child: Center(child: button),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

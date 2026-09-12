@@ -539,7 +539,11 @@ class BrowserTabBar extends HookConsumerWidget {
     }
 
     final actions = <Widget>[
-      PinnedAddonBar(axis: switcherAxis),
+      // The wide rail lays its toolbar out as a horizontal row whatever the
+      // bar axis is; a vertical add-on column there stacked one icon per
+      // enabled add-on of the selected tab and grew the row with every tab
+      // switch.
+      PinnedAddonBar(axis: wideRail ? Axis.horizontal : switcherAxis),
       if (isSmallWebMode)
         ReaderButton(
           buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
