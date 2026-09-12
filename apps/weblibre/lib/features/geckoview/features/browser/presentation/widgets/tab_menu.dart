@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -789,6 +790,15 @@ class _PinTabMenuItem extends ConsumerWidget {
     final spaceUuid = tabData?.spaceUuid;
     final isPrivate = tabData?.tabMode == TabModeDbValue.private;
     final showSpaceAndFolderItems = !isEssential && !isPrivate;
+    // Unloading (PLAN §7.4) is for live, regular, normal-shelf tabs that are
+    // not on screen — the same rule [TabRepository.demoteToCold] enforces.
+    final isSelected = ref.watch(selectedTabProvider) == selectedTabId;
+    final canUnload =
+        tabData != null &&
+        !tabData.isCold &&
+        tabData.tabShelf == TabShelf.normal &&
+        !isPrivate &&
+        !isSelected;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -824,6 +834,21 @@ class _PinTabMenuItem extends ConsumerWidget {
             isEssential ? 'Remove from essentials' : 'Add to essentials',
           ),
         ),
+        if (canUnload)
+          MenuItemButton(
+            closeOnActivate: false,
+            onPressed: () async {
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .demoteToCold(selectedTabId);
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
+            leadingIcon: const Icon(MdiIcons.snowflakeVariant),
+            child: const Text('Unload tab'),
+          ),
         if (showSpaceAndFolderItems)
           MenuItemButton(
             closeOnActivate: false,
