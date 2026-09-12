@@ -103,14 +103,22 @@ void main() {
 
     test('falls back to defaultRailWidth on a narrow viewport', () {
       expect(
-        effectiveRailWidth(isVertical: true, railWidth: 200, viewportWidth: 360),
+        effectiveRailWidth(
+          isVertical: true,
+          railWidth: 200,
+          viewportWidth: 360,
+        ),
         defaultRailWidth,
       );
     });
 
     test('falls back to defaultRailWidth when railWidth is too small', () {
       expect(
-        effectiveRailWidth(isVertical: true, railWidth: 56, viewportWidth: 1000),
+        effectiveRailWidth(
+          isVertical: true,
+          railWidth: 56,
+          viewportWidth: 1000,
+        ),
         defaultRailWidth,
       );
     });
@@ -126,7 +134,10 @@ void main() {
         GeneralSettings.withDefaults(railWidth: 1000).railWidth,
         maxRailWidth,
       );
-      expect(GeneralSettings.withDefaults(railWidth: 0).railWidth, minRailWidth);
+      expect(
+        GeneralSettings.withDefaults(railWidth: 0).railWidth,
+        minRailWidth,
+      );
     });
   });
 }

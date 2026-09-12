@@ -130,7 +130,8 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
       ),
       SettingsEntryDefinition(
         title: 'Rail Width',
-        subtitle: 'Width of the side rail when the tab bar is on the left or right',
+        subtitle:
+            'Width of the side rail when the tab bar is on the left or right',
         keywords: ['rail', 'width', 'side', 'vertical', 'left', 'right'],
         child: _RailWidthTile(),
       ),
@@ -668,8 +669,8 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
 class _RailWidthTile extends HookConsumerWidget {
   const _RailWidthTile();
 
-  static final _divisions =
-      ((maxRailWidth - minRailWidth) / railWidthStep).round();
+  static final _divisions = ((maxRailWidth - minRailWidth) / railWidthStep)
+      .round();
 
   static String _label(double width) => '${width.round()} px';
 

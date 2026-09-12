@@ -16,7 +16,10 @@ void main() {
     });
 
     test('maps shopping-family icons to cart', () {
-      expect(containerIconKeyForLegacyCodePoint(MdiIcons.cart.codePoint), 'cart');
+      expect(
+        containerIconKeyForLegacyCodePoint(MdiIcons.cart.codePoint),
+        'cart',
+      );
       expect(
         containerIconKeyForLegacyCodePoint(MdiIcons.store.codePoint),
         'cart',
