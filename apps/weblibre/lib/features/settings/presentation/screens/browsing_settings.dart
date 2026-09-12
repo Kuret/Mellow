@@ -673,22 +673,12 @@ class _ShowContainerUiTile extends HookConsumerWidget {
       secondary: const Icon(MdiIcons.folder),
       value: showContainerUi,
       onChanged: (value) async {
-        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
-          currentSettings,
-        ) {
-          var updated = currentSettings.copyWith.showContainerUi(value);
-          if (!value &&
-              const {
-                TabBarStackingMode.containerTabs,
-                TabBarStackingMode.accordion,
-                TabBarStackingMode.twoLevel,
-              }.contains(updated.tabBarStackingMode)) {
-            updated = updated.copyWith.tabBarStackingMode(
-              TabBarStackingMode.lastUsedTabs,
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.showContainerUi(value),
             );
-          }
-          return updated;
-        });
 
         if (!value) {
           ref.read(selectedContainerProvider.notifier).clearContainer();

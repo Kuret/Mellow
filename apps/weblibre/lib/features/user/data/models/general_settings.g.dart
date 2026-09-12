@@ -81,7 +81,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
-  GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
+  GeneralSettings tabBarSwipeAction(
+    @Deprecated('Retired; the bar swipe switches spaces')
+    TabBarSwipeAction tabBarSwipeAction,
+  );
 
   GeneralSettings sequentialTabNavigationCrossContainers(
     bool sequentialTabNavigationCrossContainers,
@@ -99,7 +102,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
 
-  GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode);
+  GeneralSettings tabBarStackingMode(
+    @Deprecated('Retired; the bar has one layout')
+    TabBarStackingMode tabBarStackingMode,
+  );
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
@@ -262,6 +268,7 @@ abstract class _$GeneralSettingsCWProxy {
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
     bool autoHideTabBar,
+    @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
     bool sequentialTabNavigationCrossContainers,
     bool sequentialTabNavigationLoop,
@@ -270,6 +277,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarShowContextualBar,
     TabBarPosition tabBarPosition,
     TabBarLayout tabBarLayout,
+    @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
@@ -466,8 +474,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(autoHideTabBar: autoHideTabBar);
 
   @override
-  GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction) =>
-      call(tabBarSwipeAction: tabBarSwipeAction);
+  GeneralSettings tabBarSwipeAction(
+    @Deprecated('Retired; the bar swipe switches spaces')
+    TabBarSwipeAction tabBarSwipeAction,
+  ) => call(tabBarSwipeAction: tabBarSwipeAction);
 
   @override
   GeneralSettings sequentialTabNavigationCrossContainers(
@@ -503,8 +513,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarLayout: tabBarLayout);
 
   @override
-  GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode) =>
-      call(tabBarStackingMode: tabBarStackingMode);
+  GeneralSettings tabBarStackingMode(
+    @Deprecated('Retired; the bar has one layout')
+    TabBarStackingMode tabBarStackingMode,
+  ) => call(tabBarStackingMode: tabBarStackingMode);
 
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
@@ -769,6 +781,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
+    @Deprecated('Retired; the bar swipe switches spaces')
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? sequentialTabNavigationCrossContainers =
         const $CopyWithPlaceholder(),
@@ -778,6 +791,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? tabBarLayout = const $CopyWithPlaceholder(),
+    @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),

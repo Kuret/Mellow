@@ -83,21 +83,21 @@ const railWidthStep = 8.0;
 /// place. Android-only; ignored on other platforms.
 enum RefreshRateMode { system, high, low }
 
+/// What a horizontal swipe on the tab bar used to do. The bar swipe steps
+/// through spaces now; kept so stored profiles still decode.
+@Deprecated('Retired; the bar swipe switches spaces')
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
-/// Row kind rendered inside the quick tab switcher bar. [TabBarStackingMode]
-/// decides which row(s) are shown; this enum identifies a single row.
+/// Row kind the retired stacking modes rendered. Kept so stored profiles
+/// still decode.
+@Deprecated('Retired; the bar has one layout')
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs, spaceTabs }
 
-/// Layout of the quick tab switcher bar. Merges the former
-/// "show tab switcher bar" toggle and [QuickTabSwitcherMode] selection.
-///
-/// [accordion] renders all containers as header chips with the selected
-/// container's tabs expanded inline. [twoLevel] stacks a container-tabs row
-/// on top of a recently-used row. [disabled] hides the bar entirely.
-/// [spaceTabs] puts a row of space chips above the selected space's tab
-/// chips (PLAN §9 W5); on a wide rail the second row becomes the three-shelf
-/// structure the tray renders.
+/// Layout of the former quick tab switcher bar. Retired: the compact bar has
+/// exactly one layout (the current space's chips) and the wide rail its own,
+/// so [GeneralSettings.effectiveTabBarStackingMode] always answers
+/// [spaceTabs]. Kept so stored profiles still decode.
+@Deprecated('Retired; the bar has one layout')
 enum TabBarStackingMode {
   lastUsedTabs,
   containerTabs,
@@ -334,6 +334,8 @@ class GeneralSettings with FastEquatable {
   /// [BackgroundTabOpenAction].
   final BackgroundTabOpenAction backgroundTabOpenAction;
   final bool autoHideTabBar;
+  @Deprecated('Retired; the bar swipe switches spaces')
+  // ignore: deprecated_member_use_from_same_package
   final TabBarSwipeAction tabBarSwipeAction;
 
   /// Whether sequential tab navigation (the tab bar swipe and the
@@ -350,6 +352,8 @@ class GeneralSettings with FastEquatable {
   final bool tabBarShowContextualBar;
   final TabBarPosition tabBarPosition;
   final TabBarLayout tabBarLayout;
+  @Deprecated('Retired; the bar has one layout')
+  // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
@@ -547,6 +551,8 @@ class GeneralSettings with FastEquatable {
     required this.bookmarkOpenSetting,
     required this.backgroundTabOpenAction,
     required this.autoHideTabBar,
+    @Deprecated('Retired; the bar swipe switches spaces')
+    // ignore: deprecated_member_use_from_same_package
     required this.tabBarSwipeAction,
     required this.sequentialTabNavigationCrossContainers,
     required this.sequentialTabNavigationLoop,
@@ -555,6 +561,8 @@ class GeneralSettings with FastEquatable {
     required this.tabBarShowContextualBar,
     required this.tabBarPosition,
     required this.tabBarLayout,
+    @Deprecated('Retired; the bar has one layout')
+    // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
@@ -643,6 +651,7 @@ class GeneralSettings with FastEquatable {
     BookmarkOpenSetting? bookmarkOpenSetting,
     BackgroundTabOpenAction? backgroundTabOpenAction,
     bool? autoHideTabBar,
+    // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
     bool? sequentialTabNavigationCrossContainers,
     bool? sequentialTabNavigationLoop,
@@ -651,6 +660,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarShowContextualBar,
     TabBarPosition? tabBarPosition,
     TabBarLayout? tabBarLayout,
+    // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
@@ -752,7 +762,9 @@ class GeneralSettings with FastEquatable {
        backgroundTabOpenAction =
            backgroundTabOpenAction ?? BackgroundTabOpenAction.prompt,
        autoHideTabBar = autoHideTabBar ?? true,
+       // ignore: deprecated_member_use_from_same_package
        tabBarSwipeAction =
+           // ignore: deprecated_member_use_from_same_package
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
        // Defaults to the behavior sequential navigation shipped with: stepping
        // off a container's edge continues in the next one.
@@ -765,7 +777,10 @@ class GeneralSettings with FastEquatable {
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
        tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
-       tabBarStackingMode = tabBarStackingMode ?? TabBarStackingMode.accordion,
+       // ignore: deprecated_member_use_from_same_package
+       tabBarStackingMode =
+           // ignore: deprecated_member_use_from_same_package
+           tabBarStackingMode ?? TabBarStackingMode.accordion,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
@@ -942,32 +957,26 @@ class GeneralSettings with FastEquatable {
       ? TabBarPosition.top
       : TabBarPosition.bottom;
 
-  /// Container-dependent stacking modes degrade to a single recently-used
-  /// row when the container UI is disabled. Two-level stacking additionally
-  /// degrades to accordion (the default mode, which has a vertical form) on the
-  /// *narrow* vertical rail, where two stacked chip lists have no room; a wide
-  /// rail ([isWideRail]) keeps both levels. [viewportWidth] feeds the
-  /// wide-rail check; left unset, only [railWidth] decides — the way the
-  /// toolbar preview judges it.
-  TabBarStackingMode effectiveTabBarStackingMode({double? viewportWidth}) {
-    var mode = tabBarStackingMode;
+  /// The bar has one layout: the current space's chips
+  /// ([TabBarStackingMode.spaceTabs]), whatever the retired setting stored.
+  // ignore: deprecated_member_use_from_same_package
+  TabBarStackingMode effectiveTabBarStackingMode() =>
+      // ignore: deprecated_member_use_from_same_package
+      TabBarStackingMode.spaceTabs;
 
-    if (tabBarPosition.isVertical &&
-        mode == TabBarStackingMode.twoLevel &&
-        !isWideViewport(viewportWidth ?? double.infinity)) {
-      mode = TabBarStackingMode.accordion;
+  /// The edge the browser chrome occupies on a viewport of [viewportWidth]:
+  /// the side rail's [railSide] on a wide viewport ([isWideViewport]), the
+  /// compact bar's [effectiveTabBarPosition] on a narrow one. The layers of
+  /// the browser screen share [TabBarPosition] as their edge vocabulary, so
+  /// the rail answers with its (legacy) left/right values.
+  TabBarPosition chromeEdge({required double viewportWidth}) {
+    if (isWideViewport(viewportWidth)) {
+      return switch (railSide) {
+        RailSide.left => TabBarPosition.left,
+        RailSide.right => TabBarPosition.right,
+      };
     }
-
-    if (!showContainerUi &&
-        const {
-          TabBarStackingMode.containerTabs,
-          TabBarStackingMode.accordion,
-          TabBarStackingMode.twoLevel,
-        }.contains(mode)) {
-      return TabBarStackingMode.lastUsedTabs;
-    }
-
-    return mode;
+    return effectiveTabBarPosition;
   }
 
   @override
@@ -1003,6 +1012,7 @@ class GeneralSettings with FastEquatable {
     bookmarkOpenSetting,
     backgroundTabOpenAction,
     autoHideTabBar,
+    // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,
     sequentialTabNavigationCrossContainers,
     sequentialTabNavigationLoop,
@@ -1011,6 +1021,7 @@ class GeneralSettings with FastEquatable {
     tabBarShowContextualBar,
     tabBarPosition,
     tabBarLayout,
+    // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
     pullToRefreshEnabled,
     useExternalDownloadManager,

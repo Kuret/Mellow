@@ -17,90 +17,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+// The stacking modes are retired; these tests pin down that a stored value
+// still decodes and resolves to the one layout the bar has.
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 void main() {
   group('effectiveTabBarStackingMode', () {
-    GeneralSettings settings({
-      required TabBarPosition position,
-      required double railWidth,
-      TabBarStackingMode mode = TabBarStackingMode.twoLevel,
-      bool showContainerUi = true,
-    }) => GeneralSettings.withDefaults(
-      tabBarPosition: position,
-      railWidth: railWidth,
-      tabBarStackingMode: mode,
-      showContainerUi: showContainerUi,
-    );
-
-    test('keeps twoLevel on a wide vertical rail', () {
-      expect(
-        settings(
-          position: TabBarPosition.left,
-          railWidth: minRailWidth,
-        ).effectiveTabBarStackingMode(viewportWidth: 1000),
-        TabBarStackingMode.twoLevel,
-      );
+    test('answers spaceTabs whatever mode a profile stored', () {
+      for (final mode in TabBarStackingMode.values) {
+        for (final position in TabBarPosition.values) {
+          for (final showContainerUi in [true, false]) {
+            expect(
+              GeneralSettings.withDefaults(
+                tabBarStackingMode: mode,
+                tabBarPosition: position,
+                showContainerUi: showContainerUi,
+              ).effectiveTabBarStackingMode(),
+              TabBarStackingMode.spaceTabs,
+              reason: '$mode at $position, containers: $showContainerUi',
+            );
+          }
+        }
+      }
     });
 
-    test(
-      'degrades twoLevel on a narrow viewport even with a wide railWidth',
-      () {
-        expect(
-          settings(
-            position: TabBarPosition.left,
-            railWidth: maxRailWidth,
-          ).effectiveTabBarStackingMode(
-            viewportWidth: narrowRailViewportBreakpoint - 1,
-          ),
-          TabBarStackingMode.accordion,
-        );
-      },
-    );
-
-    test('without a viewport keeps twoLevel', () {
-      expect(
-        settings(
-          position: TabBarPosition.left,
-          railWidth: minRailWidth,
-        ).effectiveTabBarStackingMode(),
-        TabBarStackingMode.twoLevel,
-      );
-    });
-
-    test('keeps twoLevel on a horizontal bar', () {
-      expect(
-        settings(
-          position: TabBarPosition.bottom,
-          railWidth: minRailWidth,
-        ).effectiveTabBarStackingMode(viewportWidth: 400),
-        TabBarStackingMode.twoLevel,
-      );
-    });
-
-    test('spaceTabs does not depend on the container UI', () {
-      expect(
-        settings(
-          position: TabBarPosition.bottom,
-          railWidth: minRailWidth,
-          mode: TabBarStackingMode.spaceTabs,
-          showContainerUi: false,
-        ).effectiveTabBarStackingMode(),
-        TabBarStackingMode.spaceTabs,
-      );
-    });
-
-    test('container modes still degrade without the container UI', () {
-      expect(
-        settings(
-          position: TabBarPosition.bottom,
-          railWidth: minRailWidth,
-          mode: TabBarStackingMode.containerTabs,
-          showContainerUi: false,
-        ).effectiveTabBarStackingMode(),
-        TabBarStackingMode.lastUsedTabs,
-      );
+    test('a stored stacking mode still decodes', () {
+      final settings = GeneralSettings.fromJson({
+        'tabBarStackingMode': 'twoLevel',
+        'tabBarSwipeAction': 'navigateOrderedTabs',
+      });
+      expect(settings.tabBarStackingMode, TabBarStackingMode.twoLevel);
+      expect(settings.tabBarSwipeAction, TabBarSwipeAction.navigateOrderedTabs);
     });
   });
 }

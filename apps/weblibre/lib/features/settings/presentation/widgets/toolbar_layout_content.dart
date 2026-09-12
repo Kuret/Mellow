@@ -29,25 +29,51 @@ import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
   SettingsSectionDefinition(
-    title: 'Tab Bar',
+    title: 'Side Rail',
+    keywords: ['wide screens', 'tablet', 'landscape', 'sidebar'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Rail Side',
+        subtitle: 'Dock the side rail to the left or right on wide screens',
+        keywords: ['left', 'right', 'side', 'vertical', 'rail'],
+        child: _RailSideSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Rail Width',
+        subtitle: 'Width of the side rail on wide screens',
+        keywords: ['rail', 'width', 'side', 'vertical', 'sidebar'],
+        child: _RailWidthTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Compact Bar',
+    keywords: ['narrow screens', 'phone', 'portrait'],
     entries: [
       SettingsEntryDefinition(
         title: 'Tab Bar Position',
-        subtitle: 'Choose whether the tab bar stays at the top or bottom',
+        subtitle:
+            'Choose whether the compact bar stays at the top or bottom on '
+            'narrow screens',
         keywords: ['top', 'bottom'],
         child: _TabBarPositionSection(),
       ),
+      SettingsEntryDefinition(
+        title: 'Auto Hide Tab Bar',
+        subtitle: 'Hide the compact bar when scrolling',
+        keywords: ['scroll'],
+        child: _AutoHideTabBarTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Tab Bar',
+    entries: [
       SettingsEntryDefinition(
         title: 'Tab Bar Style',
         subtitle: 'Choose between title and compact layouts',
         keywords: ['layout', 'compact'],
         child: _TabBarLayoutModeSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Auto Hide Tab Bar',
-        subtitle: 'Hide the tab bar when scrolling',
-        keywords: ['scroll'],
-        child: _AutoHideTabBarTile(),
       ),
       SettingsEntryDefinition(
         title: 'Long Press URL to Copy',
@@ -75,23 +101,9 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Quick Tab Switcher',
+    title: 'Tab Chips',
+    keywords: ['quick tab switcher', 'switcher'],
     entries: [
-      SettingsEntryDefinition(
-        title: 'Tab Stacking',
-        subtitle: 'Choose how the quick tab switcher bar arranges tabs',
-        keywords: [
-          'recent tabs',
-          'recently used',
-          'container tabs',
-          'accordion',
-          'two level',
-          'rows',
-          'stacking',
-          'disabled',
-        ],
-        child: _TabBarStackingModeSection(),
-      ),
       SettingsEntryDefinition(
         title: 'Customize Switcher Buttons',
         subtitle: 'Choose which action buttons appear at the end of the bar',
@@ -100,40 +112,27 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
       ),
       SettingsEntryDefinition(
         title: 'Close Buttons on Tab Chips',
-        subtitle: 'Which switcher chips show a close button',
+        subtitle: 'Which chips show a close button',
         keywords: ['close', 'x button', 'active tab'],
         child: _QuickTabSwitcherCloseButtonsSection(),
       ),
       SettingsEntryDefinition(
-        title: 'History Fallback in Quick Tab Switcher',
-        subtitle: 'Use history suggestions when there are no matching tabs',
-        keywords: ['suggestions'],
-        child: _QuickTabSwitcherHistorySuggestionsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Titles in Quick Tab Switcher',
-        subtitle: 'Display page titles in the switcher list',
+        title: 'Show Titles on Tab Chips',
+        subtitle: 'Display page titles on the chips of the compact bar',
         keywords: ['page titles'],
         child: _QuickTabSwitcherShowTitlesTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Title Width in Quick Tab Switcher',
-        subtitle: 'Maximum width of tab titles on switcher chips',
+        title: 'Title Width on Tab Chips',
+        subtitle: 'Maximum width of tab titles on chips',
         keywords: ['width', 'title', 'chip', 'length'],
         child: _QuickTabSwitcherTitleWidthTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Hierarchy Depth in Quick Tab Switcher',
-        subtitle: 'How many nesting chevrons to show on switcher chips',
+        title: 'Hierarchy Depth on Tab Chips',
+        subtitle: 'How many nesting chevrons to show on chips',
         keywords: ['hierarchy', 'nesting', 'depth', 'tree', 'chevrons'],
         child: _QuickTabSwitcherHierarchyGlyphsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Rail Width',
-        subtitle:
-            'Width of the side rail when the tab bar is on the left or right',
-        keywords: ['rail', 'width', 'side', 'vertical', 'left', 'right'],
-        child: _RailWidthTile(),
       ),
     ],
   ),
@@ -222,13 +221,70 @@ class _CustomizeMenuTile extends StatelessWidget {
   }
 }
 
+class _RailSideSection extends HookConsumerWidget {
+  const _RailSideSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final railSide = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.railSide),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Rail Side'),
+            subtitle: Text(
+              'On wide screens the tabs live in a side rail; pick its edge',
+            ),
+            leading: Icon(MdiIcons.dockLeft),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: railSide,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.railSide(value),
+                    );
+              }
+            },
+            child: const Column(
+              children: [
+                RadioListTile.adaptive(
+                  value: RailSide.left,
+                  title: Text('Left'),
+                ),
+                RadioListTile.adaptive(
+                  value: RailSide.right,
+                  title: Text('Right'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TabBarPositionSection extends HookConsumerWidget {
   const _TabBarPositionSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The legacy side values read as bottom here, the way the browser does.
     final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.effectiveTabBarPosition,
+      ),
     );
 
     return Padding(
@@ -239,6 +295,9 @@ class _TabBarPositionSection extends HookConsumerWidget {
         children: [
           const ListTile(
             title: Text('Tab Bar Position'),
+            subtitle: Text(
+              'On narrow screens the tabs live in a compact bar; pick its edge',
+            ),
             leading: Icon(MdiIcons.dockWindow),
             contentPadding: EdgeInsets.zero,
           ),
@@ -265,16 +324,6 @@ class _TabBarPositionSection extends HookConsumerWidget {
                   value: TabBarPosition.bottom,
                   title: Text('Bottom'),
                   subtitle: Text('Tab bar with auto-hide support'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabBarPosition.left,
-                  title: Text('Left'),
-                  subtitle: Text('Vertical side rail, swipe to hide'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabBarPosition.right,
-                  title: Text('Right'),
-                  subtitle: Text('Vertical side rail, swipe to hide'),
                 ),
               ],
             ),
@@ -391,113 +440,22 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
   }
 }
 
-class _CustomizeQuickSwitcherButtonsTile extends HookConsumerWidget {
+class _CustomizeQuickSwitcherButtonsTile extends StatelessWidget {
   const _CustomizeQuickSwitcherButtonsTile();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
-
+  Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.tune),
       title: const Text('Customize Switcher Buttons'),
       subtitle: const Text(
-        'Action buttons pinned at the end of the switcher bar (independent of '
-        'the contextual toolbar)',
+        'Action buttons pinned at the end of the compact bar and in the rail '
+        'toolbar (independent of the contextual toolbar)',
       ),
       trailing: const Icon(Icons.chevron_right),
-      enabled: switcherEnabled,
       onTap: () async {
         await const QuickSwitcherToolbarSettingsRoute().push(context);
       },
-    );
-  }
-}
-
-class _TabBarStackingModeSection extends HookConsumerWidget {
-  const _TabBarStackingModeSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final stackingMode = settings.effectiveTabBarStackingMode();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab Stacking'),
-            subtitle: Text('How the quick tab switcher bar arranges its tabs'),
-            leading: Icon(MdiIcons.folderSettings),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: stackingMode,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarStackingMode(value),
-                    );
-              }
-            },
-            child: Column(
-              children: [
-                const RadioListTile.adaptive(
-                  value: TabBarStackingMode.lastUsedTabs,
-                  title: Text('Recently Used Tabs'),
-                  subtitle: Text('Recently used tabs across all containers'),
-                ),
-                const RadioListTile.adaptive(
-                  value: TabBarStackingMode.spaceTabs,
-                  title: Text('Spaces'),
-                  subtitle: Text(
-                    "Space chips on top, the selected space's tabs below; "
-                    'a wide side rail shows essentials, pinned and tabs',
-                  ),
-                ),
-                if (settings.showContainerUi) ...[
-                  const RadioListTile.adaptive(
-                    value: TabBarStackingMode.containerTabs,
-                    title: Text('Container Tabs'),
-                    subtitle: Text('Ordered tabs of the selected container'),
-                  ),
-                  const RadioListTile.adaptive(
-                    value: TabBarStackingMode.accordion,
-                    title: Text('Accordion'),
-                    subtitle: Text(
-                      "All containers as chips, with the selected "
-                      "container's tabs expanded inline",
-                    ),
-                  ),
-                  const RadioListTile.adaptive(
-                    value: TabBarStackingMode.twoLevel,
-                    title: Text('Two Rows'),
-                    subtitle: Text(
-                      'Tabs of the selected container on top, recently used '
-                      'tabs below',
-                    ),
-                  ),
-                ],
-                const RadioListTile.adaptive(
-                  value: TabBarStackingMode.disabled,
-                  title: Text('Disabled'),
-                  subtitle: Text('Hide the quick tab switcher bar'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -512,11 +470,6 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
         (s) => s.quickTabSwitcherCloseButtonMode,
       ),
     );
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -526,7 +479,7 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
         children: [
           const ListTile(
             title: Text('Close Buttons on Tab Chips'),
-            subtitle: Text('Which switcher chips show a close button'),
+            subtitle: Text('Which chips show a close button'),
             leading: Icon(MdiIcons.closeCircleOutline),
             contentPadding: EdgeInsets.zero,
           ),
@@ -542,29 +495,23 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
                     );
               }
             },
-            child: Column(
+            child: const Column(
               children: [
                 RadioListTile.adaptive(
                   value: TabChipCloseButtonMode.activeTabOnly,
-                  enabled: switcherEnabled,
-                  title: const Text('Active Tab Only'),
-                  subtitle: const Text(
-                    'Only the chip of the tab currently open',
-                  ),
+                  title: Text('Active Tab Only'),
+                  subtitle: Text('Only the chip of the tab currently open'),
                 ),
                 RadioListTile.adaptive(
                   value: TabChipCloseButtonMode.all,
-                  enabled: switcherEnabled,
-                  title: const Text('All Tabs'),
-                  subtitle: const Text('Every chip on the bar'),
+                  title: Text('All Tabs'),
+                  subtitle: Text('Every chip on the bar'),
                 ),
                 RadioListTile.adaptive(
                   value: TabChipCloseButtonMode.never,
-                  enabled: switcherEnabled,
-                  title: const Text('Never'),
-                  subtitle: const Text(
-                    'No close buttons; close tabs from the long press menu '
-                    'or by swiping the bar',
+                  title: Text('Never'),
+                  subtitle: Text(
+                    'No close buttons; close tabs from the long press menu',
                   ),
                 ),
               ],
@@ -598,15 +545,10 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
 
     final sliderValue = useKeyedState(titleWidth, [titleWidth]);
 
-    final enabled = switcherEnabled && showTitles;
+    final enabled = showTitles;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -615,10 +557,8 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: const Text('Title Width in Quick Tab Switcher'),
-            subtitle: const Text(
-              'Maximum width of tab titles on switcher chips',
-            ),
+            title: const Text('Title Width on Tab Chips'),
+            subtitle: const Text('Maximum width of tab titles on chips'),
             leading: const Icon(MdiIcons.arrowExpandHorizontal),
             contentPadding: EdgeInsets.zero,
             enabled: enabled,
@@ -681,17 +621,12 @@ class _RailWidthTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final width = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
-    );
-    final isVerticalPosition = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarPosition.isVertical,
+        (s) => effectiveRailWidth(railWidth: s.railWidth),
       ),
     );
 
     final sliderValue = useKeyedState(width, [width]);
-
-    final enabled = isVerticalPosition;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -699,14 +634,11 @@ class _RailWidthTile extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: const Text('Rail Width'),
-            subtitle: const Text(
-              'Width of the side rail when the tab bar is on the left or right',
-            ),
-            leading: const Icon(MdiIcons.arrowExpand),
+          const ListTile(
+            title: Text('Rail Width'),
+            subtitle: Text('Width of the side rail on wide screens'),
+            leading: Icon(MdiIcons.arrowExpand),
             contentPadding: EdgeInsets.zero,
-            enabled: enabled,
           ),
           Row(
             children: [
@@ -717,26 +649,20 @@ class _RailWidthTile extends HookConsumerWidget {
                   divisions: _divisions,
                   label: _label(sliderValue.value),
                   value: sliderValue.value.clamp(minRailWidth, maxRailWidth),
-                  onChanged: enabled
-                      ? (value) {
-                          sliderValue.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final normalized =
-                              (value / railWidthStep).round() * railWidthStep;
-                          sliderValue.value = normalized;
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .railWidth(normalized),
-                              );
-                        }
-                      : null,
+                  onChanged: (value) {
+                    sliderValue.value = value;
+                  },
+                  onChangeEnd: (value) async {
+                    final normalized =
+                        (value / railWidthStep).round() * railWidthStep;
+                    sliderValue.value = normalized;
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) =>
+                              currentSettings.copyWith.railWidth(normalized),
+                        );
+                  },
                 ),
               ),
               Text(
@@ -751,43 +677,6 @@ class _RailWidthTile extends HookConsumerWidget {
   }
 }
 
-class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
-  const _QuickTabSwitcherHistorySuggestionsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showHistorySuggestions = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowHistorySuggestions,
-      ),
-    );
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('History Fallback in Quick Tab Switcher'),
-      subtitle: const Text(
-        'Use browsing history suggestions when no tab chips are available',
-      ),
-      secondary: const Icon(MdiIcons.history),
-      value: showHistorySuggestions,
-      onChanged: switcherEnabled
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .quickTabSwitcherShowHistorySuggestions(value),
-                  );
-            }
-          : null,
-    );
-  }
-}
-
 class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
   const _QuickTabSwitcherShowTitlesTile();
 
@@ -798,29 +687,22 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
 
     return SwitchListTile.adaptive(
-      title: const Text('Show Titles in Quick Tab Switcher'),
+      title: const Text('Show Titles on Tab Chips'),
       subtitle: const Text(
-        'Display tab titles alongside icons in the quick tab switcher bar',
+        'Display tab titles alongside icons on the chips of the compact bar',
       ),
       secondary: const Icon(MdiIcons.textRecognition),
       value: quickTabSwitcherShowTitles,
-      onChanged: switcherEnabled
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .quickTabSwitcherShowTitles(value),
-                  );
-            }
-          : null,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.quickTabSwitcherShowTitles(value),
+            );
+      },
     );
   }
 }
@@ -841,18 +723,12 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherHierarchyGlyphs,
       ),
     );
-    final switcherEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
-      ),
-    );
 
     final sliderValue = useKeyedState(hierarchyGlyphs.toDouble(), [
       hierarchyGlyphs,
     ]);
 
     final currentGlyphs = sliderValue.value.round();
-    final enabled = switcherEnabled;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -860,15 +736,14 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: const Text('Hierarchy Depth in Quick Tab Switcher'),
-            subtitle: const Text(
-              'How many nesting chevrons to show on switcher chips before '
-              'collapsing into a count badge (0 hides the indicator)',
+          const ListTile(
+            title: Text('Hierarchy Depth on Tab Chips'),
+            subtitle: Text(
+              'How many nesting chevrons to show on chips before collapsing '
+              'into a count badge (0 hides the indicator)',
             ),
-            leading: const Icon(MdiIcons.fileTree),
+            leading: Icon(MdiIcons.fileTree),
             contentPadding: EdgeInsets.zero,
-            enabled: enabled,
           ),
           Row(
             children: [
@@ -884,27 +759,19 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
                     minQuickTabSwitcherHierarchyGlyphs.toDouble(),
                     maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
                   ),
-                  onChanged: enabled
-                      ? (value) {
-                          sliderValue.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final normalized = value.round();
-                          sliderValue.value = normalized.toDouble();
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .quickTabSwitcherHierarchyGlyphs(
-                                      normalized,
-                                    ),
-                              );
-                        }
-                      : null,
+                  onChanged: (value) {
+                    sliderValue.value = value;
+                  },
+                  onChangeEnd: (value) async {
+                    final normalized = value.round();
+                    sliderValue.value = normalized.toDouble();
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) => currentSettings.copyWith
+                              .quickTabSwitcherHierarchyGlyphs(normalized),
+                        );
+                  },
                 ),
               ),
               Text(
@@ -930,7 +797,9 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
 
     return SwitchListTile.adaptive(
       title: const Text('Auto Hide Tab Bar'),
-      subtitle: const Text('Hide tab bar when scrolling'),
+      subtitle: const Text(
+        'Hide the compact bar when scrolling; the side rail never hides',
+      ),
       secondary: const Icon(MdiIcons.folderHidden),
       value: autoHideTabBar,
       onChanged: (value) async {
