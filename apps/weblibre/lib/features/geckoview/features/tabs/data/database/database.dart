@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/vis
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.steps.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/migrations/v16_history_eviction_sql.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icon_migration_map.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
@@ -297,11 +298,12 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // *excluded* tab's title and content (in `history` and in `history_fts`)
       // until something touched that tab again.
       //
-      // The SQL lives in definitions.drift so the analyzer checks it against
-      // the schema; see the note there about pinning it if these tables change.
-      final database = m.database as TabDatabase;
-      await database.definitionsDrift.evictExcludedHistoryPages();
-      await database.definitionsDrift.reindexAfterExcludedHistoryEviction();
+      // Frozen to the v16 table shapes: the live named queries now read
+      // `container_local`, which does not exist yet at this version.
+      await m.database.customStatement(v16EvictExcludedHistoryPagesSql);
+      await m.database.customStatement(
+        v16ReindexAfterExcludedHistoryEvictionSql,
+      );
     },
     from16To17: (m, schema) async {
       // Two indexes only. `getTabsFifo` ordered by `timestamp DESC LIMIT n`
