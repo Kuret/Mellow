@@ -22,16 +22,13 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -92,24 +89,6 @@ HomeTarget resolveHomeTarget({
   }
 }
 
-/// Which container a home target opens its tab in.
-///
-/// Pure because this is exactly where the scope distinction is easy to get
-/// wrong: under [scopeToContainer] a null [scopedContainer] means the
-/// *unassigned* container and must stay unassigned, rather than silently
-/// falling back to whichever container happens to be selected.
-TabContainerSelection resolveHomeTargetContainer({
-  required bool scopeToContainer,
-  required ContainerData? scopedContainer,
-  required ContainerData? selectedContainer,
-}) {
-  final container = scopeToContainer ? scopedContainer : selectedContainer;
-
-  return container == null
-      ? const TabContainerSelection.unassigned()
-      : TabContainerSelection.specific(container);
-}
-
 bool _sameTarget(Uri a, Uri b) =>
     a.host.toLowerCase() == b.host.toLowerCase() && a.path == b.path;
 
@@ -131,8 +110,8 @@ class HomeTargetController extends _$HomeTargetController {
   /// custom-URL reopen loop. [excludedTabIds] are tabs that are being closed
   /// but not yet deleted, which a resume must not select.
   Future<void> applyTarget({
-    bool scopeToContainer = false,
-    String? containerId,
+    bool scopeToSpace = false,
+    String? spaceUuid,
     Uri? closingTabUrl,
     Set<String> excludedTabIds = const {},
   }) async {
@@ -151,12 +130,12 @@ class HomeTargetController extends _$HomeTargetController {
         ref.read(forceBrowserHomeProvider.notifier).request();
 
       case HomeTarget.resumeLastTab:
-        // Scoped resume goes through the container query even for a null
-        // container: that selects the newest *unassigned* tab, where the
-        // unscoped call would happily jump into some other container.
-        final resumed = scopeToContainer
-            ? await tabs.resumeLatestContainerTab(
-                containerId,
+        // Scoped resume goes through the space query even for a null space:
+        // that selects the newest tab *without* a space (private, essential),
+        // where the unscoped call would happily jump into some other space.
+        final resumed = scopeToSpace
+            ? await tabs.resumeLatestSpaceTab(
+                spaceUuid,
                 excludedTabIds: excludedTabIds,
               )
             : await tabs.resumeLatestTab(excludedTabIds: excludedTabIds);
@@ -175,26 +154,13 @@ class HomeTargetController extends _$HomeTargetController {
 
         _lastCustomUrlOpenedAt = DateTime.now();
 
-        final scopedContainer = (scopeToContainer && containerId != null)
-            ? await ref
-                  .read(containerRepositoryProvider.notifier)
-                  .getContainerData(containerId)
-            : null;
-
-        if (!ref.mounted) return;
-
         await tabs.addTab(
           url: url,
           tabMode: TabMode.regular,
           selectTab: true,
-          containerSelection: resolveHomeTargetContainer(
-            scopeToContainer: scopeToContainer,
-            scopedContainer: scopedContainer,
-            // A one-shot read takes no subscription, so this keep-alive
-            // controller does not pin the auto-disposed stream.
-            // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-            selectedContainer: ref.read(selectedContainerDataProvider).value,
-          ),
+          // A scoped target stays in the space the tab was closed in; the
+          // container follows from the space (or the selected container).
+          spaceUuid: scopeToSpace ? spaceUuid : null,
         );
     }
   }
