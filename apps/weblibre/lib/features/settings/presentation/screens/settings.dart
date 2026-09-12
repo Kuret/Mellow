@@ -114,6 +114,13 @@ _CategoryGroups _buildCategories() {
       onTap: (context) => BrowsingSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
+      title: 'Spaces',
+      subtitle: 'Create, reorder and edit spaces',
+      icon: MdiIcons.viewDashboardOutline,
+      keywords: const ['workspaces', 'zen', 'spaces', 'containers'],
+      onTap: (context) => const SpaceListRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
       title: 'Home & New Tab',
       subtitle: 'What the home and new tab pages show',
       icon: MdiIcons.homeOutline,
