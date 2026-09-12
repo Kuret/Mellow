@@ -1163,6 +1163,11 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         spaceUuid: spaceUuid,
         childCount: group.members.length - 1,
         depth: folderDepth,
+  // A row's own shelf, for the surfaces that section the list; a child that
+  // the tree query lists under a pinned root still reports its own row.
+  TabShelf shelfOf(String tabId) =>
+      summaryById[tabId]?.tabShelf ?? TabShelf.normal;
+
       ),
     );
 
@@ -1172,6 +1177,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 
     final childrenByVisibleParent = <String, List<_GroupedRow>>{};
     for (final member in group.members) {
+          shelf: group.shelf,
       if (member.row.id == root.id) {
         continue;
       }
@@ -1185,6 +1191,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           .putIfAbsent(visibleParentId, () => [])
           .add(member);
     }
+        shelf: group.shelf,
 
     // Children are sorted by storage `order_key` (optionally reversed for
     // newest-first) — even when an explicit `sortField` is active. The
@@ -1252,6 +1259,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   ])) {
     emitGroup(slot.group!, 0);
   }
+            shelf: shelfOf(child.id),
 
   final normalGroups = groupRecords
       .where((g) => g.shelf != TabShelf.pinned)

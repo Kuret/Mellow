@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 
 /// Render-time descriptor for one item in the local tabs list/grid.
 ///
@@ -46,6 +47,10 @@ sealed class TabViewItem {
   /// depth into their own tree depth; folder rows carry their own depth.
   int get depth => 0;
 
+  /// The shelf the row belongs to (PLAN §6.4). Search results and folders
+  /// report [TabShelf.normal]; the tray sections the list on it.
+  TabShelf get shelf => TabShelf.normal;
+
   const TabViewItem._();
 
   const factory TabViewItem.search({
@@ -53,8 +58,11 @@ sealed class TabViewItem {
     required String? sourceSearchQuery,
   }) = SearchTabViewItem;
 
-  const factory TabViewItem.standalone({required String tabId, int depth}) =
-      StandaloneTabViewItem;
+  const factory TabViewItem.standalone({
+    required String tabId,
+    int depth,
+    TabShelf shelf,
+  }) = StandaloneTabViewItem;
 
   const factory TabViewItem.parent({
     required String tabId,
@@ -96,6 +104,8 @@ class StandaloneTabViewItem extends TabViewItem {
   final String tabId;
   @override
   final int depth;
+  @override
+  final TabShelf shelf;
 
   @override
   String? get sourceSearchQuery => null;
@@ -109,8 +119,11 @@ class StandaloneTabViewItem extends TabViewItem {
   @override
   TabListFolderItem? get folderItem => null;
 
-  const StandaloneTabViewItem({required this.tabId, this.depth = 0})
-    : super._();
+  const StandaloneTabViewItem({
+    required this.tabId,
+    this.depth = 0,
+    this.shelf = TabShelf.normal,
+  }) : super._();
 }
 
 class ParentTabViewItem extends TabViewItem {
@@ -130,6 +143,9 @@ class ParentTabViewItem extends TabViewItem {
 
   @override
   int get depth => parentGroup.depth;
+
+  @override
+  TabShelf get shelf => parentGroup.shelf;
 
   const ParentTabViewItem({required this.tabId, required this.parentGroup})
     : super._();
@@ -152,6 +168,9 @@ class ChildTabViewItem extends TabViewItem {
 
   @override
   int get depth => childItem.depth;
+
+  @override
+  TabShelf get shelf => childItem.shelf;
 
   const ChildTabViewItem({required this.tabId, required this.childItem})
     : super._();

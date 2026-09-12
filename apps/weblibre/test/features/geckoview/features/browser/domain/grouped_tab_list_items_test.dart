@@ -230,6 +230,36 @@ void main() {
     expect((await read(container)).map(label), ['live@0', 'cold@0']);
   });
 
+  test('rows carry their shelf, pinned ones TabShelf.pinned', () async {
+    final container = makeContainer(
+      tabs: const [
+        _Tab('a', 'a'),
+        _Tab('p', 'b', shelf: TabShelf.pinned),
+        _Tab('pc', 'c', parentId: 'p', shelf: TabShelf.pinned),
+        _Tab('d', 'd'),
+      ],
+    );
+    final items = (await read(container)).whereType<TabListTabItem>();
+    expect(
+      {for (final item in items) item.tabId: item.shelf},
+      {
+        'p': TabShelf.pinned,
+        'pc': TabShelf.pinned,
+        'a': TabShelf.normal,
+        'd': TabShelf.normal,
+      },
+    );
+    // The pinned section is a leading run: every pinned row precedes every
+    // normal one.
+    final shelves = [for (final item in items) item.shelf];
+    expect(shelves, [
+      TabShelf.pinned,
+      TabShelf.pinned,
+      TabShelf.normal,
+      TabShelf.normal,
+    ]);
+  });
+
   test('essentials never appear', () async {
     final container = makeContainer(
       tabs: const [

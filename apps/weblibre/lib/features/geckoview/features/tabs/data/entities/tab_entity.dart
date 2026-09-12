@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 
 sealed class TabEntity with FastEquatable {
   String get tabId;
@@ -80,6 +81,11 @@ sealed class TabListItemEntity with FastEquatable {
 /// A [TabListItemEntity] that is a tab (as opposed to a folder).
 sealed class TabListTabItem extends TabListItemEntity {
   String get tabId;
+
+  /// The shelf the row sits on (PLAN §6.4). Essentials never appear in a
+  /// list, so this is [TabShelf.pinned] or [TabShelf.normal]; the surfaces
+  /// use it to draw the pinned section apart from the main list.
+  TabShelf get shelf;
 }
 
 class TabListStandaloneItem extends TabListTabItem {
@@ -92,16 +98,25 @@ class TabListStandaloneItem extends TabListTabItem {
 
   /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
   final int depth;
+  @override
+  final TabShelf shelf;
 
   TabListStandaloneItem({
     required this.tabId,
     required this.orderKey,
     required this.spaceUuid,
     this.depth = 0,
+    this.shelf = TabShelf.normal,
   });
 
   @override
-  List<Object?> get hashParameters => [tabId, orderKey, spaceUuid, depth];
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    spaceUuid,
+    depth,
+    shelf,
+  ];
 }
 
 class TabListParentGroup extends TabListTabItem {
@@ -115,6 +130,8 @@ class TabListParentGroup extends TabListTabItem {
 
   /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
   final int depth;
+  @override
+  final TabShelf shelf;
 
   TabListParentGroup({
     required this.tabId,
@@ -122,6 +139,7 @@ class TabListParentGroup extends TabListTabItem {
     required this.spaceUuid,
     required this.childCount,
     this.depth = 0,
+    this.shelf = TabShelf.normal,
   });
 
   @override
@@ -131,6 +149,7 @@ class TabListParentGroup extends TabListTabItem {
     spaceUuid,
     childCount,
     depth,
+    shelf,
   ];
 }
 
@@ -145,6 +164,8 @@ class TabListChildItem extends TabListTabItem {
   final String rootId;
   final int depth;
   final int childCount;
+  @override
+  final TabShelf shelf;
 
   TabListChildItem({
     required this.tabId,
@@ -154,6 +175,7 @@ class TabListChildItem extends TabListTabItem {
     required this.rootId,
     required this.depth,
     this.childCount = 0,
+    this.shelf = TabShelf.normal,
   });
 
   @override
@@ -165,6 +187,7 @@ class TabListChildItem extends TabListTabItem {
     rootId,
     depth,
     childCount,
+    shelf,
   ];
 }
 
