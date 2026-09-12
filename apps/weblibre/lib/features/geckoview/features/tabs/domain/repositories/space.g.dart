@@ -47,7 +47,7 @@ final class SpaceRepositoryProvider
   }
 }
 
-String _$spaceRepositoryHash() => r'f0716b37fed9e605c22dbbf2c8ef355bfcc08343';
+String _$spaceRepositoryHash() => r'a7909f4501d0fb0def4a75f35f1fc48e4122a6a6';
 
 /// Spaces (Zen workspaces, PLAN §6.3). Regular tabs always live in one (I2);
 /// deleting a space closes its tabs through the engine first (PLAN §7.3).
