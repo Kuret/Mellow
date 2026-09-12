@@ -34,7 +34,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -168,11 +170,7 @@ class GridTabPreview extends HookConsumerWidget {
 
     // ignore: avoid_bool_literals_in_conditional_expressions
     final isPinned = showPinBadge
-        ? ref.watch(
-            watchPinnedTabIdsProvider.select(
-              (v) => v.value?.contains(tabId) ?? false,
-            ),
-          )
+        ? ref.watch(pinnedTabIdsProvider.select((v) => v.contains(tabId)))
         : false;
 
     final modeTextColor = switch (tabState.tabMode) {
@@ -317,7 +315,13 @@ class GridTabPreview extends HookConsumerWidget {
                                           .read(
                                             tabDataRepositoryProvider.notifier,
                                           )
-                                          .setPinned(tabId, pinned: false);
+                                          .setShelf(
+                                            tabId,
+                                            TabShelf.normal,
+                                            activeSpaceUuid: ref.read(
+                                              selectedSpaceProvider,
+                                            ),
+                                          );
 
                                       if (context.mounted) {
                                         ui_helper.showInfoMessage(
@@ -331,9 +335,12 @@ class GridTabPreview extends HookConsumerWidget {
                                                     tabDataRepositoryProvider
                                                         .notifier,
                                                   )
-                                                  .setPinned(
+                                                  .setShelf(
                                                     tabId,
-                                                    pinned: true,
+                                                    TabShelf.pinned,
+                                                    activeSpaceUuid: ref.read(
+                                                      selectedSpaceProvider,
+                                                    ),
                                                   );
                                             },
                                           ),
@@ -479,11 +486,7 @@ class ListTabPreview extends HookConsumerWidget {
 
     // ignore: avoid_bool_literals_in_conditional_expressions
     final isPinned = showPinBadge
-        ? ref.watch(
-            watchPinnedTabIdsProvider.select(
-              (v) => v.value?.contains(tabId) ?? false,
-            ),
-          )
+        ? ref.watch(pinnedTabIdsProvider.select((v) => v.contains(tabId)))
         : false;
 
     final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
@@ -811,13 +814,9 @@ class SingleGridTabPreview extends HookConsumerWidget {
           }
         },
         onDeleteAll: (host) async {
-          final containerId = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerId(tabId);
-
           final count = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .closeAllTabsByHost(containerId, host);
+              .closeAllTabsByHost(ref.read(selectedSpaceProvider), host);
 
           if (context.mounted) {
             ui_helper.showTabUndoClose(
@@ -969,13 +968,9 @@ class SingleListTabPreview extends HookConsumerWidget {
           }
         },
         onDeleteAll: (host) async {
-          final containerId = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerId(tabId);
-
           final count = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .closeAllTabsByHost(containerId, host);
+              .closeAllTabsByHost(ref.read(selectedSpaceProvider), host);
 
           if (context.mounted) {
             ui_helper.showTabUndoClose(
