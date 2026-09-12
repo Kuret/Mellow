@@ -58,6 +58,7 @@ import 'package:weblibre/features/account/domain/services/account_callback_handl
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
+import 'package:weblibre/features/geckoview/domain/services/live_tab_budget.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
@@ -442,6 +443,9 @@ class _MainWidget extends HookConsumerWidget {
       _activateService(ref, nativeIntentGatekeeperReplicatorProvider);
 
       _activateService(ref, cacheRepositoryProvider);
+      // Unloads least recently used tabs back to cold rows once more than
+      // `maxLiveTabs` hold an engine session (PLAN §7.4).
+      _activateService(ref, liveTabBudgetProvider);
       // Arms the "search history limit was reduced" listener; a reduction made
       // while the browser view was gone used to be missed entirely.
       _activateService(ref, searchHistoryCleanupServiceProvider);

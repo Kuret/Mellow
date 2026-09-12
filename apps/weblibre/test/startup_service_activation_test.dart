@@ -22,6 +22,7 @@ const _services = <String>[
   'profileRestartRequestHandlerProvider',
   'sharingIntentStreamProvider',
   'appWidgetLaunchStreamProvider',
+  'liveTabBudgetProvider',
 ];
 
 /// Guards how those services are started, because getting it wrong is silent.
