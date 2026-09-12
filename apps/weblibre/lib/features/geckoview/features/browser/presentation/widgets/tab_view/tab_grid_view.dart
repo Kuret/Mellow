@@ -23,6 +23,7 @@ import 'dart:math' as math;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -47,9 +48,12 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -77,7 +81,149 @@ Widget? _gridGroupToggleFor(TabViewItem row) {
   return null;
 }
 
-int _gridDepthFor(TabViewItem row) => row.childItem?.depth ?? 0;
+int _gridDepthFor(TabViewItem row) => row.depth;
+
+/// Grid tile for a [TabListFolderItem]. Grid cells are all the same fixed
+/// aspect-ratio size (see [_TabGridView]'s `SliverGridDelegateWithFixedCrossAxisCount`),
+/// so unlike the list this renders as a single cell rather than a full-width
+/// row — see OPEN in the handoff report for the tradeoff.
+class _GridFolderTile extends ConsumerWidget {
+  final TabListFolderItem folderItem;
+
+  const _GridFolderTile({required this.folderItem});
+
+  Future<void> _showFolderMenu(BuildContext context, WidgetRef ref) async {
+    final action = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(folderItem.name.isEmpty ? 'Folder' : folderItem.name),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(dialogContext, 'rename'),
+            child: const Text('Rename'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(dialogContext, 'delete'),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (!context.mounted || action == null) return;
+
+    if (action == 'rename') {
+      final nameController = TextEditingController(text: folderItem.name);
+      final name = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Rename folder'),
+          content: TextField(controller: nameController, autofocus: true),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(dialogContext, nameController.text),
+              child: const Text('Rename'),
+            ),
+          ],
+        ),
+      );
+
+      if (name != null && name.isNotEmpty) {
+        await ref
+            .read(folderRepositoryProvider.notifier)
+            .renameFolder(folderItem.folderId, name);
+      }
+    } else if (action == 'delete') {
+      final count = await ref
+          .read(folderRepositoryProvider.notifier)
+          .countTabsInFolder(folderItem.folderId);
+
+      if (!context.mounted) return;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Delete folder'),
+          content: Text(
+            "Delete '${folderItem.name.isEmpty ? 'Folder' : folderItem.name}'? "
+            '$count tabs will be closed.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed ?? false) {
+        await ref
+            .read(folderRepositoryProvider.notifier)
+            .deleteFolder(folderItem.folderId);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    void toggleCollapsed() {
+      unawaited(
+        ref
+            .read(folderRepositoryProvider.notifier)
+            .setCollapsed(folderItem.folderId, !folderItem.isCollapsed),
+      );
+    }
+
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: EdgeInsets.only(left: 16.0 * folderItem.depth),
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: toggleCollapsed,
+          onLongPress: () => _showFolderMenu(context, ref),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(MdiIcons.folderOutline, size: 32),
+                const SizedBox(height: 8),
+                Text(
+                  folderItem.name.isEmpty ? 'Folder' : folderItem.name,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                Text('${folderItem.childCount}'),
+                IconButton(
+                  icon: Icon(
+                    folderItem.isCollapsed
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
+                  ),
+                  onPressed: toggleCollapsed,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _TabDraggable extends HookConsumerWidget {
   final String tabId;
@@ -176,23 +322,47 @@ class _TabGridView extends HookConsumerWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
     final containerId = ref.watch(selectedContainerProvider);
+    final spaceUuid = ref.watch(selectedSpaceProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
     final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
     final tabListDirection = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );
-    final pinnedTabIds = ref.watch(
-      watchPinnedTabIdsProvider.select(
-        (value) => value.value ?? const <String>{},
-      ),
-    );
+    final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
     final collapsedGroups = ref.watch(collapsedGroupsProvider);
     final treeRows = ref.watch(
       watchTabsWithRootAndDepthProvider(
-        containerId,
+        spaceUuid,
       ).select((value) => value.value ?? const []),
     );
+    // Reorder anchors: which folder (if any) each tab currently sits in, and
+    // which tabs share a splitId, both derived from the same space-tabs
+    // summaries the grouping provider already reads.
+    final spaceTabSummaries = ref.watch(
+      watchSpaceTabsDataProvider(
+        spaceUuid,
+      ).select((value) => value.value ?? const []),
+    );
+    final folderIdByTab = {
+      for (final summary in spaceTabSummaries) summary.id: summary.folderId,
+    };
+    final splitMembers = <String, List<String>>{};
+    final membersBySplitId = <String, List<TabSummary>>{};
+    for (final summary in spaceTabSummaries) {
+      final splitId = summary.splitId;
+      if (splitId == null) continue;
+      membersBySplitId.putIfAbsent(splitId, () => []).add(summary);
+    }
+    for (final members in membersBySplitId.values) {
+      members.sort(
+        (a, b) => (a.splitIndex ?? 0).compareTo(b.splitIndex ?? 0),
+      );
+      final ids = [for (final member in members) member.id];
+      for (final id in ids) {
+        splitMembers[id] = ids;
+      }
+    }
 
     final hasActiveSearch = ref.watch(
       tabSearchRepositoryProvider(
@@ -225,24 +395,24 @@ class _TabGridView extends HookConsumerWidget {
     } else {
       final visibleItems = ref.watch(
         visibleTabListItemsProvider(
-          containerId: containerId,
+          spaceUuid: spaceUuid,
           scope: TabListScope.tray,
         ),
       );
       primaryRows = [
         for (final item in visibleItems.value)
           switch (item) {
-            TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
-              tabId: tabId,
-            ),
+            TabListStandaloneItem(:final tabId, :final depth) =>
+              TabViewItem.standalone(tabId: tabId, depth: depth),
             final TabListParentGroup g =>
               showHierarchicalTabs
                   ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(tabId: g.tabId),
+                  : TabViewItem.standalone(tabId: g.tabId, depth: g.depth),
             final TabListChildItem c =>
               showHierarchicalTabs
                   ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(tabId: c.tabId),
+                  : TabViewItem.standalone(tabId: c.tabId, depth: c.depth),
+            final TabListFolderItem f => TabViewItem.folder(folderItem: f),
           },
       ];
     }
@@ -379,6 +549,9 @@ class _TabGridView extends HookConsumerWidget {
                   tabListDirection: tabListDirection,
                   hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
+                  folderIdByTab: folderIdByTab,
+                  splitMembers: splitMembers,
+                  spaceUuid: spaceUuid,
                 );
 
                 if (result == null) return;
@@ -390,6 +563,7 @@ class _TabGridView extends HookConsumerWidget {
                       previousTabId: result.previousTabId,
                       nextTabId: result.nextTabId,
                       parentChange: result.parentChange,
+                      scopeChange: result.scopeChange,
                     );
               },
               childBuilder: (reorderableItemBuilder) {
@@ -465,6 +639,17 @@ class _TabGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index < primaryRows.length) {
           final row = primaryRows[index];
+
+          if (row.isFolder) {
+            final folderTile = CustomDraggable(
+              key: Key(row.tabId),
+              child: _GridFolderTile(folderItem: row.folderItem!),
+            );
+            return itemBuilder == null
+                ? folderTile
+                : itemBuilder!(folderTile, index);
+          }
+
           final tab = CustomDraggable(
             key: Key(row.tabId),
             data: TabDragData(row.tabId),
