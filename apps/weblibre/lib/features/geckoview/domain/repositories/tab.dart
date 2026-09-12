@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -28,27 +27,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/pending_tab_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
@@ -56,19 +53,6 @@ import 'package:weblibre/utils/debouncer.dart';
 part 'tab.g.dart';
 
 @visibleForTesting
-ContainerData? resolveAssignedContainerForTabOpen({
-  required TabContainerSelection containerSelection,
-  required ContainerData? requestedContainer,
-  required ContainerData? siteAssignedContainer,
-}) {
-  return switch (containerSelection) {
-    UseSelectedContainerTabSelection() =>
-      siteAssignedContainer ?? requestedContainer,
-    UnassignedContainerTabSelection() ||
-    SpecificContainerTabSelection() => requestedContainer,
-  };
-}
-
 /// The tab one step from [currentTabId] in [order], or `null` when there is no
 /// step to take.
 ///
@@ -142,7 +126,6 @@ class TabRepository extends _$TabRepository {
   /// navigation in that tab in the meantime. The earlier request is obsolete
   /// once that happens: reopening its URL would pull the tab back to a page the
   /// engine has already left.
-  final _latestAssignmentRequests = <String, String>{};
 
   TabBackPromptBehavior? backPromptBehaviorFor(String? tabId) {
     if (tabId == null) {
@@ -181,6 +164,36 @@ class TabRepository extends _$TabRepository {
     return parent != null ? parentId : null;
   }
 
+  /// The container a new tab in [spaceUuid] gets when none is asked for: the
+  /// space's default container, else the selected container.
+  Future<ContainerData?> _defaultContainerFor(String? spaceUuid) async {
+    if (spaceUuid != null) {
+      final space = await ref
+          .read(spaceRepositoryProvider.notifier)
+          .getSpace(spaceUuid);
+      final containerId = space?.containerId;
+      if (containerId != null) {
+        final container = await ref
+            .read(containerRepositoryProvider.notifier)
+            .getContainerData(containerId);
+        if (container != null) {
+          return container;
+        }
+      }
+    }
+    return ref.read(selectedContainerProvider.notifier).fetchData();
+  }
+
+  Future<bool> _excludeFromHistory(ContainerData? container) async {
+    if (container == null) {
+      return false;
+    }
+    final local = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getLocal(container.id);
+    return local.excludeFromHistory;
+  }
+
   Future<String> addTab({
     required TabMode tabMode,
     Uri? url,
@@ -193,40 +206,36 @@ class TabRepository extends _$TabRepository {
     Map<String, String>? additionalHeaders,
     TabContainerSelection containerSelection =
         const TabContainerSelection.useSelected(),
+    String? spaceUuid,
     bool launchedFromIntent = false,
     TabBackPromptBehavior? promptOnBackBehavior,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
-    var assignedContainer = switch (containerSelection) {
-      UseSelectedContainerTabSelection() =>
-        await ref.read(selectedContainerProvider.notifier).fetchData(),
-      UnassignedContainerTabSelection() => null,
+    // Regular tabs always live in a space (I2); private tabs never do (I3).
+    final String? effectiveSpaceUuid = tabMode is PrivateTabMode
+        ? null
+        : spaceUuid ??
+              ref.read(selectedSpaceProvider) ??
+              (await ref
+                      .read(spaceRepositoryProvider.notifier)
+                      .ensureDefaultSpace())
+                  .uuid;
+
+    // An explicit container wins, then the space's default container, then
+    // the selected container.
+    final assignedContainer = switch (containerSelection) {
       SpecificContainerTabSelection(:final container) => container,
+      UnassignedContainerTabSelection() => null,
+      UseSelectedContainerTabSelection() => await _defaultContainerFor(
+        effectiveSpaceUuid,
+      ),
     };
 
-    if (tabMode is RegularTabMode &&
-        url != null &&
-        url.hasAuthority &&
-        url.isHttpOrHttps) {
-      final siteAssignedContainerId = await ref
-          .read(containerRepositoryProvider.notifier)
-          .siteAssignedContainerId(url);
-      final siteAssignedContainer = await siteAssignedContainerId.mapNotNull(
-        (id) =>
-            ref.read(containerRepositoryProvider.notifier).getContainerData(id),
-      );
-
-      assignedContainer = resolveAssignedContainerForTabOpen(
-        containerSelection: containerSelection,
-        requestedContainer: assignedContainer,
-        siteAssignedContainer: siteAssignedContainer,
-      );
-    }
-
     final validatedParentId = await _resolveParentId(parentId);
-
-    final effectiveContextId = assignedContainer?.metadata.contextualIdentity;
+    // A container's Gecko contextId is its id (DESIGN.md "D3 refinement").
+    final effectiveContextId = assignedContainer?.id;
+    final excludeFromHistory = await _excludeFromHistory(assignedContainer);
 
     final newTabId = await tabDao.upsertTabTransactional(
       () {
@@ -243,12 +252,12 @@ class TabRepository extends _$TabRepository {
           additionalHeaders: additionalHeaders,
           // Carried into the engine so the exclusion is in place before the tab
           // loads; the replicated snapshot only follows once its row is written.
-          excludeFromHistory:
-              assignedContainer?.metadata.excludeFromHistory ?? false,
+          excludeFromHistory: excludeFromHistory,
         );
       },
       parentId: Value(validatedParentId),
       containerId: Value(assignedContainer?.id),
+      spaceUuid: Value(effectiveSpaceUuid),
       url: Value(url),
       tabMode: Value(tabMode),
     );
@@ -312,12 +321,18 @@ class TabRepository extends _$TabRepository {
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
     final db = ref.read(tabDatabaseProvider);
+    final defaultSpaceUuid =
+        ref.read(selectedSpaceProvider) ??
+        (await ref.read(spaceRepositoryProvider.notifier).ensureDefaultSpace())
+            .uuid;
     final assignedContainer = switch (containerSelection) {
-      UseSelectedContainerTabSelection() =>
-        await ref.read(selectedContainerProvider.notifier).fetchData(),
+      UseSelectedContainerTabSelection() => await _defaultContainerFor(
+        defaultSpaceUuid,
+      ),
       UnassignedContainerTabSelection() => null,
       SpecificContainerTabSelection(:final container) => container,
     };
+    final excludeFromHistory = await _excludeFromHistory(assignedContainer);
 
     final createdTabIds = await db.transaction(() async {
       final createdTabIds = await _tabsService.addMultipleTabs(
@@ -326,8 +341,7 @@ class TabRepository extends _$TabRepository {
         // Carried into the engine so the exclusion is in place before these tabs
         // load; the replicated snapshot only follows once their rows are
         // written. One value for the batch — they all land in this container.
-        excludeFromHistory:
-            assignedContainer?.metadata.excludeFromHistory ?? false,
+        excludeFromHistory: excludeFromHistory,
       );
       // Build sets for validation
       final creatingTabIds = createdTabIds.toSet();
@@ -362,6 +376,7 @@ class TabRepository extends _$TabRepository {
           parentId: Value(validatedParentId),
           source: TabSource.manual,
           containerId: Value(assignedContainer?.id),
+          spaceUuid: Value(tab.private ? null : defaultSpaceUuid),
           url: Value(Uri.tryParse(tab.url)),
           tabMode: Value(tab.private ? TabMode.private : TabMode.regular),
         );
@@ -390,22 +405,25 @@ class TabRepository extends _$TabRepository {
 
     final duplicateTabMode = sourceTabMode;
 
-    final effectiveContextId = containerData?.metadata.contextualIdentity;
+    final effectiveContextId = containerData?.id;
+    final excludeFromHistory = await _excludeFromHistory(containerData);
 
     // Place the duplicate as a sibling of the source — same parent — and
     // insert it right after the source's full subtree, so existing
     // children of the source are not split from their parent.
     final sourceData = await tabDao
-        .getTabDataById(selectTabId)
+        .getTabSummaryById(selectTabId)
         .getSingleOrNull();
     final sourceParentId = sourceData?.parentId;
     final anchorTabId =
-        await tabDao
-            .lastSubtreeTabIdByOrderKey(
-              selectTabId,
-              containerId: containerData?.id,
-            )
-            .getSingleOrNull() ??
+        (sourceData == null
+            ? null
+            : await tabDao
+                  .lastSubtreeTabIdByOrderKey(
+                    selectTabId,
+                    scope: TabOrderScope.forTab(sourceData),
+                  )
+                  .getSingleOrNull()) ??
         selectTabId;
 
     final newTabId = await tabDao.upsertTabTransactional(
@@ -414,13 +432,14 @@ class TabRepository extends _$TabRepository {
           selectTabId: selectTabId,
           newContextId: effectiveContextId,
           selectNewTab: selectTab,
-          excludeFromHistory:
-              containerData?.metadata.excludeFromHistory ?? false,
+          excludeFromHistory: excludeFromHistory,
         );
       },
       parentId: Value(sourceParentId),
       afterTabId: Value(anchorTabId),
       containerId: Value(containerData?.id),
+      spaceUuid: Value(sourceData?.spaceUuid),
+      folderId: Value(sourceData?.folderId),
       tabMode: Value(duplicateTabMode),
     );
 
@@ -459,15 +478,15 @@ class TabRepository extends _$TabRepository {
     return selectTab(latestTab.id);
   }
 
-  Future<bool> resumeLatestContainerTab(
-    String? containerId, {
+  Future<bool> resumeLatestSpaceTab(
+    String? spaceUuid, {
     Set<String> excludedTabIds = const {},
   }) async {
     final latestTab = await ref
         .read(tabDatabaseProvider)
         .tabDao
-        .getContainerTabsFifo(
-          containerId,
+        .getSpaceTabsFifo(
+          spaceUuid,
           limit: 1,
           excludedTabIds: excludedTabIds,
         )
@@ -480,70 +499,43 @@ class TabRepository extends _$TabRepository {
     return selectTab(latestTab.id);
   }
 
-  Future<bool> selectPreviousTab(
-    String tabId, {
-    String? containerId,
-    bool skipContainerCheck = true,
-  }) => _selectAdjacentTab(
-    tabId,
-    containerId: containerId,
-    skipContainerCheck: skipContainerCheck,
-    selectPrevious: true,
-  );
+  Future<bool> selectPreviousTab(String tabId, {bool skipScopeCheck = true}) =>
+      _selectAdjacentTab(
+        tabId,
+        skipScopeCheck: skipScopeCheck,
+        selectPrevious: true,
+      );
 
-  Future<bool> selectNextTab(
-    String tabId, {
-    String? containerId,
-    bool skipContainerCheck = true,
-  }) => _selectAdjacentTab(
-    tabId,
-    containerId: containerId,
-    skipContainerCheck: skipContainerCheck,
-    selectPrevious: false,
-  );
+  Future<bool> selectNextTab(String tabId, {bool skipScopeCheck = true}) =>
+      _selectAdjacentTab(
+        tabId,
+        skipScopeCheck: skipScopeCheck,
+        selectPrevious: false,
+      );
 
   /// Moves the selection one step through the tab sequence.
   ///
-  /// Calls that cross containers ([skipContainerCheck] with no explicit
-  /// [containerId]) — the tab bar swipe and the next/previous tab gestures —
-  /// step through the *rendered* order
-  /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs the
-  /// user sees: the same grouping and pinned-first handling the quick tab
+  /// Calls that cross ordering scopes ([skipScopeCheck]) — the tab bar swipe
+  /// and the next/previous tab gestures — step through the *rendered* order
+  /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs
+  /// the user sees: the same grouping and pinned-first handling the quick tab
   /// switcher and the tab bar draw, and deliberately none of the tray's own
-  /// filters, collapsed groups or sort (see [TabListScope]). That order spans
-  /// every populated container while `sequentialTabNavigationCrossContainers` is
-  /// on, so this keeps walking past a container boundary exactly like the
-  /// storage-order walk did; with the setting off it holds the selected
-  /// container only and the walk ends there. It is authoritative once it
-  /// exists, and every outcome stays inside it:
+  /// filters, collapsed groups or sort (see [TabListScope]). It is
+  /// authoritative once it exists, and every outcome stays inside it:
   ///
   /// - current tab in the order: step one row, stopping at either end — or
   ///   continuing at the opposite end when `sequentialTabNavigationLoop` is on;
-  /// - current tab outside it: do nothing. Since the order excludes nothing,
-  ///   the current tab is missing only when it is not in this walk's reach at
-  ///   all — another container with cross-container navigation off, or a tab the
-  ///   engine has not reported yet. Neither says anything about which tab is
-  ///   "next", so there is no step to take; selecting an end of the order
-  ///   instead (as this did before #603) turned a swipe into a jump across the
-  ///   whole strip.
-  /// - nothing visible at all: do nothing.
+  /// - current tab outside it, or nothing visible at all: do nothing (#603).
   ///
-  /// Looping is deliberately confined to this path: the storage-order fallback
-  /// below serves container-scoped stepping and the window before the tree data
-  /// has loaded, where there is no rendered sequence whose ends could be joined.
-  ///
-  /// The storage-order path is left for calls that scope navigation to a single
-  /// container (which the cross-container order cannot answer) and for the brief
-  /// window before the tree data has loaded.
+  /// The storage-order walk below serves scope-bound stepping and the window
+  /// before the tree data has loaded, where there is no rendered sequence.
   Future<bool> _selectAdjacentTab(
     String tabId, {
-    required String? containerId,
-    required bool skipContainerCheck,
+    required bool skipScopeCheck,
     required bool selectPrevious,
   }) async {
-    if (containerId == null && skipContainerCheck) {
+    if (skipScopeCheck) {
       final visibleOrder = ref.read(sequentialTabNavigationOrderProvider).value;
-
       if (visibleOrder != null) {
         final targetTabId = adjacentTabIdInOrder(
           order: visibleOrder,
@@ -553,7 +545,6 @@ class TabRepository extends _$TabRepository {
               .read(generalSettingsWithDefaultsProvider)
               .sequentialTabNavigationLoop,
         );
-
         // The rendered order is authoritative once it exists: having no step to
         // take within it is an answer, not a reason to consult storage order.
         return targetTabId != null && await selectTab(targetTabId);
@@ -562,8 +553,7 @@ class TabRepository extends _$TabRepository {
 
     final adjacentTabId = await _adjacentVisibleTabByOrder(
       tabId,
-      containerId: containerId,
-      skipContainerCheck: skipContainerCheck,
+      skipScopeCheck: skipScopeCheck,
       selectPrevious: selectPrevious,
     );
 
@@ -616,69 +606,66 @@ class TabRepository extends _$TabRepository {
 
   Future<String?> _adjacentVisibleTabByOrder(
     String tabId, {
-    required String? containerId,
-    required bool skipContainerCheck,
+    required bool skipScopeCheck,
     required bool selectPrevious,
-  }) {
+  }) async {
     // Storage-order walk: neighbours by `order_key` only, so it sees neither
     // the tray's sort and filters nor its grouping. User-facing sequential
     // navigation goes through the rendered order in [_selectAdjacentTab] and
     // reaches this only as a fallback; what remains here is picking a tab
-    // after a close and container-scoped stepping.
+    // after a close and scope-bound stepping.
     //
     // "Previous/next" is interpreted relative to the *tab bar* direction,
     // which is the only direction this path has to go by.
     final newestFirst =
         ref.read(generalSettingsWithDefaultsProvider).tabBarDirection ==
         TabDirection.newestFirst;
-    final TabDatabase tabDatabase = ref.read(tabDatabaseProvider);
-    final definitions = tabDatabase.definitionsDrift;
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    final summary = await tabDao.getTabSummaryById(tabId).getSingleOrNull();
+    if (summary == null) {
+      return null;
+    }
+    final scope = TabOrderScope.forTab(summary);
 
     if (newestFirst == selectPrevious) {
-      return definitions
+      return tabDao
           .nextTabByOrderKey(
-            tabId: tabId,
-            containerId: containerId,
-            skipContainerCheck: skipContainerCheck,
+            tabId,
+            scope: scope,
+            skipScopeCheck: skipScopeCheck,
           )
           .getSingleOrNull();
     }
 
-    return definitions
+    return tabDao
         .previousTabByOrderKey(
-          tabId: tabId,
-          containerId: containerId,
-          skipContainerCheck: skipContainerCheck,
+          tabId,
+          scope: scope,
+          skipScopeCheck: skipScopeCheck,
         )
         .getSingleOrNull();
   }
 
   Future<String?> _nearestAvailableVisibleTabByOrder(
     String tabId, {
-    required String? containerId,
     required Set<String> excludedTabIds,
   }) async {
     Future<String?> walkDirection({required bool selectPrevious}) async {
       var candidate = await _adjacentVisibleTabByOrder(
         tabId,
-        containerId: containerId,
-        skipContainerCheck: false,
+        skipScopeCheck: false,
         selectPrevious: selectPrevious,
       );
-
       while (candidate != null) {
         if (!excludedTabIds.contains(candidate)) {
           return candidate;
         }
-
         candidate = await _adjacentVisibleTabByOrder(
           candidate,
-          containerId: containerId,
-          skipContainerCheck: false,
+          skipScopeCheck: false,
           selectPrevious: selectPrevious,
         );
       }
-
       return null;
     }
 
@@ -737,46 +724,43 @@ class TabRepository extends _$TabRepository {
     Set<String> excludedTabIds = const {},
   }) async {
     final tabState = ref.read(tabStatesProvider)[tabId];
-
-    final currentContainerId = await ref
-        .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerId(tabId);
-
+    final db = ref.read(tabDatabaseProvider);
+    final summary = await db.tabDao.getTabSummaryById(tabId).getSingleOrNull();
     if (!ref.mounted) return;
 
-    final sameContainerTabs = await ref
-        .read(containerRepositoryProvider.notifier)
-        .getContainerTabIds(currentContainerId)
-        .then(
-          (tabs) => tabs
-              .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
-              .toList(),
-        );
+    // Private tabs and essentials have no space: their "same scope" is the
+    // other tabs without one.
+    final currentSpaceUuid = summary?.spaceUuid;
 
+    Future<List<String>> spaceTabIds(String? spaceUuid) async {
+      final tabs = await db.tabDao.getSpaceTabsData(spaceUuid).get();
+      return [
+        for (final tab in tabs)
+          if (tab.id != tabId && !excludedTabIds.contains(tab.id)) tab.id,
+      ];
+    }
+
+    final sameSpaceTabs = await spaceTabIds(currentSpaceUuid);
     if (!ref.mounted) return;
 
     // Priority 1: hand the user back to whoever opened this tab, across
-    // containers if that is where the opener lives.
+    // spaces if that is where the opener lives.
     final ancestorTabId = await _nearestAvailableAncestor(
       tabId,
       excludedTabIds: excludedTabIds,
     );
-
     if (!ref.mounted) return;
-
     if (ancestorTabId != null) {
       return _selectTabAfterClose(ancestorTabId);
     }
 
     // Priority 2: Check for previous tab by timestamp
-    final previousTabId = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
+    final previousTabId = await db.definitionsDrift
         .previousTabByTimestamp(tabId: tabId)
         .getSingleOrNull();
 
     if (previousTabId != null) {
-      if (sameContainerTabs.any((tab) => tab == previousTabId)) {
+      if (sameSpaceTabs.any((tab) => tab == previousTabId)) {
         return _selectTabAfterClose(previousTabId);
       }
     }
@@ -785,7 +769,6 @@ class TabRepository extends _$TabRepository {
 
     final orderedNeighborTabId = await _nearestAvailableVisibleTabByOrder(
       tabId,
-      containerId: currentContainerId,
       excludedTabIds: excludedTabIds,
     );
 
@@ -795,19 +778,17 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
-    // Out of candidates in this container. By default the search widens to
-    // unassigned tabs and then to other containers, which drags the user out
-    // of the container they were working in; the home target keeps them here.
+    // Out of candidates in this space. By default the search widens to the
+    // other spaces, which drags the user out of the space they were working
+    // in; the home target keeps them here.
     if (ref
         .read(generalSettingsWithDefaultsProvider)
         .homeTargetOnLastTabClosed) {
       await ref
           .read(homeTargetControllerProvider.notifier)
           .applyTarget(
-            // currentContainerId is null for the unassigned container, which is
-            // still a scope to stay inside — hence the explicit flag.
-            scopeToContainer: true,
-            containerId: currentContainerId,
+            scopeToSpace: true,
+            spaceUuid: currentSpaceUuid ?? ref.read(selectedSpaceProvider),
             closingTabUrl: tabState?.url,
             // Tab rows outlive this call — they are deleted only after the next
             // selection is made — so without this the resume would pick the
@@ -817,42 +798,21 @@ class TabRepository extends _$TabRepository {
       return;
     }
 
-    final unassignedTabs = await ref
-        .read(containerRepositoryProvider.notifier)
-        .getContainerTabIds(null)
-        .then(
-          (tabs) => tabs
-              .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
-              .toList(),
-        );
-
-    if (unassignedTabs.isNotEmpty) {
-      return _selectTabAfterClose(unassignedTabs.first);
+    if (sameSpaceTabs.isNotEmpty) {
+      return _selectTabAfterClose(sameSpaceTabs.first);
     }
 
+    final spaces = await db.spaceDao.getAll();
     if (!ref.mounted) return;
-
-    final availableContainers = await ref
-        .read(containerRepositoryProvider.notifier)
-        .getAllContainersWithCount();
-
-    final nextAvailableContainer = availableContainers.firstOrNull;
-
-    if (!ref.mounted) return;
-
-    final nextContainerTabs = await nextAvailableContainer.mapNotNull(
-      (container) => ref
-          .read(containerRepositoryProvider.notifier)
-          .getContainerTabIds(container.id)
-          .then(
-            (tabs) => tabs
-                .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
-                .toList(),
-          ),
-    );
-
-    if (nextContainerTabs.isNotEmpty) {
-      return _selectTabAfterClose(nextContainerTabs!.first);
+    for (final space in spaces) {
+      if (space.uuid == currentSpaceUuid) {
+        continue;
+      }
+      final candidates = await spaceTabIds(space.uuid);
+      if (!ref.mounted) return;
+      if (candidates.isNotEmpty) {
+        return _selectTabAfterClose(candidates.first);
+      }
     }
   }
 
@@ -865,11 +825,9 @@ class TabRepository extends _$TabRepository {
         return;
       }
 
+      final db = ref.read(tabDatabaseProvider);
       if (recordTombstones) {
-        await ref
-            .read(tabDatabaseProvider)
-            .tabDao
-            .addClosedTabTombstones(tabIds);
+        await db.tabDao.addClosedTabTombstones(tabIds);
       }
 
       for (final tabId in tabIds) {
@@ -883,10 +841,25 @@ class TabRepository extends _$TabRepository {
 
       await _preservePromotedChildOrderOnClose(tabIds);
 
-      if (tabIds.length == 1) {
-        await _tabsService.removeTab(tabId: tabIds.single);
-      } else {
-        await _tabsService.removeTabs(ids: tabIds);
+      // Cold rows have no session behind them: closing one is a plain row
+      // delete (PLAN §7.4 item 2). Everything else goes through the engine,
+      // whose tab-list event drops the row.
+      final coldIds = (await db.tabDao.coldTabIds().get()).toSet();
+      final coldToClose = [
+        for (final tabId in tabIds)
+          if (coldIds.contains(tabId)) tabId,
+      ];
+      final liveToClose = [
+        for (final tabId in tabIds)
+          if (!coldIds.contains(tabId)) tabId,
+      ];
+      if (coldToClose.isNotEmpty) {
+        await (db.tab.delete()..where((t) => t.id.isIn(coldToClose))).go();
+      }
+      if (liveToClose.length == 1) {
+        await _tabsService.removeTab(tabId: liveToClose.single);
+      } else if (liveToClose.isNotEmpty) {
+        await _tabsService.removeTabs(ids: liveToClose);
       }
     });
   }
@@ -957,167 +930,15 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  /// Reopens a navigation the container extension cancelled, in the container
-  /// the site is assigned to.
-  ///
-  /// The extension cancels the request natively and reports it here. Nothing
-  /// else retries it, so a report this drops leaves the tab sitting on a
-  /// navigation that will never happen.
-  Future<void> _handleSiteAssignment(ContainerSiteAssignment event) async {
-    // Strict-mode blocks have no destination container to re-open into; the
-    // navigation was already cancelled natively and the user is notified via
-    // a snackbar (see the strict-block listener in the app shell). Nothing
-    // to reconcile here.
-    if (event.strict) {
-      return;
-    }
+  /// Gives a cold tab (PLAN §7.4) an engine session again. Filled in by W4.
+  Future<void> materializeTab(String tabId) {
+    throw UnimplementedError('W4');
+  }
 
-    final tabId = event.tabId;
-    if (tabId == null) {
-      logger.w(
-        'Site assignment for ${event.url} names no tab; nothing to reopen',
-      );
-      return;
-    }
-
-    _latestAssignmentRequests[tabId] = event.requestId;
-    bool isCurrentRequest() =>
-        ref.mounted && _latestAssignmentRequests[tabId] == event.requestId;
-
-    try {
-      // Not `ref.read(tabStatesProvider)[tabId]`: this event reaches Dart the
-      // moment the extension answers, which for a tab opened by the very
-      // navigation being cancelled is before the tab itself does.
-      final tabState = await ref
-          .read(tabStatesProvider.notifier)
-          .awaitContentState(tabId);
-
-      if (!isCurrentRequest()) {
-        return;
-      }
-
-      if (tabState == null) {
-        logger.w(
-          'Gave up waiting for tab $tabId to reopen ${event.url} in its '
-          'assigned container',
-        );
-        return;
-      }
-
-      final uri = Uri.parse(event.url);
-      final originUri = event.originUrl.mapNotNull(Uri.parse);
-
-      final targetContainerId = await ref
-          .read(containerRepositoryProvider.notifier)
-          .siteAssignedContainerId(Uri.parse(uri.origin));
-
-      if (!isCurrentRequest()) {
-        return;
-      }
-
-      final containerData = await targetContainerId.mapNotNull(
-        (id) =>
-            ref.read(containerRepositoryProvider.notifier).getContainerData(id),
-      );
-
-      if (!isCurrentRequest() || containerData == null) {
-        return;
-      }
-
-      final currentTabState = ref.read(tabStatesProvider)[tabId];
-      if (currentTabState == null) {
-        logger.w(
-          'Tab $tabId disappeared before ${event.url} could be reopened',
-        );
-        return;
-      }
-
-      // The tab is already in the target container, so there is nothing
-      // to reconcile. This notably fires when reassigning a tab into a
-      // container that shares the default Gecko context: assignContainer
-      // recreates the tab in the target container, and that new tab's
-      // load re-triggers this event. Without this guard the transiently
-      // empty new tab would be treated as an empty tab and churn yet
-      // another tab (re-prompting app-links).
-      final currentTabContainerId = await ref
-          .read(tabDataRepositoryProvider.notifier)
-          .getTabContainerId(currentTabState.id);
-      if (!isCurrentRequest() || currentTabContainerId == targetContainerId) {
-        return;
-      }
-
-      final historyIsEmpty =
-          ref
-              .read(tabHistoryStatesProvider)[currentTabState.id]
-              ?.items
-              .isEmpty ??
-          true;
-
-      final tabIsEmpty =
-          currentTabState.url == TabState.defaultUrl && historyIsEmpty;
-
-      if (event.blocked || tabIsEmpty) {
-        final newTabId = await addTab(
-          url: uri,
-          tabMode: currentTabState.tabMode,
-          containerSelection: TabContainerSelection.specific(containerData),
-          parentId: currentTabState.id,
-          selectTab: true,
-        );
-
-        // Past the point of no return. The replacement tab exists, so the swap
-        // is finished even if a newer navigation has claimed this tab since —
-        // abandoning it here would leave the new tab created but unselected.
-        if (historyIsEmpty && ref.mounted) {
-          await closeTab(currentTabState.id);
-          if (ref.mounted) {
-            await selectTab(newTabId);
-          }
-        }
-      } else {
-        final latestTabState = ref.read(tabStatesProvider)[tabId];
-        if (latestTabState == null) {
-          logger.w(
-            'Tab $tabId disappeared before ${event.url} could be reassigned',
-          );
-          return;
-        }
-
-        if (originUri == null) {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .assignContainer(
-                latestTabState.id,
-                containerData,
-                replacementUrl: uri,
-              );
-        } else if (latestTabState.url == originUri) {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .assignContainer(
-                latestTabState.id,
-                containerData,
-                closeOldTab: false,
-                replacementUrl: uri,
-              );
-        } else {
-          logger.w(
-            'Could not match origin url for assignment ${latestTabState.url} to request ${event.originUrl}',
-          );
-        }
-      }
-    } catch (error, stackTrace) {
-      // The stream's `onError` never sees what an async listener throws.
-      logger.e(
-        'Failed to reopen ${event.url} in its assigned container',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    } finally {
-      if (_latestAssignmentRequests[tabId] == event.requestId) {
-        _latestAssignmentRequests.remove(tabId);
-      }
-    }
+  /// Drops a live tab's engine session while keeping its row (no tombstone,
+  /// nothing projected). Filled in by W4.
+  Future<void> demoteToCold(String tabId) {
+    throw UnimplementedError('W4');
   }
 
   @override
@@ -1142,11 +963,13 @@ class TabRepository extends _$TabRepository {
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
       (tabId) async {
         final containerId = ref.read(selectedContainerProvider);
+        final spaceUuid = ref.read(selectedSpaceProvider);
         await db.tabDao.insertTab(
           tabId,
           parentId: const Value.absent(),
           source: TabSource.addedEvent,
           containerId: Value(containerId),
+          spaceUuid: Value(spaceUuid),
         );
       },
       onError: (Object error, StackTrace stackTrace) {
@@ -1157,20 +980,6 @@ class TabRepository extends _$TabRepository {
         );
       },
     );
-
-    final containerSiteAssignementSub = eventSerivce.siteAssignementEvent
-        .listen(
-          (event) async {
-            await _handleSiteAssignment(event);
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            logger.e(
-              'Error in container site assignment stream',
-              error: error,
-              stackTrace: stackTrace,
-            );
-          },
-        );
 
     final tabContentSub = tabContentService.tabContentStream.listen(
       (content) async {
@@ -1233,7 +1042,10 @@ class TabRepository extends _$TabRepository {
             (next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false));
 
         if (shouldSyncTabs) {
-          await db.tabDao.syncTabs(retainTabIds: next.value);
+          await db.tabDao.syncTabs(
+            engineTabIds: next.value,
+            defaultSpaceUuid: ref.read(selectedSpaceProvider),
+          );
         }
       },
       onError: (Object error, StackTrace stackTrace) {
@@ -1254,7 +1066,10 @@ class TabRepository extends _$TabRepository {
       if (restoreComplete && !(previous ?? false)) {
         final currentTabs = ref.read(tabListProvider).value;
         if (currentTabs.isNotEmpty) {
-          await db.tabDao.syncTabs(retainTabIds: currentTabs);
+          await db.tabDao.syncTabs(
+            engineTabIds: currentTabs,
+            defaultSpaceUuid: ref.read(selectedSpaceProvider),
+          );
         }
       }
     });
@@ -1289,7 +1104,6 @@ class TabRepository extends _$TabRepository {
       tabStateDebouncer.dispose();
       await tabAddedSub.cancel();
       await tabContentSub.cancel();
-      await containerSiteAssignementSub.cancel();
     });
   }
 }
