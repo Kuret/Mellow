@@ -205,6 +205,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute);
 
+  GeneralSettings maxLiveTabs(int maxLiveTabs);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -297,6 +299,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool globalDesktopMode,
     List<String> desktopModeSites,
     bool unmountGeckoViewOffRoute,
+    int maxLiveTabs,
   });
 }
 
@@ -667,6 +670,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute) =>
       call(unmountGeckoViewOffRoute: unmountGeckoViewOffRoute);
 
+  @override
+  GeneralSettings maxLiveTabs(int maxLiveTabs) =>
+      call(maxLiveTabs: maxLiveTabs);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -762,6 +769,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
     Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
+    Object? maxLiveTabs = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1251,6 +1259,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unmountGeckoViewOffRoute
           // ignore: cast_nullable_to_non_nullable
           : unmountGeckoViewOffRoute as bool,
+      maxLiveTabs:
+          maxLiveTabs == const $CopyWithPlaceholder() || maxLiveTabs == null
+          ? _value.maxLiveTabs
+          // ignore: cast_nullable_to_non_nullable
+          : maxLiveTabs as int,
     );
   }
 }
@@ -1435,6 +1448,7 @@ GeneralSettings _$GeneralSettingsFromJson(
       ?.map((e) => e as String)
       .toList(),
   unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
+  maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1543,6 +1557,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,
   'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
+  'maxLiveTabs': instance.maxLiveTabs,
 };
 
 const _$ThemeModeEnumMap = {

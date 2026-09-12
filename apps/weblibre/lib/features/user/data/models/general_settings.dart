@@ -41,6 +41,11 @@ const _fallbackSearchProvider = BangKey(
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 const defaultUiScaleFactor = 1.0;
+
+/// Bounds of [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+const defaultMaxLiveTabs = 25;
+const minMaxLiveTabs = 5;
+const maxMaxLiveTabs = 100;
 const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
 const uiScaleFactorStep = 0.05;
@@ -327,10 +332,7 @@ class GeneralSettings with FastEquatable {
   /// colours directly on top of the image, so in a light theme the image has to
   /// be washed *lighter* for those to stay readable.
   final double homeWallpaperDim;
-  @JsonKey(
-    name: 'defaultCreateTabType',
-    unknownEnumValue: TabType.regular,
-  )
+  @JsonKey(name: 'defaultCreateTabType', unknownEnumValue: TabType.regular)
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
   final TabDirection tabBarDirection;
@@ -486,6 +488,12 @@ class GeneralSettings with FastEquatable {
   /// is left here is the memory trade this describes.
   final bool unmountGeckoViewOffRoute;
 
+  /// How many tabs may hold a live engine session at once (PLAN §7.4). Above
+  /// it, [LiveTabBudget] unloads the least recently used regular tabs back to
+  /// cold rows. Clamped to [minMaxLiveTabs]..[maxMaxLiveTabs]; defaults to
+  /// [defaultMaxLiveTabs].
+  final int maxLiveTabs;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -571,6 +579,7 @@ class GeneralSettings with FastEquatable {
     required this.globalDesktopMode,
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
+    required this.maxLiveTabs,
   });
 
   GeneralSettings.withDefaults({
@@ -658,6 +667,7 @@ class GeneralSettings with FastEquatable {
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
+    int? maxLiveTabs,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -775,7 +785,11 @@ class GeneralSettings with FastEquatable {
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
-       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
+       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false,
+       maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
+         minMaxLiveTabs,
+         maxMaxLiveTabs,
+       );
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -984,5 +998,6 @@ class GeneralSettings with FastEquatable {
     globalDesktopMode,
     desktopModeSites,
     unmountGeckoViewOffRoute,
+    maxLiveTabs,
   ];
 }
