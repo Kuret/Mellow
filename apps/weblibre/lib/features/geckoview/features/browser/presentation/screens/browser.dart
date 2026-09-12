@@ -73,13 +73,6 @@ import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-/// The edge a rail docked to [side] occupies, in the edge vocabulary the
-/// layout layers share with the compact bar.
-TabBarPosition _railEdge(RailSide side) => switch (side) {
-  RailSide.left => TabBarPosition.left,
-  RailSide.right => TabBarPosition.right,
-};
-
 class _AnimatedToolbar extends HookWidget {
   final bool visible;
   final TabBarPosition position;
@@ -964,23 +957,18 @@ class BrowserScreen extends HookConsumerWidget {
     // MediaQuery.sizeOf rebuilds this on rotation and unfolding, so the
     // layout switches live. Auto-hide is not supported on the rail; it is
     // reserved via a plain content offset and dismissed only by gesture.
-    final isRail =
-        !isSmallWebActive && isWideViewport(MediaQuery.sizeOf(context).width);
-    final railSide = ref.watch(
-      generalSettingsWithDefaultsProvider.select((value) => value.railSide),
-    );
+    final viewportWidth = MediaQuery.sizeOf(context).width;
     // The resolved edge of the chrome. [TabBarPosition] doubles as the edge
     // type for the layers below: its (legacy) left/right values name the
     // rail's edge, top/bottom the compact bar's.
     final tabBarPosition = isSmallWebActive
         ? TabBarPosition.top
-        : isRail
-        ? _railEdge(railSide)
         : ref.watch(
             generalSettingsWithDefaultsProvider.select(
-              (value) => value.effectiveTabBarPosition,
+              (value) => value.chromeEdge(viewportWidth: viewportWidth),
             ),
           );
+    final isRail = tabBarPosition.isVertical;
 
     final showContextualToolbar =
         !isSmallWebActive &&
