@@ -24,11 +24,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/spaces_sync/data/snapshot_store.dart';
+import 'package:weblibre/features/spaces_sync/domain/entities/spaces_sync_status.dart';
+import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -45,6 +49,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     );
 
     final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
+    final spacesStatus = ref.watch(spacesSyncServiceProvider);
 
     final lastSyncEvent = ref.watch(
       syncEventProvider.select((value) => value.value?.$1),
@@ -308,6 +313,107 @@ class SyncSettingsScreen extends HookConsumerWidget {
         ],
       ),
       SettingsSectionDefinition(
+        title: 'Zen Spaces',
+        entries: [
+          SettingsEntryDefinition(
+            title: 'Zen Spaces sync',
+            subtitle: _spacesStatusText(spacesStatus, hasAccount: hasAccount),
+            keywords: const [
+              'zen',
+              'spaces',
+              'workspaces',
+              'essentials',
+              'folders',
+              'snapshot',
+              'restore',
+            ],
+            child: Column(
+              children: [
+                SwitchListTile.adaptive(
+                  title: const Text('Sync Zen Spaces'),
+                  subtitle: const Text(
+                    'Spaces, pinned tabs, essentials and folders, two-way '
+                    'with Zen Browser on the desktop',
+                  ),
+                  value: generalSettings.spacesSyncEnabled,
+                  onChanged: (value) async {
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (current) =>
+                              current.copyWith.spacesSyncEnabled(value),
+                        );
+                  },
+                ),
+                const Divider(height: 1),
+                SwitchListTile.adaptive(
+                  title: const Text('Allow uploads'),
+                  subtitle: const Text(
+                    'Turn off to keep reading the desktop’s spaces while '
+                    'this device writes nothing back',
+                  ),
+                  value: generalSettings.spacesSyncWritesEnabled,
+                  onChanged: generalSettings.spacesSyncEnabled
+                      ? (value) async {
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (current) => current.copyWith
+                                    .spacesSyncWritesEnabled(value),
+                              );
+                        }
+                      : null,
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: spacesStatus.syncing
+                      ? const SizedBox.square(
+                          dimension: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.sync),
+                  title: const Text('Sync spaces now'),
+                  subtitle: Text(
+                    _spacesStatusText(spacesStatus, hasAccount: hasAccount),
+                  ),
+                  isThreeLine: true,
+                  onTap:
+                      (spacesStatus.syncing ||
+                          !hasAccount ||
+                          !generalSettings.spacesSyncEnabled)
+                      ? null
+                      : () async {
+                          await ref
+                              .read(spacesSyncServiceProvider.notifier)
+                              .sync(reason: 'manual');
+                        },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text('Snapshots'),
+                  subtitle: const Text(
+                    'Copies of the desktop’s spaces taken before this device '
+                    'first wrote to them; restore one if a sync went wrong',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: spacesStatus.syncing
+                      ? null
+                      : () => _showSnapshotsDialog(
+                          context,
+                          ref,
+                          writesEnabled:
+                              generalSettings.spacesSyncWritesEnabled,
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      SettingsSectionDefinition(
         title: 'Server Overrides',
         entries: [
           SettingsEntryDefinition(
@@ -409,6 +515,139 @@ class SyncSettingsScreen extends HookConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  static String _spacesStatusText(
+    SpacesSyncStatus status, {
+    required bool hasAccount,
+  }) {
+    if (!hasAccount) {
+      return 'Sign in to sync spaces with Zen Browser';
+    }
+    if (status.syncing) {
+      return 'Syncing spaces…';
+    }
+    final lines = <String>[
+      if (status.lastSyncAt case final at?)
+        'Last synced ${timeago.format(at)}'
+      else
+        'Never synced',
+      if (status.engineEnabled == false)
+        'Zen Spaces sync is not enabled on the desktop yet',
+      if (status.writesBlockedReason case final reason?) reason,
+      if (status.lastError case final error?) 'Last error: $error',
+    ];
+    return lines.join('\n');
+  }
+
+  static Future<void> _showSnapshotsDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool writesEnabled,
+  }) async {
+    final snapshots = await ref
+        .read(spacesSyncServiceProvider.notifier)
+        .listSnapshots();
+    if (!context.mounted) {
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Spaces snapshots'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: snapshots.isEmpty
+                ? const Text(
+                    'No snapshots yet. One is taken before this device '
+                    'first uploads to the desktop’s spaces.',
+                  )
+                : ListView(
+                    shrinkWrap: true,
+                    children: [
+                      if (!writesEnabled)
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            'Uploads are disabled; enable “Allow uploads” '
+                            'to restore a snapshot.',
+                          ),
+                        ),
+                      for (final snapshot in snapshots)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            ref
+                                .read(formatProvider.notifier)
+                                .fullDateTime(snapshot.takenAt.toLocal()),
+                          ),
+                          subtitle: Text(timeago.format(snapshot.takenAt)),
+                          trailing: TextButton(
+                            onPressed: writesEnabled
+                                ? () async {
+                                    final confirmed = await _confirmRestore(
+                                      context,
+                                      snapshot,
+                                    );
+                                    if (confirmed != true) {
+                                      return;
+                                    }
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                    await ref
+                                        .read(
+                                          spacesSyncServiceProvider.notifier,
+                                        )
+                                        .restoreSnapshot(snapshot);
+                                  }
+                                : null,
+                            child: const Text('Restore'),
+                          ),
+                        ),
+                    ],
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<bool?> _confirmRestore(
+    BuildContext context,
+    SpacesSnapshot snapshot,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Restore this snapshot?'),
+          content: Text(
+            'Every space, tab, folder and container record in the snapshot '
+            'from ${timeago.format(snapshot.takenAt)} is uploaded to the '
+            'desktop and applied here. Changes made since then on any device '
+            'are overwritten.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Restore'),
+            ),
+          ],
+        );
+      },
     );
   }
 
