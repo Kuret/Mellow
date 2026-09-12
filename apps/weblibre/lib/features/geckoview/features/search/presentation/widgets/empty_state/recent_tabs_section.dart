@@ -66,10 +66,8 @@ class RecentTabsSection extends ConsumerWidget {
                       tabState: tabState,
                       iconSize: UrlListTile.iconSize,
                     ),
-                    containerColor: containerData?.color,
-                    containerIcon: containerData?.metadata.iconData,
-                    useCustomColor:
-                        containerData?.metadata.useCustomColor ?? false,
+                    containerColor: containerData?.color.color,
+                    containerIcon: containerData?.icon.icon,
                     onTap: () => onTabSelected(tabState.id),
                   );
                 },
