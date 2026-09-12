@@ -1147,13 +1147,17 @@ class TabRepository extends _$TabRepository {
   /// row must not be promoted back to live by it. Closed ids are deleted
   /// rather than demoted.
   Future<void> _syncTabs(TabDatabase db, List<String> engineTabIds) async {
-    final demoting = _demoting.toSet();
+    final skipped = _demoting.toSet()
+      // A session whose row an applied batch already deleted is on its way
+      // out; letting `syncTabs` see it would re-insert the row as a brand new
+      // tab and resurrect what the remote deleted.
+      ..addAll(await db.tabDao.pendingEngineCloseIds());
     await db.tabDao.syncTabs(
-      engineTabIds: demoting.isEmpty
+      engineTabIds: skipped.isEmpty
           ? engineTabIds
           : [
               for (final id in engineTabIds)
-                if (!demoting.contains(id)) id,
+                if (!skipped.contains(id)) id,
             ],
       defaultSpaceUuid: ref.read(selectedSpaceProvider),
       closingTabIds: _closing.toSet(),
@@ -1295,6 +1299,12 @@ class TabRepository extends _$TabRepository {
       restoreComplete,
     ) async {
       if (restoreComplete && !(previous ?? false)) {
+        // A batch that committed but crashed before its drain left sessions
+        // behind; close them before the catch-up below can see them.
+        await drainPendingEngineCloses();
+        if (!ref.mounted) {
+          return;
+        }
         final currentTabs = ref.read(tabListProvider).value;
         if (currentTabs.isNotEmpty) {
           await _syncTabs(db, currentTabs);
@@ -1337,7 +1347,47 @@ class TabRepository extends _$TabRepository {
 
   /// Closes tabs a remote Zen tombstone removed: no `closed_tab_tombstone`,
   /// so the sync client does not echo the deletion back (PLAN §8.6 item 5).
+  ///
+  /// The applier does not use this — it deletes the rows inside its own
+  /// transaction and queues the sessions for [drainPendingEngineCloses].
+  /// This stays for any caller that is not inside a transaction.
   Future<void> closeTabsFromSync(List<String> tabIds) {
     return _closeTabsInternal(tabIds, recordTombstones: false);
+  }
+
+  /// Tears down the engine sessions an applied sync batch left behind.
+  ///
+  /// The apply transaction deletes the rows and queues their `engine_tab_id`s
+  /// in `pending_engine_close`, because awaiting a platform channel inside a
+  /// database transaction is not allowed. This runs once the transaction has
+  /// committed, and again at restore completion so a crash in between still
+  /// resolves. An id the engine no longer knows is simply dropped.
+  Future<void> drainPendingEngineCloses() async {
+    final db = ref.read(tabDatabaseProvider);
+    final pending = await db.tabDao.pendingEngineCloseIds();
+    if (pending.isEmpty) {
+      return;
+    }
+
+    // The removals arrive as plain tab-list changes; without this the
+    // listener would take them for tabs that merely went cold.
+    _closing.addAll(pending);
+    final drained = <String>[];
+    for (final engineTabId in pending) {
+      try {
+        await _tabsService.removeTab(tabId: engineTabId);
+        drained.add(engineTabId);
+      } catch (error, stackTrace) {
+        // Unknown to the engine — the session is gone either way, so the
+        // queue entry has done its job.
+        drained.add(engineTabId);
+        logger.d(
+          'Engine refused the queued close of $engineTabId',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+    await db.tabDao.deletePendingEngineCloses(drained);
   }
 }
