@@ -848,9 +848,10 @@ Future<TabContainerSelection> _resolveContainerSelection(
     };
   }
 
+  // A container's Gecko contextId is its id.
   final container = await ref
       .read(containerRepositoryProvider.notifier)
-      .getContainerByContextualIdentity(contextId);
+      .getContainerData(contextId);
 
   if (container != null) {
     return TabContainerSelection.specific(container);
