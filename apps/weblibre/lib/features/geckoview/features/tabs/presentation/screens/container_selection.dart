@@ -27,13 +27,13 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uuid/enums.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
@@ -105,7 +105,6 @@ class ContainerSelectionScreen extends HookConsumerWidget {
               (index) => ContainerDataWithCount(
                 id: Namespace.nil.value,
                 name: 'Container',
-                color: Colors.transparent,
                 orderKey: '',
                 tabCount: 0,
               ),
@@ -144,8 +143,8 @@ class _UnassignedSelectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final accentColor = colorScheme.primary;
-    final palette = ContainerColors.palette(context, accentColor);
+    // The unassigned pseudo-container follows the theme, like `toolbar`.
+    final palette = containerPalette(context, null);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -236,12 +235,15 @@ class _SelectionContainerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final containerColor = container.color;
     final tabCount = container.tabCount ?? 0;
-    final palette = ContainerColors.palette(
-      context,
-      containerColor,
-      useCustomColor: container.metadata.useCustomColor,
+    final palette = containerPalette(context, container);
+    final bool clearDataOnExit = ref.watch(
+      watchContainerLocalProvider(
+        container.id,
+      ).select(
+        (AsyncValue<ContainerLocalData> value) =>
+            value.value?.clearDataOnExit ?? false,
+      ),
     );
 
     return AnimatedContainer(
@@ -276,7 +278,7 @@ class _SelectionContainerCard extends ConsumerWidget {
                       backgroundColor: palette.avatarBackgroundColor,
                       foregroundColor: palette.avatarForegroundColor,
                       child: Icon(
-                        resolveContainerIcon(container.metadata.iconData),
+                        container.icon.icon,
                         size: 22,
                       ),
                     ),
@@ -305,12 +307,7 @@ class _SelectionContainerCard extends ConsumerWidget {
                                 label:
                                     '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
                               ),
-                              if (container.metadata.contextualIdentity != null)
-                                const _SelectionInfoChip(
-                                  icon: Icons.cookie_outlined,
-                                  label: 'Isolated',
-                                ),
-                              if (container.metadata.clearDataOnExit)
+                              if (clearDataOnExit)
                                 const _SelectionInfoChip(
                                   icon: Icons.cleaning_services_outlined,
                                   label: 'Clear on exit',
