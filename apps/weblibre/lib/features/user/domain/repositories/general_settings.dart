@@ -140,6 +140,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'spacesSyncBaselineDone': DriftSqlType.bool,
   'separateEssentials': DriftSqlType.bool,
   'spacesSyncApplierVersion': DriftSqlType.int,
+  'railSide': DriftSqlType.string,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be

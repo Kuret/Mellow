@@ -221,6 +221,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion);
 
+  GeneralSettings railSide(RailSide railSide);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -321,6 +323,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool spacesSyncBaselineDone,
     bool separateEssentials,
     int spacesSyncApplierVersion,
+    RailSide railSide,
   });
 }
 
@@ -723,6 +726,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion) =>
       call(spacesSyncApplierVersion: spacesSyncApplierVersion);
 
+  @override
+  GeneralSettings railSide(RailSide railSide) => call(railSide: railSide);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -826,6 +832,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? spacesSyncBaselineDone = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? spacesSyncApplierVersion = const $CopyWithPlaceholder(),
+    Object? railSide = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1359,6 +1366,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.spacesSyncApplierVersion
           // ignore: cast_nullable_to_non_nullable
           : spacesSyncApplierVersion as int,
+      railSide: railSide == const $CopyWithPlaceholder() || railSide == null
+          ? _value.railSide
+          // ignore: cast_nullable_to_non_nullable
+          : railSide as RailSide,
     );
   }
 }
@@ -1551,6 +1562,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   spacesSyncBaselineDone: json['spacesSyncBaselineDone'] as bool?,
   separateEssentials: json['separateEssentials'] as bool?,
   spacesSyncApplierVersion: (json['spacesSyncApplierVersion'] as num?)?.toInt(),
+  railSide: $enumDecodeNullable(_$RailSideEnumMap, json['railSide']),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1667,6 +1679,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'spacesSyncBaselineDone': instance.spacesSyncBaselineDone,
   'separateEssentials': instance.separateEssentials,
   'spacesSyncApplierVersion': instance.spacesSyncApplierVersion,
+  'railSide': _$RailSideEnumMap[instance.railSide]!,
 };
 
 const _$ThemeModeEnumMap = {
@@ -1782,3 +1795,5 @@ const _$AppLinksModeEnumMap = {
   AppLinksMode.ask: 'ask',
   AppLinksMode.never: 'never',
 };
+
+const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};

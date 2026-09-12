@@ -46,18 +46,28 @@ void main() {
       );
     });
 
-    test('auto resolves to the pill for every other tab bar position', () {
+    // The side values predate the viewport-driven layout and read as bottom
+    // (effectiveTabBarPosition), so they resolve the way bottom does.
+    test('auto reads the legacy side positions as a bottom tab bar', () {
       for (final position in const [
-        TabBarPosition.top,
         TabBarPosition.left,
         TabBarPosition.right,
       ]) {
         expect(
           settingsWith(position: position).effectiveHomeSearchBarPlacement(),
-          HomeSearchBarPlacement.top,
+          HomeSearchBarPlacement.tabBar,
           reason: 'tab bar at $position',
         );
       }
+    });
+
+    test('auto resolves to the pill for a top tab bar', () {
+      expect(
+        settingsWith(
+          position: TabBarPosition.top,
+        ).effectiveHomeSearchBarPlacement(),
+        HomeSearchBarPlacement.top,
+      );
     });
 
     test('an explicit choice wins over the tab bar position', () {

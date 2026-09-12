@@ -126,23 +126,32 @@ enum BackgroundTabOpenAction { prompt, switchImmediately }
 
 enum TabDirection { newestFirst, oldestFirst }
 
+/// Edge of the compact tab bar on narrow viewports. Only [top] and [bottom]
+/// place anything today: [left] and [right] are legacy values from when the
+/// position setting alone decided between a bar and a side rail, kept so
+/// stored profiles still decode; [GeneralSettings.effectiveTabBarPosition]
+/// reads them as [bottom]. On wide viewports the layout is the side rail
+/// regardless, docked per [RailSide].
 enum TabBarPosition {
   top,
   bottom,
   left,
   right;
 
-  /// Whether the tab bar is rendered as a vertical side rail (left/right)
-  /// rather than a horizontal bar (top/bottom).
+  /// Whether this is one of the legacy side-rail values.
   bool get isVertical =>
       this == TabBarPosition.left || this == TabBarPosition.right;
 
-  /// Whether the tab bar is rendered as a horizontal bar (top/bottom).
+  /// Whether this places the compact bar (top/bottom).
   bool get isHorizontal => !isVertical;
 
   /// Main axis along which the bar's content flows.
   Axis get axis => isVertical ? Axis.vertical : Axis.horizontal;
 }
+
+/// Which edge the wide-viewport side rail docks to. Independent of
+/// [TabBarPosition], which only places the narrow-viewport compact bar.
+enum RailSide { left, right }
 
 /// Minimum [GeneralSettings.railWidth] at which the vertical rail is wide
 /// enough to show a chip title upright, instead of collapsing to icon-only
@@ -530,6 +539,9 @@ class GeneralSettings with FastEquatable {
   /// whole collection. `0` until the first sync after the field appeared.
   final int spacesSyncApplierVersion;
 
+  /// Which edge the side rail docks to on wide viewports. See [RailSide].
+  final RailSide railSide;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -623,6 +635,7 @@ class GeneralSettings with FastEquatable {
     required this.spacesSyncBaselineDone,
     required this.separateEssentials,
     required this.spacesSyncApplierVersion,
+    required this.railSide,
   });
 
   GeneralSettings.withDefaults({
@@ -718,6 +731,7 @@ class GeneralSettings with FastEquatable {
     bool? spacesSyncBaselineDone,
     bool? separateEssentials,
     int? spacesSyncApplierVersion,
+    RailSide? railSide,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -846,7 +860,8 @@ class GeneralSettings with FastEquatable {
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
        separateEssentials = separateEssentials ?? true,
-       spacesSyncApplierVersion = spacesSyncApplierVersion ?? 0;
+       spacesSyncApplierVersion = spacesSyncApplierVersion ?? 0,
+       railSide = railSide ?? RailSide.left;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -940,11 +955,19 @@ class GeneralSettings with FastEquatable {
   HomeSearchBarPlacement effectiveHomeSearchBarPlacement() =>
       switch (homeSearchBarPlacement) {
         HomeSearchBarPlacement.auto =>
-          tabBarPosition == TabBarPosition.bottom
+          effectiveTabBarPosition == TabBarPosition.bottom
               ? HomeSearchBarPlacement.tabBar
               : HomeSearchBarPlacement.top,
         final placement => placement,
       };
+
+  /// Where the compact bar sits on a narrow viewport: [tabBarPosition]
+  /// reduced to top or bottom. The legacy side values predate the
+  /// viewport-driven layout and read as [TabBarPosition.bottom].
+  TabBarPosition get effectiveTabBarPosition =>
+      tabBarPosition == TabBarPosition.top
+      ? TabBarPosition.top
+      : TabBarPosition.bottom;
 
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
@@ -1072,5 +1095,6 @@ class GeneralSettings with FastEquatable {
     spacesSyncBaselineDone,
     separateEssentials,
     spacesSyncApplierVersion,
+    railSide,
   ];
 }
