@@ -1,0 +1,482 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'dart:async';
+
+import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_bar_expanded_folders.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
+
+/// The narrow-viewport tab bar: one [height] row for the current space. At
+/// the leading edge the fixed [SpaceIndicator]; after it, scrolling
+/// horizontally, the Essentials as icon chips, a thin divider, then the
+/// pinned tabs, folders and normal tabs as chips in `order_key` order — a
+/// folder as a chip that shows its members inline while it is expanded
+/// ([compactBarExpandedFoldersProvider]). The selected tab is highlighted
+/// and kept in view.
+///
+/// Spaces are switched by swiping the indicator, by overscrolling the chip
+/// strip past either end, or from the picker sheet the indicator opens.
+class CompactTabBar extends ConsumerWidget {
+  const CompactTabBar({super.key});
+
+  /// Height of the bar; the quick tab switcher row it replaces was 48 too.
+  static const height = 48.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spaceUuid = ref.watch(selectedSpaceProvider);
+
+    return SizedBox(
+      height: height,
+      child: Row(
+        children: [
+          const SpaceIndicator(),
+          Expanded(
+            child: SpaceSlide(
+              spaceUuid: spaceUuid,
+              child: _CompactChipStrip(spaceUuid: spaceUuid),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Edge length of an Essentials icon chip on the bar.
+const compactEssentialSize = 32.0;
+
+sealed class _Entry {
+  const _Entry();
+
+  String get id;
+}
+
+class _EssentialEntry extends _Entry {
+  final String tabId;
+
+  const _EssentialEntry(this.tabId);
+
+  @override
+  String get id => 'essential-$tabId';
+}
+
+class _DividerEntry extends _Entry {
+  const _DividerEntry();
+
+  @override
+  String get id => 'divider';
+}
+
+class _FolderEntry extends _Entry {
+  final TabListFolderItem folder;
+  final bool expanded;
+
+  const _FolderEntry(this.folder, {required this.expanded});
+
+  @override
+  String get id => 'folder-${folder.folderId}';
+}
+
+class _TabEntry extends _Entry {
+  final QuickTabSwitcherItem item;
+
+  const _TabEntry(this.item);
+
+  @override
+  String get id => 'tab-${item.id}';
+}
+
+/// A folder the strip is currently inside of while walking the grouped
+/// order, and whether its members are shown.
+typedef _OpenFolder = ({String id, int depth, bool visible});
+
+class _CompactChipStrip extends HookConsumerWidget {
+  final String? spaceUuid;
+
+  const _CompactChipStrip({required this.spaceUuid});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final showTitles = settings.quickTabSwitcherShowTitles;
+    final hierarchyGlyphs = settings.quickTabSwitcherHierarchyGlyphs;
+    final titleMaxWidth = settings.quickTabSwitcherTitleWidth;
+    final closeButtonMode = settings.quickTabSwitcherCloseButtonMode;
+
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final essentialIds = watchEssentialShelfTabIds(ref) ?? const <String>[];
+    // Storage order, like the desktop sidebar and the wide rail: the chips
+    // mirror the space, they do not reorder by recency or direction.
+    final items = ref
+        .watch(
+          groupedTabListItemsProvider(
+            spaceUuid: spaceUuid,
+            scope: TabListScope.presentation,
+            ignoreDirection: true,
+          ),
+        )
+        .value;
+    final stateById = {
+      for (final state
+          in ref.watch(selectedSpaceTabStatesWithContainerProvider).value)
+        state.$1.id: state,
+    };
+    // Members of a folder collapsed in storage are absent from the grouped
+    // order; the bar reads them from the space's rows when it expands one.
+    final spaceTabs =
+        ref.watch(
+          watchSpaceTabsDataProvider(spaceUuid).select((value) => value.value),
+        ) ??
+        const <TabSummary>[];
+    final expandedFolders = ref.watch(compactBarExpandedFoldersProvider);
+
+    final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
+    final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
+    final restoreComplete = ref.watch(browserRestoreCompleteProvider);
+    final nativeTabIds = ref
+        .watch(
+          tabStatesProvider.select(
+            (states) => EquatableValue(states.keys.toSet()),
+          ),
+        )
+        .value;
+    final coldTabIds =
+        ref
+            .watch(watchColdTabIdsProvider.select((value) => value.value))
+            ?.value ??
+        const <String>{};
+    final tabDepthById = <String, int>{
+      if (hierarchyGlyphs > 0)
+        for (final item in items)
+          if (item is TabListChildItem) item.tabId: item.depth,
+    };
+
+    _TabEntry? tabEntry(String tabId) {
+      final state = stateById[tabId];
+      if (state == null) {
+        return null;
+      }
+      return _TabEntry(
+        QuickTabSwitcherItem.tab(
+          state,
+          selectedTabId: selectedTabId,
+          pinnedTabIds: pinnedTabIds,
+          tabDepthById: tabDepthById,
+          sandboxSourceUri: sandboxSourceUris[tabId],
+          presence: nativeTabIds.contains(tabId)
+              ? TabPresence.live
+              : coldTabIds.contains(tabId) || restoreComplete
+              ? TabPresence.cold
+              : TabPresence.restoring,
+        ),
+      );
+    }
+
+    final entries = <_Entry>[
+      for (final tabId in essentialIds) _EssentialEntry(tabId),
+    ];
+    final tabEntries = <_Entry>[];
+    // The grouped order nests folder members under their folder by depth;
+    // the strip walks it with a stack of the folders it is inside of, and
+    // skips the members of any that is not expanded here.
+    final openFolders = <_OpenFolder>[];
+    for (final item in items) {
+      while (openFolders.isNotEmpty && openFolders.last.depth >= item.depth) {
+        openFolders.removeLast();
+      }
+      final hidden = openFolders.any((folder) => !folder.visible);
+      switch (item) {
+        case TabListFolderItem():
+          final expanded = expandedFolders.contains(item.folderId);
+          if (!hidden) {
+            tabEntries.add(_FolderEntry(item, expanded: expanded));
+          }
+          openFolders.add((
+            id: item.folderId,
+            depth: item.depth,
+            visible: !hidden && expanded,
+          ));
+          if (!hidden && expanded && item.isCollapsed) {
+            final members =
+                spaceTabs.where((tab) => tab.folderId == item.folderId).toList()
+                  ..sort((a, b) => a.orderKey.compareTo(b.orderKey));
+            for (final member in members) {
+              final entry = tabEntry(member.id);
+              if (entry != null) {
+                tabEntries.add(entry);
+              }
+            }
+          }
+        case TabListTabItem():
+          if (hidden) {
+            continue;
+          }
+          final entry = tabEntry(item.tabId);
+          if (entry != null) {
+            tabEntries.add(entry);
+          }
+      }
+    }
+    if (entries.isNotEmpty && tabEntries.isNotEmpty) {
+      entries.add(const _DividerEntry());
+    }
+    entries.addAll(tabEntries);
+
+    final scrollController = useScrollController();
+    final activeChipKey = useRef(GlobalKey());
+    final isUserScrolling = useRef(false);
+    final userScrollTimer = useRef<Timer?>(null);
+    final overscrollDistance = useRef(0.0);
+
+    useEffect(() {
+      return userScrollTimer.value?.cancel;
+    }, []);
+
+    final activeEntryId = 'tab-$selectedTabId';
+    final hasActiveEntry = entries.any((entry) => entry.id == activeEntryId);
+
+    useScrollToActiveChip<String>(
+      controller: scrollController,
+      activeChipKey: activeChipKey.value,
+      activeId: hasActiveEntry ? activeEntryId : null,
+      orderedIds: [for (final entry in entries) entry.id],
+      isUserScrolling: () => isUserScrolling.value,
+    );
+
+    final decoration = buildQuickTabSwitcherChipDecoration(
+      context,
+      showTitles: showTitles,
+      hierarchyGlyphs: hierarchyGlyphs,
+    );
+
+    Widget buildTabChip(QuickTabSwitcherItem item) {
+      final canClose =
+          !item.isRestoring &&
+          closeButtonMode.showsFor(isActive: item.isActive);
+      final chip = QuickTabSwitcherChip(
+        item: item,
+        isSelected: item.isActive,
+        selectedBorderColor: Theme.of(context).colorScheme.primary,
+        decoration: decoration,
+        label: buildQuickTabSwitcherChipLabel(
+          context,
+          item,
+          isSelected: item.isActive,
+          showTitles: showTitles,
+          hierarchyGlyphs: hierarchyGlyphs,
+          titleMaxWidth: titleMaxWidth,
+        ),
+        padding: const EdgeInsets.only(right: 8.0),
+        onTap: () async {
+          if (item.isActive) {
+            return;
+          }
+          await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
+        },
+        onDelete: canClose
+            ? () => closeTabWithConfirmationAndUndo(context, ref, item.id)
+            : null,
+      );
+      return wrapQuickTabSwitcherChipWithMenu(
+        itemId: item.id,
+        enabled: !item.isRestoring,
+        enablePinTab: true,
+        child: chip,
+      );
+    }
+
+    if (entries.isEmpty) {
+      return Center(
+        child: Text(
+          'No tabs in this space',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        switch (notification) {
+          case UserScrollNotification(:final direction):
+            userScrollTimer.value?.cancel();
+            isUserScrolling.value = direction != ScrollDirection.idle;
+            userScrollTimer.value = Timer(
+              const Duration(milliseconds: 1500),
+              () => isUserScrolling.value = false,
+            );
+          case ScrollStartNotification():
+            overscrollDistance.value = 0.0;
+          // Only a finger dragging past the edge counts; a fling that hits
+          // the end settles without a drag and should not change spaces.
+          case OverscrollNotification(dragDetails: != null, :final overscroll):
+            overscrollDistance.value += overscroll;
+          case ScrollEndNotification():
+            final distance = overscrollDistance.value;
+            overscrollDistance.value = 0.0;
+            if (distance.abs() >= spaceSwipeCommitDistance) {
+              // Past the trailing end (positive) the next space is over
+              // there; past the leading end the previous one.
+              cycleSelectedSpace(
+                ref,
+                distance > 0
+                    ? ContainerCycleDirection.next
+                    : ContainerCycleDirection.previous,
+              );
+            }
+          default:
+            break;
+        }
+        return false;
+      },
+      child: ListView.builder(
+        key: PageStorageKey('compact_tab_bar_$spaceUuid'),
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        // Always draggable, so a space with a handful of chips still
+        // reports the overscroll that switches spaces.
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: ClampingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        scrollCacheExtent: const ScrollCacheExtent.pixels(500),
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          final entry = entries[index];
+          final child = switch (entry) {
+            _EssentialEntry(:final tabId) => Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Center(
+                child: SizedBox.square(
+                  dimension: compactEssentialSize,
+                  child: EssentialTile(tabId: tabId),
+                ),
+              ),
+            ),
+            _DividerEntry() => const Padding(
+              padding: EdgeInsets.only(left: 2.0, right: 6.0),
+              child: VerticalDivider(width: 1, indent: 12, endIndent: 12),
+            ),
+            _FolderEntry(:final folder, :final expanded) => Center(
+              child: CompactFolderChip(
+                name: folder.name,
+                childCount: folder.childCount,
+                expanded: expanded,
+                onTap: () => ref
+                    .read(compactBarExpandedFoldersProvider.notifier)
+                    .toggle(folder.folderId),
+              ),
+            ),
+            _TabEntry(:final item) => Center(child: buildTabChip(item)),
+          };
+          return KeyedSubtree(
+            key: entry.id == activeEntryId
+                ? activeChipKey.value
+                : ValueKey(entry.id),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A folder on the compact bar: the folder glyph (open while [expanded]),
+/// its name and how many tabs it holds. Tapping shows or hides its members,
+/// which follow it inline as ordinary tab chips.
+class CompactFolderChip extends StatelessWidget {
+  final String name;
+  final int childCount;
+  final bool expanded;
+  final VoidCallback? onTap;
+
+  const CompactFolderChip({
+    super.key,
+    required this.name,
+    required this.childCount,
+    required this.expanded,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: FilterChip(
+        avatar: Icon(
+          expanded ? MdiIcons.folderOpenOutline : MdiIcons.folderOutline,
+          size: 18,
+          color: scheme.onSurfaceVariant,
+        ),
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                name.isEmpty ? 'Folder' : name,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (childCount > 0) ...[
+              const SizedBox(width: 6),
+              InlineCountBadge(
+                count: childCount,
+                backgroundColor: scheme.secondaryContainer,
+                foregroundColor: scheme.onSecondaryContainer,
+              ),
+            ],
+          ],
+        ),
+        selected: expanded,
+        showCheckmark: false,
+        tooltip: expanded ? 'Hide folder tabs' : 'Show folder tabs',
+        onSelected: onTap == null ? null : (_) => onTap!(),
+      ),
+    );
+  }
+}
