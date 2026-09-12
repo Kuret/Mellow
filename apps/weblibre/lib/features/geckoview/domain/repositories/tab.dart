@@ -1102,4 +1102,10 @@ class TabRepository extends _$TabRepository {
       await tabContentSub.cancel();
     });
   }
+
+  /// Closes tabs a remote Zen tombstone removed: no `closed_tab_tombstone`,
+  /// so the sync client does not echo the deletion back (PLAN §8.6 item 5).
+  Future<void> closeTabsFromSync(List<String> tabIds) {
+    return _closeTabsInternal(tabIds, recordTombstones: false);
+  }
 }
