@@ -387,7 +387,7 @@ void main() {
       // The user deleted the desktop's space on the phone and closed its
       // tab: both would be tombstones if uploads were on.
       await harness.db.syncStateDao.recordDeletion(remoteSpace, 'space');
-      await harness.db.tabDao.addClosedTabTombstones(['rt1']);
+      await harness.db.syncStateDao.recordDeletion('rt1', 'tab');
 
       await harness.container
           .read(spacesSyncServiceProvider.notifier)
@@ -412,7 +412,7 @@ void main() {
         isNot(contains(remoteSpace)),
       );
       expect(
-        await harness.db.tabDao.allClosedTabTombstoneIds().get(),
+        await harness.db.syncStateDao.pendingDeletions(),
         isNot(contains('rt1')),
       );
 
@@ -457,6 +457,11 @@ void main() {
       initialSettings: settledSettings(server),
     );
     await seedLocalState(harness);
+    // Enough tabs that one deletion stays under the destructive-batch
+    // canary's volume limit.
+    for (var i = 0; i < 10; i++) {
+      await seedTab(harness.db, 'filler$i', spaceUuid: space1);
+    }
     await storeServerDigests(harness);
     await harness.db.syncStateDao.recordDeletion(remoteSpace, 'space');
 
@@ -551,13 +556,18 @@ void main() {
       await seedLocalState(harness);
       await seedSpaces(harness.db, [space2]);
       await seedTab(harness.db, 'closeme', spaceUuid: space2);
+      // Enough tabs that two deletions stay under the destructive-batch
+      // canary's volume limit.
+      for (var i = 0; i < 15; i++) {
+        await seedTab(harness.db, 'filler$i', spaceUuid: space1);
+      }
       final service = harness.container.read(
         spacesSyncServiceProvider.notifier,
       );
       await service.sync(reason: 'first');
       expect(uploadedIds(harness.server), containsAll([space2, 'closeme']));
 
-      // The user closes a tab (tombstone) and deletes a space (ledger); a
+      // The user closes a tab and deletes a space — both write the ledger; a
       // third record simply vanishes with no reason and must not be echoed.
       await harness.container.read(tabRepositoryProvider.notifier).closeTabs([
         'closeme',
