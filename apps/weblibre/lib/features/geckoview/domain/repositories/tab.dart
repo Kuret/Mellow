@@ -37,8 +37,10 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -46,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
+import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
@@ -110,7 +113,7 @@ final class ReturnToSearchTabBackPromptBehavior extends TabBackPromptBehavior {
 
 @Riverpod(keepAlive: true)
 class TabRepository extends _$TabRepository {
-  final _tabsService = GeckoTabService();
+  GeckoTabService get _tabsService => ref.read(geckoTabServiceProvider);
   final _sessionStartedAt = DateTime.now();
   bool _didPruneTombstones = false;
   bool _reclosing = false;
@@ -118,6 +121,16 @@ class TabRepository extends _$TabRepository {
 
   final _tabBackPromptBehavior = <String, TabBackPromptBehavior>{};
   final _closeLock = Lock();
+
+  /// Cold tabs whose session is being created ([materializeTab]) and live
+  /// tabs whose session is being torn down ([demoteToCold]) or closed
+  /// ([_closeTabsInternal]). The engine reports both as plain tab-list
+  /// changes, and the tab-list listener needs these to tell a materialised
+  /// row from an unknown engine tab, and a demotion from a close. An id
+  /// leaves its set with the first tab-list emission that settles it.
+  final _materializing = <String>{};
+  final _demoting = <String>{};
+  final _closing = <String>{};
 
   /// The site-assignment request currently being handled for each tab.
   ///
@@ -184,14 +197,41 @@ class TabRepository extends _$TabRepository {
     return ref.read(selectedContainerProvider.notifier).fetchData();
   }
 
-  Future<bool> _excludeFromHistory(ContainerData? container) async {
-    if (container == null) {
+  Future<bool> _excludeFromHistory(ContainerData? container) =>
+      _excludeFromHistoryFor(container?.id);
+
+  Future<bool> _excludeFromHistoryFor(String? containerId) async {
+    if (containerId == null) {
       return false;
     }
     final local = await ref
         .read(containerRepositoryProvider.notifier)
-        .getLocal(container.id);
+        .getLocal(containerId);
     return local.excludeFromHistory;
+  }
+
+  /// A fresh Zen-format tab id (DESIGN.md "D2 refinement") not in [taken].
+  ///
+  /// The format has millisecond resolution plus a two-digit random suffix, so
+  /// a batch minted in one go can collide with itself.
+  String _mintTabId(Set<String> taken) {
+    var id = ZenIds.newTabId();
+    while (!taken.add(id)) {
+      id = ZenIds.newTabId();
+    }
+    return id;
+  }
+
+  /// The engine creates the tab under the id we hand it; a different id back
+  /// means the row and the session would drift apart, which nothing here
+  /// recovers from, so it is loud.
+  String _confirmMintedId(String minted, String created) {
+    if (created != minted) {
+      logger.e(
+        'Engine created tab $created instead of the requested id $minted',
+      );
+    }
+    return created;
   }
 
   Future<String> addTab({
@@ -238,8 +278,10 @@ class TabRepository extends _$TabRepository {
     final excludeFromHistory = await _excludeFromHistory(assignedContainer);
 
     final newTabId = await tabDao.upsertTabTransactional(
-      () {
-        return _tabsService.addTab(
+      () async {
+        final mintedId = _mintTabId({});
+        final createdId = await _tabsService.addTab(
+          tabId: mintedId,
           url: url,
           selectTab: selectTab,
           startLoading: startLoading,
@@ -254,6 +296,7 @@ class TabRepository extends _$TabRepository {
           // loads; the replicated snapshot only follows once its row is written.
           excludeFromHistory: excludeFromHistory,
         );
+        return _confirmMintedId(mintedId, createdId);
       },
       parentId: Value(validatedParentId),
       containerId: Value(assignedContainer?.id),
@@ -334,6 +377,13 @@ class TabRepository extends _$TabRepository {
     };
     final excludeFromHistory = await _excludeFromHistory(assignedContainer);
 
+    // Every tab gets a Zen-format id up front (DESIGN.md "D2 refinement");
+    // a caller that brings its own id (a restore) keeps it.
+    final taken = {for (final tab in tabs) ?tab.tabId};
+    for (final tab in tabs) {
+      tab.tabId ??= _mintTabId(taken);
+    }
+
     final createdTabIds = await db.transaction(() async {
       final createdTabIds = await _tabsService.addMultipleTabs(
         tabs: tabs,
@@ -343,6 +393,9 @@ class TabRepository extends _$TabRepository {
         // written. One value for the batch — they all land in this container.
         excludeFromHistory: excludeFromHistory,
       );
+      for (var i = 0; i < createdTabIds.length && i < tabs.length; i++) {
+        _confirmMintedId(tabs[i].tabId!, createdTabIds[i]);
+      }
       // Build sets for validation
       final creatingTabIds = createdTabIds.toSet();
       final parentIdsToValidate = tabs
@@ -561,6 +614,22 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<bool> selectTab(String tabId) async {
+    // A cold row has no session to switch to: selecting it means giving it
+    // one (PLAN §7.4 item 2). Every UI tap lands here, so this is the one
+    // place that decides.
+    final summary = await ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabSummaryById(tabId)
+        .getSingleOrNull();
+    if (!ref.mounted) {
+      return false;
+    }
+    if (summary != null && summary.isCold) {
+      _clearForceBrowserHome();
+      return materializeTab(tabId);
+    }
+
     // The tab is still a pre-restore placeholder (known to the DB but not to
     // the engine yet): queue the selection until the native state arrives.
     if (!ref.read(browserRestoreCompleteProvider) &&
@@ -595,8 +664,15 @@ class TabRepository extends _$TabRepository {
   /// anything. Safe against the home target's own flag, because the branch of
   /// [_selectNextTab] that sets it is reached only when nothing was selected
   /// here.
-  Future<void> _selectTabAfterClose(String tabId) async {
+  Future<void> _selectTabAfterClose(
+    String tabId, {
+    required bool materialize,
+  }) async {
     _clearForceBrowserHome();
+    if (materialize) {
+      await materializeTab(tabId);
+      return;
+    }
     await _tabsService.selectTab(tabId: tabId);
   }
 
@@ -728,15 +804,31 @@ class TabRepository extends _$TabRepository {
     // other tabs without one.
     final currentSpaceUuid = summary?.spaceUuid;
 
-    Future<List<String>> spaceTabIds(String? spaceUuid) async {
+    // Cold rows have no session to switch to. A live neighbour is preferred
+    // at every step below; a cold one is only materialised once this space
+    // has no live tab left to offer (PLAN §7.4 item 2).
+    final coldIds = (await db.tabDao.coldTabIds().get()).toSet();
+    if (!ref.mounted) return;
+    final liveExcludedTabIds = {...excludedTabIds, ...coldIds};
+
+    Future<void> select(String id) =>
+        _selectTabAfterClose(id, materialize: coldIds.contains(id));
+
+    Future<List<String>> spaceTabIds(
+      String? spaceUuid, {
+      required Set<String> excluded,
+    }) async {
       final tabs = await db.tabDao.getSpaceTabsData(spaceUuid).get();
       return [
         for (final tab in tabs)
-          if (tab.id != tabId && !excludedTabIds.contains(tab.id)) tab.id,
+          if (tab.id != tabId && !excluded.contains(tab.id)) tab.id,
       ];
     }
 
-    final sameSpaceTabs = await spaceTabIds(currentSpaceUuid);
+    final sameSpaceLiveTabs = await spaceTabIds(
+      currentSpaceUuid,
+      excluded: liveExcludedTabIds,
+    );
     if (!ref.mounted) return;
 
     // Priority 1: hand the user back to whoever opened this tab, across
@@ -747,7 +839,7 @@ class TabRepository extends _$TabRepository {
     );
     if (!ref.mounted) return;
     if (ancestorTabId != null) {
-      return _selectTabAfterClose(ancestorTabId);
+      return select(ancestorTabId);
     }
 
     // Priority 2: Check for previous tab by timestamp
@@ -755,21 +847,32 @@ class TabRepository extends _$TabRepository {
         .previousTabByTimestamp(tabId: tabId)
         .getSingleOrNull();
 
-    if (previousTabId != null) {
-      if (sameSpaceTabs.any((tab) => tab == previousTabId)) {
-        return _selectTabAfterClose(previousTabId);
-      }
+    if (previousTabId != null && sameSpaceLiveTabs.contains(previousTabId)) {
+      return select(previousTabId);
     }
 
     if (!ref.mounted) return;
 
     final orderedNeighborTabId = await _nearestAvailableVisibleTabByOrder(
       tabId,
-      excludedTabIds: excludedTabIds,
+      excludedTabIds: liveExcludedTabIds,
     );
 
     if (orderedNeighborTabId != null) {
-      return _selectTabAfterClose(orderedNeighborTabId);
+      return select(orderedNeighborTabId);
+    }
+
+    if (!ref.mounted) return;
+
+    // No live tab left in this scope: a cold neighbour is still this space's
+    // tab, and loading it beats leaving the space.
+    final coldNeighborTabId = await _nearestAvailableVisibleTabByOrder(
+      tabId,
+      excludedTabIds: excludedTabIds,
+    );
+
+    if (coldNeighborTabId != null) {
+      return select(coldNeighborTabId);
     }
 
     if (!ref.mounted) return;
@@ -794,8 +897,13 @@ class TabRepository extends _$TabRepository {
       return;
     }
 
+    final sameSpaceTabs = await spaceTabIds(
+      currentSpaceUuid,
+      excluded: excludedTabIds,
+    );
+    if (!ref.mounted) return;
     if (sameSpaceTabs.isNotEmpty) {
-      return _selectTabAfterClose(sameSpaceTabs.first);
+      return select(sameSpaceTabs.first);
     }
 
     final spaces = await db.spaceDao.getAll();
@@ -804,10 +912,18 @@ class TabRepository extends _$TabRepository {
       if (space.uuid == currentSpaceUuid) {
         continue;
       }
-      final candidates = await spaceTabIds(space.uuid);
+      final candidates = await spaceTabIds(
+        space.uuid,
+        excluded: excludedTabIds,
+      );
       if (!ref.mounted) return;
       if (candidates.isNotEmpty) {
-        return _selectTabAfterClose(candidates.first);
+        return select(
+          candidates.firstWhere(
+            (id) => !coldIds.contains(id),
+            orElse: () => candidates.first,
+          ),
+        );
       }
     }
   }
@@ -852,6 +968,9 @@ class TabRepository extends _$TabRepository {
       if (coldToClose.isNotEmpty) {
         await (db.tab.delete()..where((t) => t.id.isIn(coldToClose))).go();
       }
+      // The engine reports the removal as a tab-list change; without this the
+      // listener would take a closed tab for one that merely went cold.
+      _closing.addAll(liveToClose);
       if (liveToClose.length == 1) {
         await _tabsService.removeTab(tabId: liveToClose.single);
       } else if (liveToClose.isNotEmpty) {
@@ -926,15 +1045,128 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  /// Gives a cold tab (PLAN §7.4) an engine session again. Filled in by W4.
-  Future<void> materializeTab(String tabId) {
-    throw UnimplementedError('W4');
+  /// Gives a cold tab (PLAN §7.4) an engine session again and selects it.
+  ///
+  /// The session is created under the row's own id (DESIGN.md "D2
+  /// refinement"), with the stored URL and container, and `engine_tab_id` is
+  /// set once the engine confirms. The stored title and icon stay on the row
+  /// until the engine reports its own. A live tab is simply selected. Returns
+  /// `false` when there is no such row or the engine refused.
+  Future<bool> materializeTab(String tabId) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    final row = await tabDao.getTabDataById(tabId).getSingleOrNull();
+    if (!ref.mounted || row == null) {
+      return false;
+    }
+    if (row.engineTabId != null) {
+      await _tabsService.selectTab(tabId: tabId);
+      return true;
+    }
+    if (!_materializing.add(tabId)) {
+      // Already on its way; the engine selects it when it lands.
+      return true;
+    }
+
+    try {
+      final excludeFromHistory = await _excludeFromHistoryFor(row.containerId);
+      if (!ref.mounted) return false;
+
+      final createdId = await _tabsService.addTab(
+        tabId: tabId,
+        url: row.url ?? TabState.defaultUrl,
+        selectTab: true,
+        startLoading: true,
+        parentId: null,
+        contextId: row.containerId,
+        source: Internal.none,
+        private: false,
+        historyMetadata: null,
+        additionalHeaders: null,
+        excludeFromHistory: excludeFromHistory,
+      );
+      _confirmMintedId(tabId, createdId);
+      if (!ref.mounted) return true;
+      await tabDao.setEngineTabId(tabId, createdId);
+      return true;
+    } catch (error, stackTrace) {
+      _materializing.remove(tabId);
+      logger.e(
+        'Failed to materialize tab $tabId',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 
-  /// Drops a live tab's engine session while keeping its row (no tombstone,
-  /// nothing projected). Filled in by W4.
-  Future<void> demoteToCold(String tabId) {
-    throw UnimplementedError('W4');
+  /// Drops a live tab's engine session while keeping its row: no tombstone,
+  /// nothing projected, the title/url/icon stay for the cold row to render.
+  ///
+  /// Refused (`false`) for the selected tab, pinned and essential tabs,
+  /// private tabs and rows that are cold already. The tab-list listener sees
+  /// the removal like any other and leaves ids in [_demoting] alone.
+  Future<bool> demoteToCold(String tabId) async {
+    if (ref.read(selectedTabProvider) == tabId) {
+      return false;
+    }
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    final row = await tabDao.getTabSummaryById(tabId).getSingleOrNull();
+    if (!ref.mounted || row == null) {
+      return false;
+    }
+    if (row.isCold ||
+        row.tabShelf != TabShelf.normal ||
+        row.tabMode == TabModeDbValue.private ||
+        !ref.read(tabListProvider).value.contains(tabId)) {
+      return false;
+    }
+    if (!_demoting.add(tabId)) {
+      return false;
+    }
+
+    try {
+      await _tabsService.removeTab(tabId: tabId);
+      if (!ref.mounted) return true;
+      await tabDao.setEngineTabId(tabId, null);
+      return true;
+    } catch (error, stackTrace) {
+      _demoting.remove(tabId);
+      logger.e(
+        'Failed to demote tab $tabId',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  /// Reconciles the rows with [engineTabIds] (see [TabDao.syncTabs]).
+  ///
+  /// Ids in [_demoting] are left out of the engine list on purpose: a stale
+  /// emission can still carry a tab whose session is already gone, and the
+  /// row must not be promoted back to live by it. Closed ids are deleted
+  /// rather than demoted.
+  Future<void> _syncTabs(TabDatabase db, List<String> engineTabIds) async {
+    final demoting = _demoting.toSet();
+    await db.tabDao.syncTabs(
+      engineTabIds: demoting.isEmpty
+          ? engineTabIds
+          : [
+              for (final id in engineTabIds)
+                if (!demoting.contains(id)) id,
+            ],
+      defaultSpaceUuid: ref.read(selectedSpaceProvider),
+      closingTabIds: _closing.toSet(),
+    );
+  }
+
+  /// Settles the in-flight sets against the engine's tab list: a materialised
+  /// tab is done once listed, a demoted or closed one once no longer listed.
+  void _settleInFlight(List<String> engineTabIds) {
+    final listed = engineTabIds.toSet();
+    _materializing.removeWhere(listed.contains);
+    _demoting.removeWhere((id) => !listed.contains(id));
+    _closing.removeWhere((id) => !listed.contains(id));
   }
 
   @override
@@ -958,6 +1190,11 @@ class TabRepository extends _$TabRepository {
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
       (tabId) async {
+        // A materialised tab has its row already, with its own space and
+        // container; filing it under the selected ones would move it.
+        if (_materializing.contains(tabId)) {
+          return;
+        }
         final containerId = ref.read(selectedContainerProvider);
         final spaceUuid = ref.read(selectedSpaceProvider);
         await db.tabDao.insertTab(
@@ -1038,11 +1275,9 @@ class TabRepository extends _$TabRepository {
             (next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false));
 
         if (shouldSyncTabs) {
-          await db.tabDao.syncTabs(
-            engineTabIds: next.value,
-            defaultSpaceUuid: ref.read(selectedSpaceProvider),
-          );
+          await _syncTabs(db, next.value);
         }
+        _settleInFlight(next.value);
       },
       onError: (Object error, StackTrace stackTrace) {
         logger.e(
@@ -1062,10 +1297,7 @@ class TabRepository extends _$TabRepository {
       if (restoreComplete && !(previous ?? false)) {
         final currentTabs = ref.read(tabListProvider).value;
         if (currentTabs.isNotEmpty) {
-          await db.tabDao.syncTabs(
-            engineTabIds: currentTabs,
-            defaultSpaceUuid: ref.read(selectedSpaceProvider),
-          );
+          await _syncTabs(db, currentTabs);
         }
       }
     });
