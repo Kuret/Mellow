@@ -34,14 +34,10 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -49,9 +45,9 @@ import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 /// Accordion stacking mode for the quick tab switcher bar: every available
-/// container renders as a header chip and the selected container is
+/// space renders as a header chip and the selected space is
 /// "expanded" — its tabs appear inline right after its header. Tapping
-/// another header selects that container, collapsing the previous group.
+/// another header selects that space, collapsing the previous group.
 class AccordionQuickTabSwitcher extends HookConsumerWidget {
   const AccordionQuickTabSwitcher({super.key, this.axis = Axis.horizontal});
 
@@ -110,29 +106,16 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       ),
     );
 
-    final containers =
-        ref.watch(
-          watchContainersWithCountProvider.select((value) => value.value),
-        ) ??
-        const <ContainerDataWithCount>[];
-    final selectedContainerId = ref.watch(selectedContainerProvider);
+    final spaces =
+        ref.watch(watchSpacesProvider.select((value) => value.value)) ??
+        const <SpaceData>[];
+    final selectedSpaceUuid = ref.watch(selectedSpaceProvider);
     final selectedTabId = ref.watch(selectedTabProvider);
 
-    final unassignedTabCount = ref.watch(
-      containerTabCountProvider(
-        // ignore: provider_parameters
-        ContainerFilterById(containerId: null),
-      ).select((value) => value.value ?? 0),
-    );
-
     final expandedTabStates = ref.watch(
-      selectedContainerTabStatesWithContainerProvider,
+      selectedSpaceTabStatesWithContainerProvider,
     );
-    final pinnedTabIds = ref.watch(
-      watchPinnedTabIdsProvider.select(
-        (value) => value.value ?? const <String>{},
-      ),
-    );
+    final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
     final sandboxCaptureMap =
         ref.watch(sandboxCaptureMapProvider).value ?? const {};
     final restoreComplete = ref.watch(browserRestoreCompleteProvider);
@@ -146,7 +129,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     final tabDepthById = ref
         .watch(
           groupedTabListItemsProvider(
-            containerId: selectedContainerId,
+            spaceUuid: selectedSpaceUuid,
             scope: TabListScope.presentation,
           ).select((value) {
             return EquatableValue(<String, int>{
@@ -185,14 +168,8 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       thickContainerSelectedBorder: true,
     );
 
-    Future<void> selectContainer(String? containerId) async {
-      if (containerId != null) {
-        await ref
-            .read(selectedContainerProvider.notifier)
-            .setContainerId(containerId);
-      } else {
-        ref.read(selectedContainerProvider.notifier).clearContainer();
-      }
+    void selectSpace(String spaceUuid) {
+      ref.read(selectedSpaceProvider.notifier).setSpace(spaceUuid);
     }
 
     Widget buildTabChip(QuickTabSwitcherItem item) {
@@ -241,25 +218,15 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       );
     }
 
-    final showUnassignedGroup =
-        unassignedTabCount > 0 || selectedContainerId == null;
-
     final entries = <_AccordionEntry>[
-      if (showUnassignedGroup)
+      for (final space in spaces) ...[
         _AccordionEntry.header(
-          container: null,
-          tabCount: unassignedTabCount,
-          isExpanded: selectedContainerId == null,
+          space: space,
+          tabCount:
+              ref.watch(spaceTabCountProvider(space.uuid)).value ?? 0,
+          isExpanded: space.uuid == selectedSpaceUuid,
         ),
-      if (selectedContainerId == null)
-        ...expandedItems.map(_AccordionEntry.tab),
-      for (final container in containers) ...[
-        _AccordionEntry.header(
-          container: container,
-          tabCount: container.tabCount ?? 0,
-          isExpanded: container.id == selectedContainerId,
-        ),
-        if (container.id == selectedContainerId)
+        if (space.uuid == selectedSpaceUuid)
           ...expandedItems.map(_AccordionEntry.tab),
       ],
     ];
@@ -286,28 +253,13 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         },
     ];
 
-    // The expanded group's tray is filled with the container's color so the
-    // whole group reads as "this container". The unassigned group has no color
-    // and falls back to a neutral surface.
-    ContainerDataWithCount? expandedContainer;
-    for (final container in containers) {
-      if (container.id == selectedContainerId) {
-        expandedContainer = container;
-        break;
-      }
-    }
+    // The expanded group's tray uses a plain neutral surface — spaces have no
+    // per-item color of their own (unlike the old container tray fill).
     final scheme = Theme.of(context).colorScheme;
-    final trayPalette = expandedContainer != null
-        ? ContainerColors.palette(
-            context,
-            expandedContainer.color,
-            useCustomColor: expandedContainer.metadata.useCustomColor,
-          )
-        : null;
-    final trayFill = trayPalette?.containerColor ?? scheme.surfaceContainerHigh;
+    final trayFill = scheme.surfaceContainerHigh;
 
     // The chip to keep centered: the active tab when it is part of the
-    // expanded group, otherwise the expanded container header as a fallback.
+    // expanded group, otherwise the expanded space header as a fallback.
     final activeTabEntryId = 'tab-$selectedTabId';
     final hasActiveTab = entries.any((entry) => entry.id == activeTabEntryId);
     String? expandedHeaderId;
@@ -366,31 +318,15 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   final child = switch (entry) {
-                    // Long-pressing a container header opens the same
-                    // [ContainerMenu] as the container chip in the tab view.
-                    // The unassigned pseudo-group gets the reduced variant:
-                    // it has no container row to edit, pin or delete.
-                    _AccordionHeaderEntry() => ContainerMenu(
-                      container: entry.container,
-                      scopeContainerId: entry.container?.id,
-                      enableNewTab: true,
-                      enablePin: entry.container != null,
-                      enableEdit: entry.container != null,
-                      enableDelete: entry.container != null,
-                      builder: (context, controller, _) => _AccordionHeaderChip(
-                        entry: entry,
-                        // The narrow rail can't fit the container title;
-                        // show the container icon avatar + count badge only.
-                        showTitle: !isVertical,
-                        onSelected: () => selectContainer(entry.container?.id),
-                        onLongPress: () {
-                          if (controller.isOpen) {
-                            controller.close();
-                          } else {
-                            controller.open();
-                          }
-                        },
-                      ),
+                    // Space header rows are plain switch chips; renaming,
+                    // setting a container or deleting a space happens via
+                    // SpaceChips in the tab tray header, not here.
+                    _AccordionHeaderEntry() => _AccordionHeaderChip(
+                      entry: entry,
+                      // The narrow rail can't fit the space title; show the
+                      // icon avatar + count badge only.
+                      showTitle: !isVertical,
+                      onSelected: () => selectSpace(entry.space.uuid),
                     ),
                     _AccordionTabEntry(:final item) => buildTabChip(item),
                   };
@@ -420,7 +356,7 @@ sealed class _AccordionEntry {
   const _AccordionEntry();
 
   factory _AccordionEntry.header({
-    required ContainerDataWithCount? container,
+    required SpaceData space,
     required int tabCount,
     required bool isExpanded,
   }) = _AccordionHeaderEntry;
@@ -430,21 +366,20 @@ sealed class _AccordionEntry {
   String get id;
 }
 
-/// A container group header chip; [container] is null for the pseudo-group
-/// of tabs without a container.
+/// A space group header chip.
 class _AccordionHeaderEntry extends _AccordionEntry {
-  final ContainerDataWithCount? container;
+  final SpaceData space;
   final int tabCount;
   final bool isExpanded;
 
   const _AccordionHeaderEntry({
-    required this.container,
+    required this.space,
     required this.tabCount,
     required this.isExpanded,
   });
 
   @override
-  String get id => 'container-${container?.id}';
+  String get id => 'space-${space.uuid}';
 }
 
 class _AccordionTabEntry extends _AccordionEntry {
@@ -456,56 +391,33 @@ class _AccordionTabEntry extends _AccordionEntry {
   String get id => 'tab-${item.id}';
 }
 
-/// Container group header, rendered as a solid container-colored box. The fill
-/// is the same whether the container is selected (expanded) or not — selection
-/// only adds the surrounding tray and the inline tabs, it never recolors the
+/// Space group header, rendered as a plain neutral chip. The fill is the
+/// same whether the space is selected (expanded) or not — selection only
+/// adds the surrounding tray and the inline tabs, it never recolors the
 /// header chip itself.
 class _AccordionHeaderChip extends StatelessWidget {
   final _AccordionHeaderEntry entry;
   final VoidCallback onSelected;
 
-  /// Opens the container's context menu.
-  final VoidCallback? onLongPress;
-
-  /// When false (e.g. the narrow vertical rail) the container title is hidden
+  /// When false (e.g. the narrow vertical rail) the space title is hidden
   /// and only the icon avatar + count badge are shown, so the chip fits.
   final bool showTitle;
 
   const _AccordionHeaderChip({
     required this.entry,
     required this.onSelected,
-    this.onLongPress,
     this.showTitle = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final container = entry.container;
+    final space = entry.space;
 
-    // The header content sits on the container color, so it always uses the
-    // on-container foreground.
-    final Color fill;
-    final Color nullForeground;
-    final Color badgeBackground;
-    final Color badgeForeground;
-
-    if (container != null) {
-      final palette = ContainerColors.palette(
-        context,
-        container.color,
-        useCustomColor: container.metadata.useCustomColor,
-      );
-      fill = palette.containerColor;
-      nullForeground = palette.onContainerColor;
-      badgeBackground = palette.badgeBackgroundColor;
-      badgeForeground = palette.badgeForegroundColor;
-    } else {
-      fill = scheme.surfaceContainerHigh;
-      nullForeground = scheme.onSurfaceVariant;
-      badgeBackground = scheme.secondaryContainer;
-      badgeForeground = scheme.onSecondaryContainer;
-    }
+    final fill = scheme.surfaceContainerHigh;
+    final foreground = scheme.onSurfaceVariant;
+    final badgeBackground = scheme.secondaryContainer;
+    final badgeForeground = scheme.onSecondaryContainer;
 
     final countBadge = entry.tabCount > 0
         ? InlineCountBadge(
@@ -515,85 +427,37 @@ class _AccordionHeaderChip extends StatelessWidget {
           )
         : null;
 
-    final iconAvatar = container != null
-        ? buildContainerChipAvatar(context, container, true)
-        : Icon(MdiIcons.folderHidden, color: nullForeground);
+    final iconAvatar = Icon(
+      MdiIcons.viewDashboardOutline,
+      color: foreground,
+    );
 
-    // Same fill regardless of selection — the tray (added when expanded)
-    // is what signals the active container, not a header recolor.
     final side = BorderSide(width: 2, color: fill);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8.0),
       side: side,
     );
 
-    // FilterChip has no long-press of its own, so an outer InkWell claims the
-    // gesture without interfering with the tap-to-select FilterChip beneath.
-    Widget wrapLongPress(Widget chip) {
-      if (onLongPress == null) {
-        return chip;
-      }
-      return InkWell(
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(8.0),
-        child: chip,
-      );
-    }
+    final displayName = space.name.isEmpty ? 'Space' : space.name;
 
     if (!showTitle) {
       // Narrow rail: no room for the avatar slot + title + trailing badge side
-      // by side (the badge gets clipped). Stack the container icon over the
+      // by side (the badge gets clipped). Stack the space icon over the
       // count badge inside the label instead, dropping the avatar slot.
-      return wrapLongPress(
-        FilterChip(
-          labelPadding: EdgeInsets.zero,
-          label: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (iconAvatar != null) iconAvatar,
-              if (countBadge != null) ...[
-                if (iconAvatar != null) const SizedBox(height: 4),
-                // Multi-digit counts can exceed the narrow rail's fixed 48px chip
-                // width; scale the badge down to fit instead of overflowing.
-                FittedBox(fit: BoxFit.scaleDown, child: countBadge),
-              ],
+      return FilterChip(
+        labelPadding: EdgeInsets.zero,
+        label: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            iconAvatar,
+            if (countBadge != null) ...[
+              const SizedBox(height: 4),
+              // Multi-digit counts can exceed the narrow rail's fixed 48px chip
+              // width; scale the badge down to fit instead of overflowing.
+              FittedBox(fit: BoxFit.scaleDown, child: countBadge),
             ],
-          ),
-          color: WidgetStatePropertyAll(fill),
-          selected: false,
-          showCheckmark: false,
-          onSelected: (value) {
-            if (value) {
-              onSelected();
-            }
-          },
-          side: side,
-          shape: shape,
+          ],
         ),
-      );
-    }
-
-    return wrapLongPress(
-      FilterChip(
-        avatar: iconAvatar,
-        label: container != null
-            ? buildContainerChipLabel(
-                context,
-                container,
-                true,
-                trailing: countBadge,
-              )
-            : SizedBox(
-                height: 20,
-                child: Center(
-                  child:
-                      countBadge ??
-                      DefaultTextStyle.merge(
-                        style: TextStyle(color: nullForeground),
-                        child: const SizedBox.shrink(),
-                      ),
-                ),
-              ),
         color: WidgetStatePropertyAll(fill),
         selected: false,
         showCheckmark: false,
@@ -604,7 +468,28 @@ class _AccordionHeaderChip extends StatelessWidget {
         },
         side: side,
         shape: shape,
+      );
+    }
+
+    return FilterChip(
+      avatar: iconAvatar,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(displayName, style: TextStyle(color: foreground)),
+          if (countBadge != null) ...[const SizedBox(width: 6), countBadge],
+        ],
       ),
+      color: WidgetStatePropertyAll(fill),
+      selected: false,
+      showCheckmark: false,
+      onSelected: (value) {
+        if (value) {
+          onSelected();
+        }
+      },
+      side: side,
+      shape: shape,
     );
   }
 }

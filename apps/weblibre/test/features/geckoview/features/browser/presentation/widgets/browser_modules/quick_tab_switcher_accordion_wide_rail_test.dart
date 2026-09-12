@@ -38,8 +38,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -56,10 +58,11 @@ class _NoSelectedTab extends SelectedTab {
   String? build() => null;
 }
 
-/// [SelectedContainer] without its persistence and tab-selection listeners.
-class _NoSelectedContainer extends SelectedContainer {
+/// [SelectedSpace] without its persistence and tab-selection listeners,
+/// fixed to the single test space.
+class _TestSelectedSpace extends SelectedSpace {
   @override
-  String? build() => null;
+  String? build() => 'space-1';
 }
 
 /// Forces the pre-restore ("placeholder") code path: the switcher then reads
@@ -107,6 +110,7 @@ Future<TabDatabase> _memoryDatabaseWithOneTab({required String title}) async {
     'tab-1',
     source: TabSource.manual,
     parentId: const Value(null),
+    spaceUuid: const Value('space-1'),
     url: Value(Uri.parse('https://example.com')),
     title: Value(title),
     tabMode: const Value(TabMode.regular),
@@ -130,7 +134,12 @@ Future<void> _pumpAccordion(
             railWidth: railWidth,
           ),
         ),
-        selectedContainerProvider.overrideWith(_NoSelectedContainer.new),
+        watchSpacesProvider.overrideWith(
+          (ref) => Stream.value(<SpaceData>[
+            SpaceData(uuid: 'space-1', name: 'Space', orderIndex: 0),
+          ]),
+        ),
+        selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
         selectedTabProvider.overrideWith(_NoSelectedTab.new),
         tabStatesProvider.overrideWith(_EmptyTabStates.new),
         browserRestoreCompleteProvider.overrideWith(_NotRestored.new),
