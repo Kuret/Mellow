@@ -53,10 +53,8 @@ sealed class TabViewItem {
     required String? sourceSearchQuery,
   }) = SearchTabViewItem;
 
-  const factory TabViewItem.standalone({
-    required String tabId,
-    int depth,
-  }) = StandaloneTabViewItem;
+  const factory TabViewItem.standalone({required String tabId, int depth}) =
+      StandaloneTabViewItem;
 
   const factory TabViewItem.parent({
     required String tabId,

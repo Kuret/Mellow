@@ -190,8 +190,7 @@ void main() {
       expect(result.nextTabId, 'c');
     });
 
-    test('dragging the primary split member moves every sibling with it',
-        () {
+    test('dragging the primary split member moves every sibling with it', () {
       final items = [
         TabViewItem.standalone(tabId: 'split-1'),
         TabViewItem.standalone(tabId: 'split-2'),

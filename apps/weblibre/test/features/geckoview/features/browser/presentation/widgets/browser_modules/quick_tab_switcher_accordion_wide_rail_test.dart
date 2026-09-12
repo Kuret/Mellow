@@ -202,9 +202,7 @@ void main() {
     await _disposeTree(tester);
   });
 
-  testWidgets('hides the tab title on a narrow vertical rail', (
-    tester,
-  ) async {
+  testWidgets('hides the tab title on a narrow vertical rail', (tester) async {
     final db = await _memoryDatabaseWithOneTab(title: tabTitle);
     addTearDown(db.close);
 

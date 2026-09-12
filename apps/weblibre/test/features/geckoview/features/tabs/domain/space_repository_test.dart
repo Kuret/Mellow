@@ -39,7 +39,9 @@ void main() {
       await seedTab(h.db, 'k', spaceUuid: 'keep');
       h.tabs.watchedSpaces.add('gone');
 
-      await h.container.read(spaceRepositoryProvider.notifier).deleteSpace('gone');
+      await h.container
+          .read(spaceRepositoryProvider.notifier)
+          .deleteSpace('gone');
 
       expect(h.tabs.closedTabIds, unorderedEquals(['a', 'b']));
       // The row was still there when the tabs were closed (PLAN §7.3).
@@ -48,20 +50,23 @@ void main() {
       expect(await tabIds(h.db), ['k']);
     });
 
-    test('countTabsInSpace counts pinned and folder tabs, not essentials', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s']);
-      await seedTab(h.db, 'n', spaceUuid: 's');
-      await seedTab(h.db, 'p', spaceUuid: 's', shelf: TabShelf.pinned);
-      await seedTab(h.db, 'e', shelf: TabShelf.essential);
+    test(
+      'countTabsInSpace counts pinned and folder tabs, not essentials',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s']);
+        await seedTab(h.db, 'n', spaceUuid: 's');
+        await seedTab(h.db, 'p', spaceUuid: 's', shelf: TabShelf.pinned);
+        await seedTab(h.db, 'e', shelf: TabShelf.essential);
 
-      expect(
-        await h.container
-            .read(spaceRepositoryProvider.notifier)
-            .countTabsInSpace('s'),
-        2,
-      );
-    });
+        expect(
+          await h.container
+              .read(spaceRepositoryProvider.notifier)
+              .countTabsInSpace('s'),
+          2,
+        );
+      },
+    );
 
     test('ensureDefaultSpace creates one and adopts orphans', () async {
       final h = openRepositoryHarness();

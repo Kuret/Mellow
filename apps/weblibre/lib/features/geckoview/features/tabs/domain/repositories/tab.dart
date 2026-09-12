@@ -187,10 +187,9 @@ class TabDataRepository extends _$TabDataRepository {
     } else {
       spaceUuid = tab.spaceUuid;
     }
-    await db.tabDao.moveToScope(
-      [tabId],
-      TabOrderScope.normal(spaceUuid: spaceUuid, folderId: folderId),
-    );
+    await db.tabDao.moveToScope([
+      tabId,
+    ], TabOrderScope.normal(spaceUuid: spaceUuid, folderId: folderId));
     return true;
   }
 
@@ -302,7 +301,10 @@ class TabDataRepository extends _$TabDataRepository {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .containerDao
-        .getAllTabIds(includeRegular: includeRegular, includePrivate: includePrivate)
+        .getAllTabIds(
+          includeRegular: includeRegular,
+          includePrivate: includePrivate,
+        )
         .get();
 
     if (tabIds.isNotEmpty) {

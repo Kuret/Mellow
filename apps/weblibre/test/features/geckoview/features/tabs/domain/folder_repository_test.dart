@@ -25,50 +25,56 @@ void main() {
       expect(await repo.countTabsInFolder(inner.id), 2);
     });
 
-    test('deleteFolder closes the subtree\'s tabs first, then cascades', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s']);
-      final repo = h.container.read(folderRepositoryProvider.notifier);
-      final outer = await repo.createFolder('s', name: 'Outer');
-      final inner = await repo.createFolder(
-        's',
-        parentFolderId: outer.id,
-        name: 'Inner',
-      );
-      await seedTab(h.db, 'o1', spaceUuid: 's', folderId: outer.id);
-      await seedTab(h.db, 'i1', spaceUuid: 's', folderId: inner.id);
-      await seedTab(h.db, 'root', spaceUuid: 's');
-      h.tabs.watchedFolders.add(outer.id);
+    test(
+      'deleteFolder closes the subtree\'s tabs first, then cascades',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s']);
+        final repo = h.container.read(folderRepositoryProvider.notifier);
+        final outer = await repo.createFolder('s', name: 'Outer');
+        final inner = await repo.createFolder(
+          's',
+          parentFolderId: outer.id,
+          name: 'Inner',
+        );
+        await seedTab(h.db, 'o1', spaceUuid: 's', folderId: outer.id);
+        await seedTab(h.db, 'i1', spaceUuid: 's', folderId: inner.id);
+        await seedTab(h.db, 'root', spaceUuid: 's');
+        h.tabs.watchedFolders.add(outer.id);
 
-      await repo.deleteFolder(outer.id);
+        await repo.deleteFolder(outer.id);
 
-      expect(h.tabs.closedTabIds, unorderedEquals(['o1', 'i1']));
-      expect(h.tabs.folderExistedAtClose[outer.id], isTrue);
-      expect(await repo.getFolder(outer.id), isNull);
-      expect(await repo.getFolder(inner.id), isNull);
-      expect(await tabIds(h.db), ['root']);
-    });
+        expect(h.tabs.closedTabIds, unorderedEquals(['o1', 'i1']));
+        expect(h.tabs.folderExistedAtClose[outer.id], isTrue);
+        expect(await repo.getFolder(outer.id), isNull);
+        expect(await repo.getFolder(inner.id), isNull);
+        expect(await tabIds(h.db), ['root']);
+      },
+    );
 
-    test('createFolder ranks after the scope\'s tabs; rename and collapse', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s']);
-      await seedTab(h.db, 't', spaceUuid: 's');
-      final repo = h.container.read(folderRepositoryProvider.notifier);
+    test(
+      'createFolder ranks after the scope\'s tabs; rename and collapse',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s']);
+        await seedTab(h.db, 't', spaceUuid: 's');
+        final repo = h.container.read(folderRepositoryProvider.notifier);
 
-      final folder = await repo.createFolder('s');
-      expect(folder.name, 'Folder');
-      expect(folder.spaceUuid, 's');
-      expect(
-        folder.orderKey.compareTo((await summaryOf(h.db, 't')).orderKey),
-        greaterThan(0),
-      );
+        final folder = await repo.createFolder('s');
+        expect(folder.name, 'Folder');
+        expect(folder.spaceUuid, 's');
+        expect(
+          folder.orderKey.compareTo((await summaryOf(h.db, 't')).orderKey),
+          greaterThan(0),
+        );
 
-      await repo.renameFolder(folder.id, 'Research');
-      await repo.setCollapsed(folder.id, true);
-      final updated = (await repo.getFolder(folder.id))!;
-      expect(updated.name, 'Research');
-      expect(updated.isCollapsed, isTrue);
-    });
+        await repo.renameFolder(folder.id, 'Research');
+        await repo.setCollapsed(folder.id, true);
+        final updated = (await repo.getFolder(folder.id))!;
+        expect(updated.name, 'Research');
+        expect(updated.isCollapsed, isTrue);
+      },
+    );
 
     test('moveFolder refuses its own subtree and carries tabs along', () async {
       final h = openRepositoryHarness();

@@ -355,9 +355,7 @@ class _TabGridView extends HookConsumerWidget {
       membersBySplitId.putIfAbsent(splitId, () => []).add(summary);
     }
     for (final members in membersBySplitId.values) {
-      members.sort(
-        (a, b) => (a.splitIndex ?? 0).compareTo(b.splitIndex ?? 0),
-      );
+      members.sort((a, b) => (a.splitIndex ?? 0).compareTo(b.splitIndex ?? 0));
       final ids = [for (final member in members) member.id];
       for (final id in ids) {
         splitMembers[id] = ids;

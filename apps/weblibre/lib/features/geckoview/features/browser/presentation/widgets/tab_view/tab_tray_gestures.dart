@@ -221,9 +221,7 @@ class TabTrayGestures extends HookConsumerWidget {
       // come back to the local scope with it — same as tapping a chip.
       ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
 
-      ref
-          .read(selectedSpaceProvider.notifier)
-          .setSpace(cycleOrder[index].uuid);
+      ref.read(selectedSpaceProvider.notifier).setSpace(cycleOrder[index].uuid);
     }
 
     void cycleViewMode({required bool expand}) {
@@ -437,9 +435,7 @@ class _SwipeTargetIndicator extends StatelessWidget {
         ? BorderSide(color: colorScheme.primary, width: 2)
         : BorderSide(color: colorScheme.outlineVariant);
 
-    final displayName = target.space.name.isEmpty
-        ? 'Space'
-        : target.space.name;
+    final displayName = target.space.name.isEmpty ? 'Space' : target.space.name;
 
     return DecoratedBox(
       decoration: ShapeDecoration(

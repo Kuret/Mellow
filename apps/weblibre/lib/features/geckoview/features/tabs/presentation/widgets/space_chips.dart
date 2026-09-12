@@ -115,10 +115,7 @@ class _SpaceChip extends ConsumerWidget {
       position: position,
       items: const [
         PopupMenuItem<String>(value: 'rename', child: Text('Rename')),
-        PopupMenuItem<String>(
-          value: 'container',
-          child: Text('Set container'),
-        ),
+        PopupMenuItem<String>(value: 'container', child: Text('Set container')),
         PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
       ],
     );
@@ -188,9 +185,8 @@ class _SpaceChip extends ConsumerWidget {
           ),
           for (final container in containers)
             SimpleDialogOption(
-              onPressed: () => Navigator.of(
-                context,
-              ).pop(_ContainerPick(container.id)),
+              onPressed: () =>
+                  Navigator.of(context).pop(_ContainerPick(container.id)),
               child: Text(container.name),
             ),
         ],

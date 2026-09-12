@@ -222,8 +222,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       for (final space in spaces) ...[
         _AccordionEntry.header(
           space: space,
-          tabCount:
-              ref.watch(spaceTabCountProvider(space.uuid)).value ?? 0,
+          tabCount: ref.watch(spaceTabCountProvider(space.uuid)).value ?? 0,
           isExpanded: space.uuid == selectedSpaceUuid,
         ),
         if (space.uuid == selectedSpaceUuid)
@@ -427,10 +426,7 @@ class _AccordionHeaderChip extends StatelessWidget {
           )
         : null;
 
-    final iconAvatar = Icon(
-      MdiIcons.viewDashboardOutline,
-      color: foreground,
-    );
+    final iconAvatar = Icon(MdiIcons.viewDashboardOutline, color: foreground);
 
     final side = BorderSide(width: 2, color: fill);
     final shape = RoundedRectangleBorder(

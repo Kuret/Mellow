@@ -130,12 +130,13 @@ class FolderRepository extends _$FolderRepository {
     if (afterId == null) {
       return fallback();
     }
-    final slots = (await ref
-            .read(tabDatabaseProvider)
-            .tabDao
-            .scopeChildSlots(spaceUuid, parentFolderId))
-        .where((slot) => slot.id != excludeId)
-        .toList();
+    final slots =
+        (await ref
+                .read(tabDatabaseProvider)
+                .tabDao
+                .scopeChildSlots(spaceUuid, parentFolderId))
+            .where((slot) => slot.id != excludeId)
+            .toList();
     final index = slots.indexWhere((slot) => slot.id == afterId);
     if (index < 0) {
       return fallback();

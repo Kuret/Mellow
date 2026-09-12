@@ -192,9 +192,7 @@ void main() {
       expect(_containerOf(tester).read(selectedSpaceProvider), 'shopping');
     });
 
-    testWidgets('dragging right selects the previous space', (
-      tester,
-    ) async {
+    testWidgets('dragging right selects the previous space', (tester) async {
       await _pumpTray(
         tester,
         cycleOrder: [_space('other'), _space('work'), _space('shopping')],
@@ -206,9 +204,7 @@ void main() {
       expect(_containerOf(tester).read(selectedSpaceProvider), 'work');
     });
 
-    testWidgets('wraps around to the first space in the cycle', (
-      tester,
-    ) async {
+    testWidgets('wraps around to the first space in the cycle', (tester) async {
       await _pumpTray(
         tester,
         cycleOrder: [_space('other'), _space('work'), _space('shopping')],

@@ -95,7 +95,11 @@ void main() {
     TabDirection direction = TabDirection.oldestFirst,
   }) {
     final live =
-        liveIds ?? {for (final tab in tabs) if (!tab.cold) tab.id};
+        liveIds ??
+        {
+          for (final tab in tabs)
+            if (!tab.cold) tab.id,
+        };
     final container = ProviderContainer(
       overrides: [
         watchTabsWithRootAndDepthProvider(
@@ -168,12 +172,7 @@ void main() {
         _Tab('p1', 'a', shelf: TabShelf.pinned),
       ],
     );
-    expect((await read(container)).map(label), [
-      'p1@0',
-      'p2@0',
-      'a@0',
-      'c@0',
-    ]);
+    expect((await read(container)).map(label), ['p1@0', 'p2@0', 'a@0', 'c@0']);
   });
 
   test('a folder row is followed by its indented contents', () async {
@@ -186,7 +185,10 @@ void main() {
         _Tab('n1', 'a', folderId: 'N'),
         _Tab('c', 'c'),
       ],
-      folders: [_folder('F', 'b'), _folder('N', 'z', parentFolderId: 'F')],
+      folders: [
+        _folder('F', 'b'),
+        _folder('N', 'z', parentFolderId: 'F'),
+      ],
     );
     expect((await read(container)).map(label), [
       'a@0',
@@ -243,12 +245,7 @@ void main() {
         _Tab('a', 'a'),
       ],
     );
-    expect((await read(container)).map(label), [
-      'a@0',
-      'm0@0',
-      'm1@0',
-      'x@0',
-    ]);
+    expect((await read(container)).map(label), ['a@0', 'm0@0', 'm1@0', 'x@0']);
     final newestFirst = makeContainer(
       tabs: const [
         _Tab('m1', 'b', splitId: 'S', splitIndex: 1),

@@ -235,11 +235,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: addTabToolbarButtonSpec,
     label: 'New Tab',
     icon: MdiIcons.tabPlus,
-    longPressActions: [
-      'Add Regular Tab',
-      'Add Child Tab',
-      'Add Private Tab',
-    ],
+    longPressActions: ['Add Regular Tab', 'Add Child Tab', 'Add Private Tab'],
     builder: (scope, context, ref) => scope.isPreview
         ? AddTabButtonView(onPressed: () {}, onLongPress: () {})
         : const AddTabButton(),
@@ -248,11 +244,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: tabsCountToolbarButtonSpec,
     label: 'Tabs',
     icon: MdiIcons.tab,
-    longPressActions: [
-      'Add Regular Tab',
-      'Add Child Tab',
-      'Add Private Tab',
-    ],
+    longPressActions: ['Add Regular Tab', 'Add Child Tab', 'Add Private Tab'],
     builder: (scope, context, ref) => scope.isPreview
         ? TabsCountButtonView(
             isActive: false,

@@ -485,11 +485,7 @@ class TabRepository extends _$TabRepository {
     final latestTab = await ref
         .read(tabDatabaseProvider)
         .tabDao
-        .getSpaceTabsFifo(
-          spaceUuid,
-          limit: 1,
-          excludedTabIds: excludedTabIds,
-        )
+        .getSpaceTabsFifo(spaceUuid, limit: 1, excludedTabIds: excludedTabIds)
         .getSingleOrNull();
 
     if (!ref.mounted || latestTab == null) {

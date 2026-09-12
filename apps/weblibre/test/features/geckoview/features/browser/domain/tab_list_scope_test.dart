@@ -151,10 +151,7 @@ void main() {
     ProviderContainer container,
     TabListScope scope,
   ) async {
-    final provider = visibleTabListItemsProvider(
-      spaceUuid: null,
-      scope: scope,
-    );
+    final provider = visibleTabListItemsProvider(spaceUuid: null, scope: scope);
     container.listen(provider, (_, _) {}, fireImmediately: true);
     await Future<void>.delayed(Duration.zero);
     return container

@@ -480,17 +480,11 @@ class BrowserTabBar extends HookConsumerWidget {
                         ? CompactAppBarTitle(
                             containerColor: effectiveContainerColor,
                           )
-                        : AppBarTitle(
-                            containerColor: effectiveContainerColor,
-                          ),
+                        : AppBarTitle(containerColor: effectiveContainerColor),
                   )
                 : settings.tabBarLayout == TabBarLayout.compact
-                ? CompactAppBarTitle(
-                    containerColor: effectiveContainerColor,
-                  )
-                : AppBarTitle(
-                    containerColor: effectiveContainerColor,
-                  )
+                ? CompactAppBarTitle(containerColor: effectiveContainerColor)
+                : AppBarTitle(containerColor: effectiveContainerColor)
           : null,
       actions: [
         PinnedAddonBar(axis: switcherAxis),

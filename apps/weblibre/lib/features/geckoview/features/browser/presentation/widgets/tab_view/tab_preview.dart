@@ -850,7 +850,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
         onDelete: () async {
           onBeforeDelete?.call();
 
-
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {
@@ -876,7 +875,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
       },
       onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
-
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {
@@ -1004,7 +1002,6 @@ class SingleListTabPreview extends HookConsumerWidget {
         onDelete: () async {
           onBeforeDelete?.call();
 
-
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {
@@ -1030,7 +1027,6 @@ class SingleListTabPreview extends HookConsumerWidget {
       },
       onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
-
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
           if (context.mounted) {

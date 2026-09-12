@@ -57,8 +57,7 @@ class _TabFilters extends ConsumerWidget {
 
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final syncedTabCountAsync = ref.watch(syncedTabsTotalCountProvider);
-    final showSyncedChip =
-        isAuthenticated && tabsViewMode != TabsViewMode.tree;
+    final showSyncedChip = isAuthenticated && tabsViewMode != TabsViewMode.tree;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

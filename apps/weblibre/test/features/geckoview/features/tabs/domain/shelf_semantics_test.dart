@@ -11,32 +11,35 @@ import 'repository_test_support.dart';
 /// space and folder.
 void main() {
   group('TabDataRepository.setShelf', () {
-    test('→ essential clears the space and folder, keeps the container', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s1']);
-      await seedContainer(h.db, 'c');
-      final folder = await h.container
-          .read(_folderRepo)
-          .createFolder('s1', name: 'F');
-      await seedTab(
-        h.db,
-        't',
-        spaceUuid: 's1',
-        folderId: folder.id,
-        containerId: 'c',
-      );
+    test(
+      '→ essential clears the space and folder, keeps the container',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s1']);
+        await seedContainer(h.db, 'c');
+        final folder = await h.container
+            .read(_folderRepo)
+            .createFolder('s1', name: 'F');
+        await seedTab(
+          h.db,
+          't',
+          spaceUuid: 's1',
+          folderId: folder.id,
+          containerId: 'c',
+        );
 
-      final ok = await h.container
-          .read(tabDataRepositoryProvider.notifier)
-          .setShelf('t', TabShelf.essential, activeSpaceUuid: 's1');
+        final ok = await h.container
+            .read(tabDataRepositoryProvider.notifier)
+            .setShelf('t', TabShelf.essential, activeSpaceUuid: 's1');
 
-      expect(ok, isTrue);
-      final tab = await summaryOf(h.db, 't');
-      expect(tab.tabShelf, TabShelf.essential);
-      expect(tab.spaceUuid, isNull);
-      expect(tab.folderId, isNull);
-      expect(tab.containerId, 'c');
-    });
+        expect(ok, isTrue);
+        final tab = await summaryOf(h.db, 't');
+        expect(tab.tabShelf, TabShelf.essential);
+        expect(tab.spaceUuid, isNull);
+        expect(tab.folderId, isNull);
+        expect(tab.containerId, 'c');
+      },
+    );
 
     test('essential → normal lands in the active space', () async {
       final h = openRepositoryHarness();
@@ -67,17 +70,20 @@ void main() {
       expect(tab.spaceUuid, 's2');
     });
 
-    test('essential → normal without an active space uses the default', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s1', 's2']);
-      await seedTab(h.db, 't', shelf: TabShelf.essential);
+    test(
+      'essential → normal without an active space uses the default',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s1', 's2']);
+        await seedTab(h.db, 't', shelf: TabShelf.essential);
 
-      await h.container
-          .read(tabDataRepositoryProvider.notifier)
-          .setShelf('t', TabShelf.normal, activeSpaceUuid: null);
+        await h.container
+            .read(tabDataRepositoryProvider.notifier)
+            .setShelf('t', TabShelf.normal, activeSpaceUuid: null);
 
-      expect((await summaryOf(h.db, 't')).spaceUuid, 's1');
-    });
+        expect((await summaryOf(h.db, 't')).spaceUuid, 's1');
+      },
+    );
 
     test('normal ↔ pinned keeps the tab in its own space', () async {
       final h = openRepositoryHarness();
@@ -139,28 +145,31 @@ void main() {
   });
 
   group('TabDataRepository folder and space moves', () {
-    test('moveTabToFolder takes the folder\'s space, refuses essentials', () async {
-      final h = openRepositoryHarness();
-      await seedSpaces(h.db, ['s1', 's2']);
-      final folder = await h.container
-          .read(_folderRepo)
-          .createFolder('s2', name: 'F');
-      await seedTab(h.db, 't', spaceUuid: 's1');
-      await seedTab(h.db, 'e', shelf: TabShelf.essential);
-      final repo = h.container.read(tabDataRepositoryProvider.notifier);
+    test(
+      'moveTabToFolder takes the folder\'s space, refuses essentials',
+      () async {
+        final h = openRepositoryHarness();
+        await seedSpaces(h.db, ['s1', 's2']);
+        final folder = await h.container
+            .read(_folderRepo)
+            .createFolder('s2', name: 'F');
+        await seedTab(h.db, 't', spaceUuid: 's1');
+        await seedTab(h.db, 'e', shelf: TabShelf.essential);
+        final repo = h.container.read(tabDataRepositoryProvider.notifier);
 
-      expect(await repo.moveTabToFolder('t', folder.id), isTrue);
-      var tab = await summaryOf(h.db, 't');
-      expect(tab.folderId, folder.id);
-      expect(tab.spaceUuid, 's2');
+        expect(await repo.moveTabToFolder('t', folder.id), isTrue);
+        var tab = await summaryOf(h.db, 't');
+        expect(tab.folderId, folder.id);
+        expect(tab.spaceUuid, 's2');
 
-      expect(await repo.moveTabToFolder('t', null), isTrue);
-      tab = await summaryOf(h.db, 't');
-      expect(tab.folderId, isNull);
-      expect(tab.spaceUuid, 's2');
+        expect(await repo.moveTabToFolder('t', null), isTrue);
+        tab = await summaryOf(h.db, 't');
+        expect(tab.folderId, isNull);
+        expect(tab.spaceUuid, 's2');
 
-      expect(await repo.moveTabToFolder('e', folder.id), isFalse);
-    });
+        expect(await repo.moveTabToFolder('e', folder.id), isFalse);
+      },
+    );
 
     test('moveTabToSpace keeps the shelf, drops the folder', () async {
       final h = openRepositoryHarness();

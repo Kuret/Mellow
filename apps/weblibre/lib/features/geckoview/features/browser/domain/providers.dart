@@ -891,9 +891,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   required TabListScope scope,
 }) {
   final tabsWithRoot = ref.watch(
-    watchTabsWithRootAndDepthProvider(
-      spaceUuid,
-    ).select((value) => value.value),
+    watchTabsWithRootAndDepthProvider(spaceUuid).select((value) => value.value),
   );
   if (tabsWithRoot == null) {
     return EquatableValue(const []);
@@ -1125,7 +1123,8 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       final splitId = reversed[runStart].splitId;
       var runEnd = runStart + 1;
       if (splitId != null) {
-        while (runEnd < reversed.length && reversed[runEnd].splitId == splitId) {
+        while (runEnd < reversed.length &&
+            reversed[runEnd].splitId == splitId) {
           runEnd++;
         }
         if (runEnd - runStart > 1) {
@@ -1299,16 +1298,19 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
 
   final emittedFolders = <String>{};
   void emitScope(String? folderId, int depth) {
-    final slots = <_ScopeSlot>[
-      for (final group in groupsByFolder[folderId] ?? const <_TabGroupRecord>[])
-        _ScopeSlot.ofGroup(group),
-      for (final folder in foldersByParent[folderId] ?? const <TabFolderData>[])
-        if (emittedFolders.add(folder.id)) _ScopeSlot.ofFolder(folder),
-    ]..sort((a, b) {
-      final cmp = a.orderKey.compareTo(b.orderKey);
-      if (cmp != 0) return cmp;
-      return a.splitIndex.compareTo(b.splitIndex);
-    });
+    final slots =
+        <_ScopeSlot>[
+          for (final group
+              in groupsByFolder[folderId] ?? const <_TabGroupRecord>[])
+            _ScopeSlot.ofGroup(group),
+          for (final folder
+              in foldersByParent[folderId] ?? const <TabFolderData>[])
+            if (emittedFolders.add(folder.id)) _ScopeSlot.ofFolder(folder),
+        ]..sort((a, b) {
+          final cmp = a.orderKey.compareTo(b.orderKey);
+          if (cmp != 0) return cmp;
+          return a.splitIndex.compareTo(b.splitIndex);
+        });
     for (final slot in applyDirection(slots)) {
       final group = slot.group;
       if (group != null) {

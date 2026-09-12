@@ -421,10 +421,7 @@ TabScopeChange _computeScopeChange({
     final prevFolder = folderIdByTab[prevTab.tabId];
     final nextFolder = folderIdByTab[nextTab.tabId];
     if (prevFolder == nextFolder) {
-      return TabScopeChange.toScope(
-        spaceUuid: spaceUuid,
-        folderId: prevFolder,
-      );
+      return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: prevFolder);
     }
   }
 
