@@ -18,6 +18,35 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 // Mirrors the record model of Zen Browser's ZenSpacesSync (MPL-2.0), src/zen/sync/, commit 22961e9.
+//
+// THE PROJECTION IS NEVER CACHED. Read this before adding one.
+//
+// Zen's own `spaces` engine diffs against a cached, delayed projection and
+// ships destructive batches because of it (upstream zen-browser/desktop#15380;
+// DESIGN "Hardening against Zen's stale-projection race"). After applying an
+// incoming batch `ZenSpacesSyncApplier.sys.mjs:182` calls
+// `SessionSaver.runDelayed()` fire-and-forget, while `noteApplied`
+// (`ZenSpacesSyncModel.sys.mjs:826-830`) stamps the uploaded snapshot
+// immediately. Its projection cache is keyed on `sidebar.lastCollected`
+// (`:509-511`), so between the apply and the delayed collection the projection
+// is pre-apply while the snapshot is post-apply, and `computeChangedIDs`
+// (`:748-757`) reads that skew as real change:
+//
+//   * an applied tombstone is re-uploaded as a create — closed tabs resurrect;
+//   * an applied create yields a tombstone — tabs nobody closed are destroyed
+//     on the other device.
+//
+// `#sidebarReady` (`:730-732`) does not save them: it only checks that *some*
+// space data exists, not that it is current.
+//
+// [SpacesProjection] is therefore stateless: every field is an injected
+// collaborator, `project()` reads the database on every call, and nothing it
+// computes survives the call. `spacesProjectionProvider` is `keepAlive` but
+// only caches the *object*, never its output. If a cache ever becomes
+// necessary for performance it must be keyed on a monotonic database write
+// counter (a counter bumped from Drift's `tableUpdates` notifications) — never
+// on a wall-clock timestamp, a "last collected" stamp or a dirty flag, all of
+// which are exactly what fails above.
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -99,6 +128,10 @@ class _TabRow {
 /// §4.2, W6.1). Read-only apart from minting container guids
 /// (`ContainerRepository.ensureSyncGuid`), which is what Zen's
 /// `guidForContextId(create: true)` does inside its projection too.
+///
+/// **Stateless by contract** — it holds no mutable state between calls and
+/// caches nothing. See the file header for why; do not add a field that
+/// outlives [project].
 class SpacesProjection {
   SpacesProjection(this._db, this._containers);
 
@@ -107,6 +140,8 @@ class SpacesProjection {
 
   /// Every record this device currently projects, keyed by record id.
   /// Foreign records are re-emitted verbatim.
+  ///
+  /// Queries the database on every call. Never memoise the returned map.
   Future<Map<String, ZenCleartext>> project() async {
     final tabs = await _regularTabs();
     final spaces = await _db.spaceDao.getAll();
@@ -459,6 +494,8 @@ class SpacesProjection {
   }
 }
 
+/// Caches the stateless [SpacesProjection] object, never a projection: each
+/// `project()` call still hits the database (see the file header).
 @Riverpod(keepAlive: true)
 SpacesProjection spacesProjection(Ref ref) => SpacesProjection(
   ref.watch(tabDatabaseProvider),
