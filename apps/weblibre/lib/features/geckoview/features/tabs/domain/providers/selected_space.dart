@@ -27,6 +27,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -56,6 +57,25 @@ class SelectedSpace extends _$SelectedSpace {
 
   set space(String? uuid) {
     state = uuid;
+  }
+
+  /// Selects the space one step [direction] from the selected one in
+  /// `order_index` order, wrapping around at both ends — the bar and rail
+  /// swipes, and the tray's two-finger swipe, all step through the same
+  /// cycle. Returns false when there is nowhere to go: fewer than two spaces,
+  /// or the list not loaded yet.
+  bool cycle(ContainerCycleDirection direction) {
+    final spaces = ref.read(watchSpacesProvider).value ?? const <SpaceData>[];
+    final index = adjacentContainerIndex(
+      [for (final space in spaces) space.uuid],
+      state,
+      direction,
+    );
+    if (index == null) {
+      return false;
+    }
+    state = spaces[index].uuid;
+    return true;
   }
 
   @override
