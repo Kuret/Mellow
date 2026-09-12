@@ -157,26 +157,23 @@ class _InstallConfigSheet extends HookConsumerWidget {
     final containerAsync = ref.watch(selectedContainerDataProvider);
     final containerData = containerAsync.asData?.value;
 
-    final options = useMemoized<List<_StorageOption>>(
-      () {
-        final list = <_StorageOption>[const _StorageDefault()];
+    final options = useMemoized<List<_StorageOption>>(() {
+      final list = <_StorageOption>[const _StorageDefault()];
 
-        // If a container is active, offer it; its id is its Gecko contextId.
-        if (containerData != null) {
-          list.add(
-            _StorageContainer(
-              label: containerData.name.isNotEmpty
-                  ? containerData.name
-                  : 'Container',
-              contextId: containerData.id,
-            ),
-          );
-        }
+      // If a container is active, offer it; its id is its Gecko contextId.
+      if (containerData != null) {
+        list.add(
+          _StorageContainer(
+            label: containerData.name.isNotEmpty
+                ? containerData.name
+                : 'Container',
+            contextId: containerData.id,
+          ),
+        );
+      }
 
-        return list;
-      },
-      [tabContextId, containerData?.id, containerData?.name],
-    );
+      return list;
+    }, [tabContextId, containerData?.id, containerData?.name]);
 
     // Pick sensible default selection based on current context.
     final defaultIndex = useMemoized(() {

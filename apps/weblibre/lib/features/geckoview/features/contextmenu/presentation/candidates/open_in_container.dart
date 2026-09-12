@@ -175,10 +175,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
                   shrinkWrap: true,
                   itemCount: 3,
                   itemBuilder: (context, index) => ContainerListTile(
-                    ContainerData(
-                      id: Namespace.nil.value,
-                      orderKey: '',
-                    ),
+                    ContainerData(id: Namespace.nil.value, orderKey: ''),
                     isSelected: false,
                     onTap: null,
                   ),

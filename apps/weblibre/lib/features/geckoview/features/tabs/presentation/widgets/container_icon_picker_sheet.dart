@@ -60,10 +60,7 @@ class FirefoxContainerIconPicker extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Choose Icon',
-                          style: theme.textTheme.titleMedium,
-                        ),
+                        Text('Choose Icon', style: theme.textTheme.titleMedium),
                         Text(
                           'Shared with Firefox containers',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -77,10 +74,7 @@ class FirefoxContainerIconPicker extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: palette.avatarBackgroundColor,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: palette.outlineColor,
-                        width: 2,
-                      ),
+                      border: Border.all(color: palette.outlineColor, width: 2),
                     ),
                     padding: const EdgeInsets.all(10),
                     child: Icon(
@@ -94,9 +88,10 @@ class FirefoxContainerIconPicker extends StatelessWidget {
             Flexible(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final columnCount = (constraints.maxWidth / 76)
-                      .floor()
-                      .clamp(4, 7);
+                  final columnCount = (constraints.maxWidth / 76).floor().clamp(
+                    4,
+                    7,
+                  );
 
                   return GridView.builder(
                     shrinkWrap: true,

@@ -36,11 +36,7 @@ class ContainerTitle extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (container.name.isNotEmpty) {
-      return Text(
-        container.name,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      );
+      return Text(container.name, overflow: TextOverflow.ellipsis, maxLines: 1);
     }
 
     final topicAsync = ref.watch(containerTopicProvider(container.id));

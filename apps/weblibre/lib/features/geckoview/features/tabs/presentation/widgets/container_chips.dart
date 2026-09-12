@@ -138,17 +138,9 @@ class _UnassignedContainerChip extends ConsumerWidget {
       labelPadding: const EdgeInsets.only(left: 6),
       label: SizedBox(
         height: 20,
-        child: Center(
-          child: _countBadge(
-            context,
-            null,
-            tabCount,
-          ),
-        ),
+        child: Center(child: _countBadge(context, null, tabCount)),
       ),
-      color: WidgetStatePropertyAll(
-        _chipColor(context, null, selected),
-      ),
+      color: WidgetStatePropertyAll(_chipColor(context, null, selected)),
       selected: selected,
       side: _chipSide(context, null, selected),
       showCheckmark: false,
@@ -179,9 +171,7 @@ class _SyncedTabsChip extends ConsumerWidget {
       label: count > 0
           ? _countBadge(context, null, count)
           : const SizedBox.shrink(),
-      color: WidgetStatePropertyAll(
-        _chipColor(context, null, selected),
-      ),
+      color: WidgetStatePropertyAll(_chipColor(context, null, selected)),
       selected: selected,
       side: _chipSide(context, null, selected),
       showCheckmark: false,
@@ -224,14 +214,8 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return FilterChip(
           avatar: const Icon(MdiIcons.autoFix),
           label: Text(data!.length.toString()),
-          color: WidgetStatePropertyAll(
-            _chipColor(context, null, false),
-          ),
-          side: _chipSide(
-            context,
-            null,
-            false,
-          ),
+          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
+          side: _chipSide(context, null, false),
           showCheckmark: false,
           onSelected: (_) async {
             await const ContainerDraftRoute().push(context);
@@ -250,14 +234,8 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return FilterChip(
           avatar: const Icon(MdiIcons.autoFix),
           label: const Skeletonizer(child: Text('0')),
-          color: WidgetStatePropertyAll(
-            _chipColor(context, null, false),
-          ),
-          side: _chipSide(
-            context,
-            null,
-            false,
-          ),
+          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
+          side: _chipSide(context, null, false),
           showCheckmark: false,
           onSelected: null,
         );

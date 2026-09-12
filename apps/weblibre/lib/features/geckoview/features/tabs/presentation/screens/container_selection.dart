@@ -238,9 +238,7 @@ class _SelectionContainerCard extends ConsumerWidget {
     final tabCount = container.tabCount ?? 0;
     final palette = containerPalette(context, container);
     final bool clearDataOnExit = ref.watch(
-      watchContainerLocalProvider(
-        container.id,
-      ).select(
+      watchContainerLocalProvider(container.id).select(
         (AsyncValue<ContainerLocalData> value) =>
             value.value?.clearDataOnExit ?? false,
       ),
@@ -277,10 +275,7 @@ class _SelectionContainerCard extends ConsumerWidget {
                       radius: 22,
                       backgroundColor: palette.avatarBackgroundColor,
                       foregroundColor: palette.avatarForegroundColor,
-                      child: Icon(
-                        container.icon.icon,
-                        size: 22,
-                      ),
+                      child: Icon(container.icon.icon, size: 22),
                     ),
                     const SizedBox(width: 16),
                     Expanded(

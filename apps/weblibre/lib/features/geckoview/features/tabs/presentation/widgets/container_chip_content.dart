@@ -36,7 +36,10 @@ ContainerColorPalette containerPalette(
   BuildContext context,
   ContainerData? container,
 ) {
-  return ContainerColors.palette(context, containerSeedColor(context, container));
+  return ContainerColors.palette(
+    context,
+    containerSeedColor(context, container),
+  );
 }
 
 Widget buildContainerChipAvatar(
