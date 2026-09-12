@@ -86,6 +86,17 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingleOrNull();
   }
 
+  /// A container's Gecko `contextId` is its id (DESIGN.md "D3 refinement"),
+  /// so this is [getContainerData] under the name the intent and share paths
+  /// know it by.
+  Future<ContainerData?> getContainerByContextualIdentity(String contextId) =>
+      getContainerData(contextId);
+
+  /// Always null: per-site container assignment was removed along with
+  /// container strict mode. Kept as the seam callers already null-check
+  /// rather than editing every call site's fallback path.
+  Future<String?> siteAssignedContainerId(Uri uri) async => null;
+
   Future<ContainerData?> getBySyncGuid(String syncGuid) {
     return ref
         .read(tabDatabaseProvider)
