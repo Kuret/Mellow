@@ -8,12 +8,24 @@ part of 'container.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Containers are Firefox contextual identities (PLAN §6.2). A container's
+/// Gecko `contextId` is its `id` (DESIGN.md "D3 refinement"); the per-device
+/// settings live in `container_local` and are reached via [getLocal] /
+/// [setLocal] / [watchLocal].
 
 @ProviderFor(ContainerRepository)
 final containerRepositoryProvider = ContainerRepositoryProvider._();
 
+/// Containers are Firefox contextual identities (PLAN §6.2). A container's
+/// Gecko `contextId` is its `id` (DESIGN.md "D3 refinement"); the per-device
+/// settings live in `container_local` and are reached via [getLocal] /
+/// [setLocal] / [watchLocal].
 final class ContainerRepositoryProvider
     extends $NotifierProvider<ContainerRepository, void> {
+  /// Containers are Firefox contextual identities (PLAN §6.2). A container's
+  /// Gecko `contextId` is its `id` (DESIGN.md "D3 refinement"); the per-device
+  /// settings live in `container_local` and are reached via [getLocal] /
+  /// [setLocal] / [watchLocal].
   ContainerRepositoryProvider._()
     : super(
         from: null,
@@ -42,7 +54,12 @@ final class ContainerRepositoryProvider
 }
 
 String _$containerRepositoryHash() =>
-    r'677772fc2c66cf33659dcd6b3518113313c9001c';
+    r'88e0e4756addf4e63c0c81fa7c7f972c77d1b429';
+
+/// Containers are Firefox contextual identities (PLAN §6.2). A container's
+/// Gecko `contextId` is its `id` (DESIGN.md "D3 refinement"); the per-device
+/// settings live in `container_local` and are reached via [getLocal] /
+/// [setLocal] / [watchLocal].
 
 abstract class _$ContainerRepository extends $Notifier<void> {
   void build();
