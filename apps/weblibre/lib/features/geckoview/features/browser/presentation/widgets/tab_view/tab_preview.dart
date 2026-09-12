@@ -28,7 +28,10 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
@@ -155,6 +158,7 @@ class GridTabPreview extends HookConsumerWidget {
           ).select((asyncValue) => asyncValue.value),
         ) ??
         TabState.$default(tabId);
+    final isCold = ref.watch(tabPresenceProvider(tabId)) == TabPresence.cold;
 
     final thumbnail = ref.watch(tabThumbnailProvider(tabId));
 
@@ -192,7 +196,7 @@ class GridTabPreview extends HookConsumerWidget {
       RegularTabMode() => (null, null),
     };
 
-    return GridTabItemContainer(
+    final tile = GridTabItemContainer(
       isActive: isActive,
       tabMode: tabState.tabMode,
       child: InkWell(
@@ -211,7 +215,14 @@ class GridTabPreview extends HookConsumerWidget {
                       child: SafeRawImage(image: thumbnail, fit: BoxFit.cover),
                     )
                   else
-                    Center(child: TabIcon(tabState: tabState, iconSize: 48)),
+                    Center(
+                      child: isCold
+                          ? ColdTabBadge(
+                              size: 48,
+                              child: TabIcon(tabState: tabState, iconSize: 48),
+                            )
+                          : TabIcon(tabState: tabState, iconSize: 48),
+                    ),
                   // Close button overlay
                   if (onDelete != null ||
                       onDeleteAll != null ||
@@ -412,6 +423,8 @@ class GridTabPreview extends HookConsumerWidget {
         ),
       ),
     );
+    // A cold tab is dimmed: no session behind it until it is tapped.
+    return isCold ? Opacity(opacity: ColdTabBadge.opacity, child: tile) : tile;
   }
 }
 
@@ -463,6 +476,7 @@ class ListTabPreview extends HookConsumerWidget {
           ).select((asyncValue) => asyncValue.value),
         ) ??
         TabState.$default(tabId);
+    final isCold = ref.watch(tabPresenceProvider(tabId)) == TabPresence.cold;
 
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: tabId),
@@ -496,6 +510,10 @@ class ListTabPreview extends HookConsumerWidget {
           child: SafeRawImage(image: thumbnail, fit: BoxFit.fitHeight),
         ),
       ),
+      _ when isCold => ColdTabBadge(
+        size: 32,
+        child: TabIcon(tabState: tabState, iconSize: 32),
+      ),
       _ => TabIcon(tabState: tabState, iconSize: 32),
     };
 
@@ -524,7 +542,7 @@ class ListTabPreview extends HookConsumerWidget {
 
     const borderRadius = BorderRadius.all(Radius.circular(12.0));
 
-    final card = Container(
+    final content = Container(
       margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0),
       decoration: BoxDecoration(
         color: listBgColor,
@@ -642,6 +660,10 @@ class ListTabPreview extends HookConsumerWidget {
         ),
       ),
     );
+    // A cold tab is dimmed: no session behind it until it is tapped.
+    final card = isCold
+        ? Opacity(opacity: ColdTabBadge.opacity, child: content)
+        : content;
 
     if (depth <= 0) {
       return card;
