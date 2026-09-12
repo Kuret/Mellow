@@ -140,6 +140,8 @@ class TabSplitDao extends DatabaseAccessor<TabDatabase> with $TabSplitDaoMixin {
       if (remaining.length < 2) {
         final survivor = remaining.singleOrNull;
         await deleteSplit(splitId);
+        // A user-driven dissolve: the sync client may tombstone the split.
+        await db.syncStateDao.recordDeletion(splitId, 'split');
         return SplitRemovalResult(
           splitId: splitId,
           dissolved: true,

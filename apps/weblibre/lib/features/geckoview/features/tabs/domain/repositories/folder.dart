@@ -171,11 +171,18 @@ class FolderRepository extends _$FolderRepository {
   /// Closes the subtree's tabs through [TabRepository.closeTabs], then deletes
   /// the folder row; nested folders cascade (PLAN §7.3).
   Future<void> deleteFolder(String id) async {
+    final db = ref.read(tabDatabaseProvider);
+    final subtree = await db.tabFolderDao.subtreeIds(id);
     final tabIds = await tabIdsInFolder(id);
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
     }
-    await ref.read(tabDatabaseProvider).tabFolderDao.deleteFolder(id);
+    await db.tabFolderDao.deleteFolder(id);
+    // Nested folders cascaded away with it; every one of them is a deletion
+    // the sync client may project as a tombstone.
+    for (final folderId in subtree) {
+      await db.syncStateDao.recordDeletion(folderId, 'folder');
+    }
   }
 
   @override

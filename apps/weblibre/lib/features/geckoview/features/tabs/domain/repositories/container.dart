@@ -158,8 +158,15 @@ class ContainerRepository extends _$ContainerRepository {
   /// drops the row; `container_local` cascades, and spaces pointing at it get
   /// `container_id = NULL`.
   Future<void> deleteContainer(String id) async {
+    final db = ref.read(tabDatabaseProvider);
+    final syncGuid = (await getContainerData(id))?.syncGuid;
     await ref.read(tabDataRepositoryProvider.notifier).closeContainerTabs(id);
-    return ref.read(tabDatabaseProvider).containerDao.deleteContainer(id);
+    await db.containerDao.deleteContainer(id);
+    // Built-ins are never projected as container records, so there is
+    // nothing to tombstone for them.
+    if (syncGuid != null && !ZenIds.isBuiltinContainerGuid(syncGuid)) {
+      await db.syncStateDao.recordDeletion(syncGuid, 'container');
+    }
   }
 
   // --- container_local -----------------------------------------------------
