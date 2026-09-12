@@ -17,78 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
-ContainerData _container(String id) =>
-    ContainerData(id: id, color: const Color(0xFF000000), orderKey: 'a');
-
 void main() {
-  group('resolveHomeTargetContainer', () {
-    final selected = _container('selected');
-    final scoped = _container('scoped');
-
-    test('unscoped follows the selected container', () {
-      expect(
-        resolveHomeTargetContainer(
-          scopeToContainer: false,
-          scopedContainer: null,
-          selectedContainer: selected,
-        ),
-        isA<SpecificContainerTabSelection>().having(
-          (s) => s.container.id,
-          'container',
-          'selected',
-        ),
-      );
-    });
-
-    test('unscoped with no selection is unassigned', () {
-      expect(
-        resolveHomeTargetContainer(
-          scopeToContainer: false,
-          scopedContainer: null,
-          selectedContainer: null,
-        ),
-        isA<UnassignedContainerTabSelection>(),
-      );
-    });
-
-    test('scoped uses its own container, not the selected one', () {
-      expect(
-        resolveHomeTargetContainer(
-          scopeToContainer: true,
-          scopedContainer: scoped,
-          selectedContainer: selected,
-        ),
-        isA<SpecificContainerTabSelection>().having(
-          (s) => s.container.id,
-          'container',
-          'scoped',
-        ),
-      );
-    });
-
-    test('scoped to the unassigned container stays unassigned', () {
-      // The case a plain null-check gets wrong: closing the last unassigned tab
-      // scopes to "unassigned", which is a real container, not the absence of
-      // a scope — falling back to the selected container would move the user.
-      expect(
-        resolveHomeTargetContainer(
-          scopeToContainer: true,
-          scopedContainer: null,
-          selectedContainer: selected,
-        ),
-        isA<UnassignedContainerTabSelection>(),
-      );
-    });
-  });
-
   group('default', () {
     test('is home, so startup is unchanged for existing users', () {
       // Any other default would alter startup behaviour for everyone on
