@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -57,6 +58,12 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         subtitle: 'Choose how tabs are ordered in the tab bar',
         keywords: ['sorting', 'order'],
         child: _TabBarDirectionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Keep at most N tabs loaded',
+        subtitle: 'Unload the least recently used tabs beyond this many',
+        keywords: ['memory', 'unload', 'cold', 'live', 'loaded'],
+        child: _MaxLiveTabsSection(),
       ),
       SettingsEntryDefinition(
         title: 'Show Container UI',
@@ -659,7 +666,6 @@ class _ShowContainerUiTile extends HookConsumerWidget {
   }
 }
 
-
 class _BackgroundTabOpenSection extends HookConsumerWidget {
   const _BackgroundTabOpenSection();
 
@@ -1233,6 +1239,70 @@ class _UrlCleanerSettingsTile extends StatelessWidget {
       onTap: () async {
         await UrlCleanerSettingsRoute().push(context);
       },
+    );
+  }
+}
+
+/// "Keep at most N tabs loaded" — [GeneralSettings.maxLiveTabs], the budget
+/// `LiveTabBudget` enforces (PLAN §7.4). Steps of five between
+/// [minMaxLiveTabs] and [maxMaxLiveTabs].
+class _MaxLiveTabsSection extends HookConsumerWidget {
+  static const _step = 5;
+
+  const _MaxLiveTabsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final maxLiveTabs = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
+    );
+    final sliderValue = useState(maxLiveTabs.toDouble());
+    useEffect(() {
+      sliderValue.value = maxLiveTabs.toDouble();
+      return null;
+    }, [maxLiveTabs]);
+    final shown = sliderValue.value.round();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: const Icon(MdiIcons.snowflakeVariant),
+          title: Text('Keep at most $shown tabs loaded'),
+          subtitle: const Text(
+            'Tabs beyond this are unloaded, least recently used first, and '
+            'load again when tapped',
+          ),
+          contentPadding: EdgeInsets.zero,
+        ),
+        Slider(
+          min: minMaxLiveTabs.toDouble(),
+          max: maxMaxLiveTabs.toDouble(),
+          divisions: (maxMaxLiveTabs - minMaxLiveTabs) ~/ _step,
+          label: '$shown',
+          value: sliderValue.value.clamp(
+            minMaxLiveTabs.toDouble(),
+            maxMaxLiveTabs.toDouble(),
+          ),
+          onChanged: (value) {
+            sliderValue.value = value;
+          },
+          onChangeEnd: (value) async {
+            final rounded = ((value / _step).round() * _step).clamp(
+              minMaxLiveTabs,
+              maxMaxLiveTabs,
+            );
+            sliderValue.value = rounded.toDouble();
+            await ref
+                .read(saveGeneralSettingsControllerProvider.notifier)
+                .save(
+                  (currentSettings) =>
+                      currentSettings.copyWith.maxLiveTabs(rounded),
+                );
+          },
+        ),
+      ],
     );
   }
 }
