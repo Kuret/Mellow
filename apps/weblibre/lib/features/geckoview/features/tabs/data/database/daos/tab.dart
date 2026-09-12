@@ -306,6 +306,22 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         tabId,
       ).write(TabCompanion(engineTabId: Value(engineTabId)));
 
+  /// Live regular tabs on the normal shelf, least recently used first: the
+  /// order in which [LiveTabBudget] unloads tabs back to cold rows. Pinned and
+  /// essential tabs are never candidates; the caller drops the selected one.
+  Selectable<TabSummary> liveDemotionCandidates() => _tabSummaries(
+    (q) => q
+      ..where(
+        db.tab.engineTabId.isNotNull() &
+            db.tab.tabMode.equalsValue(TabModeDbValue.regular) &
+            db.tab.tabShelf.equalsValue(TabShelf.normal),
+      )
+      ..orderBy([
+        OrderingTerm.asc(db.tab.timestamp),
+        OrderingTerm.asc(db.tab.id),
+      ]),
+  );
+
   // ---------------------------------------------------------------------------
   // Scoped ordering queries (PLAN §6.6)
   // ---------------------------------------------------------------------------
@@ -2164,15 +2180,18 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   /// tab-list event (PLAN §7.4 item 4, DESIGN.md "Cold tabs").
   ///
   /// - Rows with `engine_tab_id IS NULL` (cold) are never touched.
-  /// - Live rows the engine no longer lists: private ones are deleted (kept in
-  ///   a short undo buffer so a re-add restores the row), regular ones are
-  ///   demoted to cold (`engine_tab_id = NULL`).
+  /// - Live rows the engine no longer lists: private ones and the ones in
+  ///   [closingTabIds] (the repository asked the engine to close them) are
+  ///   deleted (kept in a short undo buffer so a re-add restores the row);
+  ///   the remaining regular ones are demoted to cold (`engine_tab_id =
+  ///   NULL`) and reported as [SyncTabsResult.demotedTabIds].
   /// - Engine ids without a row are inserted as live tabs on the normal shelf
   ///   of [defaultSpaceUuid], keyed before the space's first tab. A cold row
   ///   whose own id the engine lists is simply marked live again.
   Future<SyncTabsResult> syncTabs({
     required List<String> engineTabIds,
     required String? defaultSpaceUuid,
+    Set<String> closingTabIds = const {},
   }) {
     return db.transaction(() async {
       final engineIds = engineTabIds.toSet();
@@ -2180,23 +2199,24 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       final liveQuery = selectOnly(db.tab)
         ..addColumns([db.tab.id, db.tab.engineTabId, db.tab.tabMode])
         ..where(db.tab.engineTabId.isNotNull());
-      final lostPrivate = <String>{};
+      final lostClosed = <String>{};
       final lostRegular = <String>{};
       for (final row in await liveQuery.get()) {
         if (engineIds.contains(row.read(db.tab.engineTabId))) {
           continue;
         }
         final id = row.read(db.tab.id)!;
-        if (row.readWithConverter(db.tab.tabMode) == TabModeDbValue.private) {
-          lostPrivate.add(id);
+        if (closingTabIds.contains(id) ||
+            row.readWithConverter(db.tab.tabMode) == TabModeDbValue.private) {
+          lostClosed.add(id);
         } else {
           lostRegular.add(id);
         }
       }
 
       var deleted = const <TabData>[];
-      if (lostPrivate.isNotEmpty) {
-        deleted = await (db.tab.delete()..where((t) => t.id.isIn(lostPrivate)))
+      if (lostClosed.isNotEmpty) {
+        deleted = await (db.tab.delete()..where((t) => t.id.isIn(lostClosed)))
             .goAndReturn();
       }
       if (deleted.isNotEmpty) {

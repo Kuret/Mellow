@@ -19,7 +19,8 @@
  */
 /// Outcome of `TabDao.syncTabs` (DESIGN.md "Cold tabs").
 class SyncTabsResult {
-  /// Private rows whose engine session is gone; the rows were deleted.
+  /// Rows whose engine session is gone and that were deleted: private tabs
+  /// and tabs the repository asked the engine to close.
   final Set<String> deletedTabIds;
 
   /// Regular rows whose engine session is gone; `engine_tab_id` was cleared
