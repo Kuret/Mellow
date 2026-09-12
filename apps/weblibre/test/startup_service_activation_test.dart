@@ -23,6 +23,7 @@ const _services = <String>[
   'sharingIntentStreamProvider',
   'appWidgetLaunchStreamProvider',
   'liveTabBudgetProvider',
+  'spacesSyncServiceProvider',
 ];
 
 /// Guards how those services are started, because getting it wrong is silent.

@@ -133,6 +133,11 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'globalDesktopMode': DriftSqlType.bool,
   'unmountGeckoViewOffRoute': DriftSqlType.bool,
   'maxLiveTabs': DriftSqlType.int,
+  'spacesSyncEnabled': DriftSqlType.bool,
+  'spacesSyncWritesEnabled': DriftSqlType.bool,
+  'spacesSyncLastSyncId': DriftSqlType.string,
+  'spacesSyncLastModified': DriftSqlType.double,
+  'spacesSyncBaselineDone': DriftSqlType.bool,
   'separateEssentials': DriftSqlType.bool,
 };
 

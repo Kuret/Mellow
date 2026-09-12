@@ -69,6 +69,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
+import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -449,6 +450,9 @@ class _MainWidget extends HookConsumerWidget {
       // Arms the "search history limit was reduced" listener; a reduction made
       // while the browser view was gone used to be missed entirely.
       _activateService(ref, searchHistoryCleanupServiceProvider);
+      // The Zen Spaces sync client: schedules itself off restore completion,
+      // app resume, a periodic timer and local tab-model changes.
+      _activateService(ref, spacesSyncServiceProvider);
 
       // Before `initialize()`, because that is what flips `initialized: true`
       // and lets the router mount.
@@ -517,6 +521,10 @@ class _MainWidget extends HookConsumerWidget {
                   .fetchAllArticles();
 
               logger.i('Fetched articles in foreground');
+
+              await ref
+                  .read(spacesSyncServiceProvider.notifier)
+                  .sync(reason: 'background');
             } catch (e, s) {
               logger.e('Failed fetching articles', error: e, stackTrace: s);
             } finally {

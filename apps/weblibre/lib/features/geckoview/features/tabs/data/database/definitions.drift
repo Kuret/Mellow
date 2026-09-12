@@ -944,6 +944,16 @@ CREATE TABLE sync_record_state (
   digest TEXT NOT NULL                       -- base64 SHA-256 of canonical {kind,data}
 );
 
+-- "Tombstones need a reason" (PLAN §8.6 item 5): ids the user deleted
+-- locally (space, folder, split, container guid). A sync only projects a
+-- tombstone for an id that is both here and in `sync_record_state`; tabs use
+-- `closed_tab_tombstone` for the same purpose.
+CREATE TABLE deleted_record (
+  id TEXT NOT NULL PRIMARY KEY,
+  kind TEXT NOT NULL,
+  deleted_at DATETIME NOT NULL
+);
+
 containersWithCount WITH ContainerDataWithCount:
   SELECT
     container.*,

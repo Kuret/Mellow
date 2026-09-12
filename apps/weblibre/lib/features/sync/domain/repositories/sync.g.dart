@@ -336,7 +336,7 @@ final class SyncRepositoryProvider
   SyncRepository create() => SyncRepository();
 }
 
-String _$syncRepositoryHash() => r'a0ebf0060fe3d3c0d3f9350e7977d825e3b16bf1';
+String _$syncRepositoryHash() => r'292fc47084194d87fd6b0991876fa90332dc7b3e';
 
 abstract class _$SyncRepository extends $AsyncNotifier<SyncRepositoryState> {
   FutureOr<SyncRepositoryState> build();

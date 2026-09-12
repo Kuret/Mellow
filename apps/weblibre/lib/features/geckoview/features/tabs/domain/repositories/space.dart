@@ -113,6 +113,7 @@ class SpaceRepository extends _$SpaceRepository {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
     }
     await db.spaceDao.deleteSpace(uuid);
+    await db.syncStateDao.recordDeletion(uuid, 'space');
   }
 
   /// The first space, created when none exists; regular tabs without a space

@@ -97,4 +97,44 @@ class SyncStateDao extends DatabaseAccessor<TabDatabase>
 
   Future<List<ForeignRecordData>> allForeign() =>
       db.foreignRecord.select().get();
+
+  /// Forgets every foreign record, e.g. after a collection `syncID` reset.
+  Future<void> clearAllForeign() => db.foreignRecord.delete().go();
+
+  // --- deleted_record ------------------------------------------------------
+
+  /// Notes that the user deleted [id] (a space uuid, folder id, split id or
+  /// container guid) locally. Only ids recorded here — or tab ids in
+  /// `closed_tab_tombstone` — may ever be projected as tombstones (PLAN
+  /// §8.6 item 5).
+  Future<void> recordDeletion(String id, String kind) =>
+      db.deletedRecord.insertOne(
+        DeletedRecordCompanion.insert(
+          id: id,
+          kind: kind,
+          deletedAt: DateTime.now(),
+        ),
+        onConflict: DoUpdate(
+          (_) => DeletedRecordCompanion(
+            kind: Value(kind),
+            deletedAt: Value(DateTime.now()),
+          ),
+        ),
+      );
+
+  /// Every recorded deletion, `id → kind`.
+  Future<Map<String, String>> pendingDeletions() async {
+    final rows = await db.deletedRecord.select().get();
+    return {for (final row in rows) row.id: row.kind};
+  }
+
+  Future<void> clearDeletions(Iterable<String> ids) {
+    final unique = ids.toSet();
+    if (unique.isEmpty) {
+      return Future.value();
+    }
+    return (db.deletedRecord.delete()..where((d) => d.id.isIn(unique))).go();
+  }
+
+  Future<void> clearAllDeletions() => db.deletedRecord.delete().go();
 }

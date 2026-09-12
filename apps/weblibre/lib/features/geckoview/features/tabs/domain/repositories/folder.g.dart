@@ -50,7 +50,7 @@ final class FolderRepositoryProvider
   }
 }
 
-String _$folderRepositoryHash() => r'8fe848b22fd5a8bf3566d6a4375787390bea68ab';
+String _$folderRepositoryHash() => r'd7bec2cfdb7214b1bcdfb21d9e171340abe9d23d';
 
 /// Tab folders (Zen folders, PLAN §6.3). A folder is a slot in its parent
 /// scope's child sequence next to normal tabs; deleting one closes the tabs of

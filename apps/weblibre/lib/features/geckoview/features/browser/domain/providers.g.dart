@@ -778,7 +778,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'ada81a2ae9d2af9cfe6a17566b10e6812f3a5cc7';
+    r'59a94d6f46914b6af6b5c04ebc71f37c20257a4b';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -934,7 +934,7 @@ final class QuickTabSwitcherRowCountProvider
 }
 
 String _$quickTabSwitcherRowCountHash() =>
-    r'81a2bfbdc4dc88fdf2c66dd9f5bfd6d1ce73a073';
+    r'bc5c8276bce3f9e7caf40b16ed23a7377fffae9a';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
@@ -1349,7 +1349,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'160c156ff209cf3eaa04a67ab1f0f2891025c399';
+    r'e7d5455366f1182eefdaf59dcf3c7cc4ed9bfef2';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.

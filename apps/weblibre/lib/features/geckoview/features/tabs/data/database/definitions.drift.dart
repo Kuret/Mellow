@@ -6267,6 +6267,176 @@ typedef $SyncRecordStateProcessedTableManager =
       i2.SyncRecordStateData,
       i0.PrefetchHooks Function()
     >;
+typedef $DeletedRecordCreateCompanionBuilder =
+    i2.DeletedRecordCompanion Function({
+      required String id,
+      required String kind,
+      required DateTime deletedAt,
+      i0.Value<int> rowid,
+    });
+typedef $DeletedRecordUpdateCompanionBuilder =
+    i2.DeletedRecordCompanion Function({
+      i0.Value<String> id,
+      i0.Value<String> kind,
+      i0.Value<DateTime> deletedAt,
+      i0.Value<int> rowid,
+    });
+
+class $DeletedRecordFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.DeletedRecord> {
+  $DeletedRecordFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $DeletedRecordOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.DeletedRecord> {
+  $DeletedRecordOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $DeletedRecordAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.DeletedRecord> {
+  $DeletedRecordAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $DeletedRecordTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i2.DeletedRecord,
+          i2.DeletedRecordData,
+          i2.$DeletedRecordFilterComposer,
+          i2.$DeletedRecordOrderingComposer,
+          i2.$DeletedRecordAnnotationComposer,
+          $DeletedRecordCreateCompanionBuilder,
+          $DeletedRecordUpdateCompanionBuilder,
+          (
+            i2.DeletedRecordData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i2.DeletedRecord,
+              i2.DeletedRecordData
+            >,
+          ),
+          i2.DeletedRecordData,
+          i0.PrefetchHooks Function()
+        > {
+  $DeletedRecordTableManager(i0.GeneratedDatabase db, i2.DeletedRecord table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i2.$DeletedRecordFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i2.$DeletedRecordOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i2.$DeletedRecordAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> id = const i0.Value.absent(),
+                i0.Value<String> kind = const i0.Value.absent(),
+                i0.Value<DateTime> deletedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.DeletedRecordCompanion(
+                id: id,
+                kind: kind,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String kind,
+                required DateTime deletedAt,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.DeletedRecordCompanion.insert(
+                id: id,
+                kind: kind,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $DeletedRecordProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i2.DeletedRecord,
+      i2.DeletedRecordData,
+      i2.$DeletedRecordFilterComposer,
+      i2.$DeletedRecordOrderingComposer,
+      i2.$DeletedRecordAnnotationComposer,
+      $DeletedRecordCreateCompanionBuilder,
+      $DeletedRecordUpdateCompanionBuilder,
+      (
+        i2.DeletedRecordData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i2.DeletedRecord,
+          i2.DeletedRecordData
+        >,
+      ),
+      i2.DeletedRecordData,
+      i0.PrefetchHooks Function()
+    >;
 
 class Container extends i0.Table
     with i0.TableInfo<Container, i1.ContainerData> {
@@ -11328,6 +11498,229 @@ class SyncRecordStateCompanion
           ..write('recordId: $recordId, ')
           ..write('kind: $kind, ')
           ..write('digest: $digest, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class DeletedRecord extends i0.Table
+    with i0.TableInfo<DeletedRecord, i2.DeletedRecordData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  DeletedRecord(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> id = i0.GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final i0.GeneratedColumn<String> kind = i0.GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<DateTime> deletedAt =
+      i0.GeneratedColumn<DateTime>(
+        'deleted_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [id, kind, deletedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'deleted_record';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i2.DeletedRecordData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i2.DeletedRecordData(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      )!,
+    );
+  }
+
+  @override
+  DeletedRecord createAlias(String alias) {
+    return DeletedRecord(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class DeletedRecordData extends i0.DataClass
+    implements i0.Insertable<i2.DeletedRecordData> {
+  final String id;
+  final String kind;
+  final DateTime deletedAt;
+  const DeletedRecordData({
+    required this.id,
+    required this.kind,
+    required this.deletedAt,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<String>(id);
+    map['kind'] = i0.Variable<String>(kind);
+    map['deleted_at'] = i0.Variable<DateTime>(deletedAt);
+    return map;
+  }
+
+  factory DeletedRecordData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return DeletedRecordData(
+      id: serializer.fromJson<String>(json['id']),
+      kind: serializer.fromJson<String>(json['kind']),
+      deletedAt: serializer.fromJson<DateTime>(json['deleted_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'kind': serializer.toJson<String>(kind),
+      'deleted_at': serializer.toJson<DateTime>(deletedAt),
+    };
+  }
+
+  i2.DeletedRecordData copyWith({
+    String? id,
+    String? kind,
+    DateTime? deletedAt,
+  }) => i2.DeletedRecordData(
+    id: id ?? this.id,
+    kind: kind ?? this.kind,
+    deletedAt: deletedAt ?? this.deletedAt,
+  );
+  DeletedRecordData copyWithCompanion(i2.DeletedRecordCompanion data) {
+    return DeletedRecordData(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeletedRecordData(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, kind, deletedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i2.DeletedRecordData &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.deletedAt == this.deletedAt);
+}
+
+class DeletedRecordCompanion extends i0.UpdateCompanion<i2.DeletedRecordData> {
+  final i0.Value<String> id;
+  final i0.Value<String> kind;
+  final i0.Value<DateTime> deletedAt;
+  final i0.Value<int> rowid;
+  const DeletedRecordCompanion({
+    this.id = const i0.Value.absent(),
+    this.kind = const i0.Value.absent(),
+    this.deletedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  DeletedRecordCompanion.insert({
+    required String id,
+    required String kind,
+    required DateTime deletedAt,
+    this.rowid = const i0.Value.absent(),
+  }) : id = i0.Value(id),
+       kind = i0.Value(kind),
+       deletedAt = i0.Value(deletedAt);
+  static i0.Insertable<i2.DeletedRecordData> custom({
+    i0.Expression<String>? id,
+    i0.Expression<String>? kind,
+    i0.Expression<DateTime>? deletedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i2.DeletedRecordCompanion copyWith({
+    i0.Value<String>? id,
+    i0.Value<String>? kind,
+    i0.Value<DateTime>? deletedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i2.DeletedRecordCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<String>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] = i0.Variable<String>(kind.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = i0.Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeletedRecordCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

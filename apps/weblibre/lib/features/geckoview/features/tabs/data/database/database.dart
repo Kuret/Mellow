@@ -61,7 +61,7 @@ import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 18;
+  final int schemaVersion = 19;
 
   @override
   final int ftsTokenLimit = 10;
@@ -507,6 +507,11 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // there).
       await database.definitionsDrift.evictExcludedHistoryPages();
       await database.definitionsDrift.reindexAfterExcludedHistoryEviction();
+    },
+    from18To19: (m, schema) async {
+      // The local "deleted for a reason" ledger the sync client reads before
+      // it projects a tombstone (PLAN §8.6 item 5).
+      await m.create(schema.deletedRecord);
     },
   );
 }

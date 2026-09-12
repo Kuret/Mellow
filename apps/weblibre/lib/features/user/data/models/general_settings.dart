@@ -501,6 +501,28 @@ class GeneralSettings with FastEquatable {
   /// Zen's `zen.workspaces.separate-essentials` (PLAN §6.4, DESIGN OPEN-3):
   /// with it on, the Essentials strip is keyed on the current space's
   /// container; with it off, every essential shows in every space.
+  /// Whether the Zen Spaces sync client runs at all. Inert without a Firefox
+  /// account (PLAN §8).
+  final bool spacesSyncEnabled;
+
+  /// The kill switch (PLAN §8.6 item 6): when off, the spaces client keeps
+  /// reading the collection but uploads nothing.
+  final bool spacesSyncWritesEnabled;
+
+  /// `meta/global.engines.spaces.syncID` last seen; a change resets local
+  /// sync state (PLAN §8.3 item 4).
+  final String? spacesSyncLastSyncId;
+
+  /// The `spaces` collection's last-modified timestamp (seconds) this device
+  /// has fetched up to.
+  final double? spacesSyncLastModified;
+
+  /// Whether a full baseline of the collection has been fetched and applied;
+  /// until then no tombstone is ever uploaded (PLAN §8.6 item 4).
+  final bool spacesSyncBaselineDone;
+
+  /// Local stand-in for Zen's `zen.workspaces.separate-essentials`
+  /// (DESIGN.md OPEN-3).
   final bool separateEssentials;
 
   GeneralSettings({
@@ -589,6 +611,11 @@ class GeneralSettings with FastEquatable {
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
     required this.maxLiveTabs,
+    required this.spacesSyncEnabled,
+    required this.spacesSyncWritesEnabled,
+    required this.spacesSyncLastSyncId,
+    required this.spacesSyncLastModified,
+    required this.spacesSyncBaselineDone,
     required this.separateEssentials,
   });
 
@@ -678,6 +705,11 @@ class GeneralSettings with FastEquatable {
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
     int? maxLiveTabs,
+    bool? spacesSyncEnabled,
+    bool? spacesSyncWritesEnabled,
+    this.spacesSyncLastSyncId,
+    this.spacesSyncLastModified,
+    bool? spacesSyncBaselineDone,
     bool? separateEssentials,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
@@ -801,6 +833,9 @@ class GeneralSettings with FastEquatable {
          minMaxLiveTabs,
          maxMaxLiveTabs,
        ),
+       spacesSyncEnabled = spacesSyncEnabled ?? true,
+       spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
+       spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
        separateEssentials = separateEssentials ?? true;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
@@ -1020,6 +1055,11 @@ class GeneralSettings with FastEquatable {
     desktopModeSites,
     unmountGeckoViewOffRoute,
     maxLiveTabs,
+    spacesSyncEnabled,
+    spacesSyncWritesEnabled,
+    spacesSyncLastSyncId,
+    spacesSyncLastModified,
+    spacesSyncBaselineDone,
     separateEssentials,
   ];
 }

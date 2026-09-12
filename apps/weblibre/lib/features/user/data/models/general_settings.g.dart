@@ -207,6 +207,16 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings maxLiveTabs(int maxLiveTabs);
 
+  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled);
+
+  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled);
+
+  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId);
+
+  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified);
+
+  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone);
+
   GeneralSettings separateEssentials(bool separateEssentials);
 
   /// Creates a new instance with the provided field values.
@@ -302,6 +312,11 @@ abstract class _$GeneralSettingsCWProxy {
     List<String> desktopModeSites,
     bool unmountGeckoViewOffRoute,
     int maxLiveTabs,
+    bool spacesSyncEnabled,
+    bool spacesSyncWritesEnabled,
+    String? spacesSyncLastSyncId,
+    double? spacesSyncLastModified,
+    bool spacesSyncBaselineDone,
     bool separateEssentials,
   });
 }
@@ -678,6 +693,26 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(maxLiveTabs: maxLiveTabs);
 
   @override
+  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled) =>
+      call(spacesSyncEnabled: spacesSyncEnabled);
+
+  @override
+  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled) =>
+      call(spacesSyncWritesEnabled: spacesSyncWritesEnabled);
+
+  @override
+  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId) =>
+      call(spacesSyncLastSyncId: spacesSyncLastSyncId);
+
+  @override
+  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified) =>
+      call(spacesSyncLastModified: spacesSyncLastModified);
+
+  @override
+  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone) =>
+      call(spacesSyncBaselineDone: spacesSyncBaselineDone);
+
+  @override
   GeneralSettings separateEssentials(bool separateEssentials) =>
       call(separateEssentials: separateEssentials);
 
@@ -777,6 +812,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? desktopModeSites = const $CopyWithPlaceholder(),
     Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
+    Object? spacesSyncEnabled = const $CopyWithPlaceholder(),
+    Object? spacesSyncWritesEnabled = const $CopyWithPlaceholder(),
+    Object? spacesSyncLastSyncId = const $CopyWithPlaceholder(),
+    Object? spacesSyncLastModified = const $CopyWithPlaceholder(),
+    Object? spacesSyncBaselineDone = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
@@ -1272,6 +1312,33 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.maxLiveTabs
           // ignore: cast_nullable_to_non_nullable
           : maxLiveTabs as int,
+      spacesSyncEnabled:
+          spacesSyncEnabled == const $CopyWithPlaceholder() ||
+              spacesSyncEnabled == null
+          ? _value.spacesSyncEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncEnabled as bool,
+      spacesSyncWritesEnabled:
+          spacesSyncWritesEnabled == const $CopyWithPlaceholder() ||
+              spacesSyncWritesEnabled == null
+          ? _value.spacesSyncWritesEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncWritesEnabled as bool,
+      spacesSyncLastSyncId: spacesSyncLastSyncId == const $CopyWithPlaceholder()
+          ? _value.spacesSyncLastSyncId
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncLastSyncId as String?,
+      spacesSyncLastModified:
+          spacesSyncLastModified == const $CopyWithPlaceholder()
+          ? _value.spacesSyncLastModified
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncLastModified as double?,
+      spacesSyncBaselineDone:
+          spacesSyncBaselineDone == const $CopyWithPlaceholder() ||
+              spacesSyncBaselineDone == null
+          ? _value.spacesSyncBaselineDone
+          // ignore: cast_nullable_to_non_nullable
+          : spacesSyncBaselineDone as bool,
       separateEssentials:
           separateEssentials == const $CopyWithPlaceholder() ||
               separateEssentials == null
@@ -1463,6 +1530,11 @@ GeneralSettings _$GeneralSettingsFromJson(
       .toList(),
   unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
+  spacesSyncEnabled: json['spacesSyncEnabled'] as bool?,
+  spacesSyncWritesEnabled: json['spacesSyncWritesEnabled'] as bool?,
+  spacesSyncLastSyncId: json['spacesSyncLastSyncId'] as String?,
+  spacesSyncLastModified: (json['spacesSyncLastModified'] as num?)?.toDouble(),
+  spacesSyncBaselineDone: json['spacesSyncBaselineDone'] as bool?,
   separateEssentials: json['separateEssentials'] as bool?,
 );
 
@@ -1573,6 +1645,11 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'desktopModeSites': instance.desktopModeSites,
   'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
   'maxLiveTabs': instance.maxLiveTabs,
+  'spacesSyncEnabled': instance.spacesSyncEnabled,
+  'spacesSyncWritesEnabled': instance.spacesSyncWritesEnabled,
+  'spacesSyncLastSyncId': instance.spacesSyncLastSyncId,
+  'spacesSyncLastModified': instance.spacesSyncLastModified,
+  'spacesSyncBaselineDone': instance.spacesSyncBaselineDone,
   'separateEssentials': instance.separateEssentials,
 };
 
