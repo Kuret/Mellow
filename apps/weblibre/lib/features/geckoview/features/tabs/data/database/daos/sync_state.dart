@@ -137,4 +137,36 @@ class SyncStateDao extends DatabaseAccessor<TabDatabase>
   }
 
   Future<void> clearAllDeletions() => db.deletedRecord.delete().go();
+
+  // --- applied_tombstone ---------------------------------------------------
+
+  /// Notes that this device applied a remote tombstone for [id], now.
+  ///
+  /// Written inside the apply transaction, so the ledger and the digests it
+  /// guards commit together. The upload canary refuses a batch that would
+  /// re-create an id recorded here moments ago: that is what a projection /
+  /// snapshot skew looks like from the outside (Zen gh-15380).
+  Future<void> recordAppliedTombstone(String id) =>
+      db.appliedTombstone.insertOne(
+        AppliedTombstoneCompanion.insert(id: id, appliedAt: DateTime.now()),
+        onConflict: DoUpdate(
+          (_) => AppliedTombstoneCompanion(appliedAt: Value(DateTime.now())),
+        ),
+      );
+
+  /// The tombstones applied at or after [since], `id → applied_at`.
+  Future<Map<String, DateTime>> appliedTombstonesSince(DateTime since) async {
+    final rows =
+        await (db.appliedTombstone.select()
+              ..where((t) => t.appliedAt.isBiggerOrEqualValue(since)))
+            .get();
+    return {for (final row in rows) row.id: row.appliedAt};
+  }
+
+  /// Forgets tombstones applied before [before]; the canary only looks at a
+  /// recent window, so older entries are dead weight.
+  Future<void> pruneAppliedTombstones(DateTime before) =>
+      (db.appliedTombstone.delete()
+            ..where((t) => t.appliedAt.isSmallerThanValue(before)))
+          .go();
 }
