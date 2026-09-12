@@ -22,9 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 
 class TabsActionButtonView extends StatelessWidget {
   const TabsActionButtonView({
@@ -92,10 +90,10 @@ class TabsActionButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabCount = isActive
-        // ignore: provider_parameters
-        ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
-        : ref.watch(selectedContainerTabCountProvider);
+    // The tray lists the selected space's tabs regardless of whether it is
+    // currently open, so the badge always reflects that count rather than
+    // switching between an unfiltered total and a container-scoped one.
+    final tabCount = ref.watch(selectedSpaceTabCountProvider);
 
     final tabCountText = tabCount.when(
       skipLoadingOnReload: true,

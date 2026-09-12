@@ -22,13 +22,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 
 /// New tab / View tabs / Resume last tab.
 ///
 /// Which buttons appear depends on what there is to act on: with no tabs at all
 /// only "New tab" is meaningful, and "Resume last tab" resumes within the
-/// selected container when there is one.
+/// selected space when there is one.
 class QuickActionsSection extends ConsumerWidget {
   final VoidCallback onNewTab;
   final VoidCallback onViewTabs;
@@ -46,11 +46,9 @@ class QuickActionsSection extends ConsumerWidget {
     final hasTabs = ref.watch(
       tabListProvider.select((tabs) => tabs.value.isNotEmpty),
     );
-    final hasContainer = ref.watch(
-      selectedContainerDataProvider.select((value) => value.value != null),
-    );
-    final hasContainerTabs = ref.watch(
-      selectedContainerTabCountProvider.select(
+    final hasSpace = ref.watch(selectedSpaceProvider) != null;
+    final hasSpaceTabs = ref.watch(
+      selectedSpaceTabCountProvider.select(
         (data) => switch (data) {
           AsyncData(:final value) => value > 0,
           _ => false,
@@ -58,10 +56,10 @@ class QuickActionsSection extends ConsumerWidget {
       ),
     );
 
-    // Resuming is offered for the container in scope, or globally when no
-    // container is selected — never across a container boundary, which would
-    // silently move the user somewhere else.
-    final canResume = hasContainer ? hasContainerTabs : hasTabs;
+    // Resuming is offered for the space in scope, or globally when no space is
+    // selected (yet) — never across a space boundary, which would silently
+    // move the user somewhere else.
+    final canResume = hasSpace ? hasSpaceTabs : hasTabs;
 
     return SearchModuleSection(
       title: 'Quick Actions',
