@@ -144,6 +144,10 @@ object EngineProvider {
 
             // Apply builder-only settings from startup config
             GlobalComponents.startupSettings?.let { settings ->
+                // The debugger server is started by the runtime, so a profile
+                // that already has this on has to say so here; flipping it
+                // later goes through GeckoEngineSettingsApi instead.
+                settings.remoteDebuggingEnabled?.let { builder.remoteDebuggingEnabled(it) }
                 settings.fissionEnabled?.let { builder.fissionEnabled(it) }
                 settings.isolatedProcessEnabled?.let { builder.isolatedProcessEnabled(it) }
                 settings.appZygoteProcessEnabled?.let { builder.appZygoteProcessEnabled(it) }

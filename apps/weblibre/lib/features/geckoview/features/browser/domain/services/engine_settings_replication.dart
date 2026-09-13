@@ -378,6 +378,12 @@ class EngineSettingsReplicationService
             if (previous.value?.lnaEnabled != settings.lnaEnabled) {
               await _service.lnaEnabled(settings.lnaEnabled);
             }
+            if (previous.value?.remoteDebuggingEnabled !=
+                settings.remoteDebuggingEnabled) {
+              await _service.remoteDebuggingEnabled(
+                settings.remoteDebuggingEnabled,
+              );
+            }
             if (previous.value?.ublockFilterListSettings !=
                 settings.ublockFilterListSettings) {
               await syncUBlockFilterLists(

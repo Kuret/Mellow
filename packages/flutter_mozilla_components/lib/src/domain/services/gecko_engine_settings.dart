@@ -165,6 +165,12 @@ class GeckoEngineSettingsService {
     return _api.updateRuntimeSettings(GeckoEngineSettings(lnaEnabled: state));
   }
 
+  Future<void> remoteDebuggingEnabled(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(remoteDebuggingEnabled: state),
+    );
+  }
+
   Future<void> setScreenshotProtectionEnabled(bool enabled) {
     return _api.setScreenshotProtectionEnabled(enabled);
   }
