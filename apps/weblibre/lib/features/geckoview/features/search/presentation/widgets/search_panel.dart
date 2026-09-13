@@ -141,6 +141,35 @@ class SearchPanelMetrics {
   }
 }
 
+/// The scroll view inside the card: it measures its slivers instead of
+/// filling a box, so an empty query is a field and a short list rather than a
+/// tall empty card, and it stops growing at [maxHeight] and scrolls from
+/// there.
+class SearchPanelBody extends StatelessWidget {
+  const SearchPanelBody({
+    super.key,
+    required this.maxHeight,
+    required this.slivers,
+    this.controller,
+  });
+
+  final double maxHeight;
+  final List<Widget> slivers;
+  final ScrollController? controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: CustomScrollView(
+        controller: controller,
+        shrinkWrap: true,
+        slivers: slivers,
+      ),
+    );
+  }
+}
+
 /// The Arc/Zen-style floating command panel: the page stays on screen, blurred
 /// and dimmed, with a rounded card of search content floating over it.
 ///
