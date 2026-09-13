@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,6 +33,86 @@ part 'engine_settings.g.dart';
 typedef UpdateEngineSettingsFunc =
     EngineSettings Function(EngineSettings currentSettings);
 
+/// Column type for every persisted `engine` setting, keyed by its JSON name.
+///
+/// **Every field on [EngineSettings] must appear here or in
+/// [engineSettingJsonKeys].** A missing entry means the setting writes fine
+/// but silently reverts to its default on the next launch, because it is
+/// never read back out of the database. `engine_settings_deserialize_test.dart`
+/// guards this.
+@visibleForTesting
+const engineSettingColumnTypes = <String, DriftSqlType>{
+  'incognitoMode': DriftSqlType.bool,
+  'javascriptEnabled': DriftSqlType.bool,
+  'trackingProtectionPolicy': DriftSqlType.string,
+  'httpsOnlyMode': DriftSqlType.string,
+  'globalPrivacyControlEnabled': DriftSqlType.bool,
+  'userAgent': DriftSqlType.string,
+  'queryParameterStripping': DriftSqlType.string,
+  'bounceTrackingProtectionMode': DriftSqlType.string,
+  'enterpriseRootsEnabled': DriftSqlType.bool,
+  'remoteDebuggingEnabled': DriftSqlType.bool,
+  'addonCollection': DriftSqlType.string,
+  'ublockFilterListSettings': DriftSqlType.string,
+  'dohSettingsMode': DriftSqlType.string,
+  'dohProviderUrl': DriftSqlType.string,
+  'dohDefaultProviderUrl': DriftSqlType.string,
+  'fingerprintingProtectionOverrides': DriftSqlType.string,
+  'enablePdfJs': DriftSqlType.bool,
+  'safeBrowsingMalwareEnabled': DriftSqlType.bool,
+  'safeBrowsingPhishingEnabled': DriftSqlType.bool,
+  'useContentBlockingDatabase': DriftSqlType.bool,
+  // Custom Tracking Protection
+  'blockCookies': DriftSqlType.bool,
+  'customCookiePolicy': DriftSqlType.string,
+  'blockTrackingContent': DriftSqlType.bool,
+  'trackingContentScope': DriftSqlType.string,
+  'blockCryptominers': DriftSqlType.bool,
+  'blockFingerprinters': DriftSqlType.bool,
+  'blockRedirectTrackers': DriftSqlType.bool,
+  'blockSuspectedFingerprinters': DriftSqlType.bool,
+  'suspectedFingerprintersScope': DriftSqlType.string,
+  'allowListBaseline': DriftSqlType.bool,
+  'allowListConvenience': DriftSqlType.bool,
+  'blockAdsAnalyticsSocialTrackers': DriftSqlType.bool,
+  // Web Content Settings
+  'webFontsEnabled': DriftSqlType.bool,
+  'automaticFontSizeAdjustment': DriftSqlType.bool,
+  'fontSizeFactor': DriftSqlType.double,
+  'fontInflationEnabled': DriftSqlType.bool,
+  'displayDensityOverride': DriftSqlType.double,
+  'screenWidthOverride': DriftSqlType.int,
+  'screenHeightOverride': DriftSqlType.int,
+  'inputAutoZoomEnabled': DriftSqlType.bool,
+  'forceUserScalableContent': DriftSqlType.bool,
+  // Process Isolation Settings
+  'fissionEnabled': DriftSqlType.bool,
+  'isolatedProcessEnabled': DriftSqlType.bool,
+  'appZygoteProcessEnabled': DriftSqlType.bool,
+  'extensionsWebAPIEnabled': DriftSqlType.bool,
+  // LNA Settings
+  'lnaBlocking': DriftSqlType.bool,
+  'lnaBlockTrackers': DriftSqlType.bool,
+  'lnaEnabled': DriftSqlType.bool,
+  // No writer today: nothing calls copyWith for these, so no row for them can
+  // exist yet. Listed so that wiring up a writer later cannot silently revert.
+  'preferredColorScheme': DriftSqlType.string,
+  'cookieBannerHandlingMode': DriftSqlType.string,
+  'cookieBannerHandlingModePrivateBrowsing': DriftSqlType.string,
+  'cookieBannerHandlingGlobalRules': DriftSqlType.bool,
+  'cookieBannerHandlingGlobalRulesSubFrames': DriftSqlType.bool,
+};
+
+/// Settings stored as a JSON document in a TEXT column. Their value has to be
+/// decoded before it reaches `EngineSettings.fromJson`, which expects the
+/// already-parsed list/map.
+@visibleForTesting
+const engineSettingJsonKeys = <String>{
+  'dohExceptionsList',
+  'customDohProviders',
+  'locales',
+};
+
 @Riverpod(keepAlive: true)
 class EngineSettingsRepository extends _$EngineSettingsRepository {
   final _partitionKey = 'engine';
@@ -39,197 +120,18 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
   EngineSettings _deserializeSettings(
     List<MapEntry<String, DriftAny?>> entries,
   ) {
-    final db = ref.read(userDatabaseProvider);
     final settings = Map.fromEntries(entries);
 
+    final typeMapping = ref.read(userDatabaseProvider).typeMapping;
+
     return EngineSettings.fromJson({
-      'incognitoMode': settings['incognitoMode']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'javascriptEnabled': settings['javascriptEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'trackingProtectionPolicy': settings['trackingProtectionPolicy']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'httpsOnlyMode': settings['httpsOnlyMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'globalPrivacyControlEnabled': settings['globalPrivacyControlEnabled']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'userAgent': settings['userAgent']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'queryParameterStripping': settings['queryParameterStripping']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'bounceTrackingProtectionMode': settings['bounceTrackingProtectionMode']
-          ?.readAs(DriftSqlType.string, db.typeMapping),
-      'enterpriseRootsEnabled': settings['enterpriseRootsEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'addonCollection': settings['addonCollection']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'ublockFilterListSettings': settings['ublockFilterListSettings']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'dohSettingsMode': settings['dohSettingsMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'dohProviderUrl': settings['dohProviderUrl']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'dohDefaultProviderUrl': settings['dohDefaultProviderUrl']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'dohExceptionsList': settings['dohExceptionsList']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'customDohProviders': settings['customDohProviders']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'fingerprintingProtectionOverrides':
-          settings['fingerprintingProtectionOverrides']?.readAs(
-            DriftSqlType.string,
-            db.typeMapping,
-          ),
-      'enablePdfJs': settings['enablePdfJs']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'safeBrowsingMalwareEnabled': settings['safeBrowsingMalwareEnabled']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'safeBrowsingPhishingEnabled': settings['safeBrowsingPhishingEnabled']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'locales': settings['locales']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'useContentBlockingDatabase': settings['useContentBlockingDatabase']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      // Custom Tracking Protection
-      'blockCookies': settings['blockCookies']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'customCookiePolicy': settings['customCookiePolicy']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'blockTrackingContent': settings['blockTrackingContent']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'trackingContentScope': settings['trackingContentScope']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'blockCryptominers': settings['blockCryptominers']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'blockFingerprinters': settings['blockFingerprinters']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'blockRedirectTrackers': settings['blockRedirectTrackers']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'blockSuspectedFingerprinters': settings['blockSuspectedFingerprinters']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'suspectedFingerprintersScope': settings['suspectedFingerprintersScope']
-          ?.readAs(DriftSqlType.string, db.typeMapping),
-      'allowListBaseline': settings['allowListBaseline']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'allowListConvenience': settings['allowListConvenience']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'blockAdsAnalyticsSocialTrackers':
-          settings['blockAdsAnalyticsSocialTrackers']?.readAs(
-            DriftSqlType.bool,
-            db.typeMapping,
-          ),
-      // Web Content Settings
-      'webFontsEnabled': settings['webFontsEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'automaticFontSizeAdjustment': settings['automaticFontSizeAdjustment']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'fontSizeFactor': settings['fontSizeFactor']?.readAs(
-        DriftSqlType.double,
-        db.typeMapping,
-      ),
-      'fontInflationEnabled': settings['fontInflationEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'displayDensityOverride': settings['displayDensityOverride']?.readAs(
-        DriftSqlType.double,
-        db.typeMapping,
-      ),
-      'screenWidthOverride': settings['screenWidthOverride']?.readAs(
-        DriftSqlType.int,
-        db.typeMapping,
-      ),
-      'screenHeightOverride': settings['screenHeightOverride']?.readAs(
-        DriftSqlType.int,
-        db.typeMapping,
-      ),
-      'inputAutoZoomEnabled': settings['inputAutoZoomEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'forceUserScalableContent': settings['forceUserScalableContent']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      // Process Isolation Settings
-      'fissionEnabled': settings['fissionEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'isolatedProcessEnabled': settings['isolatedProcessEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'appZygoteProcessEnabled': settings['appZygoteProcessEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'extensionsWebAPIEnabled': settings['extensionsWebAPIEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      // LNA Settings
-      'lnaBlocking': settings['lnaBlocking']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'lnaBlockTrackers': settings['lnaBlockTrackers']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'lnaEnabled': settings['lnaEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
+      for (final MapEntry(key: key, value: type)
+          in engineSettingColumnTypes.entries)
+        key: settings[key]?.readAs(type, typeMapping),
+      for (final key in engineSettingJsonKeys)
+        key: settings[key]
+            ?.readAs(DriftSqlType.string, typeMapping)
+            .mapNotNull(jsonDecode),
     });
   }
 
