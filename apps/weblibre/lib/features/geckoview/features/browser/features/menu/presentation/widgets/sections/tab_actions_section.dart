@@ -52,7 +52,6 @@ import 'package:weblibre/features/geckoview/features/top_sites/domain/repositori
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -136,7 +135,6 @@ class TabActionsSection extends HookConsumerWidget {
       items: item.visibleItems,
     ),
     MenuItemType.pinTopSite => _PinTopSiteTile(selectedTabId: selectedTabId),
-    MenuItemType.fetchFeeds => _FetchFeedsTile(selectedTabId: selectedTabId),
     _ => const SizedBox.shrink(),
   };
 }
@@ -750,66 +748,6 @@ class _PinTopSiteTile extends HookConsumerWidget {
           }
         }
       },
-    );
-  }
-}
-
-class _FetchFeedsTile extends HookConsumerWidget {
-  final String selectedTabId;
-
-  const _FetchFeedsTile({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showFeeds = useState(false);
-
-    if (!showFeeds.value) {
-      return ListTile(
-        leading: const Icon(Icons.rss_feed),
-        title: const Text('Fetch Feeds on Page'),
-        onTap: () {
-          showFeeds.value = true;
-        },
-      );
-    }
-
-    final feedsAsync = ref.watch(websiteFeedProviderProvider(selectedTabId));
-
-    return feedsAsync.when(
-      skipLoadingOnReload: true,
-      data: (feeds) {
-        if (feeds.value.isEmpty) {
-          return const ListTile(
-            leading: Icon(Icons.rss_feed_outlined),
-            title: Text('No Web Feeds Found'),
-            enabled: false,
-          );
-        }
-
-        return ListTile(
-          leading: const Icon(Icons.rss_feed),
-          title: const Text('Available Web Feeds'),
-          trailing: Badge(label: Text(feeds.value!.length.toString())),
-          onTap: () async {
-            Navigator.pop(context);
-            await SelectFeedDialogRoute(
-              feedsJson: jsonEncode(
-                feeds.value!.map((feed) => feed.toString()).toList(),
-              ),
-            ).push(context);
-          },
-        );
-      },
-      error: (_, _) => const SizedBox.shrink(),
-      loading: () => const ListTile(
-        leading: Icon(Icons.rss_feed),
-        title: Text('Fetching Web Feeds...'),
-        trailing: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
     );
   }
 }

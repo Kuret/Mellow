@@ -21,7 +21,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
@@ -85,7 +84,6 @@ class QuickLinksSection extends ConsumerWidget {
     MenuItemType.bookmarks,
     MenuItemType.downloads,
     MenuItemType.bangs,
-    MenuItemType.feeds,
     MenuItemType.smallWeb,
   };
 
@@ -107,9 +105,6 @@ class QuickLinksSection extends ConsumerWidget {
       case MenuItemType.bangs:
         Navigator.pop(context);
         await const BangMenuRoute().push(context);
-      case MenuItemType.feeds:
-        Navigator.pop(context);
-        await context.push(FeedListRoute().location);
       case MenuItemType.smallWeb:
         Navigator.pop(context);
         await ref.read(smallWebModeControllerProvider.notifier).enter();

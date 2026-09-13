@@ -128,14 +128,12 @@ enum MenuItemType {
   printPage,
 
   pinTopSite,
-  fetchFeeds,
 
   // Quick links
   history,
   bookmarks,
   downloads,
   bangs,
-  feeds,
   smallWeb,
 
   // Profile & App
@@ -178,12 +176,10 @@ enum MenuItemType {
     exportAsPng => 'Export as PNG',
     printPage => 'Print',
     pinTopSite => 'Pin to Shortcuts',
-    fetchFeeds => 'Fetch Feeds',
     history => 'History',
     bookmarks => 'Bookmarks',
     downloads => 'Downloads',
     bangs => 'Bangs',
-    feeds => 'Feeds',
     smallWeb => 'Small Web',
     profileSwitch => 'Profile',
     syncNow => 'Sync Now',
@@ -231,12 +227,10 @@ enum MenuItemType {
     exportAsPng => MdiIcons.fileImage,
     printPage => MdiIcons.printer,
     pinTopSite => MdiIcons.pin,
-    fetchFeeds => Icons.rss_feed,
     history => Icons.history,
     bookmarks => MdiIcons.bookmarkMultiple,
     downloads => MdiIcons.fileDownload,
     bangs => MdiIcons.exclamationThick,
-    feeds => Icons.rss_feed,
     smallWeb => Icons.explore,
     profileSwitch => Icons.person,
     syncNow => Icons.sync,
@@ -351,7 +345,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
         ],
       ),
       MenuItemDefault(MenuItemType.pinTopSite),
-      MenuItemDefault(MenuItemType.fetchFeeds),
     ],
   ),
   MenuSectionDefault(
@@ -361,7 +354,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       MenuItemDefault(MenuItemType.bookmarks),
       MenuItemDefault(MenuItemType.downloads),
       MenuItemDefault(MenuItemType.bangs),
-      MenuItemDefault(MenuItemType.feeds),
       MenuItemDefault(MenuItemType.smallWeb),
     ],
   ),
