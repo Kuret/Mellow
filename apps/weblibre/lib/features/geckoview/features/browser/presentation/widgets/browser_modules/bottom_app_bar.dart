@@ -40,9 +40,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
@@ -58,7 +55,6 @@ class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
-  final bool isSmallWebMode;
   final bool enableGestures;
   final bool suppressMainToolbar;
 
@@ -70,7 +66,6 @@ class BrowserTopAppBar extends StatelessWidget {
     required this.showMainToolbar,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
-    required this.isSmallWebMode,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
@@ -79,7 +74,6 @@ class BrowserTopAppBar extends StatelessWidget {
       displayedSheet: null,
       showContextualToolbar: false,
       quickTabSwitcherRowCount: 0,
-      isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
@@ -101,7 +95,6 @@ class BrowserBottomAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
-  final bool isSmallWebMode;
   final Sheet? displayedSheet;
   final bool enableGestures;
   final bool suppressMainToolbar;
@@ -115,7 +108,6 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
-    required this.isSmallWebMode,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
@@ -124,7 +116,6 @@ class BrowserBottomAppBar extends StatelessWidget {
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-      isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
@@ -159,7 +150,6 @@ class BrowserBottomAppBar extends StatelessWidget {
 class BrowserSideRail extends ConsumerWidget {
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
-  final bool isSmallWebMode;
 
   /// Which edge the rail is docked to.
   final RailSide side;
@@ -177,7 +167,6 @@ class BrowserSideRail extends ConsumerWidget {
     super.key,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
-    required this.isSmallWebMode,
     required this.side,
     required this.railWidth,
     this.suppressMainToolbar = false,
@@ -187,7 +176,6 @@ class BrowserSideRail extends ConsumerWidget {
       showMainToolbar: true,
       showContextualToolbar: showContextualToolbar,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-      isSmallWebMode: isSmallWebMode,
       enableGestures: true,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
@@ -240,7 +228,6 @@ class BrowserTabBar extends HookConsumerWidget {
   final int quickTabSwitcherRowCount;
   final Sheet? displayedSheet;
   final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
-  final bool isSmallWebMode;
   final bool enableGestures;
 
   /// Drops the main toolbar row entirely — not just its contents.
@@ -270,7 +257,6 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
-    required this.isSmallWebMode,
     required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
@@ -334,9 +320,8 @@ class BrowserTabBar extends HookConsumerWidget {
               c.buttonId == ToolbarButtonId.navigationMenu.name && c.isVisible,
         );
 
-    final showMainToolbarTabsCount = !isSmallWebMode && !tabsCountInContextual;
-    final showMainToolbarNavigationButton =
-        !isSmallWebMode && !menuInContextual;
+    final showMainToolbarTabsCount = !tabsCountInContextual;
+    final showMainToolbarNavigationButton = !menuInContextual;
 
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
@@ -440,19 +425,6 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final actions = <Widget>[
       const PinnedAddonBar(),
-      if (isSmallWebMode)
-        ReaderButton(
-          buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
-            onTap: isLoading
-                ? null
-                : () async {
-                    await ref
-                        .read(readerableScreenControllerProvider.notifier)
-                        .toggleReaderView(!readerActive);
-                  },
-            child: icon,
-          ),
-        ),
       if (showMainToolbarTabsCount)
         TabsCountButton(
           selectedTabId: selectedTabId,
