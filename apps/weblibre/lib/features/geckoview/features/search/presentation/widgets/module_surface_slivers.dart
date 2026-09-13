@@ -23,7 +23,6 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/quick_actions_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
@@ -96,8 +95,6 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
         RecentTabsSection(onTabSelected: callbacks.onTabSelected),
     SearchModuleType.recentHistory: () =>
         RecentHistorySection(onUriSelected: callbacks.onUriSelected),
-    SearchModuleType.historyHighlights: () =>
-        HistoryHighlightsSection(onUriSelected: callbacks.onUriSelected),
     SearchModuleType.containers: () =>
         ContainersSection(onContainerSelected: callbacks.onContainerSelected),
     if (callbacks.onNewTab != null &&

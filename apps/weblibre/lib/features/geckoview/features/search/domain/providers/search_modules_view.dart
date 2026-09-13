@@ -49,7 +49,6 @@ enum SearchModuleType {
   /// enabling [history] and [localHistory] separately.
   combinedHistory,
 
-  historyHighlights,
   topSites,
   recentHistory,
   recentArticles,
@@ -72,7 +71,6 @@ enum SearchModuleType {
     history => 'History (engine)',
     localHistory => 'Local content',
     combinedHistory => 'History',
-    historyHighlights => 'History Highlights',
     topSites => 'Shortcuts',
     recentHistory => 'Recent History',
     recentArticles => 'Recent Articles',
@@ -104,7 +102,6 @@ enum ModuleSurface {
       (type: SearchModuleType.topSites, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: false),
-      (type: SearchModuleType.historyHighlights, visible: false),
       (type: SearchModuleType.recentArticles, visible: false),
       (type: SearchModuleType.containers, visible: false),
     ],
@@ -123,7 +120,6 @@ enum ModuleSurface {
       (type: SearchModuleType.recentArticles, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: true),
-      (type: SearchModuleType.historyHighlights, visible: true),
       (type: SearchModuleType.containers, visible: true),
     ],
   ),

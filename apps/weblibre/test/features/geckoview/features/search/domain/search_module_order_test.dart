@@ -179,7 +179,9 @@ void main() {
 
     test('a real shipped payload round-trips unchanged', () {
       // Captured from the shape SearchModuleOrder.build writes today: a user
-      // who moved Shortcuts to the top and hid History Highlights.
+      // who moved Shortcuts to the top and hid History Highlights. History
+      // Highlights has since been removed, so the decode has to drop that one
+      // entry and keep the rest of the layout.
       const payload =
           '[{"type":"topSites","visible":true},'
           '{"type":"recentSearches","visible":true},'
@@ -190,37 +192,22 @@ void main() {
           '{"type":"historyHighlights","visible":false},'
           '{"type":"containers","visible":true}]';
 
-      final decoded = (jsonDecode(payload) as List<dynamic>)
-          .cast<Map<String, dynamic>>()
-          .map(ModuleOrderEntry.fromJson)
-          .toList();
-
-      final merged = mergeModuleOrderWithDefaults(
-        decoded,
+      final merged = decodeModuleOrder(
+        payload,
         ModuleSurface.newTab.defaultModules,
       );
 
-      // Everything the user saved survives, in their order, untouched...
-      expect(
-        merged.where((e) => decoded.any((d) => d.type == e.type)).toList(),
-        decoded,
-        reason: 'a saved layout must survive the surface rename untouched',
-      );
-      expect(_types(merged).first, SearchModuleType.topSites);
-      expect(
-        merged
-            .firstWhere((e) => e.type == SearchModuleType.historyHighlights)
-            .visible,
-        isFalse,
-      );
-
-      // ...and modules added since then appear without switching themselves on.
-      final added = merged.where((e) => !decoded.any((d) => d.type == e.type));
-      expect(
-        added.every((e) => !e.visible),
-        isTrue,
-        reason: 'a module added to a shipped surface must default to off',
-      );
+      // Everything the user saved that still exists survives, in their order.
+      expect(_types(merged), [
+        SearchModuleType.topSites,
+        SearchModuleType.recentSearches,
+        SearchModuleType.frequentBangs,
+        SearchModuleType.recentArticles,
+        SearchModuleType.recentTabs,
+        SearchModuleType.recentHistory,
+        SearchModuleType.containers,
+      ]);
+      expect(merged.every((e) => e.visible), isTrue);
     });
 
     test('unparseable entries are skipped rather than poisoning the list', () {

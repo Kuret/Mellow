@@ -27,20 +27,6 @@ import 'package:weblibre/features/web_feed/domain/providers.dart';
 part 'empty_state_content.g.dart';
 
 @Riverpod()
-Future<List<HistoryHighlight>> searchEmptyHistoryHighlights(
-  Ref ref, {
-  int count = 25,
-}) async {
-  final highlights = await ref
-      .read(historyRepositoryProvider.notifier)
-      .getHistoryHighlights(limit: count);
-
-  if (!ref.mounted) return [];
-
-  return highlights.where((h) => Uri.tryParse(h.url) != null).toList();
-}
-
-@Riverpod()
 Future<List<VisitInfo>> searchEmptyRecentHistory(
   Ref ref, {
   int count = 25,
