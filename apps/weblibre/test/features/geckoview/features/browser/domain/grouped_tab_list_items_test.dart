@@ -93,7 +93,6 @@ void main() {
     required List<_Tab> tabs,
     List<TabFolderData> folders = const [],
     Set<String>? liveIds,
-    TabDirection direction = TabDirection.oldestFirst,
   }) {
     final live =
         liveIds ??
@@ -132,10 +131,7 @@ void main() {
           (ref) => Stream.value(const <String, DateTime>{}),
         ),
         generalSettingsWithDefaultsProvider.overrideWith(
-          (ref) => GeneralSettings.withDefaults(
-            tabListDirection: direction,
-            tabBarDirection: direction,
-          ),
+          (ref) => GeneralSettings.withDefaults(),
         ),
         tabViewFilterControllerProvider.overrideWith(
           () => _FakeFilterController(TabViewFilterOptions.withDefaults()),
@@ -162,13 +158,11 @@ void main() {
   }
 
   Future<List<TabListItemEntity>> readVisible(
-    ProviderContainer container, {
-    bool ignoreDirection = false,
-  }) async {
+    ProviderContainer container,
+  ) async {
     final provider = visibleTabListItemsProvider(
       spaceUuid: _space,
       scope: TabListScope.presentation,
-      ignoreDirection: ignoreDirection,
     );
     container.listen(provider, (_, _) {}, fireImmediately: true);
     for (var i = 0; i < 8; i++) {
@@ -309,21 +303,12 @@ void main() {
     },
   );
 
-  test(
-    'ignoreDirection renders order_key ascending under newestFirst',
-    () async {
-      final container = makeContainer(
-        tabs: const [_Tab('b', 'b'), _Tab('a', 'a'), _Tab('c', 'c')],
-        direction: TabDirection.newestFirst,
-      );
-      expect((await readVisible(container)).map(label), ['c@0', 'b@0', 'a@0']);
-      expect((await readVisible(container, ignoreDirection: true)).map(label), [
-        'a@0',
-        'b@0',
-        'c@0',
-      ]);
-    },
-  );
+  test('every surface renders order_key ascending', () async {
+    final container = makeContainer(
+      tabs: const [_Tab('b', 'b'), _Tab('a', 'a'), _Tab('c', 'c')],
+    );
+    expect((await readVisible(container)).map(label), ['a@0', 'b@0', 'c@0']);
+  });
 
   test('cold rows are listed, live rows the engine lost are not', () async {
     final container = makeContainer(
@@ -387,21 +372,6 @@ void main() {
       ],
     );
     expect((await read(container)).map(label), ['a@0', 'm0@0', 'm1@0', 'x@0']);
-    final newestFirst = makeContainer(
-      tabs: const [
-        _Tab('m1', 'b', splitId: 'S', splitIndex: 1),
-        _Tab('x', 'c'),
-        _Tab('m0', 'd', splitId: 'S', splitIndex: 0),
-        _Tab('a', 'a'),
-      ],
-      direction: TabDirection.newestFirst,
-    );
-    expect((await read(newestFirst)).map(label), [
-      'x@0',
-      'm0@0',
-      'm1@0',
-      'a@0',
-    ]);
   });
 }
 

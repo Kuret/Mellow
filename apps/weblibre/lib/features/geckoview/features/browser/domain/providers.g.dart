@@ -942,7 +942,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'e2dcbff7c67bf11bbc7ba683388b8f1c4484b7ef';
+    r'fb0dcaa1410425d212bce5e91ba6212556be4a7a';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -1078,18 +1078,13 @@ final class FilteredTabPreviewsFamily extends $Family
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
 ///
-/// Parent rows always render before their descendants. [TabDirection]
-/// applies both to root group ordering and to sibling ordering below each
-/// parent, so parent-child pairs stay together while child order still follows
-/// the configured direction.
+/// Rows render in storage order — `order_key` ascending, the order the
+/// desktop sidebar shows — on every surface. Parent rows always render before
+/// their descendants.
 ///
-/// [scope] decides which of the tray's controls take part and which direction
-/// setting applies — see [TabListScope]. Both scopes run the same grouping,
-/// so a tab's place relative to its parent never depends on who is asking.
-///
-/// [ignoreDirection] renders storage order (`order_key` ascending, the order
-/// the desktop sidebar shows) whatever the direction setting says; the wide
-/// rail mirrors the desktop and asks for it.
+/// [scope] decides which of the tray's controls take part — see
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place
+/// relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1099,18 +1094,13 @@ final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
 ///
-/// Parent rows always render before their descendants. [TabDirection]
-/// applies both to root group ordering and to sibling ordering below each
-/// parent, so parent-child pairs stay together while child order still follows
-/// the configured direction.
+/// Rows render in storage order — `order_key` ascending, the order the
+/// desktop sidebar shows — on every surface. Parent rows always render before
+/// their descendants.
 ///
-/// [scope] decides which of the tray's controls take part and which direction
-/// setting applies — see [TabListScope]. Both scopes run the same grouping,
-/// so a tab's place relative to its parent never depends on who is asking.
-///
-/// [ignoreDirection] renders storage order (`order_key` ascending, the order
-/// the desktop sidebar shows) whatever the direction setting says; the wide
-/// rail mirrors the desktop and asks for it.
+/// [scope] decides which of the tray's controls take part — see
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place
+/// relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1125,24 +1115,18 @@ final class GroupedTabListItemsProvider
   /// Grouped flat-list rendering shared by every surface that lays tabs out in
   /// one ordered sequence.
   ///
-  /// Parent rows always render before their descendants. [TabDirection]
-  /// applies both to root group ordering and to sibling ordering below each
-  /// parent, so parent-child pairs stay together while child order still follows
-  /// the configured direction.
+  /// Rows render in storage order — `order_key` ascending, the order the
+  /// desktop sidebar shows — on every surface. Parent rows always render before
+  /// their descendants.
   ///
-  /// [scope] decides which of the tray's controls take part and which direction
-  /// setting applies — see [TabListScope]. Both scopes run the same grouping,
-  /// so a tab's place relative to its parent never depends on who is asking.
-  ///
-  /// [ignoreDirection] renders storage order (`order_key` ascending, the order
-  /// the desktop sidebar shows) whatever the direction setting says; the wide
-  /// rail mirrors the desktop and asks for it.
+  /// [scope] decides which of the tray's controls take part — see
+  /// [TabListScope]. Both scopes run the same grouping, so a tab's place
+  /// relative to its parent never depends on who is asking.
   ///
   /// Returns `null` when the input data is not yet available (loading).
   GroupedTabListItemsProvider._({
     required GroupedTabListItemsFamily super.from,
-    required ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
-    super.argument,
+    required ({String? spaceUuid, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'groupedTabListItemsProvider',
@@ -1169,14 +1153,11 @@ final class GroupedTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument =
-        this.argument
-            as ({String? spaceUuid, TabListScope scope, bool ignoreDirection});
+    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
     return groupedTabListItems(
       ref,
       spaceUuid: argument.spaceUuid,
       scope: argument.scope,
-      ignoreDirection: argument.ignoreDirection,
     );
   }
 
@@ -1201,23 +1182,18 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'43c81c1995e3efc01e395ef07ea723a1bc33416c';
+    r'f23793b0a9f49a32228312fe511da1f76d991f50';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
 ///
-/// Parent rows always render before their descendants. [TabDirection]
-/// applies both to root group ordering and to sibling ordering below each
-/// parent, so parent-child pairs stay together while child order still follows
-/// the configured direction.
+/// Rows render in storage order — `order_key` ascending, the order the
+/// desktop sidebar shows — on every surface. Parent rows always render before
+/// their descendants.
 ///
-/// [scope] decides which of the tray's controls take part and which direction
-/// setting applies — see [TabListScope]. Both scopes run the same grouping,
-/// so a tab's place relative to its parent never depends on who is asking.
-///
-/// [ignoreDirection] renders storage order (`order_key` ascending, the order
-/// the desktop sidebar shows) whatever the direction setting says; the wide
-/// rail mirrors the desktop and asks for it.
+/// [scope] decides which of the tray's controls take part — see
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place
+/// relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1225,7 +1201,7 @@ final class GroupedTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
+          ({String? spaceUuid, TabListScope scope})
         > {
   GroupedTabListItemsFamily._()
     : super(
@@ -1239,31 +1215,21 @@ final class GroupedTabListItemsFamily extends $Family
   /// Grouped flat-list rendering shared by every surface that lays tabs out in
   /// one ordered sequence.
   ///
-  /// Parent rows always render before their descendants. [TabDirection]
-  /// applies both to root group ordering and to sibling ordering below each
-  /// parent, so parent-child pairs stay together while child order still follows
-  /// the configured direction.
+  /// Rows render in storage order — `order_key` ascending, the order the
+  /// desktop sidebar shows — on every surface. Parent rows always render before
+  /// their descendants.
   ///
-  /// [scope] decides which of the tray's controls take part and which direction
-  /// setting applies — see [TabListScope]. Both scopes run the same grouping,
-  /// so a tab's place relative to its parent never depends on who is asking.
-  ///
-  /// [ignoreDirection] renders storage order (`order_key` ascending, the order
-  /// the desktop sidebar shows) whatever the direction setting says; the wide
-  /// rail mirrors the desktop and asks for it.
+  /// [scope] decides which of the tray's controls take part — see
+  /// [TabListScope]. Both scopes run the same grouping, so a tab's place
+  /// relative to its parent never depends on who is asking.
   ///
   /// Returns `null` when the input data is not yet available (loading).
 
   GroupedTabListItemsProvider call({
     required String? spaceUuid,
     required TabListScope scope,
-    bool ignoreDirection = false,
   }) => GroupedTabListItemsProvider._(
-    argument: (
-      spaceUuid: spaceUuid,
-      scope: scope,
-      ignoreDirection: ignoreDirection,
-    ),
+    argument: (spaceUuid: spaceUuid, scope: scope),
     from: this,
   );
 
@@ -1337,8 +1303,7 @@ final class VisibleTabListItemsProvider
   /// swipe.
   VisibleTabListItemsProvider._({
     required VisibleTabListItemsFamily super.from,
-    required ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
-    super.argument,
+    required ({String? spaceUuid, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'visibleTabListItemsProvider',
@@ -1365,14 +1330,11 @@ final class VisibleTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument =
-        this.argument
-            as ({String? spaceUuid, TabListScope scope, bool ignoreDirection});
+    final argument = this.argument as ({String? spaceUuid, TabListScope scope});
     return visibleTabListItems(
       ref,
       spaceUuid: argument.spaceUuid,
       scope: argument.scope,
-      ignoreDirection: argument.ignoreDirection,
     );
   }
 
@@ -1397,7 +1359,7 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'468e8f51b2ec1c511912f582260b04a9838b3629';
+    r'a3fe31bd2fba113a779517fe196c8876e6cd9b84';
 
 /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
 /// plus the flat post-processing: where there are no visible groups to keep
@@ -1421,7 +1383,7 @@ final class VisibleTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          ({String? spaceUuid, TabListScope scope, bool ignoreDirection})
+          ({String? spaceUuid, TabListScope scope})
         > {
   VisibleTabListItemsFamily._()
     : super(
@@ -1453,13 +1415,8 @@ final class VisibleTabListItemsFamily extends $Family
   VisibleTabListItemsProvider call({
     required String? spaceUuid,
     required TabListScope scope,
-    bool ignoreDirection = false,
   }) => VisibleTabListItemsProvider._(
-    argument: (
-      spaceUuid: spaceUuid,
-      scope: scope,
-      ignoreDirection: ignoreDirection,
-    ),
+    argument: (spaceUuid: spaceUuid, scope: scope),
     from: this,
   );
 
@@ -1498,9 +1455,7 @@ final class VisibleTabListItemsFamily extends $Family
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabBarDirection` (baked into the
-/// order) rather than `tabListDirection` — the bar is what the step is read
-/// against, and the two only disagree when the user sets them apart.
+/// towards its end.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
@@ -1555,9 +1510,7 @@ final sequentialTabNavigationOrderProvider =
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabBarDirection` (baked into the
-/// order) rather than `tabListDirection` — the bar is what the step is read
-/// against, and the two only disagree when the user sets them apart.
+/// towards its end.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
@@ -1616,9 +1569,7 @@ final class SequentialTabNavigationOrderProvider
   /// edge — the containers themselves are then only switched deliberately.
   ///
   /// "Previous" is a step towards the top of that order and "next" a step
-  /// towards its end, so direction follows `tabBarDirection` (baked into the
-  /// order) rather than `tabListDirection` — the bar is what the step is read
-  /// against, and the two only disagree when the user sets them apart.
+  /// towards its end.
   ///
   /// The tray's own search results are deliberately not part of this: the swipe
   /// and the gestures are only reachable with the tray closed.

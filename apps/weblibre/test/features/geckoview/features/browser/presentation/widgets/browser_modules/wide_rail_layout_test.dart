@@ -158,7 +158,6 @@ Future<TabDatabase> _memoryDatabaseWithTabs(
 List<Override> _railOverrides(
   TabDatabase db, {
   required double railWidth,
-  TabDirection direction = TabDirection.oldestFirst,
   List<String> liveTabIds = const [],
 }) => [
   tabDatabaseProvider.overrideWith((ref) => db),
@@ -166,8 +165,6 @@ List<Override> _railOverrides(
     (ref) => GeneralSettings.withDefaults(
       tabBarPosition: TabBarPosition.left,
       railWidth: railWidth,
-      tabListDirection: direction,
-      tabBarDirection: direction,
     ),
   ),
   watchSpacesProvider.overrideWith(
@@ -529,7 +526,7 @@ void main() {
       await _disposeTree(tester);
     });
 
-    testWidgets('renders storage order even under newestFirst', (tester) async {
+    testWidgets('renders storage order', (tester) async {
       final db = await _memoryDatabaseWithTabs([
         (id: 'tab-1', title: 'First'),
         (id: 'tab-2', title: 'Second'),
@@ -541,7 +538,6 @@ void main() {
           overrides: _railOverrides(
             db,
             railWidth: railWidth,
-            direction: TabDirection.newestFirst,
             liveTabIds: const ['tab-1', 'tab-2'],
           ),
           child: _railBox(
@@ -554,7 +550,7 @@ void main() {
       await _settle(tester);
 
       // The rail mirrors the desktop sidebar: order_key ascending, so the
-      // first tab stays above the second whatever the direction setting.
+      // first tab stays above the second.
       expect(
         tester.getTopLeft(find.text('First')).dy,
         lessThan(tester.getTopLeft(find.text('Second')).dy),

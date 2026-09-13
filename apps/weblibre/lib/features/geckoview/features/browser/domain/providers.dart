@@ -45,7 +45,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -305,8 +304,8 @@ EquatableValue<List<TabStateWithContainer>> spaceTabStatesWithContainer(
           ? _placeholderTabState(tab)
           : null);
 
-  // The single order every non-tray surface shares. It already carries the tab
-  // bar direction, hierarchy grouping and pinned-first handling, so none of
+  // The single order every non-tray surface shares. It already carries the
+  // hierarchy grouping and pinned-first handling, so none of
   // that is redone here — and because the presentation scope drops no rows,
   // every tab this switcher renders has an index in it.
   final orderedItems = ref
@@ -613,24 +612,11 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       ? ref.watch(watchTabTimestampsProvider.select((value) => value.value))
       : null;
 
-  final tabListDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
-  );
-
-  // Root tabs are always inserted with a trailing LexoRank key, so the
-  // database order (ascending order_key) is oldest-first. Flip to
-  // newest-first when the user selects that direction.
-  List<TabEntity> applyDirection(List<TabEntity> entities) {
-    return tabListDirection == TabDirection.newestFirst
-        ? entities.reversed.toList()
-        : entities;
-  }
-
   if (tabSearchResults == null) {
     if (filterOptions.hasActiveFilter || pinnedTabIds.isNotEmpty) {
       return EquatableValue(
         _applyTabFiltersAndSort(
-          applyDirection(availableTabs.value),
+          availableTabs.value,
           filterOptions,
           tabStates,
           pinnedTabIds,
@@ -639,7 +625,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       );
     }
 
-    return EquatableValue(applyDirection(availableTabs.value));
+    return EquatableValue(availableTabs.value);
   }
 
   final searchFiltered = tabSearchResults
@@ -663,7 +649,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   }
 
   return EquatableValue(searchFiltered);
-  // Search results retain the search-relevance ordering — no direction flip.
+  // Search results retain the search-relevance ordering.
 }
 
 @Riverpod()
@@ -713,18 +699,13 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
 ///
-/// Parent rows always render before their descendants. [TabDirection]
-/// applies both to root group ordering and to sibling ordering below each
-/// parent, so parent-child pairs stay together while child order still follows
-/// the configured direction.
+/// Rows render in storage order — `order_key` ascending, the order the
+/// desktop sidebar shows — on every surface. Parent rows always render before
+/// their descendants.
 ///
-/// [scope] decides which of the tray's controls take part and which direction
-/// setting applies — see [TabListScope]. Both scopes run the same grouping,
-/// so a tab's place relative to its parent never depends on who is asking.
-///
-/// [ignoreDirection] renders storage order (`order_key` ascending, the order
-/// the desktop sidebar shows) whatever the direction setting says; the wide
-/// rail mirrors the desktop and asks for it.
+/// [scope] decides which of the tray's controls take part — see
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place
+/// relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 @Riverpod()
@@ -732,7 +713,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   Ref ref, {
   required String? spaceUuid,
   required TabListScope scope,
-  bool ignoreDirection = false,
 }) {
   final tabsWithRoot = ref.watch(
     watchTabsWithRootAndDepthProvider(spaceUuid).select((value) => value.value),
@@ -775,13 +755,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     ),
   );
   final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-  final direction = ignoreDirection
-      ? TabDirection.oldestFirst
-      : ref.watch(
-          generalSettingsWithDefaultsProvider.select(
-            (s) => scope.isTray ? s.tabListDirection : s.tabBarDirection,
-          ),
-        );
   // Collapsing is a tray gesture on tray rows: outside it there is nothing to
   // expand a hidden row back open with, so folded descendants would be
   // unreachable rather than merely tucked away.
@@ -964,35 +937,6 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
     return compareStorage(a, b);
   }
 
-  // Direction applies to the order of slots within a scope. When no explicit
-  // sortField is active, oldest-first is the natural order_key ASC and
-  // newest-first reverses the sequence — except that split members keep their
-  // `splitIndex` order, so a reversed run of members is put back.
-  List<_ScopeSlot> applyDirection(List<_ScopeSlot> slots) {
-    if (sortField != null || direction != TabDirection.newestFirst) {
-      return slots;
-    }
-    final reversed = slots.reversed.toList();
-    var runStart = 0;
-    while (runStart < reversed.length) {
-      final splitId = reversed[runStart].splitId;
-      var runEnd = runStart + 1;
-      if (splitId != null) {
-        while (runEnd < reversed.length &&
-            reversed[runEnd].splitId == splitId) {
-          runEnd++;
-        }
-        if (runEnd - runStart > 1) {
-          final run = reversed.sublist(runStart, runEnd)
-            ..sort((a, b) => a.splitIndex.compareTo(b.splitIndex));
-          reversed.replaceRange(runStart, runEnd, run);
-        }
-      }
-      runStart = runEnd;
-    }
-    return reversed;
-  }
-
   // Flatten according to expansion state.
   final result = <TabListItemEntity>[];
 
@@ -1048,17 +992,14 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           .add(member);
     }
 
-    // Children are sorted by storage `order_key` (optionally reversed for
-    // newest-first) — even when an explicit `sortField` is active. The
-    // explicit sort applies only to root groups; descendants remain in
-    // insertion order. When `sortPinnedFirst` is true, pinned children are
-    // sorted before unpinned siblings within each parent group.
+    // Children are sorted by storage `order_key` — even when an explicit
+    // `sortField` is active. The explicit sort applies only to root groups;
+    // descendants remain in insertion order. When `sortPinnedFirst` is true,
+    // pinned children are sorted before unpinned siblings within each parent
+    // group.
     for (final children in childrenByVisibleParent.values) {
-      int cmp(_GroupedRow a, _GroupedRow b) =>
+      int orderKeyCmp(_GroupedRow a, _GroupedRow b) =>
           a.row.orderKey.compareTo(b.row.orderKey);
-      final directionCmp = direction == TabDirection.newestFirst
-          ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)
-          : cmp;
       if (filterOptions.sortPinnedFirst) {
         final pinned = children
             .where((c) => pinnedTabIds.contains(c.row.id))
@@ -1066,14 +1007,14 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         final unpinned = children
             .where((c) => !pinnedTabIds.contains(c.row.id))
             .toList();
-        pinned.sort(directionCmp);
-        unpinned.sort(directionCmp);
+        pinned.sort(orderKeyCmp);
+        unpinned.sort(orderKeyCmp);
         children
           ..clear()
           ..addAll(pinned)
           ..addAll(unpinned);
       } else {
-        children.sort(directionCmp);
+        children.sort(orderKeyCmp);
       }
     }
 
@@ -1175,7 +1116,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       if (cmp != 0) return cmp;
       return a.splitIndex.compareTo(b.splitIndex);
     });
-    for (final slot in applyDirection(slots)) {
+    for (final slot in slots) {
       final group = slot.group;
       if (group != null) {
         emitGroup(group, depth);
@@ -1232,15 +1173,10 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   Ref ref, {
   required String? spaceUuid,
   required TabListScope scope,
-  bool ignoreDirection = false,
 }) {
   final groupedItems = ref
       .watch(
-        groupedTabListItemsProvider(
-          spaceUuid: spaceUuid,
-          scope: scope,
-          ignoreDirection: ignoreDirection,
-        ),
+        groupedTabListItemsProvider(spaceUuid: spaceUuid, scope: scope),
       )
       .value;
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
@@ -1301,9 +1237,7 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabBarDirection` (baked into the
-/// order) rather than `tabListDirection` — the bar is what the step is read
-/// against, and the two only disagree when the user sets them apart.
+/// towards its end.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.

@@ -163,13 +163,12 @@ class _CompactChipStrip extends HookConsumerWidget {
     final selectedTabId = ref.watch(selectedTabProvider);
     final essentialIds = watchEssentialShelfTabIds(ref) ?? const <String>[];
     // Storage order, like the desktop sidebar and the wide rail: the chips
-    // mirror the space, they do not reorder by recency or direction.
+    // mirror the space, they do not reorder by recency.
     final items = ref
         .watch(
           groupedTabListItemsProvider(
             spaceUuid: spaceUuid,
             scope: TabListScope.presentation,
-            ignoreDirection: true,
           ),
         )
         .value;

@@ -80,7 +80,6 @@ class WideRailTabList extends HookConsumerWidget {
           visibleTabListItemsProvider(
             spaceUuid: selectedSpaceUuid,
             scope: TabListScope.presentation,
-            ignoreDirection: true,
           ),
         )
         .value;

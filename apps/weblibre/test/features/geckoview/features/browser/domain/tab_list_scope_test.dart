@@ -85,8 +85,6 @@ void main() {
     Set<String> collapsed = const {},
     Set<String> pinned = const {},
     Map<String, TabSortKeys>? sortKeys,
-    TabDirection tabListDirection = TabDirection.oldestFirst,
-    TabDirection tabBarDirection = TabDirection.oldestFirst,
     List<TabsWithRootAndDepthResult>? rows,
   }) {
     final container = ProviderContainer(
@@ -128,8 +126,6 @@ void main() {
         ),
         generalSettingsWithDefaultsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(
-            tabListDirection: tabListDirection,
-            tabBarDirection: tabBarDirection,
             sequentialTabNavigationCrossContainers: false,
           ),
         ),
@@ -244,12 +240,9 @@ void main() {
     });
   });
 
-  group('direction', () {
-    test('each scope follows its own direction setting', () async {
-      final container = makeContainer(
-        tabListDirection: TabDirection.oldestFirst,
-        tabBarDirection: TabDirection.newestFirst,
-      );
+  group('order', () {
+    test('both scopes render storage order', () async {
+      final container = makeContainer();
 
       expect(await readOrder(container, TabListScope.tray), [
         'a',
@@ -257,12 +250,11 @@ void main() {
         'b1',
         'c',
       ]);
-      // Root groups reverse; a parent still precedes its own child.
       expect(await readOrder(container, TabListScope.presentation), [
-        'c',
+        'a',
         'b',
         'b1',
-        'a',
+        'c',
       ]);
     });
   });

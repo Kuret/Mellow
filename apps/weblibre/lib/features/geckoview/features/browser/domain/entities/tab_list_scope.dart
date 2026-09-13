@@ -34,12 +34,11 @@
 /// honour pinned-first, because those are structural preferences rather than
 /// transient tray state.
 enum TabListScope {
-  /// The tray's list and grid views: every tray control applies, ordered by
-  /// `tabListDirection`.
+  /// The tray's list and grid views: every tray control applies.
   tray,
 
   /// The quick tab switcher, the tab bar and sequential tab navigation: no
-  /// filter, no collapse and no tray sort, ordered by `tabBarDirection`.
+  /// filter, no collapse and no tray sort.
   ///
   /// Nothing is ever removed from this order, so a tab the user can see is a
   /// tab navigation can reach.
