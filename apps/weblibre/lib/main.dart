@@ -50,7 +50,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/core/rust_lib.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
@@ -630,10 +629,6 @@ void main() async {
     logger.e('Unhandled Error', error: error, stackTrace: stack);
     return true;
   };
-
-  // Started, not awaited: nothing before the first frame uses it. See
-  // `ensureRustLibInitialized`.
-  unawaited(ensureRustLibInitialized());
 
   if (kDebugMode) {
     final serviceProtocolInfo = await Service.getInfo();
