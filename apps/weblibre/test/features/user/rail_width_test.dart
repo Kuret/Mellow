@@ -19,6 +19,7 @@
  */
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 void main() {
   group('isWideViewport', () {

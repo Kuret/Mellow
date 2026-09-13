@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/hom
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 part 'general_settings.g.dart';
 
@@ -40,16 +41,6 @@ const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 const defaultUiScaleFactor = 1.0;
 
-/// Bounds of [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
-const defaultMaxLiveTabs = 25;
-const minMaxLiveTabs = 5;
-const maxMaxLiveTabs = 100;
-
-/// Defaults of the destructive-batch canary (DESIGN "Hardening against Zen's
-/// stale-projection race", defence 5).
-const defaultSpacesSyncMaxTombstoneFraction = 0.2;
-const defaultSpacesSyncMaxTombstoneCount = 25;
-
 const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
 const uiScaleFactorStep = 0.05;
@@ -60,16 +51,6 @@ const defaultQuickTabSwitcherTitleWidth = 64.0;
 const minQuickTabSwitcherTitleWidth = 32.0;
 const maxQuickTabSwitcherTitleWidth = 128.0;
 const quickTabSwitcherTitleWidthStep = 8.0;
-
-/// Width (logical px) of the side rail on wide viewports. The rail is always
-/// the expanded Arc/Zen-style sidebar — address row, shelves, toolbar, space
-/// switcher — so it needs room for a favicon and a title side by side;
-/// [minRailWidth] is the least that reads. A stored value below it (from the
-/// days of an icon-only rail) is clamped up on read, see [effectiveRailWidth].
-const defaultRailWidth = 260.0;
-const minRailWidth = 160.0;
-const maxRailWidth = 320.0;
-const railWidthStep = 8.0;
 
 /// Controls the Android display refresh rate the app requests at startup.
 ///
@@ -144,28 +125,6 @@ enum TabBarPosition {
   /// Main axis along which the bar's content flows.
   Axis get axis => isVertical ? Axis.vertical : Axis.horizontal;
 }
-
-/// Which edge the wide-viewport side rail docks to. Independent of
-/// [TabBarPosition], which only places the narrow-viewport compact bar.
-enum RailSide { left, right }
-
-/// Viewport width, in logical px, from which the browser lays its chrome out
-/// as the side rail ([RailSide]) instead of the compact horizontal bar
-/// ([TabBarPosition]): tablets, landscape and unfolded foldables clear it;
-/// phones in portrait and folded foldables get the bar. Decided per frame
-/// from the viewport, so rotating or unfolding switches live.
-const narrowRailViewportBreakpoint = 600.0;
-
-/// Whether a viewport of [viewportWidth] gets the side rail layout.
-bool isWideViewport(double viewportWidth) =>
-    viewportWidth >= narrowRailViewportBreakpoint;
-
-/// Content width of the side rail: [railWidth] clamped into
-/// [minRailWidth]..[maxRailWidth]. The lower bound rose when the icon-only
-/// rail was retired, so a stored width from before then is pulled up to the
-/// least the expanded rail can show.
-double effectiveRailWidth({required double railWidth}) =>
-    railWidth.clamp(minRailWidth, maxRailWidth);
 
 enum TabBarLayout { withTitle, compact }
 

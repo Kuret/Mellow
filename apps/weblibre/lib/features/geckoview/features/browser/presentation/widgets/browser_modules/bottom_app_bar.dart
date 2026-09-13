@@ -46,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/s
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 export 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart'

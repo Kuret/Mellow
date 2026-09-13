@@ -807,9 +807,9 @@ String _$watchColdTabIdsHash() => r'54ffcfd832c37dbaa429c9dfe33b7ac0b5be2851';
 /// One tab's row, watched — without its page text.
 ///
 /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-/// for as long as the tab menu or the parent picker is open, and both consumers
-/// read only `parentId` and `containerId`. The wide row would drag that tab's
-/// stored content (and the `content_hash` UDF) through on every tick.
+/// for as long as the tab menu is open, and the menu reads only a handful of
+/// identity columns. The wide row would drag that tab's stored content (and
+/// the `content_hash` UDF) through on every tick.
 
 @ProviderFor(watchTabDbData)
 final watchTabDbDataProvider = WatchTabDbDataFamily._();
@@ -817,9 +817,9 @@ final watchTabDbDataProvider = WatchTabDbDataFamily._();
 /// One tab's row, watched — without its page text.
 ///
 /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-/// for as long as the tab menu or the parent picker is open, and both consumers
-/// read only `parentId` and `containerId`. The wide row would drag that tab's
-/// stored content (and the `content_hash` UDF) through on every tick.
+/// for as long as the tab menu is open, and the menu reads only a handful of
+/// identity columns. The wide row would drag that tab's stored content (and
+/// the `content_hash` UDF) through on every tick.
 
 final class WatchTabDbDataProvider
     extends
@@ -832,9 +832,9 @@ final class WatchTabDbDataProvider
   /// One tab's row, watched — without its page text.
   ///
   /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-  /// for as long as the tab menu or the parent picker is open, and both consumers
-  /// read only `parentId` and `containerId`. The wide row would drag that tab's
-  /// stored content (and the `content_hash` UDF) through on every tick.
+  /// for as long as the tab menu is open, and the menu reads only a handful of
+  /// identity columns. The wide row would drag that tab's stored content (and
+  /// the `content_hash` UDF) through on every tick.
   WatchTabDbDataProvider._({
     required WatchTabDbDataFamily super.from,
     required String super.argument,
@@ -884,9 +884,9 @@ String _$watchTabDbDataHash() => r'3e3c7221b4ef73616f995c362f823128e88984e2';
 /// One tab's row, watched — without its page text.
 ///
 /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-/// for as long as the tab menu or the parent picker is open, and both consumers
-/// read only `parentId` and `containerId`. The wide row would drag that tab's
-/// stored content (and the `content_hash` UDF) through on every tick.
+/// for as long as the tab menu is open, and the menu reads only a handful of
+/// identity columns. The wide row would drag that tab's stored content (and
+/// the `content_hash` UDF) through on every tick.
 
 final class WatchTabDbDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<TabSummary?>, String> {
@@ -902,9 +902,9 @@ final class WatchTabDbDataFamily extends $Family
   /// One tab's row, watched — without its page text.
   ///
   /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-  /// for as long as the tab menu or the parent picker is open, and both consumers
-  /// read only `parentId` and `containerId`. The wide row would drag that tab's
-  /// stored content (and the `content_hash` UDF) through on every tick.
+  /// for as long as the tab menu is open, and the menu reads only a handful of
+  /// identity columns. The wide row would drag that tab's stored content (and
+  /// the `content_hash` UDF) through on every tick.
 
   WatchTabDbDataProvider call(String tabId) =>
       WatchTabDbDataProvider._(argument: tabId, from: this);

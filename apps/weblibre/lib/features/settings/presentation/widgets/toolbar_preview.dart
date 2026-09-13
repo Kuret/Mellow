@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/s
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 /// Pinned header showing both layouts the browser picks from by viewport
 /// width: the compact bar of narrow screens and the side rail of wide ones.
