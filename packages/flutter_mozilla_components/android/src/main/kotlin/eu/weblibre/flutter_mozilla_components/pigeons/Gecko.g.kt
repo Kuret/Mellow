@@ -6444,74 +6444,6 @@ data class PwaManifest (
 }
 
 /**
- * Per-tab sandbox capture state shared with the native side. The Kotlin
- * [AppRequestInterceptor] consults an in-memory registry populated from
- * these entries to decide how to handle loads in sandbox tabs.
- *
- * [redirectUrl] is precomputed by Dart and always points at a loopback URL
- * (loader or capture). Dart is responsible for keeping it current; Kotlin
- * never calls back into Dart to resolve it.
- *
- * Generated class from Pigeon that represents data sent in messages.
- */
-data class SandboxCaptureEntry (
-  val tabId: String,
-  val captureId: String,
-  val sourceUrl: String,
-  /**
-   * `http://127.0.0.1:<port>/loader?…` while pending/failed, or
-   * `http://127.0.0.1:<port>/captures/…?t=<token>` once ready.
-   */
-  val redirectUrl: String,
-  /** `pending` | `ready` | `failed`. */
-  val status: String
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): SandboxCaptureEntry {
-      val tabId = pigeonVar_list[0] as String
-      val captureId = pigeonVar_list[1] as String
-      val sourceUrl = pigeonVar_list[2] as String
-      val redirectUrl = pigeonVar_list[3] as String
-      val status = pigeonVar_list[4] as String
-      return SandboxCaptureEntry(tabId, captureId, sourceUrl, redirectUrl, status)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      tabId,
-      captureId,
-      sourceUrl,
-      redirectUrl,
-      status,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other == null || other.javaClass != javaClass) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    val other = other as SandboxCaptureEntry
-    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.captureId, other.captureId) && GeckoPigeonUtils.deepEquals(this.sourceUrl, other.sourceUrl) && GeckoPigeonUtils.deepEquals(this.redirectUrl, other.redirectUrl) && GeckoPigeonUtils.deepEquals(this.status, other.status)
-  }
-
-  override fun hashCode(): Int {
-    var result = javaClass.hashCode()
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.captureId)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.sourceUrl)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.redirectUrl)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.status)
-    return result
-  }
-  override fun toString(): String {
-    return "SandboxCaptureEntry(tabId=$tabId, captureId=$captureId, sourceUrl=$sourceUrl, redirectUrl=$redirectUrl, status=$status)"
-  }
-}
-
-/**
  * Configuration for native touch-gesture recognition.
  *
  * Pushed from Dart whenever the user's gesture settings change. Native
@@ -6783,14 +6715,12 @@ private data class GeckoPigeonInternalCodecOverflow (
       7 ->
         return PwaManifest.fromList(wrapped as List<Any?>)
       8 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
-      9 ->
         return GestureConfig.fromList(wrapped as List<Any?>)
-      10 ->
+      9 ->
         return PushDistributor.fromList(wrapped as List<Any?>)
-      11 ->
+      10 ->
         return PushStatus.fromList(wrapped as List<Any?>)
-      12 ->
+      11 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7983,28 +7913,23 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is PushDistributor -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is PushStatus -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
-        val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
-        stream.write(255)
-        writeValue(stream, wrap.toList())
-      }
       is PushSubscription -> {
-        val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -13148,151 +13073,6 @@ interface GeckoPwaApi {
           channel.setMessageHandler(null)
         }
       }
-    }
-  }
-}
-/**
- * Dart → Kotlin. Mutates the native [SandboxCaptureRegistry] that the
- * request interceptor consults on every load.
- *
- * Generated interface from Pigeon that represents a handler of messages from Flutter.
- */
-interface SandboxCaptureApi {
-  /**
-   * Replaces the entire registry with [entries]. Called at startup after
-   * Dart has brought up [CaptureServer] and reconciled local artifacts with
-   * the `capture_tab` rows.
-   */
-  fun resetAll(entries: List<SandboxCaptureEntry>)
-  /** Inserts or updates the registry entry for [entry.tabId]. */
-  fun mark(entry: SandboxCaptureEntry)
-  /** Removes the registry entry for [tabId]. */
-  fun unmark(tabId: String)
-
-  companion object {
-    /** The codec used by SandboxCaptureApi. */
-    val codec: MessageCodec<Any?> by lazy {
-      GeckoPigeonCodec()
-    }
-    /** Sets up an instance of `SandboxCaptureApi` to handle messages through the `binaryMessenger`. */
-    @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: SandboxCaptureApi?, messageChannelSuffix: String = "") {
-      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.resetAll$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val entriesArg = args[0] as List<SandboxCaptureEntry>
-            val wrapped: List<Any?> = try {
-              api.resetAll(entriesArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.mark$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val entryArg = args[0] as SandboxCaptureEntry
-            val wrapped: List<Any?> = try {
-              api.mark(entryArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.unmark$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val tabIdArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.unmark(tabIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-    }
-  }
-}
-/**
- * Kotlin → Dart. Fire-and-forget notifications from the request
- * interceptor / BrowserStore middleware. All handlers are non-blocking;
- * the interceptor never waits for a Dart response.
- *
- * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
- */
-class SandboxCaptureHostEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
-  companion object {
-    /** The codec used by SandboxCaptureHostEvents. */
-    val codec: MessageCodec<Any?> by lazy {
-      GeckoPigeonCodec()
-    }
-  }
-  /**
-   * Emitted when a sandbox tab attempted to navigate to a non-loopback,
-   * non-source URL (e.g., user clicked a link or typed a new URL into the
-   * address bar). Dart should open a new sandbox tab and capture [targetUrl].
-   */
-  fun onSandboxLinkClick(sequenceArg: Long, parentTabIdArg: String, targetUrlArg: String, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxLinkClick$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, parentTabIdArg, targetUrlArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
-        }
-      } else {
-        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
-    }
-  }
-  /**
-   * Emitted when GeckoView created a new tab (via `window.open`,
-   * `target="_blank"`, or a middle-click) whose parent is a sandbox tab.
-   * The native middleware has already rewritten the new tab's URL to
-   * `about:blank`; Dart should register it as sandbox and run the capture
-   * pipeline for [targetUrl].
-   */
-  fun onSandboxNewTab(sequenceArg: Long, parentTabIdArg: String, newTabIdArg: String, targetUrlArg: String, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxNewTab$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, parentTabIdArg, newTabIdArg, targetUrlArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
-        }
-      } else {
-        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
     }
   }
 }

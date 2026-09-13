@@ -7052,81 +7052,6 @@ class PwaManifest {
   }
 }
 
-/// Per-tab sandbox capture state shared with the native side. The Kotlin
-/// [AppRequestInterceptor] consults an in-memory registry populated from
-/// these entries to decide how to handle loads in sandbox tabs.
-///
-/// [redirectUrl] is precomputed by Dart and always points at a loopback URL
-/// (loader or capture). Dart is responsible for keeping it current; Kotlin
-/// never calls back into Dart to resolve it.
-class SandboxCaptureEntry {
-  SandboxCaptureEntry({
-    required this.tabId,
-    required this.captureId,
-    required this.sourceUrl,
-    required this.redirectUrl,
-    required this.status,
-  });
-
-  String tabId;
-
-  String captureId;
-
-  String sourceUrl;
-
-  /// `http://127.0.0.1:<port>/loader?…` while pending/failed, or
-  /// `http://127.0.0.1:<port>/captures/…?t=<token>` once ready.
-  String redirectUrl;
-
-  /// `pending` | `ready` | `failed`.
-  String status;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      tabId,
-      captureId,
-      sourceUrl,
-      redirectUrl,
-      status,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static SandboxCaptureEntry decode(Object result) {
-    result as List<Object?>;
-    return SandboxCaptureEntry(
-      tabId: result[0]! as String,
-      captureId: result[1]! as String,
-      sourceUrl: result[2]! as String,
-      redirectUrl: result[3]! as String,
-      status: result[4]! as String,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! SandboxCaptureEntry || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(tabId, other.tabId) && _deepEquals(captureId, other.captureId) && _deepEquals(sourceUrl, other.sourceUrl) && _deepEquals(redirectUrl, other.redirectUrl) && _deepEquals(status, other.status);
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
-
-  @override
-  String toString() {
-    return 'SandboxCaptureEntry(tabId: $tabId, captureId: $captureId, sourceUrl: $sourceUrl, redirectUrl: $redirectUrl, status: $status)';
-  }
-}
-
 /// Configuration for native touch-gesture recognition.
 ///
 /// Pushed from Dart whenever the user's gesture settings change. Native
@@ -7428,14 +7353,12 @@ class _PigeonCodecOverflow {
       case 7:
         return PwaManifest.decode(wrapped!);
       case 8:
-        return SandboxCaptureEntry.decode(wrapped!);
-      case 9:
         return GestureConfig.decode(wrapped!);
-      case 10:
+      case 9:
         return PushDistributor.decode(wrapped!);
-      case 11:
+      case 10:
         return PushStatus.decode(wrapped!);
-      case 12:
+      case 11:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -7859,24 +7782,20 @@ class _PigeonCodec extends StandardMessageCodec {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 7, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SandboxCaptureEntry) {
+    }    else if (value is GestureConfig) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 8, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is GestureConfig) {
+    }    else if (value is PushDistributor) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 9, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PushDistributor) {
+    }    else if (value is PushStatus) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 10, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PushStatus) {
-      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 11, wrapped: value.encode());
-      buffer.putUint8(255);
-      writeValue(buffer, wrap.encode());
     }    else if (value is PushSubscription) {
-      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 12, wrapped: value.encode());
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 11, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
     } else {
@@ -13149,151 +13068,6 @@ class GeckoPwaApi {
     )
     ;
     return pigeonVar_replyValue! as bool;
-  }
-}
-
-/// Dart → Kotlin. Mutates the native [SandboxCaptureRegistry] that the
-/// request interceptor consults on every load.
-class SandboxCaptureApi {
-  /// Constructor for [SandboxCaptureApi]. The [binaryMessenger] named argument is
-  /// available for dependency injection. If it is left null, the default
-  /// BinaryMessenger will be used which routes to the host platform.
-  SandboxCaptureApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
-  final BinaryMessenger? pigeonVar_binaryMessenger;
-
-  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
-
-  final String pigeonVar_messageChannelSuffix;
-
-  /// Replaces the entire registry with [entries]. Called at startup after
-  /// Dart has brought up [CaptureServer] and reconciled local artifacts with
-  /// the `capture_tab` rows.
-  Future<void> resetAll(List<SandboxCaptureEntry> entries) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.resetAll$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entries]);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-
-  /// Inserts or updates the registry entry for [entry.tabId].
-  Future<void> mark(SandboxCaptureEntry entry) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.mark$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entry]);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-
-  /// Removes the registry entry for [tabId].
-  Future<void> unmark(String tabId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.unmark$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-}
-
-/// Kotlin → Dart. Fire-and-forget notifications from the request
-/// interceptor / BrowserStore middleware. All handlers are non-blocking;
-/// the interceptor never waits for a Dart response.
-abstract class SandboxCaptureHostEvents {
-  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
-
-  /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
-  /// non-source URL (e.g., user clicked a link or typed a new URL into the
-  /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
-  void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl);
-
-  /// Emitted when GeckoView created a new tab (via `window.open`,
-  /// `target="_blank"`, or a middle-click) whose parent is a sandbox tab.
-  /// The native middleware has already rewritten the new tab's URL to
-  /// `about:blank`; Dart should register it as sandbox and run the capture
-  /// pipeline for [targetUrl].
-  void onSandboxNewTab(int sequence, String parentTabId, String newTabId, String targetUrl);
-
-  static void setUp(SandboxCaptureHostEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
-    {
-      final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxLinkClick$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          final List<Object?> args = message! as List<Object?>;
-          final int arg_sequence = args[0]! as int;
-          final String arg_parentTabId = args[1]! as String;
-          final String arg_targetUrl = args[2]! as String;
-          try {
-            api.onSandboxLinkClick(arg_sequence, arg_parentTabId, arg_targetUrl);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
-    {
-      final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxNewTab$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          final List<Object?> args = message! as List<Object?>;
-          final int arg_sequence = args[0]! as int;
-          final String arg_parentTabId = args[1]! as String;
-          final String arg_newTabId = args[2]! as String;
-          final String arg_targetUrl = args[3]! as String;
-          try {
-            api.onSandboxNewTab(arg_sequence, arg_parentTabId, arg_newTabId, arg_targetUrl);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
   }
 }
 

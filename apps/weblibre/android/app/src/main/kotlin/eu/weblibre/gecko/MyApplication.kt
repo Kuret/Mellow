@@ -27,7 +27,6 @@ import android.os.Build
 import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
-import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
@@ -78,14 +77,6 @@ class MyApplication : Application() {
         // process has committed. Registering them here keeps the ordering explicit:
         // whichever component commits — the launcher, a worker, a trusted PWA — runs
         // them at that moment, and a process that never commits never runs them.
-        StartupArbiter.onCommitted { _, _ ->
-            // Rehydrate the sandbox capture registry from the on-disk JSON mirror
-            // before Gecko has a chance to start restoring tabs. Each entry gets
-            // redirectUrl="about:blank"; Dart replaces those once CaptureServer is
-            // running with real loader/capture URLs.
-            SandboxCaptureFeature.preRestoreBootstrap(this)
-        }
-
         StartupArbiter.onCommitted { _, _ ->
             ActiveProfile.resolveContext(this)?.let(PushMessageScheduler::recoverLater)
         }

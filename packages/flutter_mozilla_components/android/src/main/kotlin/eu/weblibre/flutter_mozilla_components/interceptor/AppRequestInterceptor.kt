@@ -14,9 +14,6 @@ import android.util.Log
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.applinks.WebLibreAppLinksInterceptor
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.feature.InertExternalSchemes
-import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureBridge
-import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureRegistry
 import eu.weblibre.flutter_mozilla_components.pigeons.ProxyLoadError
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
@@ -55,42 +52,9 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
             return null
         }
 
-        // Parsed once and reused by both the sandbox-capture handling and the
-        // weblibre:// deep-link check below. `Uri.parse` never throws for
-        // malformed input — it returns a Uri with empty fields — so callers
-        // must check the scheme explicitly.
+        // `Uri.parse` never throws for malformed input — it returns a Uri with
+        // empty fields — so callers must check the scheme explicitly.
         val parsed = Uri.parse(uri)
-
-        // Sandbox capture tabs: rewrite loads to loopback, deny links to live URLs.
-        val sandboxEntry = (customTab?.id)?.let { SandboxCaptureRegistry.get(it) }
-        if (sandboxEntry != null) {
-            when {
-                // Loopback redirects emitted by us — pass through.
-                SandboxCaptureRegistry.isLoopbackRedirect(uri) -> {
-                    // Fall through to existing accounts/applinks logic below —
-                    // loopback URLs don't match any of them and the default
-                    // "return null" at the bottom lets Gecko load normally.
-                }
-                // Canonical source URL — redirect to current loader/capture.
-                uri == sandboxEntry.sourceUrl -> {
-                    return RequestInterceptor.InterceptionResponse.Url(
-                        sandboxEntry.redirectUrl,
-                    )
-                }
-                // Inert external schemes — hand off to existing AppLinks logic.
-                InertExternalSchemes.matches(parsed) -> {
-                    // Fall through to AppLinks handling below.
-                }
-                // Any other URL — sandbox tab is trying to navigate to the live
-                // web. Deny and ask Flutter to open a new sandbox tab instead.
-                else -> {
-                    customTab.id.let { parentId ->
-                        SandboxCaptureBridge.dispatchLinkClick(parentId, uri)
-                    }
-                    return RequestInterceptor.InterceptionResponse.Deny
-                }
-            }
-        }
 
         // Intercept weblibre:// deep links and dispatch them as Android intents
         // so the Flutter side can handle them (e.g. account callback handoff).

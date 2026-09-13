@@ -10,7 +10,6 @@ import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoWebInspectorApiImpl
-import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
@@ -83,7 +82,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     PointerInputHostApi.setUp(flutterPluginBinding.binaryMessenger, router)
     browserApi.attachBinding(flutterPluginBinding, router)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
-    SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
 
     // Register the engine-settings API at attach time (before GeckoBrowserService
     // .initialize) so Dart can push the history-exclusion snapshot to native
@@ -121,7 +119,6 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     engineLifecycle?.let { listener -> engine?.removeEngineLifecycleListener(listener) }
     engineLifecycle = null
     engine = null
-    SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()
     browserApi.disposeEngineViewVisibility()
