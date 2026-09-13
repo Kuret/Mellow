@@ -24,7 +24,8 @@ part 'compact_bar_expanded_folders.g.dart';
 /// The folders the compact tab bar currently shows the members of, by folder
 /// id. Local to the bar and never persisted: a folder's stored collapse state
 /// belongs to the tray and the desktop sidebar, while the bar only has room
-/// for one folder's members at a time and forgets them on restart.
+/// for one folder's members at a time and forgets them on restart. A
+/// subfolder is expanded the same way, under its own id.
 @Riverpod(keepAlive: true)
 class CompactBarExpandedFolders extends _$CompactBarExpandedFolders {
   @override
@@ -32,9 +33,12 @@ class CompactBarExpandedFolders extends _$CompactBarExpandedFolders {
 
   bool isExpanded(String folderId) => state.contains(folderId);
 
-  void toggle(String folderId) {
+  /// Shows or hides [folderId]'s members. Collapsing also forgets the
+  /// [descendants] the caller knows of: they leave the strip with their
+  /// parent, and re-opening it should not bring them back open.
+  void toggle(String folderId, {Iterable<String> descendants = const []}) {
     state = state.contains(folderId)
-        ? ({...state}..remove(folderId))
+        ? ({...state}..removeAll([folderId, ...descendants]))
         : {...state, folderId};
   }
 }
