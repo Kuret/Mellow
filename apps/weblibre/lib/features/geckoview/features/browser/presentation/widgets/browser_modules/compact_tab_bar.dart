@@ -373,6 +373,12 @@ class _CompactChipStrip extends HookConsumerWidget {
     // did nothing until you scroll. The opened folder is pulled to the
     // leading edge so its contents fill the view.
     final openedFolderId = useState<String?>(null);
+    // Expanding a folder shifts the selected tab's index, which is a change
+    // `useScrollToActiveChip` reads as "the active chip moved, re-centre it"
+    // — snapping the strip away from the folder the user just tapped. A
+    // toggle is the user driving the strip, so it counts as user scrolling
+    // for as long as it takes to settle.
+    final folderToggleGuard = useRef(false);
     // One stable key per folder, never swapped in and out: a key that
     // appeared only while a folder was pending re-created the chip's
     // element, and an in-flight tap died with it.
@@ -397,19 +403,27 @@ class _CompactChipStrip extends HookConsumerWidget {
         final context = folderKeys.value[folderId]?.currentContext;
         final box = context?.findRenderObject();
         if (box is RenderBox && scrollController.hasClients) {
-          // Pull the folder towards the leading edge, but not flush against
-          // it: a chip sitting exactly on the viewport's edge stops taking
-          // taps, so it keeps an inset of its own.
+          // The strip stays where it is: a tap on a folder is not a request
+          // to go somewhere else. The one exception is a folder sitting so
+          // far right that its contents open past the edge — then it moves
+          // just far enough to make room for them, never flush against the
+          // edge (a chip exactly on the boundary stops taking taps).
           const inset = 12.0;
+          const roomForContents = 96.0;
           final position = scrollController.position;
-          final reveal = RenderAbstractViewport.of(
-            box,
-          ).getOffsetToReveal(box, 0.0).offset;
+          final viewport = RenderAbstractViewport.of(box);
+          final reveal = viewport.getOffsetToReveal(box, 0.0).offset;
+          final chipEnd =
+              viewport.getOffsetToReveal(box, 1.0).offset +
+              position.viewportDimension;
+          final roomAfterChip =
+              position.pixels + position.viewportDimension - chipEnd;
           final target = (reveal - inset).clamp(
             position.minScrollExtent,
             position.maxScrollExtent,
           );
-          if ((target - position.pixels).abs() > 1.0) {
+          if (roomAfterChip < roomForContents &&
+              (target - position.pixels).abs() > 1.0) {
             unawaited(
               scrollController.animateTo(
                 target,
@@ -419,6 +433,7 @@ class _CompactChipStrip extends HookConsumerWidget {
             );
           }
         }
+        folderToggleGuard.value = false;
         openedFolderId.value = null;
       });
       return null;
@@ -429,7 +444,7 @@ class _CompactChipStrip extends HookConsumerWidget {
       activeChipKey: activeChipKey.value,
       activeId: hasActiveEntry ? activeEntryId : null,
       orderedIds: [for (final entry in entries) entry.id],
-      isUserScrolling: () => isUserScrolling.value,
+      isUserScrolling: () => isUserScrolling.value || folderToggleGuard.value,
     );
 
     final decoration = buildQuickTabSwitcherChipDecoration(
@@ -574,9 +589,17 @@ class _CompactChipStrip extends HookConsumerWidget {
                           // Collapsing takes its open subfolders with it.
                           descendants: descendantFolderIds(folder.folderId),
                         );
+                    folderToggleGuard.value = true;
                     // Only on the way open: collapsing leaves the strip
                     // where the user left it.
                     openedFolderId.value = expanded ? null : folder.folderId;
+                    if (expanded) {
+                      // Nothing pending to settle, so lift the guard after
+                      // this frame's effects have run.
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        folderToggleGuard.value = false;
+                      });
+                    }
                   },
                 ),
               ),

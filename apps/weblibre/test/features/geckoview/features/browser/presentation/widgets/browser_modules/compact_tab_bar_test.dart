@@ -345,6 +345,38 @@ void main() {
     await _disposeTree(tester);
   });
 
+  testWidgets('expanding a folder leaves the scroll position alone', (
+    tester,
+  ) async {
+    final db = await _memoryDatabase(
+      tabs: [
+        (id: 'tab-1', title: 'Member'),
+        for (var i = 0; i < 14; i++) (id: 'loose-$i', title: 'Loose $i'),
+      ],
+      folderId: 'folder-1',
+      inFolder: const {'tab-1'},
+    );
+    addTearDown(db.close);
+
+    await _pumpBar(tester, db: db, viewportWidth: 500);
+
+    final controller = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    // The folder sits near the leading edge with room to its right, so its
+    // contents have somewhere to open into.
+    final before = controller.offset;
+
+    await tester.tap(find.text('Folder'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Member'), findsOneWidget);
+    expect(controller.offset, before);
+
+    await _disposeTree(tester);
+  });
+
   testWidgets('expanding a folder brings its contents into view', (
     tester,
   ) async {
