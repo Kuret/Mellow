@@ -13600,3 +13600,81 @@ abstract class GeckoPushEvents {
     }
   }
 }
+
+/// Dart → Kotlin. Drives the built-in web inspector extension (a vendored
+/// Eruda) in a tab's content process.
+///
+/// A null tab id addresses the selected tab. Calls are dropped silently when
+/// the tab has no engine session or the inspector's content port has not
+/// connected yet, so the caller never has to sequence against page load.
+class GeckoWebInspectorApi {
+  /// Constructor for [GeckoWebInspectorApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoWebInspectorApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Shows the inspector, optionally opening it on [panel] (e.g. "elements").
+  Future<void> showInspector(String? tabId, String? panel) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoWebInspectorApi.showInspector$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, panel]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Hides the inspector without tearing it down.
+  Future<void> hideInspector(String? tabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoWebInspectorApi.hideInspector$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Enters tap-to-inspect: the next tap on the page selects that element in
+  /// the elements panel.
+  Future<void> pickElement(String? tabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoWebInspectorApi.pickElement$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+}

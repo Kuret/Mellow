@@ -3601,3 +3601,22 @@ abstract class GeckoPushEvents {
   /// [sequence] Event sequence number for ordering.
   void onPushStatusChanged(int sequence, PushStatus status);
 }
+
+/// Dart → Kotlin. Drives the built-in web inspector extension (a vendored
+/// Eruda) in a tab's content process.
+///
+/// A null tab id addresses the selected tab. Calls are dropped silently when
+/// the tab has no engine session or the inspector's content port has not
+/// connected yet, so the caller never has to sequence against page load.
+@HostApi()
+abstract class GeckoWebInspectorApi {
+  /// Shows the inspector, optionally opening it on [panel] (e.g. "elements").
+  void showInspector(String? tabId, String? panel);
+
+  /// Hides the inspector without tearing it down.
+  void hideInspector(String? tabId);
+
+  /// Enters tap-to-inspect: the next tap on the page selects that element in
+  /// the elements panel.
+  void pickElement(String? tabId);
+}
