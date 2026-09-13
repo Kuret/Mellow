@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
+import 'package:weblibre/features/geckoview/features/web_inspector/domain/providers/web_inspector.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
@@ -106,6 +107,21 @@ class PageActionsSection extends HookConsumerWidget {
               ref
                   .read(findInPageControllerProvider(selectedTabId).notifier)
                   .show();
+              Navigator.pop(context);
+            },
+          );
+
+        case MenuItemType.inspectElement:
+          tiles[item] = ListTile(
+            leading: const Icon(MdiIcons.selectSearch),
+            title: Text(item.label),
+            onTap: () {
+              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+              unawaited(
+                ref
+                    .read(webInspectorServiceProvider(tabId: selectedTabId))
+                    .pickElement(),
+              );
               Navigator.pop(context);
             },
           );

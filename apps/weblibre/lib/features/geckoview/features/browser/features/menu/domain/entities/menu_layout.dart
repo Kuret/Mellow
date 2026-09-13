@@ -93,6 +93,7 @@ enum MenuItemType {
   // Page actions
   addBookmark,
   findInPage,
+  inspectElement,
   translatePage,
   addToHomeScreen,
   openInApp,
@@ -152,6 +153,7 @@ enum MenuItemType {
     gestures => 'Gestures',
     addBookmark => 'Add Bookmark',
     findInPage => 'Find in Page',
+    inspectElement => 'Inspect Element',
     translatePage => 'Translate Page',
     addToHomeScreen => 'Add to Home Screen',
     openInApp => 'Open in App',
@@ -202,6 +204,7 @@ enum MenuItemType {
     gestures => MdiIcons.gestureSwipe,
     addBookmark => MdiIcons.bookmarkPlus,
     findInPage => Icons.search,
+    inspectElement => MdiIcons.selectSearch,
     translatePage => Icons.translate,
     addToHomeScreen => Icons.add_to_home_screen,
     openInApp => Icons.open_in_new,
@@ -301,6 +304,7 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
     items: [
       MenuItemDefault(MenuItemType.addBookmark),
       MenuItemDefault(MenuItemType.findInPage),
+      MenuItemDefault(MenuItemType.inspectElement),
       MenuItemDefault(MenuItemType.translatePage),
       MenuItemDefault(MenuItemType.addToHomeScreen),
       MenuItemDefault(MenuItemType.openInApp),
