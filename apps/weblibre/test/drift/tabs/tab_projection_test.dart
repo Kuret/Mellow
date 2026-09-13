@@ -194,7 +194,6 @@ void main() {
       await db.tabDao.insertTab(
         id,
         source: TabSource.manual,
-        parentId: const Value(null),
         containerId: Value(containerId),
         spaceUuid: Value(spaceUuid),
       );
@@ -247,10 +246,7 @@ void main() {
         final detail = await plan(
           await selectOf(
             () => db.tabDao
-                .scopeSiblings(
-                  TabOrderScope.normal(spaceUuid: 'work'),
-                  parentId: null,
-                )
+                .scopeSiblings(TabOrderScope.normal(spaceUuid: 'work'))
                 .get(),
           ),
         );

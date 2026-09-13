@@ -139,7 +139,6 @@ Future<TabDatabase> _memoryDatabaseWithTabs(
     await db.tabDao.insertTab(
       tab.id,
       source: TabSource.manual,
-      parentId: const Value(null),
       spaceUuid: const Value('space-1'),
       folderId: Value(filed ? folderId : null),
       shelf: pinned.contains(tab.id) || filed

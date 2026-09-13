@@ -8314,6 +8314,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
   /// across tabs while live, hence UNIQUE.
   final String? engineTabId;
   final i7.TabSource source;
+
+  /// Vestigial: nothing reads or writes it any more, and schema v21 drops it.
   final String? parentId;
 
   /// ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
@@ -12715,26 +12717,6 @@ class DefinitionsDrift extends i11.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<String> lastChildTabId({
-    required String parentId,
-    required String? spaceUuid,
-    required String? folderId,
-    required int tabShelf,
-    required String? scopeContainerId,
-  }) {
-    return customSelect(
-      'SELECT id FROM tab WHERE parent_id = ?1 AND space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 AND(?4 != 2 OR container_id IS ?5)ORDER BY order_key DESC LIMIT 1',
-      variables: [
-        i0.Variable<String>(parentId),
-        i0.Variable<String>(spaceUuid),
-        i0.Variable<String>(folderId),
-        i0.Variable<int>(tabShelf),
-        i0.Variable<String>(scopeContainerId),
-      ],
-      readsFrom: {tab},
-    ).map((i0.QueryRow row) => row.read<String>('id'));
-  }
-
   i0.Selectable<String> orderKeyAfterTab({
     required String? spaceUuid,
     required String? folderId,
@@ -12834,115 +12816,25 @@ class DefinitionsDrift extends i11.ModularAccessor {
     );
   }
 
-  i0.Selectable<TabTreesResult> tabTrees({
-    required bool skipSpaceCheck,
-    required String? spaceUuid,
-  }) {
-    return customSelect(
-      'WITH RECURSIVE descendants AS (SELECT t.id, t.parent_id, t.timestamp, t.id AS root_id FROM tab AS t WHERE(?1 OR t.space_uuid IS ?2)AND(t.parent_id IS NULL OR NOT EXISTS (SELECT 1 AS _c0 FROM tab AS p WHERE p.id = t.parent_id AND(?1 OR p.space_uuid IS ?2)))UNION ALL SELECT t.id, t.parent_id, t.timestamp, d.root_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id WHERE ?1 OR t.space_uuid IS ?2), root_stats AS (SELECT root_id, MAX(timestamp) AS max_timestamp, COUNT(*) AS total_children FROM descendants GROUP BY root_id) SELECT d.root_id AS root_tab_id, d.id AS latest_tab_id, d.timestamp AS latest_timestamp, rs.total_children AS total_tabs FROM descendants AS d JOIN root_stats AS rs ON d.root_id = rs.root_id AND d.timestamp = rs.max_timestamp ORDER BY d.timestamp DESC',
-      variables: [
-        i0.Variable<bool>(skipSpaceCheck),
-        i0.Variable<String>(spaceUuid),
-      ],
-      readsFrom: {tab},
-    ).map(
-      (i0.QueryRow row) => TabTreesResult(
-        rootTabId: row.read<String>('root_tab_id'),
-        latestTabId: row.read<String>('latest_tab_id'),
-        latestTimestamp: row.read<DateTime>('latest_timestamp'),
-        totalTabs: row.read<int>('total_tabs'),
-      ),
-    );
-  }
-
-  i0.Selectable<TabsWithRootAndDepthResult> tabsWithRootAndDepth({
-    required String? spaceUuid,
-  }) {
-    return customSelect(
-      'WITH RECURSIVE walk (id, parent_id, order_key, root_id, depth) AS (SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth FROM tab AS t WHERE t.space_uuid IS ?1 AND(t.parent_id IS NULL OR NOT EXISTS (SELECT 1 FROM tab AS p WHERE p.id = t.parent_id AND p.space_uuid IS ?1))UNION ALL SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1 FROM tab AS t INNER JOIN walk AS w ON t.parent_id = w.id WHERE t.space_uuid IS ?1) SELECT id, parent_id, order_key, root_id, depth FROM walk',
-      variables: [i0.Variable<String>(spaceUuid)],
-      readsFrom: {tab},
-    ).map(
-      (i0.QueryRow row) => TabsWithRootAndDepthResult(
-        id: row.read<String>('id'),
-        parentId: row.readNullable<String>('parent_id'),
-        orderKey: row.read<String>('order_key'),
-        rootId: row.read<String>('root_id'),
-        depth: row.read<int>('depth'),
-      ),
-    );
-  }
-
-  i0.Selectable<String> lastSubtreeTabIdByOrderKey({
-    required String tabId,
-    required String? spaceUuid,
-    required String? folderId,
-    required int tabShelf,
-    required String? scopeContainerId,
-  }) {
-    return customSelect(
-      'WITH RECURSIVE subtree AS (SELECT id, order_key FROM tab WHERE id = ?1 AND space_uuid IS ?2 AND folder_id IS ?3 AND tab_shelf = ?4 AND(?4 != 2 OR container_id IS ?5)UNION ALL SELECT t.id, t.order_key FROM tab AS t INNER JOIN subtree AS s ON t.parent_id = s.id WHERE t.space_uuid IS ?2 AND t.folder_id IS ?3 AND t.tab_shelf = ?4 AND(?4 != 2 OR t.container_id IS ?5)) SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1',
-      variables: [
-        i0.Variable<String>(tabId),
-        i0.Variable<String>(spaceUuid),
-        i0.Variable<String>(folderId),
-        i0.Variable<int>(tabShelf),
-        i0.Variable<String>(scopeContainerId),
-      ],
-      readsFrom: {tab},
-    ).map((i0.QueryRow row) => row.read<String>('id'));
-  }
-
   i0.Selectable<ScopeSiblingsResult> scopeSiblings({
     required String? spaceUuid,
     required String? folderId,
     required int tabShelf,
     required String? scopeContainerId,
-    required String? parentId,
   }) {
     return customSelect(
-      'SELECT t.id, t.order_key FROM tab AS t WHERE t.space_uuid IS ?1 AND t.folder_id IS ?2 AND t.tab_shelf = ?3 AND(?3 != 2 OR t.container_id IS ?4)AND(CASE WHEN EXISTS (SELECT 1 AS _c0 FROM tab AS p WHERE p.id = t.parent_id AND p.space_uuid IS t.space_uuid AND p.folder_id IS t.folder_id) THEN t.parent_id ELSE NULL END)IS ?5 ORDER BY t.order_key ASC',
+      'SELECT t.id, t.order_key FROM tab AS t WHERE t.space_uuid IS ?1 AND t.folder_id IS ?2 AND t.tab_shelf = ?3 AND(?3 != 2 OR t.container_id IS ?4)ORDER BY t.order_key ASC',
       variables: [
         i0.Variable<String>(spaceUuid),
         i0.Variable<String>(folderId),
         i0.Variable<int>(tabShelf),
         i0.Variable<String>(scopeContainerId),
-        i0.Variable<String>(parentId),
       ],
       readsFrom: {tab},
     ).map(
       (i0.QueryRow row) => ScopeSiblingsResult(
         id: row.read<String>('id'),
         orderKey: row.read<String>('order_key'),
-      ),
-    );
-  }
-
-  i0.Selectable<UnorderedTabDescendantsResult> unorderedTabDescendants({
-    required String tabId,
-  }) {
-    return customSelect(
-      'WITH RECURSIVE descendants AS (SELECT id, parent_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id) SELECT id, parent_id FROM descendants',
-      variables: [i0.Variable<String>(tabId)],
-      readsFrom: {tab},
-    ).map(
-      (i0.QueryRow row) => UnorderedTabDescendantsResult(
-        id: row.read<String>('id'),
-        parentId: row.readNullable<String>('parent_id'),
-      ),
-    );
-  }
-
-  i0.Selectable<UnorderedScopeTabDescendantsResult>
-  unorderedScopeTabDescendants({required String tabId}) {
-    return customSelect(
-      'WITH RECURSIVE descendants AS (SELECT id, parent_id, space_uuid, folder_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id, t.space_uuid, t.folder_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id WHERE t.space_uuid IS d.space_uuid AND t.folder_id IS d.folder_id) SELECT id, parent_id FROM descendants',
-      variables: [i0.Variable<String>(tabId)],
-      readsFrom: {tab},
-    ).map(
-      (i0.QueryRow row) => UnorderedScopeTabDescendantsResult(
-        id: row.read<String>('id'),
-        parentId: row.readNullable<String>('parent_id'),
       ),
     );
   }
@@ -13250,50 +13142,10 @@ class DefinitionsDrift extends i11.ModularAccessor {
   ).resultSet<i2.TabSplit>('tab_split');
 }
 
-class TabTreesResult {
-  final String rootTabId;
-  final String latestTabId;
-  final DateTime latestTimestamp;
-  final int totalTabs;
-  TabTreesResult({
-    required this.rootTabId,
-    required this.latestTabId,
-    required this.latestTimestamp,
-    required this.totalTabs,
-  });
-}
-
-class TabsWithRootAndDepthResult {
-  final String id;
-  final String? parentId;
-  final String orderKey;
-  final String rootId;
-  final int depth;
-  TabsWithRootAndDepthResult({
-    required this.id,
-    this.parentId,
-    required this.orderKey,
-    required this.rootId,
-    required this.depth,
-  });
-}
-
 class ScopeSiblingsResult {
   final String id;
   final String orderKey;
   ScopeSiblingsResult({required this.id, required this.orderKey});
-}
-
-class UnorderedTabDescendantsResult {
-  final String id;
-  final String? parentId;
-  UnorderedTabDescendantsResult({required this.id, this.parentId});
-}
-
-class UnorderedScopeTabDescendantsResult {
-  final String id;
-  final String? parentId;
-  UnorderedScopeTabDescendantsResult({required this.id, this.parentId});
 }
 
 class HistoryExclusionTabsResult {

@@ -18,14 +18,12 @@ void main() {
     await db.tabDao.insertTab(
       'blank',
       source: TabSource.manual,
-      parentId: const Value(null),
       spaceUuid: const Value(space1),
       url: Value(Uri.parse('about:blank')),
     );
     await db.tabDao.insertTab(
       'empty',
       source: TabSource.manual,
-      parentId: const Value(null),
       spaceUuid: const Value(space1),
     );
 

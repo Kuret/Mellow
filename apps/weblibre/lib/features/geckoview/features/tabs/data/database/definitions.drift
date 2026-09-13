@@ -73,6 +73,7 @@ CREATE TABLE tab(
   -- across tabs while live, hence UNIQUE.
   engine_tab_id TEXT UNIQUE,
   source ENUM(TabSource) NOT NULL,
+  -- Vestigial: nothing reads or writes it any more, and schema v21 drops it.
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
   -- ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
   -- the engine's back. Repositories close tabs before deleting a container.
@@ -132,9 +133,7 @@ CREATE TABLE closed_tab_tombstone(
 -- (space_uuid, folder_id, tab_shelf) and order by order_key.
 CREATE INDEX idx_tab_scope_order ON tab(space_uuid, folder_id, tab_shelf, order_key);
 
--- Serves `tabTrees` / `tabsWithRootAndDepth`'s boundary check (a tab whose
--- parent lives in another space or folder starts a tree of its own) and
--- `lastChildTabId` (`WHERE parent_id = ? AND space_uuid IS ? AND folder_id IS ?`).
+-- Vestigial, dropped together with `parent_id` in schema v21.
 CREATE INDEX idx_tab_parent_space ON tab(parent_id, space_uuid, folder_id);
 
 -- `tabsInContainer` and the essential-shelf queries filter on `container_id`
@@ -183,10 +182,8 @@ CREATE VIRTUAL TABLE tab_fts
     tokenize="trigram"
   );
 
--- Create trigger to handle parent deletion
+-- Vestigial, dropped together with `parent_id` in schema v21.
 CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
-  -- Update all children of the deleted row to point to its parent (grandparent)
-  -- Only if the grandparent exists, otherwise set to NULL
   UPDATE tab
   SET parent_id = CASE
     WHEN OLD.parent_id IS NOT NULL AND
@@ -197,10 +194,6 @@ CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
   WHERE parent_id = OLD.id;
 END;
 
--- F1 (PLAN §6.6): a child tab always shares its parent's space and folder.
--- Only the direct-child level is enforced here — SQLite recursive triggers
--- are off, so deeper levels (grandchildren etc.) are cascaded by the DAO
--- (`setTabParent` / the reparenting path), which walks the chain explicitly.
 CREATE TRIGGER tab_child_follows_parent_scope AFTER UPDATE OF space_uuid, folder_id ON tab BEGIN
   UPDATE tab
   SET space_uuid = NEW.space_uuid, folder_id = NEW.folder_id
@@ -220,7 +213,7 @@ CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN
     VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
 END;
 -- Scoped to FTS-relevant columns so unrelated tab updates (order_key,
--- parent_id, container_id, tab_shelf, timestamp, ...) don't trigger a
+-- container_id, tab_shelf, timestamp, ...) don't trigger a
 -- full trigram reindex of the row. Additionally gated on content_hash so
 -- rewrites of identical content (page reload re-emitting the same extract)
 -- skip the FTS rewrite. URL changes are caught separately because the hash
@@ -1086,20 +1079,6 @@ trailingOrderKey(
     )
   );
 
-lastChildTabId(
-  :parent_id AS TEXT,
-  REQUIRED :space_uuid AS TEXT OR NULL,
-  REQUIRED :folder_id AS TEXT OR NULL,
-  :tab_shelf AS INTEGER,
-  REQUIRED :scope_container_id AS TEXT OR NULL
-):
-  SELECT id FROM tab
-  WHERE parent_id = :parent_id
-    AND space_uuid IS :space_uuid AND folder_id IS :folder_id
-    AND tab_shelf = :tab_shelf
-    AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
-  ORDER BY order_key DESC LIMIT 1;
-
 orderKeyAfterTab(
   :tab_id AS TEXT,
   REQUIRED :space_uuid AS TEXT OR NULL,
@@ -1198,205 +1177,19 @@ queryTabsFullContent WITH TabQueryResult:
       t.timestamp DESC
     LIMIT :limit;
 
--- Trees rooted in the requested space, used by the tree tab view. Pass
--- :skip_space_check to build them across every space instead.
---
--- Scoped mode draws the same boundary as `tabsWithRootAndDepth`: a tab whose
--- parent lives in another space starts a tree of its own. A parent may keep
--- children elsewhere (a link followed into a differently-scoped site keeps
--- pointing at its opener), and without the boundary such a child would both
--- inflate the opener's tree and — being the newer tab — take over as its
--- `latest_tab_id`, hiding the opener's tree from its own space's view.
-tabTrees(REQUIRED :space_uuid AS TEXT OR NULL, :skip_space_check AS BOOL):
-  WITH RECURSIVE descendants AS (
-    -- Base case: every in-scope tab whose parent is not also in scope
-    SELECT
-      t.id,
-      t.parent_id,
-      t.timestamp,
-      t.id AS root_id
-    FROM tab t
-    WHERE (:skip_space_check OR t.space_uuid IS :space_uuid)
-      AND (
-        t.parent_id IS NULL
-        OR NOT EXISTS (
-          SELECT 1 FROM tab p
-          WHERE p.id = t.parent_id
-            AND (:skip_space_check OR p.space_uuid IS :space_uuid)
-        )
-      )
-
-    UNION ALL
-
-    -- Recursive case: find all descendants
-    SELECT
-      t.id,
-      t.parent_id,
-      t.timestamp,
-      d.root_id
-    FROM tab t
-    JOIN descendants d ON t.parent_id = d.id
-    WHERE :skip_space_check OR t.space_uuid IS :space_uuid
-),
-root_stats AS (
-    -- Calculate stats for each root
-    SELECT
-        root_id,
-        MAX(timestamp) AS max_timestamp,
-        COUNT(*) AS total_children
-    FROM descendants
-    GROUP BY root_id
-)
--- Get the actual tab records with latest timestamp per root
-SELECT
-    d.root_id AS root_tab_id,
-    d.id AS latest_tab_id,
-    d.timestamp AS latest_timestamp,
-    rs.total_children AS total_tabs
-FROM descendants d
-JOIN root_stats rs
-ON
-  d.root_id = rs.root_id AND
-  d.timestamp = rs.max_timestamp
-ORDER BY d.timestamp DESC;
-
--- Returns each tab in a space together with its (recursive) root id and
--- depth from that root. Drives the grouped-list rendering path. The provider
--- handles ordering, filter, and direction.
-tabsWithRootAndDepth(REQUIRED :space_uuid AS TEXT OR NULL):
-  -- Seed the recursion from every tab in the target space whose parent is
-  -- not also in this space (parent NULL, parent missing, or parent moved
-  -- away). This treats a child whose ancestor lives elsewhere as a *local
-  -- root* rather than dropping it from the grouped view entirely. A parent
-  -- that switched folder within the same space still counts as "in scope"
-  -- here — folder is not part of this boundary, only space is.
-  WITH RECURSIVE walk(id, parent_id, order_key, root_id, depth) AS (
-    SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth
-    FROM tab t
-    WHERE t.space_uuid IS :space_uuid
-      AND (
-        t.parent_id IS NULL
-        OR NOT EXISTS (
-          SELECT 1 FROM tab p
-          WHERE p.id = t.parent_id AND p.space_uuid IS :space_uuid
-        )
-      )
-
-    UNION ALL
-
-    SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1
-    FROM tab t
-    INNER JOIN walk w ON t.parent_id = w.id
-    WHERE t.space_uuid IS :space_uuid
-  )
-  SELECT id, parent_id, order_key, root_id, depth FROM walk;
-
--- Returns the id of the tab whose `order_key` is the largest within the
--- (inclusive) subtree rooted at :tab_id. Used to anchor a sibling insert
--- *after* the entire subtree of an existing tab.
---
--- Contiguity assumption: this query is only correct when subtrees occupy a
--- contiguous range in `order_key` space. The reorder algorithm preserves
--- this by moving subtrees as atomic blocks, but legacy rows or a flat
--- (non-hierarchical) reorder could interleave order_keys across scopes.
--- In that pathological case the returned anchor is still the largest-keyed
--- descendant, but it may sit *between* unrelated tabs rather than after the
--- entire subtree.
-lastSubtreeTabIdByOrderKey(
-  :tab_id AS TEXT,
-  REQUIRED :space_uuid AS TEXT OR NULL,
-  REQUIRED :folder_id AS TEXT OR NULL,
-  :tab_shelf AS INTEGER,
-  REQUIRED :scope_container_id AS TEXT OR NULL
-):
-  WITH RECURSIVE subtree AS (
-    SELECT id, order_key FROM tab
-    WHERE id = :tab_id
-      AND space_uuid IS :space_uuid AND folder_id IS :folder_id
-      AND tab_shelf = :tab_shelf
-      AND (:tab_shelf != 2 OR container_id IS :scope_container_id)
-    UNION ALL
-    SELECT t.id, t.order_key
-    FROM tab t
-    INNER JOIN subtree s ON t.parent_id = s.id
-    WHERE t.space_uuid IS :space_uuid AND t.folder_id IS :folder_id
-      AND t.tab_shelf = :tab_shelf
-      AND (:tab_shelf != 2 OR t.container_id IS :scope_container_id)
-  )
-  SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1;
-
--- The tabs that render as siblings of :parent_id inside the given scope, in
--- storage order. Pass a null :parent_id for the scope's root.
---
--- "Render as" is the point. A tab whose stored parent lives in another scope
--- is drawn as a local root by `tabsWithRootAndDepth`, so it competes for a
--- slot among its own scope's roots even though `parent_id` is set. Matching
--- `parent_id` raw would file it under a scope nothing else belongs to and
--- leave the root scope it is actually drawn in short of members — which is
--- how `preservePromotedChildOrderOnClose` ends up with no anchors to rank
--- promoted children against.
+-- The tabs of the given scope, in storage order.
 scopeSiblings(
   REQUIRED :space_uuid AS TEXT OR NULL,
   REQUIRED :folder_id AS TEXT OR NULL,
   :tab_shelf AS INTEGER,
-  REQUIRED :scope_container_id AS TEXT OR NULL,
-  REQUIRED :parent_id AS TEXT OR NULL
+  REQUIRED :scope_container_id AS TEXT OR NULL
 ):
   SELECT t.id, t.order_key
   FROM tab t
   WHERE t.space_uuid IS :space_uuid AND t.folder_id IS :folder_id
     AND t.tab_shelf = :tab_shelf
     AND (:tab_shelf != 2 OR t.container_id IS :scope_container_id)
-    AND (
-      CASE
-        WHEN EXISTS (
-          SELECT 1 FROM tab p
-          WHERE p.id = t.parent_id
-            AND p.space_uuid IS t.space_uuid AND p.folder_id IS t.folder_id
-        ) THEN t.parent_id
-        ELSE NULL
-      END
-    ) IS :parent_id
   ORDER BY t.order_key ASC;
-
--- Every descendant of :tab_id, wherever it lives. Cycle detection and the
--- hierarchy pickers need the whole picture; anything that *closes* a subtree
--- wants `unorderedScopeTabDescendants` instead.
-unorderedTabDescendants:
-  WITH RECURSIVE descendants AS (
-      SELECT id, parent_id
-      FROM tab
-      WHERE id = :tab_id
-
-      UNION ALL
-
-      -- Recursive case: find all descendants
-      SELECT t.id, t.parent_id
-      FROM tab t
-      JOIN descendants d ON t.parent_id = d.id
-  )
-  SELECT id, parent_id
-  FROM descendants;
-
--- As `unorderedTabDescendants`, but the walk stops at the seed's space and
--- folder. Bulk-close actions are offered from a scope-scoped view and count
--- what that view shows, so they must not reach into a tab that was moved to
--- another space or folder — that tab is a root of its own there.
-unorderedScopeTabDescendants:
-  WITH RECURSIVE descendants AS (
-      SELECT id, parent_id, space_uuid, folder_id
-      FROM tab
-      WHERE id = :tab_id
-
-      UNION ALL
-
-      SELECT t.id, t.parent_id, t.space_uuid, t.folder_id
-      FROM tab t
-      JOIN descendants d ON t.parent_id = d.id
-      WHERE t.space_uuid IS d.space_uuid AND t.folder_id IS d.folder_id
-  )
-  SELECT id, parent_id
-  FROM descendants;
 
 previousTabByTimestamp:
   WITH ranked_tabs AS (

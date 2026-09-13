@@ -25,9 +25,7 @@ void main() {
       containerId: containerC,
       shelf: TabShelf.essential,
     );
-    await seedTab(db, 'parent', spaceUuid: spaceA, containerId: containerC);
-    await seedTab(db, 'child', parentId: 'parent', containerId: containerC);
-    await seedTab(db, 'grandchild', parentId: 'child', containerId: containerC);
+    await seedTab(db, 'moving', spaceUuid: spaceA, containerId: containerC);
     await seedTab(db, 'sibling', spaceUuid: spaceA);
   });
 
@@ -37,37 +35,23 @@ void main() {
     'to essential nulls space and folder and keys in the container strip',
     () async {
       final moved = await db.tabDao.setShelf(
-        'parent',
+        'moving',
         TabShelf.essential,
         target: TabOrderScope.essential(containerC),
       );
       expect(moved, isTrue);
 
-      final parent = await summaryOf(db, 'parent');
-      expect(parent.tabShelf, TabShelf.essential);
-      expect(parent.spaceUuid, isNull);
-      expect(parent.folderId, isNull);
-      expect(parent.splitId, isNull);
-      expect(parent.parentId, isNull);
+      final moving = await summaryOf(db, 'moving');
+      expect(moving.tabShelf, TabShelf.essential);
+      expect(moving.spaceUuid, isNull);
+      expect(moving.folderId, isNull);
+      expect(moving.splitId, isNull);
       expect(await db.tabDao.essentialTabIds(containerC).get(), [
         'other-essential',
-        'parent',
+        'moving',
       ]);
 
-      // Essentials carry no tree: the child is handed to the grandparent (none,
-      // so it becomes a root) and keeps its space rather than following into
-      // the strip.
-      final child = await summaryOf(db, 'child');
-      expect(child.parentId, isNull);
-      expect(child.spaceUuid, spaceA);
-      expect(child.tabShelf, TabShelf.normal);
-      final grandchild = await summaryOf(db, 'grandchild');
-      expect(grandchild.parentId, 'child');
-      expect(grandchild.spaceUuid, spaceA);
-
       expect(await idsInScope(db, TabOrderScope.normal(spaceUuid: spaceA)), [
-        'child',
-        'grandchild',
         'sibling',
       ]);
     },
@@ -75,73 +59,41 @@ void main() {
 
   test('to pinned with a target space restores the space', () async {
     await db.tabDao.setShelf(
-      'parent',
+      'moving',
       TabShelf.essential,
       target: TabOrderScope.essential(containerC),
     );
 
     final moved = await db.tabDao.setShelf(
-      'parent',
+      'moving',
       TabShelf.pinned,
       target: TabOrderScope.pinned(spaceB),
     );
     expect(moved, isTrue);
 
-    final parent = await summaryOf(db, 'parent');
-    expect(parent.tabShelf, TabShelf.pinned);
-    expect(parent.spaceUuid, spaceB);
-    expect(parent.folderId, isNull);
-    expect(await idsInScope(db, TabOrderScope.pinned(spaceB)), ['parent']);
+    final moving = await summaryOf(db, 'moving');
+    expect(moving.tabShelf, TabShelf.pinned);
+    expect(moving.spaceUuid, spaceB);
+    expect(moving.folderId, isNull);
+    expect(await idsInScope(db, TabOrderScope.pinned(spaceB)), ['moving']);
     expect(await db.tabDao.essentialTabIds(containerC).get(), [
       'other-essential',
     ]);
   });
 
-  test('F1: children follow when the parent changes scope', () async {
-    final moved = await db.tabDao.setShelf(
-      'parent',
-      TabShelf.pinned,
-      target: TabOrderScope.pinned(spaceB),
-    );
-    expect(moved, isTrue);
+  test('moveToScope rewrites the space of the moving tab only', () async {
+    await db.tabDao.moveToScope([
+      'moving',
+    ], TabOrderScope.normal(spaceUuid: spaceB));
 
-    final parent = await summaryOf(db, 'parent');
-    expect(parent.spaceUuid, spaceB);
-    expect(parent.tabShelf, TabShelf.pinned);
-
-    // Direct child: moved by the `tab_child_follows_parent_scope` trigger.
-    final child = await summaryOf(db, 'child');
-    expect(child.parentId, 'parent');
-    expect(child.spaceUuid, spaceB);
-    // Grandchild: cascaded by the DAO (recursive triggers are off).
-    final grandchild = await summaryOf(db, 'grandchild');
-    expect(grandchild.parentId, 'child');
-    expect(grandchild.spaceUuid, spaceB);
-
-    // The unrelated sibling stays.
-    expect((await summaryOf(db, 'sibling')).spaceUuid, spaceA);
+    expect((await summaryOf(db, 'moving')).spaceUuid, spaceB);
+    expect(await idsInScope(db, TabOrderScope.normal(spaceUuid: spaceB)), [
+      'moving',
+    ]);
+    expect(await idsInScope(db, TabOrderScope.normal(spaceUuid: spaceA)), [
+      'sibling',
+    ]);
   });
-
-  test(
-    'the trigger alone moves a direct child on a raw scope update',
-    () async {
-      await db.tabDao.moveToScope([
-        'parent',
-      ], TabOrderScope.normal(spaceUuid: spaceB));
-
-      expect((await summaryOf(db, 'parent')).spaceUuid, spaceB);
-      expect((await summaryOf(db, 'child')).spaceUuid, spaceB);
-      expect((await summaryOf(db, 'grandchild')).spaceUuid, spaceB);
-      expect(await idsInScope(db, TabOrderScope.normal(spaceUuid: spaceB)), [
-        'parent',
-        'child',
-        'grandchild',
-      ]);
-      expect(await idsInScope(db, TabOrderScope.normal(spaceUuid: spaceA)), [
-        'sibling',
-      ]);
-    },
-  );
 
   test('a private tab cannot be pinned', () async {
     await seedTab(db, 'private', tabMode: null);

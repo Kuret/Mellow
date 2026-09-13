@@ -168,7 +168,6 @@ Future<void> _insertTab(
   return db.tabDao.insertTab(
     id,
     source: TabSource.manual,
-    parentId: const Value.absent(),
     containerId: Value(containerId),
     url: Value(Uri.parse('https://example.com/$id')),
   );

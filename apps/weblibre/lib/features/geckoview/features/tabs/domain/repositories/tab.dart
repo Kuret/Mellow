@@ -31,7 +31,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shel
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 
 part 'tab.g.dart';
@@ -69,16 +69,6 @@ class TabDataRepository extends _$TabDataRepository {
       return;
     }
 
-    // Resolved before the close, while the row is still around.
-    //
-    // A tab that survives the move is itself the opener of the replacement:
-    // the user navigated from it into a site that belongs elsewhere, so
-    // closing the replacement has to lead back to it — across the container
-    // boundary (#530). When the old tab goes away instead, the replacement
-    // takes over its place in the hierarchy.
-    final parentId = closeOldTab
-        ? (await getTabDataById(tabId))?.parentId
-        : tabId;
     if (closeOldTab) {
       await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
     }
@@ -88,7 +78,6 @@ class TabDataRepository extends _$TabDataRepository {
           url: replacementUrl ?? tabState.url,
           tabMode: tabState.tabMode,
           containerSelection: TabContainerSelection.specific(targetContainer),
-          parentId: parentId,
           selectTab: selectedTabId == tabState.id,
           flags: LoadUrlFlags.NONE,
         );
@@ -106,9 +95,6 @@ class TabDataRepository extends _$TabDataRepository {
           .assignContainer(tabId, containerId: null);
     }
 
-    // The replacement stands in for the tab being retired, so it inherits
-    // its place in the hierarchy — read before the row disappears.
-    final parentId = (await getTabDataById(tabId))?.parentId;
     await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
     await ref
         .read(tabRepositoryProvider.notifier)
@@ -116,7 +102,6 @@ class TabDataRepository extends _$TabDataRepository {
           url: tabState.url,
           tabMode: tabState.tabMode,
           containerSelection: const TabContainerSelection.unassigned(),
-          parentId: parentId,
           selectTab: selectedTabId == tabState.id,
         );
   }
@@ -229,7 +214,6 @@ class TabDataRepository extends _$TabDataRepository {
     required List<String> movingTabIds,
     required String? previousTabId,
     required String? nextTabId,
-    TabParentChange parentChange = const TabParentChange.unchanged(),
     TabScopeChange scopeChange = const TabScopeChange.unchanged(),
   }) {
     return ref
@@ -239,13 +223,12 @@ class TabDataRepository extends _$TabDataRepository {
           movingTabIds: movingTabIds,
           previousTabId: previousTabId,
           nextTabId: nextTabId,
-          parentChange: parentChange,
           scopeChange: scopeChange,
         );
   }
 
-  /// Moves the subtrees rooted at [rootTabIds] into [target]; a split member
-  /// among the roots brings its whole split along.
+  /// Moves [rootTabIds] into [target]; a split member among them brings its
+  /// whole split along.
   Future<void> moveToScope(
     List<String> rootTabIds,
     TabOrderScope target, {
@@ -256,35 +239,6 @@ class TabDataRepository extends _$TabDataRepository {
         .read(tabDatabaseProvider)
         .tabDao
         .moveToScope(rootTabIds, target, afterId: afterId, beforeId: beforeId);
-  }
-
-  Future<bool> setTabParent({
-    required String tabId,
-    required String? newParentId,
-  }) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .setTabParent(tabId: tabId, newParentId: newParentId);
-  }
-
-  Future<bool> seedParentFromEngineState({
-    required String childId,
-    required String? parentId,
-    required String? contextId,
-  }) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .seedParentFromEngineState(
-          childId: childId,
-          parentId: parentId,
-          contextId: contextId,
-        );
-  }
-
-  Future<bool> promoteChildToParent(String childId) {
-    return ref.read(tabDatabaseProvider).tabDao.promoteChildToParent(childId);
   }
 
   Future<bool> moveTabAmongSiblings(String tabId, {required bool down}) {
@@ -432,34 +386,6 @@ class TabDataRepository extends _$TabDataRepository {
         .getTabsContainerId(tabIds)
         .get()
         .then(Map.fromEntries);
-  }
-
-  Future<Map<String, String?>> getTabDescendants(String tabId) async {
-    final results = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
-        .unorderedTabDescendants(tabId: tabId)
-        .get();
-    return Map.fromEntries(
-      results.map((pair) => MapEntry(pair.id, pair.parentId)),
-    );
-  }
-
-  /// [getTabDescendants] stopped at the seed tab's ordering-scope boundary
-  /// (space, folder, shelf).
-  ///
-  /// What the bulk-close actions operate on: they are offered from a
-  /// scoped view whose counts exclude a child that was moved elsewhere, so
-  /// closing must exclude it too.
-  Future<Map<String, String?>> getContainerTabDescendants(String tabId) async {
-    final results = await ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .unorderedScopeTabDescendants(tabId)
-        .get();
-    return Map.fromEntries(
-      results.map((pair) => MapEntry(pair.id, pair.parentId)),
-    );
   }
 
   /// The tabs of [containerId] that pass the tray's active filter. Cold tabs

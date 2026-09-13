@@ -43,7 +43,6 @@ Future<void> _addTab(
   await db.tabDao.insertTab(
     id,
     source: TabSource.manual,
-    parentId: const Value(null),
     spaceUuid: Value(spaceUuid),
   );
   await db.tabDao.touchTab(

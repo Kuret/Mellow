@@ -43,7 +43,6 @@ Future<void> seedContainer(TabDatabase db, String id) {
 Future<void> seedTab(
   TabDatabase db,
   String id, {
-  String? parentId,
   String? spaceUuid,
   String? folderId,
   String? containerId,
@@ -54,7 +53,6 @@ Future<void> seedTab(
   return db.tabDao.insertTab(
     id,
     source: TabSource.manual,
-    parentId: Value(parentId),
     spaceUuid: Value(spaceUuid),
     folderId: Value(folderId),
     containerId: Value(containerId),

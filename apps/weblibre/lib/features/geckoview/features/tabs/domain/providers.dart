@@ -21,7 +21,6 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -158,31 +157,6 @@ Stream<EquatableValue<Set<String>>> watchColdTabIds(Ref ref) {
   );
 }
 
-// --- trees ---------------------------------------------------------------------
-
-/// Tab trees of one space; with [allSpaces] the space boundary is ignored and
-/// every tree is returned.
-@Riverpod()
-Stream<List<TabTreesResult>> watchTabTrees(
-  Ref ref,
-  String? spaceUuid, {
-  bool allSpaces = false,
-}) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao
-      .tabTrees(allSpaces ? null : spaceUuid, skipSpaceCheck: allSpaces)
-      .watch();
-}
-
-@Riverpod()
-Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
-  Ref ref,
-  String? spaceUuid,
-) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.tabsWithRootAndDepth(spaceUuid).watch();
-}
-
 /// One tab's row, watched — without its page text.
 ///
 /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
@@ -193,18 +167,6 @@ Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
 Stream<TabSummary?> watchTabDbData(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.tabDao.getTabSummaryById(tabId).watchSingleOrNull();
-}
-
-@Riverpod()
-Stream<Map<String, String?>> watchTabDescendants(Ref ref, String tabId) {
-  final db = ref.watch(tabDatabaseProvider);
-  return db.definitionsDrift.unorderedTabDescendants(tabId: tabId).watch().map((
-    results,
-  ) {
-    return Map.fromEntries(
-      results.map((pair) => MapEntry(pair.id, pair.parentId)),
-    );
-  });
 }
 
 @Riverpod()

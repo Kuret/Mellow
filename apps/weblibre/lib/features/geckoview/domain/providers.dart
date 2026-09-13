@@ -86,7 +86,6 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: searchProvider.searchUrl(text),
-              parentId: currentTab?.id,
               tabMode: tabMode,
               selectTab: true,
             );

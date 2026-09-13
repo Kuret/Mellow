@@ -19,7 +19,7 @@
  */
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
 
 class TabViewReorderResult {
   final List<String> movingTabIds;

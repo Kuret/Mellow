@@ -18,42 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/// How a reorder/reparent operation should affect the moving tab's
-/// `parent_id`. Distinguishes "leave parent_id alone" (the default for a
-/// plain reorder) from "detach to root" and "attach to a specific tab".
-///
-/// Mirrors the shape of [TabContainerSelection].
-sealed class TabParentChange {
-  const TabParentChange();
-
-  const factory TabParentChange.unchanged() = TabParentUnchanged;
-
-  const factory TabParentChange.detach() = TabParentDetach;
-
-  const factory TabParentChange.toParent(String parentTabId) =
-      TabParentToSpecific;
-}
-
-final class TabParentUnchanged extends TabParentChange {
-  const TabParentUnchanged();
-}
-
-final class TabParentDetach extends TabParentChange {
-  const TabParentDetach();
-}
-
-final class TabParentToSpecific extends TabParentChange {
-  final String parentTabId;
-
-  const TabParentToSpecific(this.parentTabId);
-}
-
 /// How a reorder should affect the moving block's `(space_uuid, folder_id)`
 /// (PLAN §6.6). [TabScopeChange.unchanged] keeps the current values; a
 /// [TabScopeChange.toScope] rewrites them for every tab in the moving block.
-///
-/// A `TabParentChange.toParent` wins over this: a child always shares its
-/// parent's space and folder (F1), so the parent's scope is used instead.
 sealed class TabScopeChange {
   const TabScopeChange();
 

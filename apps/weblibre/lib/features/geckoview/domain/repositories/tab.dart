@@ -151,31 +151,6 @@ class TabRepository extends _$TabRepository {
     _tabBackPromptBehavior.remove(tabId);
   }
 
-  /// Validates the opener of a tab that is about to be created.
-  ///
-  /// The link is kept even when the new tab lands in a *different* container
-  /// than its opener. Following a link into a container-assigned site reopens
-  /// that site over there, and the opener is then the only way back once the
-  /// reopened tab runs out of its own history — cutting the link stranded the
-  /// user in the target container (#530).
-  ///
-  /// Only a parent that has no row (yet) is dropped: `tab.parent_id` carries a
-  /// self-referential foreign key, so writing a dangling id would abort the
-  /// insert transaction.
-  Future<String?> _resolveParentId(String? parentId) async {
-    if (parentId == null) {
-      return null;
-    }
-
-    final parent = await ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .getTabDataById(parentId)
-        .getSingleOrNull();
-
-    return parent != null ? parentId : null;
-  }
-
   /// The container a new tab in [spaceUuid] gets when none is asked for: the
   /// space's default container, else the selected container.
   Future<ContainerData?> _defaultContainerFor(String? spaceUuid) async {
@@ -238,7 +213,6 @@ class TabRepository extends _$TabRepository {
     Uri? url,
     required bool selectTab,
     bool startLoading = true,
-    String? parentId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Source source = Internal.newTab,
     HistoryMetadataKey? historyMetadata,
@@ -271,7 +245,6 @@ class TabRepository extends _$TabRepository {
       ),
     };
 
-    final validatedParentId = await _resolveParentId(parentId);
     // A container's Gecko contextId is its id (DESIGN.md "D3 refinement").
     final effectiveContextId = assignedContainer?.id;
     final excludeFromHistory = await _excludeFromHistory(assignedContainer);
@@ -284,7 +257,7 @@ class TabRepository extends _$TabRepository {
           url: url,
           selectTab: selectTab,
           startLoading: startLoading,
-          parentId: validatedParentId,
+          parentId: null,
           flags: flags,
           contextId: effectiveContextId,
           source: source,
@@ -297,7 +270,6 @@ class TabRepository extends _$TabRepository {
         );
         return _confirmMintedId(mintedId, createdId);
       },
-      parentId: Value(validatedParentId),
       containerId: Value(assignedContainer?.id),
       spaceUuid: Value(effectiveSpaceUuid),
       url: Value(url),
@@ -395,37 +367,13 @@ class TabRepository extends _$TabRepository {
       for (var i = 0; i < createdTabIds.length && i < tabs.length; i++) {
         _confirmMintedId(tabs[i].tabId!, createdTabIds[i]);
       }
-      // Build sets for validation
-      final creatingTabIds = createdTabIds.toSet();
-      final parentIdsToValidate = tabs
-          .map((tab) => tab.parentId)
-          .whereType<String>()
-          .where((id) => !creatingTabIds.contains(id))
-          .toSet();
-
-      // Batch validate parent IDs that aren't in the current creation batch
-      final existingParentIds = await tabDao
-          .getExistingTabIds(parentIdsToValidate)
-          .get()
-          .then((ids) => ids.toSet());
-
       // Upsert all tabs in the database
       for (var i = 0; i < createdTabIds.length; i++) {
         final tabId = createdTabIds[i];
         final tab = tabs[i];
 
-        // Validate parent exists in either the batch being created or database
-        String? validatedParentId;
-        if (tab.parentId != null) {
-          if (creatingTabIds.contains(tab.parentId) ||
-              existingParentIds.contains(tab.parentId)) {
-            validatedParentId = tab.parentId;
-          }
-        }
-
         await tabDao.insertTab(
           tabId,
-          parentId: Value(validatedParentId),
           source: TabSource.manual,
           containerId: Value(assignedContainer?.id),
           spaceUuid: Value(tab.private ? null : defaultSpaceUuid),
@@ -460,23 +408,10 @@ class TabRepository extends _$TabRepository {
     final effectiveContextId = containerData?.id;
     final excludeFromHistory = await _excludeFromHistory(containerData);
 
-    // Place the duplicate as a sibling of the source — same parent — and
-    // insert it right after the source's full subtree, so existing
-    // children of the source are not split from their parent.
+    // Place the duplicate right after the source in its own scope.
     final sourceData = await tabDao
         .getTabSummaryById(selectTabId)
         .getSingleOrNull();
-    final sourceParentId = sourceData?.parentId;
-    final anchorTabId =
-        (sourceData == null
-            ? null
-            : await tabDao
-                  .lastSubtreeTabIdByOrderKey(
-                    selectTabId,
-                    scope: TabOrderScope.forTab(sourceData),
-                  )
-                  .getSingleOrNull()) ??
-        selectTabId;
 
     final newTabId = await tabDao.upsertTabTransactional(
       () {
@@ -487,8 +422,7 @@ class TabRepository extends _$TabRepository {
           excludeFromHistory: excludeFromHistory,
         );
       },
-      parentId: Value(sourceParentId),
-      afterTabId: Value(anchorTabId),
+      afterTabId: Value(selectTabId),
       containerId: Value(containerData?.id),
       spaceUuid: Value(sourceData?.spaceUuid),
       folderId: Value(sourceData?.folderId),
@@ -742,52 +676,6 @@ class TabRepository extends _$TabRepository {
         await walkDirection(selectPrevious: false);
   }
 
-  /// Nearest still-open ancestor of [tabId], or `null` when the chain runs out.
-  ///
-  /// The stored chain is the authority: `tab_maintain_parent_chain_on_delete`
-  /// repoints a child at its grandparent as soon as the parent row goes away,
-  /// whereas the engine's `parentId` only reaches Dart with that tab's *next*
-  /// content-state event and can still name a tab that is already closed. The
-  /// engine value is therefore only consulted while the row itself is missing,
-  /// i.e. before the insert for a freshly opened tab has landed.
-  ///
-  /// An ancestor in another container is a valid target: selecting it moves the
-  /// tray along with it (see `SelectedContainer`), which is the way back out of
-  /// a container a link pulled the user into (#530).
-  Future<String?> _nearestAvailableAncestor(
-    String tabId, {
-    required Set<String> excludedTabIds,
-  }) async {
-    final tabDao = ref.read(tabDatabaseProvider).tabDao;
-    final row = await tabDao.getTabDataById(tabId).getSingleOrNull();
-
-    if (!ref.mounted) return null;
-
-    var candidate = row != null
-        ? row.parentId
-        : ref.read(tabStatesProvider)[tabId]?.parentId;
-
-    final liveTabIds = ref.read(tabListProvider).value.toSet();
-    final visited = <String>{tabId};
-
-    while (candidate != null && visited.add(candidate)) {
-      if (!excludedTabIds.contains(candidate) &&
-          liveTabIds.contains(candidate)) {
-        return candidate;
-      }
-
-      // Closing an ancestor together with this tab (or an engine tab that never
-      // materialised) is not the end of the chain — keep climbing.
-      final ancestor = await tabDao.getTabDataById(candidate).getSingleOrNull();
-
-      if (!ref.mounted) return null;
-
-      candidate = ancestor?.parentId;
-    }
-
-    return null;
-  }
-
   Future<void> _selectNextTab(
     String tabId, {
     Set<String> excludedTabIds = const {},
@@ -828,18 +716,8 @@ class TabRepository extends _$TabRepository {
     );
     if (!ref.mounted) return;
 
-    // Priority 1: hand the user back to whoever opened this tab, across
-    // spaces if that is where the opener lives.
-    final ancestorTabId = await _nearestAvailableAncestor(
-      tabId,
-      excludedTabIds: excludedTabIds,
-    );
-    if (!ref.mounted) return;
-    if (ancestorTabId != null) {
-      return select(ancestorTabId);
-    }
-
-    // Priority 2: Check for previous tab by timestamp
+    // Priority 1: hand the user back to the tab they were on before this
+    // one, which for a link opened in a new tab is its opener.
     final previousTabId = await db.definitionsDrift
         .previousTabByTimestamp(tabId: tabId)
         .getSingleOrNull();
@@ -955,8 +833,6 @@ class TabRepository extends _$TabRepository {
         await _selectNextTab(selectedTab!, excludedTabIds: tabIds.toSet());
       }
 
-      await _preservePromotedChildOrderOnClose(tabIds);
-
       // Cold rows have no session behind them: closing one is a plain row
       // delete (PLAN §7.4 item 2). Everything else goes through the engine,
       // whose tab-list event drops the row.
@@ -998,13 +874,6 @@ class TabRepository extends _$TabRepository {
     final db = ref.read(tabDatabaseProvider);
     await db.tabDao.deleteClosedTabTombstones(tabIds);
     await db.syncStateDao.clearDeletions(tabIds);
-  }
-
-  Future<void> _preservePromotedChildOrderOnClose(List<String> tabIds) {
-    return ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .preservePromotedChildOrderOnClose(tabIds);
   }
 
   Future<void> undoClose() {
@@ -1205,7 +1074,6 @@ class TabRepository extends _$TabRepository {
         final spaceUuid = ref.read(selectedSpaceProvider);
         await db.tabDao.insertTab(
           tabId,
-          parentId: const Value.absent(),
           source: TabSource.addedEvent,
           containerId: Value(containerId),
           spaceUuid: Value(spaceUuid),

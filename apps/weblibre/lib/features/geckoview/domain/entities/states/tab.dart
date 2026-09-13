@@ -44,8 +44,6 @@ class TabState extends WebPageInfo {
   @CopyWithField(immutable: true)
   final String id;
 
-  final String? parentId;
-
   final String? contextId;
 
   @override
@@ -88,7 +86,6 @@ class TabState extends WebPageInfo {
 
   TabState({
     required this.id,
-    required this.parentId,
     required this.contextId,
     required super.url,
     required String title,
@@ -104,7 +101,6 @@ class TabState extends WebPageInfo {
 
   TabState._({
     required this.id,
-    required this.parentId,
     required this.contextId,
     required super.url,
     required super.title,
@@ -120,7 +116,6 @@ class TabState extends WebPageInfo {
 
   factory TabState.$default(String tabId) => TabState(
     id: tabId,
-    parentId: null,
     contextId: null,
     url: defaultUrl,
     title: "",
@@ -136,7 +131,6 @@ class TabState extends WebPageInfo {
   List<Object?> get hashParameters => [
     ...super.hashParameters,
     id,
-    parentId,
     contextId,
     icon,
     tabMode,

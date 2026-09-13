@@ -35,7 +35,7 @@ void main() {
       final h = openRepositoryHarness();
       await seedSpaces(h.db, ['keep', 'gone']);
       await seedTab(h.db, 'a', spaceUuid: 'gone');
-      await seedTab(h.db, 'b', spaceUuid: 'gone', parentId: 'a');
+      await seedTab(h.db, 'b', spaceUuid: 'gone');
       await seedTab(h.db, 'k', spaceUuid: 'keep');
       h.tabs.watchedSpaces.add('gone');
 

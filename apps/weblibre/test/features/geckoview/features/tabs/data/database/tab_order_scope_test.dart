@@ -121,37 +121,24 @@ void main() {
     );
   });
 
-  test('a new child ranks after its parent inside the parent scope', () async {
-    await seedTab(db, 'a1-child', parentId: 'a1');
-    final child = await summaryOf(db, 'a1-child');
-    expect(child.spaceUuid, spaceA);
-    expect(child.folderId, isNull);
-    expect(await idsInScope(db, aNormal), ['a1', 'a1-child', 'a2']);
+  test('a new tab appends to the end of its scope', () async {
+    await seedTab(db, 'a3', spaceUuid: spaceA);
+    expect(await idsInScope(db, aNormal), ['a1', 'a2', 'a3']);
 
-    await seedTab(db, 'f1-child', parentId: 'f1', spaceUuid: spaceB);
-    final folderChild = await summaryOf(db, 'f1-child');
-    // The parent's folder wins over the caller's space (F1).
-    expect(folderChild.spaceUuid, spaceA);
-    expect(folderChild.folderId, folderF);
-    expect(await idsInScope(db, aFolder), ['f1', 'f1-child', 'f2']);
+    expect(await idsInScope(db, aFolder), ['f1', 'f2']);
     expect(await idsInScope(db, bNormal), ['b1', 'b2']);
   });
 
   test('scopeSiblings ignores other scopes', () async {
-    await seedTab(db, 'a1-child', parentId: 'a1');
-
-    Future<List<String>> siblings(TabOrderScope scope, String? parentId) => db
-        .tabDao
-        .scopeSiblings(scope, parentId: parentId)
+    Future<List<String>> siblings(TabOrderScope scope) => db.tabDao
+        .scopeSiblings(scope)
         .get()
         .then((rows) => [for (final row in rows) row.id]);
 
-    expect(await siblings(aNormal, null), ['a1', 'a2']);
-    expect(await siblings(aNormal, 'a1'), ['a1-child']);
-    expect(await siblings(aPinned, null), ['ap1', 'ap2']);
-    expect(await siblings(aFolder, null), ['f1', 'f2']);
-    expect(await siblings(bNormal, null), ['b1', 'b2']);
-    expect(await siblings(bNormal, 'a1'), isEmpty);
+    expect(await siblings(aNormal), ['a1', 'a2']);
+    expect(await siblings(aPinned), ['ap1', 'ap2']);
+    expect(await siblings(aFolder), ['f1', 'f2']);
+    expect(await siblings(bNormal), ['b1', 'b2']);
   });
 
   test('scopeChildSlots lists the pinned section, folders included, then the '

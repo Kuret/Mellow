@@ -7,8 +7,6 @@ part of 'tab.dart';
 // **************************************************************************
 
 abstract class _$TabStateCWProxy {
-  TabState parentId(String? parentId);
-
   TabState contextId(String? contextId);
 
   TabState url(Uri url);
@@ -39,7 +37,6 @@ abstract class _$TabStateCWProxy {
   /// TabState(...).copyWith(id: 12, name: "My name")
   /// ```
   TabState call({
-    String? parentId,
     String? contextId,
     Uri url,
     String? title,
@@ -60,9 +57,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   const _$TabStateCWProxyImpl(this._value);
 
   final TabState _value;
-
-  @override
-  TabState parentId(String? parentId) => call(parentId: parentId);
 
   @override
   TabState contextId(String? contextId) => call(contextId: contextId);
@@ -110,7 +104,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   /// ```
   @override
   TabState call({
-    Object? parentId = const $CopyWithPlaceholder(),
     Object? contextId = const $CopyWithPlaceholder(),
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
@@ -125,10 +118,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   }) {
     return TabState._(
       id: _value.id,
-      parentId: parentId == const $CopyWithPlaceholder()
-          ? _value.parentId
-          // ignore: cast_nullable_to_non_nullable
-          : parentId as String?,
       contextId: contextId == const $CopyWithPlaceholder()
           ? _value.contextId
           // ignore: cast_nullable_to_non_nullable

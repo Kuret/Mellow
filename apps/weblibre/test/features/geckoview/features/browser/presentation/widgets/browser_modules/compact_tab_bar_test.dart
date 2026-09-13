@@ -152,7 +152,6 @@ Future<TabDatabase> _memoryDatabase({
     await db.tabDao.insertTab(
       id,
       source: TabSource.manual,
-      parentId: const Value(null),
       shelf: TabShelf.essential,
       url: Value(Uri.parse('https://example.com/$id')),
       title: Value('Essential $id'),
@@ -165,7 +164,6 @@ Future<TabDatabase> _memoryDatabase({
     await db.tabDao.insertTab(
       tab.id,
       source: TabSource.manual,
-      parentId: const Value(null),
       spaceUuid: const Value('space-1'),
       folderId: Value(tabFolderId),
       shelf: tabFolderId != null ? TabShelf.pinned : TabShelf.normal,
