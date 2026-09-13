@@ -38,8 +38,9 @@ class ContainerLocalData with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool clearDataOnExit;
 
-  /// JSON of `WallpaperOverride`; stored as plain text, the model layer
-  /// converts.
+  /// Legacy per-container wallpaper override, as JSON. Nothing reads it any
+  /// more; the column stays so the value survives until a schema migration
+  /// drops it.
   final String? wallpaper;
 
   ContainerLocalData({

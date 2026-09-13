@@ -52,23 +52,9 @@ const settingsExportFormatVersion = 1;
 /// URL are caught separately by [stripEmbeddedUrlCredentials].
 const redactedGeneralSettingsKeys = <String>{'unshortenerToken'};
 
-/// `GeneralSettings` keys naming a file that exists only in this profile.
-///
-/// These are not secrets — they are references that mean nothing anywhere else.
-/// A wallpaper is stored as a file name inside the profile's wallpaper
-/// directory and the export carries no image, so importing one elsewhere would
-/// point the destination at a file it does not have *and* leave its own image
-/// unreferenced, which the startup sweep in `WallpaperSweeper` then deletes.
-/// Handled exactly like a credential — emptied on the way out, the device's own
-/// value restored on the way in — for a different reason.
-const profileLocalGeneralSettingsKeys = <String>{'homeWallpaperFile'};
-
 /// Every `GeneralSettings` key whose value belongs to the device rather than to
 /// the export.
-const deviceOwnedGeneralSettingsKeys = <String>{
-  ...redactedGeneralSettingsKeys,
-  ...profileLocalGeneralSettingsKeys,
-};
+const deviceOwnedGeneralSettingsKeys = <String>{...redactedGeneralSettingsKeys};
 
 /// Gecko preferences that are credentials outright, whatever they hold.
 const sensitiveGeckoPrefNames = <String>{'network.trr.credentials'};
@@ -338,15 +324,6 @@ Map<String, dynamic> restoreDeviceOwnedValues({
   required Map<String, dynamic> local,
 }) {
   final values = Map<String, dynamic>.of(imported);
-
-  // A profile-local reference is never negotiable. Exports written before these
-  // keys were scrubbed still carry a real file name, and a file name from
-  // another profile is not a setting worth honouring — it points at an image
-  // this device does not have, and leaves the one it does have unreferenced for
-  // the sweep to delete.
-  for (final key in profileLocalGeneralSettingsKeys) {
-    values[key] = local[key];
-  }
 
   // A credential the file carries deliberately still wins, so a hand-written
   // import can set one.

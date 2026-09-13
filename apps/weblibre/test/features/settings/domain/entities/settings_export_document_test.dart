@@ -232,18 +232,6 @@ void main() {
 
       expect(result.keys.toSet(), deviceOwnedGeneralSettingsKeys);
     });
-
-    test('empties the wallpaper reference, which means nothing elsewhere', () {
-      final result = scrubGeneralSettings({
-        'homeWallpaperFile': 'a1b2c3.jpg',
-        'homeWallpaperBlur': 4.0,
-      });
-
-      expect(result.values['homeWallpaperFile'], isNull);
-      // The treatment travels; only the file it points at does not.
-      expect(result.values['homeWallpaperBlur'], 4.0);
-      expect(result.keys, ['homeWallpaperFile']);
-    });
   });
 
   group('restoreDeviceOwnedValues', () {
@@ -255,17 +243,6 @@ void main() {
 
       expect(restored['unshortenerToken'], 'local-token');
       expect(restored['themeMode'], 'dark');
-    });
-
-    test('protects the wallpaper the destination already has', () {
-      // Losing this is not a wrong setting but a deleted file: the sweep in
-      // WallpaperSweeper reclaims any image nothing references.
-      final restored = restoreDeviceOwnedValues(
-        imported: {'homeWallpaperFile': null},
-        local: {'homeWallpaperFile': 'local.jpg'},
-      );
-
-      expect(restored['homeWallpaperFile'], 'local.jpg');
     });
 
     test('protects a credential the file omits entirely', () {
@@ -490,28 +467,6 @@ void main() {
 
       expect(result.names, isEmpty);
       expect(result.content, contains('from:file'));
-    });
-  });
-
-  group('profile-local references', () {
-    test('always come from the device, even against an older export', () {
-      // Exports written before these keys were scrubbed carry a real file name.
-      // A non-empty value must not win here the way a credential does.
-      final restored = restoreDeviceOwnedValues(
-        imported: {'homeWallpaperFile': 'from-another-profile.jpg'},
-        local: {'homeWallpaperFile': 'mine.jpg'},
-      );
-
-      expect(restored['homeWallpaperFile'], 'mine.jpg');
-    });
-
-    test('stay empty when the device has none', () {
-      final restored = restoreDeviceOwnedValues(
-        imported: {'homeWallpaperFile': 'from-another-profile.jpg'},
-        local: <String, dynamic>{},
-      );
-
-      expect(restored['homeWallpaperFile'], isNull);
     });
   });
 

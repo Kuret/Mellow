@@ -34,9 +34,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
-import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
 
 enum _DialogMode { create, edit }
 
@@ -82,9 +79,9 @@ class ContainerEditScreen extends HookConsumerWidget {
     final iconKey = useState(initialContainer.iconKey);
     final isPinned = useState(initialContainer.isPinned);
 
-    // The local, never-synced half of the container: privacy flags and the
-    // wallpaper override. A new container starts from the defaults; an
-    // existing one loads its row once and edits a copy of it.
+    // The local, never-synced half of the container: its privacy flags. A new
+    // container starts from the defaults; an existing one loads its row once
+    // and edits a copy of it.
     final initialLocal = useState(
       ContainerLocalData.defaults(initialContainer.id),
     );
@@ -235,12 +232,6 @@ class ContainerEditScreen extends HookConsumerWidget {
         container != comparison || local.value != initialLocal.value;
     final previewIcon = FirefoxContainerIcon.fromKeyword(iconKey.value).icon;
     final previewPalette = ContainerColors.palette(context, seedColor());
-    final wallpaper = WallpaperOverride.fromStored(local.value.wallpaper);
-
-    void setWallpaper(WallpaperOverride? override) {
-      local.value = local.value.copyWith(wallpaper: override?.toStored());
-    }
-
     return PopScope(
       canPop: !isDirty,
       onPopInvokedWithResult: (didPop, result) async {
@@ -372,75 +363,6 @@ class ContainerEditScreen extends HookConsumerWidget {
                           onChanged: (value) {
                             isPinned.value = value;
                           },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        // Collapsed by default: most containers use the
-                        // profile's wallpaper, and an always-open picker with a
-                        // preview would push the rest of this form off screen.
-                        ExpansionTile(
-                          shape: const Border(),
-                          collapsedShape: const Border(),
-                          leading: const Icon(MdiIcons.imageOutline),
-                          title: const Text('Wallpaper'),
-                          subtitle: Text(
-                            wallpaper != null
-                                ? 'Shown on home while this container is '
-                                      'selected'
-                                : 'Uses the wallpaper from settings',
-                          ),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                              // The inherited treatment is read here rather
-                              // than in the screen's build: a collapsed
-                              // ExpansionTile never builds its body, so a form
-                              // whose wallpaper section is untouched does not
-                              // open the settings database at all.
-                              child: Consumer(
-                                builder: (context, ref, child) {
-                                  final settings = ref.watch(
-                                    generalSettingsWithDefaultsProvider,
-                                  );
-
-                                  return WallpaperEditor(
-                                    fileName: wallpaper?.file,
-                                    blur:
-                                        wallpaper?.blur ??
-                                        settings.homeWallpaperBlur,
-                                    dim:
-                                        wallpaper?.dim ??
-                                        settings.homeWallpaperDim,
-                                    emptyDescription:
-                                        'This container falls back to the '
-                                        'wallpaper set in settings.',
-                                    // Replacing the picture keeps the
-                                    // treatment; removing it drops the whole
-                                    // override, so a later pick starts from
-                                    // whatever the profile does now rather
-                                    // than from a setting made months ago.
-                                    onFileChanged: (fileName) => setWallpaper(
-                                      fileName == null
-                                          ? null
-                                          : WallpaperOverride(
-                                              file: fileName,
-                                              blur: wallpaper?.blur,
-                                              dim: wallpaper?.dim,
-                                            ),
-                                    ),
-                                    // The sliders are disabled without a
-                                    // wallpaper, so there is always an
-                                    // override to amend here.
-                                    onBlurChanged: (value) => setWallpaper(
-                                      wallpaper?.copyWith(blur: value),
-                                    ),
-                                    onDimChanged: (value) => setWallpaper(
-                                      wallpaper?.copyWith(dim: value),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),

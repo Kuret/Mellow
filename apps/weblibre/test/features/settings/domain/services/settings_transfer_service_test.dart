@@ -210,44 +210,9 @@ void main() {
         contains('engine.customDohProviders[0].url'),
       );
     });
-
-    test('empties the wallpaper reference', () async {
-      await generalSettings().updateSettings(
-        (current) => current.copyWith.homeWallpaperFile('mine.jpg'),
-      );
-
-      final text = await service().export(sections: settingsOnly);
-
-      expect(text, isNot(contains('mine.jpg')));
-      expect(
-        decodeSettingsExport(text).redacted,
-        contains('general.homeWallpaperFile'),
-      );
-    });
   });
 
   group('import protection', () {
-    // The damage here is a deleted file, not a wrong setting: WallpaperSweeper
-    // reclaims any image that nothing references, so adopting a foreign file
-    // name costs the destination its own wallpaper on the next start.
-    test('keeps the wallpaper the destination already has', () async {
-      final exported = await service().export(sections: settingsOnly);
-
-      await generalSettings().updateSettings(
-        (current) => current.copyWith.homeWallpaperFile('local.jpg'),
-      );
-
-      await service().import(
-        document: decodeSettingsExport(exported),
-        sections: settingsOnly,
-      );
-
-      expect(
-        (await generalSettings().fetchSettings()).homeWallpaperFile,
-        'local.jpg',
-      );
-    });
-
     // Export strips the password; without the matching restore on the way in,
     // re-importing your own file hands back a resolver you can no longer
     // authenticate against — while the UI claims this device keeps its own.

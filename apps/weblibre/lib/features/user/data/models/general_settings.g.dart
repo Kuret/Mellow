@@ -55,12 +55,6 @@ abstract class _$GeneralSettingsCWProxy {
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
 
-  GeneralSettings homeWallpaperFile(String? homeWallpaperFile);
-
-  GeneralSettings homeWallpaperBlur(double homeWallpaperBlur);
-
-  GeneralSettings homeWallpaperDim(double homeWallpaperDim);
-
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   );
@@ -260,9 +254,6 @@ abstract class _$GeneralSettingsCWProxy {
     String? homeTargetUrl,
     bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
-    String? homeWallpaperFile,
-    double homeWallpaperBlur,
-    double homeWallpaperDim,
     TabType storedDefaultCreateTabType,
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
@@ -431,18 +422,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings homeSearchBarPlacement(
     HomeSearchBarPlacement homeSearchBarPlacement,
   ) => call(homeSearchBarPlacement: homeSearchBarPlacement);
-
-  @override
-  GeneralSettings homeWallpaperFile(String? homeWallpaperFile) =>
-      call(homeWallpaperFile: homeWallpaperFile);
-
-  @override
-  GeneralSettings homeWallpaperBlur(double homeWallpaperBlur) =>
-      call(homeWallpaperBlur: homeWallpaperBlur);
-
-  @override
-  GeneralSettings homeWallpaperDim(double homeWallpaperDim) =>
-      call(homeWallpaperDim: homeWallpaperDim);
 
   @override
   GeneralSettings storedDefaultCreateTabType(
@@ -779,9 +758,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
-    Object? homeWallpaperFile = const $CopyWithPlaceholder(),
-    Object? homeWallpaperBlur = const $CopyWithPlaceholder(),
-    Object? homeWallpaperDim = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
@@ -975,22 +951,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeSearchBarPlacement
           // ignore: cast_nullable_to_non_nullable
           : homeSearchBarPlacement as HomeSearchBarPlacement,
-      homeWallpaperFile: homeWallpaperFile == const $CopyWithPlaceholder()
-          ? _value.homeWallpaperFile
-          // ignore: cast_nullable_to_non_nullable
-          : homeWallpaperFile as String?,
-      homeWallpaperBlur:
-          homeWallpaperBlur == const $CopyWithPlaceholder() ||
-              homeWallpaperBlur == null
-          ? _value.homeWallpaperBlur
-          // ignore: cast_nullable_to_non_nullable
-          : homeWallpaperBlur as double,
-      homeWallpaperDim:
-          homeWallpaperDim == const $CopyWithPlaceholder() ||
-              homeWallpaperDim == null
-          ? _value.homeWallpaperDim
-          // ignore: cast_nullable_to_non_nullable
-          : homeWallpaperDim as double,
       storedDefaultCreateTabType:
           storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
               storedDefaultCreateTabType == null
@@ -1453,9 +1413,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$HomeSearchBarPlacementEnumMap,
     json['homeSearchBarPlacement'],
   ),
-  homeWallpaperFile: json['homeWallpaperFile'] as String?,
-  homeWallpaperBlur: (json['homeWallpaperBlur'] as num?)?.toDouble(),
-  homeWallpaperDim: (json['homeWallpaperDim'] as num?)?.toDouble(),
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
@@ -1627,9 +1584,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
-  'homeWallpaperFile': instance.homeWallpaperFile,
-  'homeWallpaperBlur': instance.homeWallpaperBlur,
-  'homeWallpaperDim': instance.homeWallpaperDim,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,

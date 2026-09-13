@@ -32,7 +32,10 @@ void main() {
     // database correctly and then reverts to its default on the next launch,
     // because nothing ever reads it back out.
     test('every serialized field is read back by the deserializer', () {
-      final serializedKeys = EngineSettings.withDefaults().toJson().keys.toSet();
+      final serializedKeys = EngineSettings.withDefaults()
+          .toJson()
+          .keys
+          .toSet();
       final readKeys = {
         ...engineSettingColumnTypes.keys,
         ...engineSettingJsonKeys,

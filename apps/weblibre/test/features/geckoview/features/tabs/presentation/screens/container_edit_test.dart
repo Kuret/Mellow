@@ -176,11 +176,6 @@ void main() {
 
     expect(_switchValue(tester, 'Exclude from History'), isTrue);
     expect(_switchValue(tester, 'Clear Data on Exit'), isFalse);
-    expect(
-      find.text('Shown on home while this container is selected'),
-      findsOneWidget,
-    );
-
     await _tapSwitch(tester, 'Exclude from Search Index');
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.check));

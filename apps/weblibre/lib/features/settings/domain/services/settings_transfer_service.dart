@@ -364,13 +364,11 @@ class SettingsTransferService extends _$SettingsTransferService {
     ).readUserPrefs();
   }
 
-  /// Returns [envelope] with this device's credentials and local file
-  /// references filled back in.
+  /// Returns [envelope] with this device's credentials filled back in.
   ///
   /// The envelope is applied by replacing the whole settings object, so a null
   /// left behind by [scrubGeneralSettings] would not be ignored — it would
-  /// reset the field to its default and take the user's token, or their
-  /// wallpaper, with it.
+  /// reset the field to its default and take the user's token with it.
   Future<Map<String, dynamic>> _withDeviceOwnedValues(
     Map<String, dynamic> envelope,
   ) async {
