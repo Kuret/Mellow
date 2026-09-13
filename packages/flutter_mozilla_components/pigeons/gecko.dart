@@ -1158,6 +1158,12 @@ class GeckoEngineSettings {
   final bool? lnaBlockTrackers;
   final bool? lnaEnabled;
 
+  // Developer Settings
+  /// Starts GeckoView's remote debugging server so Firefox DevTools on a
+  /// desktop can attach to the browser over adb. While enabled, anything able
+  /// to reach the debugger socket can inspect and control the browser.
+  final bool? remoteDebuggingEnabled;
+
   GeckoEngineSettings(
     this.javascriptEnabled,
     this.trackingProtectionPolicy,
@@ -1203,6 +1209,7 @@ class GeckoEngineSettings {
     this.lnaBlocking,
     this.lnaBlockTrackers,
     this.lnaEnabled,
+    this.remoteDebuggingEnabled,
   );
 }
 
