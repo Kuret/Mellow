@@ -35,6 +35,7 @@ import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFe
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
+import eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
@@ -114,6 +115,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
     val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
+    private val webInspectorFeature = ViewBoundFeatureWrapper<WebInspectorFeature>()
     private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
     private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
 
@@ -605,6 +607,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             readabilityExtractFeature.set(
                 feature = components.features.readabilityExtractFeature,
+                owner = this,
+                view = view,
+            )
+
+            webInspectorFeature.set(
+                feature = components.features.webInspectorFeature,
                 owner = this,
                 view = view,
             )

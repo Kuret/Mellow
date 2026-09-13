@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.components
 
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
+import eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import mozilla.components.browser.state.store.BrowserStore
@@ -31,6 +32,13 @@ class Features(
             engine,
             store,
             tabContentEvents
+        )
+    }
+
+    val webInspectorFeature by lazy {
+        WebInspectorFeature(
+            engine,
+            store
         )
     }
 }
