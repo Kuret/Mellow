@@ -448,6 +448,31 @@ void main() {
       expect(find.text('Sub'), findsOneWidget);
       expect(find.text('Deeper'), findsNothing);
 
+      // The folder's contents sit on a band that is rounded where the group
+      // opens and where it closes, so a row that cannot indent still says
+      // where the folder ends and the space resumes.
+      BorderRadius bandRadiusAround(Finder text) {
+        final boxes = tester.widgetList<DecoratedBox>(
+          find.ancestor(of: text, matching: find.byType(DecoratedBox)),
+        );
+        for (final box in boxes) {
+          final decoration = box.decoration;
+          if (decoration is BoxDecoration &&
+              decoration.borderRadius is BorderRadius) {
+            return decoration.borderRadius! as BorderRadius;
+          }
+        }
+        fail('no band behind ${text.description}');
+      }
+
+      final opening = bandRadiusAround(find.text('Folder'));
+      expect(opening.topLeft, isNot(Radius.zero));
+      expect(opening.topRight, Radius.zero);
+
+      final closing = bandRadiusAround(find.text('Sub'));
+      expect(closing.topLeft, Radius.zero);
+      expect(closing.topRight, isNot(Radius.zero));
+
       await _disposeTree(tester);
     },
   );

@@ -132,7 +132,13 @@ class _FolderEntry extends _Entry {
 class _TabEntry extends _Entry {
   final QuickTabSwitcherItem item;
 
-  const _TabEntry(this.item);
+  /// How many expanded folders this tab sits inside; `0` for a tab of the
+  /// space itself. Drives the band the strip draws behind a folder's
+  /// contents — on one row there is nowhere to indent, so the band is the
+  /// only thing that says where a folder ends and the space resumes.
+  final int depth;
+
+  const _TabEntry(this.item, {this.depth = 0});
 
   @override
   String get id => 'tab-${item.id}';
@@ -209,7 +215,7 @@ class _CompactChipStrip extends HookConsumerWidget {
           if (item is TabListChildItem) item.tabId: item.depth,
     };
 
-    _TabEntry? tabEntry(String tabId) {
+    _TabEntry? tabEntry(String tabId, {int depth = 0}) {
       final state = stateById[tabId];
       if (state == null) {
         return null;
@@ -227,6 +233,7 @@ class _CompactChipStrip extends HookConsumerWidget {
               ? TabPresence.cold
               : TabPresence.restoring,
         ),
+        depth: depth,
       );
     }
 
@@ -288,7 +295,7 @@ class _CompactChipStrip extends HookConsumerWidget {
       for (final slot in slots) {
         final folder = slot.folder;
         if (folder == null) {
-          final entry = tabEntry(slot.tab!.id);
+          final entry = tabEntry(slot.tab!.id, depth: depth);
           if (entry != null) {
             tabEntries.add(entry);
           }
@@ -348,7 +355,7 @@ class _CompactChipStrip extends HookConsumerWidget {
           if (hidden) {
             continue;
           }
-          final entry = tabEntry(item.tabId);
+          final entry = tabEntry(item.tabId, depth: openFolders.length);
           if (entry != null) {
             tabEntries.add(entry);
           }
@@ -467,6 +474,10 @@ class _CompactChipStrip extends HookConsumerWidget {
         }
         return false;
       },
+      // A folder's contents get a tinted band behind them, rounded at both
+      // ends. The row has nowhere to indent, so without it an expanded
+      // folder's tabs run straight into the space's own and there is nothing
+      // to say where the folder stopped.
       child: ListView.builder(
         key: PageStorageKey('compact_tab_bar_$spaceUuid'),
         controller: scrollController,
@@ -513,6 +524,54 @@ class _CompactChipStrip extends HookConsumerWidget {
               ),
             _TabEntry(:final item) => Center(child: buildTabChip(item)),
           };
+
+          // How deep inside expanded folders this entry sits. An expanded
+          // folder chip opens the band its members continue.
+          int bandDepth(int i) {
+            if (i < 0 || i >= entries.length) return 0;
+            return switch (entries[i]) {
+              _FolderEntry(:final expanded, :final depth) =>
+                expanded ? depth + 1 : depth,
+              _TabEntry(:final depth) => depth,
+              _ => 0,
+            };
+          }
+
+          final depth = bandDepth(index);
+          if (depth > 0) {
+            final scheme = Theme.of(context).colorScheme;
+            const radius = Radius.circular(14.0);
+            final opensHere = bandDepth(index - 1) < depth;
+            final closesHere = bandDepth(index + 1) < depth;
+            return KeyedSubtree(
+              key: entry.id == activeEntryId
+                  ? activeChipKey.value
+                  : ValueKey(entry.id),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3.0),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    // Nested folders sit a shade stronger, so a folder
+                    // inside a folder still reads as its own group.
+                    color: depth > 1
+                        ? scheme.surfaceContainerHighest
+                        : scheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.horizontal(
+                      left: opensHere ? radius : Radius.zero,
+                      right: closesHere ? radius : Radius.zero,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: opensHere ? 4.0 : 0.0,
+                      right: closesHere ? 4.0 : 0.0,
+                    ),
+                    child: child,
+                  ),
+                ),
+              ),
+            );
+          }
           return KeyedSubtree(
             key: entry.id == activeEntryId
                 ? activeChipKey.value
