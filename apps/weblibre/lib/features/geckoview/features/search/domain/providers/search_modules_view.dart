@@ -52,7 +52,6 @@ enum SearchModuleType {
   recentHistory,
   recentTabs,
   containers,
-  frequentBangs,
 
   /// New tab / View tabs / Resume last tab. These act on the browser shell
   /// around the surface, so they are only offered on [ModuleSurface.home] —
@@ -72,7 +71,6 @@ enum SearchModuleType {
     recentHistory => 'Recent History',
     recentTabs => 'Recent Tabs',
     containers => 'Containers',
-    frequentBangs => 'Frequent Bangs',
     quickActions => 'Quick Actions',
   };
 }
@@ -110,7 +108,6 @@ enum ModuleSurface {
     key: 'EmptyStateModuleOrder',
     defaultModules: [
       (type: SearchModuleType.recentSearches, visible: true),
-      (type: SearchModuleType.frequentBangs, visible: true),
       (type: SearchModuleType.topSites, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: true),

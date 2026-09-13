@@ -22,7 +22,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/quick_actions_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
@@ -81,7 +80,6 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
         searchTextController: callbacks.searchTextController!,
         submitSearch: callbacks.submitSearch!,
       ),
-    SearchModuleType.frequentBangs: () => const FrequentBangsSection(),
     SearchModuleType.topSites: () =>
         TopSitesSection(onUriSelected: callbacks.onUriSelected),
     SearchModuleType.recentTabs: () =>

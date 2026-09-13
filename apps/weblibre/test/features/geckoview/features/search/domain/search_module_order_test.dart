@@ -46,13 +46,13 @@ void main() {
     test('preserves a reordered persisted list', () {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.frequentBangs, visible: true),
+        (type: SearchModuleType.searchProviders, visible: true),
         (type: SearchModuleType.topSites, visible: true),
       ];
       final persisted = [
         _entry(SearchModuleType.topSites),
         _entry(SearchModuleType.recentSearches),
-        _entry(SearchModuleType.frequentBangs),
+        _entry(SearchModuleType.searchProviders),
       ];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
@@ -94,7 +94,7 @@ void main() {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
         (
-          type: SearchModuleType.frequentBangs,
+          type: SearchModuleType.searchProviders,
           visible: true,
         ), // newly introduced, in the middle
         (type: SearchModuleType.topSites, visible: true),
@@ -108,7 +108,7 @@ void main() {
 
       expect(_types(merged), [
         SearchModuleType.recentSearches,
-        SearchModuleType.frequentBangs,
+        SearchModuleType.searchProviders,
         SearchModuleType.topSites,
       ]);
     });
@@ -133,7 +133,7 @@ void main() {
     test('clamps the insert position when the persisted list is shorter', () {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.frequentBangs, visible: true),
+        (type: SearchModuleType.searchProviders, visible: true),
         (type: SearchModuleType.topSites, visible: true),
         (
           type: SearchModuleType.containers,
@@ -154,7 +154,7 @@ void main() {
     test('is idempotent', () {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.frequentBangs, visible: true),
+        (type: SearchModuleType.searchProviders, visible: true),
         (type: SearchModuleType.topSites, visible: true),
       ];
       final persisted = [
@@ -180,8 +180,8 @@ void main() {
     test('a real shipped payload round-trips unchanged', () {
       // Captured from the shape SearchModuleOrder.build writes today: a user
       // who moved Shortcuts to the top and hid History Highlights. History
-      // Highlights and Recent Articles have since been removed, so the decode
-      // has to drop those entries and keep the rest of the layout.
+      // Highlights, Recent Articles and Frequent Bangs have since been removed,
+      // so the decode has to drop those entries and keep the rest of the layout.
       const payload =
           '[{"type":"topSites","visible":true},'
           '{"type":"recentSearches","visible":true},'
@@ -201,7 +201,6 @@ void main() {
       expect(_types(merged), [
         SearchModuleType.topSites,
         SearchModuleType.recentSearches,
-        SearchModuleType.frequentBangs,
         SearchModuleType.recentTabs,
         SearchModuleType.recentHistory,
         SearchModuleType.containers,
@@ -234,6 +233,7 @@ void main() {
         'historyHighlights',
         'articles',
         'recentArticles',
+        'frequentBangs',
       ];
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
