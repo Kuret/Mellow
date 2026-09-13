@@ -47,9 +47,10 @@ import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 /// The selected space's three shelves (PLAN §6.4) as full-width rows on the
-/// wide vertical rail: the Essentials icon grid, the pinned section — pinned
-/// tabs as compact rows and folder headers with their members indented by
-/// depth — then the main list of normal tabs. The rail mirrors the desktop
+/// wide vertical rail: the Essentials icon grid, pinned above the scrolling
+/// list, and then — scrolling — the pinned section (pinned tabs as compact
+/// rows and folder headers with their members indented by depth) followed by
+/// the main list of normal tabs. The rail mirrors the desktop
 /// sidebar, so it always renders storage order (`order_key` ascending)
 /// regardless of the tab direction setting. Scrolls along the rail and keeps
 /// the active tab in view.
@@ -111,7 +112,6 @@ class WideRailTabList extends HookConsumerWidget {
       }
     }
     final entries = <_RailEntry>[
-      if (hasEssentials) const _RailEssentialsEntry(),
       if (pinned.isNotEmpty) const _RailLabelEntry('Pinned'),
       ...pinned,
       if (pinned.isNotEmpty || hasEssentials) const _RailLabelEntry('Tabs'),
@@ -138,7 +138,7 @@ class WideRailTabList extends HookConsumerWidget {
       isUserScrolling: () => isUserScrolling.value,
     );
 
-    return NotificationListener<UserScrollNotification>(
+    final list = NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
         userScrollTimer.value?.cancel();
         isUserScrolling.value = notification.direction != ScrollDirection.idle;
@@ -157,11 +157,6 @@ class WideRailTabList extends HookConsumerWidget {
         itemBuilder: (context, index) {
           final entry = entries[index];
           final child = switch (entry) {
-            _RailEssentialsEntry() => const EssentialsGrid(
-              showHeader: false,
-              tileSize: 40,
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            ),
             _RailLabelEntry(:final label) => ShelfSectionHeader(title: label),
             _RailFolderEntry(:final folder) => WideRailFolderRow(
               folder: folder,
@@ -182,6 +177,24 @@ class WideRailTabList extends HookConsumerWidget {
         },
       ),
     );
+
+    // The Essentials strip is pinned: it sits in its own slot above the
+    // scrolling list — Zen keeps it at the top of the sidebar (PLAN §6.4) —
+    // and the "Pinned" and "Tabs" labels scroll with their rows.
+    if (!hasEssentials) {
+      return list;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const EssentialsGrid(
+          showHeader: false,
+          tileSize: 40,
+          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        ),
+        Expanded(child: list),
+      ],
+    );
   }
 }
 
@@ -189,13 +202,6 @@ sealed class _RailEntry {
   const _RailEntry();
 
   String get id;
-}
-
-class _RailEssentialsEntry extends _RailEntry {
-  const _RailEssentialsEntry();
-
-  @override
-  String get id => 'essentials';
 }
 
 class _RailLabelEntry extends _RailEntry {
