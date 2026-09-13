@@ -82,7 +82,6 @@ class QuickLinksSection extends ConsumerWidget {
     MenuItemType.history,
     MenuItemType.bookmarks,
     MenuItemType.downloads,
-    MenuItemType.bangs,
   };
 
   Future<void> _open(BuildContext context, MenuItemType item) async {
@@ -96,9 +95,6 @@ class QuickLinksSection extends ConsumerWidget {
       case MenuItemType.downloads:
         Navigator.pop(context);
         await const HistoryDownloadsRoute().push(context);
-      case MenuItemType.bangs:
-        Navigator.pop(context);
-        await const BangMenuRoute().push(context);
       default:
         break;
     }
