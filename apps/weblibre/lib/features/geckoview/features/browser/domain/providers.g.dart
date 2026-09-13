@@ -1096,7 +1096,7 @@ final class FilteredTabPreviewsProvider
 }
 
 String _$filteredTabPreviewsHash() =>
-    r'e291cdb7848c9607d388f8fdfb640f25265fca03';
+    r'2327ad86650b3baa6b9339e280abfc7463c72cf9';
 
 final class FilteredTabPreviewsFamily extends $Family
     with

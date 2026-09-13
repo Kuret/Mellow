@@ -33,7 +33,6 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-assets/quotes/quotes.db
 assets/sites/sites.db
 assets/bangs/*
 !assets/bangs/

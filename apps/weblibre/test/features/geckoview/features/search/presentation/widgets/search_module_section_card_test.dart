@@ -30,7 +30,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 class _FixedOrder extends SearchModuleOrder {
   @override
   List<ModuleOrderEntry> build(ModuleSurface surface) => [
-    ModuleOrderEntry(type: SearchModuleType.quote, visible: true),
+    ModuleOrderEntry(type: SearchModuleType.recentTabs, visible: true),
   ];
 }
 
@@ -51,15 +51,15 @@ void main() {
             body: CustomScrollView(
               slivers: [
                 SearchModuleSection(
-                  title: 'A thought for the road',
-                  moduleType: SearchModuleType.quote,
+                  title: 'Recent Tabs',
+                  moduleType: SearchModuleType.recentTabs,
                   totalCount: 0,
                   showPagination: false,
                   card: card,
                   // Without a ModuleSurfaceScope the section behaves like the
                   // search screen, which is the surface that pins its headers.
                   surface: ModuleSurface.search,
-                  headerLeading: const Icon(Icons.format_quote),
+                  headerLeading: const Icon(Icons.history),
                   contentSliverBuilder:
                       ({required isCollapsed, required visibleCount}) => [
                         if (!isCollapsed)
@@ -96,8 +96,8 @@ void main() {
     await pumpHarness(tester, card: true);
 
     // Sentence case, not the list surfaces' uppercase micro-label.
-    expect(find.text('A thought for the road'), findsOneWidget);
-    expect(find.byIcon(Icons.format_quote), findsOneWidget);
+    expect(find.text('Recent Tabs'), findsOneWidget);
+    expect(find.byIcon(Icons.history), findsOneWidget);
     expect(find.text('body'), findsOneWidget);
   });
 
@@ -106,7 +106,7 @@ void main() {
 
     expect(find.text('body'), findsOneWidget);
 
-    await tester.tap(find.text('A thought for the road'));
+    await tester.tap(find.text('Recent Tabs'));
     await tester.pumpAndSettle();
 
     expect(find.text('body'), findsNothing);

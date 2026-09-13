@@ -53,4 +53,4 @@ final class ShowSiteSettingsBadgeProvider
 }
 
 String _$showSiteSettingsBadgeHash() =>
-    r'6345920e4391786e47a89964c7ffa75818732584';
+    r'fbfe409cdd6656d5cd26e377a68acde6ff4294fa';

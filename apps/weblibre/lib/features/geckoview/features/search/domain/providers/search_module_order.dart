@@ -67,6 +67,33 @@ List<ModuleOrderEntry> mergeModuleOrderWithDefaults(
   );
 }
 
+/// Decodes a persisted module order and reconciles it with [defaults].
+///
+/// Entries that fail to parse are skipped instead of failing the whole decode.
+/// The case that matters is a module we have since deleted: its name is still
+/// in the user's stored configuration, `fromJson` throws on the unknown enum
+/// value, and without the skip a single stale name would wipe the layout.
+/// [mergeModuleOrderWithDefaults] then fills the gap from the surface defaults.
+List<ModuleOrderEntry> decodeModuleOrder(
+  String encoded,
+  List<ModuleSurfaceDefault> defaults,
+) {
+  final decoded = (jsonDecode(encoded) as List<dynamic>)
+      .cast<Map<String, dynamic>>()
+      .map((e) {
+        try {
+          return ModuleOrderEntry.fromJson(e);
+        } catch (_) {
+          return null;
+        }
+      })
+      .whereType<ModuleOrderEntry>()
+      .toList();
+
+  // Merge with defaults to pick up newly added or remove deleted modules
+  return mergeModuleOrderWithDefaults(decoded, defaults);
+}
+
 @Riverpod(keepAlive: true)
 class SearchModuleOrder extends _$SearchModuleOrder {
   void reorder(int oldIndex, int newIndex) {
@@ -98,21 +125,7 @@ class SearchModuleOrder extends _$SearchModuleOrder {
       key: surface.key,
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
-      decode: (encoded) {
-        final decoded = (jsonDecode(encoded) as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-            .map((e) {
-              try {
-                return ModuleOrderEntry.fromJson(e);
-              } catch (_) {
-                return null;
-              }
-            })
-            .whereType<ModuleOrderEntry>()
-            .toList();
-        // Merge with defaults to pick up newly added or remove deleted modules
-        return mergeModuleOrderWithDefaults(decoded, surface.defaultModules);
-      },
+      decode: (encoded) => decodeModuleOrder(encoded, surface.defaultModules),
     );
 
     return stateOrNull ??

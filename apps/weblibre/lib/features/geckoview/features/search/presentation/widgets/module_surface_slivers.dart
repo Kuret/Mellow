@@ -25,7 +25,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/quick_actions_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/quote_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
@@ -101,7 +100,6 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
         HistoryHighlightsSection(onUriSelected: callbacks.onUriSelected),
     SearchModuleType.containers: () =>
         ContainersSection(onContainerSelected: callbacks.onContainerSelected),
-    SearchModuleType.quote: () => const QuoteSection(),
     if (callbacks.onNewTab != null &&
         callbacks.onViewTabs != null &&
         callbacks.onResumeLastTab != null)

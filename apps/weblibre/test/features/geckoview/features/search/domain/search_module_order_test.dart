@@ -118,14 +118,14 @@ void main() {
       // on for everyone who already customised that surface.
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.topSites, visible: true),
-        (type: SearchModuleType.quote, visible: false),
+        (type: SearchModuleType.containers, visible: false),
       ];
       final persisted = [_entry(SearchModuleType.topSites)];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
 
       expect(
-        merged.firstWhere((e) => e.type == SearchModuleType.quote).visible,
+        merged.firstWhere((e) => e.type == SearchModuleType.containers).visible,
         isFalse,
       );
     });
@@ -224,25 +224,52 @@ void main() {
     });
 
     test('unparseable entries are skipped rather than poisoning the list', () {
-      // Mirrors the try/catch in SearchModuleOrder.build's decode: an entry
-      // naming a module that no longer exists must not discard the whole order.
+      // An entry naming a module that no longer exists must not discard the
+      // whole order.
+      const defaults = <ModuleSurfaceDefault>[
+        (type: SearchModuleType.topSites, visible: true),
+      ];
       const payload =
           '[{"type":"topSites","visible":true},'
           '{"type":"aModuleThatWasRemoved","visible":true}]';
 
-      final decoded = (jsonDecode(payload) as List<dynamic>)
-          .cast<Map<String, dynamic>>()
-          .map((e) {
-            try {
-              return ModuleOrderEntry.fromJson(e);
-            } catch (_) {
-              return null;
-            }
-          })
-          .whereType<ModuleOrderEntry>()
-          .toList();
+      expect(_types(decodeModuleOrder(payload, defaults)), [
+        SearchModuleType.topSites,
+      ]);
+    });
 
-      expect(_types(decoded), [SearchModuleType.topSites]);
+    test('a layout naming a module we deleted still loads', () {
+      // These three shipped as SearchModuleType values and are still named in
+      // stored configurations. Removing the enum values must not throw, and
+      // must not cost the user the rest of their layout.
+      const removedModuleNames = ['quote', 'popularSites', 'historyHighlights'];
+      const defaults = <ModuleSurfaceDefault>[
+        (type: SearchModuleType.recentSearches, visible: true),
+        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.recentTabs, visible: false),
+      ];
+
+      final payload = jsonEncode([
+        {'type': 'topSites', 'visible': true},
+        for (final name in removedModuleNames) {'type': name, 'visible': true},
+        {'type': 'recentSearches', 'visible': false},
+      ]);
+
+      final decoded = decodeModuleOrder(payload, defaults);
+
+      // The surviving entries keep their persisted order and visibility, and
+      // the surface's other defaults are merged back in.
+      expect(_types(decoded), [
+        SearchModuleType.topSites,
+        SearchModuleType.recentSearches,
+        SearchModuleType.recentTabs,
+      ]);
+      expect(
+        decoded
+            .firstWhere((e) => e.type == SearchModuleType.recentSearches)
+            .visible,
+        isFalse,
+      );
     });
   });
 }

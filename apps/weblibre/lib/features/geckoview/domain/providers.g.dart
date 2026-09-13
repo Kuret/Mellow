@@ -55,7 +55,7 @@ final class SelectionActionServiceProvider
 }
 
 String _$selectionActionServiceHash() =>
-    r'c2cdd69d3dc4c2fe4bb54658d76ca26efb5bfc74';
+    r'78593799e8d903de415cf49ebb3acfb73e45d878';
 
 /// The engine's tab API. A provider rather than a bare constructor so tests
 /// can stand in a fake engine for [TabRepository].

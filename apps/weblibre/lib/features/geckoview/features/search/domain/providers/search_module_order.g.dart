@@ -36,7 +36,6 @@ const _$SearchModuleTypeEnumMap = {
   SearchModuleType.recentTabs: 'recentTabs',
   SearchModuleType.containers: 'containers',
   SearchModuleType.frequentBangs: 'frequentBangs',
-  SearchModuleType.quote: 'quote',
   SearchModuleType.quickActions: 'quickActions',
 };
 
@@ -96,7 +95,7 @@ final class SearchModuleOrderProvider
   }
 }
 
-String _$searchModuleOrderHash() => r'ef43bc259db7a07ca1accab9d7ae803c376e76b4';
+String _$searchModuleOrderHash() => r'b165a0b5ba676fe7f516b673ee3283f0c2e036ec';
 
 final class SearchModuleOrderFamily extends $Family
     with

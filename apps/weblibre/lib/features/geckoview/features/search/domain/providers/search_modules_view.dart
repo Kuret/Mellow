@@ -64,10 +64,6 @@ enum SearchModuleType {
   containers,
   frequentBangs,
 
-  /// The daily quote card. Carries no list of its own, so it neither paginates
-  /// nor reports a count; the header's trailing slot holds the reroll button.
-  quote,
-
   /// New tab / View tabs / Resume last tab. These act on the browser shell
   /// around the surface, so they are only offered on [ModuleSurface.home] —
   /// on the new-tab page "New tab" is the page you are already looking at.
@@ -91,7 +87,6 @@ enum SearchModuleType {
     recentTabs => 'Recent Tabs',
     containers => 'Containers',
     frequentBangs => 'Frequent Bangs',
-    quote => 'Quote',
     quickActions => 'Quick Actions',
   };
 }
@@ -116,7 +111,6 @@ enum ModuleSurface {
       (type: SearchModuleType.quickActions, visible: true),
       (type: SearchModuleType.topSites, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
-      (type: SearchModuleType.quote, visible: true),
       (type: SearchModuleType.recentHistory, visible: false),
       (type: SearchModuleType.historyHighlights, visible: false),
       (type: SearchModuleType.recentArticles, visible: false),
@@ -139,8 +133,6 @@ enum ModuleSurface {
       (type: SearchModuleType.recentHistory, visible: true),
       (type: SearchModuleType.historyHighlights, visible: true),
       (type: SearchModuleType.containers, visible: true),
-      // Offered but off, so adding it leaves existing new-tab pages untouched.
-      (type: SearchModuleType.quote, visible: false),
     ],
   ),
 
