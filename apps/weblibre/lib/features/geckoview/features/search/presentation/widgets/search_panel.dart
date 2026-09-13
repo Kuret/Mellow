@@ -39,8 +39,12 @@ const double kSearchPanelMinTop = 12.0;
 const double kSearchPanelMaxTop = 120.0;
 
 const double kSearchPanelRadius = 20.0;
-const double kSearchPanelBlurSigma = 12.0;
-const double kSearchPanelScrimOpacity = 0.38;
+
+/// A light touch of blur, with most of the separation coming from the dim
+/// below. A heavier blur smears the page into something unreadable behind a
+/// panel that is only meant to sit in front of it for a moment.
+const double kSearchPanelBlurSigma = 4.0;
+const double kSearchPanelScrimOpacity = 0.52;
 
 /// Cap on the suggestion list. Past this the list scrolls inside the card
 /// instead of the card growing into a full-screen page by another name.
