@@ -162,6 +162,28 @@ function inspect(element) {
   report({ selected: true });
 }
 
+/**
+ * Eats the click (and the mouse events synthesised alongside it) that follows
+ * the tap which chose an element, so choosing a link inspects it instead of
+ * following it. Capture on `window` runs before any page handler, including
+ * the delegated ones frameworks hang off `document`.
+ */
+function swallowNextClick() {
+  const swallow = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const events = ['click', 'mousedown', 'mouseup'];
+  for (const name of events) {
+    window.addEventListener(name, swallow, true);
+  }
+  setTimeout(() => {
+    for (const name of events) {
+      window.removeEventListener(name, swallow, true);
+    }
+  }, 700);
+}
+
 function cancelPicking() {
   if (stopPicking) {
     stopPicking();
@@ -271,6 +293,10 @@ async function pick() {
     event.preventDefault();
     event.stopPropagation();
     const element = elementAt(event);
+    // The shield swallows the pointer events, but the click the browser
+    // synthesises from the same touch lands after it is gone — on whatever is
+    // underneath. Without this, picking a link navigates the page.
+    swallowNextClick();
     cancelPicking();
     if (element) inspect(element);
   }
