@@ -14,8 +14,10 @@ import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_
     as i7;
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart'
     as i8;
-import 'package:drift/internal/modular.dart' as i9;
-import 'package:sqlite3/common.dart' as i10;
+import 'package:weblibre/features/user/data/database/daos/search_history.dart'
+    as i9;
+import 'package:drift/internal/modular.dart' as i10;
+import 'package:sqlite3/common.dart' as i11;
 
 abstract class $UserDatabase extends i0.GeneratedDatabase {
   $UserDatabase(i0.QueryExecutor e) : super(e);
@@ -29,6 +31,7 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i1.QuickSwitcherButtonConfigs quickSwitcherButtonConfigs =
       i1.QuickSwitcherButtonConfigs(this);
   late final i1.SearchTokens searchTokens = i1.SearchTokens(this);
+  late final i1.SearchHistory searchHistory = i1.SearchHistory(this);
   late final i2.SettingDao settingDao = i2.SettingDao(this as i3.UserDatabase);
   late final i4.CacheDao cacheDao = i4.CacheDao(this as i3.UserDatabase);
   late final i5.OnboardingDao onboardingDao = i5.OnboardingDao(
@@ -41,7 +44,10 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i8.SearchTokensDao searchTokensDao = i8.SearchTokensDao(
     this as i3.UserDatabase,
   );
-  i1.DefinitionsDrift get definitionsDrift => i9.ReadDatabaseContainer(
+  late final i9.SearchHistoryDao searchHistoryDao = i9.SearchHistoryDao(
+    this as i3.UserDatabase,
+  );
+  i1.DefinitionsDrift get definitionsDrift => i10.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -60,6 +66,8 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
     searchTokens,
     i1.idxSearchTokensInsertedAt,
     i1.idxSearchTokensReservedAt,
+    searchHistory,
+    i1.idxSearchHistoryDate,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>
@@ -111,9 +119,11 @@ class $UserDatabaseManager {
       );
   i1.$SearchTokensTableManager get searchTokens =>
       i1.$SearchTokensTableManager(_db, _db.searchTokens);
+  i1.$SearchHistoryTableManager get searchHistory =>
+      i1.$SearchHistoryTableManager(_db, _db.searchHistory);
 }
 
-extension DefineFunctions on i10.CommonDatabase {
+extension DefineFunctions on i11.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
@@ -127,7 +137,7 @@ extension DefineFunctions on i10.CommonDatabase {
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i10.AllowedArgumentCount(2),
+      argumentCount: const i11.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -136,7 +146,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i10.AllowedArgumentCount(2),
+      argumentCount: const i11.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -145,7 +155,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i10.AllowedArgumentCount(2),
+      argumentCount: const i11.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -154,7 +164,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i10.AllowedArgumentCount(2),
+      argumentCount: const i11.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -163,14 +173,14 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'generate_content_hash',
-      argumentCount: const i10.AllowedArgumentCount(0),
+      argumentCount: const i11.AllowedArgumentCount(0),
       function: (args) {
         return generateContentHash();
       },
     );
     createFunction(
       functionName: 'url_indexable',
-      argumentCount: const i10.AllowedArgumentCount(1),
+      argumentCount: const i11.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlIndexable(arg0);
@@ -178,7 +188,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'url_canonical',
-      argumentCount: const i10.AllowedArgumentCount(1),
+      argumentCount: const i11.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlCanonical(arg0);
@@ -186,7 +196,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'url_host',
-      argumentCount: const i10.AllowedArgumentCount(1),
+      argumentCount: const i11.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlHost(arg0);
@@ -194,7 +204,7 @@ extension DefineFunctions on i10.CommonDatabase {
     );
     createFunction(
       functionName: 'url_path',
-      argumentCount: const i10.AllowedArgumentCount(1),
+      argumentCount: const i11.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlPath(arg0);

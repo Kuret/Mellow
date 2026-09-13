@@ -121,16 +121,6 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     partitionKey: partitionKey.present ? partitionKey.value : this.partitionKey,
     value: value.present ? value.value : this.value,
   );
-  SettingData copyWithCompanion(SettingCompanion data) {
-    return SettingData(
-      key: data.key.present ? data.key.value : this.key,
-      partitionKey: data.partitionKey.present
-          ? data.partitionKey.value
-          : this.partitionKey,
-      value: data.value.present ? data.value.value : this.value,
-    );
-  }
-
   @override
   String toString() {
     return (StringBuffer('SettingData(')
@@ -150,81 +140,6 @@ class SettingData extends DataClass implements Insertable<SettingData> {
           other.key == this.key &&
           other.partitionKey == this.partitionKey &&
           other.value == this.value);
-}
-
-class SettingCompanion extends UpdateCompanion<SettingData> {
-  final Value<String> key;
-  final Value<String?> partitionKey;
-  final Value<DriftAny?> value;
-  final Value<int> rowid;
-  const SettingCompanion({
-    this.key = const Value.absent(),
-    this.partitionKey = const Value.absent(),
-    this.value = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  SettingCompanion.insert({
-    required String key,
-    this.partitionKey = const Value.absent(),
-    this.value = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : key = Value(key);
-  static Insertable<SettingData> custom({
-    Expression<String>? key,
-    Expression<String>? partitionKey,
-    Expression<DriftAny>? value,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (key != null) 'key': key,
-      if (partitionKey != null) 'partition_key': partitionKey,
-      if (value != null) 'value': value,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  SettingCompanion copyWith({
-    Value<String>? key,
-    Value<String?>? partitionKey,
-    Value<DriftAny?>? value,
-    Value<int>? rowid,
-  }) {
-    return SettingCompanion(
-      key: key ?? this.key,
-      partitionKey: partitionKey ?? this.partitionKey,
-      value: value ?? this.value,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (key.present) {
-      map['key'] = Variable<String>(key.value);
-    }
-    if (partitionKey.present) {
-      map['partition_key'] = Variable<String>(partitionKey.value);
-    }
-    if (value.present) {
-      map['value'] = Variable<DriftAny>(value.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SettingCompanion(')
-          ..write('key: $key, ')
-          ..write('partitionKey: $partitionKey, ')
-          ..write('value: $value, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class IconCache extends Table with TableInfo<IconCache, IconCacheData> {
@@ -342,14 +257,6 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
     iconData: iconData ?? this.iconData,
     fetchDate: fetchDate ?? this.fetchDate,
   );
-  IconCacheData copyWithCompanion(IconCacheCompanion data) {
-    return IconCacheData(
-      origin: data.origin.present ? data.origin.value : this.origin,
-      iconData: data.iconData.present ? data.iconData.value : this.iconData,
-      fetchDate: data.fetchDate.present ? data.fetchDate.value : this.fetchDate,
-    );
-  }
-
   @override
   String toString() {
     return (StringBuffer('IconCacheData(')
@@ -370,83 +277,6 @@ class IconCacheData extends DataClass implements Insertable<IconCacheData> {
           other.origin == this.origin &&
           $driftBlobEquality.equals(other.iconData, this.iconData) &&
           other.fetchDate == this.fetchDate);
-}
-
-class IconCacheCompanion extends UpdateCompanion<IconCacheData> {
-  final Value<String> origin;
-  final Value<i2.Uint8List> iconData;
-  final Value<int> fetchDate;
-  final Value<int> rowid;
-  const IconCacheCompanion({
-    this.origin = const Value.absent(),
-    this.iconData = const Value.absent(),
-    this.fetchDate = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  IconCacheCompanion.insert({
-    required String origin,
-    required i2.Uint8List iconData,
-    required int fetchDate,
-    this.rowid = const Value.absent(),
-  }) : origin = Value(origin),
-       iconData = Value(iconData),
-       fetchDate = Value(fetchDate);
-  static Insertable<IconCacheData> custom({
-    Expression<String>? origin,
-    Expression<i2.Uint8List>? iconData,
-    Expression<int>? fetchDate,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (origin != null) 'origin': origin,
-      if (iconData != null) 'icon_data': iconData,
-      if (fetchDate != null) 'fetch_date': fetchDate,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  IconCacheCompanion copyWith({
-    Value<String>? origin,
-    Value<i2.Uint8List>? iconData,
-    Value<int>? fetchDate,
-    Value<int>? rowid,
-  }) {
-    return IconCacheCompanion(
-      origin: origin ?? this.origin,
-      iconData: iconData ?? this.iconData,
-      fetchDate: fetchDate ?? this.fetchDate,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (origin.present) {
-      map['origin'] = Variable<String>(origin.value);
-    }
-    if (iconData.present) {
-      map['icon_data'] = Variable<i2.Uint8List>(iconData.value);
-    }
-    if (fetchDate.present) {
-      map['fetch_date'] = Variable<int>(fetchDate.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('IconCacheCompanion(')
-          ..write('origin: $origin, ')
-          ..write('iconData: $iconData, ')
-          ..write('fetchDate: $fetchDate, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class Onboarding extends Table with TableInfo<Onboarding, OnboardingData> {
@@ -539,15 +369,6 @@ class OnboardingData extends DataClass implements Insertable<OnboardingData> {
         revision: revision ?? this.revision,
         completionDate: completionDate ?? this.completionDate,
       );
-  OnboardingData copyWithCompanion(OnboardingCompanion data) {
-    return OnboardingData(
-      revision: data.revision.present ? data.revision.value : this.revision,
-      completionDate: data.completionDate.present
-          ? data.completionDate.value
-          : this.completionDate,
-    );
-  }
-
   @override
   String toString() {
     return (StringBuffer('OnboardingData(')
@@ -565,71 +386,6 @@ class OnboardingData extends DataClass implements Insertable<OnboardingData> {
       (other is OnboardingData &&
           other.revision == this.revision &&
           other.completionDate == this.completionDate);
-}
-
-class OnboardingCompanion extends UpdateCompanion<OnboardingData> {
-  final Value<int> revision;
-  final Value<int> completionDate;
-  final Value<int> rowid;
-  const OnboardingCompanion({
-    this.revision = const Value.absent(),
-    this.completionDate = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  OnboardingCompanion.insert({
-    required int revision,
-    required int completionDate,
-    this.rowid = const Value.absent(),
-  }) : revision = Value(revision),
-       completionDate = Value(completionDate);
-  static Insertable<OnboardingData> custom({
-    Expression<int>? revision,
-    Expression<int>? completionDate,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (revision != null) 'revision': revision,
-      if (completionDate != null) 'completion_date': completionDate,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  OnboardingCompanion copyWith({
-    Value<int>? revision,
-    Value<int>? completionDate,
-    Value<int>? rowid,
-  }) {
-    return OnboardingCompanion(
-      revision: revision ?? this.revision,
-      completionDate: completionDate ?? this.completionDate,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (revision.present) {
-      map['revision'] = Variable<int>(revision.value);
-    }
-    if (completionDate.present) {
-      map['completion_date'] = Variable<int>(completionDate.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('OnboardingCompanion(')
-          ..write('revision: $revision, ')
-          ..write('completionDate: $completionDate, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class Riverpod extends Table with TableInfo<Riverpod, RiverpodData> {
@@ -771,17 +527,6 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
     expireAt: expireAt.present ? expireAt.value : this.expireAt,
     destroyKey: destroyKey.present ? destroyKey.value : this.destroyKey,
   );
-  RiverpodData copyWithCompanion(RiverpodCompanion data) {
-    return RiverpodData(
-      key: data.key.present ? data.key.value : this.key,
-      json: data.json.present ? data.json.value : this.json,
-      expireAt: data.expireAt.present ? data.expireAt.value : this.expireAt,
-      destroyKey: data.destroyKey.present
-          ? data.destroyKey.value
-          : this.destroyKey,
-    );
-  }
-
   @override
   String toString() {
     return (StringBuffer('RiverpodData(')
@@ -803,82 +548,6 @@ class RiverpodData extends DataClass implements Insertable<RiverpodData> {
           other.json == this.json &&
           other.expireAt == this.expireAt &&
           other.destroyKey == this.destroyKey);
-}
-
-class RiverpodCompanion extends UpdateCompanion<RiverpodData> {
-  final Value<String> key;
-  final Value<String> json;
-  final Value<int?> expireAt;
-  final Value<String?> destroyKey;
-  const RiverpodCompanion({
-    this.key = const Value.absent(),
-    this.json = const Value.absent(),
-    this.expireAt = const Value.absent(),
-    this.destroyKey = const Value.absent(),
-  });
-  RiverpodCompanion.insert({
-    required String key,
-    required String json,
-    this.expireAt = const Value.absent(),
-    this.destroyKey = const Value.absent(),
-  }) : key = Value(key),
-       json = Value(json);
-  static Insertable<RiverpodData> custom({
-    Expression<String>? key,
-    Expression<String>? json,
-    Expression<int>? expireAt,
-    Expression<String>? destroyKey,
-  }) {
-    return RawValuesInsertable({
-      if (key != null) 'key': key,
-      if (json != null) 'json': json,
-      if (expireAt != null) 'expireAt': expireAt,
-      if (destroyKey != null) 'destroyKey': destroyKey,
-    });
-  }
-
-  RiverpodCompanion copyWith({
-    Value<String>? key,
-    Value<String>? json,
-    Value<int?>? expireAt,
-    Value<String?>? destroyKey,
-  }) {
-    return RiverpodCompanion(
-      key: key ?? this.key,
-      json: json ?? this.json,
-      expireAt: expireAt ?? this.expireAt,
-      destroyKey: destroyKey ?? this.destroyKey,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (key.present) {
-      map['key'] = Variable<String>(key.value);
-    }
-    if (json.present) {
-      map['json'] = Variable<String>(json.value);
-    }
-    if (expireAt.present) {
-      map['expireAt'] = Variable<int>(expireAt.value);
-    }
-    if (destroyKey.present) {
-      map['destroyKey'] = Variable<String>(destroyKey.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RiverpodCompanion(')
-          ..write('key: $key, ')
-          ..write('json: $json, ')
-          ..write('expireAt: $expireAt, ')
-          ..write('destroyKey: $destroyKey')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class DatabaseAtV2 extends GeneratedDatabase {

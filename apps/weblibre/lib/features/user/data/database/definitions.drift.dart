@@ -1566,6 +1566,161 @@ typedef $SearchTokensProcessedTableManager =
       i1.SearchToken,
       i0.PrefetchHooks Function()
     >;
+typedef $SearchHistoryCreateCompanionBuilder =
+    i1.SearchHistoryCompanion Function({
+      required String searchQuery,
+      required DateTime searchDate,
+      i0.Value<int> rowid,
+    });
+typedef $SearchHistoryUpdateCompanionBuilder =
+    i1.SearchHistoryCompanion Function({
+      i0.Value<String> searchQuery,
+      i0.Value<DateTime> searchDate,
+      i0.Value<int> rowid,
+    });
+
+class $SearchHistoryFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchHistory> {
+  $SearchHistoryFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get searchDate => $composableBuilder(
+    column: $table.searchDate,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $SearchHistoryOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchHistory> {
+  $SearchHistoryOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get searchDate => $composableBuilder(
+    column: $table.searchDate,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $SearchHistoryAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchHistory> {
+  $SearchHistoryAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<DateTime> get searchDate => $composableBuilder(
+    column: $table.searchDate,
+    builder: (column) => column,
+  );
+}
+
+class $SearchHistoryTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.SearchHistory,
+          i1.SearchHistoryData,
+          i1.$SearchHistoryFilterComposer,
+          i1.$SearchHistoryOrderingComposer,
+          i1.$SearchHistoryAnnotationComposer,
+          $SearchHistoryCreateCompanionBuilder,
+          $SearchHistoryUpdateCompanionBuilder,
+          (
+            i1.SearchHistoryData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.SearchHistory,
+              i1.SearchHistoryData
+            >,
+          ),
+          i1.SearchHistoryData,
+          i0.PrefetchHooks Function()
+        > {
+  $SearchHistoryTableManager(i0.GeneratedDatabase db, i1.SearchHistory table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$SearchHistoryFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i1.$SearchHistoryOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i1.$SearchHistoryAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> searchQuery = const i0.Value.absent(),
+                i0.Value<DateTime> searchDate = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.SearchHistoryCompanion(
+                searchQuery: searchQuery,
+                searchDate: searchDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String searchQuery,
+                required DateTime searchDate,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.SearchHistoryCompanion.insert(
+                searchQuery: searchQuery,
+                searchDate: searchDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $SearchHistoryProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.SearchHistory,
+      i1.SearchHistoryData,
+      i1.$SearchHistoryFilterComposer,
+      i1.$SearchHistoryOrderingComposer,
+      i1.$SearchHistoryAnnotationComposer,
+      $SearchHistoryCreateCompanionBuilder,
+      $SearchHistoryUpdateCompanionBuilder,
+      (
+        i1.SearchHistoryData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.SearchHistory,
+          i1.SearchHistoryData
+        >,
+      ),
+      i1.SearchHistoryData,
+      i0.PrefetchHooks Function()
+    >;
 
 class Setting extends i0.Table with i0.TableInfo<Setting, i1.SettingData> {
   @override
@@ -3313,6 +3468,203 @@ i0.Index get idxSearchTokensReservedAt => i0.Index(
   'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
 );
 
+class SearchHistory extends i0.Table
+    with i0.TableInfo<SearchHistory, i1.SearchHistoryData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  SearchHistory(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> searchQuery =
+      i0.GeneratedColumn<String>(
+        'search_query',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL PRIMARY KEY',
+      );
+  late final i0.GeneratedColumn<DateTime> searchDate =
+      i0.GeneratedColumn<DateTime>(
+        'search_date',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [searchQuery, searchDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'search_history';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {searchQuery};
+  @override
+  i1.SearchHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.SearchHistoryData(
+      searchQuery: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}search_query'],
+      )!,
+      searchDate: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}search_date'],
+      )!,
+    );
+  }
+
+  @override
+  SearchHistory createAlias(String alias) {
+    return SearchHistory(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class SearchHistoryData extends i0.DataClass
+    implements i0.Insertable<i1.SearchHistoryData> {
+  final String searchQuery;
+  final DateTime searchDate;
+  const SearchHistoryData({
+    required this.searchQuery,
+    required this.searchDate,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['search_query'] = i0.Variable<String>(searchQuery);
+    map['search_date'] = i0.Variable<DateTime>(searchDate);
+    return map;
+  }
+
+  factory SearchHistoryData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return SearchHistoryData(
+      searchQuery: serializer.fromJson<String>(json['search_query']),
+      searchDate: serializer.fromJson<DateTime>(json['search_date']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'search_query': serializer.toJson<String>(searchQuery),
+      'search_date': serializer.toJson<DateTime>(searchDate),
+    };
+  }
+
+  i1.SearchHistoryData copyWith({String? searchQuery, DateTime? searchDate}) =>
+      i1.SearchHistoryData(
+        searchQuery: searchQuery ?? this.searchQuery,
+        searchDate: searchDate ?? this.searchDate,
+      );
+  SearchHistoryData copyWithCompanion(i1.SearchHistoryCompanion data) {
+    return SearchHistoryData(
+      searchQuery: data.searchQuery.present
+          ? data.searchQuery.value
+          : this.searchQuery,
+      searchDate: data.searchDate.present
+          ? data.searchDate.value
+          : this.searchDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SearchHistoryData(')
+          ..write('searchQuery: $searchQuery, ')
+          ..write('searchDate: $searchDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(searchQuery, searchDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.SearchHistoryData &&
+          other.searchQuery == this.searchQuery &&
+          other.searchDate == this.searchDate);
+}
+
+class SearchHistoryCompanion extends i0.UpdateCompanion<i1.SearchHistoryData> {
+  final i0.Value<String> searchQuery;
+  final i0.Value<DateTime> searchDate;
+  final i0.Value<int> rowid;
+  const SearchHistoryCompanion({
+    this.searchQuery = const i0.Value.absent(),
+    this.searchDate = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  SearchHistoryCompanion.insert({
+    required String searchQuery,
+    required DateTime searchDate,
+    this.rowid = const i0.Value.absent(),
+  }) : searchQuery = i0.Value(searchQuery),
+       searchDate = i0.Value(searchDate);
+  static i0.Insertable<i1.SearchHistoryData> custom({
+    i0.Expression<String>? searchQuery,
+    i0.Expression<DateTime>? searchDate,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (searchQuery != null) 'search_query': searchQuery,
+      if (searchDate != null) 'search_date': searchDate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i1.SearchHistoryCompanion copyWith({
+    i0.Value<String>? searchQuery,
+    i0.Value<DateTime>? searchDate,
+    i0.Value<int>? rowid,
+  }) {
+    return i1.SearchHistoryCompanion(
+      searchQuery: searchQuery ?? this.searchQuery,
+      searchDate: searchDate ?? this.searchDate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (searchQuery.present) {
+      map['search_query'] = i0.Variable<String>(searchQuery.value);
+    }
+    if (searchDate.present) {
+      map['search_date'] = i0.Variable<DateTime>(searchDate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SearchHistoryCompanion(')
+          ..write('searchQuery: $searchQuery, ')
+          ..write('searchDate: $searchDate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxSearchHistoryDate => i0.Index(
+  'idx_search_history_date',
+  'CREATE INDEX idx_search_history_date ON search_history (search_date)',
+);
+
 class DefinitionsDrift extends i3.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
   i0.Selectable<String> toolbarLeadingOrderKey({
@@ -3403,6 +3755,25 @@ class DefinitionsDrift extends i3.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
+  i0.Selectable<i1.SearchHistoryData> searchHistoryEntries({
+    required int limit,
+  }) {
+    return customSelect(
+      'SELECT * FROM search_history ORDER BY search_date DESC LIMIT ?1',
+      variables: [i0.Variable<int>(limit)],
+      readsFrom: {searchHistory},
+    ).asyncMap(searchHistory.mapFromRow);
+  }
+
+  Future<int> evictHistoryEntries({required int limit}) {
+    return customUpdate(
+      'DELETE FROM search_history WHERE search_query IN (SELECT search_query FROM search_history ORDER BY search_date DESC LIMIT -1 OFFSET ?1)',
+      variables: [i0.Variable<int>(limit)],
+      updates: {searchHistory},
+      updateKind: i0.UpdateKind.delete,
+    );
+  }
+
   Future<int> evictCacheEntries({required int limit}) {
     return customUpdate(
       'DELETE FROM icon_cache WHERE "rowid" IN (SELECT "rowid" FROM icon_cache ORDER BY fetch_date DESC LIMIT -1 OFFSET ?1)',
@@ -3421,6 +3792,9 @@ class DefinitionsDrift extends i3.ModularAccessor {
       ).resultSet<i1.QuickSwitcherButtonConfigs>(
         'quick_switcher_button_configs',
       );
+  i1.SearchHistory get searchHistory => i3.ReadDatabaseContainer(
+    attachedDatabase,
+  ).resultSet<i1.SearchHistory>('search_history');
   i1.IconCache get iconCache => i3.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.IconCache>('icon_cache');

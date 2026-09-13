@@ -1085,8 +1085,122 @@ class SearchTokensData extends DataClass
           other.reservedAt == this.reservedAt);
 }
 
-class DatabaseAtV11 extends GeneratedDatabase {
-  DatabaseAtV11(QueryExecutor e) : super(e);
+class SearchHistory extends Table
+    with TableInfo<SearchHistory, SearchHistoryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  SearchHistory(this.attachedDatabase, [this._alias]);
+  late final GeneratedColumn<String> searchQuery = GeneratedColumn<String>(
+    'search_query',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final GeneratedColumn<int> searchDate = GeneratedColumn<int>(
+    'search_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [searchQuery, searchDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'search_history';
+  @override
+  Set<GeneratedColumn> get $primaryKey => {searchQuery};
+  @override
+  SearchHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SearchHistoryData(
+      searchQuery: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_query'],
+      )!,
+      searchDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}search_date'],
+      )!,
+    );
+  }
+
+  @override
+  SearchHistory createAlias(String alias) {
+    return SearchHistory(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class SearchHistoryData extends DataClass
+    implements Insertable<SearchHistoryData> {
+  final String searchQuery;
+  final int searchDate;
+  const SearchHistoryData({
+    required this.searchQuery,
+    required this.searchDate,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['search_query'] = Variable<String>(searchQuery);
+    map['search_date'] = Variable<int>(searchDate);
+    return map;
+  }
+
+  factory SearchHistoryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SearchHistoryData(
+      searchQuery: serializer.fromJson<String>(json['searchQuery']),
+      searchDate: serializer.fromJson<int>(json['searchDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'searchQuery': serializer.toJson<String>(searchQuery),
+      'searchDate': serializer.toJson<int>(searchDate),
+    };
+  }
+
+  SearchHistoryData copyWith({String? searchQuery, int? searchDate}) =>
+      SearchHistoryData(
+        searchQuery: searchQuery ?? this.searchQuery,
+        searchDate: searchDate ?? this.searchDate,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SearchHistoryData(')
+          ..write('searchQuery: $searchQuery, ')
+          ..write('searchDate: $searchDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(searchQuery, searchDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SearchHistoryData &&
+          other.searchQuery == this.searchQuery &&
+          other.searchDate == this.searchDate);
+}
+
+class DatabaseAtV12 extends GeneratedDatabase {
+  DatabaseAtV12(QueryExecutor e) : super(e);
   late final Setting setting = Setting(this);
   late final IconCache iconCache = IconCache(this);
   late final Onboarding onboarding = Onboarding(this);
@@ -1113,6 +1227,11 @@ class DatabaseAtV11 extends GeneratedDatabase {
     'idx_search_tokens_reserved_at',
     'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
   );
+  late final SearchHistory searchHistory = SearchHistory(this);
+  late final Index idxSearchHistoryDate = Index(
+    'idx_search_history_date',
+    'CREATE INDEX idx_search_history_date ON search_history (search_date)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1129,6 +1248,8 @@ class DatabaseAtV11 extends GeneratedDatabase {
     searchTokens,
     idxSearchTokensInsertedAt,
     idxSearchTokensReservedAt,
+    searchHistory,
+    idxSearchHistoryDate,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1150,5 +1271,5 @@ class DatabaseAtV11 extends GeneratedDatabase {
     ),
   ]);
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 }

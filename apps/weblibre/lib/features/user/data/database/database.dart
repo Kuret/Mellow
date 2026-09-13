@@ -24,6 +24,7 @@ import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
+import 'package:weblibre/features/user/data/database/daos/search_history.dart';
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
@@ -39,11 +40,12 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
     ToolbarButtonConfigDao,
     QuickSwitcherButtonConfigDao,
     SearchTokensDao,
+    SearchHistoryDao,
   ],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 11;
+  final int schemaVersion = 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -134,6 +136,10 @@ class UserDatabase extends $UserDatabase {
       // matching the from7To8 precedent for proxy_routing_setting — this
       // step's meaning must not drift with the current schema.
       await m.database.customStatement('DROP TABLE IF EXISTS proxy_profile');
+    },
+    from11To12: (m, schema) async {
+      await m.createTable(schema.searchHistory);
+      await m.createIndex(schema.idxSearchHistoryDate);
     },
   );
 }

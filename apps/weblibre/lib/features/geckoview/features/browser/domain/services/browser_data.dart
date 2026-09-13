@@ -21,8 +21,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/search/domain/repositories/search_history.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 part 'browser_data.g.dart';
@@ -63,9 +63,7 @@ class BrowserDataService extends _$BrowserDataService {
             // don't dangle (and can't re-attach to a future same-URL visit).
             await ref.read(tabDatabaseProvider).visitContainerDao.clearAll();
           case DeleteBrowsingDataType.recentSearches:
-            await ref
-                .read(bangDataRepositoryProvider.notifier)
-                .clearSearchHistory();
+            await ref.read(searchHistoryRepositoryProvider.notifier).clear();
           case DeleteBrowsingDataType.cookies:
             await _service.deleteCookiesAndSiteData();
           case DeleteBrowsingDataType.cache:

@@ -19,11 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
+import 'package:weblibre/features/search/domain/repositories/search_history.dart';
 
 class RecentSearchesSection extends ConsumerWidget {
   final TextEditingController searchTextController;
@@ -56,8 +55,8 @@ class RecentSearchesSection extends ConsumerWidget {
                 searchTextController: searchTextController,
                 submitSearch: submitSearch,
                 onDeleteHistory: (query) => ref
-                    .read(bangSearchProvider.notifier)
-                    .removeSearchEntry(query),
+                    .read(searchHistoryRepositoryProvider.notifier)
+                    .removeEntry(query),
               ),
             ),
           ],
