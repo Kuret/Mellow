@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "web-inspector@weblibre.eu"
+    }
+  },
+  "name": "Web Inspector",
+  "version": "1.0",
+  "description": "On-device element picker, DOM tree, styles, console and network log.",
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    "eruda.js"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "permissions": [
+    "mozillaAddons",
+    "geckoViewAddons",
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "<all_urls>"
+  ]
+}
