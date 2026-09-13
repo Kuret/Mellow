@@ -603,8 +603,9 @@ class BrowserTabBarView extends StatelessWidget {
 
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior. No
-      // horizontal handler: the chip strip scrolls horizontally and switches
-      // spaces on overscroll, and the space indicator takes the swipe.
+      // horizontal handler here: the chip strip scrolls horizontally, so a
+      // drag over it belongs to the strip. The address row below it takes
+      // the space swipe instead (see its SpaceSwipeDetector).
       onVerticalDragStart: onVerticalDragStart,
       onVerticalDragEnd: onVerticalDragEnd,
       child: ColoredBox(
@@ -622,18 +623,24 @@ class BrowserTabBarView extends StatelessWidget {
               Visibility(
                 visible: displayAppBar,
                 maintainState: true,
-                child: AppBar(
-                  primary: false,
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.transparent,
-                  scrolledUnderElevation: 0,
-                  shadowColor: Colors.transparent,
-                  surfaceTintColor: Colors.transparent,
-                  titleSpacing: 0.0,
-                  leadingWidth: 40.0,
-                  toolbarHeight: kToolbarHeight,
-                  title: title,
-                  actions: actions,
+                // The address row is the strip's full-width neighbour and
+                // never scrolls sideways itself, so it can carry the space
+                // swipe: reaching the end of a long chip strip to overscroll
+                // is not a gesture anyone would find.
+                child: SpaceSwipeDetector(
+                  child: AppBar(
+                    primary: false,
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Colors.transparent,
+                    scrolledUnderElevation: 0,
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    titleSpacing: 0.0,
+                    leadingWidth: 40.0,
+                    toolbarHeight: kToolbarHeight,
+                    title: title,
+                    actions: actions,
+                  ),
                 ),
               ),
             if (showContextualToolbar) contextualToolbar,
