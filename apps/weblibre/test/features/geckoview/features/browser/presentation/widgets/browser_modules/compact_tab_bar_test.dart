@@ -314,9 +314,11 @@ void main() {
     // Collapsed on the bar until asked, whatever the stored state says.
     expect(find.text('Member'), findsNothing);
 
-    await tester.tap(find.byType(CompactFolderChip));
+    await tester.tap(find.text('Folder'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    // The strip animates the opened folder to the leading edge; the chip has
+    // to come to rest before it can be tapped again.
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Member'), findsOneWidget);
     // Inline, right after the folder and ahead of the loose tab.
@@ -333,12 +335,74 @@ void main() {
       lessThanOrEqualTo(56),
     );
 
-    await tester.tap(find.byType(CompactFolderChip));
+    await tester.tap(find.text('Folder'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    // The strip animates the opened folder to the leading edge; the chip has
+    // to come to rest before it can be tapped again.
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Member'), findsNothing);
 
     await _disposeTree(tester);
+  });
+
+  testWidgets('expanding a folder brings its contents into view', (
+    tester,
+  ) async {
+    final db = await _memoryDatabase(
+      // Essentials push the folder towards the trailing edge, which is where
+      // expanding it used to insert its members off-screen.
+      essentials: const [
+        'e1',
+        'e2',
+        'e3',
+        'e4',
+        'e5',
+        'e6',
+        'e7',
+        'e8',
+        'e9',
+        'e10',
+      ],
+      tabs: const [
+        (id: 'tab-1', title: 'Member'),
+        (id: 'tab-2', title: 'Loose'),
+      ],
+      folderId: 'folder-1',
+      inFolder: {'tab-1'},
+    );
+    addTearDown(db.close);
+
+    await _pumpBar(tester, db: db, viewportWidth: 320);
+
+    // Scroll only until the folder chip appears, which leaves it at the
+    // trailing edge — the position where its members land off-screen.
+    await tester.dragUntilVisible(
+      find.text('Folder'),
+      find.byType(ListView),
+      const Offset(-40, 0),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    final bar = tester.getRect(find.byType(CompactTabBar));
+
+    await tester.tap(find.text('Folder'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The folder sits near the leading edge afterwards and its member is on
+    // screen, rather than inserted past the right edge where expanding looked
+    // like it had done nothing.
+    expect(find.text('Member'), findsOneWidget);
+    final folder = tester.getRect(find.text('Folder'));
+    expect(folder.left - bar.left, lessThan(bar.width / 2));
+    final member = tester.getRect(find.text('Member'));
+    expect(member.left, greaterThanOrEqualTo(bar.left));
+    expect(member.right, lessThanOrEqualTo(bar.right));
+
+    // Ten essential tiles leave their favicon shimmers running; let them
+    // finish before the tree goes away.
+    await tester.pump(const Duration(seconds: 2));
+    await _disposeTree(tester);
+    await tester.pump(const Duration(seconds: 2));
   });
 
   testWidgets(
@@ -402,7 +466,7 @@ void main() {
 
       await tester.tap(find.text('Folder'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       // The folder's own tab and a chip for the subfolder, in order_key
       // order, both behind the folder chip.
@@ -423,7 +487,7 @@ void main() {
 
       await tester.tap(find.text('Sub'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Deeper'), findsOneWidget);
       expect(
@@ -435,7 +499,7 @@ void main() {
       // re-opening it does not bring the subfolder back open.
       await tester.tap(find.text('Folder'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Inner'), findsNothing);
       expect(find.text('Sub'), findsNothing);
@@ -443,7 +507,7 @@ void main() {
 
       await tester.tap(find.text('Folder'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Sub'), findsOneWidget);
       expect(find.text('Deeper'), findsNothing);
@@ -502,14 +566,14 @@ void main() {
 
       await tester.tap(find.text('Folder'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Sub'), findsOneWidget);
       expect(find.text('Deeper'), findsNothing);
 
       await tester.tap(find.text('Sub'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Deeper'), findsOneWidget);
 

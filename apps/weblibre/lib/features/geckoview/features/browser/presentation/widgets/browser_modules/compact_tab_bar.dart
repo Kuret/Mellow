@@ -368,6 +368,15 @@ class _CompactChipStrip extends HookConsumerWidget {
 
     final scrollController = useScrollController();
     final activeChipKey = useRef(GlobalKey());
+    // Expanding a folder inserts its contents to the right of the chip,
+    // usually past the edge of the strip: without this the bar looks like it
+    // did nothing until you scroll. The opened folder is pulled to the
+    // leading edge so its contents fill the view.
+    final openedFolderId = useState<String?>(null);
+    // One stable key per folder, never swapped in and out: a key that
+    // appeared only while a folder was pending re-created the chip's
+    // element, and an in-flight tap died with it.
+    final folderKeys = useRef(<String, GlobalKey>{});
     final isUserScrolling = useRef(false);
     final userScrollTimer = useRef<Timer?>(null);
     final overscrollDistance = useRef(0.0);
@@ -378,6 +387,42 @@ class _CompactChipStrip extends HookConsumerWidget {
 
     final activeEntryId = 'tab-$selectedTabId';
     final hasActiveEntry = entries.any((entry) => entry.id == activeEntryId);
+
+    useEffect(() {
+      final folderId = openedFolderId.value;
+      if (folderId == null) {
+        return null;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = folderKeys.value[folderId]?.currentContext;
+        final box = context?.findRenderObject();
+        if (box is RenderBox && scrollController.hasClients) {
+          // Pull the folder towards the leading edge, but not flush against
+          // it: a chip sitting exactly on the viewport's edge stops taking
+          // taps, so it keeps an inset of its own.
+          const inset = 12.0;
+          final position = scrollController.position;
+          final reveal = RenderAbstractViewport.of(
+            box,
+          ).getOffsetToReveal(box, 0.0).offset;
+          final target = (reveal - inset).clamp(
+            position.minScrollExtent,
+            position.maxScrollExtent,
+          );
+          if ((target - position.pixels).abs() > 1.0) {
+            unawaited(
+              scrollController.animateTo(
+                target,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+              ),
+            );
+          }
+        }
+        openedFolderId.value = null;
+      });
+      return null;
+    }, [openedFolderId.value]);
 
     useScrollToActiveChip<String>(
       controller: scrollController,
@@ -492,6 +537,14 @@ class _CompactChipStrip extends HookConsumerWidget {
         itemCount: entries.length,
         itemBuilder: (context, index) {
           final entry = entries[index];
+          Key entryKey(_Entry entry) => entry.id == activeEntryId
+              ? activeChipKey.value
+              : entry is _FolderEntry
+              ? folderKeys.value.putIfAbsent(
+                  entry.folder.folderId,
+                  GlobalKey.new,
+                )
+              : ValueKey(entry.id);
           final child = switch (entry) {
             _EssentialEntry(:final tabId) => Padding(
               padding: const EdgeInsets.only(right: 4.0),
@@ -513,13 +566,18 @@ class _CompactChipStrip extends HookConsumerWidget {
                   childCount: folder.childCount,
                   expanded: expanded,
                   depth: depth,
-                  onTap: () => ref
-                      .read(compactBarExpandedFoldersProvider.notifier)
-                      .toggle(
-                        folder.folderId,
-                        // Collapsing takes its open subfolders with it.
-                        descendants: descendantFolderIds(folder.folderId),
-                      ),
+                  onTap: () {
+                    ref
+                        .read(compactBarExpandedFoldersProvider.notifier)
+                        .toggle(
+                          folder.folderId,
+                          // Collapsing takes its open subfolders with it.
+                          descendants: descendantFolderIds(folder.folderId),
+                        );
+                    // Only on the way open: collapsing leaves the strip
+                    // where the user left it.
+                    openedFolderId.value = expanded ? null : folder.folderId;
+                  },
                 ),
               ),
             _TabEntry(:final item) => Center(child: buildTabChip(item)),
@@ -568,9 +626,7 @@ class _CompactChipStrip extends HookConsumerWidget {
               ),
             );
             return KeyedSubtree(
-              key: entry.id == activeEntryId
-                  ? activeChipKey.value
-                  : ValueKey(entry.id),
+              key: entryKey(entry),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3.0),
                 child: DecoratedBox(
@@ -594,12 +650,7 @@ class _CompactChipStrip extends HookConsumerWidget {
               ),
             );
           }
-          return KeyedSubtree(
-            key: entry.id == activeEntryId
-                ? activeChipKey.value
-                : ValueKey(entry.id),
-            child: child,
-          );
+          return KeyedSubtree(key: entryKey(entry), child: child);
         },
       ),
     );
