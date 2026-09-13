@@ -29,6 +29,14 @@ class UriBreadcrumb extends StatelessWidget {
   final bool showHttpScheme;
   final void Function()? onTooltipTriggered;
 
+  /// Whether the crumb strip takes horizontal drags to scroll itself.
+  ///
+  /// Off where the strip sits inside something that owns the horizontal
+  /// gesture — the address pill on the compact tab bar, where a sideways
+  /// drag switches spaces. A scroll view wins the gesture arena outright, so
+  /// leaving it on there silently swallows that swipe.
+  final bool scrollable;
+
   const UriBreadcrumb({
     super.key,
     required this.uri,
@@ -36,6 +44,7 @@ class UriBreadcrumb extends StatelessWidget {
     this.style,
     this.showHttpScheme = true,
     this.onTooltipTriggered,
+    this.scrollable = true,
   });
 
   @override
@@ -53,6 +62,7 @@ class UriBreadcrumb extends StatelessWidget {
             return SingleChildScrollView(
               controller: controller,
               scrollDirection: Axis.horizontal,
+              physics: scrollable ? null : const NeverScrollableScrollPhysics(),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

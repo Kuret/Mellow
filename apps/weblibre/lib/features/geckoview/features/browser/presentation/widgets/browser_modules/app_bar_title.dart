@@ -229,6 +229,9 @@ class CompactAppBarTitleView extends StatelessWidget {
                     child: UriBreadcrumb(
                       uri: sandboxSourceUri ?? tabState.url,
                       showHttpScheme: false,
+                      // The pill's own sideways drag belongs to the space
+                      // swipe on the bar.
+                      scrollable: false,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
@@ -466,6 +469,8 @@ class AppBarTitleView extends StatelessWidget {
                       Expanded(
                         child: UriBreadcrumb(
                           uri: sandboxSourceUri ?? tabState.url,
+                          // As above: the row owns the sideways drag.
+                          scrollable: false,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface,
                           ),
