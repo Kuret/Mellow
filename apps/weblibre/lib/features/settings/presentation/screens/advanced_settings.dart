@@ -68,6 +68,17 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
+    title: 'Developer',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Remote debugging via USB',
+        subtitle: 'Attach Firefox DevTools from a computer',
+        keywords: ['devtools', 'inspect', 'debugging', 'adb'],
+        child: _RemoteDebuggingTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
     title: 'Experimental',
     entries: [
       SettingsEntryDefinition(
@@ -234,6 +245,37 @@ class _EnterpriseRootsTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.enterpriseRootsEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _RemoteDebuggingTile extends HookConsumerWidget {
+  const _RemoteDebuggingTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remoteDebuggingEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.remoteDebuggingEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Remote debugging via USB'),
+      subtitle: const Text(
+        'While this is on, anything that can reach the debugger socket on this '
+        'device can inspect and control the browser',
+      ),
+      secondary: const Icon(MdiIcons.bugOutline),
+      value: remoteDebuggingEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.remoteDebuggingEnabled(value),
             );
       },
     );
