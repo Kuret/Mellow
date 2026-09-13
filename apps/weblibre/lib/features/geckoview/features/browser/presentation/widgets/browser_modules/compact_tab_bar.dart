@@ -543,6 +543,30 @@ class _CompactChipStrip extends HookConsumerWidget {
             const radius = Radius.circular(14.0);
             final opensHere = bandDepth(index - 1) < depth;
             final closesHere = bandDepth(index + 1) < depth;
+            // The chips are neutral greys, so a grey band disappears behind
+            // them. The band takes the accent hue instead — faint enough to
+            // stay a background, different enough in hue to read at a
+            // glance — and the group is capped at both ends by a solid
+            // accent bar, which is what actually says "the folder stops
+            // here". A folder inside a folder deepens the same hue rather
+            // than introducing a second one.
+            final accent = scheme.primary;
+            final band = accent.withValues(alpha: depth > 1 ? 0.26 : 0.16);
+            // A solid bar at each end of the group: the band says these
+            // chips belong together, the bars say exactly where it stops.
+            Widget cap() => Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 4.0,
+                vertical: 6.0,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(2.0),
+                ),
+                child: const SizedBox(width: 3.0),
+              ),
+            );
             return KeyedSubtree(
               key: entry.id == activeEntryId
                   ? activeChipKey.value
@@ -551,22 +575,20 @@ class _CompactChipStrip extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 3.0),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    // Nested folders sit a shade stronger, so a folder
-                    // inside a folder still reads as its own group.
-                    color: depth > 1
-                        ? scheme.surfaceContainerHighest
-                        : scheme.surfaceContainerHigh,
+                    color: band,
                     borderRadius: BorderRadius.horizontal(
                       left: opensHere ? radius : Radius.zero,
                       right: closesHere ? radius : Radius.zero,
                     ),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: opensHere ? 4.0 : 0.0,
-                      right: closesHere ? 4.0 : 0.0,
-                    ),
-                    child: child,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (opensHere) cap(),
+                      child,
+                      if (closesHere) cap(),
+                    ],
                   ),
                 ),
               ),

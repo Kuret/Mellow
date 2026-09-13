@@ -306,7 +306,7 @@ void main() {
     );
     addTearDown(db.close);
 
-    await _pumpBar(tester, db: db);
+    await _pumpBar(tester, db: db, viewportWidth: 500);
 
     expect(find.byType(CompactFolderChip), findsOneWidget);
     expect(find.text('Folder'), findsOneWidget);
