@@ -30,7 +30,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
@@ -114,7 +113,6 @@ class GridTabPreview extends HookConsumerWidget {
   final VoidCallback? onDoubleTap;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
-  final VoidCallback? onCloseSubtree;
 
   final bool showPinBadge;
 
@@ -123,7 +121,6 @@ class GridTabPreview extends HookConsumerWidget {
   /// Hierarchy widget rendered in the top-left corner alongside any
   /// pin badge / [trailingChild]. Used by the tabs grid to inline the
   /// expand/collapse toggle without overlay layers.
-  final Widget? groupToggle;
 
   /// Tree depth (>= 1 for any child). Renders a stack of overlapping
   /// subdirectory glyphs in the bottom-left of the thumbnail to signal
@@ -140,10 +137,8 @@ class GridTabPreview extends HookConsumerWidget {
     this.onDoubleTap,
     this.onDelete,
     this.onDeleteAll,
-    this.onCloseSubtree,
     this.showPinBadge = false,
     this.trailingChild,
-    this.groupToggle,
     this.depth = 0,
     this.split,
     super.key,
@@ -230,9 +225,7 @@ class GridTabPreview extends HookConsumerWidget {
                       ),
                     ),
                   // Close button overlay
-                  if (onDelete != null ||
-                      onDeleteAll != null ||
-                      onCloseSubtree != null)
+                  if (onDelete != null || onDeleteAll != null)
                     Positioned(
                       top: 6.0,
                       right: 6.0,
@@ -249,12 +242,6 @@ class GridTabPreview extends HookConsumerWidget {
                             leadingIcon: const Icon(Icons.language),
                             child: const Text('Close from Same Host'),
                           ),
-                          if (onCloseSubtree != null)
-                            MenuItemButton(
-                              onPressed: onCloseSubtree,
-                              leadingIcon: const Icon(Icons.account_tree),
-                              child: const Text('Close Tab and Descendants'),
-                            ),
                         ],
                         child: SizedBox(
                           width: 28,
@@ -270,8 +257,7 @@ class GridTabPreview extends HookConsumerWidget {
                                 Radius.circular(8.0),
                               ),
                               onTap: onDelete,
-                              onLongPress:
-                                  onDeleteAll != null || onCloseSubtree != null
+                              onLongPress: onDeleteAll != null
                                   ? () {
                                       if (extendedDeleteMenuController.isOpen) {
                                         extendedDeleteMenuController.close();
@@ -296,18 +282,13 @@ class GridTabPreview extends HookConsumerWidget {
                       left: 6.0,
                       child: TabDepthIndicator(depth: depth),
                     ),
-                  if (trailingChild != null || isPinned || groupToggle != null)
+                  if (trailingChild != null || isPinned)
                     Positioned(
                       top: 6.0,
                       left: 6.0,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (groupToggle != null) ...[
-                            groupToggle!,
-                            if (trailingChild != null || isPinned)
-                              const SizedBox(width: 4),
-                          ],
                           if (trailingChild != null) trailingChild!,
                           if (isPinned)
                             Padding(
@@ -441,7 +422,6 @@ class ListTabPreview extends HookConsumerWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
-  final VoidCallback? onCloseSubtree;
 
   final bool showPinBadge;
 
@@ -449,7 +429,6 @@ class ListTabPreview extends HookConsumerWidget {
 
   /// Hierarchy widget rendered inside the trailing row, just before the
   /// close button. Used to inline the group expand/collapse toggle.
-  final Widget? groupToggle;
 
   /// Tree depth of this row. Used to render an integrated indent guide
   /// (vertical bar + L-stub) on the leading edge of the tile.
@@ -465,10 +444,8 @@ class ListTabPreview extends HookConsumerWidget {
     this.onTap,
     this.onDelete,
     this.onDeleteAll,
-    this.onCloseSubtree,
     this.showPinBadge = false,
     this.trailingChild,
-    this.groupToggle,
     this.depth = 0,
     this.split,
     super.key,
@@ -617,10 +594,7 @@ class ListTabPreview extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                if (groupToggle != null) groupToggle!,
-                if (onDelete != null ||
-                    onDeleteAll != null ||
-                    onCloseSubtree != null)
+                if (onDelete != null || onDeleteAll != null)
                   MenuAnchor(
                     controller: extendedDeleteMenuController,
                     builder: (context, controller, child) {
@@ -634,16 +608,10 @@ class ListTabPreview extends HookConsumerWidget {
                         leadingIcon: const Icon(Icons.language),
                         child: const Text('Close from Same Host'),
                       ),
-                      if (onCloseSubtree != null)
-                        MenuItemButton(
-                          onPressed: onCloseSubtree,
-                          leadingIcon: const Icon(Icons.account_tree),
-                          child: const Text('Close Tab and Descendants'),
-                        ),
                     ],
                     child: IconButton(
                       onPressed: onDelete,
-                      onLongPress: onDeleteAll != null || onCloseSubtree != null
+                      onLongPress: onDeleteAll != null
                           ? () {
                               if (extendedDeleteMenuController.isOpen) {
                                 extendedDeleteMenuController.close();
@@ -784,7 +752,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
   final void Function() onClose;
   final void Function()? onBeforeDelete;
 
-  final Widget? groupToggle;
   final int depth;
   final SplitMembership? split;
 
@@ -795,7 +762,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
     this.onBeforeDelete,
-    this.groupToggle,
     this.depth = 0,
     this.split,
     super.key,
@@ -817,7 +783,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         showPinBadge: true,
-        groupToggle: groupToggle,
         depth: depth,
         split: split,
         onTap: () async {
@@ -857,27 +822,6 @@ class SingleGridTabPreview extends HookConsumerWidget {
               context,
               ref.read(tabRepositoryProvider.notifier).undoClose,
               count: count,
-            );
-          }
-        },
-        onCloseSubtree: () async {
-          final subtreeIds = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getContainerTabDescendants(tabId)
-              .then((descendants) => descendants.keys.toList());
-          if (!context.mounted) return;
-
-          final didClose = await closeTabsWithConfirmation(
-            context,
-            ref,
-            subtreeIds,
-          );
-
-          if (context.mounted && didClose) {
-            ui_helper.showTabUndoClose(
-              context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: subtreeIds.length,
             );
           }
         },
@@ -943,7 +887,6 @@ class SingleListTabPreview extends HookConsumerWidget {
   final void Function() onClose;
   final void Function()? onBeforeDelete;
 
-  final Widget? groupToggle;
   final int depth;
   final SplitMembership? split;
 
@@ -954,7 +897,6 @@ class SingleListTabPreview extends HookConsumerWidget {
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
     this.onBeforeDelete,
-    this.groupToggle,
     this.depth = 0,
     this.split,
     super.key,
@@ -972,7 +914,6 @@ class SingleListTabPreview extends HookConsumerWidget {
         tabId: tabId,
         isActive: tabId == activeTabId,
         showPinBadge: true,
-        groupToggle: groupToggle,
         depth: depth,
         split: split,
         onTap: () async {
@@ -1012,27 +953,6 @@ class SingleListTabPreview extends HookConsumerWidget {
               context,
               ref.read(tabRepositoryProvider.notifier).undoClose,
               count: count,
-            );
-          }
-        },
-        onCloseSubtree: () async {
-          final subtreeIds = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getContainerTabDescendants(tabId)
-              .then((descendants) => descendants.keys.toList());
-          if (!context.mounted) return;
-
-          final didClose = await closeTabsWithConfirmation(
-            context,
-            ref,
-            subtreeIds,
-          );
-
-          if (context.mounted && didClose) {
-            ui_helper.showTabUndoClose(
-              context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: subtreeIds.length,
             );
           }
         },

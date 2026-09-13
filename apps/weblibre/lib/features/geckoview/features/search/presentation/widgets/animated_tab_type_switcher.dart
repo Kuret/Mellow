@@ -26,14 +26,12 @@ import 'package:weblibre/core/routing/routes.dart';
 class AnimatedTabTypeSwitcher extends StatelessWidget {
   final TabType selected;
   final ValueChanged<TabType> onChanged;
-  final bool showChildOption;
   final Color? selectedBackgroundColor;
 
   const AnimatedTabTypeSwitcher({
     super.key,
     required this.selected,
     required this.onChanged,
-    this.showChildOption = false,
     this.selectedBackgroundColor,
   });
 
@@ -62,17 +60,6 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.regular),
               ),
-              if (showChildOption) ...[
-                _divider(borderColor),
-                _Segment(
-                  tabType: TabType.child,
-                  icon: MdiIcons.fileTree,
-                  label: 'Child',
-                  isSelected: selected == TabType.child,
-                  selectedBackgroundColor: selectedBackgroundColor,
-                  onTap: () => onChanged(TabType.child),
-                ),
-              ],
               _divider(borderColor),
               _Segment(
                 tabType: TabType.private,

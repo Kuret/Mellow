@@ -45,7 +45,7 @@ import 'package:weblibre/presentation/widgets/sliver_center_on_underflow.dart';
 /// The home surface creates tabs of the user's configured default type; the
 /// child type is meaningless here because there is no tab to be a child of.
 TabMode _tabModeFor(TabType tabType) => switch (tabType) {
-  TabType.regular || TabType.child => TabMode.regular,
+  TabType.regular => TabMode.regular,
   TabType.private => TabMode.private,
 };
 

@@ -54,10 +54,6 @@ part of 'routes.dart';
       name: 'ContainerSelectionRoute',
       path: 'select_container',
     ),
-    TypedGoRoute<TabTreeRoute>(
-      name: 'TabTreeRoute',
-      path: 'tab_tree/:rootTabId',
-    ),
     TypedGoRoute<OpenSharedContentRoute>(
       name: 'OpenSharedContentRoute',
       path: 'open_content',
@@ -272,17 +268,6 @@ class ContextMenuRoute extends GoRouteData with $ContextMenuRoute {
       builder: (_) =>
           ContextMenuDialog(hitResult: HitResultJson.fromJson(hitResult)),
     );
-  }
-}
-
-class TabTreeRoute extends GoRouteData with $TabTreeRoute {
-  final String rootTabId;
-
-  const TabTreeRoute(this.rootTabId);
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => TabTreeDialog(rootTabId));
   }
 }
 

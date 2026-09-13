@@ -44,7 +44,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
@@ -63,30 +62,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/e
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
-
-/// Build the hierarchy toggle injected into [ListTabPreview.groupToggle].
-///
-/// Returns a [TabGroupExpandToggle] for any node with descendants
-/// (root parents AND intermediate children), and null otherwise.
-Widget? _listGroupToggleFor(TabViewItem row) {
-  final parentGroup = row.parentGroup;
-  if (parentGroup != null) {
-    return TabGroupExpandToggle(
-      parentId: parentGroup.tabId,
-      childCount: parentGroup.childCount,
-    );
-  }
-  final child = row.childItem;
-  if (child != null && child.childCount > 0) {
-    return TabGroupExpandToggle(
-      parentId: child.tabId,
-      childCount: child.childCount,
-    );
-  }
-  return null;
-}
-
-int _depthFor(TabViewItem row) => row.depth;
 
 /// Plain list row for a [TabListFolderItem]: icon, name, child count,
 /// collapse toggle and folder-depth indentation. Tap and the toggle both
@@ -229,7 +204,6 @@ class _TabDraggable extends HookConsumerWidget {
   final String? suggestedContainerId;
   final VoidCallback onClose;
   final double height;
-  final Widget? groupToggle;
   final int depth;
 
   /// Pinned-shelf rendering: a [CompactTabRow] instead of the preview card.
@@ -242,7 +216,6 @@ class _TabDraggable extends HookConsumerWidget {
     required this.height,
     this.sourceSearchQuery,
     this.suggestedContainerId,
-    this.groupToggle,
     this.depth = 0,
     this.compact = false,
     this.split,
@@ -266,63 +239,51 @@ class _TabDraggable extends HookConsumerWidget {
     );
 
     // Cache the tab widget to avoid rebuilding
-    final tab = useMemoized(
-      () {
-        if (suggestedContainerId != null) {
-          return SuggestedSingleListTabPreview(
-            key: ValueKey(tabId),
-            tabId: tabId,
-            activeTabId: activeTab,
-            onTap: () async {
-              final containerData = await ref
-                  .read(containerRepositoryProvider.notifier)
-                  .getContainerData(suggestedContainerId!);
-
-              if (containerData != null) {
-                await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .assignContainer(tabId, containerData);
-              }
-            },
-          );
-        }
-        if (compact) {
-          return CompactTabRow(
-            key: ValueKey(tabId),
-            tabId: tabId,
-            isActive: tabId == activeTab,
-            split: split,
-            onTap: () async {
-              //Close first to avoid rebuilds
-              onClose();
-              if (tabId != activeTab) {
-                await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-              }
-            },
-            onClose: () => closeTabWithConfirmationAndUndo(context, ref, tabId),
-          );
-        }
-        return SingleListTabPreview(
+    final tab = useMemoized(() {
+      if (suggestedContainerId != null) {
+        return SuggestedSingleListTabPreview(
           key: ValueKey(tabId),
           tabId: tabId,
           activeTabId: activeTab,
-          onClose: onClose,
-          sourceSearchQuery: sourceSearchQuery,
-          groupToggle: groupToggle,
-          depth: depth,
-          split: split,
+          onTap: () async {
+            final containerData = await ref
+                .read(containerRepositoryProvider.notifier)
+                .getContainerData(suggestedContainerId!);
+
+            if (containerData != null) {
+              await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .assignContainer(tabId, containerData);
+            }
+          },
         );
-      },
-      [
-        tabId,
-        activeTab,
-        suggestedContainerId,
-        groupToggle,
-        depth,
-        compact,
-        split,
-      ],
-    );
+      }
+      if (compact) {
+        return CompactTabRow(
+          key: ValueKey(tabId),
+          tabId: tabId,
+          isActive: tabId == activeTab,
+          split: split,
+          onTap: () async {
+            //Close first to avoid rebuilds
+            onClose();
+            if (tabId != activeTab) {
+              await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+            }
+          },
+          onClose: () => closeTabWithConfirmationAndUndo(context, ref, tabId),
+        );
+      }
+      return SingleListTabPreview(
+        key: ValueKey(tabId),
+        tabId: tabId,
+        activeTabId: activeTab,
+        onClose: onClose,
+        sourceSearchQuery: sourceSearchQuery,
+        depth: depth,
+        split: split,
+      );
+    }, [tabId, activeTab, suggestedContainerId, depth, compact, split]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -464,13 +425,6 @@ class _TabListView extends HookConsumerWidget {
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
-    final collapsedGroups = ref.watch(collapsedGroupsProvider);
-    final treeRows = ref.watch(
-      watchTabsWithRootAndDepthProvider(
-        spaceUuid,
-      ).select((value) => value.value ?? const []),
-    );
     // Reorder anchors: which folder (if any) each tab currently sits in, and
     // which tabs share a splitId, both derived from the same space-tabs
     // summaries the grouping provider already reads.
@@ -520,7 +474,6 @@ class _TabListView extends HookConsumerWidget {
           // ignore: document_ignores using fast equatable
           // ignore: provider_parameters
           containerFilter: ContainerFilterById(containerId: containerId),
-          groupTrees: false,
         ),
       );
       primaryRows = [
@@ -530,7 +483,6 @@ class _TabListView extends HookConsumerWidget {
             sourceSearchQuery: switch (entity) {
               DefaultTabEntity _ => null,
               final SearchResultTabEntity e => e.searchQuery,
-              TabTreeEntity _ => null,
             },
           ),
       ];
@@ -544,24 +496,8 @@ class _TabListView extends HookConsumerWidget {
       primaryRows = [
         for (final item in visibleItems.value)
           switch (item) {
-            TabListStandaloneItem(:final tabId, :final depth, :final shelf) =>
-              TabViewItem.standalone(tabId: tabId, depth: depth, shelf: shelf),
-            final TabListParentGroup g =>
-              showHierarchicalTabs
-                  ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(
-                      tabId: g.tabId,
-                      depth: g.depth,
-                      shelf: g.shelf,
-                    ),
-            final TabListChildItem c =>
-              showHierarchicalTabs
-                  ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(
-                      tabId: c.tabId,
-                      depth: c.depth,
-                      shelf: c.shelf,
-                    ),
+            TabListTabItem(:final tabId, :final depth, :final shelf) =>
+              TabViewItem.tab(tabId: tabId, depth: depth, shelf: shelf),
             final TabListFolderItem f => TabViewItem.folder(folderItem: f),
           },
       ];
@@ -570,23 +506,13 @@ class _TabListView extends HookConsumerWidget {
     // Section the list by shelf (PLAN §6.4): the pinned rows the grouping
     // provider already leads with become a compact "Pinned" section, the rest
     // the main list. Folders live in the pinned section too (their members
-    // are pinned tabs), and a child row belongs to its root's section, so a
-    // pinned subtree stays together. Search results are one flat list.
+    // are pinned tabs). Search results are one flat list.
     final sectioned = !hasActiveSearch;
     var pinnedCount = 0;
     if (sectioned) {
-      final pinnedRootIds = {
-        for (final row in primaryRows)
-          if (row.shelf == TabShelf.pinned && row.childItem == null) row.tabId,
-      };
       while (pinnedCount < primaryRows.length) {
         final row = primaryRows[pinnedCount];
-        final child = row.childItem;
-        final inPinned =
-            row.shelf == TabShelf.pinned ||
-            row.isFolder ||
-            (child != null && pinnedRootIds.contains(child.rootId));
-        if (!inPinned) break;
+        if (row.shelf != TabShelf.pinned && !row.isFolder) break;
         pinnedCount++;
       }
     }
@@ -674,8 +600,7 @@ class _TabListView extends HookConsumerWidget {
         onClose: onClose,
         sourceSearchQuery: item.sourceSearchQuery,
         height: _heightOf(row),
-        groupToggle: row.pinned ? null : _listGroupToggleFor(item),
-        depth: _depthFor(item),
+        depth: item.depth,
         compact: row.pinned,
         split: splitByTab[item.tabId],
       );
@@ -804,12 +729,9 @@ class _TabListView extends HookConsumerWidget {
 
                 final result = buildTabViewReorderResult(
                   visibleItems: primaryRows,
-                  treeRows: treeRows,
-                  collapsedGroups: collapsedGroups,
                   pinnedTabIds: effectivePinnedTabIds,
                   oldIndex: moving.primaryIndex,
                   newIndex: primaryNewIndex,
-                  hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
                   folderIdByTab: folderIdByTab,
                   splitMembers: splitMembers,
@@ -824,7 +746,6 @@ class _TabListView extends HookConsumerWidget {
                       movingTabIds: result.movingTabIds,
                       previousTabId: result.previousTabId,
                       nextTabId: result.nextTabId,
-                      parentChange: result.parentChange,
                       scopeChange: result.scopeChange,
                     );
               },

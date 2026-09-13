@@ -19,18 +19,12 @@
  */
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 
 class TabViewReorderResult {
   final List<String> movingTabIds;
   final String? previousTabId;
   final String? nextTabId;
-
-  /// Parent assignment implied by the drop position. `unchanged` for plain
-  /// reorders; `detach` / `toParent` only emitted in hierarchical mode when
-  /// the drop lands outside the moving root's current parent scope.
-  final TabParentChange parentChange;
 
   /// Space/folder assignment implied by the drop position — see
   /// [buildTabViewReorderResult] doc for the anchor rule.
@@ -40,12 +34,11 @@ class TabViewReorderResult {
     required this.movingTabIds,
     required this.previousTabId,
     required this.nextTabId,
-    this.parentChange = const TabParentChange.unchanged(),
     this.scopeChange = const TabScopeChange.unchanged(),
   });
 }
 
-/// Builds the reorder/reparent/rescope request implied by dragging
+/// Builds the reorder/rescope request implied by dragging
 /// `visibleItems[oldIndex]` to `newIndex`.
 ///
 /// [folderIdByTab] and [splitMembers] are pure lookups the caller builds once
@@ -67,15 +60,12 @@ class TabViewReorderResult {
 /// drop into that folder; if only one exists, drop into its folder; if
 /// neither exists, the block moves to the space root. The result is only
 /// reported as a change when the resolved folder differs from the moving
-/// root's current folder — otherwise `TabScopeChange.unchanged()`.
+/// tab's current folder — otherwise `TabScopeChange.unchanged()`.
 TabViewReorderResult? buildTabViewReorderResult({
   required List<TabViewItem> visibleItems,
-  required List<TabsWithRootAndDepthResult> treeRows,
-  required Set<String> collapsedGroups,
   required Set<String> pinnedTabIds,
   required int oldIndex,
   required int newIndex,
-  required bool hierarchical,
   required bool sortPinnedFirst,
   required Map<String, String?> folderIdByTab,
   required Map<String, List<String>> splitMembers,
@@ -104,205 +94,49 @@ TabViewReorderResult? buildTabViewReorderResult({
   reordered.insert(insertIndex, movingItem);
 
   // Every other tab sharing the moving tab's splitId must move as one block
-  // with it, in splitIndex order, regardless of hierarchy mode.
+  // with it, in splitIndex order.
   final movingSplitSiblings = (splitMembers[movingItem.tabId] ?? const [])
       .where((tabId) => tabId != movingItem.tabId)
       .toList();
 
-  if (!hierarchical) {
-    final withoutSplitSiblings = movingSplitSiblings.isEmpty
-        ? reordered
-        : [
-            for (final item in reordered)
-              if (!movingSplitSiblings.contains(item.tabId)) item,
-          ];
-
-    final scopeChange = _computeScopeChange(
-      displayOrder: withoutSplitSiblings,
-      movingTabId: movingItem.tabId,
-      folderIdByTab: folderIdByTab,
-      spaceUuid: spaceUuid,
-    );
-
-    final ordered = <String>[];
-    for (final item in withoutSplitSiblings) {
-      ordered.add(item.tabId);
-      if (item.tabId == movingItem.tabId) {
-        ordered.addAll(movingSplitSiblings);
-      }
-    }
-
-    return _resultFromOrderedIds(
-      movingTabIds: [movingItem.tabId, ...movingSplitSiblings],
-      orderedTabIds: _orderedIdsForStorageAnchors(
-        ordered,
-        pinnedTabIds: pinnedTabIds,
-        parentById: const {},
-        movingPartitionRootId: movingItem.tabId,
-        sortPinnedFirst: sortPinnedFirst,
-      ),
-      scopeChange: scopeChange,
-    );
-  }
-
-  final rowsById = {for (final row in treeRows) row.id: row};
-  final parentById = {for (final row in treeRows) row.id: row.parentId};
-  // Build the parent → ordered-children index once and reuse for every
-  // _subtreeIds call below. _subtreeIds is invoked for the moving item plus
-  // every collapsed group encountered while flattening, so reusing this map
-  // turns N tree walks into N cheap lookups.
-  final childrenByParent = _buildChildrenByParent(rowsById, parentById);
-  final treeBlock = _subtreeIds(movingItem.tabId, rowsById, childrenByParent);
-  // Split siblings ride along with the moving block but are not part of its
-  // tab-tree subtree, so they are appended rather than walked via
-  // _subtreeIds.
-  final moveBlock = [...treeBlock, ...movingSplitSiblings];
-  final moveBlockIds = moveBlock.toSet();
-
-  final withoutMovingItem = visibleItems.toList()..removeAt(oldIndex);
-  final targetBeforeId = insertIndex < withoutMovingItem.length
-      ? withoutMovingItem[insertIndex].tabId
-      : null;
-  if (targetBeforeId != null && moveBlockIds.contains(targetBeforeId)) {
-    logger.t('reorder refused: drop target is inside the moving subtree');
-    return null;
-  }
-
-  final remaining = [
-    for (final item in visibleItems)
-      if (!moveBlockIds.contains(item.tabId)) item,
-  ];
-  final requestedInsertIndex = targetBeforeId == null
-      ? remaining.length
-      : remaining.indexWhere((item) => item.tabId == targetBeforeId);
-  if (requestedInsertIndex < 0) {
-    logger.t(
-      'reorder refused: target $targetBeforeId not present in remaining list '
-      '(defensive)',
-    );
-    return null;
-  }
-
-  // Derive the new parent scope purely from the visual drop position. The
-  // rule is "adopt the parent of the item you dropped above"; when dropped
-  // past the last visible item, adopt the parent of that last item. This
-  // unifies plain reorder ("same parent as the target slot") and
-  // drag-to-reparent ("different parent than the moving root") behind a
-  // single predicate.
-  final String? newParentScope = _dropParentScopeFor(
-    remaining,
-    requestedInsertIndex,
-  );
-
-  // Cycle guard: the new parent must not be inside the moving subtree.
-  if (newParentScope != null && moveBlockIds.contains(newParentScope)) {
-    logger.t('reorder refused: new parent scope is inside moving subtree');
-    return null;
-  }
-
-  final originalParentScope = _parentScope(movingItem);
-  final TabParentChange parentChange = newParentScope == originalParentScope
-      ? const TabParentChange.unchanged()
-      : newParentScope == null
-      ? const TabParentChange.detach()
-      : TabParentChange.toParent(newParentScope);
-  final resolvedInsertIndex = requestedInsertIndex.clamp(0, remaining.length);
-
-  final reorderedBlocks = remaining.toList()
-    ..insert(resolvedInsertIndex, movingItem);
+  final withoutSplitSiblings = movingSplitSiblings.isEmpty
+      ? reordered
+      : [
+          for (final item in reordered)
+            if (!movingSplitSiblings.contains(item.tabId)) item,
+        ];
 
   final scopeChange = _computeScopeChange(
-    displayOrder: reorderedBlocks,
+    displayOrder: withoutSplitSiblings,
     movingTabId: movingItem.tabId,
     folderIdByTab: folderIdByTab,
     spaceUuid: spaceUuid,
   );
 
-  final displayBlocks = <List<String>>[];
-  final emitted = <String>{};
-  for (final item in reorderedBlocks) {
-    if (emitted.contains(item.tabId)) {
-      continue;
+  final ordered = <String>[];
+  for (final item in withoutSplitSiblings) {
+    ordered.add(item.tabId);
+    if (item.tabId == movingItem.tabId) {
+      ordered.addAll(movingSplitSiblings);
     }
-
-    final hasChildren =
-        item.parentGroup != null || (item.childItem?.childCount ?? 0) > 0;
-    final block = item.tabId == movingItem.tabId
-        ? moveBlock
-        : hasChildren && collapsedGroups.contains(item.tabId)
-        ? _subtreeIds(item.tabId, rowsById, childrenByParent)
-        : [item.tabId];
-
-    final visibleBlock = [
-      for (final tabId in block)
-        if (!emitted.contains(tabId)) tabId,
-    ];
-    if (visibleBlock.isEmpty) {
-      continue;
-    }
-
-    displayBlocks.add(visibleBlock);
-    emitted.addAll(visibleBlock);
   }
-
-  // Partition blocks (not raw ids) by their root group, preserving block
-  // atomicity. The first block in each group always contains the root, since
-  // visibleItems is rendered parent-before-children. Subsequent blocks are
-  // siblings/descendants in display order.
-  final blocksByRoot = <String, List<List<String>>>{};
-  final rootOrder = <String>[];
-  for (final block in displayBlocks) {
-    final rootId = _rootIdFor(block.first, parentById);
-    blocksByRoot
-        .putIfAbsent(rootId, () {
-          rootOrder.add(rootId);
-          return [];
-        })
-        .add(block);
-  }
-
-  // Rows render in storage (orderKey-ascending) order on every surface, so the
-  // display order is already the order genBetween's anchors are read in.
-  final orderedTabIds = [
-    for (final rootId in rootOrder)
-      for (final block in blocksByRoot[rootId]!) ...block,
-  ];
 
   return _resultFromOrderedIds(
-    movingTabIds: moveBlock,
+    movingTabIds: [movingItem.tabId, ...movingSplitSiblings],
     orderedTabIds: _orderedIdsForStorageAnchors(
-      orderedTabIds,
+      ordered,
       pinnedTabIds: pinnedTabIds,
-      parentById: parentById,
-      movingPartitionRootId: _rootIdFor(movingItem.tabId, parentById),
+      movingTabId: movingItem.tabId,
       sortPinnedFirst: sortPinnedFirst,
     ),
-    parentChange: parentChange,
     scopeChange: scopeChange,
   );
-}
-
-/// Returns the parent scope implied by dropping just before
-/// `remaining[insertIndex]` (or "at the end" when `insertIndex == length`).
-///
-/// Rule: adopt the parent of the item you dropped above. For a tail-drop,
-/// adopt the parent of the last item. The resulting scope is the
-/// candidate `parent_id` for the moving subtree's root.
-String? _dropParentScopeFor(List<TabViewItem> remaining, int insertIndex) {
-  if (remaining.isEmpty) {
-    return null;
-  }
-  if (insertIndex < remaining.length) {
-    return _parentScope(remaining[insertIndex]);
-  }
-  return _parentScope(remaining.last);
 }
 
 List<String> _orderedIdsForStorageAnchors(
   List<String> orderedTabIds, {
   required Set<String> pinnedTabIds,
-  required Map<String, String?> parentById,
-  required String movingPartitionRootId,
+  required String movingTabId,
   required bool sortPinnedFirst,
 }) {
   if (!sortPinnedFirst || pinnedTabIds.isEmpty) {
@@ -311,17 +145,15 @@ List<String> _orderedIdsForStorageAnchors(
 
   // Pinned-first is a render-only partition, so choose DB anchors only from
   // the moving tab's own partition to avoid snapping across the boundary.
-  final movingPinned = pinnedTabIds.contains(movingPartitionRootId);
-  return orderedTabIds.where((tabId) {
-    final rootId = _rootIdFor(tabId, parentById);
-    return pinnedTabIds.contains(rootId) == movingPinned;
-  }).toList();
+  final movingPinned = pinnedTabIds.contains(movingTabId);
+  return orderedTabIds
+      .where((tabId) => pinnedTabIds.contains(tabId) == movingPinned)
+      .toList();
 }
 
 TabViewReorderResult? _resultFromOrderedIds({
   required List<String> movingTabIds,
   required List<String> orderedTabIds,
-  TabParentChange parentChange = const TabParentChange.unchanged(),
   TabScopeChange scopeChange = const TabScopeChange.unchanged(),
 }) {
   if (movingTabIds.isEmpty) {
@@ -346,7 +178,6 @@ TabViewReorderResult? _resultFromOrderedIds({
     nextTabId: lastIndex + 1 < orderedTabIds.length
         ? orderedTabIds[lastIndex + 1]
         : null,
-    parentChange: parentChange,
     scopeChange: scopeChange,
   );
 }
@@ -417,65 +248,4 @@ TabScopeChange _computeScopeChange({
     return const TabScopeChange.unchanged();
   }
   return TabScopeChange.toScope(spaceUuid: spaceUuid, folderId: resolvedFolder);
-}
-
-String? _parentScope(TabViewItem item) => item.childItem?.parentId;
-
-Map<String, List<TabsWithRootAndDepthResult>> _buildChildrenByParent(
-  Map<String, TabsWithRootAndDepthResult> rowsById,
-  Map<String, String?> parentById,
-) {
-  final childrenByParent = <String, List<TabsWithRootAndDepthResult>>{};
-  for (final row in rowsById.values) {
-    final parentId = parentById[row.id];
-    if (parentId == null) continue;
-    childrenByParent.putIfAbsent(parentId, () => []).add(row);
-  }
-  for (final children in childrenByParent.values) {
-    children.sort((a, b) => a.orderKey.compareTo(b.orderKey));
-  }
-  return childrenByParent;
-}
-
-List<String> _subtreeIds(
-  String rootId,
-  Map<String, TabsWithRootAndDepthResult> rowsById,
-  Map<String, List<TabsWithRootAndDepthResult>> childrenByParent,
-) {
-  final root = rowsById[rootId];
-  if (root == null) {
-    return [rootId];
-  }
-
-  final result = <String>[];
-  final visited = <String>{};
-
-  void collect(String tabId) {
-    if (!visited.add(tabId)) return;
-
-    result.add(tabId);
-    for (final child
-        in childrenByParent[tabId] ?? const <TabsWithRootAndDepthResult>[]) {
-      collect(child.id);
-    }
-  }
-
-  collect(root.id);
-  return result;
-}
-
-String _rootIdFor(String tabId, Map<String, String?> parentById) {
-  var rootId = tabId;
-  var parentId = parentById[rootId];
-  final seen = <String>{rootId};
-
-  while (parentId != null && parentById.containsKey(parentId)) {
-    if (!seen.add(parentId)) {
-      break;
-    }
-    rootId = parentId;
-    parentId = parentById[rootId];
-  }
-
-  return rootId;
 }

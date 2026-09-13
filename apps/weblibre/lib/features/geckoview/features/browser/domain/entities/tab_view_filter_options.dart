@@ -86,8 +86,6 @@ class TabViewFilterOptions with FastEquatable {
   final TabTypeFilter tabTypeFilter;
   final TabSortType sortType;
   final bool sortPinnedFirst;
-  @JsonKey(defaultValue: true)
-  final bool showHierarchicalTabs;
   @DateTimeRangeConverter()
   final DateTimeRange<DateTime>? dateRange;
   final TabQuickInterval? quickInterval;
@@ -96,7 +94,6 @@ class TabViewFilterOptions with FastEquatable {
     required this.tabTypeFilter,
     required this.sortType,
     required this.sortPinnedFirst,
-    required this.showHierarchicalTabs,
     required this.dateRange,
     required this.quickInterval,
   });
@@ -106,7 +103,6 @@ class TabViewFilterOptions with FastEquatable {
         tabTypeFilter: TabTypeFilter.all,
         sortType: TabSortType.manual,
         sortPinnedFirst: true,
-        showHierarchicalTabs: true,
         dateRange: null,
         quickInterval: null,
       );
@@ -141,14 +137,12 @@ class TabViewFilterOptions with FastEquatable {
   /// reordering or hiding rows on a surface that is on screen while the tray is
   /// closed.
   ///
-  /// [sortPinnedFirst] and [showHierarchicalTabs] deliberately survive: they
-  /// describe how tabs are structured everywhere, not what the tray is
-  /// currently showing.
+  /// [sortPinnedFirst] deliberately survives: it describes how tabs are
+  /// structured everywhere, not what the tray is currently showing.
   TabViewFilterOptions toPresentationScope() => TabViewFilterOptions(
     tabTypeFilter: TabTypeFilter.all,
     sortType: TabSortType.manual,
     sortPinnedFirst: sortPinnedFirst,
-    showHierarchicalTabs: showHierarchicalTabs,
     dateRange: null,
     quickInterval: null,
   );
@@ -158,7 +152,6 @@ class TabViewFilterOptions with FastEquatable {
     tabTypeFilter,
     sortType,
     sortPinnedFirst,
-    showHierarchicalTabs,
     dateRange,
     quickInterval,
   ];

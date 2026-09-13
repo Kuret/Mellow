@@ -8,7 +8,6 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
@@ -21,12 +20,10 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 const _space = '{space}';
 
-/// A row of the space: a root tab (or child of [parentId]) with its shelf,
-/// folder, split and liveness.
+/// A row of the space with its shelf, folder, split and liveness.
 class _Tab {
   final String id;
   final String orderKey;
-  final String? parentId;
   final TabShelf shelf;
   final String? folderId;
   final String? splitId;
@@ -36,7 +33,6 @@ class _Tab {
   const _Tab(
     this.id,
     this.orderKey, {
-    this.parentId,
     this.shelf = TabShelf.normal,
     this.folderId,
     this.splitId,
@@ -44,19 +40,11 @@ class _Tab {
     this.cold = false,
   });
 
-  TabsWithRootAndDepthResult get row => TabsWithRootAndDepthResult(
-    id: id,
-    parentId: parentId,
-    orderKey: orderKey,
-    rootId: parentId ?? id,
-    depth: parentId == null ? 0 : 1,
-  );
-
   TabSummary get summary => TabSummary(
     id: id,
     engineTabId: cold ? null : id,
     source: TabSource.manual,
-    parentId: parentId,
+    parentId: null,
     containerId: null,
     spaceUuid: _space,
     folderId: folderId,
@@ -102,9 +90,6 @@ void main() {
         };
     final container = ProviderContainer(
       overrides: [
-        watchTabsWithRootAndDepthProvider(
-          _space,
-        ).overrideWith((ref) => Stream.value([for (final t in tabs) t.row])),
         watchSpaceTabsDataProvider(_space).overrideWith(
           (ref) => Stream.value([for (final t in tabs) t.summary]),
         ),
@@ -136,7 +121,6 @@ void main() {
         tabViewFilterControllerProvider.overrideWith(
           () => _FakeFilterController(TabViewFilterOptions.withDefaults()),
         ),
-        collapsedGroupsProvider.overrideWith(() => _FakeCollapsedGroups()),
       ],
     );
     addTearDown(container.dispose);
@@ -149,8 +133,8 @@ void main() {
       scope: TabListScope.tray,
     );
     container.listen(provider, (_, _) {}, fireImmediately: true);
-    // The provider chains stream providers (tree rows, then their summaries
-    // and folders); each hop is delivered on a later event-loop turn.
+    // The provider chains stream providers (row summaries, then folders);
+    // each hop is delivered on a later event-loop turn.
     for (var i = 0; i < 8; i++) {
       await Future<void>.delayed(Duration.zero);
     }
@@ -172,9 +156,7 @@ void main() {
   }
 
   String label(TabListItemEntity item) => switch (item) {
-    TabListStandaloneItem(:final tabId, :final depth) => '$tabId@$depth',
-    TabListParentGroup(:final tabId, :final depth) => '$tabId+@$depth',
-    TabListChildItem(:final tabId, :final depth) => '$tabId>@$depth',
+    TabListTabItem(:final tabId, :final depth) => '$tabId@$depth',
     TabListFolderItem(:final folderId, :final depth, :final childCount) =>
       '[$folderId:$childCount]@$depth',
   };
@@ -197,7 +179,7 @@ void main() {
         _Tab('a', 'a'),
         _Tab('f1', 'a', folderId: 'F'),
         _Tab('f2', 'b', folderId: 'F'),
-        _Tab('f2c', 'c', folderId: 'F', parentId: 'f2'),
+        _Tab('f2c', 'c', folderId: 'F'),
         _Tab('n1', 'a', folderId: 'N'),
         _Tab('c', 'c'),
       ],
@@ -210,8 +192,8 @@ void main() {
     expect((await read(container)).map(label), [
       '[F:4]@0',
       'f1@1',
-      'f2+@1',
-      'f2c>@2',
+      'f2@1',
+      'f2c@1',
       '[N:1]@1',
       'n1@2',
       'a@0',
@@ -327,7 +309,7 @@ void main() {
       tabs: const [
         _Tab('a', 'a'),
         _Tab('p', 'b', shelf: TabShelf.pinned),
-        _Tab('pc', 'c', parentId: 'p', shelf: TabShelf.pinned),
+        _Tab('pc', 'c', shelf: TabShelf.pinned),
         _Tab('d', 'd'),
       ],
     );
@@ -387,11 +369,6 @@ class _FakeFilterController extends TabViewFilterController {
   final TabViewFilterOptions options;
   @override
   TabViewFilterOptions build() => options;
-}
-
-class _FakeCollapsedGroups extends CollapsedGroups {
-  @override
-  Set<String> build() => const {};
 }
 
 /// The restore has completed, so only engine-listed and cold rows render.

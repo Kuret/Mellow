@@ -70,43 +70,37 @@ class SearchResultTabEntity extends TabEntity {
 /// Sealed type for items rendered in the grouped flat list/grid views.
 ///
 /// Distinct from [TabEntity] which serves the original flat-only path. The
-/// grouped variant carries enough information to render parent-with-children
-/// blocks — and, since PLAN §6.6, folders — while keeping a single ordered
-/// top-level list. Items are scoped by space rather than container.
+/// grouped variant carries enough information to render folders (PLAN §6.6)
+/// while keeping a single ordered top-level list. Items are scoped by space
+/// rather than container.
 sealed class TabListItemEntity with FastEquatable {
   String get orderKey;
   String? get spaceUuid;
 
-  /// Nesting depth from the space root: +1 per enclosing folder and, for a
-  /// tree child, +1 per visible ancestor. `0` marks a root row.
+  /// Nesting depth from the space root: +1 per enclosing folder. `0` marks a
+  /// row at the space root.
   int get depth;
 }
 
-/// A [TabListItemEntity] that is a tab (as opposed to a folder).
-sealed class TabListTabItem extends TabListItemEntity {
-  String get tabId;
+/// A tab occupying a slot in its scope's child sequence (as opposed to a
+/// folder).
+class TabListTabItem extends TabListItemEntity {
+  final String tabId;
+  @override
+  final String orderKey;
+  @override
+  final String? spaceUuid;
+
+  /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
+  @override
+  final int depth;
 
   /// The shelf the row sits on (PLAN §6.4). Essentials never appear in a
   /// list, so this is [TabShelf.pinned] or [TabShelf.normal]; the surfaces
   /// use it to draw the pinned section apart from the main list.
-  TabShelf get shelf;
-}
-
-class TabListStandaloneItem extends TabListTabItem {
-  @override
-  final String tabId;
-  @override
-  final String orderKey;
-  @override
-  final String? spaceUuid;
-
-  /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
-  @override
-  final int depth;
-  @override
   final TabShelf shelf;
 
-  TabListStandaloneItem({
+  TabListTabItem({
     required this.tabId,
     required this.orderKey,
     required this.spaceUuid,
@@ -120,80 +114,6 @@ class TabListStandaloneItem extends TabListTabItem {
     orderKey,
     spaceUuid,
     depth,
-    shelf,
-  ];
-}
-
-class TabListParentGroup extends TabListTabItem {
-  @override
-  final String tabId;
-  @override
-  final String orderKey;
-  @override
-  final String? spaceUuid;
-  final int childCount;
-
-  /// Folder nesting depth: 0 at the space root, +1 per enclosing folder.
-  @override
-  final int depth;
-  @override
-  final TabShelf shelf;
-
-  TabListParentGroup({
-    required this.tabId,
-    required this.orderKey,
-    required this.spaceUuid,
-    required this.childCount,
-    this.depth = 0,
-    this.shelf = TabShelf.normal,
-  });
-
-  @override
-  List<Object?> get hashParameters => [
-    tabId,
-    orderKey,
-    spaceUuid,
-    childCount,
-    depth,
-    shelf,
-  ];
-}
-
-class TabListChildItem extends TabListTabItem {
-  @override
-  final String tabId;
-  @override
-  final String orderKey;
-  @override
-  final String? spaceUuid;
-  final String parentId;
-  final String rootId;
-  @override
-  final int depth;
-  final int childCount;
-  @override
-  final TabShelf shelf;
-
-  TabListChildItem({
-    required this.tabId,
-    required this.orderKey,
-    required this.spaceUuid,
-    required this.parentId,
-    required this.rootId,
-    required this.depth,
-    this.childCount = 0,
-    this.shelf = TabShelf.normal,
-  });
-
-  @override
-  List<Object?> get hashParameters => [
-    tabId,
-    orderKey,
-    spaceUuid,
-    parentId,
-    rootId,
-    depth,
-    childCount,
     shelf,
   ];
 }
@@ -232,35 +152,5 @@ class TabListFolderItem extends TabListItemEntity {
     isCollapsed,
     depth,
     childCount,
-  ];
-}
-
-class TabTreeEntity extends TabEntity {
-  @override
-  final String tabId;
-  @override
-  final String orderKey;
-
-  final String? containerId;
-
-  final String rootId;
-
-  final int totalTabs;
-
-  TabTreeEntity({
-    required this.tabId,
-    required this.orderKey,
-    required this.containerId,
-    required this.rootId,
-    required this.totalTabs,
-  });
-
-  @override
-  List<Object?> get hashParameters => [
-    tabId,
-    orderKey,
-    containerId,
-    rootId,
-    totalTabs,
   ];
 }

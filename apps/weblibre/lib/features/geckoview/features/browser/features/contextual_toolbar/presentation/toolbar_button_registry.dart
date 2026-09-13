@@ -53,7 +53,6 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -235,7 +234,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: addTabToolbarButtonSpec,
     label: 'New Tab',
     icon: MdiIcons.tabPlus,
-    longPressActions: ['Add Regular Tab', 'Add Child Tab', 'Add Private Tab'],
+    longPressActions: ['Add Regular Tab', 'Add Private Tab'],
     builder: (scope, context, ref) => scope.isPreview
         ? AddTabButtonView(onPressed: () {}, onLongPress: () {})
         : const AddTabButton(),
@@ -244,7 +243,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: tabsCountToolbarButtonSpec,
     label: 'Tabs',
     icon: MdiIcons.tab,
-    longPressActions: ['Add Regular Tab', 'Add Child Tab', 'Add Private Tab'],
+    longPressActions: ['Add Regular Tab', 'Add Private Tab'],
     builder: (scope, context, ref) => scope.isPreview
         ? TabsCountButtonView(
             isActive: false,
@@ -810,23 +809,6 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
             },
             child: const Text('Close from Same Host'),
           ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.account_tree),
-          onPressed: () async {
-            final tabId = scope.selectedTabId;
-            if (tabId == null) return;
-            final descendants = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .getContainerTabDescendants(tabId);
-            if (!context.mounted) return;
-
-            final subtreeIds = descendants.keys.toList();
-            if (subtreeIds.isNotEmpty) {
-              await closeTabsWithConfirmation(context, ref, subtreeIds);
-            }
-          },
-          child: const Text('Close Tab and Descendants'),
-        ),
       ],
       child: IconButton(
         onPressed: scope.isPreview

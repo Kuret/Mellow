@@ -103,7 +103,6 @@ class OpenInContainer extends HookConsumerWidget {
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: hitResult.tryGetLink(),
-              parentId: currentTab?.id,
               selectTab: false,
               tabMode: tabMode,
               containerSelection: TabContainerSelection.specific(

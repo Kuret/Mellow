@@ -164,10 +164,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
         return WebPageInfo(url: url, favicon: favicon);
       }
 
-      return WebPageInfo(
-        url: url,
-        title: (result['title'] as String?)?.trim(),
-      );
+      return WebPageInfo(url: url, title: (result['title'] as String?)?.trim());
     }, exceptionHandler: handleHttpError);
   }
 

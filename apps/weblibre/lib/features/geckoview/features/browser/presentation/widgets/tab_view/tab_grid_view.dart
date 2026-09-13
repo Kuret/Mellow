@@ -41,7 +41,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
@@ -58,31 +57,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-
-/// Top-left expand/collapse toggle for grid cells. Returns null for any
-/// row that is not a parent — leaf children rely on the bottom-left depth
-/// indicator instead.
-Widget? _gridGroupToggleFor(TabViewItem row) {
-  final parentGroup = row.parentGroup;
-  if (parentGroup != null) {
-    return TabGroupExpandToggle(
-      parentId: parentGroup.tabId,
-      childCount: parentGroup.childCount,
-      style: TabGroupToggleStyle.grid,
-    );
-  }
-  final child = row.childItem;
-  if (child != null && child.childCount > 0) {
-    return TabGroupExpandToggle(
-      parentId: child.tabId,
-      childCount: child.childCount,
-      style: TabGroupToggleStyle.grid,
-    );
-  }
-  return null;
-}
-
-int _gridDepthFor(TabViewItem row) => row.depth;
 
 /// Grid tile for a [TabListFolderItem]. Grid cells are all the same fixed
 /// aspect-ratio size (see [_TabGridView]'s `SliverGridDelegateWithFixedCrossAxisCount`),
@@ -231,7 +205,6 @@ class _TabDraggable extends HookConsumerWidget {
   final String? sourceSearchQuery;
   final String? suggestedContainerId;
   final VoidCallback onClose;
-  final Widget? groupToggle;
   final int depth;
 
   const _TabDraggable({
@@ -239,7 +212,6 @@ class _TabDraggable extends HookConsumerWidget {
     required this.onClose,
     this.sourceSearchQuery,
     this.suggestedContainerId,
-    this.groupToggle,
     this.depth = 0,
   });
 
@@ -284,10 +256,9 @@ class _TabDraggable extends HookConsumerWidget {
               activeTabId: activeTab,
               onClose: onClose,
               sourceSearchQuery: sourceSearchQuery,
-              groupToggle: groupToggle,
               depth: depth,
             );
-    }, [tabId, activeTab, suggestedContainerId, groupToggle, depth]);
+    }, [tabId, activeTab, suggestedContainerId, depth]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -326,14 +297,7 @@ class _TabGridView extends HookConsumerWidget {
     final spaceUuid = ref.watch(selectedSpaceProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
-    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-    final collapsedGroups = ref.watch(collapsedGroupsProvider);
-    final treeRows = ref.watch(
-      watchTabsWithRootAndDepthProvider(
-        spaceUuid,
-      ).select((value) => value.value ?? const []),
-    );
     // Reorder anchors: which folder (if any) each tab currently sits in, and
     // which tabs share a splitId, both derived from the same space-tabs
     // summaries the grouping provider already reads.
@@ -374,7 +338,6 @@ class _TabGridView extends HookConsumerWidget {
           // ignore: document_ignores using fast equatable
           // ignore: provider_parameters
           containerFilter: ContainerFilterById(containerId: containerId),
-          groupTrees: false,
         ),
       );
       primaryRows = [
@@ -384,7 +347,6 @@ class _TabGridView extends HookConsumerWidget {
             sourceSearchQuery: switch (entity) {
               DefaultTabEntity _ => null,
               final SearchResultTabEntity e => e.searchQuery,
-              TabTreeEntity _ => null,
             },
           ),
       ];
@@ -398,16 +360,10 @@ class _TabGridView extends HookConsumerWidget {
       primaryRows = [
         for (final item in visibleItems.value)
           switch (item) {
-            TabListStandaloneItem(:final tabId, :final depth) =>
-              TabViewItem.standalone(tabId: tabId, depth: depth),
-            final TabListParentGroup g =>
-              showHierarchicalTabs
-                  ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(tabId: g.tabId, depth: g.depth),
-            final TabListChildItem c =>
-              showHierarchicalTabs
-                  ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(tabId: c.tabId, depth: c.depth),
+            TabListTabItem(:final tabId, :final depth) => TabViewItem.tab(
+              tabId: tabId,
+              depth: depth,
+            ),
             final TabListFolderItem f => TabViewItem.folder(folderItem: f),
           },
       ];
@@ -537,12 +493,9 @@ class _TabGridView extends HookConsumerWidget {
 
                 final result = buildTabViewReorderResult(
                   visibleItems: primaryRows,
-                  treeRows: treeRows,
-                  collapsedGroups: collapsedGroups,
                   pinnedTabIds: pinnedTabIds,
                   oldIndex: oldIndex,
                   newIndex: newIndex,
-                  hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
                   folderIdByTab: folderIdByTab,
                   splitMembers: splitMembers,
@@ -557,7 +510,6 @@ class _TabGridView extends HookConsumerWidget {
                       movingTabIds: result.movingTabIds,
                       previousTabId: result.previousTabId,
                       nextTabId: result.nextTabId,
-                      parentChange: result.parentChange,
                       scopeChange: result.scopeChange,
                     );
               },
@@ -652,8 +604,7 @@ class _TabGrid extends StatelessWidget {
               tabId: row.tabId,
               sourceSearchQuery: row.sourceSearchQuery,
               onClose: onClose,
-              groupToggle: _gridGroupToggleFor(row),
-              depth: _gridDepthFor(row),
+              depth: row.depth,
             ),
           );
 

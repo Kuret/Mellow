@@ -54,13 +54,6 @@ const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
 const uiScaleFactorStep = 0.05;
 
-/// Max number of inline chevron glyphs shown on a quick tab switcher chip
-/// before the depth indicator collapses into a single icon + count badge.
-/// A value of 0 hides the hierarchy indicator entirely.
-const defaultQuickTabSwitcherHierarchyGlyphs = 2;
-const minQuickTabSwitcherHierarchyGlyphs = 0;
-const maxQuickTabSwitcherHierarchyGlyphs = 4;
-
 /// Max width (logical px) of the title text on a quick tab switcher chip.
 /// The default of 64 sits at the 1/3 position of the slider scale.
 const defaultQuickTabSwitcherTitleWidth = 64.0;
@@ -273,7 +266,6 @@ class GeneralSettings with FastEquatable {
   final String? defaultSearchProvider;
 
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
-  final bool createChildTabsOption;
   final bool enableLocalAiFeatures;
   final bool showContainerUi;
 
@@ -341,7 +333,6 @@ class GeneralSettings with FastEquatable {
   final bool allowClipboardAccess;
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
-  final int quickTabSwitcherHierarchyGlyphs;
   final bool quickTabSwitcherShowHistorySuggestions;
 
   /// Max width (logical px) for chip titles in the quick tab switcher.
@@ -514,7 +505,6 @@ class GeneralSettings with FastEquatable {
     required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
-    required this.createChildTabsOption,
     required this.enableLocalAiFeatures,
     required this.showContainerUi,
     required this.showSearchCloseButton,
@@ -548,7 +538,6 @@ class GeneralSettings with FastEquatable {
     required this.allowClipboardAccess,
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
-    required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
     required this.railWidth,
@@ -608,7 +597,6 @@ class GeneralSettings with FastEquatable {
     bool? allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
-    bool? createChildTabsOption,
     bool? enableLocalAiFeatures,
     bool? showContainerUi,
     bool? showSearchCloseButton,
@@ -640,7 +628,6 @@ class GeneralSettings with FastEquatable {
     bool? allowClipboardAccess,
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
-    int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
     double? railWidth,
@@ -697,7 +684,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
-       createChildTabsOption = createChildTabsOption ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        showContainerUi = showContainerUi ?? true,
        showSearchCloseButton = showSearchCloseButton ?? false,
@@ -744,9 +730,6 @@ class GeneralSettings with FastEquatable {
        allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
-       quickTabSwitcherHierarchyGlyphs =
-           quickTabSwitcherHierarchyGlyphs ??
-           defaultQuickTabSwitcherHierarchyGlyphs,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
@@ -933,7 +916,6 @@ class GeneralSettings with FastEquatable {
     allowPrivateTabScreenshots,
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
-    createChildTabsOption,
     enableLocalAiFeatures,
     showContainerUi,
     showSearchCloseButton,
@@ -965,7 +947,6 @@ class GeneralSettings with FastEquatable {
     allowClipboardAccess,
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
-    quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
     railWidth,

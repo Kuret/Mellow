@@ -32,8 +32,7 @@ part 'tab_view_controllers.g.dart';
 
 enum TabsViewMode {
   list(MdiIcons.folderTable, 'List'),
-  grid(MdiIcons.table, 'Grid'),
-  tree(MdiIcons.familyTree, 'Tree');
+  grid(MdiIcons.table, 'Grid');
 
   final IconData icon;
   final String label;
@@ -58,7 +57,11 @@ class TabsViewModeController extends _$TabsViewModeController {
       encode: (state) => jsonEncode([state.name]),
       decode: (encoded) {
         final name = (jsonDecode(encoded) as List<dynamic>).first as String;
-        return TabsViewMode.values.firstWhere((e) => e.name == name);
+        // Stored configs may still name the removed `tree` mode (phase 7).
+        return TabsViewMode.values.firstWhere(
+          (e) => e.name == name,
+          orElse: () => TabsViewMode.list,
+        );
       },
     );
 
@@ -79,10 +82,6 @@ class TabViewFilterController extends _$TabViewFilterController {
 
   void setSortPinnedFirst(bool value) {
     state = state.copyWith(sortPinnedFirst: value);
-  }
-
-  void setShowHierarchicalTabs(bool value) {
-    state = state.copyWith(showHierarchicalTabs: value);
   }
 
   void setDateRange(DateTimeRange<DateTime>? range) {
@@ -109,25 +108,6 @@ class TabViewFilterController extends _$TabViewFilterController {
 
     return stateOrNull ?? TabViewFilterOptions.withDefaults();
   }
-}
-
-/// Tracks which parent groups are *collapsed* in the grouped list/grid views.
-///
-/// Stored as the collapsed set so groups default to expanded for fresh
-/// sessions. In-memory only — group expansion is treated as ephemeral UI
-/// state, not a persisted setting.
-@Riverpod(keepAlive: true)
-class CollapsedGroups extends _$CollapsedGroups {
-  @override
-  Set<String> build() => const {};
-
-  void toggle(String parentId) {
-    state = state.contains(parentId)
-        ? (state.toSet()..remove(parentId))
-        : (state.toSet()..add(parentId));
-  }
-
-  void expandAll() => state = const {};
 }
 
 @Riverpod()

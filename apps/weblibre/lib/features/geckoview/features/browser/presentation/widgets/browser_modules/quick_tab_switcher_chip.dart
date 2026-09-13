@@ -29,7 +29,6 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
@@ -43,7 +42,6 @@ class QuickTabSwitcherItem with FastEquatable {
   final TabMode tabMode;
   final bool isHistory;
   final bool isPinned;
-  final int depth;
   final String title;
   final Uri url;
   final Widget avatar;
@@ -67,7 +65,6 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.url,
     required this.avatar,
     this.useCustomColor = false,
-    this.depth = 0,
     this.presence = TabPresence.live,
   });
 
@@ -76,7 +73,6 @@ class QuickTabSwitcherItem with FastEquatable {
     TabStateWithContainer state, {
     required String? selectedTabId,
     required Set<String> pinnedTabIds,
-    required Map<String, int> tabDepthById,
     TabPresence presence = TabPresence.live,
   }) {
     final (tab, container) = state;
@@ -89,7 +85,6 @@ class QuickTabSwitcherItem with FastEquatable {
       tabMode: tab.tabMode,
       isHistory: false,
       isPinned: pinnedTabIds.contains(tab.id),
-      depth: tabDepthById[tab.id] ?? 0,
       url: tab.url,
       avatar: TabIcon(tabState: tab, iconSize: 20),
       presence: presence,
@@ -126,7 +121,6 @@ class QuickTabSwitcherItem with FastEquatable {
     tabMode,
     isHistory,
     isPinned,
-    depth,
     title,
     url,
     avatar,
@@ -140,7 +134,6 @@ SelectableChipDecoration<QuickTabSwitcherItem>
 buildQuickTabSwitcherChipDecoration(
   BuildContext context, {
   required bool showTitles,
-  required int hierarchyGlyphs,
   // On the vertical rail nesting is shown as a corner badge on the favicon (not
   // a leading pill), so a nested chip carries no extra inline width and can use
   // the same zero label padding as a leaf chip instead of overflowing.
@@ -193,7 +186,6 @@ buildQuickTabSwitcherChipDecoration(
         (!showTitles &&
             !item.isHistory &&
             !item.isPinned &&
-            (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
             item.tabMode is! PrivateTabMode)
         ? EdgeInsets.zero
         : null,
@@ -207,37 +199,17 @@ Widget buildQuickTabSwitcherChipLabel(
   QuickTabSwitcherItem item, {
   required bool isSelected,
   required bool showTitles,
-  required int hierarchyGlyphs,
   required double titleMaxWidth,
-  // On the narrow vertical rail the leading depth pill has no room beside the
-  // favicon (it clips the icon), so nesting is shown as a compact corner badge
-  // overlaid on the favicon instead.
   bool isVertical = false,
 }) {
   final appColors = AppColors.of(context);
   final hasTitle = item.isHistory || showTitles;
-  final isNested = item.depth > 0 && hierarchyGlyphs > 0;
-  final showInlineDepth = isNested && !isVertical;
-  final nestedAvatar = (isNested && isVertical)
-      ? _RailDepthAvatar(depth: item.depth, child: item.avatar)
-      : item.avatar;
   final avatar = item.isCold
-      ? ColdTabBadge(size: 20, child: nestedAvatar)
-      : nestedAvatar;
+      ? ColdTabBadge(size: 20, child: item.avatar)
+      : item.avatar;
   final labelRow = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      if (showInlineDepth)
-        Padding(
-          padding: const EdgeInsets.only(right: 6.0),
-          child: TabDepthIndicator(
-            depth: item.depth,
-            height: 20.0,
-            iconSize: 14.0,
-            horizontalPadding: 4.0,
-            maxInlineGlyphs: hierarchyGlyphs,
-          ),
-        ),
       Padding(
         padding: EdgeInsets.only(right: hasTitle ? 6.0 : 0.0),
         child: avatar,
@@ -297,67 +269,6 @@ Widget buildQuickTabSwitcherChipLabel(
         ),
       ) ??
       row;
-}
-
-/// Favicon with a compact nesting badge overlaid on its bottom-right corner,
-/// used on the vertical side rail where the inline [TabDepthIndicator] pill
-/// would clip the favicon. The badge shows a subdirectory-arrow glyph for a
-/// direct child and the depth number for deeper nesting.
-class _RailDepthAvatar extends StatelessWidget {
-  final int depth;
-  final Widget child;
-
-  const _RailDepthAvatar({required this.depth, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    // Keep the exact 20px footprint of a plain favicon so a nested chip stays
-    // the same width as a leaf chip on the narrow rail; the badge is anchored
-    // inside the horizontal bounds (only the vertical corner is allowed to
-    // bleed, where there's ample room) so it never widens the chip.
-    return SizedBox(
-      width: 20,
-      height: 20,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(child: child),
-          Positioned(
-            right: -3,
-            bottom: -5,
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 1.0),
-              decoration: BoxDecoration(
-                color: scheme.secondaryContainer,
-                borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-                border: Border.all(color: scheme.surfaceContainer, width: 1.0),
-              ),
-              child: Center(
-                child: depth > 1
-                    ? Text(
-                        '$depth',
-                        style: TextStyle(
-                          fontSize: 9,
-                          height: 1.0,
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSecondaryContainer,
-                        ),
-                      )
-                    : Icon(
-                        MdiIcons.subdirectoryArrowRight,
-                        size: 10,
-                        color: scheme.onSecondaryContainer,
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// FilterChip matching [SelectableChips]' visual contract, used by render

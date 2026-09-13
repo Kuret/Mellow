@@ -35,8 +35,6 @@ abstract class _$GeneralSettingsCWProxy {
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
   );
 
-  GeneralSettings createChildTabsOption(bool createChildTabsOption);
-
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
 
   GeneralSettings showContainerUi(bool showContainerUi);
@@ -112,10 +110,6 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings tabListShowFavicons(bool tabListShowFavicons);
 
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
-
-  GeneralSettings quickTabSwitcherHierarchyGlyphs(
-    int quickTabSwitcherHierarchyGlyphs,
-  );
 
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
@@ -237,7 +231,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
-    bool createChildTabsOption,
     bool enableLocalAiFeatures,
     bool showContainerUi,
     bool showSearchCloseButton,
@@ -269,7 +262,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowClipboardAccess,
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
-    int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
     double railWidth,
@@ -373,10 +365,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
   ) => call(defaultSearchSuggestionsProvider: defaultSearchSuggestionsProvider);
-
-  @override
-  GeneralSettings createChildTabsOption(bool createChildTabsOption) =>
-      call(createChildTabsOption: createChildTabsOption);
 
   @override
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures) =>
@@ -508,11 +496,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles) =>
       call(quickTabSwitcherShowTitles: quickTabSwitcherShowTitles);
-
-  @override
-  GeneralSettings quickTabSwitcherHierarchyGlyphs(
-    int quickTabSwitcherHierarchyGlyphs,
-  ) => call(quickTabSwitcherHierarchyGlyphs: quickTabSwitcherHierarchyGlyphs);
 
   @override
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
@@ -721,7 +704,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
-    Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showSearchCloseButton = const $CopyWithPlaceholder(),
@@ -754,7 +736,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
-    Object? quickTabSwitcherHierarchyGlyphs = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
@@ -869,12 +850,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchSuggestionsProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchSuggestionsProvider as SearchSuggestionProviders,
-      createChildTabsOption:
-          createChildTabsOption == const $CopyWithPlaceholder() ||
-              createChildTabsOption == null
-          ? _value.createChildTabsOption
-          // ignore: cast_nullable_to_non_nullable
-          : createChildTabsOption as bool,
       enableLocalAiFeatures:
           enableLocalAiFeatures == const $CopyWithPlaceholder() ||
               enableLocalAiFeatures == null
@@ -1046,12 +1021,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowTitles
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowTitles as bool,
-      quickTabSwitcherHierarchyGlyphs:
-          quickTabSwitcherHierarchyGlyphs == const $CopyWithPlaceholder() ||
-              quickTabSwitcherHierarchyGlyphs == null
-          ? _value.quickTabSwitcherHierarchyGlyphs
-          // ignore: cast_nullable_to_non_nullable
-          : quickTabSwitcherHierarchyGlyphs as int,
       quickTabSwitcherShowHistorySuggestions:
           quickTabSwitcherShowHistorySuggestions ==
                   const $CopyWithPlaceholder() ||
@@ -1344,7 +1313,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$SearchSuggestionProvidersEnumMap,
     json['defaultSearchSuggestionsProvider'],
   ),
-  createChildTabsOption: json['createChildTabsOption'] as bool?,
   enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
   showContainerUi: json['showContainerUi'] as bool?,
   showSearchCloseButton: json['showSearchCloseButton'] as bool?,
@@ -1415,8 +1383,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
-  quickTabSwitcherHierarchyGlyphs:
-      (json['quickTabSwitcherHierarchyGlyphs'] as num?)?.toInt(),
   quickTabSwitcherShowHistorySuggestions:
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
@@ -1503,7 +1469,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'defaultSearchSuggestionsProvider':
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
-  'createChildTabsOption': instance.createChildTabsOption,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
   'showSearchCloseButton': instance.showSearchCloseButton,
@@ -1541,7 +1506,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
-  'quickTabSwitcherHierarchyGlyphs': instance.quickTabSwitcherHierarchyGlyphs,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
@@ -1638,7 +1602,6 @@ const _$HomeSearchBarPlacementEnumMap = {
 const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
-  TabType.child: 'child',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

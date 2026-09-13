@@ -19,7 +19,6 @@
  */
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -402,7 +401,7 @@ Future<void> _clearContainerData(
   final shouldReopenTabs = result!.reopenTabs;
 
   try {
-    final closedTabIds = await ref
+    await ref
         .read(tabDataRepositoryProvider.notifier)
         .closeContainerTabs(container.id);
 
@@ -414,26 +413,18 @@ Future<void> _clearContainerData(
       await ref
           .read(tabRepositoryProvider.notifier)
           .addMultipleTabs(
-            tabs: tabs.map((tab) {
-              // Re-parent onto the nearest ancestor that survives, so the
-              // restored hierarchy doesn't reference closed tabs.
-              var parentId = tab.parentId;
-              while (parentId != null && closedTabIds.contains(parentId)) {
-                parentId = tabs
-                    .firstWhereOrNull((old) => old.id == parentId)
-                    ?.parentId;
-              }
-
-              return AddTabParams(
-                url: tab.url.toString(),
-                startLoading: true,
-                parentId: parentId,
-                private: tab.tabMode == TabModeDbValue.private,
-                flags: LoadUrlFlags.NONE.toValue(),
-                source: Internal.newTab.toValue(),
-                contextId: contextualIdentity,
-              );
-            }).toList(),
+            tabs: tabs
+                .map(
+                  (tab) => AddTabParams(
+                    url: tab.url.toString(),
+                    startLoading: true,
+                    private: tab.tabMode == TabModeDbValue.private,
+                    flags: LoadUrlFlags.NONE.toValue(),
+                    source: Internal.newTab.toValue(),
+                    contextId: contextualIdentity,
+                  ),
+                )
+                .toList(),
             containerSelection: TabContainerSelection.specific(container),
           );
     }

@@ -45,13 +45,10 @@ class OpenInNewTab extends HookConsumerWidget {
     WidgetRef ref,
     TabMode tabMode,
   ) async {
-    final currentTab = ref.read(selectedTabStateProvider);
-
     final tabId = await ref
         .read(tabRepositoryProvider.notifier)
         .addTab(
           url: hitResult.tryGetLink(),
-          parentId: currentTab?.id,
           selectTab: false,
           tabMode: tabMode,
         );

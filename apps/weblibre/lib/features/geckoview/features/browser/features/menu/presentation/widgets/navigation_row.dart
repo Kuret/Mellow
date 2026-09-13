@@ -29,7 +29,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -165,24 +164,6 @@ class MenuNavigationRow extends HookConsumerWidget {
                 },
                 child: const Text('Close from Same Host'),
               ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.account_tree),
-              onPressed: () async {
-                final descendants = await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .getContainerTabDescendants(selectedTabId);
-                if (!context.mounted) return;
-
-                final subtreeIds = descendants.keys.toList();
-                if (subtreeIds.isNotEmpty) {
-                  await closeTabsWithConfirmation(context, ref, subtreeIds);
-                }
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Close Tab and Descendants'),
-            ),
           ],
           child: _buildNavIcon(
             icon: MdiIcons.tabMinus,

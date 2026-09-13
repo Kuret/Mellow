@@ -55,7 +55,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
@@ -2044,15 +2043,6 @@ class _ViewTabsSheet extends HookConsumerWidget {
                 showNewTabFab: true,
                 tabsReorderable: tabsReorderable,
                 draggableScrollableController: draggableScrollableController,
-                onClose: () {
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-              ),
-              TabsViewMode.tree => ViewTabTreesWidget(
-                scrollController: scrollController,
-                showNewTabFab: true,
                 onClose: () {
                   ref
                       .read(bottomSheetControllerProvider.notifier)

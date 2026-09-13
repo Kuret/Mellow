@@ -61,11 +61,7 @@ typedef _SwipeTarget = ({
 /// Density order for the pinch gesture. Pinching apart moves toward the mode
 /// that shows more per tab, pinching together toward the denser one; both ends
 /// clamp, so a pinch never wraps around to the opposite extreme.
-const _viewModeDensityOrder = [
-  TabsViewMode.grid,
-  TabsViewMode.list,
-  TabsViewMode.tree,
-];
+const _viewModeDensityOrder = [TabsViewMode.grid, TabsViewMode.list];
 
 /// Movement of two pointers — of their focal point, or of the fingers relative
 /// to it — after which [_MultitouchScaleGestureRecognizer] claims the sequence.

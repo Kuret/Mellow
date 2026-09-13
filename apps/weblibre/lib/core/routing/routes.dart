@@ -38,7 +38,6 @@ import 'package:weblibre/features/geckoview/features/bookmarks/presentation/scre
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_folder_edit.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_list.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/tab_tree.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/tab_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';

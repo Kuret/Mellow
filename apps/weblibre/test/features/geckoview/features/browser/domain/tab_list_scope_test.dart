@@ -8,7 +8,6 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
@@ -19,43 +18,27 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-/// A tree in the unassigned container:
-///
-///   a          (root)
-///   b          (root)
-///   └─ b1      (child of b)
-///   c          (root)
-///
-/// `order_key` runs a < b < b1 < c, so oldest-first renders them in that order.
+/// Four tabs in the unassigned container, `order_key` a < b < b1 < c.
 final _rows = [
-  _row(id: 'a', orderKey: 'a', rootId: 'a'),
-  _row(id: 'b', orderKey: 'b', rootId: 'b'),
-  _row(id: 'b1', orderKey: 'c', rootId: 'b', parentId: 'b', depth: 1),
-  _row(id: 'c', orderKey: 'd', rootId: 'c'),
+  _row(id: 'a', orderKey: 'a'),
+  _row(id: 'b', orderKey: 'b'),
+  _row(id: 'b1', orderKey: 'c'),
+  _row(id: 'c', orderKey: 'd'),
 ];
 
-TabsWithRootAndDepthResult _row({
+({String id, String orderKey}) _row({
   required String id,
   required String orderKey,
-  required String rootId,
-  String? parentId,
-  int depth = 0,
-}) => TabsWithRootAndDepthResult(
-  id: id,
-  parentId: parentId,
-  orderKey: orderKey,
-  rootId: rootId,
-  depth: depth,
-);
+}) => (id: id, orderKey: orderKey);
 
 TabSummary _summary(
-  TabsWithRootAndDepthResult row, {
+  ({String id, String orderKey}) row, {
   required TabShelf shelf,
 }) => TabSummary(
   id: row.id,
   engineTabId: row.id,
   source: TabSource.manual,
-  parentId: row.parentId,
+  parentId: null,
   containerId: null,
   spaceUuid: null,
   folderId: null,
@@ -82,16 +65,12 @@ TabSortKeys _sortKeys(String title, {TabMode mode = const RegularTabMode()}) =>
 void main() {
   ProviderContainer makeContainer({
     TabViewFilterOptions? filterOptions,
-    Set<String> collapsed = const {},
     Set<String> pinned = const {},
     Map<String, TabSortKeys>? sortKeys,
-    List<TabsWithRootAndDepthResult>? rows,
+    List<({String id, String orderKey})>? rows,
   }) {
     final container = ProviderContainer(
       overrides: [
-        watchTabsWithRootAndDepthProvider(
-          null,
-        ).overrideWith((ref) => Stream.value(rows ?? _rows)),
         watchSpaceTabsDataProvider(null).overrideWith(
           (ref) => Stream.value([
             for (final row in rows ?? _rows)
@@ -134,9 +113,6 @@ void main() {
             filterOptions ?? TabViewFilterOptions.withDefaults(),
           ),
         ),
-        collapsedGroupsProvider.overrideWith(
-          () => _FakeCollapsedGroups(collapsed),
-        ),
         selectedSpaceProvider.overrideWith(() => _FakeSelectedSpace()),
       ],
     );
@@ -171,7 +147,7 @@ void main() {
   }
 
   group('presentation scope ignores tray-only state', () {
-    test('the baseline order groups children under their parent', () async {
+    test('the baseline order is storage order', () async {
       final container = makeContainer();
 
       expect(await readOrder(container, TabListScope.presentation), [
@@ -206,18 +182,6 @@ void main() {
       },
     );
 
-    test('a collapsed group folds rows away in the tray only', () async {
-      final container = makeContainer(collapsed: {'b'});
-
-      expect(await readOrder(container, TabListScope.tray), ['a', 'b', 'c']);
-      expect(await readOrder(container, TabListScope.presentation), [
-        'a',
-        'b',
-        'b1',
-        'c',
-      ]);
-    });
-
     test('the tray sort reorders the tray only', () async {
       final container = makeContainer(
         filterOptions: TabViewFilterOptions.withDefaults().copyWith.sortType(
@@ -227,8 +191,8 @@ void main() {
 
       expect(await readOrder(container, TabListScope.tray), [
         'c',
-        'b',
         'b1',
+        'b',
         'a',
       ]);
       expect(await readOrder(container, TabListScope.presentation), [
@@ -261,17 +225,17 @@ void main() {
 
   group('pinned handling', () {
     test(
-      'a pinned child leads the presentation order but stays grouped in the tray',
+      'a pinned tab leads both orders, so no surface disagrees about it',
       () async {
-        // The stock configuration: hierarchy on, pinned-first on. This is the
-        // pair that disagreed in issue #603 — the bar hoisted the pinned child
-        // while navigation kept walking it inside its group.
+        // The stock configuration: pinned-first on. This is the pair that
+        // disagreed in issue #603 — the bar hoisted the pinned row while
+        // navigation kept walking it where storage put it.
         final container = makeContainer(pinned: {'b1'});
 
         expect(await readOrder(container, TabListScope.tray), [
+          'b1',
           'a',
           'b',
-          'b1',
           'c',
         ]);
         expect(await readOrder(container, TabListScope.presentation), [
@@ -290,7 +254,6 @@ void main() {
         filterOptions: TabViewFilterOptions.withDefaults().copyWith.sortType(
           TabSortType.titleDesc,
         ),
-        collapsed: {'b'},
         pinned: {'b1'},
       );
 
@@ -298,12 +261,12 @@ void main() {
       final navigation = await readNavigationOrder(container);
 
       expect(navigation, rendered);
-      // ...and specifically not the tray's, which all three tray controls moved.
+      // ...and specifically not the tray's, which the tray's sort moved.
       expect(navigation, isNot(await readOrder(container, TabListScope.tray)));
     });
 
     test('reaches every tab, so no swipe can skip one', () async {
-      final container = makeContainer(collapsed: {'b'}, pinned: {'b1'});
+      final container = makeContainer(pinned: {'b1'});
 
       expect(
         (await readNavigationOrder(container))?.toSet(),
@@ -313,8 +276,8 @@ void main() {
   });
 }
 
-/// The grouped list chains several stream providers (tree rows, then the
-/// rows' summaries); each hop is delivered on a later event-loop turn.
+/// The grouped list chains several stream providers (row summaries, then
+/// folders); each hop is delivered on a later event-loop turn.
 Future<void> _settle() async {
   for (var i = 0; i < 8; i++) {
     await Future<void>.delayed(Duration.zero);
@@ -337,15 +300,6 @@ class _FakeFilterController extends TabViewFilterController {
 
   @override
   TabViewFilterOptions build() => options;
-}
-
-class _FakeCollapsedGroups extends CollapsedGroups {
-  _FakeCollapsedGroups(this.collapsed);
-
-  final Set<String> collapsed;
-
-  @override
-  Set<String> build() => collapsed;
 }
 
 class _FakeSelectedSpace extends SelectedSpace {

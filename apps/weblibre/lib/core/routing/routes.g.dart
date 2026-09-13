@@ -521,12 +521,6 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $ContainerSelectionRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'tab_tree/:rootTabId',
-      name: 'TabTreeRoute',
-      hasOverriddenOnExit: false,
-      factory: $TabTreeRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'open_content',
       name: 'OpenSharedContentRoute',
       hasOverriddenOnExit: false,
@@ -623,7 +617,6 @@ mixin $SearchRoute on GoRouteData {
 const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
-  TabType.child: 'child',
 };
 
 const _$SearchPresentationEnumMap = {
@@ -779,31 +772,6 @@ mixin $ContainerSelectionRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/browser/select_container');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $TabTreeRoute on GoRouteData {
-  static TabTreeRoute _fromState(GoRouterState state) =>
-      TabTreeRoute(state.pathParameters['rootTabId']!);
-
-  TabTreeRoute get _self => this as TabTreeRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/browser/tab_tree/${Uri.encodeComponent(_self.rootTabId)}',
-  );
 
   @override
   void go(BuildContext context) => context.go(location);

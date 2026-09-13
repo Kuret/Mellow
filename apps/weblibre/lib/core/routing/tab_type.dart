@@ -21,4 +21,4 @@
 /// The kind of tab a browser route opens. Lives outside `routes.dart` so the
 /// data layer (`TabMode.fromTabType`) can name it without pulling every
 /// screen in through the router; `routes.dart` re-exports it.
-enum TabType { regular, private, child }
+enum TabType { regular, private }

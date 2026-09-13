@@ -156,7 +156,6 @@ class _CompactChipStrip extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final showTitles = settings.quickTabSwitcherShowTitles;
-    final hierarchyGlyphs = settings.quickTabSwitcherHierarchyGlyphs;
     final titleMaxWidth = settings.quickTabSwitcherTitleWidth;
     final closeButtonMode = settings.quickTabSwitcherCloseButtonMode;
 
@@ -206,12 +205,6 @@ class _CompactChipStrip extends HookConsumerWidget {
             .watch(watchColdTabIdsProvider.select((value) => value.value))
             ?.value ??
         const <String>{};
-    final tabDepthById = <String, int>{
-      if (hierarchyGlyphs > 0)
-        for (final item in items)
-          if (item is TabListChildItem) item.tabId: item.depth,
-    };
-
     _TabEntry? tabEntry(String tabId, {int depth = 0}) {
       final state = stateById[tabId];
       if (state == null) {
@@ -222,7 +215,6 @@ class _CompactChipStrip extends HookConsumerWidget {
           state,
           selectedTabId: selectedTabId,
           pinnedTabIds: pinnedTabIds,
-          tabDepthById: tabDepthById,
           presence: nativeTabIds.contains(tabId)
               ? TabPresence.live
               : coldTabIds.contains(tabId) || restoreComplete
@@ -446,7 +438,6 @@ class _CompactChipStrip extends HookConsumerWidget {
     final decoration = buildQuickTabSwitcherChipDecoration(
       context,
       showTitles: showTitles,
-      hierarchyGlyphs: hierarchyGlyphs,
     );
 
     Widget buildTabChip(QuickTabSwitcherItem item) {
@@ -463,7 +454,6 @@ class _CompactChipStrip extends HookConsumerWidget {
           item,
           isSelected: item.isActive,
           showTitles: showTitles,
-          hierarchyGlyphs: hierarchyGlyphs,
           titleMaxWidth: titleMaxWidth,
         ),
         padding: const EdgeInsets.only(right: 8.0),

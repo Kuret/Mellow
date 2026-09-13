@@ -875,7 +875,6 @@ final class SeamlessFilteredTabEntitiesProvider
     required ({
       TabSearchPartition searchPartition,
       ContainerFilter containerFilter,
-      bool groupTrees,
     })
     super.argument,
   }) : super(
@@ -909,13 +908,11 @@ final class SeamlessFilteredTabEntitiesProvider
             as ({
               TabSearchPartition searchPartition,
               ContainerFilter containerFilter,
-              bool groupTrees,
             });
     return seamlessFilteredTabEntities(
       ref,
       searchPartition: argument.searchPartition,
       containerFilter: argument.containerFilter,
-      groupTrees: argument.groupTrees,
     );
   }
 
@@ -942,7 +939,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'fb0dcaa1410425d212bce5e91ba6212556be4a7a';
+    r'5867e0ebfce3b3e0505a1d72d273949eadc89bd4';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -951,7 +948,6 @@ final class SeamlessFilteredTabEntitiesFamily extends $Family
           ({
             TabSearchPartition searchPartition,
             ContainerFilter containerFilter,
-            bool groupTrees,
           })
         > {
   SeamlessFilteredTabEntitiesFamily._()
@@ -966,12 +962,10 @@ final class SeamlessFilteredTabEntitiesFamily extends $Family
   SeamlessFilteredTabEntitiesProvider call({
     required TabSearchPartition searchPartition,
     required ContainerFilter containerFilter,
-    required bool groupTrees,
   }) => SeamlessFilteredTabEntitiesProvider._(
     argument: (
       searchPartition: searchPartition,
       containerFilter: containerFilter,
-      groupTrees: groupTrees,
     ),
     from: this,
   );
@@ -1079,14 +1073,14 @@ final class FilteredTabPreviewsFamily extends $Family
 /// one ordered sequence.
 ///
 /// Rows render in storage order — `order_key` ascending, the order the
-/// desktop sidebar shows — on every surface. Parent rows always render before
-/// their descendants.
+/// desktop sidebar shows — on every surface. A folder renders before its
+/// contents, which sit one indent level below it.
 ///
 /// [scope] decides which of the tray's controls take part — see
-/// [TabListScope]. Both scopes run the same grouping, so a tab's place
-/// relative to its parent never depends on who is asking.
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place never
+/// depends on who is asking.
 ///
-/// Returns `null` when the input data is not yet available (loading).
+/// Returns an empty list while the input data is not yet available (loading).
 
 @ProviderFor(groupedTabListItems)
 final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
@@ -1095,14 +1089,14 @@ final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
 /// one ordered sequence.
 ///
 /// Rows render in storage order — `order_key` ascending, the order the
-/// desktop sidebar shows — on every surface. Parent rows always render before
-/// their descendants.
+/// desktop sidebar shows — on every surface. A folder renders before its
+/// contents, which sit one indent level below it.
 ///
 /// [scope] decides which of the tray's controls take part — see
-/// [TabListScope]. Both scopes run the same grouping, so a tab's place
-/// relative to its parent never depends on who is asking.
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place never
+/// depends on who is asking.
 ///
-/// Returns `null` when the input data is not yet available (loading).
+/// Returns an empty list while the input data is not yet available (loading).
 
 final class GroupedTabListItemsProvider
     extends
@@ -1116,14 +1110,14 @@ final class GroupedTabListItemsProvider
   /// one ordered sequence.
   ///
   /// Rows render in storage order — `order_key` ascending, the order the
-  /// desktop sidebar shows — on every surface. Parent rows always render before
-  /// their descendants.
+  /// desktop sidebar shows — on every surface. A folder renders before its
+  /// contents, which sit one indent level below it.
   ///
   /// [scope] decides which of the tray's controls take part — see
-  /// [TabListScope]. Both scopes run the same grouping, so a tab's place
-  /// relative to its parent never depends on who is asking.
+  /// [TabListScope]. Both scopes run the same grouping, so a tab's place never
+  /// depends on who is asking.
   ///
-  /// Returns `null` when the input data is not yet available (loading).
+  /// Returns an empty list while the input data is not yet available (loading).
   GroupedTabListItemsProvider._({
     required GroupedTabListItemsFamily super.from,
     required ({String? spaceUuid, TabListScope scope}) super.argument,
@@ -1182,20 +1176,20 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'f23793b0a9f49a32228312fe511da1f76d991f50';
+    r'1b8a698dfe4c3b02ebdaa3664b8061a369a21bd7';
 
 /// Grouped flat-list rendering shared by every surface that lays tabs out in
 /// one ordered sequence.
 ///
 /// Rows render in storage order — `order_key` ascending, the order the
-/// desktop sidebar shows — on every surface. Parent rows always render before
-/// their descendants.
+/// desktop sidebar shows — on every surface. A folder renders before its
+/// contents, which sit one indent level below it.
 ///
 /// [scope] decides which of the tray's controls take part — see
-/// [TabListScope]. Both scopes run the same grouping, so a tab's place
-/// relative to its parent never depends on who is asking.
+/// [TabListScope]. Both scopes run the same grouping, so a tab's place never
+/// depends on who is asking.
 ///
-/// Returns `null` when the input data is not yet available (loading).
+/// Returns an empty list while the input data is not yet available (loading).
 
 final class GroupedTabListItemsFamily extends $Family
     with
@@ -1216,14 +1210,14 @@ final class GroupedTabListItemsFamily extends $Family
   /// one ordered sequence.
   ///
   /// Rows render in storage order — `order_key` ascending, the order the
-  /// desktop sidebar shows — on every surface. Parent rows always render before
-  /// their descendants.
+  /// desktop sidebar shows — on every surface. A folder renders before its
+  /// contents, which sit one indent level below it.
   ///
   /// [scope] decides which of the tray's controls take part — see
-  /// [TabListScope]. Both scopes run the same grouping, so a tab's place
-  /// relative to its parent never depends on who is asking.
+  /// [TabListScope]. Both scopes run the same grouping, so a tab's place never
+  /// depends on who is asking.
   ///
-  /// Returns `null` when the input data is not yet available (loading).
+  /// Returns an empty list while the input data is not yet available (loading).
 
   GroupedTabListItemsProvider call({
     required String? spaceUuid,
@@ -1359,7 +1353,7 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'a3fe31bd2fba113a779517fe196c8876e6cd9b84';
+    r'980b5325ae4e1a8a508df546fced4d66d2f92933';
 
 /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
 /// plus the flat post-processing: where there are no visible groups to keep
@@ -1428,14 +1422,14 @@ final class VisibleTabListItemsFamily extends $Family
 /// action and the next/previous tab gestures.
 ///
 /// Navigation follows the rendered order instead of the raw storage
-/// `order_key`, so it carries tree grouping and pinned-first handling — stepping
-/// to the tab the user sees next to the current one rather than to an unrelated
-/// `order_key` neighbour.
+/// `order_key`, so it carries folder nesting and pinned-first handling —
+/// stepping to the tab the user sees next to the current one rather than to an
+/// unrelated `order_key` neighbour.
 ///
 /// The order it follows is [TabListScope.presentation], the one the quick tab
 /// switcher and the tab bar draw, *not* the tray's. Both gestures are only
-/// reachable with the tray closed, so the tray's filters, collapsed groups and
-/// title/URL/date sort describe a list nobody is looking at while they fire;
+/// reachable with the tray closed, so the tray's filters and title/URL/date
+/// sort describe a list nobody is looking at while they fire;
 /// letting them through made the swipe skip chips that were plainly on screen
 /// and, when they hid the current tab outright, jump to the far end of the
 /// strip (issue #603). Sharing one provider with those surfaces is what keeps
@@ -1448,7 +1442,7 @@ final class VisibleTabListItemsFamily extends $Family
 /// them out — the unassigned bucket first, then containers by pinned/`order_key`.
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
-/// containers holding no tabs are skipped so their tree query never runs.
+/// containers holding no tabs are skipped so their row query never runs.
 ///
 /// With the setting off the order holds only the selected container's rows, so
 /// navigation stays inside the container the user is looking at and stops at its
@@ -1460,7 +1454,7 @@ final class VisibleTabListItemsFamily extends $Family
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
 ///
-/// `null` means the underlying tree data has not arrived yet — the only state
+/// `null` means the underlying row data has not arrived yet — the only state
 /// in which the caller may fall back to storage order. An empty list is a real
 /// answer ("this container holds nothing to move to") and must not be mistaken
 /// for a missing one.
@@ -1469,10 +1463,10 @@ final class VisibleTabListItemsFamily extends $Family
 /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
 /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
 /// screen watching it, so the order could go stale — or be created empty on the
-/// read, with its tree stream still loading, and silently drop navigation back
+/// read, with its row stream still loading, and silently drop navigation back
 /// to storage order. The selected container's chain is alive anyway whenever the
 /// quick tab switcher or the tray is on screen; the price of crossing container
-/// boundaries is that the other populated containers' tree queries are kept
+/// boundaries is that the other populated containers' row queries are kept
 /// alive too.
 
 @ProviderFor(sequentialTabNavigationOrder)
@@ -1483,14 +1477,14 @@ final sequentialTabNavigationOrderProvider =
 /// action and the next/previous tab gestures.
 ///
 /// Navigation follows the rendered order instead of the raw storage
-/// `order_key`, so it carries tree grouping and pinned-first handling — stepping
-/// to the tab the user sees next to the current one rather than to an unrelated
-/// `order_key` neighbour.
+/// `order_key`, so it carries folder nesting and pinned-first handling —
+/// stepping to the tab the user sees next to the current one rather than to an
+/// unrelated `order_key` neighbour.
 ///
 /// The order it follows is [TabListScope.presentation], the one the quick tab
 /// switcher and the tab bar draw, *not* the tray's. Both gestures are only
-/// reachable with the tray closed, so the tray's filters, collapsed groups and
-/// title/URL/date sort describe a list nobody is looking at while they fire;
+/// reachable with the tray closed, so the tray's filters and title/URL/date
+/// sort describe a list nobody is looking at while they fire;
 /// letting them through made the swipe skip chips that were plainly on screen
 /// and, when they hid the current tab outright, jump to the far end of the
 /// strip (issue #603). Sharing one provider with those surfaces is what keeps
@@ -1503,7 +1497,7 @@ final sequentialTabNavigationOrderProvider =
 /// them out — the unassigned bucket first, then containers by pinned/`order_key`.
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
-/// containers holding no tabs are skipped so their tree query never runs.
+/// containers holding no tabs are skipped so their row query never runs.
 ///
 /// With the setting off the order holds only the selected container's rows, so
 /// navigation stays inside the container the user is looking at and stops at its
@@ -1515,7 +1509,7 @@ final sequentialTabNavigationOrderProvider =
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
 ///
-/// `null` means the underlying tree data has not arrived yet — the only state
+/// `null` means the underlying row data has not arrived yet — the only state
 /// in which the caller may fall back to storage order. An empty list is a real
 /// answer ("this container holds nothing to move to") and must not be mistaken
 /// for a missing one.
@@ -1524,10 +1518,10 @@ final sequentialTabNavigationOrderProvider =
 /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
 /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
 /// screen watching it, so the order could go stale — or be created empty on the
-/// read, with its tree stream still loading, and silently drop navigation back
+/// read, with its row stream still loading, and silently drop navigation back
 /// to storage order. The selected container's chain is alive anyway whenever the
 /// quick tab switcher or the tray is on screen; the price of crossing container
-/// boundaries is that the other populated containers' tree queries are kept
+/// boundaries is that the other populated containers' row queries are kept
 /// alive too.
 
 final class SequentialTabNavigationOrderProvider
@@ -1542,14 +1536,14 @@ final class SequentialTabNavigationOrderProvider
   /// action and the next/previous tab gestures.
   ///
   /// Navigation follows the rendered order instead of the raw storage
-  /// `order_key`, so it carries tree grouping and pinned-first handling — stepping
-  /// to the tab the user sees next to the current one rather than to an unrelated
-  /// `order_key` neighbour.
+  /// `order_key`, so it carries folder nesting and pinned-first handling —
+  /// stepping to the tab the user sees next to the current one rather than to an
+  /// unrelated `order_key` neighbour.
   ///
   /// The order it follows is [TabListScope.presentation], the one the quick tab
   /// switcher and the tab bar draw, *not* the tray's. Both gestures are only
-  /// reachable with the tray closed, so the tray's filters, collapsed groups and
-  /// title/URL/date sort describe a list nobody is looking at while they fire;
+  /// reachable with the tray closed, so the tray's filters and title/URL/date
+  /// sort describe a list nobody is looking at while they fire;
   /// letting them through made the swipe skip chips that were plainly on screen
   /// and, when they hid the current tab outright, jump to the far end of the
   /// strip (issue #603). Sharing one provider with those surfaces is what keeps
@@ -1562,7 +1556,7 @@ final class SequentialTabNavigationOrderProvider
   /// them out — the unassigned bucket first, then containers by pinned/`order_key`.
   /// Stepping off the end of one container therefore continues into the next, and
   /// selecting that tab moves the selected container along with it. Named
-  /// containers holding no tabs are skipped so their tree query never runs.
+  /// containers holding no tabs are skipped so their row query never runs.
   ///
   /// With the setting off the order holds only the selected container's rows, so
   /// navigation stays inside the container the user is looking at and stops at its
@@ -1574,7 +1568,7 @@ final class SequentialTabNavigationOrderProvider
   /// The tray's own search results are deliberately not part of this: the swipe
   /// and the gestures are only reachable with the tray closed.
   ///
-  /// `null` means the underlying tree data has not arrived yet — the only state
+  /// `null` means the underlying row data has not arrived yet — the only state
   /// in which the caller may fall back to storage order. An empty list is a real
   /// answer ("this container holds nothing to move to") and must not be mistaken
   /// for a missing one.
@@ -1583,10 +1577,10 @@ final class SequentialTabNavigationOrderProvider
   /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
   /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
   /// screen watching it, so the order could go stale — or be created empty on the
-  /// read, with its tree stream still loading, and silently drop navigation back
+  /// read, with its row stream still loading, and silently drop navigation back
   /// to storage order. The selected container's chain is alive anyway whenever the
   /// quick tab switcher or the tray is on screen; the price of crossing container
-  /// boundaries is that the other populated containers' tree queries are kept
+  /// boundaries is that the other populated containers' row queries are kept
   /// alive too.
   SequentialTabNavigationOrderProvider._()
     : super(
@@ -1625,4 +1619,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'bac0dd53a3a27d7db81cb2e72bf9cbc31133d585';
+    r'4e82b33b2b8c2ae4a0b75a40dd5889dd26277c62';

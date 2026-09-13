@@ -39,7 +39,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/tab_parent_picker.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
@@ -79,7 +78,6 @@ class TabMenu extends HookConsumerWidget {
   final bool enablePinTab;
   final bool enableReloadButton;
   final bool enableNavigationButtons;
-  final bool enableHierarchy;
   final bool enableReorder;
 
   const TabMenu({
@@ -100,7 +98,6 @@ class TabMenu extends HookConsumerWidget {
     this.enablePinTab = true,
     this.enableReloadButton = true,
     this.enableNavigationButtons = true,
-    this.enableHierarchy = true,
     this.enableReorder = true,
   });
 
@@ -323,23 +320,6 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.folder),
             child: const Text('Container'),
           ),
-        if (enableHierarchy)
-          _TabHierarchySubmenu(
-            selectedTabId: selectedTabId,
-            controller: controller,
-            onChangeParent: () async {
-              await showTabParentPicker(
-                context: context,
-                ref: ref,
-                tabId: selectedTabId,
-              );
-            },
-            onDetachFromParent: () async {
-              await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .setTabParent(tabId: selectedTabId, newParentId: null);
-            },
-          ),
         if (enableReorder)
           SubmenuButton(
             leadingIcon: const Icon(MdiIcons.swapVertical),
@@ -514,54 +494,6 @@ class _AddToHomeScreenMenuItem extends ConsumerWidget {
           }
         },
       ),
-    );
-  }
-}
-
-/// `MenuItemButton.onPressed` is dispatched as a post-frame callback by
-/// Flutter's menu_anchor — by the time it fires, this widget (and any
-/// context/ref it could watch) has been deactivated as the menu overlay
-/// tears down. So the actual navigation/mutation ([onChangeParent] /
-/// [onDetachFromParent]) is passed in from TabMenu.build, closing over
-/// TabMenu's own context/ref, which live above the menu overlay and stay
-/// mounted with the trigger button.
-class _TabHierarchySubmenu extends ConsumerWidget {
-  final String selectedTabId;
-  final MenuController controller;
-  final VoidCallback onChangeParent;
-  final VoidCallback onDetachFromParent;
-
-  const _TabHierarchySubmenu({
-    required this.selectedTabId,
-    required this.controller,
-    required this.onChangeParent,
-    required this.onDetachFromParent,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final movingTab = ref.watch(watchTabDbDataProvider(selectedTabId));
-    final tabData = movingTab.value;
-    final hasParent = tabData?.parentId != null;
-
-    return SubmenuButton(
-      leadingIcon: const Icon(MdiIcons.fileTree),
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.swapHorizontal),
-          onPressed: () {
-            controller.close();
-            onChangeParent();
-          },
-          child: const Text('Change parent…'),
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(MdiIcons.fileTreeOutline),
-          onPressed: hasParent ? onDetachFromParent : null,
-          child: const Text('Detach from parent'),
-        ),
-      ],
-      child: const Text('Hierarchy'),
     );
   }
 }

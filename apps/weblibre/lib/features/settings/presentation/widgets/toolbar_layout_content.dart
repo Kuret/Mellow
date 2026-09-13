@@ -128,12 +128,6 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         keywords: ['width', 'title', 'chip', 'length'],
         child: _QuickTabSwitcherTitleWidthTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Hierarchy Depth on Tab Chips',
-        subtitle: 'How many nesting chevrons to show on chips',
-        keywords: ['hierarchy', 'nesting', 'depth', 'tree', 'chevrons'],
-        child: _QuickTabSwitcherHierarchyGlyphsTile(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -703,85 +697,6 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
                   currentSettings.copyWith.quickTabSwitcherShowTitles(value),
             );
       },
-    );
-  }
-}
-
-class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
-  const _QuickTabSwitcherHierarchyGlyphsTile();
-
-  static String _label(int glyphs) => switch (glyphs) {
-    0 => 'Off',
-    1 => '1 level',
-    _ => '$glyphs levels',
-  };
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final hierarchyGlyphs = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherHierarchyGlyphs,
-      ),
-    );
-
-    final sliderValue = useKeyedState(hierarchyGlyphs.toDouble(), [
-      hierarchyGlyphs,
-    ]);
-
-    final currentGlyphs = sliderValue.value.round();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Hierarchy Depth on Tab Chips'),
-            subtitle: Text(
-              'How many nesting chevrons to show on chips before collapsing '
-              'into a count badge (0 hides the indicator)',
-            ),
-            leading: Icon(MdiIcons.fileTree),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Slider(
-                  min: minQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  max: maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  divisions:
-                      maxQuickTabSwitcherHierarchyGlyphs -
-                      minQuickTabSwitcherHierarchyGlyphs,
-                  label: _label(currentGlyphs),
-                  value: sliderValue.value.clamp(
-                    minQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                    maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  ),
-                  onChanged: (value) {
-                    sliderValue.value = value;
-                  },
-                  onChangeEnd: (value) async {
-                    final normalized = value.round();
-                    sliderValue.value = normalized.toDouble();
-                    await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
-                        .save(
-                          (currentSettings) => currentSettings.copyWith
-                              .quickTabSwitcherHierarchyGlyphs(normalized),
-                        );
-                  },
-                ),
-              ),
-              Text(
-                _label(currentGlyphs),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

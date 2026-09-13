@@ -60,12 +60,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _ShowContainerUiTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Create Child Tabs',
-        subtitle: 'Open links from tabs in the same container context',
-        keywords: ['child tabs'],
-        child: _CreateChildTabsTile(),
-      ),
-      SettingsEntryDefinition(
         title: 'Background Tab Behavior',
         subtitle: 'Choose what happens after a tab opens in the background',
         keywords: ['switch', 'background', 'new tab', 'snackbar', 'prompt'],
@@ -257,7 +251,6 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                 TabType.private => SegmentedButton.styleFrom(
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
-                TabType.child => null,
               },
             ),
           ),
@@ -399,36 +392,6 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _CreateChildTabsTile extends HookConsumerWidget {
-  const _CreateChildTabsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final createChildTabsOption = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.createChildTabsOption,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Create Child Tabs'),
-      subtitle: const Text(
-        'Display a button to create a child tab under the current tab (tree view only)',
-      ),
-      secondary: const Icon(MdiIcons.fileTree),
-      value: createChildTabsOption,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.createChildTabsOption(value),
-            );
-      },
     );
   }
 }

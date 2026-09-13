@@ -13,8 +13,6 @@ abstract class _$TabViewFilterOptionsCWProxy {
 
   TabViewFilterOptions sortPinnedFirst(bool sortPinnedFirst);
 
-  TabViewFilterOptions showHierarchicalTabs(bool showHierarchicalTabs);
-
   TabViewFilterOptions dateRange(DateTimeRange<DateTime>? dateRange);
 
   TabViewFilterOptions quickInterval(TabQuickInterval? quickInterval);
@@ -30,7 +28,6 @@ abstract class _$TabViewFilterOptionsCWProxy {
     TabTypeFilter tabTypeFilter,
     TabSortType sortType,
     bool sortPinnedFirst,
-    bool showHierarchicalTabs,
     DateTimeRange<DateTime>? dateRange,
     TabQuickInterval? quickInterval,
   });
@@ -57,10 +54,6 @@ class _$TabViewFilterOptionsCWProxyImpl
       call(sortPinnedFirst: sortPinnedFirst);
 
   @override
-  TabViewFilterOptions showHierarchicalTabs(bool showHierarchicalTabs) =>
-      call(showHierarchicalTabs: showHierarchicalTabs);
-
-  @override
   TabViewFilterOptions dateRange(DateTimeRange<DateTime>? dateRange) =>
       call(dateRange: dateRange);
 
@@ -80,7 +73,6 @@ class _$TabViewFilterOptionsCWProxyImpl
     Object? tabTypeFilter = const $CopyWithPlaceholder(),
     Object? sortType = const $CopyWithPlaceholder(),
     Object? sortPinnedFirst = const $CopyWithPlaceholder(),
-    Object? showHierarchicalTabs = const $CopyWithPlaceholder(),
     Object? dateRange = const $CopyWithPlaceholder(),
     Object? quickInterval = const $CopyWithPlaceholder(),
   }) {
@@ -100,12 +92,6 @@ class _$TabViewFilterOptionsCWProxyImpl
           ? _value.sortPinnedFirst
           // ignore: cast_nullable_to_non_nullable
           : sortPinnedFirst as bool,
-      showHierarchicalTabs:
-          showHierarchicalTabs == const $CopyWithPlaceholder() ||
-              showHierarchicalTabs == null
-          ? _value.showHierarchicalTabs
-          // ignore: cast_nullable_to_non_nullable
-          : showHierarchicalTabs as bool,
       dateRange: dateRange == const $CopyWithPlaceholder()
           ? _value.dateRange
           // ignore: cast_nullable_to_non_nullable
@@ -140,7 +126,6 @@ TabViewFilterOptions _$TabViewFilterOptionsFromJson(
   ),
   sortType: $enumDecode(_$TabSortTypeEnumMap, json['sortType']),
   sortPinnedFirst: json['sortPinnedFirst'] as bool,
-  showHierarchicalTabs: json['showHierarchicalTabs'] as bool? ?? true,
   dateRange: const DateTimeRangeConverter().fromJson(
     json['dateRange'] as Map<String, dynamic>?,
   ),
@@ -156,7 +141,6 @@ Map<String, dynamic> _$TabViewFilterOptionsToJson(
   'tabTypeFilter': _$TabTypeFilterEnumMap[instance.tabTypeFilter]!,
   'sortType': _$TabSortTypeEnumMap[instance.sortType]!,
   'sortPinnedFirst': instance.sortPinnedFirst,
-  'showHierarchicalTabs': instance.showHierarchicalTabs,
   'dateRange': const DateTimeRangeConverter().toJson(instance.dateRange),
   'quickInterval': _$TabQuickIntervalEnumMap[instance.quickInterval],
 };

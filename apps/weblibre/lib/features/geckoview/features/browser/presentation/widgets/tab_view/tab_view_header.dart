@@ -58,7 +58,7 @@ class _TabFilters extends ConsumerWidget {
 
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final syncedTabCountAsync = ref.watch(syncedTabsTotalCountProvider);
-    final showSyncedChip = isAuthenticated && tabsViewMode != TabsViewMode.tree;
+    final showSyncedChip = isAuthenticated;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -194,10 +194,7 @@ class TabViewHeader extends HookConsumerWidget {
 
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
-    final canManualReorder =
-        !isSyncedScope &&
-        tabsViewMode != TabsViewMode.tree &&
-        canManualTabReorder;
+    final canManualReorder = !isSyncedScope && canManualTabReorder;
 
     final didShowReorderDisabledInfo = useRef(false);
 
@@ -272,18 +269,17 @@ class TabViewHeader extends HookConsumerWidget {
               if (!searchMode.value)
                 Row(
                   children: [
-                    if (tabsViewMode != TabsViewMode.tree)
-                      IconButton(
-                        icon: const Icon(MdiIcons.tabSearch),
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        tooltip: 'Search inside tabs',
-                        onPressed: () {
-                          searchMode.value = true;
-                          searchTextFocus.requestFocus();
-                        },
-                      ),
-                    if (!isSyncedScope && tabsViewMode != TabsViewMode.tree)
+                    IconButton(
+                      icon: const Icon(MdiIcons.tabSearch),
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Search inside tabs',
+                      onPressed: () {
+                        searchMode.value = true;
+                        searchTextFocus.requestFocus();
+                      },
+                    ),
+                    if (!isSyncedScope)
                       Consumer(
                         builder: (context, ref, child) {
                           final filterOptions = ref.watch(
@@ -386,24 +382,6 @@ class TabViewHeader extends HookConsumerWidget {
                                   ),
                                 ],
                                 child: const Text('Sort'),
-                              ),
-                              MenuItemButton(
-                                leadingIcon: Icon(
-                                  filterOptions.showHierarchicalTabs
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                ),
-                                onPressed: () {
-                                  ref
-                                      .read(
-                                        tabViewFilterControllerProvider
-                                            .notifier,
-                                      )
-                                      .setShowHierarchicalTabs(
-                                        !filterOptions.showHierarchicalTabs,
-                                      );
-                                },
-                                child: const Text('Hierarchical View'),
                               ),
                               const Divider(),
                               // Date range picker
@@ -529,11 +507,6 @@ class TabViewHeader extends HookConsumerWidget {
                               leadingIcon: Icon(mode.icon),
                               child: Text(mode.label),
                               onPressed: () {
-                                if (mode == TabsViewMode.tree) {
-                                  searchTextController.clear();
-                                  searchMode.value = false;
-                                }
-
                                 ref
                                     .read(
                                       tabsViewModeControllerProvider.notifier,
@@ -563,11 +536,7 @@ class TabViewHeader extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    if (enableAiFeatures &&
-                        switch (tabsViewMode) {
-                          TabsViewMode.list || TabsViewMode.grid => true,
-                          TabsViewMode.tree => false,
-                        })
+                    if (enableAiFeatures)
                       Consumer(
                         builder: (context, ref, child) {
                           final tabSuggestionsEnabled = ref.watch(
@@ -628,41 +597,36 @@ class TabViewHeader extends HookConsumerWidget {
                           );
                         },
                       ),
-                    if (switch (tabsViewMode) {
-                      TabsViewMode.list || TabsViewMode.grid => true,
-                      TabsViewMode.tree => false,
-                    })
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.swap_vert),
-                        isSelected: tabsReorderable,
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        tooltip: tabsReorderable
-                            ? 'Disable reordering mode'
-                            : canManualReorder
-                            ? 'Enable reordering mode'
-                            : 'Reordering requires default manual mode',
-                        onPressed: canManualReorder
-                            ? () {
-                                final wasEnabled = tabsReorderable;
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.swap_vert),
+                      isSelected: tabsReorderable,
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      tooltip: tabsReorderable
+                          ? 'Disable reordering mode'
+                          : canManualReorder
+                          ? 'Enable reordering mode'
+                          : 'Reordering requires default manual mode',
+                      onPressed: canManualReorder
+                          ? () {
+                              final wasEnabled = tabsReorderable;
 
-                                ref
-                                    .read(
-                                      tabsReorderableControllerProvider
-                                          .notifier,
-                                    )
-                                    .toggle();
+                              ref
+                                  .read(
+                                    tabsReorderableControllerProvider.notifier,
+                                  )
+                                  .toggle();
 
-                                // Show info when enabling reordering
-                                if (!wasEnabled && context.mounted) {
-                                  ui_helper.showInfoMessage(
-                                    context,
-                                    'Drag and drop tabs to reorder them',
-                                  );
-                                }
+                              // Show info when enabling reordering
+                              if (!wasEnabled && context.mounted) {
+                                ui_helper.showInfoMessage(
+                                  context,
+                                  'Drag and drop tabs to reorder them',
+                                );
                               }
-                            : null,
-                      ),
+                            }
+                          : null,
+                    ),
                     Consumer(
                       builder: (context, ref, child) {
                         // The id is known synchronously; the row it points at
@@ -690,8 +654,7 @@ class TabViewHeader extends HookConsumerWidget {
                           // The synced scope lists tabs from other devices;
                           // none of these act on them.
                           enabled: !isSyncedScope,
-                          enableCloseFilteredTabs:
-                              tabsViewMode != TabsViewMode.tree,
+                          enableCloseFilteredTabs: true,
                           builder: (context, controller, _) => IconButton(
                             tooltip: 'Tab actions',
                             onPressed: () {

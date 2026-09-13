@@ -25,7 +25,6 @@ void main() {
     test('maps to and from TabType', () {
       expect(TabMode.fromTabType(TabType.private), TabMode.private);
       expect(TabMode.fromTabType(TabType.regular), TabMode.regular);
-      expect(TabMode.fromTabType(TabType.child), TabMode.regular);
       expect(TabMode.private.toTabType(), TabType.private);
       expect(TabMode.regular.toTabType(), TabType.regular);
     });

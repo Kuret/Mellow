@@ -253,9 +253,9 @@ class _RailTabEntry extends _RailEntry {
 }
 
 /// One tab row of the rail: the tray's [CompactTabRow] for a root pinned
-/// tab, [WideRailTabRow] (indented by depth) for everything else — folder
-/// members and tree children included. Both switch on tap, close per
-/// [closeButtonMode] and carry the long-press tab menu.
+/// tab, [WideRailTabRow] (indented by folder depth) for everything else —
+/// folder members included. Both switch on tap, close per [closeButtonMode]
+/// and carry the long-press tab menu.
 class _RailTabRow extends ConsumerWidget {
   final TabListTabItem item;
   final String? spaceUuid;
@@ -286,14 +286,7 @@ class _RailTabRow extends ConsumerWidget {
       unawaited(closeTabWithConfirmationAndUndo(context, ref, tabId));
     }
 
-    final (depth, childCount) = switch (item) {
-      TabListStandaloneItem(:final depth) => (depth, 0),
-      TabListParentGroup(:final depth, :final childCount) => (
-        depth,
-        childCount,
-      ),
-      TabListChildItem(:final depth, :final childCount) => (depth, childCount),
-    };
+    final depth = item.depth;
 
     final row = item.shelf == TabShelf.pinned && depth == 0
         ? CompactTabRow(
@@ -307,7 +300,6 @@ class _RailTabRow extends ConsumerWidget {
             spaceUuid: spaceUuid,
             isActive: isActive,
             depth: depth,
-            childCount: childCount,
             onTap: () => unawaited(select()),
             onClose: canClose ? close : null,
           );
@@ -329,11 +321,8 @@ class WideRailTabRow extends ConsumerWidget {
   final String? spaceUuid;
   final bool isActive;
 
-  /// Folder (and tree) nesting depth, drawn as a left inset.
+  /// Folder nesting depth, drawn as a left inset.
   final int depth;
-
-  /// Number of tree children under this tab, shown as a badge when > 0.
-  final int childCount;
   final VoidCallback? onTap;
   final VoidCallback? onClose;
 
@@ -343,7 +332,6 @@ class WideRailTabRow extends ConsumerWidget {
     required this.spaceUuid,
     required this.isActive,
     this.depth = 0,
-    this.childCount = 0,
     this.onTap,
     this.onClose,
   });
@@ -370,7 +358,6 @@ class WideRailTabRow extends ConsumerWidget {
       isActive: isActive,
       isCold: isCold,
       depth: depth,
-      childCount: childCount,
       onTap: onTap,
       onClose: onClose,
     );
@@ -387,7 +374,6 @@ class WideRailTabRowView extends StatelessWidget {
   final bool isActive;
   final bool isCold;
   final int depth;
-  final int childCount;
   final VoidCallback? onTap;
   final VoidCallback? onClose;
 
@@ -398,7 +384,6 @@ class WideRailTabRowView extends StatelessWidget {
     required this.isActive,
     this.isCold = false,
     this.depth = 0,
-    this.childCount = 0,
     this.onTap,
     this.onClose,
   });
@@ -449,14 +434,6 @@ class WideRailTabRowView extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (childCount > 0) ...[
-                  const SizedBox(width: 6),
-                  InlineCountBadge(
-                    count: childCount,
-                    backgroundColor: scheme.surfaceContainerHighest,
-                    foregroundColor: scheme.onSurfaceVariant,
-                  ),
-                ],
                 if (onClose != null)
                   IconButton(
                     onPressed: onClose,

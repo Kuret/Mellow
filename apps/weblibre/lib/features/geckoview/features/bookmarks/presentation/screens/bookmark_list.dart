@@ -1096,12 +1096,7 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     final tabId = await ref
         .read(tabRepositoryProvider.notifier)
-        .addTab(
-          url: url,
-          parentId: currentTab?.id,
-          selectTab: selectTab,
-          tabMode: tabMode,
-        );
+        .addTab(url: url, selectTab: selectTab, tabMode: tabMode);
 
     if (selectTab) {
       if (context.mounted) {

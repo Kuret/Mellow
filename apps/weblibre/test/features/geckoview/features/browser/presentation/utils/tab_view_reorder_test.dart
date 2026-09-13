@@ -36,21 +36,16 @@ void main() {
     required List<TabViewItem> visibleItems,
     required int oldIndex,
     required int newIndex,
-    bool hierarchical = false,
     Map<String, String?> folderIdByTab = const {},
     Map<String, List<String>> splitMembers = const {},
     Set<String> pinnedTabIds = const {},
-    Set<String> collapsedGroups = const {},
     String? spaceUuid,
   }) {
     return buildTabViewReorderResult(
       visibleItems: visibleItems,
-      treeRows: const [],
-      collapsedGroups: collapsedGroups,
       pinnedTabIds: pinnedTabIds,
       oldIndex: oldIndex,
       newIndex: newIndex,
-      hierarchical: hierarchical,
       sortPinnedFirst: false,
       folderIdByTab: folderIdByTab,
       splitMembers: splitMembers,
@@ -62,12 +57,12 @@ void main() {
   // list *after* the moving item has been taken out (post-removal), so moving
   // the first of three items to the end is `oldIndex: 0, newIndex: 2` and
   // placing it between the other two is `newIndex: 1`.
-  group('buildTabViewReorderResult (flat)', () {
+  group('buildTabViewReorderResult', () {
     test('plain reorder moves a single tab between its new neighbours', () {
       final items = [
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
-        const TabViewItem.standalone(tabId: 'c'),
+        const TabViewItem.tab(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'b'),
+        const TabViewItem.tab(tabId: 'c'),
       ];
 
       final result = build(visibleItems: items, oldIndex: 0, newIndex: 1);
@@ -92,7 +87,7 @@ void main() {
             childCount: 0,
           ),
         ),
-        const TabViewItem.standalone(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'a'),
       ];
 
       final result = build(visibleItems: items, oldIndex: 0, newIndex: 1);
@@ -102,9 +97,9 @@ void main() {
 
     test('dropping a tab between two tabs of the same folder scopes to it', () {
       final items = [
-        const TabViewItem.standalone(tabId: 'x'),
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.tab(tabId: 'x'),
+        const TabViewItem.tab(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'b'),
       ];
 
       final result = build(
@@ -134,7 +129,7 @@ void main() {
       );
       final items = [
         TabViewItem.folder(folderItem: folderItem),
-        const TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.tab(tabId: 'x'),
       ];
 
       final result = build(
@@ -155,8 +150,8 @@ void main() {
     test('dropping back at the root reports a scope change away from a '
         'folder', () {
       final items = [
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'x'),
+        const TabViewItem.tab(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'x'),
       ];
 
       final result = build(
@@ -176,11 +171,11 @@ void main() {
 
     test('dragging a split member brings its siblings along in order', () {
       final items = [
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
-        const TabViewItem.standalone(tabId: 'split-1'),
-        const TabViewItem.standalone(tabId: 'split-2'),
-        const TabViewItem.standalone(tabId: 'c'),
+        const TabViewItem.tab(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'b'),
+        const TabViewItem.tab(tabId: 'split-1'),
+        const TabViewItem.tab(tabId: 'split-2'),
+        const TabViewItem.tab(tabId: 'c'),
       ];
 
       final result = build(
@@ -202,67 +197,16 @@ void main() {
 
     test('dragging the primary split member moves every sibling with it', () {
       final items = [
-        const TabViewItem.standalone(tabId: 'split-1'),
-        const TabViewItem.standalone(tabId: 'split-2'),
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
+        const TabViewItem.tab(tabId: 'split-1'),
+        const TabViewItem.tab(tabId: 'split-2'),
+        const TabViewItem.tab(tabId: 'a'),
+        const TabViewItem.tab(tabId: 'b'),
       ];
 
       final result = build(
         visibleItems: items,
         oldIndex: 0,
         newIndex: 2,
-        splitMembers: const {
-          'split-1': ['split-1', 'split-2'],
-          'split-2': ['split-1', 'split-2'],
-        },
-      );
-
-      expect(result, isNotNull);
-      expect(result!.movingTabIds, ['split-1', 'split-2']);
-      expect(result.previousTabId, 'a');
-      expect(result.nextTabId, 'b');
-    });
-  });
-
-  group('buildTabViewReorderResult (hierarchical)', () {
-    test('drop-into-folder scope change also applies with hierarchy on', () {
-      final items = [
-        const TabViewItem.standalone(tabId: 'x'),
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
-      ];
-
-      final result = build(
-        visibleItems: items,
-        oldIndex: 0,
-        newIndex: 2,
-        hierarchical: true,
-        folderIdByTab: const {'a': 'f1', 'b': 'f1', 'x': null},
-        spaceUuid: 'space-1',
-      );
-
-      expect(result, isNotNull);
-      expect(result!.parentChange, const TabParentChange.unchanged());
-      expect(
-        result.scopeChange,
-        scopedTo(spaceUuid: 'space-1', folderId: 'f1'),
-      );
-    });
-
-    test('split siblings ride along with a hierarchical drag too', () {
-      final items = [
-        const TabViewItem.standalone(tabId: 'split-1'),
-        const TabViewItem.standalone(tabId: 'split-2'),
-        const TabViewItem.standalone(tabId: 'a'),
-        const TabViewItem.standalone(tabId: 'b'),
-      ];
-
-      final result = build(
-        visibleItems: items,
-        oldIndex: 0,
-        newIndex: 2,
-        hierarchical: true,
         splitMembers: const {
           'split-1': ['split-1', 'split-2'],
           'split-2': ['split-1', 'split-2'],

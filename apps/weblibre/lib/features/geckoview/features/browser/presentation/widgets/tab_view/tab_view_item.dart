@@ -36,15 +36,12 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shel
 sealed class TabViewItem {
   String get tabId;
   String? get sourceSearchQuery;
-  TabListParentGroup? get parentGroup;
-  TabListChildItem? get childItem;
   TabListFolderItem? get folderItem;
 
   bool get isFolder => folderItem != null;
 
-  /// Folder nesting depth for indentation. Standalone/parent rows carry the
-  /// folder depth (0 at the space root); child rows already fold the folder
-  /// depth into their own tree depth; folder rows carry their own depth.
+  /// Folder nesting depth for indentation: 0 at the space root, +1 per
+  /// enclosing folder. Folder rows carry their own depth.
   int get depth => 0;
 
   /// The shelf the row belongs to (PLAN §6.4). Search results and folders
@@ -58,21 +55,11 @@ sealed class TabViewItem {
     required String? sourceSearchQuery,
   }) = SearchTabViewItem;
 
-  const factory TabViewItem.standalone({
+  const factory TabViewItem.tab({
     required String tabId,
     int depth,
     TabShelf shelf,
-  }) = StandaloneTabViewItem;
-
-  const factory TabViewItem.parent({
-    required String tabId,
-    required TabListParentGroup parentGroup,
-  }) = ParentTabViewItem;
-
-  const factory TabViewItem.child({
-    required String tabId,
-    required TabListChildItem childItem,
-  }) = ChildTabViewItem;
+  }) = PlainTabViewItem;
 
   const factory TabViewItem.folder({required TabListFolderItem folderItem}) =
       FolderTabViewItem;
@@ -85,12 +72,6 @@ class SearchTabViewItem extends TabViewItem {
   final String? sourceSearchQuery;
 
   @override
-  TabListParentGroup? get parentGroup => null;
-
-  @override
-  TabListChildItem? get childItem => null;
-
-  @override
   TabListFolderItem? get folderItem => null;
 
   const SearchTabViewItem({
@@ -99,7 +80,7 @@ class SearchTabViewItem extends TabViewItem {
   }) : super._();
 }
 
-class StandaloneTabViewItem extends TabViewItem {
+class PlainTabViewItem extends TabViewItem {
   @override
   final String tabId;
   @override
@@ -111,69 +92,13 @@ class StandaloneTabViewItem extends TabViewItem {
   String? get sourceSearchQuery => null;
 
   @override
-  TabListParentGroup? get parentGroup => null;
-
-  @override
-  TabListChildItem? get childItem => null;
-
-  @override
   TabListFolderItem? get folderItem => null;
 
-  const StandaloneTabViewItem({
+  const PlainTabViewItem({
     required this.tabId,
     this.depth = 0,
     this.shelf = TabShelf.normal,
   }) : super._();
-}
-
-class ParentTabViewItem extends TabViewItem {
-  @override
-  final String tabId;
-  @override
-  final TabListParentGroup parentGroup;
-
-  @override
-  String? get sourceSearchQuery => null;
-
-  @override
-  TabListChildItem? get childItem => null;
-
-  @override
-  TabListFolderItem? get folderItem => null;
-
-  @override
-  int get depth => parentGroup.depth;
-
-  @override
-  TabShelf get shelf => parentGroup.shelf;
-
-  const ParentTabViewItem({required this.tabId, required this.parentGroup})
-    : super._();
-}
-
-class ChildTabViewItem extends TabViewItem {
-  @override
-  final String tabId;
-  @override
-  final TabListChildItem childItem;
-
-  @override
-  String? get sourceSearchQuery => null;
-
-  @override
-  TabListParentGroup? get parentGroup => null;
-
-  @override
-  TabListFolderItem? get folderItem => null;
-
-  @override
-  int get depth => childItem.depth;
-
-  @override
-  TabShelf get shelf => childItem.shelf;
-
-  const ChildTabViewItem({required this.tabId, required this.childItem})
-    : super._();
 }
 
 class FolderTabViewItem extends TabViewItem {
@@ -185,12 +110,6 @@ class FolderTabViewItem extends TabViewItem {
 
   @override
   String? get sourceSearchQuery => null;
-
-  @override
-  TabListParentGroup? get parentGroup => null;
-
-  @override
-  TabListChildItem? get childItem => null;
 
   @override
   int get depth => folderItem.depth;

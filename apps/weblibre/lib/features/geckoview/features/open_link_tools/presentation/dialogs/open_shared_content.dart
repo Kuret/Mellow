@@ -420,7 +420,6 @@ class OpenSharedContent extends HookConsumerWidget {
                       selectedBackgroundColor: switch (selectedTabType.value) {
                         TabType.regular => null,
                         TabType.private => appColors.privateSelectionOverlay,
-                        TabType.child => null,
                       },
                     );
 

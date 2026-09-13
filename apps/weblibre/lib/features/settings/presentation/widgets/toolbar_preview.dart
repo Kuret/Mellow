@@ -472,7 +472,6 @@ class _CompactBarPreview extends StatelessWidget {
         tabMode: TabMode.private,
         isHistory: false,
         isPinned: false,
-        depth: 1,
         url: Uri.parse('https://example.com/private'),
         color: null,
         avatar: const Icon(MdiIcons.web, size: 20),
@@ -481,7 +480,6 @@ class _CompactBarPreview extends StatelessWidget {
     final decoration = buildQuickTabSwitcherChipDecoration(
       context,
       showTitles: settings.quickTabSwitcherShowTitles,
-      hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
     );
 
     Widget essential() => Padding(
@@ -540,8 +538,6 @@ class _CompactBarPreview extends StatelessWidget {
                         item,
                         isSelected: item.isActive,
                         showTitles: settings.quickTabSwitcherShowTitles,
-                        hierarchyGlyphs:
-                            settings.quickTabSwitcherHierarchyGlyphs,
                         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
                       ),
                       padding: const EdgeInsets.only(right: 8.0),

@@ -27,7 +27,6 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -106,15 +105,9 @@ class SearchScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
-    final createChildTabsOption = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.createChildTabsOption,
-      ),
-    );
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     final selectedTabType = useState(tabType);
-    final currentTabTabType = ref.watch(selectedTabTypeProvider);
 
     final selectedContainer = ref.watch(
       selectedContainerDataProvider.select((value) => value.value),
@@ -134,10 +127,6 @@ class SearchScreen extends HookConsumerWidget {
         : switch (selectedTabType.value) {
             TabType.regular => TabMode.regular,
             TabType.private => TabMode.private,
-            TabType.child => switch (currentTabTabType) {
-              TabType.private => TabMode.private,
-              _ => TabMode.regular,
-            },
           };
 
     final privateTabMode = effectiveTabMode is PrivateTabMode;
@@ -406,9 +395,6 @@ class SearchScreen extends HookConsumerWidget {
             .addTab(
               url: uri,
               tabMode: effectiveTabMode,
-              parentId: (selectedTabType.value == TabType.child)
-                  ? ref.read(selectedTabProvider)
-                  : null,
               launchedFromIntent: launchedFromIntent,
               selectTab: true,
               containerSelection: selectedContainer == null
@@ -583,16 +569,10 @@ class SearchScreen extends HookConsumerWidget {
                             searchFocusNode.requestFocus();
                           });
                         },
-                        showChildOption: createChildTabsOption,
                         selectedBackgroundColor: switch (selectedTabType
                             .value) {
                           TabType.regular => null,
                           TabType.private => appColors.privateSelectionOverlay,
-                          TabType.child => switch (currentTabTabType) {
-                            TabType.private =>
-                              appColors.privateSelectionOverlay,
-                            _ => null,
-                          },
                         },
                       ),
                     );
