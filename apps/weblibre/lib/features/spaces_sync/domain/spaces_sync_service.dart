@@ -45,8 +45,8 @@ import 'package:weblibre/features/spaces_sync/domain/providers.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 part 'spaces_sync_service.g.dart';
 
@@ -201,7 +201,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     });
 
     ref.listen(
-      generalSettingsWithDefaultsProvider.select(
+      zenSettingsWithDefaultsProvider.select(
         (settings) => settings.spacesSyncEnabled,
       ),
       (previous, next) {
@@ -282,7 +282,7 @@ class SpacesSyncService extends _$SpacesSyncService {
   }
 
   Future<void> _syncOnce(String reason) async {
-    final settingsRepo = ref.read(generalSettingsRepositoryProvider.notifier);
+    final settingsRepo = ref.read(zenSettingsRepositoryProvider.notifier);
     var settings = await settingsRepo.fetchSettings();
     if (!settings.spacesSyncEnabled) {
       return;
@@ -450,7 +450,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     await db.syncStateDao.clearAllDeletions();
     await ref.read(spacesSyncSnapshotStoreProvider).writeFailedIds({});
     await ref
-        .read(generalSettingsRepositoryProvider.notifier)
+        .read(zenSettingsRepositoryProvider.notifier)
         .updateSettings(
           (current) => current
               .copyWith(
@@ -472,7 +472,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     await db.syncStateDao.clearAll();
     await db.syncStateDao.clearAllForeign();
     await ref
-        .read(generalSettingsRepositoryProvider.notifier)
+        .read(zenSettingsRepositoryProvider.notifier)
         .updateSettings(
           (current) => current
               .copyWith(spacesSyncApplierVersion: spacesApplierVersion)
@@ -523,7 +523,7 @@ class SpacesSyncService extends _$SpacesSyncService {
   /// run's outgoing set (PLAN §4.4).
   Future<Set<String>> _fetchAndApply(
     _Session session,
-    GeneralSettings settings,
+    ZenSettings settings,
   ) async {
     final store = ref.read(spacesSyncSnapshotStoreProvider);
     final firstSync = !settings.spacesSyncBaselineDone;
@@ -567,7 +567,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     await store.writeFailedIds(failed);
 
     await ref
-        .read(generalSettingsRepositoryProvider.notifier)
+        .read(zenSettingsRepositoryProvider.notifier)
         .updateSettings(
           (current) => current
               .copyWith(spacesSyncBaselineDone: true)
@@ -835,7 +835,7 @@ class SpacesSyncService extends _$SpacesSyncService {
   /// record, or `null` to let [outgoing] through.
   Future<SpacesSyncBlockedBatch?> _canary(
     _Outgoing outgoing,
-    GeneralSettings settings,
+    ZenSettings settings,
   ) async {
     final db = ref.read(tabDatabaseProvider);
 
@@ -931,7 +931,7 @@ class SpacesSyncService extends _$SpacesSyncService {
 
   Future<void> _upload(
     _Session session,
-    GeneralSettings settings,
+    ZenSettings settings,
     Set<String> appliedThisSync, {
     required bool tombstonesAllowed,
     bool retried = false,
@@ -1014,7 +1014,7 @@ class SpacesSyncService extends _$SpacesSyncService {
       }
       // Someone else wrote first: take their changes, then try once more.
       logger.i('spaces sync: collection changed underneath us; refetching');
-      final settingsRepo = ref.read(generalSettingsRepositoryProvider.notifier);
+      final settingsRepo = ref.read(zenSettingsRepositoryProvider.notifier);
       final applied = await _fetchAndApply(session, settings);
       final refreshed = await settingsRepo.fetchSettings();
       return _upload(
@@ -1040,7 +1040,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     }
     if (result.modified case final modified?) {
       await ref
-          .read(generalSettingsRepositoryProvider.notifier)
+          .read(zenSettingsRepositoryProvider.notifier)
           .updateSettings(
             (current) => current.copyWith.spacesSyncLastModified(modified),
           );
@@ -1081,7 +1081,7 @@ class SpacesSyncService extends _$SpacesSyncService {
   /// its own divergence on the next run. Gated by the kill switch.
   Future<void> restoreSnapshot(SpacesSnapshot snapshot) {
     return _lock.synchronized(() async {
-      final settingsRepo = ref.read(generalSettingsRepositoryProvider.notifier);
+      final settingsRepo = ref.read(zenSettingsRepositoryProvider.notifier);
       final settings = await settingsRepo.fetchSettings();
       if (!settings.spacesSyncWritesEnabled) {
         state = state.copyWith(

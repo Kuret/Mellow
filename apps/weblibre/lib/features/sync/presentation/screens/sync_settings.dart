@@ -36,7 +36,9 @@ import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class SyncSettingsScreen extends HookConsumerWidget {
@@ -49,6 +51,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     );
 
     final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
+    final zenSettings = ref.watch(zenSettingsWithDefaultsProvider);
     final spacesStatus = ref.watch(spacesSyncServiceProvider);
 
     final lastSyncEvent = ref.watch(
@@ -337,10 +340,10 @@ class SyncSettingsScreen extends HookConsumerWidget {
                     'Spaces, pinned tabs, essentials and folders, two-way '
                     'with Zen Browser on the desktop',
                   ),
-                  value: generalSettings.spacesSyncEnabled,
+                  value: zenSettings.spacesSyncEnabled,
                   onChanged: (value) async {
                     await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .read(saveZenSettingsControllerProvider.notifier)
                         .save(
                           (current) =>
                               current.copyWith.spacesSyncEnabled(value),
@@ -354,13 +357,11 @@ class SyncSettingsScreen extends HookConsumerWidget {
                     'Turn off to keep reading the desktop’s spaces while '
                     'this device writes nothing back',
                   ),
-                  value: generalSettings.spacesSyncWritesEnabled,
-                  onChanged: generalSettings.spacesSyncEnabled
+                  value: zenSettings.spacesSyncWritesEnabled,
+                  onChanged: zenSettings.spacesSyncEnabled
                       ? (value) async {
                           await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
+                              .read(saveZenSettingsControllerProvider.notifier)
                               .save(
                                 (current) => current.copyWith
                                     .spacesSyncWritesEnabled(value),
@@ -384,7 +385,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                   onTap:
                       (spacesStatus.syncing ||
                           !hasAccount ||
-                          !generalSettings.spacesSyncEnabled)
+                          !zenSettings.spacesSyncEnabled)
                       ? null
                       : () async {
                           await ref
@@ -406,8 +407,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                       : () => _showSnapshotsDialog(
                           context,
                           ref,
-                          writesEnabled:
-                              generalSettings.spacesSyncWritesEnabled,
+                          writesEnabled: zenSettings.spacesSyncWritesEnabled,
                         ),
                 ),
               ],

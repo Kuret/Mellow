@@ -100,3 +100,48 @@ abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(SaveZenSettingsController)
+final saveZenSettingsControllerProvider = SaveZenSettingsControllerProvider._();
+
+final class SaveZenSettingsControllerProvider
+    extends $AsyncNotifierProvider<SaveZenSettingsController, void> {
+  SaveZenSettingsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveZenSettingsControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveZenSettingsControllerHash();
+
+  @$internal
+  @override
+  SaveZenSettingsController create() => SaveZenSettingsController();
+}
+
+String _$saveZenSettingsControllerHash() =>
+    r'dac3034d147fbb2c770955f695b1208d1226e22e';
+
+abstract class _$SaveZenSettingsController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

@@ -44,7 +44,7 @@ class _Tab {
     id: id,
     engineTabId: cold ? null : id,
     source: TabSource.manual,
-      containerId: null,
+    containerId: null,
     spaceUuid: _space,
     folderId: folderId,
     splitId: splitId,

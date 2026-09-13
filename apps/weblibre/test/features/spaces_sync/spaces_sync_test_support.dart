@@ -19,8 +19,8 @@ import 'package:weblibre/features/spaces_sync/domain/providers.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 
@@ -69,21 +69,19 @@ class FakeSyncTabRepository extends TabRepository {
 }
 
 /// In-memory settings: what the service reads and writes between runs.
-class FakeGeneralSettingsRepository extends GeneralSettingsRepository {
-  FakeGeneralSettingsRepository(this.current);
+class FakeZenSettingsRepository extends ZenSettingsRepository {
+  FakeZenSettingsRepository(this.current);
 
-  GeneralSettings current;
-
-  @override
-  Stream<GeneralSettings> build() => Stream.value(current);
+  ZenSettings current;
 
   @override
-  Future<GeneralSettings> fetchSettings() async => current;
+  Stream<ZenSettings> build() => Stream.value(current);
 
   @override
-  Future<void> updateSettings(
-    UpdateGeneralSettingsFunc updateWithCurrent,
-  ) async {
+  Future<ZenSettings> fetchSettings() async => current;
+
+  @override
+  Future<void> updateSettings(UpdateZenSettingsFunc updateWithCurrent) async {
     current = updateWithCurrent(current);
     state = AsyncData(current);
   }
@@ -544,7 +542,7 @@ class ServiceHarness {
   final TabDatabase db;
   final FakeSyncTabRepository tabs;
   final FakeSyncServer server;
-  final FakeGeneralSettingsRepository settings;
+  final FakeZenSettingsRepository settings;
   final Directory snapshotDir;
 
   /// [applierVersion] defaults to the current one so a test starts from a
@@ -552,7 +550,7 @@ class ServiceHarness {
   /// exercise the re-apply reset.
   static Future<ServiceHarness> open({
     FakeSyncServer? server,
-    GeneralSettings? initialSettings,
+    ZenSettings? initialSettings,
     int applierVersion = spacesApplierVersion,
     bool authenticated = true,
     List<Override> overrides = const [],
@@ -561,8 +559,8 @@ class ServiceHarness {
     final db = openTestTabDatabase();
     final tabs = FakeSyncTabRepository();
     final fakeServer = server ?? FakeSyncServer();
-    final settings = FakeGeneralSettingsRepository(
-      (initialSettings ?? GeneralSettings.withDefaults()).copyWith(
+    final settings = FakeZenSettingsRepository(
+      (initialSettings ?? ZenSettings.withDefaults()).copyWith(
         spacesSyncApplierVersion: applierVersion,
       ),
     );
@@ -577,7 +575,7 @@ class ServiceHarness {
               () async => testCredentials(),
         ),
         syncIsAuthenticatedProvider.overrideWith((ref) => authenticated),
-        generalSettingsRepositoryProvider.overrideWith(() => settings),
+        zenSettingsRepositoryProvider.overrideWith(() => settings),
         browserRestoreCompleteProvider.overrideWith(NeverRestored.new),
         spacesSyncSnapshotStoreProvider.overrideWith(
           (ref) => SnapshotStore(snapshotDir),

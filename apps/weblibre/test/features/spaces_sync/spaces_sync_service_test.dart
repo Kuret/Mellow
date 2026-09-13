@@ -12,7 +12,7 @@ import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 import 'spaces_sync_test_support.dart';
@@ -72,7 +72,7 @@ void main() {
     () async {
       final harness = await ServiceHarness.open(
         server: serverWithRemoteState(),
-        initialSettings: GeneralSettings.withDefaults(
+        initialSettings: ZenSettings.withDefaults(
           spacesSyncLastSyncId: 'spaces-sync-1',
         ),
       );
@@ -312,10 +312,10 @@ void main() {
 
   /// A device that applied the whole collection earlier: the collection has
   /// not changed since, so `newer=` returns nothing.
-  GeneralSettings settledSettings(
+  ZenSettings settledSettings(
     FakeSyncServer server, {
     bool writesEnabled = true,
-  }) => GeneralSettings.withDefaults(
+  }) => ZenSettings.withDefaults(
     spacesSyncLastSyncId: server.syncId,
     spacesSyncBaselineDone: true,
     spacesSyncLastModified: server.collectionModified,
@@ -484,9 +484,7 @@ void main() {
   test('the kill switch blocks uploads', () async {
     final harness = await ServiceHarness.open(
       server: serverWithRemoteState(),
-      initialSettings: GeneralSettings.withDefaults(
-        spacesSyncWritesEnabled: false,
-      ),
+      initialSettings: ZenSettings.withDefaults(spacesSyncWritesEnabled: false),
     );
     await seedLocalState(harness);
 
