@@ -51,6 +51,7 @@ import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
+import 'package:weblibre/core/startup/background_fetch_entrypoint.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
@@ -74,7 +75,6 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
-import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 import 'package:weblibre/presentation/startup_phase_host.dart';
