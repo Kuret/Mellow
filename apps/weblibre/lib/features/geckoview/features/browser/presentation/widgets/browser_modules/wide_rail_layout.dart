@@ -22,8 +22,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 
 /// The wide vertical rail (PLAN §9 W1), laid out like Arc/Zen: the address
 /// field in one upright row at the top, the tab shelves filling the height
@@ -184,10 +184,6 @@ class WideRailCollapsedUrlButton extends ConsumerWidget {
         (s) => s.effectiveDefaultCreateTabType,
       ),
     );
-    final sandboxSourceUri = tabState == null
-        ? null
-        : ref.watch(sandboxSourceUriForTabProvider(tabId: tabState.id));
-
     return IconButton(
       tooltip: 'Search or enter URL',
       icon: const Icon(Icons.search),
@@ -201,7 +197,7 @@ class WideRailCollapsedUrlButton extends ConsumerWidget {
         }
         await SearchRoute(
           tabId: tabState.id,
-          searchText: searchTextForTab(tabState, sandboxSourceUri),
+          searchText: searchTextForTab(tabState),
           tabType: tabState.tabMode.toTabType(),
         ).push(context);
       },

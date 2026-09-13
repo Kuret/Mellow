@@ -40,7 +40,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -69,15 +68,9 @@ class ShareBottomSheet extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
 
-    final rawTabUrl = ref.watch(
+    final tabUrl = ref.watch(
       tabStateProvider(selectedTabId).select((v) => v?.url),
     );
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: selectedTabId),
-    );
-    // For sandbox-captured tabs every share/copy/QR/cleaner action must
-    // operate on the canonical source URL — never the loopback loader.
-    final tabUrl = sandboxSourceUri ?? rawTabUrl;
 
     final cleanedUrl = useState<Uri?>(null);
     final cleaner = useUrlCleanerController(
@@ -417,13 +410,7 @@ class _SendToDeviceTile extends ConsumerWidget {
                         );
                         if (tabState == null) return;
 
-                        final sendUrl =
-                            ref.read(
-                              sandboxSourceUriForTabProvider(
-                                tabId: tabState.id,
-                              ),
-                            ) ??
-                            tabState.url;
+                        final sendUrl = tabState.url;
                         final title = tabState.title.isNotEmpty
                             ? tabState.title
                             : sendUrl.toString();

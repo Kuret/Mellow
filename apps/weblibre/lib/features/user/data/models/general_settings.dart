@@ -46,6 +46,7 @@ const defaultUiScaleFactor = 1.0;
 const defaultMaxLiveTabs = 25;
 const minMaxLiveTabs = 5;
 const maxMaxLiveTabs = 100;
+
 /// Defaults of the destructive-batch canary (DESIGN "Hardening against Zen's
 /// stale-projection race", defence 5).
 const defaultSpacesSyncMaxTombstoneFraction = 0.2;

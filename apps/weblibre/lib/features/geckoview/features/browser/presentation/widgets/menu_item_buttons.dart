@@ -36,7 +36,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -52,9 +51,7 @@ class ShareMenuItemButton extends HookConsumerWidget {
       closeOnActivate: false,
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
-        final shareUrl =
-            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
-            tabState.url;
+        final shareUrl = tabState.url;
 
         await SharePlus.instance.share(ShareParams(uri: shareUrl));
 
@@ -79,9 +76,7 @@ class ShowQrCodeMenuItemButton extends HookConsumerWidget {
       closeOnActivate: false,
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
-        final qrUrl =
-            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
-            tabState.url;
+        final qrUrl = tabState.url;
 
         await showQrCode(context, qrUrl.toString());
 
@@ -350,9 +345,7 @@ class CopyAddressMenuItemButton extends HookConsumerWidget {
       child: const Text('Copy Address'),
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
-        final copyUrl =
-            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
-            tabState.url;
+        final copyUrl = tabState.url;
 
         await Clipboard.setData(ClipboardData(text: copyUrl.toString()));
 
@@ -410,11 +403,7 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                         return;
                       }
 
-                      final sendUrl =
-                          ref.read(
-                            sandboxSourceUriForTabProvider(tabId: tabState.id),
-                          ) ??
-                          tabState.url;
+                      final sendUrl = tabState.url;
                       final title = tabState.title.isNotEmpty
                           ? tabState.title
                           : sendUrl.toString();

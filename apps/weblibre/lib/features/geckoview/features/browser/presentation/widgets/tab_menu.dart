@@ -61,7 +61,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -195,11 +194,7 @@ class TabMenu extends HookConsumerWidget {
             child: const Text('Add Bookmark'),
             onPressed: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final bookmarkUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
+              final bookmarkUrl = tabState.url;
 
               await BookmarkEntryAddRoute(
                 bookmarkInfo: jsonEncode(
@@ -224,11 +219,7 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
-                  final cloneUrl =
-                      ref.read(
-                        sandboxSourceUriForTabProvider(tabId: tabState.id),
-                      ) ??
-                      tabState.url;
+                  final cloneUrl = tabState.url;
                   final tabId = (tabState.tabMode is! RegularTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)
@@ -267,11 +258,7 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
-                  final cloneUrl =
-                      ref.read(
-                        sandboxSourceUriForTabProvider(tabId: tabState.id),
-                      ) ??
-                      tabState.url;
+                  final cloneUrl = tabState.url;
                   final tabId = (tabState.tabMode is! PrivateTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)

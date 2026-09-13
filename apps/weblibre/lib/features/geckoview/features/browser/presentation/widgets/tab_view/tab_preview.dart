@@ -43,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
@@ -167,13 +166,8 @@ class GridTabPreview extends HookConsumerWidget {
 
     final thumbnail = ref.watch(tabThumbnailProvider(tabId));
 
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabId),
-    );
-    final displayUrl = sandboxSourceUri ?? tabState.url;
-    final displayTitle = sandboxSourceUri != null && tabState.title.isEmpty
-        ? sandboxSourceUri.authority
-        : tabState.titleOrAuthority;
+    final displayUrl = tabState.url;
+    final displayTitle = tabState.titleOrAuthority;
 
     final extendedDeleteMenuController = useMenuController();
 
@@ -495,13 +489,8 @@ class ListTabPreview extends HookConsumerWidget {
         TabState.$default(tabId);
     final isCold = ref.watch(tabPresenceProvider(tabId)) == TabPresence.cold;
 
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabId),
-    );
-    final displayUrl = sandboxSourceUri ?? tabState.url;
-    final displayTitle = sandboxSourceUri != null && tabState.title.isEmpty
-        ? sandboxSourceUri.authority
-        : tabState.titleOrAuthority;
+    final displayUrl = tabState.url;
+    final displayTitle = tabState.titleOrAuthority;
 
     final tabListShowFavicons = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),

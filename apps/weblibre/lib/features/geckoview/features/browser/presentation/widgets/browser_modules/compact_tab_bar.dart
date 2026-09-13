@@ -46,7 +46,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/e
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
@@ -195,7 +194,6 @@ class _CompactChipStrip extends HookConsumerWidget {
     final expandedFolders = ref.watch(compactBarExpandedFoldersProvider);
 
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
-    final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
     final restoreComplete = ref.watch(browserRestoreCompleteProvider);
     final nativeTabIds = ref
         .watch(
@@ -226,7 +224,6 @@ class _CompactChipStrip extends HookConsumerWidget {
           selectedTabId: selectedTabId,
           pinnedTabIds: pinnedTabIds,
           tabDepthById: tabDepthById,
-          sandboxSourceUri: sandboxSourceUris[tabId],
           presence: nativeTabIds.contains(tabId)
               ? TabPresence.live
               : coldTabIds.contains(tabId) || restoreComplete

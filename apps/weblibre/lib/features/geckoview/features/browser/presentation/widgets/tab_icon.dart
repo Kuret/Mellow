@@ -25,10 +25,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class TabIcon extends HookConsumerWidget {
   final TabState tabState;
@@ -39,10 +37,6 @@ class TabIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
-
     final icon = useCachedFuture(() async {
       if (tabState.icon case final EquatableImage tabIcon
           when !tabIcon.isDisposed) {
@@ -55,10 +49,6 @@ class TabIcon extends HookConsumerWidget {
 
       return cachedIcon?.image;
     }, [tabState.icon, tabState.url]);
-
-    if (sandboxSourceUri != null) {
-      return UrlIcon([sandboxSourceUri], iconSize: iconSize, cacheOnly: true);
-    }
 
     // While the icon future is still resolving, show the skeleton bone. This is
     // the only state that needs the (comparatively expensive) Skeletonizer +

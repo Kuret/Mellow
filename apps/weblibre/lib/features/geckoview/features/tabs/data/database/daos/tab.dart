@@ -2274,9 +2274,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           });
         }
 
-        final missing = engineIds
-            .where((id) => !knownIds.contains(id))
-            .toSet();
+        final missing = engineIds.where((id) => !knownIds.contains(id)).toSet();
         if (missing.isNotEmpty) {
           insertedIds.addAll(missing);
           var currentOrderKey = await leadingOrderKey(

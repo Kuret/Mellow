@@ -815,7 +815,6 @@ class SyncSettingsScreen extends HookConsumerWidget {
   }
 }
 
-
 /// Surfaces a batch the destructive-batch canary refused (DESIGN "Hardening
 /// against Zen's stale-projection race", defence 5). Uploads stay paused until
 /// the user says otherwise, so this has to be impossible to miss.

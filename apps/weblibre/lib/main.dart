@@ -77,7 +77,6 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 import 'package:weblibre/presentation/startup_phase_host.dart';
@@ -190,9 +189,6 @@ class _MainWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Keep the sandbox capture controller alive for the lifetime of the app
-    // so it can react to pigeon events even when no UI subscribes to it.
-    ref.watch(sandboxCaptureControllerProvider);
     // Apply the configured display refresh rate from app start and keep it in
     // sync with the setting (Flutter defaults to 60Hz otherwise).
     ref.watch(displayModeApplierProvider);

@@ -51,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -60,7 +61,6 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/exit_app.dart';
@@ -387,12 +387,9 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
             : () async {
                 final tabState = scope.tabState;
                 if (tabState != null) {
-                  final sandboxSourceUri = ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  );
                   await SearchRoute(
                     tabId: tabState.id,
-                    searchText: searchTextForTab(tabState, sandboxSourceUri),
+                    searchText: searchTextForTab(tabState),
                     tabType: tabState.tabMode.toTabType(),
                   ).push(context);
                 } else {

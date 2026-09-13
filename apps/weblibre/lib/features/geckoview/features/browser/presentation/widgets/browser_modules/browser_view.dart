@@ -32,7 +32,6 @@ import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
-import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -593,19 +592,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   final bang =
                       ref.read(selectedBangDataProvider()) ??
                       await ref.read(defaultSearchBangProvider.future);
-
-                  if (bang != null && isWebSearchBang(bang)) {
-                    final router = await ref.read(routerProvider.future);
-                    await router.push(
-                      SearchRoute(
-                        tabType: tabMode.toTabType(),
-                        searchText: sharedContent.text,
-                        launchedFromIntent: true,
-                        autoSubmitSearch: true,
-                      ).location,
-                    );
-                    break;
-                  }
 
                   await ref
                       .read(tabRepositoryProvider.notifier)

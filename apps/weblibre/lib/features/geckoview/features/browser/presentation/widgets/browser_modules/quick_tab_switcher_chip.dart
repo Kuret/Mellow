@@ -43,7 +43,6 @@ class QuickTabSwitcherItem with FastEquatable {
   final TabMode tabMode;
   final bool isHistory;
   final bool isPinned;
-  final bool isSandbox;
   final int depth;
   final String title;
   final Uri url;
@@ -68,20 +67,16 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.url,
     required this.avatar,
     this.useCustomColor = false,
-    this.isSandbox = false,
     this.depth = 0,
     this.presence = TabPresence.live,
   });
 
-  /// Builds a switcher entry for an open tab. [sandboxSourceUri] is the
-  /// canonical source URL when the tab is a sandbox capture (otherwise null),
-  /// so the bar shows the real site instead of the loopback capture URL.
+  /// Builds a switcher entry for an open tab.
   factory QuickTabSwitcherItem.tab(
     TabStateWithContainer state, {
     required String? selectedTabId,
     required Set<String> pinnedTabIds,
     required Map<String, int> tabDepthById,
-    required Uri? sandboxSourceUri,
     TabPresence presence = TabPresence.live,
   }) {
     final (tab, container) = state;
@@ -90,15 +85,12 @@ class QuickTabSwitcherItem with FastEquatable {
       color: container?.color.color,
       id: tab.id,
       isActive: tab.id == selectedTabId,
-      title: sandboxSourceUri != null && tab.title.isEmpty
-          ? sandboxSourceUri.authority
-          : tab.titleOrAuthority,
+      title: tab.titleOrAuthority,
       tabMode: tab.tabMode,
       isHistory: false,
       isPinned: pinnedTabIds.contains(tab.id),
-      isSandbox: sandboxSourceUri != null,
       depth: tabDepthById[tab.id] ?? 0,
-      url: sandboxSourceUri ?? tab.url,
+      url: tab.url,
       avatar: TabIcon(tabState: tab, iconSize: 20),
       presence: presence,
     );
@@ -134,7 +126,6 @@ class QuickTabSwitcherItem with FastEquatable {
     tabMode,
     isHistory,
     isPinned,
-    isSandbox,
     depth,
     title,
     url,
@@ -202,7 +193,6 @@ buildQuickTabSwitcherChipDecoration(
         (!showTitles &&
             !item.isHistory &&
             !item.isPinned &&
-            !item.isSandbox &&
             (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
             item.tabMode is! PrivateTabMode)
         ? EdgeInsets.zero
@@ -263,15 +253,6 @@ Widget buildQuickTabSwitcherChipLabel(
           child: Icon(
             MdiIcons.dominoMask,
             color: appColors.privateTabPurple,
-            size: 20,
-          ),
-        ),
-      if (item.isSandbox)
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Icon(
-            MdiIcons.archiveLockOutline,
-            color: Theme.of(context).colorScheme.tertiary,
             size: 20,
           ),
         ),

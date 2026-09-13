@@ -36,7 +36,6 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/web_inspector/domain/providers/web_inspector.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 /// Actions on the page in front of the user.
@@ -81,11 +80,7 @@ class PageActionsSection extends HookConsumerWidget {
             title: Text(item.label),
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final bookmarkUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
+              final bookmarkUrl = tabState.url;
               Navigator.pop(context);
               await BookmarkEntryAddRoute(
                 bookmarkInfo: jsonEncode(

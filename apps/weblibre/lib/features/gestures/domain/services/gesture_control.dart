@@ -54,7 +54,6 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/host_rules.dart';
 import 'package:weblibre/utils/move_to_background.dart';
@@ -285,7 +284,7 @@ class GestureControlService extends _$GestureControlService {
 
     final bookmarkUrl =
         // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-        ref.read(sandboxSourceUriForTabProvider(tabId: tabId)) ?? tabState.url;
+        tabState.url;
 
     final repository = ref.read(bookmarksRepositoryProvider.notifier);
     final existingGuids = await repository.bookmarkGuidsForUrl(bookmarkUrl);

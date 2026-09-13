@@ -37,7 +37,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
     as tab_data;
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
 class ShareMenuButton extends StatelessWidget {
@@ -325,9 +324,7 @@ Future<void> _cloneTabAsMode(
 
   // Sandbox-captured tab: clone the canonical source URL so the new tab
   // either re-captures or loads the real site — never the loopback loader.
-  final cloneUrl =
-      ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
-      tabState.url;
+  final cloneUrl = tabState.url;
 
   final containerData = await ref
       .read(tab_data.tabDataRepositoryProvider.notifier)

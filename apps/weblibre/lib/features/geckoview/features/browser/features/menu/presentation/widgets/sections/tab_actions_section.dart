@@ -52,7 +52,6 @@ import 'package:weblibre/features/geckoview/features/top_sites/domain/repositori
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -226,12 +225,7 @@ class _ShareExpansion extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
     final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: selectedTabId),
-    );
-    // Sandbox-captured tabs: every share/copy/QR/cleaner action must operate
-    // on the canonical source URL — never the loopback loader.
-    final tabUrl = sandboxSourceUri ?? tabState?.url;
+    final tabUrl = tabState?.url;
 
     final cleanedUrl = useState<Uri?>(null);
     final cleaner = useUrlCleanerController(
@@ -411,13 +405,7 @@ class _SendToDeviceExpansion extends ConsumerWidget {
                         );
                         if (tabState == null) return;
 
-                        final sendUrl =
-                            ref.read(
-                              sandboxSourceUriForTabProvider(
-                                tabId: tabState.id,
-                              ),
-                            ) ??
-                            tabState.url;
+                        final sendUrl = tabState.url;
                         final title = tabState.title.isNotEmpty
                             ? tabState.title
                             : sendUrl.toString();
@@ -497,11 +485,7 @@ class _CloneTabExpansion extends ConsumerWidget {
             icon: MdiIcons.tab,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final cloneUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
+              final cloneUrl = tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
                   .getTabContainerData(selectedTabId);
@@ -537,11 +521,7 @@ class _CloneTabExpansion extends ConsumerWidget {
             iconColor: appColors.privateTabPurple,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final cloneUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
+              final cloneUrl = tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
                   .getTabContainerData(selectedTabId);
@@ -731,10 +711,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: selectedTabId),
-    );
-    final url = sandboxSourceUri ?? tabState?.url;
+    final url = tabState?.url;
 
     final isPinned = useCachedFuture(
       () => url != null
