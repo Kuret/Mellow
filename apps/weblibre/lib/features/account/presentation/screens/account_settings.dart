@@ -30,7 +30,6 @@ import 'package:weblibre/features/account/presentation/widgets/account_auth_stat
 import 'package:weblibre/features/account/presentation/widgets/subscription_card.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_list_section.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_setup_card.dart';
-import 'package:weblibre/features/search_credits/presentation/widgets/search_credits_section.dart';
 import 'package:weblibre/features/settings/domain/services/prefs_sync_service.dart';
 import 'package:weblibre/features/settings/domain/services/settings_sync_service.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -150,18 +149,6 @@ class AccountSettingsScreen extends HookConsumerWidget {
               subtitle: 'Status, billing, and subscription management',
               keywords: const ['billing', 'supporter'],
               child: SubscriptionCard(subscriptionAsync: subscriptionAsync),
-            ),
-          ],
-        ),
-      if (authState.isSignedIn)
-        const SettingsSectionDefinition(
-          title: 'Search Credits',
-          entries: [
-            SettingsEntryDefinition(
-              title: 'Search credits',
-              subtitle: 'Credits balance, token issuance, and purchases',
-              keywords: ['tokens', 'search pack'],
-              child: SearchCreditsSection(embedded: true),
             ),
           ],
         ),
