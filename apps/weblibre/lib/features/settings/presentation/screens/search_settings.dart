@@ -22,15 +22,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const List<SettingsSectionDefinition> searchSettingsSections = [
   SettingsSectionDefinition(
@@ -48,24 +47,6 @@ const List<SettingsSectionDefinition> searchSettingsSections = [
         subtitle: 'Choose the provider for search suggestions',
         keywords: ['suggestions'],
         child: _AutocompleteProviderSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Custom Search Engines',
-        subtitle: 'Add and manage your own search providers',
-        keywords: ['user bangs', 'providers'],
-        child: _CustomSearchEnginesTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Bang Shortcuts',
-    keywords: ['bangs'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Bang Settings',
-        subtitle: 'Manage bang repositories and usage data',
-        keywords: ['shortcuts', 'bangs'],
-        child: _BangsTile(),
       ),
     ],
   ),
@@ -125,7 +106,7 @@ class SearchSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Search',
-      subtitle: 'Providers, bangs, history suggestions, and on-device search.',
+      subtitle: 'Providers, history suggestions, and on-device search.',
       icon: MdiIcons.magnify,
       sections: searchSettingsSections,
     );
@@ -168,7 +149,7 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
         (s) => s.defaultSearchSuggestionsProvider,
       ),
     );
-    final relatedBang = defaultSearchSuggestionsProvider.relatedBang;
+    final suggestionIconUrl = defaultSearchSuggestionsProvider.iconUrl;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -191,8 +172,8 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
                 ),
               ),
               width: double.infinity,
-              leadingIcon: relatedBang.mapNotNull(
-                (trigger) => BangIcon(trigger: trigger),
+              leadingIcon: suggestionIconUrl.mapNotNull(
+                (url) => UrlIcon([url], iconSize: 20),
               ),
               dropdownMenuEntries: SearchSuggestionProviders.values.map((
                 provider,
@@ -200,8 +181,8 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
                 return DropdownMenuEntry(
                   value: provider,
                   label: provider.label,
-                  leadingIcon: provider.relatedBang.mapNotNull(
-                    (trigger) => BangIcon(trigger: trigger),
+                  leadingIcon: provider.iconUrl.mapNotNull(
+                    (url) => UrlIcon([url], iconSize: 20),
                   ),
                 );
               }).toList(),
@@ -219,48 +200,6 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _CustomSearchEnginesTile extends StatelessWidget {
-  const _CustomSearchEnginesTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Custom Search Engines'),
-      subtitle: const Text('Add and manage your own search providers'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.searchWeb),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await const UserBangsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _BangsTile extends StatelessWidget {
-  const _BangsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Bang Settings'),
-      subtitle: const Text('Manage bang repositories and usage data'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.exclamationThick),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await BangSettingsRoute().push(context);
-      },
     );
   }
 }

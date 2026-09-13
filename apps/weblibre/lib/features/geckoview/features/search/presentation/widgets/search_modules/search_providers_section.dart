@@ -21,29 +21,24 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/smart_bang_selector.dart';
+import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:weblibre/features/search/presentation/widgets/search_provider_chips.dart';
 
-/// Hosts the [SmartBangSelector] inside the standard collapsible/reorderable
-/// search module header. The selector renders its own empty/default state and
-/// scrolls horizontally on its own, so this section runs with
-/// `showPagination: false` — the header keeps its collapse / reorder
+/// Hosts the engine picker inside the standard collapsible/reorderable search
+/// module header. The chips scroll horizontally on their own, so this section
+/// runs with `showPagination: false` — the header keeps its collapse / reorder
 /// affordances but the "Show all N / Show less" button is suppressed.
 class SearchProvidersSection extends ConsumerWidget {
-  final TextEditingController searchTextController;
   final String? domain;
 
-  const SearchProvidersSection({
-    required this.searchTextController,
-    required this.domain,
-    super.key,
-  });
+  const SearchProvidersSection({required this.domain, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SearchModuleSection(
       title: 'Search Providers',
       moduleType: SearchModuleType.searchProviders,
-      totalCount: 0,
+      totalCount: builtinSearchProviders.length,
       showPagination: false,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [
@@ -51,10 +46,7 @@ class SearchProvidersSection extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12.0, top: 8.0),
-                  child: SmartBangSelector(
-                    domain: domain,
-                    searchTextController: searchTextController,
-                  ),
+                  child: SearchProviderChips(domain: domain),
                 ),
               ),
           ],

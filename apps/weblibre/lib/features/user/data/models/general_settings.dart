@@ -25,18 +25,17 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/bangs/data/models/bang_group.dart';
-import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
 
 part 'general_settings.g.dart';
 
-const _fallbackSearchProvider = BangKey(
-  group: BangGroup.general,
-  trigger: 'wikipedia',
-);
+/// Id of the engine a user who never touched the setting searches with. A
+/// literal rather than `fallbackSearchProvider.id` because a const initializer
+/// cannot read a field off another const object.
+const _fallbackSearchProvider = 'wikipedia';
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
 const defaultUiScaleFactor = 1.0;
@@ -267,14 +266,13 @@ class GeneralSettings with FastEquatable {
   /// still wins when both are on, because it blocks capture app-wide.
   /// Defaults to false.
   final bool allowPrivateTabScreenshots;
-  @BangKeyConverter()
-  final BangKey? defaultSearchProvider;
 
-  /// Bangs the user keeps in the search-provider strip regardless of how often
-  /// they are used. Frequency-ranked chips churn as habits change; a pin does
-  /// not. Ordered, because the order is the user's own.
-  @BangKeyListConverter()
-  final List<BangKey> pinnedBangs;
+  /// Id of the [SearchProvider] typed queries are sent to.
+  ///
+  /// Read through [SearchProviderIdConverter], which also translates the
+  /// `group::trigger` bang keys older installs stored here.
+  @SearchProviderIdConverter()
+  final String? defaultSearchProvider;
 
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
@@ -519,7 +517,6 @@ class GeneralSettings with FastEquatable {
     required this.screenshotProtectionEnabled,
     required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
-    required this.pinnedBangs,
     required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
     required this.enableLocalAiFeatures,
@@ -615,8 +612,7 @@ class GeneralSettings with FastEquatable {
     this.deleteBrowsingDataOnQuit,
     bool? screenshotProtectionEnabled,
     bool? allowPrivateTabScreenshots,
-    BangKey? defaultSearchProvider,
-    List<BangKey>? pinnedBangs,
+    String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
     bool? enableLocalAiFeatures,
@@ -707,7 +703,6 @@ class GeneralSettings with FastEquatable {
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
        allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
-       pinnedBangs = pinnedBangs ?? const [],
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
@@ -964,7 +959,6 @@ class GeneralSettings with FastEquatable {
     screenshotProtectionEnabled,
     allowPrivateTabScreenshots,
     defaultSearchProvider,
-    pinnedBangs,
     defaultSearchSuggestionsProvider,
     createChildTabsOption,
     enableLocalAiFeatures,

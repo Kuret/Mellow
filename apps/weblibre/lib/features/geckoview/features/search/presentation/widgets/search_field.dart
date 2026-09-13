@@ -23,8 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
@@ -46,17 +46,17 @@ class SearchField extends HookConsumerWidget {
   final Widget? hint;
   final bool privateMode;
 
-  final BangData? activeBang;
-  final bool showBangIcon;
+  final SearchProvider? activeProvider;
+  final bool showProviderIcon;
 
-  /// Whether [activeBang] was explicitly chosen for this search — a provider
-  /// chip or an inline `!bang` — rather than being the standing default.
+  /// Whether [activeProvider] was explicitly chosen for this search — a
+  /// provider chip — rather than being the standing default.
   ///
   /// Picking a provider states the intent to *search*, so the inline URL
   /// completion is no longer what submitting should mean. The suggestion stays
   /// on screen and can still be taken by tapping it; it just no longer wins by
   /// default when the user hits enter.
-  final bool explicitBangSelected;
+  final bool explicitProviderSelected;
 
   /// Overrides the clear (`x`) button behaviour. When null, the button just
   /// clears the text. When provided, the callback decides what to do (e.g.
@@ -67,15 +67,15 @@ class SearchField extends HookConsumerWidget {
     super.key,
     required this.textEditingController,
     required this.onSubmitted,
-    required this.activeBang,
+    required this.activeProvider,
     required this.showSuggestions,
     required this.label,
     this.focusNode,
     this.maxLines = 1,
     this.minLines = 1,
     this.unfocusOnTapOutside = true,
-    this.showBangIcon = true,
-    this.explicitBangSelected = false,
+    this.showProviderIcon = true,
+    this.explicitProviderSelected = false,
     this.autofocus = false,
     this.textFieldKey,
     this.hint,
@@ -143,7 +143,7 @@ class SearchField extends HookConsumerWidget {
         controller: textEditingController,
         suggestion: suggestion.value,
         acceptSuggestionOnSubmit:
-            acceptSuggestionOnSubmit && !explicitBangSelected,
+            acceptSuggestionOnSubmit && !explicitProviderSelected,
         enableSuggestions: true,
         autocorrect: false,
         enableIMEPersonalizedLearning: !privateMode,
@@ -162,10 +162,10 @@ class SearchField extends HookConsumerWidget {
         decoration: InputDecoration(
           border: InputBorder.none,
           contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 12, 0, 12),
-          prefixIcon: (showBangIcon && activeBang != null)
+          prefixIcon: (showProviderIcon && activeProvider != null)
               ? Padding(
                   padding: const EdgeInsetsDirectional.all(12.0),
-                  child: UrlIcon([activeBang!.getDefaultUrl()], iconSize: 24.0),
+                  child: UrlIcon([activeProvider!.homeUrl], iconSize: 24.0),
                 )
               : null,
           label: label,

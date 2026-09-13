@@ -19,36 +19,37 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/bangs/data/models/bang_key.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
+import 'package:weblibre/features/search/presentation/widgets/search_provider_dialog.dart';
+import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
   const DefaultSearchSelector({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.value),
-    );
+    final activeProvider = ref.watch(defaultSearchProviderProvider);
 
-    Future<void> updateSearchProvider(BangKey key) async {
+    Future<void> updateSearchProvider(SearchProvider provider) async {
       await ref
           .read(saveGeneralSettingsControllerProvider.notifier)
           .save(
             (currentSettings) =>
-                currentSettings.copyWith.defaultSearchProvider(key),
+                currentSettings.copyWith.defaultSearchProvider(provider.id),
           );
     }
 
     Future<void> pickProvider() async {
-      final trigger = await const BangSearchRoute().push<BangKey?>(context);
-      if (trigger != null) {
-        await updateSearchProvider(trigger);
+      final picked = await showSearchProviderDialog(
+        context,
+        selected: activeProvider,
+      );
+
+      if (picked != null) {
+        await updateSearchProvider(picked);
       }
     }
 
@@ -57,18 +58,11 @@ class DefaultSearchSelector extends HookConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            child: activeBang == null
-                ? OutlinedButton.icon(
-                    onPressed: pickProvider,
-                    icon: const Icon(Icons.search),
-                    label: const Text('Choose a search provider'),
-                  )
-                : ActionChip(
-                    avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),
-                    label: BangLabel(activeBang),
-                    tooltip: activeBang.trigger,
-                    onPressed: pickProvider,
-                  ),
+            child: ActionChip(
+              avatar: SearchProviderIcon(provider: activeProvider),
+              label: Text(activeProvider.name),
+              onPressed: pickProvider,
+            ),
           ),
           IconButton(
             onPressed: pickProvider,

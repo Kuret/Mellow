@@ -25,11 +25,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/bangs/data/models/bang_data.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/bangs/domain/providers/search.dart';
-import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
-import 'package:weblibre/features/bangs/domain/services/reverse_match.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -59,6 +54,10 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
+import 'package:weblibre/features/search/domain/repositories/search_history.dart';
+import 'package:weblibre/features/search/domain/services/search_provider_match.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
@@ -176,11 +175,6 @@ class SearchScreen extends HookConsumerWidget {
         final text = searchTextController.text;
         hasUserProvidedInput.value = text.isNotEmpty;
 
-        // Keeps the address bar's provider icon in step with a bang the user
-        // is typing. Submitting resolves again from the submitted text, so a
-        // lookup still in flight here can never decide where a search goes.
-        unawaited(ref.read(inlineBangProvider.notifier).resolve(text));
-
         if (startedWithUrl) {
           hasUserModifiedInput.value = text != initialSearchText;
         }
@@ -224,45 +218,49 @@ class SearchScreen extends HookConsumerWidget {
       return null;
     }, []);
 
-    // Try to recognise the current URL as a bang search. If a bang matches,
-    // swap the URL for its extracted query and pre-select the bang so the
-    // user can refine the search instead of editing the raw URL.
+    // Try to recognise the current URL as a search we know how to run. If a
+    // provider matches, swap the URL for the query that produced it and
+    // pre-select that provider, so the user refines the search instead of
+    // editing a raw results URL.
     useEffect(() {
       if (!startedWithUrl || initialSearchText == null) return null;
       final uri = Uri.tryParse(initialSearchText!);
       if (uri == null) return null;
 
-      unawaited(() async {
-        final match = await ref
-            .read(reverseBangMatcherProvider.notifier)
-            .match(uri);
-        if (!context.mounted) return;
-        if (match == null) return;
-        // Bail out if the user has already started editing while we matched.
-        if (searchTextController.text != initialSearchText) return;
+      final match = matchSearchUrl(uri);
+      if (match == null) return null;
 
-        revertUrl.value = initialSearchText;
-        reverseMatchedQuery.value = match.query;
-        searchTextController.value = TextEditingValue(
-          text: match.query,
-          selection: TextSelection(
-            baseOffset: 0,
-            extentOffset: match.query.length,
-          ),
-        );
-        // Mutual exclusion: clear any site-scoped selection so the global
-        // auto-match isn't hidden behind a stale site bang (mirrors the
-        // SmartBangSelector selection logic).
-        final tabHost = existingTabState?.url.host;
-        if (tabHost != null && tabHost.isNotEmpty) {
+      // Deferred: the effect runs inside the build pass that mounted this
+      // screen, and the selection providers must not be written to from there.
+      unawaited(
+        Future.microtask(() {
+          if (!context.mounted) return;
+          // Bail out if the user started editing before the frame settled.
+          if (searchTextController.text != initialSearchText) return;
+
+          revertUrl.value = initialSearchText;
+          reverseMatchedQuery.value = match.searchTerms;
+          searchTextController.value = TextEditingValue(
+            text: match.searchTerms,
+            selection: TextSelection(
+              baseOffset: 0,
+              extentOffset: match.searchTerms.length,
+            ),
+          );
+          // Mutual exclusion: clear any site-scoped selection so the global
+          // auto-match isn't hidden behind a stale site choice (mirrors the
+          // SearchProviderChips selection logic).
+          final tabHost = existingTabState?.url.host;
+          if (tabHost != null && tabHost.isNotEmpty) {
+            ref
+                .read(selectedSearchProviderProvider(domain: tabHost).notifier)
+                .clear();
+          }
           ref
-              .read(selectedBangTriggerProvider(domain: tabHost).notifier)
-              .clearTrigger();
-        }
-        ref
-            .read(selectedBangTriggerProvider().notifier)
-            .setTrigger(match.bang.toKey());
-      }());
+              .read(selectedSearchProviderProvider().notifier)
+              .select(match.provider);
+        }),
+      );
 
       return null;
     }, []);
@@ -352,50 +350,40 @@ class SearchScreen extends HookConsumerWidget {
       }
     });
 
-    final defaultSearchBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.value),
-    );
+    final defaultSearchProvider = ref.watch(defaultSearchProviderProvider);
 
     // Watch both selection providers - only one should be set at a time
-    // due to mutual exclusion in SmartBangSelector
-    final siteSelectedBang = isEditMode
-        ? ref.watch(selectedBangDataProvider(domain: existingTabState.url.host))
+    // due to mutual exclusion in SearchProviderChips
+    final siteSelectedProvider = isEditMode
+        ? ref.watch(
+            selectedSearchProviderProvider(domain: existingTabState.url.host),
+          )
         : null;
-    final globalSelectedBang = ref.watch(selectedBangDataProvider());
+    final globalSelectedProvider = ref.watch(selectedSearchProviderProvider());
 
     // The active selection is whichever one is set (site takes priority if both somehow set)
-    final selectedBang = siteSelectedBang ?? globalSelectedBang;
+    final selectedProvider = siteSelectedProvider ?? globalSelectedProvider;
 
-    // A bang written into the field beats a chip: it is the more explicit and
-    // more recent statement of where this one search should go.
-    final inlineBang = ref.watch(inlineBangProvider);
-
-    final activeBang = inlineBang?.bang ?? selectedBang ?? defaultSearchBang;
+    final activeProvider = selectedProvider ?? defaultSearchProvider;
 
     // The user named a provider for this search instead of falling back to the
     // default. That drives the field's provider icon, and it also settles what
     // enter means: search with that provider, not open the completed URL.
-    final showBangIcon = inlineBang != null || selectedBang != null;
+    final showProviderIcon = selectedProvider != null;
 
-    // What the rest of the modules should search for. A resolved bang is an
-    // instruction, not a search term, so it is lifted out before bookmarks,
-    // history and the rest see the text. An unresolved `!foo` stays put — it
-    // is just a word the user typed.
+    // What the rest of the modules should search for — the field's text as
+    // typed. Only the text matters downstream; selection and composing belong
+    // to the field the user is actually editing.
     final sampledQueryText = useValueNotifier(sampledSearchText.value);
     useEffect(() {
       void sync() {
-        final value = sampledSearchText.value;
-        // Only the text matters downstream; selection and composing belong to
-        // the field the user is actually editing.
-        sampledQueryText.value = inlineBang == null
-            ? value
-            : TextEditingValue(text: parseBangInput(value.text).query);
+        sampledQueryText.value = sampledSearchText.value;
       }
 
       sync();
       sampledSearchText.addListener(sync);
       return () => sampledSearchText.removeListener(sync);
-    }, [sampledSearchText, sampledQueryText, inlineBang]);
+    }, [sampledSearchText, sampledQueryText]);
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -403,7 +391,7 @@ class SearchScreen extends HookConsumerWidget {
       });
 
       return null;
-    }, [showBangIcon]);
+    }, [showProviderIcon]);
 
     Future<void> openUriInTab(Uri uri, {String? findInPageQuery}) async {
       final String targetTabId;
@@ -441,15 +429,16 @@ class SearchScreen extends HookConsumerWidget {
       }
     }
 
-    /// Records the bang search and returns the resolved URI.
-    Future<Uri> resolveSearchUri(BangData bang, String query) async {
+    /// Records the search and returns the URI that runs it.
+    Future<Uri> resolveSearchUri(SearchProvider provider, String query) async {
       if (!privateTabMode) {
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
         await ref
-            .read(bangSearchProvider.notifier)
-            .triggerBangSearch(bang, query);
+            .read(searchHistoryRepositoryProvider.notifier)
+            .addEntry(query, maxEntryCount: settings.maxSearchHistoryEntries);
       }
 
-      return bang.getTemplateUrl(query);
+      return provider.searchUrl(query);
     }
 
     Future<void> submitSearch(String query) async {
@@ -457,15 +446,7 @@ class SearchScreen extends HookConsumerWidget {
         return;
       }
 
-      // Suggestion rows carry the typed text forward verbatim, bang and all.
-      final inline = await ref.read(inlineBangProvider.notifier).resolve(query);
-      final bang = inline?.bang ?? activeBang;
-
-      if (bang == null) {
-        return;
-      }
-
-      await openUriInTab(await resolveSearchUri(bang, inline?.query ?? query));
+      await openUriInTab(await resolveSearchUri(activeProvider, query));
     }
 
     final scrollController = useScrollController();
@@ -503,10 +484,7 @@ class SearchScreen extends HookConsumerWidget {
     );
 
     final searchWidgets = <SearchModuleType, Widget>{
-      // The bang picker is the one module that wants the raw text: `!g` is
-      // what it filters on.
       SearchModuleType.searchProviders: SearchProvidersSection(
-        searchTextController: searchTextController,
         domain: isEditMode ? existingTabState.url.host : null,
       ),
       SearchModuleType.searchSuggestions: SearchTermSuggestionsSection(
@@ -657,8 +635,8 @@ class SearchScreen extends HookConsumerWidget {
           preferredSize: Size.fromHeight(preferredHeight.value),
           child: SearchField(
             textFieldKey: textFieldKey,
-            showBangIcon: showBangIcon,
-            explicitBangSelected: showBangIcon,
+            showProviderIcon: showProviderIcon,
+            explicitProviderSelected: showProviderIcon,
             textEditingController: searchTextController,
             focusNode: searchFocusNode,
             maxLines: isEditMode ? 3 : 1,
@@ -670,7 +648,7 @@ class SearchScreen extends HookConsumerWidget {
               if (url != null &&
                   searchTextController.text == reverseMatchedQuery.value) {
                 // First press after a reverse-match swap: restore the
-                // original URL and drop the auto-selected bang. The
+                // original URL and drop the auto-selected provider. The
                 // user can press again to actually clear.
                 searchTextController.value = TextEditingValue(
                   text: url,
@@ -681,7 +659,7 @@ class SearchScreen extends HookConsumerWidget {
                 );
                 revertUrl.value = null;
                 reverseMatchedQuery.value = null;
-                ref.read(selectedBangTriggerProvider().notifier).clearTrigger();
+                ref.read(selectedSearchProviderProvider().notifier).clear();
               } else {
                 revertUrl.value = null;
                 reverseMatchedQuery.value = null;
@@ -695,42 +673,33 @@ class SearchScreen extends HookConsumerWidget {
                 case NavigateInputClassification(:final uri):
                   await openUriInTab(uri);
                 case SearchInputClassification(:final query):
-                  // Resolved from the submitted text rather than the
-                  // provider's state so a lookup still in flight for
-                  // the last keystroke cannot misroute the search.
-                  final inline = await ref
-                      .read(inlineBangProvider.notifier)
-                      .resolve(query);
-
-                  // Read from both providers - use site if set, otherwise global
-                  final siteBang = isEditMode
+                  // Read from both overrides - use site if set, otherwise
+                  // global, otherwise the standing default.
+                  final siteProvider = isEditMode
                       ? ref.read(
-                          selectedBangDataProvider(
+                          selectedSearchProviderProvider(
                             domain: existingTabState.url.host,
                           ),
                         )
                       : null;
-                  final globalBang = ref.read(selectedBangDataProvider());
-                  final bang =
-                      inline?.bang ??
-                      siteBang ??
-                      globalBang ??
-                      await ref.read(defaultSearchBangProvider.future);
-
-                  if (bang == null) return;
-
-                  // `!g` on its own carries no query, which every
-                  // bang already reads as "open the site itself".
-                  await openUriInTab(
-                    await resolveSearchUri(bang, inline?.query ?? query),
+                  final globalProvider = ref.read(
+                    selectedSearchProviderProvider(),
                   );
+                  // Annotated: the standing default always answers, so the
+                  // chain cannot come up empty even though both overrides can.
+                  final SearchProvider provider =
+                      siteProvider ??
+                      globalProvider ??
+                      ref.read(defaultSearchProviderProvider);
+
+                  await openUriInTab(await resolveSearchUri(provider, query));
                 case InvalidInputClassification():
                   if (context.mounted) {
                     ui_helper.showErrorMessage(context, 'Invalid address');
                   }
               }
             },
-            activeBang: activeBang,
+            activeProvider: activeProvider,
             showSuggestions: true,
           ),
         ),

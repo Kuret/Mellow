@@ -31,7 +31,6 @@ import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -58,6 +57,8 @@ import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_sourc
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -564,14 +565,14 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         containerSelection: containerSelection,
                       );
                 case SharedText():
-                  final bang =
-                      ref.read(selectedBangDataProvider()) ??
-                      await ref.read(defaultSearchBangProvider.future);
+                  final SearchProvider provider =
+                      ref.read(selectedSearchProviderProvider()) ??
+                      ref.read(defaultSearchProviderProvider);
 
                   await ref
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
-                        url: bang?.getTemplateUrl(sharedContent.text),
+                        url: provider.searchUrl(sharedContent.text),
                         tabMode: tabMode,
                         launchedFromIntent: true,
                         selectTab: true,

@@ -31,7 +31,6 @@ const _$SearchModuleTypeEnumMap = {
   SearchModuleType.recentHistory: 'recentHistory',
   SearchModuleType.recentTabs: 'recentTabs',
   SearchModuleType.containers: 'containers',
-  SearchModuleType.frequentBangs: 'frequentBangs',
   SearchModuleType.quickActions: 'quickActions',
 };
 

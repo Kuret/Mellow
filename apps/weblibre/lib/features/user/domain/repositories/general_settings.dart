@@ -149,7 +149,6 @@ const generalSettingJsonKeys = <String>{
   'externalAppIntentPolicies',
   'appLinkRules',
   'desktopModeSites',
-  'pinnedBangs',
 };
 
 @Riverpod(keepAlive: true)

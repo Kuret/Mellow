@@ -29,9 +29,7 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings allowPrivateTabScreenshots(bool allowPrivateTabScreenshots);
 
-  GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider);
-
-  GeneralSettings pinnedBangs(List<BangKey> pinnedBangs);
+  GeneralSettings defaultSearchProvider(String? defaultSearchProvider);
 
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
@@ -241,8 +239,7 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     bool screenshotProtectionEnabled,
     bool allowPrivateTabScreenshots,
-    BangKey? defaultSearchProvider,
-    List<BangKey> pinnedBangs,
+    String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
     bool enableLocalAiFeatures,
@@ -375,12 +372,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(allowPrivateTabScreenshots: allowPrivateTabScreenshots);
 
   @override
-  GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider) =>
+  GeneralSettings defaultSearchProvider(String? defaultSearchProvider) =>
       call(defaultSearchProvider: defaultSearchProvider);
-
-  @override
-  GeneralSettings pinnedBangs(List<BangKey> pinnedBangs) =>
-      call(pinnedBangs: pinnedBangs);
 
   @override
   GeneralSettings defaultSearchSuggestionsProvider(
@@ -741,7 +734,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
-    Object? pinnedBangs = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
@@ -886,12 +878,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           defaultSearchProvider == const $CopyWithPlaceholder()
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
-          : defaultSearchProvider as BangKey?,
-      pinnedBangs:
-          pinnedBangs == const $CopyWithPlaceholder() || pinnedBangs == null
-          ? _value.pinnedBangs
-          // ignore: cast_nullable_to_non_nullable
-          : pinnedBangs as List<BangKey>,
+          : defaultSearchProvider as String?,
       defaultSearchSuggestionsProvider:
           defaultSearchSuggestionsProvider == const $CopyWithPlaceholder() ||
               defaultSearchSuggestionsProvider == null
@@ -1378,11 +1365,8 @@ GeneralSettings _$GeneralSettingsFromJson(
       .toSet(),
   screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
   allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
-  defaultSearchProvider: const BangKeyConverter().fromJson(
+  defaultSearchProvider: const SearchProviderIdConverter().fromJson(
     json['defaultSearchProvider'] as String?,
-  ),
-  pinnedBangs: const BangKeyListConverter().fromJson(
-    json['pinnedBangs'] as List?,
   ),
   defaultSearchSuggestionsProvider: $enumDecodeNullable(
     _$SearchSuggestionProvidersEnumMap,
@@ -1549,10 +1533,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       .toList(),
   'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
   'allowPrivateTabScreenshots': instance.allowPrivateTabScreenshots,
-  'defaultSearchProvider': const BangKeyConverter().toJson(
+  'defaultSearchProvider': const SearchProviderIdConverter().toJson(
     instance.defaultSearchProvider,
   ),
-  'pinnedBangs': const BangKeyListConverter().toJson(instance.pinnedBangs),
   'defaultSearchSuggestionsProvider':
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,

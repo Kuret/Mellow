@@ -23,9 +23,6 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/sort_field.dart';
-import 'package:weblibre/features/bangs/data/models/bang_data.dart';
-import 'package:weblibre/features/bangs/data/models/bang_key.dart';
-import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
@@ -47,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -67,45 +65,27 @@ bool canManualTabReorder(Ref ref) {
   return !filterOptions.hasActiveFilter && !hasActiveSearch;
 }
 
+/// The engine the user picked for the search they are composing, overriding
+/// their standing default.
+///
+/// Keyed by [domain] so a choice made while editing a site's address stays
+/// with that site: the unkeyed instance is the global one. Null means "no
+/// override", not "no engine" — the caller falls back to
+/// `defaultSearchProviderProvider`, which always answers.
 @Riverpod(keepAlive: true)
-class SelectedBangTrigger extends _$SelectedBangTrigger {
+class SelectedSearchProvider extends _$SelectedSearchProvider {
   // ignore: document_ignores api decision
   // ignore: use_setters_to_change_properties
-  void setTrigger(BangKey trigger) {
-    state = trigger;
+  void select(SearchProvider provider) {
+    state = provider;
   }
 
-  void clearTrigger() {
+  void clear() {
     state = null;
   }
 
   @override
-  BangKey? build({String? domain}) {
-    return null;
-  }
-}
-
-@Riverpod()
-class SelectedBangData extends _$SelectedBangData {
-  @override
-  BangData? build({String? domain}) {
-    final repository = ref.watch(bangDataRepositoryProvider.notifier);
-    final selectedBangTrigger = ref.watch(
-      selectedBangTriggerProvider(domain: domain),
-    );
-
-    final subscription = repository.watchBang(selectedBangTrigger).listen((
-      value,
-    ) {
-      if (ref.mounted) {
-        state = value;
-      }
-    });
-
-    ref.onDispose(() async {
-      await subscription.cancel();
-    });
-
+  SearchProvider? build({String? domain}) {
     return null;
   }
 }

@@ -11,7 +11,6 @@ List<RouteBase> get $appRoutes => [
   $onboardingRoute,
   $lockRoute,
   $addonManagerRoute,
-  $bangMenuRoute,
   $bookmarksRoute,
   $browserRoute,
   $historyRoute,
@@ -267,279 +266,6 @@ mixin $AddonInternalSettingsRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $bangMenuRoute => GoRouteData.$route(
-  path: '/bangs',
-  name: 'BangRoute',
-  hasOverriddenOnExit: false,
-  factory: $BangMenuRoute._fromState,
-  routes: [
-    GoRouteData.$route(
-      path: 'user',
-      name: 'UserBangsRoute',
-      hasOverriddenOnExit: false,
-      factory: $UserBangsRoute._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'new',
-          name: 'NewUserBangRoute',
-          hasOverriddenOnExit: false,
-          factory: $NewUserBangRoute._fromState,
-        ),
-        GoRouteData.$route(
-          path: 'edit',
-          name: 'EditUserBangRoute',
-          hasOverriddenOnExit: false,
-          factory: $EditUserBangRoute._fromState,
-        ),
-      ],
-    ),
-    GoRouteData.$route(
-      path: 'search/:searchText',
-      name: 'BangSearchRoute',
-      hasOverriddenOnExit: false,
-      factory: $BangSearchRoute._fromState,
-    ),
-    GoRouteData.$route(
-      path: 'categories',
-      name: 'BangCategoriesRoute',
-      hasOverriddenOnExit: false,
-      factory: $BangCategoriesRoute._fromState,
-      routes: [
-        GoRouteData.$route(
-          path: 'category/:category',
-          name: 'BangCategoryRoute',
-          hasOverriddenOnExit: false,
-          factory: $BangCategoryRoute._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: ':subCategory',
-              name: 'BangSubCategoryRoute',
-              hasOverriddenOnExit: false,
-              factory: $BangSubCategoryRoute._fromState,
-            ),
-          ],
-        ),
-      ],
-    ),
-  ],
-);
-
-mixin $BangMenuRoute on GoRouteData {
-  static BangMenuRoute _fromState(GoRouterState state) => const BangMenuRoute();
-
-  @override
-  String get location => GoRouteData.$location('/bangs');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $UserBangsRoute on GoRouteData {
-  static UserBangsRoute _fromState(GoRouterState state) =>
-      const UserBangsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/bangs/user');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $NewUserBangRoute on GoRouteData {
-  static NewUserBangRoute _fromState(GoRouterState state) =>
-      const NewUserBangRoute();
-
-  @override
-  String get location => GoRouteData.$location('/bangs/user/new');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $EditUserBangRoute on GoRouteData {
-  static EditUserBangRoute _fromState(GoRouterState state) => EditUserBangRoute(
-    initialBang: state.uri.queryParameters['initial-bang']!,
-    fork:
-        _$convertMapValue('fork', state.uri.queryParameters, _$boolConverter) ??
-        false,
-  );
-
-  EditUserBangRoute get _self => this as EditUserBangRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/bangs/user/edit',
-    queryParams: {
-      'initial-bang': _self.initialBang,
-      if (_self.fork != false) 'fork': _self.fork.toString(),
-    },
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BangSearchRoute on GoRouteData {
-  static BangSearchRoute _fromState(GoRouterState state) => BangSearchRoute(
-    searchText:
-        state.pathParameters['searchText'] ?? BangSearchRoute.emptySearchText,
-  );
-
-  BangSearchRoute get _self => this as BangSearchRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/bangs/search/${Uri.encodeComponent(_self.searchText)}',
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BangCategoriesRoute on GoRouteData {
-  static BangCategoriesRoute _fromState(GoRouterState state) =>
-      const BangCategoriesRoute();
-
-  @override
-  String get location => GoRouteData.$location('/bangs/categories');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BangCategoryRoute on GoRouteData {
-  static BangCategoryRoute _fromState(GoRouterState state) =>
-      BangCategoryRoute(category: state.pathParameters['category']!);
-
-  BangCategoryRoute get _self => this as BangCategoryRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/bangs/categories/category/${Uri.encodeComponent(_self.category)}',
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BangSubCategoryRoute on GoRouteData {
-  static BangSubCategoryRoute _fromState(GoRouterState state) =>
-      BangSubCategoryRoute(
-        category: state.pathParameters['category']!,
-        subCategory: state.pathParameters['subCategory']!,
-      );
-
-  BangSubCategoryRoute get _self => this as BangSubCategoryRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/bangs/categories/category/${Uri.encodeComponent(_self.category)}/${Uri.encodeComponent(_self.subCategory)}',
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-T? _$convertMapValue<T>(
-  String key,
-  Map<String, String> map,
-  T? Function(String) converter,
-) {
-  final value = map[key];
-  return value == null ? null : converter(value);
-}
-
-bool _$boolConverter(String value) {
-  switch (value) {
-    case 'true':
-      return true;
-    case 'false':
-      return false;
-    default:
-      throw UnsupportedError('Cannot convert "$value" into a bool.');
-  }
 }
 
 RouteBase get $bookmarksRoute => GoRouteData.$route(
@@ -1148,6 +874,26 @@ mixin $SelectProfileRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+bool _$boolConverter(String value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw UnsupportedError('Cannot convert "$value" into a bool.');
+  }
+}
+
 extension<T extends Enum> on Map<T, String> {
   T? _$fromName(String? value) =>
       entries.where((element) => element.value == value).firstOrNull?.key;
@@ -1467,12 +1213,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'WebPushSettingsRoute',
       hasOverriddenOnExit: false,
       factory: $WebPushSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
-      path: 'bang',
-      name: 'BangSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $BangSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'hardening',
@@ -1856,27 +1596,6 @@ mixin $WebPushSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/push');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $BangSettingsRoute on GoRouteData {
-  static BangSettingsRoute _fromState(GoRouterState state) =>
-      BangSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/bang');
 
   @override
   void go(BuildContext context) => context.go(location);

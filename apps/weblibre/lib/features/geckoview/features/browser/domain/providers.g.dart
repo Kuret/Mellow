@@ -51,47 +51,70 @@ final class CanManualTabReorderProvider
 String _$canManualTabReorderHash() =>
     r'ba5d961933464b6e005d7945802908a9a4ae034b';
 
-@ProviderFor(SelectedBangTrigger)
-final selectedBangTriggerProvider = SelectedBangTriggerFamily._();
+/// The engine the user picked for the search they are composing, overriding
+/// their standing default.
+///
+/// Keyed by [domain] so a choice made while editing a site's address stays
+/// with that site: the unkeyed instance is the global one. Null means "no
+/// override", not "no engine" — the caller falls back to
+/// `defaultSearchProviderProvider`, which always answers.
 
-final class SelectedBangTriggerProvider
-    extends $NotifierProvider<SelectedBangTrigger, BangKey?> {
-  SelectedBangTriggerProvider._({
-    required SelectedBangTriggerFamily super.from,
+@ProviderFor(SelectedSearchProvider)
+final selectedSearchProviderProvider = SelectedSearchProviderFamily._();
+
+/// The engine the user picked for the search they are composing, overriding
+/// their standing default.
+///
+/// Keyed by [domain] so a choice made while editing a site's address stays
+/// with that site: the unkeyed instance is the global one. Null means "no
+/// override", not "no engine" — the caller falls back to
+/// `defaultSearchProviderProvider`, which always answers.
+final class SelectedSearchProviderProvider
+    extends $NotifierProvider<SelectedSearchProvider, SearchProvider?> {
+  /// The engine the user picked for the search they are composing, overriding
+  /// their standing default.
+  ///
+  /// Keyed by [domain] so a choice made while editing a site's address stays
+  /// with that site: the unkeyed instance is the global one. Null means "no
+  /// override", not "no engine" — the caller falls back to
+  /// `defaultSearchProviderProvider`, which always answers.
+  SelectedSearchProviderProvider._({
+    required SelectedSearchProviderFamily super.from,
     required String? super.argument,
   }) : super(
          retry: null,
-         name: r'selectedBangTriggerProvider',
+         name: r'selectedSearchProviderProvider',
          isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$selectedBangTriggerHash();
+  String debugGetCreateSourceHash() => _$selectedSearchProviderHash();
 
   @override
   String toString() {
-    return r'selectedBangTriggerProvider'
+    return r'selectedSearchProviderProvider'
         ''
         '($argument)';
   }
 
   @$internal
   @override
-  SelectedBangTrigger create() => SelectedBangTrigger();
+  SelectedSearchProvider create() => SelectedSearchProvider();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(BangKey? value) {
+  Override overrideWithValue(SearchProvider? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<BangKey?>(value),
+      providerOverride: $SyncValueProvider<SearchProvider?>(value),
     );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SelectedBangTriggerProvider && other.argument == argument;
+    return other is SelectedSearchProviderProvider &&
+        other.argument == argument;
   }
 
   @override
@@ -100,145 +123,72 @@ final class SelectedBangTriggerProvider
   }
 }
 
-String _$selectedBangTriggerHash() =>
-    r'162d053d0207b8b98549adc453111111d8ff69d6';
+String _$selectedSearchProviderHash() =>
+    r'f3db57c2359c9018371fa6cf0184396e2472d9cd';
 
-final class SelectedBangTriggerFamily extends $Family
+/// The engine the user picked for the search they are composing, overriding
+/// their standing default.
+///
+/// Keyed by [domain] so a choice made while editing a site's address stays
+/// with that site: the unkeyed instance is the global one. Null means "no
+/// override", not "no engine" — the caller falls back to
+/// `defaultSearchProviderProvider`, which always answers.
+
+final class SelectedSearchProviderFamily extends $Family
     with
         $ClassFamilyOverride<
-          SelectedBangTrigger,
-          BangKey?,
-          BangKey?,
-          BangKey?,
+          SelectedSearchProvider,
+          SearchProvider?,
+          SearchProvider?,
+          SearchProvider?,
           String?
         > {
-  SelectedBangTriggerFamily._()
+  SelectedSearchProviderFamily._()
     : super(
         retry: null,
-        name: r'selectedBangTriggerProvider',
+        name: r'selectedSearchProviderProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: false,
       );
 
-  SelectedBangTriggerProvider call({String? domain}) =>
-      SelectedBangTriggerProvider._(argument: domain, from: this);
+  /// The engine the user picked for the search they are composing, overriding
+  /// their standing default.
+  ///
+  /// Keyed by [domain] so a choice made while editing a site's address stays
+  /// with that site: the unkeyed instance is the global one. Null means "no
+  /// override", not "no engine" — the caller falls back to
+  /// `defaultSearchProviderProvider`, which always answers.
+
+  SelectedSearchProviderProvider call({String? domain}) =>
+      SelectedSearchProviderProvider._(argument: domain, from: this);
 
   @override
-  String toString() => r'selectedBangTriggerProvider';
+  String toString() => r'selectedSearchProviderProvider';
 }
 
-abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
+/// The engine the user picked for the search they are composing, overriding
+/// their standing default.
+///
+/// Keyed by [domain] so a choice made while editing a site's address stays
+/// with that site: the unkeyed instance is the global one. Null means "no
+/// override", not "no engine" — the caller falls back to
+/// `defaultSearchProviderProvider`, which always answers.
+
+abstract class _$SelectedSearchProvider extends $Notifier<SearchProvider?> {
   late final _$args = ref.$arg as String?;
   String? get domain => _$args;
 
-  BangKey? build({String? domain});
+  SearchProvider? build({String? domain});
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<BangKey?, BangKey?>;
+    final ref = this.ref as $Ref<SearchProvider?, SearchProvider?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<BangKey?, BangKey?>,
-              BangKey?,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, () => build(domain: _$args));
-  }
-}
-
-@ProviderFor(SelectedBangData)
-final selectedBangDataProvider = SelectedBangDataFamily._();
-
-final class SelectedBangDataProvider
-    extends $NotifierProvider<SelectedBangData, BangData?> {
-  SelectedBangDataProvider._({
-    required SelectedBangDataFamily super.from,
-    required String? super.argument,
-  }) : super(
-         retry: null,
-         name: r'selectedBangDataProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$selectedBangDataHash();
-
-  @override
-  String toString() {
-    return r'selectedBangDataProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  SelectedBangData create() => SelectedBangData();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(BangData? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<BangData?>(value),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SelectedBangDataProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$selectedBangDataHash() => r'68bdd0d203cc47a0d26904ecb30651b58aa19486';
-
-final class SelectedBangDataFamily extends $Family
-    with
-        $ClassFamilyOverride<
-          SelectedBangData,
-          BangData?,
-          BangData?,
-          BangData?,
-          String?
-        > {
-  SelectedBangDataFamily._()
-    : super(
-        retry: null,
-        name: r'selectedBangDataProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  SelectedBangDataProvider call({String? domain}) =>
-      SelectedBangDataProvider._(argument: domain, from: this);
-
-  @override
-  String toString() => r'selectedBangDataProvider';
-}
-
-abstract class _$SelectedBangData extends $Notifier<BangData?> {
-  late final _$args = ref.$arg as String?;
-  String? get domain => _$args;
-
-  BangData? build({String? domain});
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<BangData?, BangData?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<BangData?, BangData?>,
-              BangData?,
+              AnyNotifier<SearchProvider?, SearchProvider?>,
+              SearchProvider?,
               Object?,
               Object?
             >;

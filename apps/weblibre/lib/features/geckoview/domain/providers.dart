@@ -26,12 +26,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -66,52 +66,30 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
       DefaultSearchAction((text) async {
         if (!ref.mounted) return;
 
-        final searchBang = await ref.read(defaultSearchBangProvider.future);
+        // Always answers, so the external search intent can no longer fall
+        // through to the search screen for want of an engine.
+        final searchProvider = ref.read(defaultSearchProviderProvider);
 
-        if (!ref.mounted) return;
-
-        if (searchBang != null) {
-          final currentTab = ref.read(
-            tabStatesProvider,
-          )[ref.read(selectedTabProvider)];
-
-          final tabMode =
-              currentTab?.tabMode ??
-              TabMode.fromTabType(
-                ref
-                    .read(generalSettingsWithDefaultsProvider)
-                    .effectiveDefaultCreateTabType,
-              );
-
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .addTab(
-                url: searchBang.getTemplateUrl(text),
-                parentId: currentTab?.id,
-                tabMode: tabMode,
-                selectTab: true,
-              );
-          return;
-        }
-
-        logger.w('No search bang found, falling back to search screen');
-
-        final router = await ref.read(routerProvider.future);
-        if (!ref.mounted) return;
-
-        final settings = ref.read(generalSettingsWithDefaultsProvider);
-        final selectedTabState = ref.read(
+        final currentTab = ref.read(
           tabStatesProvider,
         )[ref.read(selectedTabProvider)];
 
-        await router.push(
-          SearchRoute(
-            tabType:
-                selectedTabState?.tabMode.toTabType() ??
-                settings.effectiveDefaultCreateTabType,
-            searchText: text,
-          ).location,
-        );
+        final tabMode =
+            currentTab?.tabMode ??
+            TabMode.fromTabType(
+              ref
+                  .read(generalSettingsWithDefaultsProvider)
+                  .effectiveDefaultCreateTabType,
+            );
+
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(
+              url: searchProvider.searchUrl(text),
+              parentId: currentTab?.id,
+              tabMode: tabMode,
+              selectTab: true,
+            );
       }),
       FindInPageAction((text) async {
         if (ref.mounted) {

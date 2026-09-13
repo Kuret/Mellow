@@ -18,32 +18,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/features/bangs/data/models/bang.dart';
-import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 
-/// Renders a bang's website name, appending an amber crown for the official
-/// WebLibre bang ([BangGroup.weblibre]) so it stands out as first-party.
-class BangLabel extends StatelessWidget {
-  final Bang bang;
+/// The engine's favicon, fetched from its own home page.
+///
+/// A wrapper rather than a raw [UrlIcon] so every provider affordance — the
+/// address-bar prefix, the settings tile, the picker rows — asks for the icon
+/// the same way and at whatever size its caller needs.
+class SearchProviderIcon extends StatelessWidget {
+  final SearchProvider provider;
+  final double iconSize;
 
-  const BangLabel(this.bang, {super.key});
+  const SearchProviderIcon({
+    required this.provider,
+    this.iconSize = 20,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final label = Text(bang.websiteName);
-
-    if (bang.group != BangGroup.weblibre) {
-      return label;
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(child: label),
-        const SizedBox(width: 4.0),
-        const Icon(MdiIcons.crown, color: Colors.amber, size: 16.0),
-      ],
-    );
+    return UrlIcon([provider.homeUrl], iconSize: iconSize);
   }
 }

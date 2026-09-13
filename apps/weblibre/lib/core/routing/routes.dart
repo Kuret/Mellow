@@ -33,13 +33,6 @@ import 'package:weblibre/features/addons/presentation/screens/addon_internal_set
 import 'package:weblibre/features/addons/presentation/screens/addon_listing_details.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_manager.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_permissions.dart';
-import 'package:weblibre/features/bangs/data/models/bang.dart';
-import 'package:weblibre/features/bangs/presentation/screens/categories.dart';
-import 'package:weblibre/features/bangs/presentation/screens/category.dart';
-import 'package:weblibre/features/bangs/presentation/screens/edit.dart';
-import 'package:weblibre/features/bangs/presentation/screens/menu.dart';
-import 'package:weblibre/features/bangs/presentation/screens/search.dart';
-import 'package:weblibre/features/bangs/presentation/screens/user.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_entry_edit.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/screens/bookmark_folder_edit.dart';
@@ -69,7 +62,6 @@ import 'package:weblibre/features/gestures/presentation/screens/gesture_settings
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/contextual_toolbar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/custom_tracking_protection.dart';
@@ -109,7 +101,6 @@ import 'package:weblibre/features/web_push/presentation/screens/web_push_setting
 export 'package:weblibre/core/routing/tab_type.dart';
 
 part 'routes.addons.dart';
-part 'routes.bangs.dart';
 part 'routes.bookmarks.dart';
 part 'routes.browser.dart';
 part 'routes.g.dart';
