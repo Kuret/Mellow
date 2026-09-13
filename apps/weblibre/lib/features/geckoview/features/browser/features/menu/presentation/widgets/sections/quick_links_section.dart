@@ -25,7 +25,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 
 /// Icon grid of the browser's other screens.
 ///
@@ -67,7 +66,7 @@ class QuickLinksSection extends ConsumerWidget {
                   child: _QuickLinkTile(
                     icon: link.icon,
                     label: link.label,
-                    onTap: () => _open(context, ref, link),
+                    onTap: () => _open(context, link),
                   ),
                 ),
             ],
@@ -84,14 +83,9 @@ class QuickLinksSection extends ConsumerWidget {
     MenuItemType.bookmarks,
     MenuItemType.downloads,
     MenuItemType.bangs,
-    MenuItemType.smallWeb,
   };
 
-  Future<void> _open(
-    BuildContext context,
-    WidgetRef ref,
-    MenuItemType item,
-  ) async {
+  Future<void> _open(BuildContext context, MenuItemType item) async {
     switch (item) {
       case MenuItemType.history:
         Navigator.pop(context);
@@ -105,9 +99,6 @@ class QuickLinksSection extends ConsumerWidget {
       case MenuItemType.bangs:
         Navigator.pop(context);
         await const BangMenuRoute().push(context);
-      case MenuItemType.smallWeb:
-        Navigator.pop(context);
-        await ref.read(smallWebModeControllerProvider.notifier).enter();
       default:
         break;
     }

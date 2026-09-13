@@ -57,7 +57,6 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.bookmarks: 'bookmarks',
   MenuItemType.downloads: 'downloads',
   MenuItemType.bangs: 'bangs',
-  MenuItemType.smallWeb: 'smallWeb',
   MenuItemType.profileSwitch: 'profileSwitch',
   MenuItemType.syncNow: 'syncNow',
   MenuItemType.appSettings: 'appSettings',

@@ -134,7 +134,6 @@ enum MenuItemType {
   bookmarks,
   downloads,
   bangs,
-  smallWeb,
 
   // Profile & App
   profileSwitch,
@@ -180,7 +179,6 @@ enum MenuItemType {
     bookmarks => 'Bookmarks',
     downloads => 'Downloads',
     bangs => 'Bangs',
-    smallWeb => 'Small Web',
     profileSwitch => 'Profile',
     syncNow => 'Sync Now',
     appSettings => 'Settings',
@@ -231,7 +229,6 @@ enum MenuItemType {
     bookmarks => MdiIcons.bookmarkMultiple,
     downloads => MdiIcons.fileDownload,
     bangs => MdiIcons.exclamationThick,
-    smallWeb => Icons.explore,
     profileSwitch => Icons.person,
     syncNow => Icons.sync,
     appSettings => Icons.settings,
@@ -354,7 +351,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       MenuItemDefault(MenuItemType.bookmarks),
       MenuItemDefault(MenuItemType.downloads),
       MenuItemDefault(MenuItemType.bangs),
-      MenuItemDefault(MenuItemType.smallWeb),
     ],
   ),
   MenuSectionDefault(

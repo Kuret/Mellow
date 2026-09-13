@@ -351,14 +351,15 @@ void main() {
       expect(decoded.last.visible, isFalse);
     });
 
-    test('a layout naming the retired feed items still loads', () {
-      // `feeds` and `fetchFeeds` shipped as MenuItemType values and are still
-      // named in stored menu layouts. Removing the enum values must not throw,
-      // and must not cost the user the rest of their arrangement.
+    test('a layout naming the retired feed and small-web items still loads', () {
+      // `feeds`, `fetchFeeds` and `smallWeb` shipped as MenuItemType values and
+      // are still named in stored menu layouts. Removing the enum values must
+      // not throw, and must not cost the user the rest of their arrangement.
       final decoded = menuItemEntriesFromJson([
         {'type': 'history', 'visible': true},
         {'type': 'feeds', 'visible': true},
         {'type': 'fetchFeeds', 'visible': true},
+        {'type': 'smallWeb', 'visible': true},
         {'type': 'bookmarks', 'visible': true},
       ]);
 
