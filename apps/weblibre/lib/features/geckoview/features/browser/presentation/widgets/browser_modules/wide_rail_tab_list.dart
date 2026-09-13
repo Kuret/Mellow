@@ -122,10 +122,31 @@ class WideRailTabList extends HookConsumerWidget {
     final activeRowKey = useRef(GlobalKey());
     final isUserScrolling = useRef(false);
     final userScrollTimer = useRef<Timer?>(null);
+    // Collapsing or expanding a folder shifts the active row's index, which
+    // `useScrollToActiveChip` reads as "the active row moved, re-centre it" —
+    // scrolling the rail away from the folder the user just tapped. A toggle
+    // is the user driving the list, so it counts as a manual scroll until the
+    // rows it adds or removes have settled.
+    final folderToggleGuard = useRef(false);
+    final folderToggleTimer = useRef<Timer?>(null);
 
     useEffect(() {
-      return userScrollTimer.value?.cancel;
+      return () {
+        userScrollTimer.value?.cancel();
+        folderToggleTimer.value?.cancel();
+      };
     }, []);
+
+    void guardFolderToggle() {
+      folderToggleGuard.value = true;
+      folderToggleTimer.value?.cancel();
+      // Long enough to cover the write and the rebuild it triggers; all it
+      // suppresses in the meantime is auto-centring, which is exactly what
+      // the tap asked not to happen.
+      folderToggleTimer.value = Timer(const Duration(milliseconds: 1200), () {
+        folderToggleGuard.value = false;
+      });
+    }
 
     final activeEntryId = 'tab-$selectedTabId';
     final hasActiveEntry = entries.any((entry) => entry.id == activeEntryId);
@@ -135,7 +156,7 @@ class WideRailTabList extends HookConsumerWidget {
       activeChipKey: activeRowKey.value,
       activeId: hasActiveEntry ? activeEntryId : null,
       orderedIds: [for (final entry in entries) entry.id],
-      isUserScrolling: () => isUserScrolling.value,
+      isUserScrolling: () => isUserScrolling.value || folderToggleGuard.value,
     );
 
     final list = NotificationListener<UserScrollNotification>(
@@ -160,6 +181,7 @@ class WideRailTabList extends HookConsumerWidget {
             _RailLabelEntry(:final label) => ShelfSectionHeader(title: label),
             _RailFolderEntry(:final folder) => WideRailFolderRow(
               folder: folder,
+              onToggle: guardFolderToggle,
             ),
             _RailTabEntry(:final item) => _RailTabRow(
               item: item,
@@ -470,7 +492,11 @@ class WideRailTabRowView extends StatelessWidget {
 class WideRailFolderRow extends ConsumerWidget {
   final TabListFolderItem folder;
 
-  const WideRailFolderRow({super.key, required this.folder});
+  /// Called as the toggle is tapped, before the write. The rail uses it to
+  /// stop its auto-centring from scrolling away from the folder.
+  final VoidCallback? onToggle;
+
+  const WideRailFolderRow({super.key, required this.folder, this.onToggle});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -478,6 +504,7 @@ class WideRailFolderRow extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     void toggleCollapsed() {
+      onToggle?.call();
       unawaited(
         ref
             .read(folderRepositoryProvider.notifier)

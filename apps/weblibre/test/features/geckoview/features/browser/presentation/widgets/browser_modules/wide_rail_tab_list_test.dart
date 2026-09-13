@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -51,6 +52,15 @@ class _EmptyTabStates extends TabStates {
 class _NoSelectedTab extends SelectedTab {
   @override
   String? build() => null;
+}
+
+class _FixedSelectedTab extends SelectedTab {
+  _FixedSelectedTab(this.tabId);
+
+  final String tabId;
+
+  @override
+  String? build() => tabId;
 }
 
 class _TestSelectedSpace extends SelectedSpace {
@@ -88,11 +98,31 @@ Future<TabDatabase> _seed({
   int essentials = 2,
   int pinned = 2,
   int normal = 20,
+  bool folder = false,
 }) async {
   final db = openTestTabDatabase();
   await db.spaceDao.insertSpace(
     SpaceData(uuid: 'space-1', name: 'Work', orderIndex: 0),
   );
+  if (folder) {
+    // Collapsed in storage, so its member only shows once the row is tapped.
+    await db.tabFolderDao.insertFolder(
+      TabFolderData(
+        id: 'folder-1',
+        name: 'Folder',
+        spaceUuid: 'space-1',
+        isCollapsed: true,
+        orderKey: 'f',
+      ),
+    );
+    await seedTab(
+      db,
+      'mem-0',
+      spaceUuid: 'space-1',
+      folderId: 'folder-1',
+      shelf: TabShelf.pinned,
+    );
+  }
   for (var i = 0; i < essentials; i++) {
     await seedTab(db, 'ess-$i', shelf: TabShelf.essential);
   }
@@ -105,7 +135,11 @@ Future<TabDatabase> _seed({
   return db;
 }
 
-Future<void> _pumpRail(WidgetTester tester, {required TabDatabase db}) async {
+Future<void> _pumpRail(
+  WidgetTester tester, {
+  required TabDatabase db,
+  String? selectedTabId,
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -119,7 +153,12 @@ Future<void> _pumpRail(WidgetTester tester, {required TabDatabase db}) async {
           ]),
         ),
         selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
-        selectedTabProvider.overrideWith(_NoSelectedTab.new),
+        if (selectedTabId == null)
+          selectedTabProvider.overrideWith(_NoSelectedTab.new)
+        else
+          selectedTabProvider.overrideWith(
+            () => _FixedSelectedTab(selectedTabId),
+          ),
         tabStatesProvider.overrideWith(_EmptyTabStates.new),
         browserRestoreCompleteProvider.overrideWith(_NotRestored.new),
         genericWebsiteServiceProvider.overrideWith(
@@ -194,6 +233,38 @@ void main() {
     expect(tester.getTopLeft(firstPinnedRow).dy, lessThan(pinnedRowBefore));
     expect(tester.getTopLeft(find.text('Tabs')).dy, greaterThan(0));
     expect(tester.getRect(essentials), essentialsRect);
+
+    await _disposeTree(tester);
+  });
+
+  testWidgets('expanding a folder leaves the scroll position alone', (
+    tester,
+  ) async {
+    final db = await _seed(essentials: 0, pinned: 1, folder: true);
+    addTearDown(db.close);
+
+    // An active tab at the far end of the list: expanding the folder shifts
+    // its index, which used to be read as "the active row moved" and scrolled
+    // the rail back down to it.
+    await _pumpRail(tester, db: db, selectedTabId: 'tab-19');
+
+    final controller = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    expect(controller.offset, greaterThan(0));
+
+    // Back to the top, where the folder row is.
+    controller.jumpTo(0);
+    await tester.pump();
+    expect(find.text('Folder'), findsOneWidget);
+    expect(find.text('mem-0'), findsNothing);
+
+    await tester.tap(find.text('Folder'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('mem-0'), findsOneWidget);
+    expect(controller.offset, 0);
 
     await _disposeTree(tester);
   });
