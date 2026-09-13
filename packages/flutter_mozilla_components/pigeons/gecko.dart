@@ -2403,7 +2403,6 @@ abstract class GeckoDownloadsApi {
 
 @FlutterApi()
 abstract class BrowserExtensionEvents {
-  void onFeedRequested(int sequence, String url);
 }
 
 class GeckoHeader {

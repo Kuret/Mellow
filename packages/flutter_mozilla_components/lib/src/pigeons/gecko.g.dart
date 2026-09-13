@@ -11982,32 +11982,8 @@ class GeckoDownloadsApi {
 abstract class BrowserExtensionEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  void onFeedRequested(int sequence, String url);
-
   static void setUp(BrowserExtensionEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
-    {
-      final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          final List<Object?> args = message! as List<Object?>;
-          final int arg_sequence = args[0]! as int;
-          final String arg_url = args[1]! as String;
-          try {
-            api.onFeedRequested(arg_sequence, arg_url);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
   }
 }
 

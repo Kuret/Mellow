@@ -4,21 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/src/domain/entities/turndown_result.dart';
-import 'package:flutter_mozilla_components/src/extensions/subject.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
-import 'package:rxdart/rxdart.dart';
 
 final _apiInstance = GeckoBrowserExtensionApi();
 
 class GeckoBrowserExtensionService extends BrowserExtensionEvents {
-  final _feedRequest = BehaviorSubject<String>();
-
-  Stream<String> get feedRequested => _feedRequest.stream;
-
   static Future<List<TurndownResults>> turndownHtml(
     List<String> htmlList, {
     Duration timeout = const Duration(seconds: 1),
@@ -55,14 +47,5 @@ class GeckoBrowserExtensionService extends BrowserExtensionEvents {
       binaryMessenger: binaryMessenger,
       messageChannelSuffix: messageChannelSuffix,
     );
-  }
-
-  @override
-  void onFeedRequested(int sequence, String url) {
-    _feedRequest.addWhenMoreRecent(sequence, null, url);
-  }
-
-  void dispose() {
-    unawaited(_feedRequest.close());
   }
 }

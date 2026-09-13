@@ -11,8 +11,7 @@
     "scripts": [
       "readability.min.js",
       "port.js",
-      "turndown.js",
-      "feed.js"
+      "turndown.js"
     ]
   },
   "permissions": [

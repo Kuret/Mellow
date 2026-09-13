@@ -110,16 +110,7 @@ object BrowserExtensionFeature {
                         val messageJSON = message as JSONObject;
                         val type = messageJSON.getString("type")
 
-                        if (type == "feedRequest") {
-                            val url = messageJSON.getString("url")
-
-                            runOnUiThread {
-                                extensionEvents.onFeedRequested(
-                                    EventSequence.next(),
-                                    url
-                                ) { _ -> }
-                            }
-                        } else if (type == "turndown") {
+                        if (type == "turndown") {
                             val requestId = messageJSON.getInt("id")
                             val status = messageJSON.getString("status")
                             val handler = requestHandlers.remove(requestId)

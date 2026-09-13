@@ -11853,23 +11853,6 @@ class BrowserExtensionEvents(private val binaryMessenger: BinaryMessenger, priva
       GeckoPigeonCodec()
     }
   }
-  fun onFeedRequested(sequenceArg: Long, urlArg: String, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.BrowserExtensionEvents.onFeedRequested$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, urlArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
-        }
-      } else {
-        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
-    }
-  }
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoFetchApi {
