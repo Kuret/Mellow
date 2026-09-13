@@ -21,7 +21,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_serializer.dart';
+import 'package:weblibre/domain/utils/user_js_serializer.dart';
 import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 

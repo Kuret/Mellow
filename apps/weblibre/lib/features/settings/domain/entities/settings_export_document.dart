@@ -20,8 +20,8 @@
 import 'dart:convert';
 
 import 'package:convert/convert.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_parser.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_serializer.dart';
+import 'package:weblibre/domain/utils/user_js_parser.dart';
+import 'package:weblibre/domain/utils/user_js_serializer.dart';
 import 'package:weblibre/utils/uri_input_parser.dart';
 
 /// Marks a file as a WebLibre settings export.

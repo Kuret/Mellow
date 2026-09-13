@@ -22,11 +22,11 @@ import 'dart:convert';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/domain/utils/user_js_parser.dart';
+import 'package:weblibre/domain/utils/user_js_serializer.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 import 'package:weblibre/features/account/domain/services/prefs_js_reader.dart';
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_parser.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_serializer.dart';
 
 part 'prefs_sync_service.g.dart';
 

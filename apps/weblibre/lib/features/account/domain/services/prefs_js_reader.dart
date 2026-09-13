@@ -21,7 +21,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_parser.dart';
+import 'package:weblibre/domain/utils/user_js_parser.dart';
 import 'package:weblibre/utils/filesystem.dart';
 
 /// Reads persisted Gecko user prefs directly from the active profile's

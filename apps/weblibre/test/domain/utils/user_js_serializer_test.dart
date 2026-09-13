@@ -19,8 +19,8 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_parser.dart';
-import 'package:weblibre/features/account/domain/utils/user_js_serializer.dart';
+import 'package:weblibre/domain/utils/user_js_parser.dart';
+import 'package:weblibre/domain/utils/user_js_serializer.dart';
 
 void main() {
   group('serializeUserJs', () {
