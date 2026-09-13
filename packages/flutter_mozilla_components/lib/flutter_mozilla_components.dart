@@ -35,6 +35,7 @@ export 'src/domain/services/gecko_sync.dart';
 export 'src/domain/services/gecko_tab.dart';
 export 'src/domain/services/gecko_tab_content.dart';
 export 'src/domain/services/gecko_viewport.dart';
+export 'src/domain/services/gecko_web_inspector.dart';
 export 'src/geckoview_widget.dart';
 export 'src/pigeons/gecko.g.dart'
     show
