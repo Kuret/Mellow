@@ -42,12 +42,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _NewTabDefaultSection(),
       ),
       SettingsEntryDefinition(
-        title: 'Small Web Tab Default',
-        subtitle: 'Choose the tab type used when entering Small Web',
-        keywords: ['regular', 'private'],
-        child: _SmallWebTabDefaultSection(),
-      ),
-      SettingsEntryDefinition(
         title: 'Tab List Direction',
         subtitle: 'Choose how tabs are ordered in the list view',
         keywords: ['sorting', 'order'],
@@ -271,71 +265,6 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                     );
               },
               style: switch (defaultCreateTabType) {
-                TabType.regular => null,
-                TabType.private => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.privateSelectionOverlay,
-                ),
-                TabType.child => null,
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SmallWebTabDefaultSection extends HookConsumerWidget {
-  const _SmallWebTabDefaultSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final smallWebTabType = settings.effectiveSmallWebTabType;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Small Web Tab Default'),
-            subtitle: Text('Choose the tab type used when entering Small Web'),
-            leading: Icon(Icons.explore),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton(
-              showSelectedIcon: false,
-              segments: [
-                const ButtonSegment(
-                  value: TabType.regular,
-                  label: Text('Regular'),
-                  icon: Icon(MdiIcons.tab),
-                ),
-                ButtonSegment(
-                  value: TabType.private,
-                  label: const Text('Private'),
-                  icon: Icon(
-                    MdiIcons.dominoMask,
-                    color: smallWebTabType == TabType.private
-                        ? null
-                        : appColors.privateTabPurple,
-                  ),
-                ),
-              ],
-              selected: {smallWebTabType},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.smallWebTabType(value.first),
-                    );
-              },
-              style: switch (smallWebTabType) {
                 TabType.regular => null,
                 TabType.private => SegmentedButton.styleFrom(
                   selectedBackgroundColor: appColors.privateSelectionOverlay,

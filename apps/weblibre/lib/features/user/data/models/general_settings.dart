@@ -370,8 +370,6 @@ class GeneralSettings with FastEquatable {
   final bool urlCleanerAutoUpdate;
   final int? urlCleanerLastCheckEpochMs;
   final bool urlCleanerLastUpdateWasAuto;
-  @JsonKey(unknownEnumValue: TabType.regular)
-  final TabType smallWebTabType;
   final bool tabBarLongPressUrlCopy;
   final bool unshortenerEnabled;
   final String unshortenerToken;
@@ -574,7 +572,6 @@ class GeneralSettings with FastEquatable {
     required this.urlCleanerAutoUpdate,
     required this.urlCleanerLastCheckEpochMs,
     required this.urlCleanerLastUpdateWasAuto,
-    required this.smallWebTabType,
     required this.tabBarLongPressUrlCopy,
     required this.unshortenerEnabled,
     required this.unshortenerToken,
@@ -670,7 +667,6 @@ class GeneralSettings with FastEquatable {
     bool? urlCleanerAutoUpdate,
     this.urlCleanerLastCheckEpochMs,
     bool? urlCleanerLastUpdateWasAuto,
-    TabType? smallWebTabType,
     bool? tabBarLongPressUrlCopy,
     bool? unshortenerEnabled,
     String? unshortenerToken,
@@ -793,7 +789,6 @@ class GeneralSettings with FastEquatable {
            'https://rules2.clearurls.xyz/rules.minify.hash',
        urlCleanerAutoUpdate = urlCleanerAutoUpdate ?? false,
        urlCleanerLastUpdateWasAuto = urlCleanerLastUpdateWasAuto ?? false,
-       smallWebTabType = smallWebTabType ?? TabType.private,
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        unshortenerEnabled = unshortenerEnabled ?? false,
        unshortenerToken = unshortenerToken ?? '',
@@ -839,7 +834,6 @@ class GeneralSettings with FastEquatable {
     // rolling back to a version with isolated tabs is no longer a concern.
     for (final key in const [
       'defaultCreateTabType',
-      'smallWebTabType',
       'tabIntentOpenSetting',
       'bookmarkOpenSetting',
     ]) {
@@ -898,8 +892,6 @@ class GeneralSettings with FastEquatable {
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
   TabType get effectiveDefaultCreateTabType => storedDefaultCreateTabType;
-
-  TabType get effectiveSmallWebTabType => smallWebTabType;
 
   TabIntentOpenSetting get effectiveTabIntentOpenSetting =>
       tabIntentOpenSetting;
@@ -1023,7 +1015,6 @@ class GeneralSettings with FastEquatable {
     urlCleanerAutoUpdate,
     urlCleanerLastCheckEpochMs,
     urlCleanerLastUpdateWasAuto,
-    smallWebTabType,
     tabBarLongPressUrlCopy,
     unshortenerEnabled,
     unshortenerToken,

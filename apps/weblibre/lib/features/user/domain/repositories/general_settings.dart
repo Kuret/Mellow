@@ -106,7 +106,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'urlCleanerAutoUpdate': DriftSqlType.bool,
   'urlCleanerLastCheckEpochMs': DriftSqlType.int,
   'urlCleanerLastUpdateWasAuto': DriftSqlType.bool,
-  'smallWebTabType': DriftSqlType.string,
   'tabBarLongPressUrlCopy': DriftSqlType.bool,
   'unshortenerEnabled': DriftSqlType.bool,
   'unshortenerToken': DriftSqlType.string,
