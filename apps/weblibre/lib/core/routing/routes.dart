@@ -56,8 +56,10 @@ import 'package:weblibre/features/geckoview/features/history/presentation/screen
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/unshortener_settings.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/entities/search_presentation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_panel.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_draft_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';

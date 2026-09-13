@@ -856,6 +856,13 @@ mixin $SearchRoute on GoRouteData {
         ) ??
         false,
     tabId: state.uri.queryParameters['tab-id'],
+    presentation:
+        _$convertMapValue(
+          'presentation',
+          state.uri.queryParameters,
+          _$SearchPresentationEnumMap._$fromName,
+        ) ??
+        SearchPresentation.panel,
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -869,6 +876,8 @@ mixin $SearchRoute on GoRouteData {
       if (_self.autoSubmitSearch != false)
         'auto-submit-search': _self.autoSubmitSearch.toString(),
       if (_self.tabId != null) 'tab-id': _self.tabId,
+      if (_self.presentation != SearchPresentation.panel)
+        'presentation': _$SearchPresentationEnumMap[_self.presentation],
     },
   );
 
@@ -890,6 +899,11 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
+};
+
+const _$SearchPresentationEnumMap = {
+  SearchPresentation.fullScreen: 'full-screen',
+  SearchPresentation.panel: 'panel',
 };
 
 mixin $TabViewRoute on GoRouteData {

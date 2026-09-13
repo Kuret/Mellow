@@ -96,24 +96,60 @@ class SearchRoute extends GoRouteData with $SearchRoute {
   /// site-specific bangs instead of the tab type selector.
   final String? tabId;
 
+  /// Whether the search floats over the page as a command panel or takes the
+  /// screen. Panel is the default because the common way in is a tap on the
+  /// address bar, where the page behind is the context for the edit.
+  final SearchPresentation presentation;
+
   const SearchRoute({
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
     this.launchedFromIntent = false,
     this.autoSubmitSearch = false,
     this.tabId,
+    this.presentation = SearchPresentation.panel,
   });
+
+  /// An intent from outside the app has no browser behind it to float over,
+  /// and an auto-submitted search lands on a page of results rather than a
+  /// suggestion list. Both take the screen whatever the caller asked for.
+  SearchPresentation get effectivePresentation =>
+      (launchedFromIntent || autoSubmitSearch)
+      ? SearchPresentation.fullScreen
+      : presentation;
+
+  String? get _initialSearchText =>
+      (searchText.isEmpty || searchText == emptySearchText) ? null : searchText;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return SearchScreen(
       tabType: tabType,
-      initialSearchText: (searchText.isEmpty || searchText == emptySearchText)
-          ? null
-          : searchText,
+      initialSearchText: _initialSearchText,
       launchedFromIntent: launchedFromIntent,
       autoSubmitSearch: autoSubmitSearch,
       tabId: tabId,
+    );
+  }
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    if (effectivePresentation == SearchPresentation.fullScreen) {
+      return MaterialPage(key: state.pageKey, child: build(context, state));
+    }
+
+    return searchPanelPage<void>(
+      key: state.pageKey,
+      child: SearchPanel(
+        builder: (context, metrics) => SearchScreen(
+          tabType: tabType,
+          initialSearchText: _initialSearchText,
+          tabId: tabId,
+          presentation: SearchPresentation.panel,
+          panelMaxHeight: metrics.maxHeight,
+          panelExpandedMaxHeight: metrics.expandedMaxHeight,
+        ),
+      ),
     );
   }
 }
