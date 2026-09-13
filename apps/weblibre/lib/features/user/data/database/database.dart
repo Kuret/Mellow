@@ -45,7 +45,7 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 12;
+  final int schemaVersion = 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -140,6 +140,36 @@ class UserDatabase extends $UserDatabase {
     from11To12: (m, schema) async {
       await m.createTable(schema.searchHistory);
       await m.createIndex(schema.idxSearchHistoryDate);
+    },
+    from12To13: (m, schema) async {
+      // The settings this fork owns left upstream's `GeneralSettings` for
+      // `ZenSettings`, so their rows move from the `general` partition to
+      // `zen`. Data only — the `setting` table itself is unchanged, and
+      // `key` is its primary key, so re-tagging the partition carries every
+      // value across untouched. Losing them would cost the user their rail
+      // width and side, silently re-enable uploads, and — worst — drop the
+      // incremental sync bookkeeping, forcing a full re-fetch that can
+      // resurrect deleted records.
+      //
+      // Frozen literals rather than `zenSettingColumnTypes`: this step's
+      // meaning must not drift with the current model, following the
+      // from7To8 precedent above.
+      await m.database.customStatement('''
+UPDATE setting SET partition_key = 'zen'
+WHERE partition_key = 'general' AND "key" IN (
+  'spacesSyncEnabled',
+  'spacesSyncWritesEnabled',
+  'spacesSyncLastSyncId',
+  'spacesSyncLastModified',
+  'spacesSyncBaselineDone',
+  'spacesSyncApplierVersion',
+  'spacesSyncMaxTombstoneFraction',
+  'spacesSyncMaxTombstoneCount',
+  'railSide',
+  'railWidth',
+  'maxLiveTabs',
+  'separateEssentials'
+)''');
     },
   );
 }
