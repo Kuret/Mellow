@@ -238,48 +238,46 @@ class WideRailToolbarRow extends StatelessWidget {
   /// Vertical padding around the runs.
   static const verticalPadding = 2.0;
 
-  /// Total height of the row, fixed: [targetHeight] plus the padding above
-  /// and below it.
+  /// Height of a row that has content: [targetHeight] plus the padding above
+  /// and below it. A row whose buttons all draw nothing collapses instead.
   static const rowHeight = targetHeight + verticalPadding * 2;
 
   @override
   Widget build(BuildContext context) {
     if (buttons.isEmpty) return const SizedBox.shrink();
 
-    // One run, always, every child laid out against a share of the rail's
-    // width. The children are composite bars — the switcher row, the pinned
-    // add-on bar — whose width changes with the tab (an add-on enabled here,
-    // a primary action unavailable there), and a bar sizes itself to the
-    // width it is offered.
+    // One run, and no run at all when there is nothing to put in it.
     //
-    // What must not happen, in either direction: a Wrap flips to a second run
-    // when the bars stop fitting, doubling the row's height and pushing the
-    // contextual strip up; a horizontal scroll view or a FittedBox hands the
-    // bars *unbounded* width, which a bar that fills its width cannot lay out
-    // against at all, and an empty row is the same gap by another route.
-    // So neither: a plain Row, fixed height, loose-flexible children whose
-    // width is bounded and whose height is clamped to one target.
-    return SizedBox(
-      height: rowHeight,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 4.0,
-          vertical: verticalPadding,
-        ),
-        child: ClipRect(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              for (final button in buttons)
-                Flexible(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: targetHeight),
-                    child: button,
-                  ),
+    // Three ways this row has gone wrong, all of them visible as a band of
+    // dead space above the spaces row:
+    //  * a Wrap flips to a second run when the bars stop fitting, doubling
+    //    the height and pushing the contextual strip up;
+    //  * a horizontal scroll view or a FittedBox hands the bars *unbounded*
+    //    width, which a bar that sizes itself to its width cannot lay out
+    //    against, so the row renders empty at full height;
+    //  * a fixed height reserves a row even when every child draws nothing —
+    //    the add-on bar with no pinned add-ons, the switcher row with its
+    //    buttons configured off.
+    // So: a plain Row that cannot wrap, children bounded in width and capped
+    // in height, and the row sized by what it actually contains.
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4.0,
+        vertical: verticalPadding,
+      ),
+      child: ClipRect(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            for (final button in buttons)
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: targetHeight),
+                  child: button,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

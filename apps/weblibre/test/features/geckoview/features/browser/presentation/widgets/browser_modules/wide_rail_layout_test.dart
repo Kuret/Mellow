@@ -261,6 +261,32 @@ void main() {
       },
     );
 
+    testWidgets('collapses the toolbar when every button draws nothing', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _railBox(
+          railWidth: railWidth,
+          viewportWidth: 900,
+          child: const WideRailLayout(
+            urlRow: SizedBox(height: 56, width: double.infinity),
+            tabs: SizedBox.expand(),
+            // The add-on bar with nothing pinned and the switcher row with
+            // its buttons off both build, and both draw nothing.
+            toolbar: WideRailToolbarRow(
+              buttons: [SizedBox.shrink(), SizedBox.shrink()],
+            ),
+            spaces: SizedBox(height: 56, width: double.infinity),
+          ),
+        ),
+      );
+
+      final toolbar = tester.getRect(find.byKey(WideRailLayout.toolbarKey));
+      final spaces = tester.getRect(find.byKey(WideRailLayout.spacesKey));
+      expect(toolbar.height, lessThan(WideRailToolbarRow.targetHeight));
+      expect(toolbar.bottom, spaces.top);
+    });
+
     testWidgets(
       'keeps the toolbar one run tall when the selected tab widens it past '
       'the rail',
@@ -334,8 +360,13 @@ void main() {
         final toolbarAfter = tester.getRect(
           find.byKey(WideRailLayout.toolbarKey),
         );
-        expect(toolbarAfter.height, WideRailToolbarRow.rowHeight);
+        // The row keeps whatever height its content needs, unchanged by the
+        // switch, and never more than one target tall.
         expect(toolbarAfter, toolbarBefore);
+        expect(
+          toolbarAfter.height,
+          lessThanOrEqualTo(WideRailToolbarRow.rowHeight),
+        );
         expect(
           tester.getRect(find.byKey(WideRailLayout.spacesKey)),
           spacesBefore,
@@ -412,8 +443,12 @@ void main() {
         expect(toolbarAfter, toolbarBefore);
         expect(spacesAfter, spacesBefore);
         expect(toolbarAfter.bottom, spacesAfter.top);
-        // One run: both targets side by side, spanning the rail.
-        expect(toolbarAfter.height, WideRailToolbarRow.rowHeight);
+        // One run: both targets side by side, spanning the rail, and never
+        // taller than a single target.
+        expect(
+          toolbarAfter.height,
+          lessThanOrEqualTo(WideRailToolbarRow.rowHeight),
+        );
         expect(toolbarAfter.width, railWidth);
       },
     );
