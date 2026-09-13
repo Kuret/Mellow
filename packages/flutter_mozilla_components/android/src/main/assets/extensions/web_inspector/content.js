@@ -124,10 +124,11 @@ async function ensureReady() {
 
 async function show(panel) {
   const tools = await ensureReady();
+  // `show(name)` only switches the active tool — it does not open the panel —
+  // so opening always goes through the bare call first.
+  tools.show();
   if (panel) {
     tools.show(panel);
-  } else {
-    tools.show();
   }
   visible = true;
   report();
@@ -149,14 +150,23 @@ function hide() {
 function inspect(element) {
   const tools = eruda();
   if (!tools) return;
+  tools.show();
   tools.show('elements');
   visible = true;
   try {
-    tools.get('elements').set(element);
+    const elements = tools.get('elements');
+    // `select` is the Elements tool's own API; `set` is what older builds
+    // called it. Without one of them the panel opens on whatever it had.
+    if (typeof elements.select === 'function') {
+      elements.select(element);
+    } else if (typeof elements.set === 'function') {
+      elements.set(element);
+    } else {
+      report({ selected: false });
+      return;
+    }
   } catch (error) {
-    // Older Eruda, or a panel that has not built yet: the Elements panel is
-    // open on whatever it had, which still beats nothing.
-    report({ selected: false });
+    report({ selected: false, error: String((error && error.message) || error) });
     return;
   }
   report({ selected: true });
