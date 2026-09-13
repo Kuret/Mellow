@@ -90,7 +90,6 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     tab,
     closedTabTombstone,
     i1.idxTabScopeOrder,
-    i1.idxTabParentSpace,
     i1.idxTabContainer,
     i1.idxTabTimestamp,
     i1.idxTabFolderParent,
@@ -98,8 +97,6 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     captureTab,
     i1.idxCaptureTabCaptureId,
     tabFts,
-    i1.tabMaintainParentChainOnDelete,
-    i1.tabChildFollowsParentScope,
     i1.tabAfterInsert,
     i1.tabAfterDelete,
     i1.tabAfterUpdate,
@@ -174,13 +171,6 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
         ),
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(
-            'tab',
-            limitUpdateKind: i0.UpdateKind.delete,
-          ),
-          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
             'container',
             limitUpdateKind: i0.UpdateKind.delete,
           ),
@@ -213,20 +203,6 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
             limitUpdateKind: i0.UpdateKind.delete,
           ),
           result: [i0.TableUpdate('capture_tab', kind: i0.UpdateKind.delete)],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'tab',
-            limitUpdateKind: i0.UpdateKind.delete,
-          ),
-          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
-        ),
-        i0.WritePropagation(
-          on: i0.TableUpdateQuery.onTableName(
-            'tab',
-            limitUpdateKind: i0.UpdateKind.update,
-          ),
-          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
         ),
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(

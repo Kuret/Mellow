@@ -42,7 +42,6 @@ class TabSummary with FastEquatable {
   /// [id] (DESIGN.md "D2 refinement").
   final String? engineTabId;
   final TabSource source;
-  final String? parentId;
   final String? containerId;
   final String? spaceUuid;
   final String? folderId;
@@ -67,7 +66,6 @@ class TabSummary with FastEquatable {
     required this.id,
     required this.engineTabId,
     required this.source,
-    required this.parentId,
     required this.containerId,
     required this.spaceUuid,
     required this.folderId,
@@ -89,7 +87,6 @@ class TabSummary with FastEquatable {
     id,
     engineTabId,
     source,
-    parentId,
     containerId,
     spaceUuid,
     folderId,

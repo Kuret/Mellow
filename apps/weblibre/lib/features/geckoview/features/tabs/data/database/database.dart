@@ -61,7 +61,7 @@ import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 20;
+  final int schemaVersion = 21;
 
   @override
   final int ftsTokenLimit = 10;
@@ -519,6 +519,39 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // gh-15380).
       await m.create(schema.appliedTombstone);
       await m.create(schema.pendingEngineClose);
+    },
+    from20To21: (m, schema) async {
+      // The parent/child tab tree is gone: folders are the only nesting this
+      // browser keeps, and Zen's model has no equivalent of `tab.parent_id`.
+      //
+      // `ALTER TABLE ... DROP COLUMN` is not an option: `parent_id` carries a
+      // self-referential foreign key, which SQLite refuses to drop a column
+      // for. So the table is rebuilt. The two tree triggers and the tree
+      // index are dropped first — `alterTable` re-creates whatever it finds
+      // in `sqlite_master` for `tab`, and those three name a column the new
+      // table no longer has.
+      await m.database.customStatement(
+        'DROP TRIGGER IF EXISTS tab_maintain_parent_chain_on_delete',
+      );
+      await m.database.customStatement(
+        'DROP TRIGGER IF EXISTS tab_child_follows_parent_scope',
+      );
+      await m.database.customStatement(
+        'DROP INDEX IF EXISTS idx_tab_parent_space',
+      );
+
+      // Copies every remaining column of every row into the new table; the
+      // FTS triggers, the tab→history triggers and the other indexes come
+      // back with it.
+      await m.alterTable(TableMigration(schema.tab));
+
+      // `tab_fts` is an external-content FTS5 table keyed on `tab.rowid`, and
+      // the rebuild above hands out fresh rowids (the copy is a plain
+      // INSERT ... SELECT, and the triggers are not on the temporary table
+      // while it runs). Same reason the v18 step rebuilds it.
+      await m.database.customStatement(
+        "INSERT INTO tab_fts(tab_fts) VALUES('rebuild')",
+      );
     },
   );
 }

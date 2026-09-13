@@ -2953,7 +2953,6 @@ typedef $TabCreateCompanionBuilder =
       required String id,
       i0.Value<String?> engineTabId,
       required i7.TabSource source,
-      i0.Value<String?> parentId,
       i0.Value<String?> containerId,
       i0.Value<String?> spaceUuid,
       i0.Value<String?> folderId,
@@ -2981,7 +2980,6 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String> id,
       i0.Value<String?> engineTabId,
       i0.Value<i7.TabSource> source,
-      i0.Value<String?> parentId,
       i0.Value<String?> containerId,
       i0.Value<String?> spaceUuid,
       i0.Value<String?> folderId,
@@ -3008,27 +3006,6 @@ typedef $TabUpdateCompanionBuilder =
 final class $TabReferences
     extends i0.BaseReferences<i0.GeneratedDatabase, i2.Tab, i2.TabData> {
   $TabReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static i2.Tab _parentIdTable(i0.GeneratedDatabase db) =>
-      i11.ReadDatabaseContainer(
-        db,
-      ).resultSet<i2.Tab>('tab').createAlias('tab__parent_id__tab__id');
-
-  i2.$TabProcessedTableManager? get parentId {
-    final $_column = $_itemColumn<String>('parent_id');
-    if ($_column == null) return null;
-    final manager = i2
-        .$TabTableManager(
-          $_db,
-          i11.ReadDatabaseContainer($_db).resultSet<i2.Tab>('tab'),
-        )
-        .filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
-    if (item == null) return manager;
-    return i0.ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static i2.Container _containerIdTable(i0.GeneratedDatabase db) =>
       i11.ReadDatabaseContainer(db)
@@ -3249,29 +3226,6 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
     column: $table.contentHash,
     builder: (column) => i0.ColumnFilters(column),
   );
-
-  i2.$TabFilterComposer get parentId {
-    final i2.$TabFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i2.$TabFilterComposer(
-            $db: $db,
-            $table: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   i2.$ContainerFilterComposer get containerId {
     final i2.$ContainerFilterComposer composer = $composerBuilder(
@@ -3517,29 +3471,6 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i2.$TabOrderingComposer get parentId {
-    final i2.$TabOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i2.$TabOrderingComposer(
-            $db: $db,
-            $table: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
   i2.$ContainerOrderingComposer get containerId {
     final i2.$ContainerOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3737,29 +3668,6 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
     builder: (column) => column,
   );
 
-  i2.$TabAnnotationComposer get parentId {
-    final i2.$TabAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => i2.$TabAnnotationComposer(
-            $db: $db,
-            $table: i11.ReadDatabaseContainer($db).resultSet<i2.Tab>('tab'),
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
   i2.$ContainerAnnotationComposer get containerId {
     final i2.$ContainerAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -3910,7 +3818,6 @@ class $TabTableManager
           (i2.TabData, i2.$TabReferences),
           i2.TabData,
           i0.PrefetchHooks Function({
-            bool parentId,
             bool containerId,
             bool spaceUuid,
             bool folderId,
@@ -3934,7 +3841,6 @@ class $TabTableManager
                 i0.Value<String> id = const i0.Value.absent(),
                 i0.Value<String?> engineTabId = const i0.Value.absent(),
                 i0.Value<i7.TabSource> source = const i0.Value.absent(),
-                i0.Value<String?> parentId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String?> spaceUuid = const i0.Value.absent(),
                 i0.Value<String?> folderId = const i0.Value.absent(),
@@ -3962,7 +3868,6 @@ class $TabTableManager
                 id: id,
                 engineTabId: engineTabId,
                 source: source,
-                parentId: parentId,
                 containerId: containerId,
                 spaceUuid: spaceUuid,
                 folderId: folderId,
@@ -3990,7 +3895,6 @@ class $TabTableManager
                 required String id,
                 i0.Value<String?> engineTabId = const i0.Value.absent(),
                 required i7.TabSource source,
-                i0.Value<String?> parentId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String?> spaceUuid = const i0.Value.absent(),
                 i0.Value<String?> folderId = const i0.Value.absent(),
@@ -4018,7 +3922,6 @@ class $TabTableManager
                 id: id,
                 engineTabId: engineTabId,
                 source: source,
-                parentId: parentId,
                 containerId: containerId,
                 spaceUuid: spaceUuid,
                 folderId: folderId,
@@ -4046,7 +3949,6 @@ class $TabTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                parentId = false,
                 containerId = false,
                 spaceUuid = false,
                 folderId = false,
@@ -4077,19 +3979,6 @@ class $TabTableManager
                           dynamic
                         >
                       >(state) {
-                        if (parentId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.parentId,
-                                    referencedTable: i2.$TabReferences
-                                        ._parentIdTable(db),
-                                    referencedColumn: i2.$TabReferences
-                                        ._parentIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
                         if (containerId) {
                           state =
                               state.withJoin(
@@ -4185,7 +4074,6 @@ typedef $TabProcessedTableManager =
       (i2.TabData, i2.$TabReferences),
       i2.TabData,
       i0.PrefetchHooks Function({
-        bool parentId,
         bool containerId,
         bool spaceUuid,
         bool folderId,
@@ -7940,14 +7828,6 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<i7.TabSource>(i2.Tab.$convertersource);
-  late final i0.GeneratedColumn<String> parentId = i0.GeneratedColumn<String>(
-    'parent_id',
-    aliasedName,
-    true,
-    type: i0.DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'REFERENCES tab(id)ON DELETE SET NULL',
-  );
   late final i0.GeneratedColumn<String> containerId =
       i0.GeneratedColumn<String>(
         'container_id',
@@ -8144,7 +8024,6 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
     id,
     engineTabId,
     source,
-    parentId,
     containerId,
     spaceUuid,
     folderId,
@@ -8191,10 +8070,6 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
           i0.DriftSqlType.int,
           data['${effectivePrefix}source'],
         )!,
-      ),
-      parentId: attachedDatabase.typeMapping.read(
-        i0.DriftSqlType.string,
-        data['${effectivePrefix}parent_id'],
       ),
       containerId: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
@@ -8315,9 +8190,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
   final String? engineTabId;
   final i7.TabSource source;
 
-  /// Vestigial: nothing reads or writes it any more, and schema v21 drops it.
-  final String? parentId;
-
   /// ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
   /// the engine's back. Repositories close tabs before deleting a container.
   final String? containerId;
@@ -8357,7 +8229,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     required this.id,
     this.engineTabId,
     required this.source,
-    this.parentId,
     this.containerId,
     this.spaceUuid,
     this.folderId,
@@ -8389,9 +8260,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     }
     {
       map['source'] = i0.Variable<int>(i2.Tab.$convertersource.toSql(source));
-    }
-    if (!nullToAbsent || parentId != null) {
-      map['parent_id'] = i0.Variable<String>(parentId);
     }
     if (!nullToAbsent || containerId != null) {
       map['container_id'] = i0.Variable<String>(containerId);
@@ -8467,7 +8335,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
       source: i2.Tab.$convertersource.fromJson(
         serializer.fromJson<int>(json['source']),
       ),
-      parentId: serializer.fromJson<String?>(json['parent_id']),
       containerId: serializer.fromJson<String?>(json['container_id']),
       spaceUuid: serializer.fromJson<String?>(json['space_uuid']),
       folderId: serializer.fromJson<String?>(json['folder_id']),
@@ -8512,7 +8379,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
       'id': serializer.toJson<String>(id),
       'engine_tab_id': serializer.toJson<String?>(engineTabId),
       'source': serializer.toJson<int>(i2.Tab.$convertersource.toJson(source)),
-      'parent_id': serializer.toJson<String?>(parentId),
       'container_id': serializer.toJson<String?>(containerId),
       'space_uuid': serializer.toJson<String?>(spaceUuid),
       'folder_id': serializer.toJson<String?>(folderId),
@@ -8549,7 +8415,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     String? id,
     i0.Value<String?> engineTabId = const i0.Value.absent(),
     i7.TabSource? source,
-    i0.Value<String?> parentId = const i0.Value.absent(),
     i0.Value<String?> containerId = const i0.Value.absent(),
     i0.Value<String?> spaceUuid = const i0.Value.absent(),
     i0.Value<String?> folderId = const i0.Value.absent(),
@@ -8575,7 +8440,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     id: id ?? this.id,
     engineTabId: engineTabId.present ? engineTabId.value : this.engineTabId,
     source: source ?? this.source,
-    parentId: parentId.present ? parentId.value : this.parentId,
     containerId: containerId.present ? containerId.value : this.containerId,
     spaceUuid: spaceUuid.present ? spaceUuid.value : this.spaceUuid,
     folderId: folderId.present ? folderId.value : this.folderId,
@@ -8614,7 +8478,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
           ..write('id: $id, ')
           ..write('engineTabId: $engineTabId, ')
           ..write('source: $source, ')
-          ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('spaceUuid: $spaceUuid, ')
           ..write('folderId: $folderId, ')
@@ -8645,7 +8508,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     id,
     engineTabId,
     source,
-    parentId,
     containerId,
     spaceUuid,
     folderId,
@@ -8675,7 +8537,6 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
           other.id == this.id &&
           other.engineTabId == this.engineTabId &&
           other.source == this.source &&
-          other.parentId == this.parentId &&
           other.containerId == this.containerId &&
           other.spaceUuid == this.spaceUuid &&
           other.folderId == this.folderId &&
@@ -8703,7 +8564,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
   final i0.Value<String> id;
   final i0.Value<String?> engineTabId;
   final i0.Value<i7.TabSource> source;
-  final i0.Value<String?> parentId;
   final i0.Value<String?> containerId;
   final i0.Value<String?> spaceUuid;
   final i0.Value<String?> folderId;
@@ -8729,7 +8589,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     this.id = const i0.Value.absent(),
     this.engineTabId = const i0.Value.absent(),
     this.source = const i0.Value.absent(),
-    this.parentId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.spaceUuid = const i0.Value.absent(),
     this.folderId = const i0.Value.absent(),
@@ -8756,7 +8615,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     required String id,
     this.engineTabId = const i0.Value.absent(),
     required i7.TabSource source,
-    this.parentId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.spaceUuid = const i0.Value.absent(),
     this.folderId = const i0.Value.absent(),
@@ -8786,7 +8644,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     i0.Expression<String>? id,
     i0.Expression<String>? engineTabId,
     i0.Expression<int>? source,
-    i0.Expression<String>? parentId,
     i0.Expression<String>? containerId,
     i0.Expression<String>? spaceUuid,
     i0.Expression<String>? folderId,
@@ -8813,7 +8670,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       if (id != null) 'id': id,
       if (engineTabId != null) 'engine_tab_id': engineTabId,
       if (source != null) 'source': source,
-      if (parentId != null) 'parent_id': parentId,
       if (containerId != null) 'container_id': containerId,
       if (spaceUuid != null) 'space_uuid': spaceUuid,
       if (folderId != null) 'folder_id': folderId,
@@ -8846,7 +8702,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     i0.Value<String>? id,
     i0.Value<String?>? engineTabId,
     i0.Value<i7.TabSource>? source,
-    i0.Value<String?>? parentId,
     i0.Value<String?>? containerId,
     i0.Value<String?>? spaceUuid,
     i0.Value<String?>? folderId,
@@ -8873,7 +8728,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       id: id ?? this.id,
       engineTabId: engineTabId ?? this.engineTabId,
       source: source ?? this.source,
-      parentId: parentId ?? this.parentId,
       containerId: containerId ?? this.containerId,
       spaceUuid: spaceUuid ?? this.spaceUuid,
       folderId: folderId ?? this.folderId,
@@ -8913,9 +8767,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       map['source'] = i0.Variable<int>(
         i2.Tab.$convertersource.toSql(source.value),
       );
-    }
-    if (parentId.present) {
-      map['parent_id'] = i0.Variable<String>(parentId.value);
     }
     if (containerId.present) {
       map['container_id'] = i0.Variable<String>(containerId.value);
@@ -9001,7 +8852,6 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
           ..write('id: $id, ')
           ..write('engineTabId: $engineTabId, ')
           ..write('source: $source, ')
-          ..write('parentId: $parentId, ')
           ..write('containerId: $containerId, ')
           ..write('spaceUuid: $spaceUuid, ')
           ..write('folderId: $folderId, ')
@@ -9221,10 +9071,6 @@ class ClosedTabTombstoneCompanion
 i0.Index get idxTabScopeOrder => i0.Index(
   'idx_tab_scope_order',
   'CREATE INDEX idx_tab_scope_order ON tab (space_uuid, folder_id, tab_shelf, order_key)',
-);
-i0.Index get idxTabParentSpace => i0.Index(
-  'idx_tab_parent_space',
-  'CREATE INDEX idx_tab_parent_space ON tab (parent_id, space_uuid, folder_id)',
 );
 i0.Index get idxTabContainer => i0.Index(
   'idx_tab_container',
@@ -9825,14 +9671,6 @@ class TabFtsCompanion extends i0.UpdateCompanion<i2.TabFt> {
   }
 }
 
-i0.Trigger get tabMaintainParentChainOnDelete => i0.Trigger(
-  'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
-  'tab_maintain_parent_chain_on_delete',
-);
-i0.Trigger get tabChildFollowsParentScope => i0.Trigger(
-  'CREATE TRIGGER tab_child_follows_parent_scope AFTER UPDATE OF space_uuid, folder_id ON tab BEGIN UPDATE tab SET space_uuid = NEW.space_uuid, folder_id = NEW.folder_id WHERE parent_id = NEW.id AND(space_uuid IS NOT NEW.space_uuid OR folder_id IS NOT NEW.folder_id);END',
-  'tab_child_follows_parent_scope',
-);
 i0.Trigger get tabAfterInsert => i0.Trigger(
   'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
   'tab_after_insert',

@@ -38,7 +38,6 @@ TabSummary _summary(
   id: row.id,
   engineTabId: row.id,
   source: TabSource.manual,
-  parentId: null,
   containerId: null,
   spaceUuid: null,
   folderId: null,

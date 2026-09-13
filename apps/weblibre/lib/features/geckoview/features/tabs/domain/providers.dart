@@ -160,9 +160,9 @@ Stream<EquatableValue<Set<String>>> watchColdTabIds(Ref ref) {
 /// One tab's row, watched — without its page text.
 ///
 /// A [TabSummary]: this is a `.watch()`, so it re-runs on every write to `tab`
-/// for as long as the tab menu or the parent picker is open, and both consumers
-/// read only `parentId` and `containerId`. The wide row would drag that tab's
-/// stored content (and the `content_hash` UDF) through on every tick.
+/// for as long as the tab menu is open, and the menu reads only a handful of
+/// identity columns. The wide row would drag that tab's stored content (and
+/// the `content_hash` UDF) through on every tick.
 @Riverpod()
 Stream<TabSummary?> watchTabDbData(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);

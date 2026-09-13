@@ -73,8 +73,6 @@ CREATE TABLE tab(
   -- across tabs while live, hence UNIQUE.
   engine_tab_id TEXT UNIQUE,
   source ENUM(TabSource) NOT NULL,
-  -- Vestigial: nothing reads or writes it any more, and schema v21 drops it.
-  parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
   -- ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
   -- the engine's back. Repositories close tabs before deleting a container.
   container_id TEXT REFERENCES container (id) ON DELETE SET NULL,
@@ -133,9 +131,6 @@ CREATE TABLE closed_tab_tombstone(
 -- (space_uuid, folder_id, tab_shelf) and order by order_key.
 CREATE INDEX idx_tab_scope_order ON tab(space_uuid, folder_id, tab_shelf, order_key);
 
--- Vestigial, dropped together with `parent_id` in schema v21.
-CREATE INDEX idx_tab_parent_space ON tab(parent_id, space_uuid, folder_id);
-
 -- `tabsInContainer` and the essential-shelf queries filter on `container_id`
 -- alone; neither of the composite indexes above has it as a leftmost column.
 CREATE INDEX idx_tab_container ON tab(container_id);
@@ -181,25 +176,6 @@ CREATE VIRTUAL TABLE tab_fts
     content=tab,
     tokenize="trigram"
   );
-
--- Vestigial, dropped together with `parent_id` in schema v21.
-CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN
-  UPDATE tab
-  SET parent_id = CASE
-    WHEN OLD.parent_id IS NOT NULL AND
-         EXISTS(SELECT 1 FROM tab WHERE id = OLD.parent_id)
-    THEN OLD.parent_id
-    ELSE NULL
-  END
-  WHERE parent_id = OLD.id;
-END;
-
-CREATE TRIGGER tab_child_follows_parent_scope AFTER UPDATE OF space_uuid, folder_id ON tab BEGIN
-  UPDATE tab
-  SET space_uuid = NEW.space_uuid, folder_id = NEW.folder_id
-  WHERE parent_id = NEW.id
-    AND (space_uuid IS NOT NEW.space_uuid OR folder_id IS NOT NEW.folder_id);
-END;
 
 -- Triggers to keep the FTS index up to date.
 CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN

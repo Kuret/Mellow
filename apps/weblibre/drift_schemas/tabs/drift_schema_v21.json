@@ -1,0 +1,2248 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "container",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "sync_guid",
+            "getter_name": "syncGuid",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "UNIQUE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT ''",
+            "default_dart": "const CustomExpression('\\'\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "icon_key",
+            "getter_name": "iconKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 'circle'",
+            "default_dart": "const CustomExpression('\\'circle\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "color_key",
+            "getter_name": "colorKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 'blue'",
+            "default_dart": "const CustomExpression('\\'blue\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "order_key",
+            "getter_name": "orderKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_pinned",
+            "getter_name": "isPinned",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 1,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "container_local",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "container_id",
+            "getter_name": "containerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY REFERENCES container(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key",
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "container",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "exclude_from_index",
+            "getter_name": "excludeFromIndex",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "exclude_from_history",
+            "getter_name": "excludeFromHistory",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "clear_data_on_exit",
+            "getter_name": "clearDataOnExit",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "wallpaper",
+            "getter_name": "wallpaper",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 2,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "space",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "uuid",
+            "getter_name": "uuid",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT ''",
+            "default_dart": "const CustomExpression('\\'\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "icon",
+            "getter_name": "icon",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "theme",
+            "getter_name": "theme",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "container_id",
+            "getter_name": "containerId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES container(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "container",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "order_index",
+            "getter_name": "orderIndex",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 3,
+      "references": [
+        2
+      ],
+      "type": "table",
+      "data": {
+        "name": "tab_folder",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "name",
+            "getter_name": "name",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT ''",
+            "default_dart": "const CustomExpression('\\'\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "icon",
+            "getter_name": "icon",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "space_uuid",
+            "getter_name": "spaceUuid",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES space(uuid)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "space",
+                    "column": "uuid"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "parent_folder_id",
+            "getter_name": "parentFolderId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES tab_folder(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tab_folder",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "live",
+            "getter_name": "live",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_collapsed",
+            "getter_name": "isCollapsed",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "order_key",
+            "getter_name": "orderKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 4,
+      "references": [
+        2,
+        3
+      ],
+      "type": "table",
+      "data": {
+        "name": "tab_split",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "grid_type",
+            "getter_name": "gridType",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 'grid'",
+            "default_dart": "const CustomExpression('\\'grid\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_pinned",
+            "getter_name": "isPinned",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "space_uuid",
+            "getter_name": "spaceUuid",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES space(uuid)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "space",
+                    "column": "uuid"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "folder_id",
+            "getter_name": "folderId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES tab_folder(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tab_folder",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "order_key",
+            "getter_name": "orderKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 5,
+      "references": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "type": "table",
+      "data": {
+        "name": "tab",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "engine_tab_id",
+            "getter_name": "engineTabId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "UNIQUE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "source",
+            "getter_name": "source",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumIndexConverter<TabSource>(TabSource.values)",
+              "dart_type_name": "TabSource"
+            }
+          },
+          {
+            "name": "container_id",
+            "getter_name": "containerId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES container(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "container",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "space_uuid",
+            "getter_name": "spaceUuid",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES space(uuid)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "space",
+                    "column": "uuid"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "folder_id",
+            "getter_name": "folderId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES tab_folder(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tab_folder",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "split_id",
+            "getter_name": "splitId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "REFERENCES tab_split(id)ON DELETE SET NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tab_split",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "setNull"
+                }
+              }
+            ]
+          },
+          {
+            "name": "split_index",
+            "getter_name": "splitIndex",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tab_shelf",
+            "getter_name": "tabShelf",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumIndexConverter<TabShelf>(TabShelf.values)",
+              "dart_type_name": "TabShelf"
+            }
+          },
+          {
+            "name": "order_key",
+            "getter_name": "orderKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url",
+            "getter_name": "url",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const UriConverterNullable()",
+              "dart_type_name": "Uri?"
+            }
+          },
+          {
+            "name": "title",
+            "getter_name": "title",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "icon_url",
+            "getter_name": "iconUrl",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "static_label",
+            "getter_name": "staticLabel",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "has_static_icon",
+            "getter_name": "hasStaticIcon",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "default_container",
+            "getter_name": "defaultContainer",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tab_mode",
+            "getter_name": "tabMode",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 0",
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumIndexConverter<TabModeDbValue>(TabModeDbValue.values)",
+              "dart_type_name": "TabModeDbValue"
+            }
+          },
+          {
+            "name": "is_probably_readerable",
+            "getter_name": "isProbablyReaderable",
+            "moor_type": "bool",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_markdown",
+            "getter_name": "extractedContentMarkdown",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_plain",
+            "getter_name": "extractedContentPlain",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_markdown",
+            "getter_name": "fullContentMarkdown",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_plain",
+            "getter_name": "fullContentPlain",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "timestamp",
+            "getter_name": "timestamp",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "content_hash",
+            "getter_name": "contentHash",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "GENERATED ALWAYS AS (generate_content_hash(title, extracted_content_plain, full_content_plain)) VIRTUAL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "generated_as": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/drift.dart"
+                      },
+                      "('generate_content_hash(title, extracted_content_plain, full_content_plain)')"
+                    ]
+                  },
+                  "stored": false
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 6,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "closed_tab_tombstone",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "tab_id",
+            "getter_name": "tabId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "closed_at",
+            "getter_name": "closedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 7,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "idx_tab_scope_order",
+        "sql": "CREATE INDEX idx_tab_scope_order ON tab(space_uuid, folder_id, tab_shelf, order_key);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 8,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "idx_tab_container",
+        "sql": "CREATE INDEX idx_tab_container ON tab(container_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 9,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "idx_tab_timestamp",
+        "sql": "CREATE INDEX idx_tab_timestamp ON tab(timestamp DESC, id DESC);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 10,
+      "references": [
+        3
+      ],
+      "type": "index",
+      "data": {
+        "on": 3,
+        "name": "idx_tab_folder_parent",
+        "sql": "CREATE INDEX idx_tab_folder_parent ON tab_folder(parent_folder_id, space_uuid, order_key);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 11,
+      "references": [
+        4
+      ],
+      "type": "index",
+      "data": {
+        "on": 4,
+        "name": "idx_tab_split_scope",
+        "sql": "CREATE INDEX idx_tab_split_scope ON tab_split(space_uuid, folder_id, order_key);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 12,
+      "references": [
+        5
+      ],
+      "type": "table",
+      "data": {
+        "name": "capture_tab",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "tab_id",
+            "getter_name": "tabId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY REFERENCES tab(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key",
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tab",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "capture_id",
+            "getter_name": "captureId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "source_url",
+            "getter_name": "sourceUrl",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "status",
+            "getter_name": "status",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 'pending'",
+            "default_dart": "const CustomExpression('\\'pending\\'')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "created_at",
+            "getter_name": "createdAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 13,
+      "references": [
+        12
+      ],
+      "type": "index",
+      "data": {
+        "on": 12,
+        "name": "idx_capture_tab_capture_id",
+        "sql": "CREATE INDEX idx_capture_tab_capture_id ON capture_tab(capture_id);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 14,
+      "references": [
+        5
+      ],
+      "type": "table",
+      "data": {
+        "name": "tab_fts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "title",
+            "getter_name": "title",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url",
+            "getter_name": "url",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_plain",
+            "getter_name": "extractedContentPlain",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_plain",
+            "getter_name": "fullContentPlain",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": true,
+        "create_virtual_stmt": "CREATE VIRTUAL TABLE \"tab_fts\" USING fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize=\"trigram\")",
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 15,
+      "references": [
+        5,
+        14
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          14
+        ],
+        "name": "tab_after_insert",
+        "sql": "CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN\n  INSERT INTO\n    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain)\n    VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 16,
+      "references": [
+        5,
+        14
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          14
+        ],
+        "name": "tab_after_delete",
+        "sql": "CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN\n  INSERT INTO\n    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain)\n    VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 17,
+      "references": [
+        5,
+        14
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          14
+        ],
+        "name": "tab_after_update",
+        "sql": "CREATE TRIGGER tab_after_update AFTER UPDATE OF\n  title, url, extracted_content_plain, full_content_plain\nON tab\nWHEN OLD.content_hash IS NOT NEW.content_hash\n   OR OLD.url IS NOT NEW.url\nBEGIN\n  INSERT INTO\n    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain)\n    VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);\n  INSERT INTO\n    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain)\n    VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 18,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "local_index_setting",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "key",
+            "getter_name": "key",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "value",
+            "getter_name": "value",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "strict": true
+      }
+    },
+    {
+      "id": 19,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "history",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "url_canonical",
+            "getter_name": "urlCanonical",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "url_host",
+            "getter_name": "urlHost",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url_path",
+            "getter_name": "urlPath",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "title",
+            "getter_name": "title",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "is_probably_readerable",
+            "getter_name": "isProbablyReaderable",
+            "moor_type": "bool",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_markdown",
+            "getter_name": "extractedContentMarkdown",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_plain",
+            "getter_name": "extractedContentPlain",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_markdown",
+            "getter_name": "fullContentMarkdown",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_plain",
+            "getter_name": "fullContentPlain",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "content_hash",
+            "getter_name": "contentHash",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "observed_at",
+            "getter_name": "observedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "observed_count",
+            "getter_name": "observedCount",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL DEFAULT 1",
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 20,
+      "references": [
+        19
+      ],
+      "type": "index",
+      "data": {
+        "on": 19,
+        "name": "idx_history_host",
+        "sql": "CREATE INDEX idx_history_host ON history(url_host);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 21,
+      "references": [
+        19
+      ],
+      "type": "index",
+      "data": {
+        "on": 19,
+        "name": "idx_history_observed",
+        "sql": "CREATE INDEX idx_history_observed ON history(observed_at DESC);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 22,
+      "references": [
+        19
+      ],
+      "type": "table",
+      "data": {
+        "name": "history_fts",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "title",
+            "getter_name": "title",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url_host",
+            "getter_name": "urlHost",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url_path",
+            "getter_name": "urlPath",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "extracted_content_plain",
+            "getter_name": "extractedContentPlain",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "full_content_plain",
+            "getter_name": "fullContentPlain",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": true,
+        "create_virtual_stmt": "CREATE VIRTUAL TABLE \"history_fts\" USING fts5(title, url_host, url_path, extracted_content_plain, full_content_plain, content=history, tokenize=\"trigram\")",
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 23,
+      "references": [
+        19,
+        22
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 19,
+        "references_in_body": [
+          19,
+          22
+        ],
+        "name": "history_after_insert",
+        "sql": "CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN\n  INSERT INTO\n    history_fts(rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)\n    VALUES (new.rowid, new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 24,
+      "references": [
+        19,
+        22
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 19,
+        "references_in_body": [
+          19,
+          22
+        ],
+        "name": "history_after_delete",
+        "sql": "CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN\n  INSERT INTO\n    history_fts(history_fts, rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)\n    VALUES('delete', old.rowid, old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 25,
+      "references": [
+        19,
+        22
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 19,
+        "references_in_body": [
+          19,
+          22
+        ],
+        "name": "history_after_update",
+        "sql": "CREATE TRIGGER history_after_update AFTER UPDATE OF\n  title, url_host, url_path, extracted_content_plain, full_content_plain\nON history BEGIN\n  INSERT INTO\n    history_fts(history_fts, rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)\n    VALUES('delete', old.rowid, old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);\n  INSERT INTO\n    history_fts(rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)\n    VALUES (new.rowid, new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);\nEND;"
+      }
+    },
+    {
+      "id": 26,
+      "references": [
+        5,
+        18,
+        1,
+        19
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          18,
+          1,
+          19
+        ],
+        "name": "tab_to_history_on_insert",
+        "sql": "CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab\nWHEN NEW.url IS NOT NULL\n AND url_indexable(CAST(NEW.url AS TEXT)) = 1\n AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1\n AND (NEW.tab_mode != 1\n      OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n AND NOT EXISTS (\n   SELECT 1 FROM container_local cl\n   WHERE cl.container_id = NEW.container_id\n     AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n )\nBEGIN\n  INSERT INTO history (\n    url_canonical, url_host, url_path, title, is_probably_readerable,\n    extracted_content_markdown, extracted_content_plain,\n    full_content_markdown, full_content_plain,\n    content_hash, observed_at, observed_count\n  ) VALUES (\n    url_canonical(CAST(NEW.url AS TEXT)),\n    url_host(CAST(NEW.url AS TEXT)),\n    url_path(CAST(NEW.url AS TEXT)),\n    NEW.title,\n    NEW.is_probably_readerable,\n    NEW.extracted_content_markdown,\n    NEW.extracted_content_plain,\n    NEW.full_content_markdown,\n    NEW.full_content_plain,\n    NEW.content_hash,\n    strftime('%s','now') * 1000,\n    1\n  )\n  ON CONFLICT(url_canonical) DO UPDATE SET\n    title                       = COALESCE(excluded.title, history.title),\n    is_probably_readerable      = excluded.is_probably_readerable,\n    extracted_content_markdown  = excluded.extracted_content_markdown,\n    extracted_content_plain     = excluded.extracted_content_plain,\n    full_content_markdown       = excluded.full_content_markdown,\n    full_content_plain          = excluded.full_content_plain,\n    content_hash                = excluded.content_hash,\n    observed_at                 = excluded.observed_at,\n    observed_count              = history.observed_count + 1\n  WHERE history.content_hash IS NOT excluded.content_hash;\nEND;"
+      }
+    },
+    {
+      "id": 27,
+      "references": [
+        5,
+        18,
+        1,
+        19
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          18,
+          1,
+          19
+        ],
+        "name": "tab_to_history_on_update",
+        "sql": "CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF\n  title, url, extracted_content_plain, extracted_content_markdown,\n  full_content_plain, full_content_markdown, is_probably_readerable\nON tab\nWHEN NEW.url IS NOT NULL\n AND url_indexable(CAST(NEW.url AS TEXT)) = 1\n AND (OLD.content_hash IS NOT NEW.content_hash\n      OR OLD.url IS NOT NEW.url)\n AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1\n AND (NEW.tab_mode != 1\n      OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n AND NOT EXISTS (\n   SELECT 1 FROM container_local cl\n   WHERE cl.container_id = NEW.container_id\n     AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n )\nBEGIN\n  INSERT INTO history (\n    url_canonical, url_host, url_path, title, is_probably_readerable,\n    extracted_content_markdown, extracted_content_plain,\n    full_content_markdown, full_content_plain,\n    content_hash, observed_at, observed_count\n  ) VALUES (\n    url_canonical(CAST(NEW.url AS TEXT)),\n    url_host(CAST(NEW.url AS TEXT)),\n    url_path(CAST(NEW.url AS TEXT)),\n    NEW.title,\n    NEW.is_probably_readerable,\n    NEW.extracted_content_markdown,\n    NEW.extracted_content_plain,\n    NEW.full_content_markdown,\n    NEW.full_content_plain,\n    NEW.content_hash,\n    strftime('%s','now') * 1000,\n    1\n  )\n  ON CONFLICT(url_canonical) DO UPDATE SET\n    title                       = COALESCE(excluded.title, history.title),\n    is_probably_readerable      = excluded.is_probably_readerable,\n    extracted_content_markdown  = excluded.extracted_content_markdown,\n    extracted_content_plain     = excluded.extracted_content_plain,\n    full_content_markdown       = excluded.full_content_markdown,\n    full_content_plain          = excluded.full_content_plain,\n    content_hash                = excluded.content_hash,\n    observed_at                 = excluded.observed_at,\n    observed_count              = history.observed_count + 1\n  WHERE history.content_hash IS NOT excluded.content_hash;\nEND;"
+      }
+    },
+    {
+      "id": 28,
+      "references": [
+        5,
+        18,
+        19,
+        1
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 5,
+        "references_in_body": [
+          5,
+          18,
+          19,
+          1
+        ],
+        "name": "tab_to_history_on_container_update",
+        "sql": "CREATE TRIGGER tab_to_history_on_container_update AFTER UPDATE OF container_id\nON tab\nWHEN NEW.url IS NOT NULL\n AND url_indexable(CAST(NEW.url AS TEXT)) = 1\n AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1\nBEGIN\n  DELETE FROM history\n  WHERE url_canonical = url_canonical(CAST(NEW.url AS TEXT))\n    AND NOT EXISTS (\n      SELECT 1\n      FROM tab AS candidate\n      WHERE candidate.url IS NOT NULL\n        AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical\n        AND (candidate.tab_mode != 1\n             OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n        AND NOT EXISTS (\n          SELECT 1 FROM container_local cl\n          WHERE cl.container_id = candidate.container_id\n            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n        )\n    );\n\n  INSERT INTO history (\n    url_canonical, url_host, url_path, title, is_probably_readerable,\n    extracted_content_markdown, extracted_content_plain,\n    full_content_markdown, full_content_plain,\n    content_hash, observed_at, observed_count\n  )\n  SELECT\n    url_canonical(CAST(candidate.url AS TEXT)),\n    url_host(CAST(candidate.url AS TEXT)),\n    url_path(CAST(candidate.url AS TEXT)),\n    candidate.title,\n    candidate.is_probably_readerable,\n    candidate.extracted_content_markdown,\n    candidate.extracted_content_plain,\n    candidate.full_content_markdown,\n    candidate.full_content_plain,\n    candidate.content_hash,\n    strftime('%s','now') * 1000,\n    1\n  FROM tab AS candidate\n  WHERE candidate.url IS NOT NULL\n    AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n    AND url_canonical(CAST(candidate.url AS TEXT)) = url_canonical(CAST(NEW.url AS TEXT))\n    AND (candidate.tab_mode != 1\n         OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n    AND NOT EXISTS (\n      SELECT 1 FROM container_local cl\n      WHERE cl.container_id = candidate.container_id\n        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n    )\n  ORDER BY candidate.timestamp DESC, candidate.rowid DESC\n  LIMIT 1\n  ON CONFLICT(url_canonical) DO UPDATE SET\n    title                       = COALESCE(excluded.title, history.title),\n    is_probably_readerable      = excluded.is_probably_readerable,\n    extracted_content_markdown  = excluded.extracted_content_markdown,\n    extracted_content_plain     = excluded.extracted_content_plain,\n    full_content_markdown       = excluded.full_content_markdown,\n    full_content_plain          = excluded.full_content_plain,\n    content_hash                = excluded.content_hash,\n    observed_at                 = excluded.observed_at,\n    observed_count              = history.observed_count + 1;\nEND;"
+      }
+    },
+    {
+      "id": 29,
+      "references": [
+        1,
+        18,
+        19,
+        5
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 1,
+        "references_in_body": [
+          1,
+          18,
+          19,
+          5
+        ],
+        "name": "container_local_to_history_on_insert",
+        "sql": "CREATE TRIGGER container_local_to_history_on_insert AFTER INSERT ON container_local\nWHEN (NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)\n AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1\nBEGIN\n  DELETE FROM history\n  WHERE url_canonical IN (\n      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))\n      FROM tab AS affected\n      WHERE affected.container_id = NEW.container_id\n        AND affected.url IS NOT NULL\n        AND url_indexable(CAST(affected.url AS TEXT)) = 1\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM tab AS candidate\n      WHERE candidate.url IS NOT NULL\n        AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical\n        AND (candidate.tab_mode != 1\n             OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n        AND NOT EXISTS (\n          SELECT 1 FROM container_local cl\n          WHERE cl.container_id = candidate.container_id\n            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n        )\n    );\n\n  INSERT INTO history (\n    url_canonical, url_host, url_path, title, is_probably_readerable,\n    extracted_content_markdown, extracted_content_plain,\n    full_content_markdown, full_content_plain,\n    content_hash, observed_at, observed_count\n  )\n  SELECT\n    url_canonical(CAST(candidate.url AS TEXT)),\n    url_host(CAST(candidate.url AS TEXT)),\n    url_path(CAST(candidate.url AS TEXT)),\n    candidate.title,\n    candidate.is_probably_readerable,\n    candidate.extracted_content_markdown,\n    candidate.extracted_content_plain,\n    candidate.full_content_markdown,\n    candidate.full_content_plain,\n    candidate.content_hash,\n    strftime('%s','now') * 1000,\n    1\n  FROM tab AS candidate\n  WHERE candidate.url IS NOT NULL\n    AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n    AND url_canonical(CAST(candidate.url AS TEXT)) IN (\n      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))\n      FROM tab AS affected\n      WHERE affected.container_id = NEW.container_id\n        AND affected.url IS NOT NULL\n        AND url_indexable(CAST(affected.url AS TEXT)) = 1\n    )\n    AND (candidate.tab_mode != 1\n         OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n    AND NOT EXISTS (\n      SELECT 1 FROM container_local cl\n      WHERE cl.container_id = candidate.container_id\n        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM tab AS newer\n      WHERE newer.url IS NOT NULL\n        AND url_indexable(CAST(newer.url AS TEXT)) = 1\n        AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT))\n        AND (newer.tab_mode != 1\n             OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n        AND NOT EXISTS (\n          SELECT 1 FROM container_local cl2\n          WHERE cl2.container_id = newer.container_id\n            AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)\n        )\n        AND (\n          newer.timestamp > candidate.timestamp\n          OR (newer.timestamp = candidate.timestamp AND newer.rowid > candidate.rowid)\n        )\n    )\n  ON CONFLICT(url_canonical) DO UPDATE SET\n    title                       = COALESCE(excluded.title, history.title),\n    is_probably_readerable      = excluded.is_probably_readerable,\n    extracted_content_markdown  = excluded.extracted_content_markdown,\n    extracted_content_plain     = excluded.extracted_content_plain,\n    full_content_markdown       = excluded.full_content_markdown,\n    full_content_plain          = excluded.full_content_plain,\n    content_hash                = excluded.content_hash,\n    observed_at                 = excluded.observed_at,\n    observed_count              = history.observed_count + 1;\nEND;"
+      }
+    },
+    {
+      "id": 30,
+      "references": [
+        1,
+        18,
+        19,
+        5
+      ],
+      "type": "trigger",
+      "data": {
+        "on": 1,
+        "references_in_body": [
+          1,
+          18,
+          19,
+          5
+        ],
+        "name": "container_local_to_history_on_update",
+        "sql": "CREATE TRIGGER container_local_to_history_on_update AFTER UPDATE OF\n  exclude_from_index, exclude_from_history\nON container_local\nWHEN (OLD.exclude_from_index = 1 OR OLD.exclude_from_history = 1)\n     != (NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)\n AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1\nBEGIN\n  DELETE FROM history\n  WHERE url_canonical IN (\n      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))\n      FROM tab AS affected\n      WHERE affected.container_id = NEW.container_id\n        AND affected.url IS NOT NULL\n        AND url_indexable(CAST(affected.url AS TEXT)) = 1\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM tab AS candidate\n      WHERE candidate.url IS NOT NULL\n        AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical\n        AND (candidate.tab_mode != 1\n             OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n        AND NOT EXISTS (\n          SELECT 1 FROM container_local cl\n          WHERE cl.container_id = candidate.container_id\n            AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n        )\n    );\n\n  INSERT INTO history (\n    url_canonical, url_host, url_path, title, is_probably_readerable,\n    extracted_content_markdown, extracted_content_plain,\n    full_content_markdown, full_content_plain,\n    content_hash, observed_at, observed_count\n  )\n  SELECT\n    url_canonical(CAST(candidate.url AS TEXT)),\n    url_host(CAST(candidate.url AS TEXT)),\n    url_path(CAST(candidate.url AS TEXT)),\n    candidate.title,\n    candidate.is_probably_readerable,\n    candidate.extracted_content_markdown,\n    candidate.extracted_content_plain,\n    candidate.full_content_markdown,\n    candidate.full_content_plain,\n    candidate.content_hash,\n    strftime('%s','now') * 1000,\n    1\n  FROM tab AS candidate\n  WHERE candidate.url IS NOT NULL\n    AND url_indexable(CAST(candidate.url AS TEXT)) = 1\n    AND url_canonical(CAST(candidate.url AS TEXT)) IN (\n      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))\n      FROM tab AS affected\n      WHERE affected.container_id = NEW.container_id\n        AND affected.url IS NOT NULL\n        AND url_indexable(CAST(affected.url AS TEXT)) = 1\n    )\n    AND (candidate.tab_mode != 1\n         OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n    AND NOT EXISTS (\n      SELECT 1 FROM container_local cl\n      WHERE cl.container_id = candidate.container_id\n        AND (cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM tab AS newer\n      WHERE newer.url IS NOT NULL\n        AND url_indexable(CAST(newer.url AS TEXT)) = 1\n        AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT))\n        AND (newer.tab_mode != 1\n             OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)\n        AND NOT EXISTS (\n          SELECT 1 FROM container_local cl2\n          WHERE cl2.container_id = newer.container_id\n            AND (cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)\n        )\n        AND (\n          newer.timestamp > candidate.timestamp\n          OR (newer.timestamp = candidate.timestamp AND newer.rowid > candidate.rowid)\n        )\n    )\n  ON CONFLICT(url_canonical) DO UPDATE SET\n    title                       = COALESCE(excluded.title, history.title),\n    is_probably_readerable      = excluded.is_probably_readerable,\n    extracted_content_markdown  = excluded.extracted_content_markdown,\n    extracted_content_plain     = excluded.extracted_content_plain,\n    full_content_markdown       = excluded.full_content_markdown,\n    full_content_plain          = excluded.full_content_plain,\n    content_hash                = excluded.content_hash,\n    observed_at                 = excluded.observed_at,\n    observed_count              = history.observed_count + 1;\nEND;"
+      }
+    },
+    {
+      "id": 31,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "visit_container",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY AUTOINCREMENT",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "auto-increment"
+            ]
+          },
+          {
+            "name": "raw_url",
+            "getter_name": "rawUrl",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "url_canonical",
+            "getter_name": "urlCanonical",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "visit_time",
+            "getter_name": "visitTime",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "container_id",
+            "getter_name": "containerId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL REFERENCES container(id)ON DELETE CASCADE",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "container",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": null,
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 32,
+      "references": [
+        31
+      ],
+      "type": "index",
+      "data": {
+        "on": 31,
+        "name": "idx_vc_canonical",
+        "sql": "CREATE INDEX idx_vc_canonical ON visit_container(url_canonical, visit_time);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 33,
+      "references": [
+        31
+      ],
+      "type": "index",
+      "data": {
+        "on": 31,
+        "name": "idx_vc_container",
+        "sql": "CREATE INDEX idx_vc_container ON visit_container(container_id, visit_time DESC);",
+        "unique": false,
+        "columns": []
+      }
+    },
+    {
+      "id": 34,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "foreign_record",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "payload",
+            "getter_name": "payload",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "modified",
+            "getter_name": "modified",
+            "moor_type": "double",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 35,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "sync_record_state",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "record_id",
+            "getter_name": "recordId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "digest",
+            "getter_name": "digest",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 36,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "deleted_record",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "kind",
+            "getter_name": "kind",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "deleted_at",
+            "getter_name": "deletedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 37,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "applied_tombstone",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "applied_at",
+            "getter_name": "appliedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 38,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "pending_engine_close",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "engine_tab_id",
+            "getter_name": "engineTabId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "NOT NULL PRIMARY KEY",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ]
+          },
+          {
+            "name": "requested_at",
+            "getter_name": "requestedAt",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": "NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "container",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"container\" (\"id\" TEXT PRIMARY KEY NOT NULL, \"sync_guid\" TEXT UNIQUE, \"name\" TEXT NOT NULL DEFAULT '', \"icon_key\" TEXT NOT NULL DEFAULT 'circle', \"color_key\" TEXT NOT NULL DEFAULT 'blue', \"order_key\" TEXT NOT NULL, \"is_pinned\" INTEGER NOT NULL DEFAULT 0);"
+        }
+      ]
+    },
+    {
+      "name": "container_local",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"container_local\" (\"container_id\" TEXT NOT NULL PRIMARY KEY REFERENCES container(id)ON DELETE CASCADE, \"exclude_from_index\" INTEGER NOT NULL DEFAULT 0, \"exclude_from_history\" INTEGER NOT NULL DEFAULT 0, \"clear_data_on_exit\" INTEGER NOT NULL DEFAULT 0, \"wallpaper\" TEXT);"
+        }
+      ]
+    },
+    {
+      "name": "space",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"space\" (\"uuid\" TEXT PRIMARY KEY NOT NULL, \"name\" TEXT NOT NULL DEFAULT '', \"icon\" TEXT, \"theme\" TEXT, \"container_id\" TEXT REFERENCES container(id)ON DELETE SET NULL, \"order_index\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "tab_folder",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"tab_folder\" (\"id\" TEXT PRIMARY KEY NOT NULL, \"name\" TEXT NOT NULL DEFAULT '', \"icon\" TEXT, \"space_uuid\" TEXT REFERENCES space(uuid)ON DELETE CASCADE, \"parent_folder_id\" TEXT REFERENCES tab_folder(id)ON DELETE CASCADE, \"live\" TEXT, \"is_collapsed\" INTEGER NOT NULL DEFAULT 0, \"order_key\" TEXT NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "tab_split",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"tab_split\" (\"id\" TEXT PRIMARY KEY NOT NULL, \"grid_type\" TEXT NOT NULL DEFAULT 'grid', \"is_pinned\" INTEGER NOT NULL DEFAULT 0, \"space_uuid\" TEXT REFERENCES space(uuid)ON DELETE CASCADE, \"folder_id\" TEXT REFERENCES tab_folder(id)ON DELETE SET NULL, \"order_key\" TEXT NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "tab",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"tab\" (\"id\" TEXT PRIMARY KEY NOT NULL, \"engine_tab_id\" TEXT UNIQUE, \"source\" INTEGER NOT NULL, \"container_id\" TEXT REFERENCES container(id)ON DELETE SET NULL, \"space_uuid\" TEXT REFERENCES space(uuid)ON DELETE SET NULL, \"folder_id\" TEXT REFERENCES tab_folder(id)ON DELETE SET NULL, \"split_id\" TEXT REFERENCES tab_split(id)ON DELETE SET NULL, \"split_index\" INTEGER, \"tab_shelf\" INTEGER NOT NULL DEFAULT 0, \"order_key\" TEXT NOT NULL, \"url\" TEXT, \"title\" TEXT, \"icon_url\" TEXT, \"static_label\" TEXT, \"has_static_icon\" INTEGER NOT NULL DEFAULT 0, \"default_container\" INTEGER NOT NULL DEFAULT 0, \"tab_mode\" INTEGER NOT NULL DEFAULT 0, \"is_probably_readerable\" INTEGER, \"extracted_content_markdown\" TEXT, \"extracted_content_plain\" TEXT, \"full_content_markdown\" TEXT, \"full_content_plain\" TEXT, \"timestamp\" INTEGER NOT NULL, \"content_hash\" INTEGER GENERATED ALWAYS AS (generate_content_hash(title, extracted_content_plain, full_content_plain)) VIRTUAL);"
+        }
+      ]
+    },
+    {
+      "name": "closed_tab_tombstone",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"closed_tab_tombstone\" (\"tab_id\" TEXT PRIMARY KEY NOT NULL, \"closed_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "idx_tab_scope_order",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tab_scope_order ON tab (space_uuid, folder_id, tab_shelf, order_key)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tab_container",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tab_container ON tab (container_id)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tab_timestamp",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tab_timestamp ON tab (timestamp DESC, id DESC)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tab_folder_parent",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tab_folder_parent ON tab_folder (parent_folder_id, space_uuid, order_key)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tab_split_scope",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tab_split_scope ON tab_split (space_uuid, folder_id, order_key)"
+        }
+      ]
+    },
+    {
+      "name": "capture_tab",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"capture_tab\" (\"tab_id\" TEXT NOT NULL PRIMARY KEY REFERENCES tab(id)ON DELETE CASCADE, \"capture_id\" TEXT NOT NULL, \"source_url\" TEXT NOT NULL, \"status\" TEXT NOT NULL DEFAULT 'pending', \"created_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "idx_capture_tab_capture_id",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)"
+        }
+      ]
+    },
+    {
+      "name": "tab_fts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIRTUAL TABLE IF NOT EXISTS \"tab_fts\" USING fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize=\"trigram\");"
+        }
+      ]
+    },
+    {
+      "name": "tab_after_insert",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts (\"rowid\", title, url, extracted_content_plain, full_content_plain) VALUES (new.\"rowid\", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "tab_after_delete",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, \"rowid\", title, url, extracted_content_plain, full_content_plain) VALUES ('delete', old.\"rowid\", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "tab_after_update",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_after_update AFTER UPDATE OF title, url, extracted_content_plain, full_content_plain ON tab WHEN OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url BEGIN INSERT INTO tab_fts (tab_fts, \"rowid\", title, url, extracted_content_plain, full_content_plain) VALUES ('delete', old.\"rowid\", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts (\"rowid\", title, url, extracted_content_plain, full_content_plain) VALUES (new.\"rowid\", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "local_index_setting",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"local_index_setting\" (\"key\" TEXT PRIMARY KEY NOT NULL, \"value\" INTEGER NOT NULL) STRICT;"
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"history\" (\"url_canonical\" TEXT PRIMARY KEY NOT NULL, \"url_host\" TEXT NOT NULL, \"url_path\" TEXT, \"title\" TEXT, \"is_probably_readerable\" INTEGER, \"extracted_content_markdown\" TEXT, \"extracted_content_plain\" TEXT, \"full_content_markdown\" TEXT, \"full_content_plain\" TEXT, \"content_hash\" INTEGER, \"observed_at\" INTEGER NOT NULL, \"observed_count\" INTEGER NOT NULL DEFAULT 1);"
+        }
+      ]
+    },
+    {
+      "name": "idx_history_host",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_history_host ON history (url_host)"
+        }
+      ]
+    },
+    {
+      "name": "idx_history_observed",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_history_observed ON history (observed_at DESC)"
+        }
+      ]
+    },
+    {
+      "name": "history_fts",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE VIRTUAL TABLE IF NOT EXISTS \"history_fts\" USING fts5(title, url_host, url_path, extracted_content_plain, full_content_plain, content=history, tokenize=\"trigram\");"
+        }
+      ]
+    },
+    {
+      "name": "history_after_insert",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN INSERT INTO history_fts (\"rowid\", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new.\"rowid\", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "history_after_delete",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN INSERT INTO history_fts (history_fts, \"rowid\", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES ('delete', old.\"rowid\", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "history_after_update",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER history_after_update AFTER UPDATE OF title, url_host, url_path, extracted_content_plain, full_content_plain ON history BEGIN INSERT INTO history_fts (history_fts, \"rowid\", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES ('delete', old.\"rowid\", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);INSERT INTO history_fts (\"rowid\", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new.\"rowid\", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END"
+        }
+      ]
+    },
+    {
+      "name": "tab_to_history_on_insert",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = NEW.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)) BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime('%s', 'now') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END"
+        }
+      ]
+    },
+    {
+      "name": "tab_to_history_on_update",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF title, url, extracted_content_plain, extracted_content_markdown, full_content_plain, full_content_markdown, is_probably_readerable ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND(OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url)AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = NEW.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)) BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime('%s', 'now') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END"
+        }
+      ]
+    },
+    {
+      "name": "tab_to_history_on_container_update",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER tab_to_history_on_container_update AFTER UPDATE OF container_id ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1 BEGIN DELETE FROM history WHERE url_canonical = url_canonical(CAST(NEW.url AS TEXT)) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime('%s', 'now') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = url_canonical(CAST(NEW.url AS TEXT)) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)) ORDER BY candidate.timestamp DESC, candidate.\"rowid\" DESC LIMIT 1 ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END"
+        }
+      ]
+    },
+    {
+      "name": "container_local_to_history_on_insert",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER container_local_to_history_on_insert AFTER INSERT ON container_local WHEN(NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1 BEGIN DELETE FROM history WHERE url_canonical IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.container_id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime('%s', 'now') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.container_id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)) AND NOT EXISTS (SELECT 1 FROM tab AS newer WHERE newer.url IS NOT NULL AND url_indexable(CAST(newer.url AS TEXT)) = 1 AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT)) AND(newer.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl2 WHERE cl2.container_id = newer.container_id AND(cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)) AND(newer.timestamp > candidate.timestamp OR(newer.timestamp = candidate.timestamp AND newer.\"rowid\" > candidate.\"rowid\"))) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END"
+        }
+      ]
+    },
+    {
+      "name": "container_local_to_history_on_update",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TRIGGER container_local_to_history_on_update AFTER UPDATE OF exclude_from_index, exclude_from_history ON container_local WHEN(OLD.exclude_from_index = 1 OR OLD.exclude_from_history = 1)!=(NEW.exclude_from_index = 1 OR NEW.exclude_from_history = 1)AND (SELECT value FROM local_index_setting WHERE \"key\" = 'enabled') = 1 BEGIN DELETE FROM history WHERE url_canonical IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.container_id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime('%s', 'now') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.container_id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl WHERE cl.container_id = candidate.container_id AND(cl.exclude_from_index = 1 OR cl.exclude_from_history = 1)) AND NOT EXISTS (SELECT 1 FROM tab AS newer WHERE newer.url IS NOT NULL AND url_indexable(CAST(newer.url AS TEXT)) = 1 AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT)) AND(newer.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE \"key\" = 'index_private') = 1)AND NOT EXISTS (SELECT 1 FROM container_local AS cl2 WHERE cl2.container_id = newer.container_id AND(cl2.exclude_from_index = 1 OR cl2.exclude_from_history = 1)) AND(newer.timestamp > candidate.timestamp OR(newer.timestamp = candidate.timestamp AND newer.\"rowid\" > candidate.\"rowid\"))) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END"
+        }
+      ]
+    },
+    {
+      "name": "visit_container",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"visit_container\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"raw_url\" TEXT NOT NULL, \"url_canonical\" TEXT NOT NULL, \"visit_time\" INTEGER NOT NULL, \"container_id\" TEXT NOT NULL REFERENCES container(id)ON DELETE CASCADE);"
+        }
+      ]
+    },
+    {
+      "name": "idx_vc_canonical",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_vc_canonical ON visit_container (url_canonical, visit_time)"
+        }
+      ]
+    },
+    {
+      "name": "idx_vc_container",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_vc_container ON visit_container (container_id, visit_time DESC)"
+        }
+      ]
+    },
+    {
+      "name": "foreign_record",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"foreign_record\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"kind\" TEXT NOT NULL, \"payload\" TEXT NOT NULL, \"modified\" REAL NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "sync_record_state",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"sync_record_state\" (\"record_id\" TEXT NOT NULL PRIMARY KEY, \"kind\" TEXT NOT NULL, \"digest\" TEXT NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "deleted_record",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"deleted_record\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"kind\" TEXT NOT NULL, \"deleted_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "applied_tombstone",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"applied_tombstone\" (\"id\" TEXT NOT NULL PRIMARY KEY, \"applied_at\" INTEGER NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "pending_engine_close",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"pending_engine_close\" (\"engine_tab_id\" TEXT NOT NULL PRIMARY KEY, \"requested_at\" INTEGER NOT NULL);"
+        }
+      ]
+    }
+  ]
+}
