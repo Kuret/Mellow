@@ -995,15 +995,23 @@ class ViewTabListWidget extends HookConsumerWidget {
                     tabsViewMode: TabsViewMode.list,
                   ),
             ),
-            // The Essentials shelf sits above the scrolling list, the way
-            // Zen keeps its strip at the top of the sidebar (PLAN §6.4).
-            if (!isSyncedScope)
-              SliverToBoxAdapter(child: EssentialsGrid(onSelected: onClose)),
           ],
-          body: _TabListView(
-            scrollController: scrollController,
-            tabsReorderable: tabsReorderable,
-            onClose: onClose,
+          // The Essentials shelf is pinned above the scrolling list, the way
+          // Zen keeps its strip at the top of the sidebar (PLAN §6.4): its
+          // own slot in the body, outside the list's scrollable, so the
+          // "Pinned" and "Tabs" sections scroll under it.
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!isSyncedScope) EssentialsGrid(onSelected: onClose),
+              Expanded(
+                child: _TabListView(
+                  scrollController: scrollController,
+                  tabsReorderable: tabsReorderable,
+                  onClose: onClose,
+                ),
+              ),
+            ],
           ),
         ),
         if (showNewTabFab && !isSyncedScope)
