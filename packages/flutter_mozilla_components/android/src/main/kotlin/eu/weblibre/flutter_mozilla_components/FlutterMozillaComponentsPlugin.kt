@@ -9,11 +9,13 @@ package eu.weblibre.flutter_mozilla_components
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoWebInspectorApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
 
@@ -96,6 +98,11 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     )
     GeckoEngineSettingsApi.setUp(flutterPluginBinding.binaryMessenger, engineSettingsApiImpl)
     GlobalComponents.engineSettingsApi = engineSettingsApiImpl
+
+    GeckoWebInspectorApi.setUp(
+      flutterPluginBinding.binaryMessenger,
+      GeckoWebInspectorApiImpl(),
+    )
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -103,6 +110,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     pointerRouter?.dispose()
     pointerRouter = null
     GeckoProfileApi.setUp(binding.binaryMessenger, null)
+    GeckoWebInspectorApi.setUp(binding.binaryMessenger, null)
     // Before anything else: the profile-access lease and the arbiter's selection
     // and maintenance leases are all process-global and keyed on the isolate, so
     // an engine that detaches without handing them back locks every later engine
