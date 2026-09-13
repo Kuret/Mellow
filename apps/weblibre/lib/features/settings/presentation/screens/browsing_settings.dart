@@ -42,18 +42,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _NewTabDefaultSection(),
       ),
       SettingsEntryDefinition(
-        title: 'Tab List Direction',
-        subtitle: 'Choose how tabs are ordered in the list view',
-        keywords: ['sorting', 'order'],
-        child: _TabListDirectionSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Tab Bar Direction',
-        subtitle: 'Choose how tabs are ordered in the tab bar',
-        keywords: ['sorting', 'order'],
-        child: _TabBarDirectionSection(),
-      ),
-      SettingsEntryDefinition(
         title: 'Keep at most N tabs loaded',
         subtitle: 'Unload the least recently used tabs beyond this many',
         keywords: ['memory', 'unload', 'cold', 'live', 'loaded'],
@@ -407,116 +395,6 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
                   secondary: Icon(MdiIcons.applicationOutline),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabListDirectionSection extends HookConsumerWidget {
-  const _TabListDirectionSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final direction = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab List Direction'),
-            subtitle: Text(
-              'Choose whether the newest tab appears at the top or bottom of the tab list',
-            ),
-            leading: Icon(MdiIcons.formatListBulleted),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
-                  value: TabDirection.newestFirst,
-                  label: Text('Newest first'),
-                  icon: Icon(MdiIcons.arrowCollapseUp),
-                ),
-                ButtonSegment(
-                  value: TabDirection.oldestFirst,
-                  label: Text('Oldest first'),
-                  icon: Icon(MdiIcons.arrowCollapseDown),
-                ),
-              ],
-              selected: {direction},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .tabListDirection(value.first),
-                    );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabBarDirectionSection extends HookConsumerWidget {
-  const _TabBarDirectionSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final direction = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Tab Bar Direction'),
-            subtitle: Text(
-              'Choose whether the newest tab appears on the left or right of the quick switcher',
-            ),
-            leading: Icon(MdiIcons.reorderHorizontal),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
-                  value: TabDirection.newestFirst,
-                  label: Text('Newest first'),
-                  icon: Icon(MdiIcons.arrowCollapseLeft),
-                ),
-                ButtonSegment(
-                  value: TabDirection.oldestFirst,
-                  label: Text('Oldest first'),
-                  icon: Icon(MdiIcons.arrowCollapseRight),
-                ),
-              ],
-              selected: {direction},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarDirection(value.first),
-                    );
-              },
             ),
           ),
         ],
