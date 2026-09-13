@@ -462,7 +462,7 @@ void main() {
             return decoration.borderRadius! as BorderRadius;
           }
         }
-        fail('no band behind ${text.description}');
+        fail('no band behind the chip');
       }
 
       final opening = bandRadiusAround(find.text('Folder'));
