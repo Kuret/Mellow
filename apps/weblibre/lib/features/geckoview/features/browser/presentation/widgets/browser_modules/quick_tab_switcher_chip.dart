@@ -437,7 +437,6 @@ Widget wrapQuickTabSwitcherChipWithMenu({
   return TabMenu(
     selectedTabId: itemId,
     enableFindInPage: false,
-    enableFetchFeeds: false,
     enableDesktopMode: false,
     enableReaderMode: false,
     enableReloadButton: false,

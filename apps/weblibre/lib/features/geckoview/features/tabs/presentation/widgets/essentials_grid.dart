@@ -234,7 +234,6 @@ class EssentialTile extends ConsumerWidget {
           child: TabMenu(
             selectedTabId: tabId,
             enableFindInPage: false,
-            enableFetchFeeds: false,
             enableDesktopMode: false,
             enableReaderMode: false,
             enableReloadButton: false,

@@ -24,14 +24,12 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/quick_actions_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
 
 /// How a host opens the things its modules surface.
 ///
@@ -43,7 +41,6 @@ import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart
 class ModuleSurfaceCallbacks {
   final void Function(Uri uri) onUriSelected;
   final void Function(String tabId) onTabSelected;
-  final void Function(FeedArticleSummary article) onArticleSelected;
   final void Function(ContainerDataWithCount container) onContainerSelected;
 
   /// Present only on surfaces that own a live text field. Modules that write
@@ -60,7 +57,6 @@ class ModuleSurfaceCallbacks {
   const ModuleSurfaceCallbacks({
     required this.onUriSelected,
     required this.onTabSelected,
-    required this.onArticleSelected,
     required this.onContainerSelected,
     this.searchTextController,
     this.submitSearch,
@@ -88,9 +84,6 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
     SearchModuleType.frequentBangs: () => const FrequentBangsSection(),
     SearchModuleType.topSites: () =>
         TopSitesSection(onUriSelected: callbacks.onUriSelected),
-    SearchModuleType.recentArticles: () => RecentFeedArticlesSection(
-      onArticleSelected: callbacks.onArticleSelected,
-    ),
     SearchModuleType.recentTabs: () =>
         RecentTabsSection(onTabSelected: callbacks.onTabSelected),
     SearchModuleType.recentHistory: () =>

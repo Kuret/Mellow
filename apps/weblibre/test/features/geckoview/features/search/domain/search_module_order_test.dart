@@ -180,8 +180,8 @@ void main() {
     test('a real shipped payload round-trips unchanged', () {
       // Captured from the shape SearchModuleOrder.build writes today: a user
       // who moved Shortcuts to the top and hid History Highlights. History
-      // Highlights has since been removed, so the decode has to drop that one
-      // entry and keep the rest of the layout.
+      // Highlights and Recent Articles have since been removed, so the decode
+      // has to drop those entries and keep the rest of the layout.
       const payload =
           '[{"type":"topSites","visible":true},'
           '{"type":"recentSearches","visible":true},'
@@ -202,7 +202,6 @@ void main() {
         SearchModuleType.topSites,
         SearchModuleType.recentSearches,
         SearchModuleType.frequentBangs,
-        SearchModuleType.recentArticles,
         SearchModuleType.recentTabs,
         SearchModuleType.recentHistory,
         SearchModuleType.containers,
@@ -226,10 +225,16 @@ void main() {
     });
 
     test('a layout naming a module we deleted still loads', () {
-      // These three shipped as SearchModuleType values and are still named in
+      // These all shipped as SearchModuleType values and are still named in
       // stored configurations. Removing the enum values must not throw, and
       // must not cost the user the rest of their layout.
-      const removedModuleNames = ['quote', 'popularSites', 'historyHighlights'];
+      const removedModuleNames = [
+        'quote',
+        'popularSites',
+        'historyHighlights',
+        'articles',
+        'recentArticles',
+      ];
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
         (type: SearchModuleType.topSites, visible: true),

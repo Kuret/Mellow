@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/tab_type.dart';
 import 'package:weblibre/core/routing/widgets/bottom_sheet_page.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
@@ -105,12 +104,6 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_list.
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/presentation/widgets/auth_gate.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
-import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
-import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';
-import 'package:weblibre/features/web_feed/presentation/screens/feed_edit.dart';
-import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
-import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
 import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
 
 export 'package:weblibre/core/routing/tab_type.dart';
@@ -119,7 +112,6 @@ part 'routes.addons.dart';
 part 'routes.bangs.dart';
 part 'routes.bookmarks.dart';
 part 'routes.browser.dart';
-part 'routes.feeds.dart';
 part 'routes.g.dart';
 part 'routes.history.dart';
 part 'routes.profiles.dart';

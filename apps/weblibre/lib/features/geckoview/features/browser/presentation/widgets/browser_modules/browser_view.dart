@@ -25,7 +25,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
@@ -36,7 +35,6 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -66,8 +64,6 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
-import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
-import 'package:weblibre/features/web_feed/domain/services/article_content_processor.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -496,16 +492,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       },
     );
 
-    ref.listenManual(feedRequestedProvider, (previous, next) async {
-      if (next.value.mapNotNull(Uri.tryParse) case final Uri url) {
-        if (GoRouterState.of(context).topRoute?.name != FeedAddRoute.name) {
-          if (ref.read(addFeedDialogBlockingProvider.notifier).canPush(url)) {
-            await FeedAddRoute(uri: url.toString()).push(context);
-          }
-        }
-      }
-    });
-
     ref.listenManual<AsyncValue<PendingIntentDecision>>(
       fireImmediately: true,
       intentGatekeeperProvider,
@@ -702,19 +688,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     // a start that lands on the home surface with no tab never mounts it — so
     // anything activated from here did not run at all until the user opened a
     // tab.
-
-    ref.listenManual(
-      fireImmediately: true,
-      articleContentProcessorServiceProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to articleContentProcessorServiceProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
     // Ensure PWA manifest state is collected and stays alive
     ref.listenManual(

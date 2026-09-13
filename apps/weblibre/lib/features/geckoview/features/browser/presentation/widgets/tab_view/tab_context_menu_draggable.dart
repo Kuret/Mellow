@@ -96,7 +96,6 @@ class TabContextMenuDraggable extends HookConsumerWidget {
       selectedTabId: tabId,
       controller: menuController,
       enableFindInPage: false,
-      enableFetchFeeds: false,
       enableDesktopMode: false,
       enableReaderMode: false,
       enableReloadButton: false,

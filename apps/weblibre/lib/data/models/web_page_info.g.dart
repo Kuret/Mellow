@@ -13,8 +13,6 @@ abstract class _$WebPageInfoCWProxy {
 
   WebPageInfo favicon(BrowserIcon? favicon);
 
-  WebPageInfo feeds(Set<Uri>? feeds);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebPageInfo(...).copyWith.fieldName(value)`.
   ///
@@ -22,12 +20,7 @@ abstract class _$WebPageInfoCWProxy {
   /// ```dart
   /// WebPageInfo(...).copyWith(id: 12, name: "My name")
   /// ```
-  WebPageInfo call({
-    Uri url,
-    String? title,
-    BrowserIcon? favicon,
-    Set<Uri>? feeds,
-  });
+  WebPageInfo call({Uri url, String? title, BrowserIcon? favicon});
 }
 
 /// Callable proxy for `copyWith` functionality.
@@ -46,9 +39,6 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   @override
   WebPageInfo favicon(BrowserIcon? favicon) => call(favicon: favicon);
 
-  @override
-  WebPageInfo feeds(Set<Uri>? feeds) => call(feeds: feeds);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebPageInfo(...).copyWith.fieldName(value)`.
   ///
@@ -61,7 +51,6 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? favicon = const $CopyWithPlaceholder(),
-    Object? feeds = const $CopyWithPlaceholder(),
   }) {
     return WebPageInfo(
       url: url == const $CopyWithPlaceholder() || url == null
@@ -76,10 +65,6 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
           ? _value.favicon
           // ignore: cast_nullable_to_non_nullable
           : favicon as BrowserIcon?,
-      feeds: feeds == const $CopyWithPlaceholder()
-          ? _value.feeds
-          // ignore: cast_nullable_to_non_nullable
-          : feeds as Set<Uri>?,
     );
   }
 }

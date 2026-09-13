@@ -74,7 +74,6 @@ import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
-import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 import 'package:weblibre/presentation/startup_phase_host.dart';
@@ -505,16 +504,10 @@ class _MainWidget extends HookConsumerWidget {
           (String taskId) async {
             try {
               await ref
-                  .read(fetchArticlesControllerProvider.notifier)
-                  .fetchAllArticles();
-
-              logger.i('Fetched articles in foreground');
-
-              await ref
                   .read(spacesSyncServiceProvider.notifier)
                   .sync(reason: 'background');
             } catch (e, s) {
-              logger.e('Failed fetching articles', error: e, stackTrace: s);
+              logger.e('Failed syncing spaces', error: e, stackTrace: s);
             } finally {
               await BackgroundFetch.finish(taskId);
             }

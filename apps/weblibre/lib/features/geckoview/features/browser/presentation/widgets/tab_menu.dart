@@ -22,7 +22,6 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -62,7 +61,6 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_o
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabMenu extends HookConsumerWidget {
@@ -72,7 +70,6 @@ class TabMenu extends HookConsumerWidget {
   final bool enableFindInPage;
   final bool enableReaderMode;
   final bool enableDesktopMode;
-  final bool enableFetchFeeds;
   final bool enableAddBookmark;
   final bool enableAddToHomeScreen;
   final bool enableCloneTab;
@@ -94,7 +91,6 @@ class TabMenu extends HookConsumerWidget {
     this.enableFindInPage = true,
     this.enableReaderMode = true,
     this.enableDesktopMode = true,
-    this.enableFetchFeeds = true,
     this.enableAddBookmark = true,
     this.enableAddToHomeScreen = true,
     this.enableCloneTab = true,
@@ -111,16 +107,12 @@ class TabMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showFeeds = useState(false);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     final controller = this.controller ?? useMenuController();
 
     return MenuAnchor(
       controller: controller,
-      onClose: () {
-        showFeeds.value = false;
-      },
       builder: builder,
       menuChildren: [
         if (enableFindInPage)
@@ -175,19 +167,6 @@ class TabMenu extends HookConsumerWidget {
           ),
         if (enableFindInPage || enableReaderMode || enableDesktopMode)
           const Divider(),
-        if (enableFetchFeeds)
-          Visibility(
-            visible: showFeeds.value,
-            replacement: MenuItemButton(
-              closeOnActivate: false,
-              leadingIcon: const Icon(Icons.rss_feed),
-              child: const Text('Fetch Feeds on Page'),
-              onPressed: () {
-                showFeeds.value = true;
-              },
-            ),
-            child: WebsiteFeedMenuButton(selectedTabId),
-          ),
         if (enableAddBookmark)
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.bookmarkPlus),

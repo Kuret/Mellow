@@ -50,7 +50,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/combined_history_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/local_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
@@ -484,9 +483,6 @@ class SearchScreen extends HookConsumerWidget {
       onUriSelected: openUriInTab,
       searchTextController: searchTextController,
       submitSearch: submitSearch,
-      onArticleSelected: (article) {
-        FeedArticleRoute(articleId: article.id).pushReplacement(context);
-      },
       onTabSelected: (tabId) async {
         await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
 
@@ -522,9 +518,6 @@ class SearchScreen extends HookConsumerWidget {
         searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
-      SearchModuleType.articles: FeedSearch(
-        searchTextNotifier: sampledQueryText,
-      ),
       SearchModuleType.history: HistorySuggestions(
         searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
@@ -551,7 +544,6 @@ class SearchScreen extends HookConsumerWidget {
       return switch (type) {
         SearchModuleType.searchProviders ||
         SearchModuleType.searchSuggestions ||
-        SearchModuleType.articles => false,
         _ => true,
       };
     }

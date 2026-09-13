@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
@@ -82,20 +81,4 @@ Future<WebPageInfo> pageInfo(
   }
 
   return result.value;
-}
-
-@Riverpod()
-AsyncValue<EquatableValue<Set<Uri>?>> websiteFeedProvider(
-  Ref ref,
-  String tabId,
-) {
-  final tabState = ref.watch(tabStateProvider(tabId))!;
-  final feeds = ref.watch(
-    pageInfoProvider(
-      tabState.url,
-      isImageRequest: false,
-    ).select((value) => value.whenData((data) => EquatableValue(data.feeds))),
-  );
-
-  return feeds;
 }

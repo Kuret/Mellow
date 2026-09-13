@@ -24,7 +24,6 @@ import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/startup/startup_bootstrap.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
-import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 
 @pragma('vm:entry-point')
 Future<void> backgroundFetch(HeadlessEvent task) async {
@@ -77,16 +76,6 @@ Future<void> backgroundFetch(HeadlessEvent task) async {
 
   final ref = ProviderContainer(observers: const [ErrorObserver()]);
   try {
-    try {
-      await ref
-          .read(fetchArticlesControllerProvider.notifier)
-          .fetchAllArticles();
-
-      logger.i('Fetched articles in background');
-    } catch (e, s) {
-      logger.e('Failed fetching articles', error: e, stackTrace: s);
-    }
-
     // The coarse catch-up for Zen spaces sync (PLAN §8.4): Firefox Sync is a
     // poll, so a background window is the only chance to pick up desktop
     // changes while the app is not open. An explicit sync is not gated on the

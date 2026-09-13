@@ -32,9 +32,3 @@ GeckoBrowserExtensionService browserExtensionService(Ref ref) {
 
   return service;
 }
-
-@Riverpod()
-Stream<String> feedRequested(Ref ref) {
-  final service = ref.watch(browserExtensionServiceProvider);
-  return service.feedRequested;
-}

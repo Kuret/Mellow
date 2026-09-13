@@ -29,13 +29,11 @@ class WebPageInfo with FastEquatable {
   final Uri url;
   final String? title;
   final BrowserIcon? favicon;
-  final Set<Uri>? feeds;
 
-  bool get isPageInfoComplete =>
-      title.isNotEmpty && favicon != null && feeds != null;
+  bool get isPageInfoComplete => title.isNotEmpty && favicon != null;
 
-  WebPageInfo({required this.url, this.title, this.favicon, this.feeds});
+  WebPageInfo({required this.url, this.title, this.favicon});
 
   @override
-  List<Object?> get hashParameters => [url, title, favicon, feeds];
+  List<Object?> get hashParameters => [url, title, favicon];
 }

@@ -36,7 +36,6 @@ import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
-import 'package:weblibre/features/web_feed/utils/feed_finder.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
 part 'generic_website.g.dart';
@@ -145,15 +144,8 @@ class GenericWebsiteService extends _$GenericWebsiteService {
           final document = html_parser.parse(response.bodyUnicodeFallback);
 
           final title = document.querySelector('title')?.text;
-          final feeds = await FeedFinder(
-            url: baseUri,
-            document: document,
-          ).parse();
 
-          return {
-            'title': title,
-            'feeds': feeds.map((uri) => uri.toString()).toList(),
-          };
+          return {'title': title};
         } finally {
           client.close();
         }
@@ -175,9 +167,6 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       return WebPageInfo(
         url: url,
         title: (result['title'] as String?)?.trim(),
-        feeds: Set.from(
-          (result['feeds']! as List<String>).map((url) => Uri.tryParse(url)),
-        ),
       );
     }, exceptionHandler: handleHttpError);
   }

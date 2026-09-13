@@ -21,8 +21,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
-import 'package:weblibre/features/web_feed/domain/providers.dart';
 
 part 'empty_state_content.g.dart';
 
@@ -38,23 +36,6 @@ Future<List<VisitInfo>> searchEmptyRecentHistory(
   if (!ref.mounted) return [];
 
   return visits.where((v) => Uri.tryParse(v.url) != null).toList();
-}
-
-@Riverpod()
-AsyncValue<List<FeedArticleSummary>> searchEmptyRecentFeedArticles(
-  Ref ref, {
-  int count = 25,
-}) {
-  final feeds = ref.watch(feedListProvider);
-
-  final hasFeeds = feeds.whenOrNull(data: (list) => list.isNotEmpty) ?? false;
-  if (!hasFeeds) {
-    return const AsyncValue.data([]);
-  }
-
-  return ref
-      .watch(feedArticleListProvider(null))
-      .whenData((articles) => articles.take(count).toList());
 }
 
 @Riverpod()

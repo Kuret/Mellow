@@ -109,9 +109,6 @@ class BrowserHome extends ConsumerWidget {
       onTabSelected: (tabId) async {
         await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
       },
-      onArticleSelected: (article) {
-        unawaited(FeedArticleRoute(articleId: article.id).push(context));
-      },
       onContainerSelected: (container) async {
         await ref
             .read(selectedContainerProvider.notifier)

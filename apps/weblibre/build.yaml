@@ -18,7 +18,6 @@ targets:
             tabs: lib/features/geckoview/features/tabs/data/database/database.dart
             top_site: lib/features/geckoview/features/top_sites/data/database/database.dart
             user: lib/features/user/data/database/database.dart
-            web_feed: lib/features/web_feed/data/database/database.dart
           sql:
             dialect: sqlite
             options:
