@@ -237,6 +237,9 @@ class GeckoEngineSettingsApiImpl(
         if(settings.enterpriseRootsEnabled != null) {
             components.core.engineSettings.enterpriseRootsEnabled = settings.enterpriseRootsEnabled;
         }
+        if(settings.remoteDebuggingEnabled != null) {
+            components.core.engineSettings.remoteDebuggingEnabled = settings.remoteDebuggingEnabled;
+        }
         if(settings.dohSettings != null) {
             components.core.engineSettings.dohSettingsMode = when(settings.dohSettings.dohSettingsMode) {
                 DohSettingsMode.GECKO_DEFAULT -> Engine.DohSettingsMode.DEFAULT
@@ -336,6 +339,9 @@ class GeckoEngineSettingsApiImpl(
         if(settings.enterpriseRootsEnabled != null) {
             components.core.engine.settings.enterpriseRootsEnabled = components.core.engineSettings.enterpriseRootsEnabled
             reloadSession = true
+        }
+        if(settings.remoteDebuggingEnabled != null) {
+            components.core.engine.settings.remoteDebuggingEnabled = components.core.engineSettings.remoteDebuggingEnabled
         }
         if(settings.dohSettings != null) {
             components.core.engine.settings.dohSettingsMode = components.core.engineSettings.dohSettingsMode
