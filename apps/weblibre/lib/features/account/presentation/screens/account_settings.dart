@@ -26,13 +26,13 @@ import 'package:weblibre/features/account/data/models/subscription_status.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
-import 'package:weblibre/features/account/domain/services/prefs_sync_service.dart';
-import 'package:weblibre/features/account/domain/services/settings_sync_service.dart';
 import 'package:weblibre/features/account/presentation/widgets/account_auth_status_card.dart';
 import 'package:weblibre/features/account/presentation/widgets/subscription_card.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_list_section.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_setup_card.dart';
 import 'package:weblibre/features/search_credits/presentation/widgets/search_credits_section.dart';
+import 'package:weblibre/features/settings/domain/services/prefs_sync_service.dart';
+import 'package:weblibre/features/settings/domain/services/settings_sync_service.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 
 class AccountSettingsScreen extends HookConsumerWidget {

@@ -21,12 +21,11 @@ import 'dart:convert';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
-import 'package:weblibre/features/account/domain/services/prefs_js_reader.dart';
-import 'package:weblibre/features/account/domain/services/prefs_sync_service.dart';
-import 'package:weblibre/features/account/domain/services/settings_sync_service.dart';
-import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
+import 'package:weblibre/features/settings/domain/services/prefs_js_reader.dart';
+import 'package:weblibre/features/settings/domain/services/prefs_sync_service.dart';
+import 'package:weblibre/features/settings/domain/services/settings_sync_service.dart';
+import 'package:weblibre/features/settings/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'settings_transfer_service.g.dart';

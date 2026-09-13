@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/features/account/presentation/widgets/sync_document_dialogs.dart';
 import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
 import 'package:weblibre/features/settings/domain/services/settings_transfer_service.dart';
+import 'package:weblibre/features/settings/presentation/widgets/metadata_row.dart';
 
 /// Confirms an import and picks which of the file's sections to apply.
 ///

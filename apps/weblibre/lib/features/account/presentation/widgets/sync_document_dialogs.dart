@@ -19,49 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
-
-// -- Metadata display helpers ------------------------------------------------
-
-class MetadataRow extends StatelessWidget {
-  const MetadataRow({super.key, required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodySmall),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String formatDateTime(DateTime dt) {
-  final local = dt.toLocal();
-  return '${local.year}-${_pad(local.month)}-${_pad(local.day)} '
-      '${_pad(local.hour)}:${_pad(local.minute)}';
-}
-
-String _pad(int n) => n.toString().padLeft(2, '0');
-
-// -- Dialogs -----------------------------------------------------------------
+import 'package:weblibre/features/settings/presentation/widgets/metadata_row.dart';
 
 Future<String?> showStoreLabelDialog(BuildContext context) {
   final controller = TextEditingController();

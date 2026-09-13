@@ -20,9 +20,8 @@
 import 'dart:convert';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/account/data/models/settings_sync_envelope.dart';
-import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
-import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
+import 'package:weblibre/features/settings/domain/entities/settings_sync_envelope.dart';
+import 'package:weblibre/features/settings/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 

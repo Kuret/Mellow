@@ -17,7 +17,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
+/// The document kinds a settings transfer can carry.
+///
+/// The [value] is the stable identifier written into exported settings files
+/// (and, historically, into hosted sync storage), so it must not change.
+enum SyncDocumentKind {
+  weblibreSettings('weblibre_settings', 'Settings'),
+  geckoUserJs('gecko_user_js', 'Gecko Prefs'),
+
+  /// Small encrypted canary written on first-device sync setup so a second
+  /// device could verify a candidate sync key. Never surfaced in any settings
+  /// UI and has no [SyncDocumentService] behind it.
+  syncValidationProbe('sync_validation_probe', 'Sync Validation Probe');
+
+  final String value;
+  final String displayName;
+
+  const SyncDocumentKind(this.value, this.displayName);
+}
 
 /// Contract for document kinds that can be synced.
 ///

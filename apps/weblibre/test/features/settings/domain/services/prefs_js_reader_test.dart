@@ -22,7 +22,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/features/account/domain/services/prefs_js_reader.dart';
+import 'package:weblibre/features/settings/domain/services/prefs_js_reader.dart';
 
 void main() {
   late Directory profileDir;

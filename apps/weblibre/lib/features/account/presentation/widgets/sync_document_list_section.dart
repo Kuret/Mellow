@@ -25,8 +25,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
-import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_dialogs.dart';
+import 'package:weblibre/features/settings/domain/services/sync_document_service.dart';
+import 'package:weblibre/features/settings/presentation/widgets/metadata_row.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_content_card.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
