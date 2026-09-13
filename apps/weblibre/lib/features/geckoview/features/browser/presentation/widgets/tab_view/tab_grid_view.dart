@@ -327,9 +327,6 @@ class _TabGridView extends HookConsumerWidget {
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
     final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
-    final tabListDirection = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
-    );
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
     final collapsedGroups = ref.watch(collapsedGroupsProvider);
     final treeRows = ref.watch(
@@ -545,7 +542,6 @@ class _TabGridView extends HookConsumerWidget {
                   pinnedTabIds: pinnedTabIds,
                   oldIndex: oldIndex,
                   newIndex: newIndex,
-                  tabListDirection: tabListDirection,
                   hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
                   folderIdByTab: folderIdByTab,

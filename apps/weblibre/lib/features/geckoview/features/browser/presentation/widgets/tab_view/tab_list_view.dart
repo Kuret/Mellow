@@ -465,9 +465,6 @@ class _TabListView extends HookConsumerWidget {
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
     final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
-    final tabListDirection = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
-    );
     final collapsedGroups = ref.watch(collapsedGroupsProvider);
     final treeRows = ref.watch(
       watchTabsWithRootAndDepthProvider(
@@ -812,7 +809,6 @@ class _TabListView extends HookConsumerWidget {
                   pinnedTabIds: effectivePinnedTabIds,
                   oldIndex: moving.primaryIndex,
                   newIndex: primaryNewIndex,
-                  tabListDirection: tabListDirection,
                   hierarchical: showHierarchicalTabs && !hasActiveSearch,
                   sortPinnedFirst: filterOptions.sortPinnedFirst,
                   folderIdByTab: folderIdByTab,

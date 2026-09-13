@@ -22,7 +22,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 // [TabScopeToSpecific] has no value equality, so a direct `==` comparison
 // against a runtime-constructed instance (as opposed to the same `const`
@@ -51,7 +50,6 @@ void main() {
       pinnedTabIds: pinnedTabIds,
       oldIndex: oldIndex,
       newIndex: newIndex,
-      tabListDirection: TabDirection.oldestFirst,
       hierarchical: hierarchical,
       sortPinnedFirst: false,
       folderIdByTab: folderIdByTab,

@@ -21,7 +21,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class TabViewReorderResult {
   final List<String> movingTabIds;
@@ -76,7 +75,6 @@ TabViewReorderResult? buildTabViewReorderResult({
   required Set<String> pinnedTabIds,
   required int oldIndex,
   required int newIndex,
-  required TabDirection tabListDirection,
   required bool hierarchical,
   required bool sortPinnedFirst,
   required Map<String, String?> folderIdByTab,
@@ -138,7 +136,6 @@ TabViewReorderResult? buildTabViewReorderResult({
       movingTabIds: [movingItem.tabId, ...movingSplitSiblings],
       orderedTabIds: _orderedIdsForStorageAnchors(
         ordered,
-        tabListDirection: tabListDirection,
         pinnedTabIds: pinnedTabIds,
         parentById: const {},
         movingPartitionRootId: movingItem.tabId,
@@ -264,28 +261,10 @@ TabViewReorderResult? buildTabViewReorderResult({
         .add(block);
   }
 
-  // For newest-first display, the rendered child order within a group is the
-  // reverse of storage (orderKey-ascending) order. Convert back to storage
-  // order before picking anchors so genBetween receives prev.orderKey <
-  // next.orderKey. Block contents (e.g. the moving subtree from _subtreeIds)
-  // are already storage-ordered internally, so we reverse blocks as units.
-  if (tabListDirection == TabDirection.newestFirst) {
-    for (final blocks in blocksByRoot.values) {
-      if (blocks.length > 1) {
-        final reversedTail = blocks.sublist(1).reversed.toList();
-        blocks
-          ..removeRange(1, blocks.length)
-          ..addAll(reversedTail);
-      }
-    }
-  }
-
-  final orderedRootIds = tabListDirection == TabDirection.newestFirst
-      ? rootOrder.reversed
-      : rootOrder;
-
+  // Rows render in storage (orderKey-ascending) order on every surface, so the
+  // display order is already the order genBetween's anchors are read in.
   final orderedTabIds = [
-    for (final rootId in orderedRootIds)
+    for (final rootId in rootOrder)
       for (final block in blocksByRoot[rootId]!) ...block,
   ];
 
@@ -293,7 +272,6 @@ TabViewReorderResult? buildTabViewReorderResult({
     movingTabIds: moveBlock,
     orderedTabIds: _orderedIdsForStorageAnchors(
       orderedTabIds,
-      tabListDirection: tabListDirection,
       pinnedTabIds: pinnedTabIds,
       parentById: parentById,
       movingPartitionRootId: _rootIdFor(movingItem.tabId, parentById),
@@ -322,26 +300,19 @@ String? _dropParentScopeFor(List<TabViewItem> remaining, int insertIndex) {
 
 List<String> _orderedIdsForStorageAnchors(
   List<String> orderedTabIds, {
-  required TabDirection tabListDirection,
   required Set<String> pinnedTabIds,
   required Map<String, String?> parentById,
   required String movingPartitionRootId,
   required bool sortPinnedFirst,
 }) {
-  final storageOrderedIds = tabListDirection == TabDirection.newestFirst
-      // Rendering flips root group order for newest-first; convert the
-      // display order back to storage order before choosing anchors.
-      ? orderedTabIds.reversed.toList()
-      : orderedTabIds;
-
   if (!sortPinnedFirst || pinnedTabIds.isEmpty) {
-    return storageOrderedIds;
+    return orderedTabIds;
   }
 
   // Pinned-first is a render-only partition, so choose DB anchors only from
   // the moving tab's own partition to avoid snapping across the boundary.
   final movingPinned = pinnedTabIds.contains(movingPartitionRootId);
-  return storageOrderedIds.where((tabId) {
+  return orderedTabIds.where((tabId) {
     final rootId = _rootIdFor(tabId, parentById);
     return pinnedTabIds.contains(rootId) == movingPinned;
   }).toList();
