@@ -4,7 +4,7 @@
   "weblibre": {
     "remote": "origin",
     "branch": "main",
-    "last_reviewed": "045de46b30f4cab24c39f99651294eb5608099f7"
+    "last_reviewed": "45df19cbf3c69c3304c22dc15559930b7233dc0f"
   },
   "zen": {
     "path": "../zen-desktop",
@@ -13,7 +13,7 @@
     "contract_paths": [
       "src/zen/sync"
     ],
-    "last_reviewed": "22961e97d85e9bd487ad2fce0807f54ef421ae6e",
+    "last_reviewed": "787f9c5e025ff41eaad6455a7e5b9eeb540bfaa6",
     "engine_version": 3,
     "clone": "blobless (git clone --filter=blob:none); never shallow - see SKILL.md"
   }
