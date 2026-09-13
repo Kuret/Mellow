@@ -49,7 +49,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
@@ -687,11 +686,9 @@ class TabRepository extends _$TabRepository {
     // reaches this only as a fallback; what remains here is picking a tab
     // after a close and scope-bound stepping.
     //
-    // "Previous/next" is interpreted relative to the *tab bar* direction,
-    // which is the only direction this path has to go by.
-    final newestFirst =
-        ref.read(generalSettingsWithDefaultsProvider).tabBarDirection ==
-        TabDirection.newestFirst;
+    // "Previous/next" is `order_key` descending/ascending: storage order is
+    // the order every surface renders, so a step here means the same thing
+    // the user sees.
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
     final summary = await tabDao.getTabSummaryById(tabId).getSingleOrNull();
     if (summary == null) {
@@ -699,7 +696,7 @@ class TabRepository extends _$TabRepository {
     }
     final scope = TabOrderScope.forTab(summary);
 
-    if (newestFirst == selectPrevious) {
+    if (!selectPrevious) {
       return tabDao
           .nextTabByOrderKey(
             tabId,

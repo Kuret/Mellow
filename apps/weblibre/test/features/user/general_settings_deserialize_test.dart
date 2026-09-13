@@ -69,7 +69,6 @@ void main() {
       // These no longer exist on GeneralSettings but are still consumed by the
       // migrations in GeneralSettings.fromJson, so they must stay readable.
       for (final legacyKey in const [
-        'newTabPosition',
         'tabBarShowQuickTabSwitcherBar',
         'quickTabSwitcherMode',
       ]) {

@@ -57,10 +57,6 @@ abstract class _$GeneralSettingsCWProxy {
     TabType storedDefaultCreateTabType,
   );
 
-  GeneralSettings tabListDirection(TabDirection tabListDirection);
-
-  GeneralSettings tabBarDirection(TabDirection tabBarDirection);
-
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   );
@@ -250,8 +246,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
     TabType storedDefaultCreateTabType,
-    TabDirection tabListDirection,
-    TabDirection tabBarDirection,
     TabIntentOpenSetting tabIntentOpenSetting,
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
@@ -417,14 +411,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   ) => call(storedDefaultCreateTabType: storedDefaultCreateTabType);
-
-  @override
-  GeneralSettings tabListDirection(TabDirection tabListDirection) =>
-      call(tabListDirection: tabListDirection);
-
-  @override
-  GeneralSettings tabBarDirection(TabDirection tabBarDirection) =>
-      call(tabBarDirection: tabBarDirection);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -744,8 +730,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
-    Object? tabListDirection = const $CopyWithPlaceholder(),
-    Object? tabBarDirection = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
@@ -936,18 +920,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.storedDefaultCreateTabType
           // ignore: cast_nullable_to_non_nullable
           : storedDefaultCreateTabType as TabType,
-      tabListDirection:
-          tabListDirection == const $CopyWithPlaceholder() ||
-              tabListDirection == null
-          ? _value.tabListDirection
-          // ignore: cast_nullable_to_non_nullable
-          : tabListDirection as TabDirection,
-      tabBarDirection:
-          tabBarDirection == const $CopyWithPlaceholder() ||
-              tabBarDirection == null
-          ? _value.tabBarDirection
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarDirection as TabDirection,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -1388,14 +1360,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['defaultCreateTabType'],
     unknownValue: TabType.regular,
   ),
-  tabListDirection: $enumDecodeNullable(
-    _$TabDirectionEnumMap,
-    json['tabListDirection'],
-  ),
-  tabBarDirection: $enumDecodeNullable(
-    _$TabDirectionEnumMap,
-    json['tabBarDirection'],
-  ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
@@ -1550,8 +1514,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
-  'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
-  'tabBarDirection': _$TabDirectionEnumMap[instance.tabBarDirection]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'bookmarkOpenSetting':
@@ -1677,11 +1639,6 @@ const _$TabTypeEnumMap = {
   TabType.regular: 'regular',
   TabType.private: 'private',
   TabType.child: 'child',
-};
-
-const _$TabDirectionEnumMap = {
-  TabDirection.newestFirst: 'newestFirst',
-  TabDirection.oldestFirst: 'oldestFirst',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

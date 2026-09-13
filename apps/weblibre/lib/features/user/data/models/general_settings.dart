@@ -129,8 +129,6 @@ enum BookmarkOpenSetting { regular, private, customTab, ask }
 /// always stay in the background and are unaffected.
 enum BackgroundTabOpenAction { prompt, switchImmediately }
 
-enum TabDirection { newestFirst, oldestFirst }
-
 /// Edge of the compact tab bar on narrow viewports. Only [top] and [bottom]
 /// place anything today: [left] and [right] are legacy values from when the
 /// position setting alone decided between a bar and a side rail, kept so
@@ -302,8 +300,6 @@ class GeneralSettings with FastEquatable {
 
   @JsonKey(name: 'defaultCreateTabType', unknownEnumValue: TabType.regular)
   final TabType storedDefaultCreateTabType;
-  final TabDirection tabListDirection;
-  final TabDirection tabBarDirection;
   @JsonKey(unknownEnumValue: TabIntentOpenSetting.regular)
   final TabIntentOpenSetting tabIntentOpenSetting;
 
@@ -527,8 +523,6 @@ class GeneralSettings with FastEquatable {
     required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
     required this.storedDefaultCreateTabType,
-    required this.tabListDirection,
-    required this.tabBarDirection,
     required this.tabIntentOpenSetting,
     required this.bookmarkOpenSetting,
     required this.backgroundTabOpenAction,
@@ -623,8 +617,6 @@ class GeneralSettings with FastEquatable {
     bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
     TabType? storedDefaultCreateTabType,
-    TabDirection? tabListDirection,
-    TabDirection? tabBarDirection,
     TabIntentOpenSetting? tabIntentOpenSetting,
     BookmarkOpenSetting? bookmarkOpenSetting,
     BackgroundTabOpenAction? backgroundTabOpenAction,
@@ -719,10 +711,6 @@ class GeneralSettings with FastEquatable {
            homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
-       // Synced order is `order_key` ascending, the desktop's order, so new
-       // installs read the list the way the desktop sidebar shows it.
-       tabListDirection = tabListDirection ?? TabDirection.oldestFirst,
-       tabBarDirection = tabBarDirection ?? TabDirection.oldestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
        backgroundTabOpenAction =
@@ -835,21 +823,6 @@ class GeneralSettings with FastEquatable {
       if (json[key] == 'isolated') {
         json[key] = 'regular';
       }
-    }
-
-    // Migrate legacy `newTabPosition` setting to direction settings.
-    // Old `first` (new tabs at top) → newestFirst; `end` → oldestFirst.
-    // TODO: Drop this fallback (and the `newTabPosition` row in the user
-    // settings DB) once enough releases have shipped that rolling back to a
-    // version without `tabListDirection`/`tabBarDirection` is no longer a
-    // concern.
-    final legacyNewTabPosition = json['newTabPosition'];
-    if (legacyNewTabPosition != null) {
-      final mapped = legacyNewTabPosition == 'end'
-          ? 'oldestFirst'
-          : 'newestFirst';
-      json.putIfAbsent('tabListDirection', () => mapped);
-      json.putIfAbsent('tabBarDirection', () => mapped);
     }
 
     // Migrate the legacy `tabBarShowQuickTabSwitcherBar` toggle and
@@ -969,8 +942,6 @@ class GeneralSettings with FastEquatable {
     homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
     storedDefaultCreateTabType,
-    tabListDirection,
-    tabBarDirection,
     tabIntentOpenSetting,
     bookmarkOpenSetting,
     backgroundTabOpenAction,

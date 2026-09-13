@@ -58,7 +58,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/fo
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -350,12 +349,7 @@ class TabMenu extends HookConsumerWidget {
                 onPressed: () async {
                   await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .moveTabAmongSiblings(
-                        selectedTabId,
-                        down:
-                            settings.tabListDirection ==
-                            TabDirection.newestFirst,
-                      );
+                      .moveTabAmongSiblings(selectedTabId, down: false);
                 },
                 child: const Text('Move up'),
               ),
@@ -364,12 +358,7 @@ class TabMenu extends HookConsumerWidget {
                 onPressed: () async {
                   await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .moveTabAmongSiblings(
-                        selectedTabId,
-                        down:
-                            settings.tabListDirection !=
-                            TabDirection.newestFirst,
-                      );
+                      .moveTabAmongSiblings(selectedTabId, down: true);
                 },
                 child: const Text('Move down'),
               ),
