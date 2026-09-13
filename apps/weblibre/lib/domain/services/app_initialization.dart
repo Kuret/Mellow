@@ -23,8 +23,6 @@ import 'package:exceptions/exceptions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
-import 'package:weblibre/features/bangs/data/models/bang_group.dart';
-import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 
 part 'app_initialization.g.dart';
 
@@ -38,21 +36,19 @@ class AppInitializationService extends _$AppInitializationService {
 
   Future<void>? _format;
   Future<void>? _packageInfo;
-  Future<Map<BangGroup, Result<void>>>? _bangs;
 
   /// Discards the prewarmed futures so a retry re-runs the work rather than
   /// re-awaiting a future that already failed.
   void _resetPrewarm() {
     _format = null;
     _packageInfo = null;
-    _bangs = null;
   }
 
   /// Starts the work [initialize] will await, without waiting for it.
   ///
-  /// All of it is profile-local — intl date symbols, package info, the bundled
-  /// bang import — and none of it touches the engine, so on a cold start it can
-  /// run *while* GeckoView comes up rather than queueing behind it. `main` calls
+  /// All of it is profile-local — intl date symbols, package info — and none of
+  /// it touches the engine, so on a cold start it can run *while* GeckoView
+  /// comes up rather than queueing behind it. `main` calls
   /// this before it starts the engine and then awaits [initialize] after, so what
   /// changes is only that the two long stretches of a cold start overlap: the
   /// point at which the UI is allowed to mount is still the end of [initialize].
@@ -67,14 +63,8 @@ class AppInitializationService extends _$AppInitializationService {
     // would be logged twice — once as "Unhandled Error" during startup, then
     // again as the initialization failure it actually is. `ignore()` only
     // suppresses that report; the later `await` still receives the error.
-    //
-    // `_bangs` needs none: `syncBundledBangGroups` returns a `Result` per group
-    // and does not reject.
     _format ??= _unlistened(ref.read(formatProvider.future));
     _packageInfo ??= _unlistened(ref.read(packageInfoProvider.future));
-    _bangs ??= ref
-        .read(bangSyncRepositoryProvider.notifier)
-        .syncBundledBangGroups();
   }
 
   /// Marks [future] as having its errors handled, and returns it unchanged.
@@ -120,16 +110,6 @@ class AppInitializationService extends _$AppInitializationService {
       );
       if (!ref.mounted) {
         return (initialized: false, stage: null, errors: errors);
-      }
-
-      final bangSyncResults = await _stage(
-        'Synchronizing Bangs...',
-        () => _bangs ??= ref
-            .read(bangSyncRepositoryProvider.notifier)
-            .syncBundledBangGroups(),
-      );
-      for (final MapEntry(value: result) in bangSyncResults.entries) {
-        result.onFailure(errors.add);
       }
 
       // The secure-storage claim and the account/restart handlers used to be

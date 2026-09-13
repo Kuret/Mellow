@@ -23,7 +23,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
@@ -31,13 +30,11 @@ import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 class FixedSearchTermSuggestions extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
-  final BangData? activeBang;
   final int limit;
 
   const FixedSearchTermSuggestions({
     required this.searchTextController,
     required this.submitSearch,
-    required this.activeBang,
     required this.limit,
     super.key,
   });

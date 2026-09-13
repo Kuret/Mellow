@@ -162,7 +162,7 @@ class SearchScreen extends HookConsumerWidget {
     final hasUserModifiedInput = useState(false);
     final isUrlInput = useState(false);
 
-    // Holds the original URL when reverse bang-matching has swapped the
+    // Holds the original URL when reverse matching has swapped the
     // address-bar text for an extracted query. First tap of the clear button
     // restores this URL; a subsequent tap clears the field normally.
     final revertUrl = useState<String?>(null);

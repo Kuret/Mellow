@@ -32,7 +32,7 @@ Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
 /// Generic subdomain labels that don't identify a distinct site. Search engines
 /// routinely redirect between these (e.g. `bing.com` → `www.bing.com`,
 /// `www.youtube.com` → `m.youtube.com`), so they are treated as equivalent when
-/// matching a live URL against a bang template host.
+/// matching a live URL against a search provider's template host.
 const _genericHostPrefixes = {'www', 'm', 'mobile'};
 
 /// Strips a single leading generic subdomain label ([_genericHostPrefixes])
@@ -53,7 +53,7 @@ String normalizeHost(String host) {
 }
 
 /// All host spellings that should be considered the same site as [host] for the
-/// purposes of bang template lookup: the normalized base plus each generic
+/// purposes of search template lookup: the normalized base plus each generic
 /// subdomain variant.
 Set<String> hostVariants(String host) {
   final base = normalizeHost(host);

@@ -93,7 +93,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
 
   /// When provided, the search screen will load URLs into this existing tab
   /// instead of creating a new tab. This also changes the UI to show
-  /// site-specific bangs instead of the tab type selector.
+  /// a site-specific search provider instead of the tab type selector.
   final String? tabId;
 
   /// Whether the search floats over the page as a command panel or takes the

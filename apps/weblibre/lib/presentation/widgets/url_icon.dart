@@ -31,7 +31,7 @@ import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 /// Origins served by a bundled asset instead of a network-fetched favicon.
-/// Lets first-party properties (e.g. the WebLibre search bang) show their
+/// Lets first-party properties (e.g. WebLibre's own search) show their
 /// brand mark rather than a generic globe or a remotely fetched icon.
 const _bundledIconByOrigin = {
   'https://weblibre.eu': 'assets/icon/bang_icon.png',

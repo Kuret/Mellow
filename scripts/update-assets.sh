@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Unified asset updater — downloads all external data files used by the app.
-# Usage: ./scripts/update-assets.sh [--group bangs|bridges|url-cleaner|url-shorteners] ...
+# Usage: ./scripts/update-assets.sh [--group bridges|url-cleaner|url-shorteners] ...
 #   Without --group flags, all groups are updated.
 
 set -euo pipefail
@@ -55,8 +55,8 @@ fetch() {
 # Clears temp files a previous run left in an asset directory.
 #
 # Asset directories are declared with a trailing slash in pubspec.yaml, so every
-# file in them is bundled into the APK, and a stale `bangs.json.tmp.*` was riding
-# along at 1.2 MB. Every path through fetch() already moves or removes its own
+# file in them is bundled into the APK, and a stale `*.json.tmp.*` was riding
+# along at over a megabyte. Every path through fetch() already moves or removes its own
 # temp file; the one that cannot is an abort in the middle of curl, and this is
 # what collects those on the next run.
 sweep_stale_temp_files() {
@@ -73,21 +73,6 @@ sweep_stale_temp_files() {
 }
 
 # ── asset groups ─────────────────────────────────────────────────────────────
-
-update_bangs() {
-  local dir="$REPO_ROOT/apps/weblibre/assets/bangs"
-  log "Updating bangs..."
-
-  fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json" \
-        "$dir/bangs.json"
-  fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json" \
-        "$dir/kagi_bangs.json"
-  fetch "https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json" \
-        "$dir/custom.json"
-
-  date -u --iso-8601=seconds > "$dir/last_sync.txt"
-  log "Bangs sync completed at $(cat "$dir/last_sync.txt")"
-}
 
 update_bridges() {
   local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
@@ -126,7 +111,7 @@ update_ublock() {
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
-ALL_GROUPS=(bangs bridges url-cleaner url-shorteners ublock)
+ALL_GROUPS=(bridges url-cleaner url-shorteners ublock)
 SELECTED_GROUPS=()
 
 while [[ $# -gt 0 ]]; do
@@ -146,7 +131,6 @@ sweep_stale_temp_files
 
 for group in "${SELECTED_GROUPS[@]}"; do
   case "$group" in
-    bangs)          update_bangs          || ((FAILURES++)) ;;
     bridges)        update_bridges        || ((FAILURES++)) ;;
     url-cleaner)    update_url_cleaner    || ((FAILURES++)) ;;
     url-shorteners) update_url_shorteners || ((FAILURES++)) ;;

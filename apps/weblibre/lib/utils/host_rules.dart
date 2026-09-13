@@ -25,7 +25,8 @@ import 'package:weblibre/utils/uri_input_parser.dart';
 ///
 /// Note: this is intentionally distinct from `uri_parser.dart`'s `normalizeHost`
 /// /`hostVariants`, which strip generic `www`/`m`/`mobile` prefixes for fuzzy
-/// bang-template matching — a different semantic that must not be conflated.
+/// search-template matching — a different semantic that must not be
+/// conflated.
 
 /// Normalises a user-entered site into a bare lowercase host, e.g.
 /// `https://News.example.com/foo` → `news.example.com`. Accepts either a full

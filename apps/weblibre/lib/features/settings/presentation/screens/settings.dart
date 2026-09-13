@@ -171,9 +171,9 @@ _CategoryGroups _buildCategories() {
     ),
     _SettingsCategoryDefinition(
       title: 'Search',
-      subtitle: 'Providers, bangs, search history',
+      subtitle: 'Providers, suggestions, search history',
       icon: MdiIcons.magnify,
-      keywords: const ['bangs', 'suggestions', 'local search index'],
+      keywords: const ['engines', 'suggestions', 'local search index'],
       sections: searchSettingsSections,
       onTap: (context) => SearchSettingsRoute().push(context),
     ),

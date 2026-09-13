@@ -602,8 +602,6 @@ class _Filesystem {
 
     final dbFolder = await path_provider.getApplicationDocumentsDirectory();
 
-    final bangDb = File(p.join(dbFolder.path, 'bang3.db'));
-    await bangDb.copy(p.join(profileDatabasesDir.path, 'bang.db'));
     final tabDb = File(p.join(dbFolder.path, 'tab2.db'));
     await tabDb.copy(p.join(profileDatabasesDir.path, 'tab.db'));
     final userDb = File(p.join(dbFolder.path, 'user.db'));

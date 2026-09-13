@@ -68,7 +68,7 @@ melos:
       description: Format all Dart files in the workspace
       exec: dart format .
     update-assets:
-      description: Download external assets (bangs, bridges, URL lists)
+      description: Download external assets (bridges, URL lists)
       run: bash scripts/update-assets.sh
     build-components:
       description: Build the readability JS bundle

@@ -14,7 +14,6 @@ targets:
           data_class_to_companions: false
           named_parameters: true
           databases:
-            bangs: lib/features/bangs/data/database/database.dart
             tabs: lib/features/geckoview/features/tabs/data/database/database.dart
             top_site: lib/features/geckoview/features/top_sites/data/database/database.dart
             user: lib/features/user/data/database/database.dart

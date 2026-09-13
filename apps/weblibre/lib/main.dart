@@ -253,7 +253,7 @@ class _MainWidget extends HookConsumerWidget {
 
     useOnInitialization(() async {
       // Starts the profile-local initialization work — intl symbols, package
-      // info, the bundled bang import — so it runs alongside the engine bring-up
+      // info — so it runs alongside the engine bring-up
       // below instead of after it. `initialize()` further down awaits these same
       // futures, so the UI still mounts only once all of it is done; what changes
       // is that the two long stretches of a cold start overlap.

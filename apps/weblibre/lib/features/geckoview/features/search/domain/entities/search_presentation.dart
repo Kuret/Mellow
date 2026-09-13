@@ -21,7 +21,8 @@
 /// How the search surface is presented.
 ///
 /// The screen's content is the same either way — the tab-type switcher, the
-/// field, bangs and every suggestion module. Only the chrome around it and
+/// field, the engine picker and every suggestion module. Only the chrome
+/// around it and
 /// how it is sized differ.
 enum SearchPresentation {
   /// A page of its own: opaque, full-bleed, with a [Scaffold] and a safe area.
