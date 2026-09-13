@@ -206,13 +206,6 @@ _CategoryGroups _buildCategories() {
       onTap: (context) => ExtensionsSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'WebLibre Account',
-      subtitle: 'Sign in, sync settings',
-      icon: Icons.account_circle_outlined,
-      keywords: const ['account', 'subscription'],
-      onTap: (context) => AccountSettingsRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
       title: 'Firefox Sync',
       subtitle: 'Account, sync now, engine selection',
       icon: Icons.sync,

@@ -28,7 +28,6 @@ import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/startup/startup_bootstrap.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
-import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
@@ -47,13 +46,6 @@ _buildSharingIntentTransformer(
   GeneralSettingsRepository settingsRepository,
 ) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
   handleData: (intent, sink) async {
-    if (_extractAccountCallback(intent) != null) {
-      // Account callback intents are consumed by accountCallbackStreamProvider —
-      // suppress them from the regular share/sharing intent pipeline so they
-      // don't open a browser tab.
-      return;
-    }
-
     if (restartProfileIdClaim(intent) != null) {
       // Same reasoning: profileRestartRequestHandlerProvider consumes these. It
       // carries no URL, so letting it through here would open a blank tab in the
@@ -178,8 +170,8 @@ _buildSharingIntentTransformer(
   },
 );
 
-/// Native intent receiver, consumed only by [intentBus]. Sharing and account
-/// callback handlers subscribe to [allIntents], not directly to this receiver.
+/// Native intent receiver, consumed only by [intentBus]. Intent handlers
+/// subscribe to [allIntents], not directly to this receiver.
 @Riverpod(keepAlive: true)
 Raw<IntentReceiver> intentReceiver(Ref ref) {
   final receiver = IntentReceiver.setUp();
@@ -336,34 +328,4 @@ Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
     intents,
     _buildSharingIntentTransformer(gatekeeper, settingsRepository),
   );
-}
-
-/// Stream of account callback handoff codes extracted from deep link intents.
-@Riverpod(keepAlive: true)
-Raw<Stream<AccountCallback>> accountCallbackStream(Ref ref) {
-  final intents = ref.watch(allIntentsProvider);
-  return _consumeIntents(ref, intents, _accountCallbackTransformer);
-}
-
-/// Transformer that yields handoff codes for matching VIEW intents and
-/// drops everything else. Shared with the sharing-intent suppression
-/// branch via [_extractAccountCallback] so the two streams agree on which
-/// intents are "account callbacks".
-final _accountCallbackTransformer =
-    StreamTransformer<Intent, AccountCallback>.fromHandlers(
-      handleData: (intent, sink) {
-        final callback = _extractAccountCallback(intent);
-        if (callback != null) {
-          // The whole callback, not just the code: the echoed nonce is what
-          // decides whether it may be redeemed at all.
-          sink.add(callback);
-        }
-      },
-    );
-
-AccountCallback? _extractAccountCallback(Intent intent) {
-  if (intent.action != 'android.intent.action.VIEW' || intent.data == null) {
-    return null;
-  }
-  return tryParseAccountCallback(intent.data!);
 }

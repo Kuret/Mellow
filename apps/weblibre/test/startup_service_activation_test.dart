@@ -18,7 +18,6 @@ const _services = <String>[
   'cacheRepositoryProvider',
   'searchHistoryCleanupServiceProvider',
   'localIndexSettingsSyncProvider',
-  'accountCallbackHandlerProvider',
   'profileRestartRequestHandlerProvider',
   'sharingIntentStreamProvider',
   'appWidgetLaunchStreamProvider',

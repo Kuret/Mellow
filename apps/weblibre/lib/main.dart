@@ -54,7 +54,6 @@ import 'package:weblibre/core/rust_lib.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
-import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -483,20 +482,14 @@ class _MainWidget extends HookConsumerWidget {
       // background; failures are logged and ignored.
       unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
 
-      // The secure-storage claim the account handler depends on completed
-      // above, before the UI was allowed to mount.
-
-      // Activate account callback deep link handler
-      _activateService(ref, accountCallbackHandlerProvider);
-
       // Listen for "restart into the shortcut's profile" from the native
       // mismatch dialog. Only this isolate can shut the profile down cleanly.
       _activateService(ref, profileRestartRequestHandlerProvider);
 
       // Every consumer of `allIntents` has to exist before the intent bus starts
-      // delivery and the broker is drained. The account-callback and
-      // restart-request consumers are alive from the two reads above; these two
-      // are otherwise built by the browser widget, far too late.
+      // delivery and the broker is drained. The restart-request consumer is
+      // alive from the read above; these two are otherwise built by the browser
+      // widget, far too late.
       _activateService(ref, sharingIntentStreamProvider);
       _activateService(ref, appWidgetLaunchStreamProvider);
       await ref.read(brokeredIntentDeliveryProvider.future);
