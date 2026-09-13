@@ -176,6 +176,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   bool get extensionsWebAPIEnabled => super.extensionsWebAPIEnabled!;
 
+  // Developer Settings
+  @override
+  bool get remoteDebuggingEnabled => super.remoteDebuggingEnabled!;
+
   final QueryParameterStripping queryParameterStripping;
 
   final BounceTrackingProtectionMode bounceTrackingProtectionMode;
@@ -272,6 +276,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.lnaBlocking,
     required super.lnaBlockTrackers,
     required super.lnaEnabled,
+    required super.remoteDebuggingEnabled,
   });
 
   EngineSettings.withDefaults({
@@ -325,6 +330,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
+    bool? remoteDebuggingEnabled,
   }) : ublockFilterListSettings =
            ublockFilterListSettings ?? UBlockFilterListSettings(),
        queryParameterStripping =
@@ -387,6 +393,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          extensionsWebAPIEnabled: extensionsWebAPIEnabled ?? true,
          lnaBlockTrackers: lnaBlockTrackers ?? true,
          lnaEnabled: lnaEnabled ?? true,
+         remoteDebuggingEnabled: remoteDebuggingEnabled ?? false,
        );
 
   static AddonCollection? _addonCollectionFromJson(String? json) =>
@@ -468,5 +475,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     lnaBlocking,
     lnaBlockTrackers,
     lnaEnabled,
+    remoteDebuggingEnabled,
   ];
 }

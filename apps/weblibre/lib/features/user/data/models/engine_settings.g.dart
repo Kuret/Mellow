@@ -184,6 +184,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings lnaEnabled(bool? lnaEnabled);
 
+  EngineSettings remoteDebuggingEnabled(bool? remoteDebuggingEnabled);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -242,6 +244,7 @@ abstract class _$EngineSettingsCWProxy {
     bool? lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
+    bool? remoteDebuggingEnabled,
   });
 }
 
@@ -463,6 +466,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings lnaEnabled(bool? lnaEnabled) => call(lnaEnabled: lnaEnabled);
 
+  @override
+  EngineSettings remoteDebuggingEnabled(bool? remoteDebuggingEnabled) =>
+      call(remoteDebuggingEnabled: remoteDebuggingEnabled);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -522,6 +529,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? lnaBlocking = const $CopyWithPlaceholder(),
     Object? lnaBlockTrackers = const $CopyWithPlaceholder(),
     Object? lnaEnabled = const $CopyWithPlaceholder(),
+    Object? remoteDebuggingEnabled = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
       javascriptEnabled: javascriptEnabled == const $CopyWithPlaceholder()
@@ -760,6 +768,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.lnaEnabled
           // ignore: cast_nullable_to_non_nullable
           : lnaEnabled as bool?,
+      remoteDebuggingEnabled:
+          remoteDebuggingEnabled == const $CopyWithPlaceholder()
+          ? _value.remoteDebuggingEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : remoteDebuggingEnabled as bool?,
     );
   }
 }
@@ -881,6 +894,7 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         lnaBlocking: json['lnaBlocking'] as bool?,
         lnaBlockTrackers: json['lnaBlockTrackers'] as bool?,
         lnaEnabled: json['lnaEnabled'] as bool?,
+        remoteDebuggingEnabled: json['remoteDebuggingEnabled'] as bool?,
       )
       ..cookieBannerHandlingMode = $enumDecodeNullable(
         _$CookieBannerHandlingModeEnumMap,
@@ -949,6 +963,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'isolatedProcessEnabled': instance.isolatedProcessEnabled,
   'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,
   'extensionsWebAPIEnabled': instance.extensionsWebAPIEnabled,
+  'remoteDebuggingEnabled': instance.remoteDebuggingEnabled,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':
