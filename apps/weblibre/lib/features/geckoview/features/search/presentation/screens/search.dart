@@ -53,7 +53,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/local_history_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/popular_sites_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_term_suggestions_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
@@ -535,10 +534,6 @@ class SearchScreen extends HookConsumerWidget {
         onUriSelected: openUriInTab,
       ),
       SearchModuleType.combinedHistory: CombinedHistorySuggestions(
-        searchTextListenable: sampledQueryText,
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.popularSites: PopularSitesSuggestions(
         searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),

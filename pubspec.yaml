@@ -71,11 +71,10 @@ melos:
       description: Download external assets (bangs, bridges, URL lists)
       run: bash scripts/update-assets.sh
     build-components:
-      description: Build JS components and generate the sites DB
+      description: Build the readability JS bundle
       run: |
         set -e
         sh scripts/build-readability.sh
-        python3 scripts/build_sites_db.py
     test-intents:
       description: Run the Dart intent delivery queue tests
       packageFilters:

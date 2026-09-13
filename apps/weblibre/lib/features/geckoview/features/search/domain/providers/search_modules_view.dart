@@ -49,13 +49,6 @@ enum SearchModuleType {
   /// enabling [history] and [localHistory] separately.
   combinedHistory,
 
-  /// Popular-domain prefix completions from the bundled Tranco-derived
-  /// `sites.db` asset (filtered against adult/gambling + tracker/CDN lists).
-  /// Static popularity data, ranked below history and bookmarks so
-  /// visited/saved sites always win. Domain autocomplete: typing "git"
-  /// suggests github.com even with no local history.
-  popularSites,
-
   historyHighlights,
   topSites,
   recentHistory,
@@ -79,7 +72,6 @@ enum SearchModuleType {
     history => 'History (engine)',
     localHistory => 'Local content',
     combinedHistory => 'History',
-    popularSites => 'Popular Sites',
     historyHighlights => 'History Highlights',
     topSites => 'Shortcuts',
     recentHistory => 'Recent History',
@@ -146,7 +138,6 @@ enum ModuleSurface {
       (type: SearchModuleType.bookmarks, visible: true),
       (type: SearchModuleType.articles, visible: true),
       (type: SearchModuleType.combinedHistory, visible: true),
-      (type: SearchModuleType.popularSites, visible: true),
     ],
   );
 
