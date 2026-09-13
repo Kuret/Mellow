@@ -11,7 +11,8 @@ part of 'compact_bar_expanded_folders.dart';
 /// The folders the compact tab bar currently shows the members of, by folder
 /// id. Local to the bar and never persisted: a folder's stored collapse state
 /// belongs to the tray and the desktop sidebar, while the bar only has room
-/// for one folder's members at a time and forgets them on restart.
+/// for one folder's members at a time and forgets them on restart. A
+/// subfolder is expanded the same way, under its own id.
 
 @ProviderFor(CompactBarExpandedFolders)
 final compactBarExpandedFoldersProvider = CompactBarExpandedFoldersProvider._();
@@ -19,13 +20,15 @@ final compactBarExpandedFoldersProvider = CompactBarExpandedFoldersProvider._();
 /// The folders the compact tab bar currently shows the members of, by folder
 /// id. Local to the bar and never persisted: a folder's stored collapse state
 /// belongs to the tray and the desktop sidebar, while the bar only has room
-/// for one folder's members at a time and forgets them on restart.
+/// for one folder's members at a time and forgets them on restart. A
+/// subfolder is expanded the same way, under its own id.
 final class CompactBarExpandedFoldersProvider
     extends $NotifierProvider<CompactBarExpandedFolders, Set<String>> {
   /// The folders the compact tab bar currently shows the members of, by folder
   /// id. Local to the bar and never persisted: a folder's stored collapse state
   /// belongs to the tray and the desktop sidebar, while the bar only has room
-  /// for one folder's members at a time and forgets them on restart.
+  /// for one folder's members at a time and forgets them on restart. A
+  /// subfolder is expanded the same way, under its own id.
   CompactBarExpandedFoldersProvider._()
     : super(
         from: null,
@@ -54,12 +57,13 @@ final class CompactBarExpandedFoldersProvider
 }
 
 String _$compactBarExpandedFoldersHash() =>
-    r'1a8c0b525791bb0a22f2a99c398d385bfe529a3a';
+    r'a3c10a636f8ed934b9a6a5d52a97c60a094640f4';
 
 /// The folders the compact tab bar currently shows the members of, by folder
 /// id. Local to the bar and never persisted: a folder's stored collapse state
 /// belongs to the tray and the desktop sidebar, while the bar only has room
-/// for one folder's members at a time and forgets them on restart.
+/// for one folder's members at a time and forgets them on restart. A
+/// subfolder is expanded the same way, under its own id.
 
 abstract class _$CompactBarExpandedFolders extends $Notifier<Set<String>> {
   Set<String> build();
