@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -52,8 +54,9 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// the leading edge the fixed [SpaceIndicator]; after it, scrolling
 /// horizontally, the Essentials as icon chips, a thin divider, then the
 /// pinned tabs, folders and normal tabs as chips in `order_key` order — a
-/// folder as a chip that shows its members inline while it is expanded
-/// ([compactBarExpandedFoldersProvider]). The selected tab is highlighted
+/// folder as a chip that shows its contents inline while it is expanded
+/// ([compactBarExpandedFoldersProvider]): its tabs and a chip per subfolder,
+/// which opens the same way. The selected tab is highlighted
 /// and kept in view.
 ///
 /// Spaces are switched by swiping the indicator, by overscrolling the chip
@@ -114,7 +117,13 @@ class _FolderEntry extends _Entry {
   final TabListFolderItem folder;
   final bool expanded;
 
-  const _FolderEntry(this.folder, {required this.expanded});
+  /// How many expanded folder chips the strip is inside of: `0` for a folder
+  /// of the space itself, `1` for a subfolder of an expanded folder, and so
+  /// on. A single row has no room to indent, so the chip wears the depth as
+  /// leading chevrons instead.
+  final int depth;
+
+  const _FolderEntry(this.folder, {required this.expanded, this.depth = 0});
 
   @override
   String get id => 'folder-${folder.folderId}';
@@ -165,12 +174,18 @@ class _CompactChipStrip extends HookConsumerWidget {
         state.$1.id: state,
     };
     // Members of a folder collapsed in storage are absent from the grouped
-    // order; the bar reads them from the space's rows when it expands one.
+    // order — its subfolders with them — so the bar reads both from the
+    // space's own rows when it expands one.
     final spaceTabs =
         ref.watch(
           watchSpaceTabsDataProvider(spaceUuid).select((value) => value.value),
         ) ??
         const <TabSummary>[];
+    final spaceFolders =
+        ref.watch(
+          watchFoldersProvider(spaceUuid).select((value) => value.value),
+        ) ??
+        const <TabFolderData>[];
     final expandedFolders = ref.watch(compactBarExpandedFoldersProvider);
 
     final pinnedTabIds = ref.watch(pinnedTabIdsProvider);
@@ -219,6 +234,88 @@ class _CompactChipStrip extends HookConsumerWidget {
       for (final tabId in essentialIds) _EssentialEntry(tabId),
     ];
     final tabEntries = <_Entry>[];
+
+    // Everything the strip needs about a folder that the grouped order does
+    // not carry, straight off the space's rows.
+    List<TabSummary> tabsDirectlyIn(String folderId) => [
+      for (final tab in spaceTabs)
+        if (tab.folderId == folderId) tab,
+    ];
+    List<TabFolderData> subfoldersOf(String folderId) => [
+      for (final folder in spaceFolders)
+        if (folder.parentFolderId == folderId) folder,
+    ];
+    int tabsInFolder(String folderId, [Set<String>? seen]) {
+      final visited = seen ?? <String>{};
+      if (!visited.add(folderId)) {
+        return 0;
+      }
+      var count = tabsDirectlyIn(folderId).length;
+      for (final child in subfoldersOf(folderId)) {
+        count += tabsInFolder(child.id, visited);
+      }
+      return count;
+    }
+
+    List<String> descendantFolderIds(String folderId, [Set<String>? seen]) {
+      final visited = seen ?? <String>{folderId};
+      final ids = <String>[];
+      for (final child in subfoldersOf(folderId)) {
+        if (!visited.add(child.id)) {
+          continue;
+        }
+        ids
+          ..add(child.id)
+          ..addAll(descendantFolderIds(child.id, visited));
+      }
+      return ids;
+    }
+
+    // The contents of a folder the grouped order left out: its tabs and its
+    // subfolders in one `order_key` sequence, each subfolder opening the
+    // same way under its own id.
+    void addFolderContents(String folderId, int depth, Set<String> seen) {
+      if (!seen.add(folderId)) {
+        return;
+      }
+      final slots =
+          <({String orderKey, TabSummary? tab, TabFolderData? folder})>[
+            for (final tab in tabsDirectlyIn(folderId))
+              (orderKey: tab.orderKey, tab: tab, folder: null),
+            for (final folder in subfoldersOf(folderId))
+              (orderKey: folder.orderKey, tab: null, folder: folder),
+          ]..sort((a, b) => a.orderKey.compareTo(b.orderKey));
+      for (final slot in slots) {
+        final folder = slot.folder;
+        if (folder == null) {
+          final entry = tabEntry(slot.tab!.id);
+          if (entry != null) {
+            tabEntries.add(entry);
+          }
+          continue;
+        }
+        final expanded = expandedFolders.contains(folder.id);
+        tabEntries.add(
+          _FolderEntry(
+            TabListFolderItem(
+              folderId: folder.id,
+              orderKey: folder.orderKey,
+              spaceUuid: spaceUuid,
+              name: folder.name,
+              isCollapsed: folder.isCollapsed,
+              depth: depth,
+              childCount: tabsInFolder(folder.id),
+            ),
+            expanded: expanded,
+            depth: depth,
+          ),
+        );
+        if (expanded) {
+          addFolderContents(folder.id, depth + 1, seen);
+        }
+      }
+    }
+
     // The grouped order nests folder members under their folder by depth;
     // the strip walks it with a stack of the folders it is inside of, and
     // skips the members of any that is not expanded here.
@@ -231,24 +328,21 @@ class _CompactChipStrip extends HookConsumerWidget {
       switch (item) {
         case TabListFolderItem():
           final expanded = expandedFolders.contains(item.folderId);
+          final chipDepth = openFolders.length;
           if (!hidden) {
-            tabEntries.add(_FolderEntry(item, expanded: expanded));
+            tabEntries.add(
+              _FolderEntry(item, expanded: expanded, depth: chipDepth),
+            );
           }
           openFolders.add((
             id: item.folderId,
             depth: item.depth,
             visible: !hidden && expanded,
           ));
+          // A folder collapsed in storage brought nothing with it: the strip
+          // fills in its tabs and subfolders itself.
           if (!hidden && expanded && item.isCollapsed) {
-            final members =
-                spaceTabs.where((tab) => tab.folderId == item.folderId).toList()
-                  ..sort((a, b) => a.orderKey.compareTo(b.orderKey));
-            for (final member in members) {
-              final entry = tabEntry(member.id);
-              if (entry != null) {
-                tabEntries.add(entry);
-              }
-            }
+            addFolderContents(item.folderId, chipDepth + 1, <String>{});
           }
         case TabListTabItem():
           if (hidden) {
@@ -401,16 +495,22 @@ class _CompactChipStrip extends HookConsumerWidget {
               padding: EdgeInsets.only(left: 2.0, right: 6.0),
               child: VerticalDivider(width: 1, indent: 12, endIndent: 12),
             ),
-            _FolderEntry(:final folder, :final expanded) => Center(
-              child: CompactFolderChip(
-                name: folder.name,
-                childCount: folder.childCount,
-                expanded: expanded,
-                onTap: () => ref
-                    .read(compactBarExpandedFoldersProvider.notifier)
-                    .toggle(folder.folderId),
+            _FolderEntry(:final folder, :final expanded, :final depth) =>
+              Center(
+                child: CompactFolderChip(
+                  name: folder.name,
+                  childCount: folder.childCount,
+                  expanded: expanded,
+                  depth: depth,
+                  onTap: () => ref
+                      .read(compactBarExpandedFoldersProvider.notifier)
+                      .toggle(
+                        folder.folderId,
+                        // Collapsing takes its open subfolders with it.
+                        descendants: descendantFolderIds(folder.folderId),
+                      ),
+                ),
               ),
-            ),
             _TabEntry(:final item) => Center(child: buildTabChip(item)),
           };
           return KeyedSubtree(
@@ -426,19 +526,32 @@ class _CompactChipStrip extends HookConsumerWidget {
 }
 
 /// A folder on the compact bar: the folder glyph (open while [expanded]),
-/// its name and how many tabs it holds. Tapping shows or hides its members,
-/// which follow it inline as ordinary tab chips.
+/// its name and how many tabs it holds. Tapping shows or hides its contents,
+/// which follow it inline — tab chips and a chip per subfolder, in
+/// `order_key` order.
+///
+/// A single row cannot indent, so a subfolder wears its [depth] as leading
+/// chevrons ("› Child", "›› Grandchild"): the chip reads as belonging to the
+/// expanded folder chip in front of it.
 class CompactFolderChip extends StatelessWidget {
   final String name;
   final int childCount;
   final bool expanded;
+
+  /// Folder nesting below the strip's own root, drawn as leading chevrons.
+  final int depth;
+
   final VoidCallback? onTap;
+
+  /// Chevrons a chip shows at most, however deep the folder sits.
+  static const maxDepthGlyphs = 3;
 
   const CompactFolderChip({
     super.key,
     required this.name,
     required this.childCount,
     required this.expanded,
+    this.depth = 0,
     this.onTap,
   });
 
@@ -456,6 +569,16 @@ class CompactFolderChip extends StatelessWidget {
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (depth > 0)
+              Padding(
+                padding: const EdgeInsets.only(right: 3),
+                child: Text(
+                  '\u203a' * math.min(depth, maxDepthGlyphs),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             Flexible(
               child: Text(
                 name.isEmpty ? 'Folder' : name,
@@ -474,7 +597,7 @@ class CompactFolderChip extends StatelessWidget {
         ),
         selected: expanded,
         showCheckmark: false,
-        tooltip: expanded ? 'Hide folder tabs' : 'Show folder tabs',
+        tooltip: expanded ? 'Hide folder contents' : 'Show folder contents',
         onSelected: onTap == null ? null : (_) => onTap!(),
       ),
     );

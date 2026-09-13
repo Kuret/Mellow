@@ -117,6 +117,8 @@ Future<TabDatabase> _memoryDatabase({
   bool folderCollapsed = false,
   Set<String> inFolder = const {},
   Set<String> cold = const {},
+  List<TabFolderData> extraFolders = const [],
+  Map<String, String> folderOfTab = const {},
 }) async {
   final db = TabDatabase(
     NativeDatabase.memory(
@@ -143,6 +145,9 @@ Future<TabDatabase> _memoryDatabase({
       ),
     );
   }
+  for (final folder in extraFolders) {
+    await db.tabFolderDao.insertFolder(folder);
+  }
   for (final id in essentials) {
     await db.tabDao.insertTab(
       id,
@@ -155,14 +160,15 @@ Future<TabDatabase> _memoryDatabase({
     );
   }
   for (final tab in tabs) {
-    final filed = inFolder.contains(tab.id);
+    final tabFolderId =
+        folderOfTab[tab.id] ?? (inFolder.contains(tab.id) ? folderId : null);
     await db.tabDao.insertTab(
       tab.id,
       source: TabSource.manual,
       parentId: const Value(null),
       spaceUuid: const Value('space-1'),
-      folderId: Value(filed ? folderId : null),
-      shelf: filed ? TabShelf.pinned : TabShelf.normal,
+      folderId: Value(tabFolderId),
+      shelf: tabFolderId != null ? TabShelf.pinned : TabShelf.normal,
       url: Value(Uri.parse('https://example.com/${tab.id}')),
       title: Value(tab.title),
       tabMode: const Value(TabMode.regular),
@@ -355,6 +361,132 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.text('Member'), findsOneWidget);
+
+      await _disposeTree(tester);
+    },
+  );
+
+  testWidgets(
+    'expanding a folder reveals its tabs and a chip per subfolder, in '
+    'order_key order',
+    (tester) async {
+      final db = await _memoryDatabase(
+        tabs: const [
+          (id: 'tab-1', title: 'Inner'),
+          (id: 'tab-2', title: 'Deeper'),
+        ],
+        folderId: 'folder-f',
+        folderCollapsed: true,
+        extraFolders: [
+          TabFolderData(
+            id: 'folder-g',
+            name: 'Sub',
+            spaceUuid: 'space-1',
+            parentFolderId: 'folder-f',
+            // After tab-1, whose generated key sorts ahead of it.
+            orderKey: 'zz',
+            isCollapsed: true,
+          ),
+        ],
+        folderOfTab: const {'tab-1': 'folder-f', 'tab-2': 'folder-g'},
+      );
+      addTearDown(db.close);
+
+      // Wide enough for the folder, its tab and both subfolder chips.
+      await _pumpBar(tester, db: db, viewportWidth: 800);
+
+      // Closed on the bar: neither the subfolder nor anything under it.
+      expect(find.byType(CompactFolderChip), findsOneWidget);
+      expect(find.text('Sub'), findsNothing);
+      expect(find.text('Inner'), findsNothing);
+
+      await tester.tap(find.text('Folder'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The folder's own tab and a chip for the subfolder, in order_key
+      // order, both behind the folder chip.
+      expect(find.text('Inner'), findsOneWidget);
+      expect(find.text('Sub'), findsOneWidget);
+      expect(find.text('Deeper'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Folder')).dx,
+        lessThan(tester.getTopLeft(find.text('Inner')).dx),
+      );
+      expect(
+        tester.getTopLeft(find.text('Inner')).dx,
+        lessThan(tester.getTopLeft(find.text('Sub')).dx),
+      );
+      // A chevron marks the subfolder as belonging to the chip in front of
+      // it; the row has no room to indent.
+      expect(find.text('\u203a'), findsOneWidget);
+
+      await tester.tap(find.text('Sub'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Deeper'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Sub')).dx,
+        lessThan(tester.getTopLeft(find.text('Deeper')).dx),
+      );
+
+      // Collapsing the parent takes the subfolder and its tab with it, and
+      // re-opening it does not bring the subfolder back open.
+      await tester.tap(find.text('Folder'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Inner'), findsNothing);
+      expect(find.text('Sub'), findsNothing);
+      expect(find.text('Deeper'), findsNothing);
+
+      await tester.tap(find.text('Folder'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Sub'), findsOneWidget);
+      expect(find.text('Deeper'), findsNothing);
+
+      await _disposeTree(tester);
+    },
+  );
+
+  testWidgets(
+    'a subfolder of a folder expanded in storage gets a chip of its own',
+    (tester) async {
+      final db = await _memoryDatabase(
+        tabs: const [(id: 'tab-2', title: 'Deeper')],
+        folderId: 'folder-f',
+        extraFolders: [
+          TabFolderData(
+            id: 'folder-g',
+            name: 'Sub',
+            spaceUuid: 'space-1',
+            parentFolderId: 'folder-f',
+            orderKey: 'zz',
+          ),
+        ],
+        folderOfTab: const {'tab-2': 'folder-g'},
+      );
+      addTearDown(db.close);
+
+      await _pumpBar(tester, db: db, viewportWidth: 800);
+
+      expect(find.text('Sub'), findsNothing);
+
+      await tester.tap(find.text('Folder'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Sub'), findsOneWidget);
+      expect(find.text('Deeper'), findsNothing);
+
+      await tester.tap(find.text('Sub'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.text('Deeper'), findsOneWidget);
 
       await _disposeTree(tester);
     },
