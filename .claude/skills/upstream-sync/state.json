@@ -1,0 +1,20 @@
+{
+  "_comment": "Markers for .claude/skills/upstream-sync. Update these in the same commit as the merge they describe, never by hand alone.",
+  "fork_base": "045de46b30f4cab24c39f99651294eb5608099f7",
+  "weblibre": {
+    "remote": "origin",
+    "branch": "main",
+    "last_reviewed": "045de46b30f4cab24c39f99651294eb5608099f7"
+  },
+  "zen": {
+    "path": "../zen-desktop",
+    "url": "https://github.com/zen-browser/desktop.git",
+    "branch": "dev",
+    "contract_paths": [
+      "src/zen/sync"
+    ],
+    "last_reviewed": "22961e97d85e9bd487ad2fce0807f54ef421ae6e",
+    "engine_version": 3,
+    "clone": "blobless (git clone --filter=blob:none); never shallow - see SKILL.md"
+  }
+}
