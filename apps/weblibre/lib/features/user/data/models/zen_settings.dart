@@ -209,6 +209,13 @@ class ZenSettings with FastEquatable {
   /// profile that has since overridden them.
   final int profileDefaultsRevision;
 
+  /// The accent color the Appearance settings' color picker chose, as an
+  /// ARGB int (`Color.toARGB32()`/`Color(value)`). `null` means "follow the
+  /// system": the platform's dynamic wallpaper color where available, or the
+  /// app's own fallback seed otherwise — today's behaviour, kept as the
+  /// default so nobody who never opens the picker sees a color change.
+  final int? accentColor;
+
   ZenSettings({
     required this.spacesSyncEnabled,
     required this.spacesSyncWritesEnabled,
@@ -224,6 +231,7 @@ class ZenSettings with FastEquatable {
     required this.separateEssentials,
     required this.customSearchProviders,
     required this.profileDefaultsRevision,
+    required this.accentColor,
   });
 
   ZenSettings.withDefaults({
@@ -241,6 +249,7 @@ class ZenSettings with FastEquatable {
     bool? separateEssentials,
     List<CustomSearchEngine>? customSearchProviders,
     int? profileDefaultsRevision,
+    this.accentColor,
   }) : spacesSyncEnabled = spacesSyncEnabled ?? true,
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
@@ -286,5 +295,6 @@ class ZenSettings with FastEquatable {
     separateEssentials,
     customSearchProviders,
     profileDefaultsRevision,
+    accentColor,
   ];
 }

@@ -112,6 +112,8 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings profileDefaultsRevision(int profileDefaultsRevision);
 
+  ZenSettings accentColor(int? accentColor);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -134,6 +136,7 @@ abstract class _$ZenSettingsCWProxy {
     bool separateEssentials,
     List<CustomSearchEngine> customSearchProviders,
     int profileDefaultsRevision,
+    int? accentColor,
   });
 }
 
@@ -199,6 +202,9 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings profileDefaultsRevision(int profileDefaultsRevision) =>
       call(profileDefaultsRevision: profileDefaultsRevision);
 
+  @override
+  ZenSettings accentColor(int? accentColor) => call(accentColor: accentColor);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -222,6 +228,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? customSearchProviders = const $CopyWithPlaceholder(),
     Object? profileDefaultsRevision = const $CopyWithPlaceholder(),
+    Object? accentColor = const $CopyWithPlaceholder(),
   }) {
     return ZenSettings(
       spacesSyncEnabled:
@@ -300,6 +307,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.profileDefaultsRevision
           // ignore: cast_nullable_to_non_nullable
           : profileDefaultsRevision as int,
+      accentColor: accentColor == const $CopyWithPlaceholder()
+          ? _value.accentColor
+          // ignore: cast_nullable_to_non_nullable
+          : accentColor as int?,
     );
   }
 }
@@ -350,6 +361,7 @@ ZenSettings _$ZenSettingsFromJson(
       ?.map((e) => CustomSearchEngine.fromJson(e as Map<String, dynamic>))
       .toList(),
   profileDefaultsRevision: (json['profileDefaultsRevision'] as num?)?.toInt(),
+  accentColor: (json['accentColor'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
@@ -370,6 +382,7 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
           .map((e) => e.toJson())
           .toList(),
       'profileDefaultsRevision': instance.profileDefaultsRevision,
+      'accentColor': instance.accentColor,
     };
 
 const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};
