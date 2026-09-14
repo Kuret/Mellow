@@ -446,6 +446,14 @@ class SearchScreen extends HookConsumerWidget {
         floating: !isPanel,
         pinned: true,
         automaticallyImplyLeading: false,
+        // `primary` (default true) pads for the status bar unconditionally,
+        // on top of whatever `toolbarHeight`/`title` need. The full-screen
+        // route sits under a `SafeArea` that already zeroes that padding out
+        // for it, but the floating card has no such wrapper and already
+        // clears the status bar via its own positioning — so left at the
+        // default this reserves a second, empty status-bar-high gap above
+        // the field.
+        primary: !isPanel,
         backgroundColor: isPanel
             ? colorScheme.surfaceContainerHigh
             : colorScheme.surface,
@@ -592,10 +600,26 @@ class SearchScreen extends HookConsumerWidget {
         child: ClipboardFillLink(controller: searchTextController),
       ),
       // A fixed pair, in this order: what the autocomplete provider thinks you
-      // are typing, then where you have already been. Before anything is typed
-      // neither has a query to work from, so the panel offers the searches you
-      // ran last instead.
-      if (showNoInputSections)
+      // are typing, then where you have already been.
+      //
+      // The panel reads as a spotlight — field, then results — so it never
+      // shows the recent-searches empty state: with nothing typed these two
+      // sections have nothing to suggest either and hide themselves rather
+      // than leave empty headers between the field and the clipboard-fill
+      // row. The full-screen route keeps its original empty state, recent
+      // searches included.
+      if (isPanel) ...[
+        SearchTermSuggestionsSection(
+          searchTextController: searchTextController,
+          submitSearch: submitSearch,
+          hideWhenEmpty: true,
+        ),
+        CombinedHistorySuggestions(
+          searchTextListenable: sampledQueryText,
+          onUriSelected: openUriInTab,
+          hideWhenEmpty: true,
+        ),
+      ] else if (showNoInputSections)
         RecentSearchesSection(
           searchTextController: searchTextController,
           submitSearch: submitSearch,

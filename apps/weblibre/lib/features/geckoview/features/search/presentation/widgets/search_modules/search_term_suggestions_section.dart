@@ -30,9 +30,16 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
 
+  /// Forwarded to [SearchModuleSection.hideWhenEmpty]. The floating panel
+  /// wants the section to vanish rather than show an empty "Suggestions"
+  /// header when there is nothing to suggest; the full-screen route keeps
+  /// the header for its usual empty state.
+  final bool hideWhenEmpty;
+
   const SearchTermSuggestionsSection({
     required this.searchTextController,
     required this.submitSearch,
+    this.hideWhenEmpty = false,
     super.key,
   });
 
@@ -68,6 +75,7 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
       title: 'Suggestions',
       section: SearchSection.suggestions,
       totalCount: queries.length,
+      hideWhenEmpty: hideWhenEmpty,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [
             SliverToBoxAdapter(

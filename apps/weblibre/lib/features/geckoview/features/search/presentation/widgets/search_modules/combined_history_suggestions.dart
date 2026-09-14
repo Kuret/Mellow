@@ -50,10 +50,17 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
   /// when opening the URL.
   final void Function(Uri uri, {String? findInPageQuery}) onUriSelected;
 
+  /// Forwarded to [SearchModuleSection.hideWhenEmpty]. The floating panel
+  /// wants the section to vanish rather than show an empty "History" header
+  /// when there is nothing to show; the full-screen route keeps the header
+  /// for its usual empty state.
+  final bool hideWhenEmpty;
+
   const CombinedHistorySuggestions({
     super.key,
     required this.onUriSelected,
     required this.searchTextListenable,
+    this.hideWhenEmpty = false,
   });
 
   @override
@@ -100,6 +107,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
       title: 'History',
       section: SearchSection.history,
       totalCount: items.length,
+      hideWhenEmpty: hideWhenEmpty,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [
             SliverList.builder(
