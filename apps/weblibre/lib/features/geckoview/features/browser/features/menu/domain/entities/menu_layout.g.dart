@@ -51,7 +51,6 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.exportAsPdf: 'exportAsPdf',
   MenuItemType.exportAsPng: 'exportAsPng',
   MenuItemType.printPage: 'printPage',
-  MenuItemType.pinTopSite: 'pinTopSite',
   MenuItemType.history: 'history',
   MenuItemType.bookmarks: 'bookmarks',
   MenuItemType.downloads: 'downloads',

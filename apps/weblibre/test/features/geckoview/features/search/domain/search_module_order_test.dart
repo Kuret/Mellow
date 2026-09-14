@@ -34,7 +34,7 @@ void main() {
     test('uses the defaults verbatim when nothing is persisted', () {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
 
       final merged = mergeModuleOrderWithDefaults(null, defaults);
@@ -47,10 +47,10 @@ void main() {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
         (type: SearchModuleType.searchProviders, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       final persisted = [
-        _entry(SearchModuleType.topSites),
+        _entry(SearchModuleType.bookmarks),
         _entry(SearchModuleType.recentSearches),
         _entry(SearchModuleType.searchProviders),
       ];
@@ -63,11 +63,11 @@ void main() {
     test('preserves persisted visibility', () {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       final persisted = [
         _entry(SearchModuleType.recentSearches, visible: false),
-        _entry(SearchModuleType.topSites),
+        _entry(SearchModuleType.bookmarks),
       ];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
@@ -78,16 +78,16 @@ void main() {
 
     test('drops persisted modules that are no longer offered', () {
       const defaults = <ModuleSurfaceDefault>[
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       final persisted = [
         _entry(SearchModuleType.recentSearches),
-        _entry(SearchModuleType.topSites),
+        _entry(SearchModuleType.bookmarks),
       ];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
 
-      expect(_types(merged), [SearchModuleType.topSites]);
+      expect(_types(merged), [SearchModuleType.bookmarks]);
     });
 
     test('inserts a new default at its position, not at the tail', () {
@@ -97,11 +97,11 @@ void main() {
           type: SearchModuleType.searchProviders,
           visible: true,
         ), // newly introduced, in the middle
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       final persisted = [
         _entry(SearchModuleType.recentSearches),
-        _entry(SearchModuleType.topSites),
+        _entry(SearchModuleType.bookmarks),
       ];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
@@ -109,7 +109,7 @@ void main() {
       expect(_types(merged), [
         SearchModuleType.recentSearches,
         SearchModuleType.searchProviders,
-        SearchModuleType.topSites,
+        SearchModuleType.bookmarks,
       ]);
     });
 
@@ -117,10 +117,10 @@ void main() {
       // This is what lets a module be offered on a surface without switching it
       // on for everyone who already customised that surface.
       const defaults = <ModuleSurfaceDefault>[
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
         (type: SearchModuleType.containers, visible: false),
       ];
-      final persisted = [_entry(SearchModuleType.topSites)];
+      final persisted = [_entry(SearchModuleType.bookmarks)];
 
       final merged = mergeModuleOrderWithDefaults(persisted, defaults);
 
@@ -134,7 +134,7 @@ void main() {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
         (type: SearchModuleType.searchProviders, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
         (
           type: SearchModuleType.containers,
           visible: true,
@@ -155,10 +155,10 @@ void main() {
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
         (type: SearchModuleType.searchProviders, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       final persisted = [
-        _entry(SearchModuleType.topSites, visible: false),
+        _entry(SearchModuleType.bookmarks, visible: false),
         _entry(SearchModuleType.recentSearches),
       ];
 
@@ -179,9 +179,10 @@ void main() {
 
     test('a real shipped payload round-trips unchanged', () {
       // Captured from the shape SearchModuleOrder.build writes today: a user
-      // who moved Shortcuts to the top and hid History Highlights. History
-      // Highlights, Recent Articles and Frequent Bangs have since been removed,
-      // so the decode has to drop those entries and keep the rest of the layout.
+      // who moved Shortcuts to the top and hid History Highlights. Shortcuts,
+      // History Highlights, Recent Articles and Frequent Bangs have since been
+      // removed, so the decode has to drop those entries and keep the rest of
+      // the layout.
       const payload =
           '[{"type":"topSites","visible":true},'
           '{"type":"recentSearches","visible":true},'
@@ -199,7 +200,6 @@ void main() {
 
       // Everything the user saved that still exists survives, in their order.
       expect(_types(merged), [
-        SearchModuleType.topSites,
         SearchModuleType.recentSearches,
         SearchModuleType.recentTabs,
         SearchModuleType.recentHistory,
@@ -212,14 +212,14 @@ void main() {
       // An entry naming a module that no longer exists must not discard the
       // whole order.
       const defaults = <ModuleSurfaceDefault>[
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
       ];
       const payload =
-          '[{"type":"topSites","visible":true},'
+          '[{"type":"bookmarks","visible":true},'
           '{"type":"aModuleThatWasRemoved","visible":true}]';
 
       expect(_types(decodeModuleOrder(payload, defaults)), [
-        SearchModuleType.topSites,
+        SearchModuleType.bookmarks,
       ]);
     });
 
@@ -234,15 +234,16 @@ void main() {
         'articles',
         'recentArticles',
         'frequentBangs',
+        'topSites',
       ];
       const defaults = <ModuleSurfaceDefault>[
         (type: SearchModuleType.recentSearches, visible: true),
-        (type: SearchModuleType.topSites, visible: true),
+        (type: SearchModuleType.bookmarks, visible: true),
         (type: SearchModuleType.recentTabs, visible: false),
       ];
 
       final payload = jsonEncode([
-        {'type': 'topSites', 'visible': true},
+        {'type': 'bookmarks', 'visible': true},
         for (final name in removedModuleNames) {'type': name, 'visible': true},
         {'type': 'recentSearches', 'visible': false},
       ]);
@@ -252,7 +253,7 @@ void main() {
       // The surviving entries keep their persisted order and visibility, and
       // the surface's other defaults are merged back in.
       expect(_types(decoded), [
-        SearchModuleType.topSites,
+        SearchModuleType.bookmarks,
         SearchModuleType.recentSearches,
         SearchModuleType.recentTabs,
       ]);

@@ -45,11 +45,9 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Actions on the tab itself.
@@ -131,7 +129,6 @@ class TabActionsSection extends HookConsumerWidget {
       selectedTabId: selectedTabId,
       items: item.visibleItems,
     ),
-    MenuItemType.pinTopSite => _PinTopSiteTile(selectedTabId: selectedTabId),
     _ => const SizedBox.shrink(),
   };
 }
@@ -643,56 +640,5 @@ class _ExportExpansion extends ConsumerWidget {
       );
       if (context.mounted) Navigator.pop(context);
     }
-  }
-}
-
-class _PinTopSiteTile extends HookConsumerWidget {
-  final String selectedTabId;
-
-  const _PinTopSiteTile({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final url = tabState?.url;
-
-    final isPinned = useCachedFuture(
-      () => url != null
-          ? ref.read(topSiteRepositoryProvider.notifier).isPinnedTopSiteUrl(url)
-          : Future.value(false),
-      [url],
-    );
-
-    final pinned = isPinned.data ?? false;
-
-    return ListTile(
-      leading: Icon(pinned ? MdiIcons.pinOff : MdiIcons.pin),
-      title: Text(pinned ? 'Unpin from Shortcuts' : 'Pin to Shortcuts'),
-      onTap: () async {
-        if (tabState == null || url == null) return;
-        Navigator.pop(context);
-        try {
-          if (pinned) {
-            await ref
-                .read(topSiteRepositoryProvider.notifier)
-                .unpinSiteByUrl(url);
-            if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Unpinned from Shortcuts');
-            }
-          } else {
-            await ref
-                .read(topSiteRepositoryProvider.notifier)
-                .addPinnedSite(title: tabState.titleOrAuthority, url: url);
-            if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Pinned to Shortcuts');
-            }
-          }
-        } catch (e) {
-          if (context.mounted) {
-            ui_helper.showErrorMessage(context, 'Failed to update Shortcuts');
-          }
-        }
-      },
-    );
   }
 }

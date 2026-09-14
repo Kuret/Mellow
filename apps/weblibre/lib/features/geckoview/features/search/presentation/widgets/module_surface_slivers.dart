@@ -26,7 +26,6 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 
@@ -80,8 +79,6 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
         searchTextController: callbacks.searchTextController!,
         submitSearch: callbacks.submitSearch!,
       ),
-    SearchModuleType.topSites: () =>
-        TopSitesSection(onUriSelected: callbacks.onUriSelected),
     SearchModuleType.recentTabs: () =>
         RecentTabsSection(onTabSelected: callbacks.onTabSelected),
     SearchModuleType.recentHistory: () =>

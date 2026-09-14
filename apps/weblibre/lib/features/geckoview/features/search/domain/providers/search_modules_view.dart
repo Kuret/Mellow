@@ -48,7 +48,6 @@ enum SearchModuleType {
   /// enabling [history] and [localHistory] separately.
   combinedHistory,
 
-  topSites,
   recentHistory,
   recentTabs,
   containers,
@@ -67,7 +66,6 @@ enum SearchModuleType {
     history => 'History (engine)',
     localHistory => 'Local content',
     combinedHistory => 'History',
-    topSites => 'Shortcuts',
     recentHistory => 'Recent History',
     recentTabs => 'Recent Tabs',
     containers => 'Containers',
@@ -93,7 +91,6 @@ enum ModuleSurface {
     key: 'HomeModuleOrder',
     defaultModules: [
       (type: SearchModuleType.quickActions, visible: true),
-      (type: SearchModuleType.topSites, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: false),
       (type: SearchModuleType.containers, visible: false),
@@ -108,7 +105,6 @@ enum ModuleSurface {
     key: 'EmptyStateModuleOrder',
     defaultModules: [
       (type: SearchModuleType.recentSearches, visible: true),
-      (type: SearchModuleType.topSites, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: true),
       (type: SearchModuleType.containers, visible: true),

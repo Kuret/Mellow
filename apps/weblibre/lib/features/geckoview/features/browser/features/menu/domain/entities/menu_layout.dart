@@ -126,7 +126,6 @@ enum MenuItemType {
   exportAsPng,
   printPage,
 
-  pinTopSite,
 
   // Quick links
   history,
@@ -171,7 +170,6 @@ enum MenuItemType {
     exportAsPdf => 'Export as PDF',
     exportAsPng => 'Export as PNG',
     printPage => 'Print',
-    pinTopSite => 'Pin to Shortcuts',
     history => 'History',
     bookmarks => 'Bookmarks',
     downloads => 'Downloads',
@@ -219,7 +217,6 @@ enum MenuItemType {
     exportAsPdf => MdiIcons.filePdfBox,
     exportAsPng => MdiIcons.fileImage,
     printPage => MdiIcons.printer,
-    pinTopSite => MdiIcons.pin,
     history => Icons.history,
     bookmarks => MdiIcons.bookmarkMultiple,
     downloads => MdiIcons.fileDownload,
@@ -334,7 +331,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
           MenuItemDefault(MenuItemType.printPage),
         ],
       ),
-      MenuItemDefault(MenuItemType.pinTopSite),
     ],
   ),
   MenuSectionDefault(
