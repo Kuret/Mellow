@@ -323,6 +323,11 @@ class SpaceIconRailView extends StatelessWidget {
 /// selected border — only the active space's glyph is colored (PLAN §9 W1
 /// change 3, matching Zen's sidebar). The permanent chip is gone; the
 /// [InkResponse] still gives a circular ripple on tap.
+/// How far back an unselected space's glyph is pushed. Enough to read as
+/// "not this one" beside a full-strength glyph, not so far that a rail of
+/// four spaces looks disabled.
+const double _inactiveGlyphOpacity = 0.45;
+
 class _SpaceGlyphButton extends StatelessWidget {
   final SpaceIconRailEntry entry;
   final VoidCallback? onTap;
@@ -370,7 +375,16 @@ class _SpaceGlyphButton extends StatelessWidget {
         child: SizedBox(
           width: SpaceIconRailView.targetSize,
           height: SpaceIconRailView.targetSize,
-          child: Center(child: glyph),
+          // Dimmed rather than only recoloured: a space's icon is usually a
+          // colour emoji, and a colour font ignores the foreground colour
+          // entirely — so on an emoji rail the accent alone marks nothing as
+          // active. Opacity is the one affordance that works for both an
+          // emoji and a tinted vector glyph.
+          child: Center(
+            child: entry.selected
+                ? glyph
+                : Opacity(opacity: _inactiveGlyphOpacity, child: glyph),
+          ),
         ),
       ),
     );
