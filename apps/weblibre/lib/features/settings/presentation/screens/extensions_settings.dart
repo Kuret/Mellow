@@ -30,6 +30,8 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 const List<SettingsSectionDefinition> extensionsSettingsSections = [
   SettingsSectionDefinition(
     title: 'Extensions',
+    keywords: ['addons'],
+    showTitle: false,
     entries: [
       SettingsEntryDefinition(
         title: 'Manage Extensions',
@@ -44,27 +46,17 @@ const List<SettingsSectionDefinition> extensionsSettingsSections = [
         keywords: ['addons'],
         child: _AddonCollectionTile(),
       ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Updates',
-    entries: [
       SettingsEntryDefinition(
         title: 'Automatic updates',
         subtitle:
             'Automatically check for and install extension updates every 12 hours',
-        keywords: ['addons'],
+        keywords: ['addons', 'updates'],
         child: _AutoUpdateTile(),
       ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Security',
-    entries: [
       SettingsEntryDefinition(
         title: 'Allow unsigned extensions',
         subtitle: 'Unsigned extensions have not been verified by Mozilla',
-        keywords: ['addons'],
+        keywords: ['addons', 'security'],
         child: _AllowUnsignedExtensionsTile(),
       ),
     ],
