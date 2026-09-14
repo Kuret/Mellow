@@ -20,7 +20,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
 
@@ -47,12 +46,13 @@ class SearchProviderChips extends ConsumerWidget {
     // The chip that reads as "on" is whatever this search would use right now,
     // an override if there is one and the standing default otherwise.
     final active = siteSelected ?? globalSelected ?? defaultProvider;
+    final providers = ref.watch(allSearchProvidersProvider);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          for (final provider in builtinSearchProviders)
+          for (final provider in providers)
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: FilterChip(

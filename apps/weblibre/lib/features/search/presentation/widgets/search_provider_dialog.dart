@@ -18,15 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
 
 /// Asks the user which engine to search with.
 ///
-/// The catalogue is eight entries, so it fits in a dialog and needs neither a
-/// search field nor a route of its own — which is what the bang picker this
-/// replaced needed.
+/// The catalogue is the eight built-ins plus however many engines the user
+/// added, so it still fits in a dialog and needs neither a search field nor a
+/// route of its own — which is what the bang picker this replaced needed. The
+/// list is scrollable so a user with a long shelf of their own engines can
+/// still reach the bottom of it.
 ///
 /// Returns the chosen provider, or null if the user dismissed the dialog.
 Future<SearchProvider?> showSearchProviderDialog(
@@ -38,16 +41,27 @@ Future<SearchProvider?> showSearchProviderDialog(
     builder: (context) => SimpleDialog(
       title: const Text('Search provider'),
       children: [
-        for (final provider in builtinSearchProviders)
-          ListTile(
-            leading: SearchProviderIcon(provider: provider),
-            title: Text(provider.name),
-            trailing: provider.id == selected?.id
-                ? const Icon(Icons.check)
-                : null,
-            selected: provider.id == selected?.id,
-            onTap: () => Navigator.of(context).pop(provider),
-          ),
+        Consumer(
+          builder: (context, ref, child) {
+            final providers = ref.watch(allSearchProvidersProvider);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final provider in providers)
+                  ListTile(
+                    leading: SearchProviderIcon(provider: provider),
+                    title: Text(provider.name),
+                    trailing: provider.id == selected?.id
+                        ? const Icon(Icons.check)
+                        : null,
+                    selected: provider.id == selected?.id,
+                    onTap: () => Navigator.of(context).pop(provider),
+                  ),
+              ],
+            );
+          },
+        ),
       ],
     ),
   );

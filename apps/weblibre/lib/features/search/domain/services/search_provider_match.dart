@@ -27,13 +27,19 @@ typedef SearchProviderMatch = ({SearchProvider provider, String searchTerms});
 /// and `}` are not legal URL characters, so they cannot survive a round trip.
 const _placeholderSentinel = 'weblibresearchtermssentinel';
 
-/// Recognises [url] as a search on one of the built-in providers and recovers
-/// the query that produced it.
+/// Recognises [url] as a search on one of [providers] and recovers the query
+/// that produced it.
 ///
 /// This is what lets the address bar open on `cats` rather than on
-/// `https://duckduckgo.com/?q=cats` when the user edits a results page.
-SearchProviderMatch? matchSearchUrl(Uri url) {
-  for (final provider in builtinSearchProviders) {
+/// `https://duckduckgo.com/?q=cats` when the user edits a results page. The
+/// caller passes the catalogue so an engine the user defined is recognised on
+/// the same terms as a built-in; [builtinSearchProviders] is the default for
+/// the callers that have no `Ref` to read it from.
+SearchProviderMatch? matchSearchUrl(
+  Uri url, {
+  Iterable<SearchProvider> providers = builtinSearchProviders,
+}) {
+  for (final provider in providers) {
     final searchTerms = _searchTermsOf(provider, url);
     if (searchTerms != null) {
       return (provider: provider, searchTerms: searchTerms);

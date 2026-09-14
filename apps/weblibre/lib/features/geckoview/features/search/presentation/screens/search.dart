@@ -216,7 +216,10 @@ class SearchScreen extends HookConsumerWidget {
       final uri = Uri.tryParse(initialSearchText!);
       if (uri == null) return null;
 
-      final match = matchSearchUrl(uri);
+      final match = matchSearchUrl(
+        uri,
+        providers: ref.read(allSearchProvidersProvider),
+      );
       if (match == null) return null;
 
       // Deferred: the effect runs inside the build pass that mounted this

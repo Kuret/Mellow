@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/search/presentation/widgets/search_provider_chips.dart';
 
 /// Hosts the engine picker inside the standard collapsible/reorderable search
@@ -38,7 +38,7 @@ class SearchProvidersSection extends ConsumerWidget {
     return SearchModuleSection(
       title: 'Search Providers',
       moduleType: SearchModuleType.searchProviders,
-      totalCount: builtinSearchProviders.length,
+      totalCount: ref.watch(allSearchProvidersProvider).length,
       showPagination: false,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [
