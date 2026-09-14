@@ -32,10 +32,10 @@ part 'menu_layout.g.dart';
 /// is a [MenuItemType], and items never move between sections — the grouping is
 /// part of the design, only the order within it is the user's.
 enum MenuSectionType {
-  /// Segmented Desktop / Gestures bar at the top of the sheet.
+  /// Segmented Gestures bar at the top of the sheet.
   quickToggles,
 
-  /// Actions on the page in front: bookmark, find, install.
+  /// Actions on the page in front: desktop mode, bookmark, find, install.
   pageActions,
 
   /// The installed extensions list.
@@ -86,10 +86,10 @@ enum MenuSectionType {
 /// configuration behind for things that no longer exist.
 enum MenuItemType {
   // Quick toggles
-  desktopMode,
   gestures,
 
   // Page actions
+  desktopMode,
   addBookmark,
   findInPage,
   inspectElement,
@@ -272,14 +272,12 @@ class MenuSectionDefault {
 const List<MenuSectionDefault> menuLayoutDefaults = [
   MenuSectionDefault(
     MenuSectionType.quickToggles,
-    items: [
-      MenuItemDefault(MenuItemType.desktopMode),
-      MenuItemDefault(MenuItemType.gestures),
-    ],
+    items: [MenuItemDefault(MenuItemType.gestures)],
   ),
   MenuSectionDefault(
     MenuSectionType.pageActions,
     items: [
+      MenuItemDefault(MenuItemType.desktopMode),
       MenuItemDefault(MenuItemType.addBookmark),
       MenuItemDefault(MenuItemType.findInPage),
       MenuItemDefault(MenuItemType.inspectElement),

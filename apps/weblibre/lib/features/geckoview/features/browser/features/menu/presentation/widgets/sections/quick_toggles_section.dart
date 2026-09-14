@@ -23,18 +23,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 
-/// The segmented Desktop / Reader / Gestures bar at the top of the sheet.
+/// The segmented toggle bar at the top of the sheet.
 ///
 /// Only the toggles the user kept are built, so a hidden toggle costs nothing:
-/// the reader and desktop state it would otherwise watch is never subscribed
-/// to. Renders nothing at all when none of its toggles apply, so the sheet is
-/// not left with a gap where the bar would have been.
+/// the state it would otherwise watch is never subscribed to. Renders nothing
+/// at all when none of its toggles apply, so the sheet is not left with a gap
+/// where the bar would have been.
 class QuickTogglesSection extends ConsumerWidget {
   final String selectedTabId;
   final List<MenuItemType> items;
@@ -48,20 +47,6 @@ class QuickTogglesSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final toggles = <MenuItemType, _QuickToggle>{};
-
-    if (items.contains(MenuItemType.desktopMode)) {
-      final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
-      toggles[MenuItemType.desktopMode] = _QuickToggle(
-        icon: MdiIcons.monitor,
-        label: MenuItemType.desktopMode.label,
-        active: desktopEnabled,
-        onTap: () {
-          ref
-              .read(desktopModeProvider(selectedTabId).notifier)
-              .enabled(!desktopEnabled);
-        },
-      );
-    }
 
     if (items.contains(MenuItemType.gestures)) {
       final gestureSettings = ref.watch(gestureSettingsWithDefaultsProvider);

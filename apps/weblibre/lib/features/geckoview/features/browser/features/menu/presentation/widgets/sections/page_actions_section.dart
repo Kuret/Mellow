@@ -26,6 +26,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
@@ -71,6 +72,28 @@ class PageActionsSection extends HookConsumerWidget {
 
     for (final item in items) {
       switch (item) {
+        case MenuItemType.desktopMode:
+          final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
+
+          void toggleDesktop() {
+            ref
+                .read(desktopModeProvider(selectedTabId).notifier)
+                .enabled(!desktopEnabled);
+          }
+
+          tiles[item] = ListTile(
+            leading: const Icon(MdiIcons.monitor),
+            title: Text(item.label),
+            // The switch is the state readout, so the row keeps the sheet's
+            // plain ListTile shape rather than becoming a SwitchListTile with
+            // its own padding.
+            trailing: Switch.adaptive(
+              value: desktopEnabled,
+              onChanged: (_) => toggleDesktop(),
+            ),
+            onTap: toggleDesktop,
+          );
+
         case MenuItemType.addBookmark:
           tiles[item] = ListTile(
             leading: const Icon(MdiIcons.bookmarkPlus),
