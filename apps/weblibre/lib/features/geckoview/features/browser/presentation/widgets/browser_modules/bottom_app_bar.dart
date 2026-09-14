@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 export 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart'
     show QuickTabSwitcherItem;
@@ -289,6 +290,9 @@ class BrowserTabBar extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final showRailToolbar = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.showRailToolbar),
+    );
 
     // Determine which buttons are actually visible in the contextual toolbar
     // so we only hide them from the main toolbar when they're genuinely present there.
@@ -434,7 +438,10 @@ class BrowserTabBar extends HookConsumerWidget {
       return WideRailLayout(
         backgroundColor: effectiveContainerPalette?.surfaceColor,
         showUrlRow: displayAppBar && showTabTitle,
-        showToolbar: displayAppBar,
+        // Scoped to the wide rail only: the narrow compact bar always shows
+        // its toolbar row, since the "+" long-press menu that replaces it
+        // for the rail only exists there.
+        showToolbar: displayAppBar && showRailToolbar,
         urlRow: WideRailUrlRow(
           title: uprightTitle,
           collapsed: const WideRailCollapsedUrlButton(),
