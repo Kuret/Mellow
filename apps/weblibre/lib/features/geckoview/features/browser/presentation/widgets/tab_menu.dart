@@ -41,8 +41,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
@@ -64,7 +62,6 @@ class TabMenu extends HookConsumerWidget {
   final MenuController? controller;
   final String selectedTabId;
   final bool enableFindInPage;
-  final bool enableReaderMode;
   final bool enableDesktopMode;
   final bool enableAddBookmark;
   final bool enableAddToHomeScreen;
@@ -84,7 +81,6 @@ class TabMenu extends HookConsumerWidget {
     required this.selectedTabId,
     this.controller,
     this.enableFindInPage = true,
-    this.enableReaderMode = true,
     this.enableDesktopMode = true,
     this.enableAddBookmark = true,
     this.enableAddToHomeScreen = true,
@@ -121,31 +117,6 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(Icons.search),
             child: const Text('Find in Page'),
           ),
-        if (enableReaderMode)
-          ReaderButton(
-            buttonBuilder: (isLoading, readerActive, icon) => MenuItemButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      await ref
-                          .read(readerableScreenControllerProvider.notifier)
-                          .toggleReaderView(!readerActive);
-                    },
-              leadingIcon: icon,
-              trailingIcon: Checkbox(
-                value: readerActive,
-                onChanged: (value) async {
-                  if (value != null && !isLoading) {
-                    await ref
-                        .read(readerableScreenControllerProvider.notifier)
-                        .toggleReaderView(!readerActive);
-                    controller.close();
-                  }
-                },
-              ),
-              child: const Text('Reader Mode'),
-            ),
-          ),
         if (enableDesktopMode)
           _DesktopModeMenuItem(
             selectedTabId: selectedTabId,
@@ -159,7 +130,7 @@ class TabMenu extends HookConsumerWidget {
                   .enabled(value);
             },
           ),
-        if (enableFindInPage || enableReaderMode || enableDesktopMode)
+        if (enableFindInPage || enableDesktopMode)
           const Divider(),
         if (enableAddBookmark)
           MenuItemButton(

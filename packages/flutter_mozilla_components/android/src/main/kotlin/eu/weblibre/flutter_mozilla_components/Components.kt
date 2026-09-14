@@ -23,7 +23,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
 import mozilla.components.feature.downloads.DefaultFileSizeFormatter
@@ -36,7 +35,6 @@ import mozilla.components.support.utils.DefaultDateTimeProvider
 
 class Components(val profileApplicationContext: ProfileContext,
                  val flutterEvents: GeckoStateEvents,
-                 val readerViewController: ReaderViewController,
                  val selectionAction: SelectionActionDelegate,
                  val logLevel: Log.Priority,
                  val contentBlocking: ContentBlocking,

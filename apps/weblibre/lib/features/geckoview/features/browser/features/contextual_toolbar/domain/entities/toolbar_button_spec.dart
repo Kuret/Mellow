@@ -91,12 +91,6 @@ const reloadToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
-const readerModeToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.readerMode,
-  defaultVisible: false,
-  canBeFallbackTarget: false,
-);
-
 const desktopToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.desktop,
   defaultVisible: false,
@@ -206,7 +200,6 @@ const toolbarButtonSpecs = [
   tabsCountToolbarButtonSpec,
   navigationMenuToolbarButtonSpec,
   reloadToolbarButtonSpec,
-  readerModeToolbarButtonSpec,
   desktopToolbarButtonSpec,
   findInPageToolbarButtonSpec,
   closeTabToolbarButtonSpec,

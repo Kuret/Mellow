@@ -48,8 +48,6 @@ class CertificateTile extends HookConsumerWidget {
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         );
-      } else if (tabState.readerableState.active) {
-        return const SizedBox.shrink();
       } else if (!tabState.securityInfoState.secure) {
         return ListTile(
           leading: Icon(

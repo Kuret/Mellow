@@ -36,7 +36,6 @@ import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature
-import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
 import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
@@ -113,7 +112,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
     private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
-    val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
     private val webInspectorFeature = ViewBoundFeatureWrapper<WebInspectorFeature>()
     private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
@@ -587,19 +585,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     accountManager = components.backgroundServices.accountManager,
                     serverConfig = components.backgroundServices.serverConfig,
                     fxaCapabilities = setOf(FxaCapability.CHOOSE_WHAT_TO_SYNC),
-                ),
-                owner = this,
-                view = view,
-            )
-
-            readerViewFeature.set(
-                feature = ReaderViewIntegration(
-                    profileContext,
-                    components.core.engine,
-                    components.core.store,
-                    binding.readerViewBar,
-                    components.events.readerViewEvents,
-                    components.readerViewController,
                 ),
                 owner = this,
                 view = view,

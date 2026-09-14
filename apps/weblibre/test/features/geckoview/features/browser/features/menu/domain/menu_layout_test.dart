@@ -352,10 +352,10 @@ void main() {
     });
 
     test('a layout naming retired menu items still loads', () {
-      // `feeds`, `fetchFeeds`, `smallWeb`, `bangs`, `translatePage` and
-      // `pinTopSite` shipped as MenuItemType values and are still named in
-      // stored menu layouts. Removing the enum values must not throw, and must
-      // not cost the user the rest of their arrangement.
+      // `feeds`, `fetchFeeds`, `smallWeb`, `bangs`, `translatePage`,
+      // `pinTopSite` and `readerMode` shipped as MenuItemType values and are
+      // still named in stored menu layouts. Removing the enum values must not
+      // throw, and must not cost the user the rest of their arrangement.
       final decoded = menuItemEntriesFromJson([
         {'type': 'history', 'visible': true},
         {'type': 'feeds', 'visible': true},
@@ -364,6 +364,7 @@ void main() {
         {'type': 'bangs', 'visible': true},
         {'type': 'translatePage', 'visible': true},
         {'type': 'pinTopSite', 'visible': true},
+        {'type': 'readerMode', 'visible': true},
         {'type': 'bookmarks', 'visible': true},
       ]);
 

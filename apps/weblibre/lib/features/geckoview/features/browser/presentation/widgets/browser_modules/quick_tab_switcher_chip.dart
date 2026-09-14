@@ -349,7 +349,6 @@ Widget wrapQuickTabSwitcherChipWithMenu({
     selectedTabId: itemId,
     enableFindInPage: false,
     enableDesktopMode: false,
-    enableReaderMode: false,
     enableReloadButton: false,
     enableNavigationButtons: false,
     enableAddToHomeScreen: false,

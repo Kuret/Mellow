@@ -17,10 +17,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showModalBarrier(bool showModalBarrier);
 
-  GeneralSettings enableReadability(bool enableReadability);
-
-  GeneralSettings enforceReadability(bool enforceReadability);
-
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
@@ -174,8 +170,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool disableAnimations,
     RefreshRateMode refreshRateMode,
     bool showModalBarrier,
-    bool enableReadability,
-    bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     bool screenshotProtectionEnabled,
     bool allowPrivateTabScreenshots,
@@ -261,14 +255,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showModalBarrier(bool showModalBarrier) =>
       call(showModalBarrier: showModalBarrier);
-
-  @override
-  GeneralSettings enableReadability(bool enableReadability) =>
-      call(enableReadability: enableReadability);
-
-  @override
-  GeneralSettings enforceReadability(bool enforceReadability) =>
-      call(enforceReadability: enforceReadability);
 
   @override
   GeneralSettings deleteBrowsingDataOnQuit(
@@ -530,8 +516,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? disableAnimations = const $CopyWithPlaceholder(),
     Object? refreshRateMode = const $CopyWithPlaceholder(),
     Object? showModalBarrier = const $CopyWithPlaceholder(),
-    Object? enableReadability = const $CopyWithPlaceholder(),
-    Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
@@ -620,18 +604,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showModalBarrier
           // ignore: cast_nullable_to_non_nullable
           : showModalBarrier as bool,
-      enableReadability:
-          enableReadability == const $CopyWithPlaceholder() ||
-              enableReadability == null
-          ? _value.enableReadability
-          // ignore: cast_nullable_to_non_nullable
-          : enableReadability as bool,
-      enforceReadability:
-          enforceReadability == const $CopyWithPlaceholder() ||
-              enforceReadability == null
-          ? _value.enforceReadability
-          // ignore: cast_nullable_to_non_nullable
-          : enforceReadability as bool,
       deleteBrowsingDataOnQuit:
           deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
           ? _value.deleteBrowsingDataOnQuit
@@ -980,8 +952,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['refreshRateMode'],
   ),
   showModalBarrier: json['showModalBarrier'] as bool?,
-  enableReadability: json['enableReadability'] as bool?,
-  enforceReadability: json['enforceReadability'] as bool?,
   deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
@@ -1110,8 +1080,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'disableAnimations': instance.disableAnimations,
   'refreshRateMode': _$RefreshRateModeEnumMap[instance.refreshRateMode]!,
   'showModalBarrier': instance.showModalBarrier,
-  'enableReadability': instance.enableReadability,
-  'enforceReadability': instance.enforceReadability,
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),

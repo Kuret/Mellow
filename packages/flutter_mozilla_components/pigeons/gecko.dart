@@ -6,44 +6,6 @@
 
 import 'package:pigeon/pigeon.dart';
 
-/// Value type that represents the state of reader mode/view.
-class ReaderState {
-  /// Whether or not the current page can be transformed to
-  /// be displayed in a reader view.
-  final bool readerable;
-
-  /// Whether or not reader view is active.
-  final bool active;
-
-  /// Whether or not a readerable check is required for the
-  /// current page.
-  final bool checkRequired;
-
-  /// Whether or not a new connection to the reader view
-  /// content script is required.
-  final bool connectRequired;
-
-  /// The base URL of the reader view extension page.
-  final String? baseUrl;
-
-  /// The URL of the page currently displayed in reader view.
-  final String? activeUrl;
-
-  /// The vertical scroll position of the page currently
-  /// displayed in reader view.
-  final int? scrollY;
-
-  const ReaderState({
-    this.readerable = false,
-    this.active = false,
-    this.checkRequired = false,
-    this.connectRequired = false,
-    this.baseUrl,
-    this.activeUrl,
-    this.scrollY,
-  });
-}
-
 /// Parameters for adding a new tab.
 class AddTabParams {
   final String url;
@@ -181,9 +143,6 @@ class TabState {
   /// The context ID ("container") this tab used (or null).
   final String? contextId;
 
-  /// The last [ReaderState] of the tab.
-  final ReaderState readerState;
-
   /// The last time this tab was selected.
   final int lastAccess;
 
@@ -215,7 +174,6 @@ class TabState {
     this.title = "",
     this.searchTerm = "",
     this.contextId,
-    this.readerState = const ReaderState(),
     this.lastAccess = 0,
     this.createdAt = 0,
     this.lastMediaAccessState = const LastMediaAccessState(),
@@ -551,17 +509,6 @@ class HistoryState {
     this.canGoBack,
     this.canGoForward,
   );
-}
-
-class ReaderableState {
-  /// Whether or not the current page can be transformed to
-  /// be displayed in a reader view.
-  final bool readerable;
-
-  /// Whether or not reader view is active.
-  final bool active;
-
-  ReaderableState(this.readerable, this.active);
 }
 
 class SecurityInfoState {
@@ -1542,12 +1489,6 @@ abstract class GeckoEngineSettingsApi {
   /// during startup/replication restore, to avoid clobbering per-tab overrides.
   void setGlobalDesktopMode(bool enable, bool applyToExistingTabs);
 
-  /// Sets whether the reader view dark color scheme should be rendered as pure
-  /// black (AMOLED). Mirrors WebLibre's "pure black" theme setting into
-  /// Mozilla's reader view extension. Persisted in SharedPreferences so a
-  /// cold-started reader view resolves the right value before Flutter runs.
-  void setReaderViewPureBlack(bool enabled);
-
   /// Snapshot of which sessions must NOT write to Mozilla Places (hard
   /// exclude-from-history / "incognito container"). Every engine session runs a
   /// tab-scoped history delegate that consults this snapshot, so the decision is
@@ -1647,7 +1588,6 @@ abstract class GeckoTabsApi {
     required bool onTabContentStateChange,
     required bool onIconChange,
     required bool onSecurityInfoStateChange,
-    required bool onReaderableStateChange,
     required bool onHistoryStateChange,
     required bool onFindResults,
     required bool onThumbnailChange,
@@ -1908,7 +1848,6 @@ abstract class GeckoStateEvents {
 
   void onTabContentStateChange(int sequence, TabContentState state);
   void onHistoryStateChange(int sequence, String id, HistoryState state);
-  void onReaderableStateChange(int sequence, String id, ReaderableState state);
   void onSecurityInfoStateChange(
     int sequence,
     String id,
@@ -1943,17 +1882,6 @@ abstract class GeckoSyncStateEvents {
 @FlutterApi()
 abstract class GeckoLogging {
   void onLog(LogLevel level, String message);
-}
-
-@HostApi()
-abstract class ReaderViewEvents {
-  void onToggleReaderView(bool enable);
-  void onAppearanceButtonTap();
-}
-
-@FlutterApi()
-abstract class ReaderViewController {
-  void appearanceButtonVisibility(int sequence, bool visible);
 }
 
 @HostApi()

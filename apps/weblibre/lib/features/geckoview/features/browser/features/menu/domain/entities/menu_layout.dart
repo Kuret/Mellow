@@ -32,7 +32,7 @@ part 'menu_layout.g.dart';
 /// is a [MenuItemType], and items never move between sections — the grouping is
 /// part of the design, only the order within it is the user's.
 enum MenuSectionType {
-  /// Segmented Desktop / Reader / Gestures bar at the top of the sheet.
+  /// Segmented Desktop / Gestures bar at the top of the sheet.
   quickToggles,
 
   /// Actions on the page in front: bookmark, find, install.
@@ -87,7 +87,6 @@ enum MenuSectionType {
 enum MenuItemType {
   // Quick toggles
   desktopMode,
-  readerMode,
   gestures,
 
   // Page actions
@@ -143,7 +142,6 @@ enum MenuItemType {
 
   String get label => switch (this) {
     desktopMode => 'Desktop',
-    readerMode => 'Reader',
     gestures => 'Gestures',
     addBookmark => 'Add Bookmark',
     findInPage => 'Find in Page',
@@ -183,12 +181,11 @@ enum MenuItemType {
   /// Identity icon for the arrangement UI.
   ///
   /// One fixed icon per row, where the row itself may draw a different one for
-  /// its current state — Reader and Pin to Shortcuts both flip theirs. Keeping
-  /// this static is the point: a list you are rearranging should not change
-  /// under you because the page finished loading.
+  /// its current state. Keeping this static is the point: a list you are
+  /// rearranging should not change under you because the page finished
+  /// loading.
   IconData get icon => switch (this) {
     desktopMode => MdiIcons.monitor,
-    readerMode => MdiIcons.bookOpenOutline,
     gestures => MdiIcons.gestureSwipe,
     addBookmark => MdiIcons.bookmarkPlus,
     findInPage => Icons.search,
@@ -277,7 +274,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
     MenuSectionType.quickToggles,
     items: [
       MenuItemDefault(MenuItemType.desktopMode),
-      MenuItemDefault(MenuItemType.readerMode),
       MenuItemDefault(MenuItemType.gestures),
     ],
   ),

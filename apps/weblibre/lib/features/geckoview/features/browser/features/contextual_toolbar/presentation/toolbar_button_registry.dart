@@ -25,7 +25,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -47,7 +46,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -277,37 +275,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     longPressActions: ['Hard Refresh (bypass cache)'],
     isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) => _ReloadToolbarButton(scope: scope),
-  ),
-  ToolbarButtonDefinition(
-    spec: readerModeToolbarButtonSpec,
-    label: 'Reader Mode',
-    icon: MdiIcons.bookOpenOutline,
-    isPrimaryAvailable: (scope, ref) {
-      final readerableState =
-          scope.tabState?.readerableState ?? ReaderableState.$default();
-      final enableReadability = ref.read(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enableReadability,
-        ),
-      );
-      final enforceReadability = ref.read(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enforceReadability,
-        ),
-      );
-      return (readerableState.readerable &&
-              (enableReadability || readerableState.active)) ||
-          (enforceReadability && enableReadability);
-    },
-    builder: (scope, context, ref) {
-      if (scope.isPreview) {
-        return IconButton(
-          onPressed: () {},
-          icon: const Icon(MdiIcons.bookOpenOutline),
-        );
-      }
-      return _ReaderModeToolbarButton(selectedTabId: scope.selectedTabId);
-    },
   ),
   ToolbarButtonDefinition(
     spec: desktopToolbarButtonSpec,
@@ -989,40 +956,6 @@ Future<void> _adjustFontSize(
       .save(
         (currentSettings) => currentSettings.copyWith.fontSizeFactor(rounded),
       );
-}
-
-class _ReaderModeToolbarButton extends ConsumerWidget {
-  final String? selectedTabId;
-
-  const _ReaderModeToolbarButton({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final readerableState = ref.watch(
-      tabStateProvider(
-        selectedTabId,
-      ).select((state) => state?.readerableState ?? ReaderableState.$default()),
-    );
-    final isReaderLoading = ref.watch(
-      readerableScreenControllerProvider.select((state) => state.isLoading),
-    );
-
-    return IconButton(
-      onPressed: isReaderLoading
-          ? null
-          : () async {
-              await ref
-                  .read(readerableScreenControllerProvider.notifier)
-                  .toggleReaderView(!readerableState.active);
-            },
-      icon: Icon(
-        readerableState.active ? MdiIcons.bookOpen : MdiIcons.bookOpenOutline,
-        color: readerableState.active
-            ? Theme.of(context).colorScheme.primary
-            : null,
-      ),
-    );
-  }
 }
 
 class _DesktopModeToolbarButton extends ConsumerWidget {

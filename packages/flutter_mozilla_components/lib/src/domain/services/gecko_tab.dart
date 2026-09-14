@@ -41,7 +41,6 @@ class GeckoTabService {
       onHistoryStateChange: onHistoryStateChange,
       onFindResults: onFindResults,
       onThumbnailChange: onThumbnailChange,
-      onReaderableStateChange: false,
       onBrowserExtensionsChange: onBrowserExtensionsChange,
       onPageExtensionsChange: onPageExtensionsChange,
       onBrowserExtensionIcons: onBrowserExtensionIcons,

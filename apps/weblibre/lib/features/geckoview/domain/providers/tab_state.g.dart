@@ -41,7 +41,7 @@ final class TabStatesProvider
   }
 }
 
-String _$tabStatesHash() => r'8f0ce9fc2222ff4cb14aa61c7e9cbb8843cfed73';
+String _$tabStatesHash() => r'ef7a7519d2493e9db7b0c6fd0d1d02919612c5ac';
 
 abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   Map<String, TabState> build();
@@ -141,7 +141,7 @@ final class TabStateFamily extends $Family
 /// Projection of [tabStatesProvider] for consumers that order or filter tabs
 /// but render nothing from the state itself. Watching this instead of the full
 /// map keeps the (expensive) grouping/sorting passes off the path of every
-/// icon, security-info and readerable event.
+/// icon and security-info event.
 
 @ProviderFor(tabSortKeys)
 final tabSortKeysProvider = TabSortKeysProvider._();
@@ -149,7 +149,7 @@ final tabSortKeysProvider = TabSortKeysProvider._();
 /// Projection of [tabStatesProvider] for consumers that order or filter tabs
 /// but render nothing from the state itself. Watching this instead of the full
 /// map keeps the (expensive) grouping/sorting passes off the path of every
-/// icon, security-info and readerable event.
+/// icon and security-info event.
 
 final class TabSortKeysProvider
     extends
@@ -162,7 +162,7 @@ final class TabSortKeysProvider
   /// Projection of [tabStatesProvider] for consumers that order or filter tabs
   /// but render nothing from the state itself. Watching this instead of the full
   /// map keeps the (expensive) grouping/sorting passes off the path of every
-  /// icon, security-info and readerable event.
+  /// icon and security-info event.
   TabSortKeysProvider._()
     : super(
         from: null,

@@ -23,7 +23,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryItem
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryState
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderableState
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
@@ -43,7 +42,6 @@ import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.LastMediaAccessState
-import mozilla.components.browser.state.state.ReaderState
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.state.recover.RecoverableTab
@@ -87,15 +85,6 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 title = tab.state.title,
                 searchTerm = tab.state.searchTerm,
                 contextId = tab.state.contextId,
-                readerState = ReaderState(
-                    readerable = tab.state.readerState.readerable,
-                    active = tab.state.readerState.active,
-                    checkRequired = tab.state.readerState.checkRequired,
-                    connectRequired = tab.state.readerState.connectRequired,
-                    baseUrl = tab.state.readerState.baseUrl,
-                    activeUrl = tab.state.readerState.activeUrl,
-                    scrollY = tab.state.readerState.scrollY?.toInt()
-                ),
                 lastAccess = tab.state.lastAccess,
                 createdAt = tab.state.createdAt,
                 lastMediaAccessState = LastMediaAccessState(
@@ -179,7 +168,6 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         onTabContentStateChange: Boolean,
         onIconChange: Boolean,
         onSecurityInfoStateChange: Boolean,
-        onReaderableStateChange: Boolean,
         onHistoryStateChange: Boolean,
         onFindResults: Boolean,
         onThumbnailChange: Boolean,
@@ -243,17 +231,6 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                             tab.content.securityInfo.isSecure,
                             tab.content.securityInfo.host,
                             tab.content.securityInfo.issuer
-                        )
-                    ) { }
-                }
-
-                if (onReaderableStateChange) {
-                    components.flutterEvents.onReaderableStateChange(
-                        EventSequence.next(),
-                        tab.id,
-                        ReaderableState(
-                            tab.readerState.readerable,
-                            tab.readerState.active
                         )
                     ) { }
                 }

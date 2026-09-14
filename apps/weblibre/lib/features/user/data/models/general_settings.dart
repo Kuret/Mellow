@@ -205,8 +205,6 @@ class GeneralSettings with FastEquatable {
   /// Android display refresh rate requested at startup. See [RefreshRateMode].
   final RefreshRateMode refreshRateMode;
   final bool showModalBarrier;
-  final bool enableReadability;
-  final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
   final bool screenshotProtectionEnabled;
 
@@ -390,8 +388,6 @@ class GeneralSettings with FastEquatable {
     required this.disableAnimations,
     required this.refreshRateMode,
     required this.showModalBarrier,
-    required this.enableReadability,
-    required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
     required this.screenshotProtectionEnabled,
     required this.allowPrivateTabScreenshots,
@@ -459,8 +455,6 @@ class GeneralSettings with FastEquatable {
     bool? disableAnimations,
     RefreshRateMode? refreshRateMode,
     bool? showModalBarrier,
-    bool? enableReadability,
-    bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
     bool? screenshotProtectionEnabled,
     bool? allowPrivateTabScreenshots,
@@ -523,8 +517,6 @@ class GeneralSettings with FastEquatable {
        disableAnimations = disableAnimations ?? false,
        refreshRateMode = refreshRateMode ?? RefreshRateMode.high,
        showModalBarrier = showModalBarrier ?? true,
-       enableReadability = enableReadability ?? true,
-       enforceReadability = enforceReadability ?? false,
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
        allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
@@ -704,8 +696,6 @@ class GeneralSettings with FastEquatable {
     disableAnimations,
     refreshRateMode,
     showModalBarrier,
-    enableReadability,
-    enforceReadability,
     deleteBrowsingDataOnQuit,
     screenshotProtectionEnabled,
     allowPrivateTabScreenshots,

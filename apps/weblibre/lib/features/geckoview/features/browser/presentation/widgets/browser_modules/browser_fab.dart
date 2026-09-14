@@ -20,11 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
-import 'package:weblibre/features/geckoview/features/readerview/domain/providers/readerable.dart';
 
 class BrowserFab extends HookConsumerWidget {
   const BrowserFab({super.key});
@@ -36,19 +33,6 @@ class BrowserFab extends HookConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
 
-    final appearanceButtonVisible = ref.watch(
-      appearanceButtonVisibilityProvider.select(
-        (value) => value.value ?? false,
-      ),
-    );
-
-    final readerabilityState = ref.watch(
-      selectedTabStateProvider.select(
-        (state) => state?.readerableState ?? ReaderableState.$default(),
-      ),
-    );
-
-    final showAppearance = readerabilityState.active && appearanceButtonVisible;
     final showDock = toolbarState == ToolbarVisibility.dismissed;
 
     void forceShowToolbar() {
@@ -57,10 +41,7 @@ class BrowserFab extends HookConsumerWidget {
           .forceShow();
     }
 
-    // Re-show the hidden tab bar / toolbar. Kept available even while reading,
-    // where the reader appearance button would otherwise take the FAB's slot
-    // and leave no way to bring the toolbar back. Rendered smaller when paired
-    // with the appearance button to mark it as the secondary action.
+    // Re-show the hidden tab bar / toolbar.
     Widget buildDockFab({required bool small}) {
       const icon = Icon(MdiIcons.dockBottom);
       return small
@@ -78,30 +59,7 @@ class BrowserFab extends HookConsumerWidget {
             );
     }
 
-    Widget buildAppearanceFab() {
-      return FloatingActionButton(
-        key: const ValueKey('appearance_fab'),
-        heroTag: 'appearance_fab',
-        onPressed: () async {
-          await ref.read(readerableServiceProvider).onAppearanceButtonTap();
-        },
-        child: const Icon(MdiIcons.formatFont),
-      );
-    }
-
-    if (showAppearance && showDock) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          buildDockFab(small: true),
-          const SizedBox(height: 12),
-          buildAppearanceFab(),
-        ],
-      );
-    } else if (showAppearance) {
-      return buildAppearanceFab();
-    } else if (showDock) {
+    if (showDock) {
       return buildDockFab(small: false);
     } else {
       return const SizedBox.shrink(key: ValueKey('no_fab'));

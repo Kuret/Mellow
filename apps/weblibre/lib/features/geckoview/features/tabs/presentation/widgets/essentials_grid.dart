@@ -235,7 +235,6 @@ class EssentialTile extends ConsumerWidget {
             selectedTabId: tabId,
             enableFindInPage: false,
             enableDesktopMode: false,
-            enableReaderMode: false,
             enableReloadButton: false,
             enableNavigationButtons: false,
             enableAddToHomeScreen: false,

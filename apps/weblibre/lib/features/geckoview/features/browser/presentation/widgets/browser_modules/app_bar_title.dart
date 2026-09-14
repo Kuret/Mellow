@@ -484,8 +484,6 @@ class _SecurityStatusIcon extends StatelessWidget {
         color: Theme.of(context).colorScheme.error,
         size: size,
       );
-    } else if (tabState.readerableState.active) {
-      return Icon(MdiIcons.lockMinus, color: containerColor, size: size);
     } else if (!tabState.securityInfoState.secure) {
       return Icon(
         MdiIcons.lockAlert,

@@ -30,7 +30,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GestureConfig
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
@@ -349,7 +348,6 @@ object GlobalComponents {
     fun setUp(
         applicationContext: ProfileContext,
         flutterEvents: GeckoStateEvents,
-        readerViewController: ReaderViewController,
         selectionAction: SelectionActionDelegate,
         addonEvents: GeckoAddonEvents,
         tabContentEvents: GeckoTabContentEvents,
@@ -397,7 +395,6 @@ object GlobalComponents {
         val newComponents = Components(
             applicationContext,
             flutterEvents,
-            readerViewController,
             selectionAction,
             logLevel,
             contentBlocking,
@@ -622,7 +619,6 @@ object GlobalComponents {
         setUp(
             applicationContext = profileContext,
             flutterEvents = GeckoStateEvents(messenger),
-            readerViewController = ReaderViewController(messenger),
             selectionAction = selectionActionDelegate,
             addonEvents = GeckoAddonEvents(messenger),
             tabContentEvents = GeckoTabContentEvents(messenger),

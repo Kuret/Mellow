@@ -26,7 +26,6 @@ export 'src/domain/services/gecko_logging.dart';
 export 'src/domain/services/gecko_pref.dart';
 export 'src/domain/services/gecko_profile.dart';
 export 'src/domain/services/gecko_push.dart';
-export 'src/domain/services/gecko_readerable.dart';
 export 'src/domain/services/gecko_selection_action.dart';
 export 'src/domain/services/gecko_session.dart';
 export 'src/domain/services/gecko_suggestions.dart';

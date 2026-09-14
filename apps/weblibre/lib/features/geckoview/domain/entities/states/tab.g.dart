@@ -27,8 +27,6 @@ abstract class _$TabStateCWProxy {
 
   TabState securityInfoState(SecurityState securityInfoState);
 
-  TabState readerableState(ReaderableState readerableState);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
@@ -47,7 +45,6 @@ abstract class _$TabStateCWProxy {
     bool isLoading,
     bool showToolbarAsExpanded,
     SecurityState securityInfoState,
-    ReaderableState readerableState,
   });
 }
 
@@ -91,10 +88,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState securityInfoState(SecurityState securityInfoState) =>
       call(securityInfoState: securityInfoState);
 
-  @override
-  TabState readerableState(ReaderableState readerableState) =>
-      call(readerableState: readerableState);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
@@ -114,7 +107,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? isLoading = const $CopyWithPlaceholder(),
     Object? showToolbarAsExpanded = const $CopyWithPlaceholder(),
     Object? securityInfoState = const $CopyWithPlaceholder(),
-    Object? readerableState = const $CopyWithPlaceholder(),
   }) {
     return TabState._(
       id: _value.id,
@@ -165,12 +157,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.securityInfoState
           // ignore: cast_nullable_to_non_nullable
           : securityInfoState as SecurityState,
-      readerableState:
-          readerableState == const $CopyWithPlaceholder() ||
-              readerableState == null
-          ? _value.readerableState
-          // ignore: cast_nullable_to_non_nullable
-          : readerableState as ReaderableState,
     );
   }
 }

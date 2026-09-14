@@ -67,7 +67,6 @@ import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
-import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.concept.engine.history.HistoryTrackingDelegate
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -256,7 +255,6 @@ class Core(
                     ),
                 ),
                 ThumbnailsMiddleware(thumbnailStorage),
-                ReaderViewMiddleware(),
                 UndoMiddleware(),
                 LastAccessMiddleware(),
                 SessionPrioritizationMiddleware(),

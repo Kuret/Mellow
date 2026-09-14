@@ -41,8 +41,7 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
         GlobalComponents.viewportApi?.applyPendingToolbarHeight()
     }
 
-    override fun onBackPressed(): Boolean =
-        super.readerViewFeature.onBackPressed() || super.onBackPressed()
+    override fun onBackPressed(): Boolean = super.onBackPressed()
 
     override fun onDestroyView() {
         super.onDestroyView()

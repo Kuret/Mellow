@@ -12,7 +12,6 @@ import 'package:rxdart/rxdart.dart';
 
 // Typedefs for record types
 typedef HistoryEvent = ({String tabId, HistoryState history});
-typedef ReaderableEvent = ({String tabId, ReaderableState readerable});
 typedef SecurityInfoEvent = ({String tabId, SecurityInfoState securityInfo});
 typedef IconChangeEvent = ({String tabId, Uint8List? bytes});
 typedef IconUpdateEvent = ({String url, Uint8List bytes});
@@ -34,7 +33,6 @@ class GeckoEventService extends GeckoStateEvents {
   final _tabContentSubject = ReplaySubject<TabContentState>();
   final _historySubject = ReplaySubject<HistoryEvent>();
   final _securityInfoSubject = ReplaySubject<SecurityInfoEvent>();
-  final _readerableSubject = ReplaySubject<ReaderableEvent>();
 
   final _iconChangeSubject = PublishSubject<IconChangeEvent>();
   final _iconUpdateSubject = PublishSubject<IconUpdateEvent>();
@@ -74,7 +72,6 @@ class GeckoEventService extends GeckoStateEvents {
 
   Stream<TabContentState> get tabContentEvents => _tabContentSubject.stream;
   Stream<HistoryEvent> get historyEvents => _historySubject.stream;
-  Stream<ReaderableEvent> get readerableEvents => _readerableSubject.stream;
   Stream<SecurityInfoEvent> get securityInfoEvents =>
       _securityInfoSubject.stream;
   Stream<IconChangeEvent> get iconChangeEvents => _iconChangeSubject.stream;
@@ -131,14 +128,6 @@ class GeckoEventService extends GeckoStateEvents {
     _historySubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       history: state,
-    ));
-  }
-
-  @override
-  void onReaderableStateChange(int sequence, String id, ReaderableState state) {
-    _readerableSubject.addWhenMoreRecent(sequence, id, (
-      tabId: id,
-      readerable: state,
     ));
   }
 
@@ -297,7 +286,6 @@ class GeckoEventService extends GeckoStateEvents {
     await _selectedTabSubject.close();
     await _tabContentSubject.close();
     await _historySubject.close();
-    await _readerableSubject.close();
     await _securityInfoSubject.close();
     await _iconChangeSubject.close();
     await _iconUpdateSubject.close();

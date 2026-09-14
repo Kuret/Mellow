@@ -9,7 +9,6 @@ package eu.weblibre.flutter_mozilla_components.api
 import android.content.Context
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
@@ -441,20 +440,6 @@ class GeckoEngineSettingsApiImpl(
                 store.dispatch(ContentAction.UpdateTabDesktopMode(tab.id, enable))
             }
         }
-    }
-
-    override fun setReaderViewPureBlack(enabled: Boolean) {
-        // Push to every tab whose reader view is currently active so the change
-        // applies live, without depending on a single tracked session.
-        val activeReaderSessions = components.core.store.state.tabs
-            .filter { it.readerState.active }
-            .mapNotNull { it.engineState.engineSession }
-
-        ReaderViewAppearanceFeature.setPureBlack(
-            enabled,
-            components.core.prefs,
-            activeReaderSessions,
-        )
     }
 
     override fun setHistoryExclusions(

@@ -254,7 +254,6 @@ const _$GestureActionEnumMap = {
   GestureAction.togglePinTab: 'togglePinTab',
   GestureAction.nextContainer: 'nextContainer',
   GestureAction.previousContainer: 'previousContainer',
-  GestureAction.toggleReaderMode: 'toggleReaderMode',
   GestureAction.toggleDesktopMode: 'toggleDesktopMode',
   GestureAction.findInPage: 'findInPage',
   GestureAction.increaseFontSize: 'increaseFontSize',

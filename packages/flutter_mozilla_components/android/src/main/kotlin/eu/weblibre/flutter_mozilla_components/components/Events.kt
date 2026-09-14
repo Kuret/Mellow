@@ -7,9 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.components
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.api.ReaderViewEventsImpl
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
@@ -18,7 +16,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.PwaIcon
 import eu.weblibre.flutter_mozilla_components.pigeons.PwaManifest
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryItem
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryState
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderableState
 import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
@@ -153,7 +150,6 @@ internal fun Flow<TabSessionState>.conflatedByTab(
 class Events(
     private val flutterEvents: GeckoStateEvents,
 ) {
-    val readerViewEvents by lazy { ReaderViewEventsImpl() }
 
     @OptIn(FlowPreview::class)
     fun registerFlowEvents(stateFlow: Store<BrowserState, BrowserAction>) {
@@ -229,61 +225,6 @@ class Events(
                             tab.content.securityInfo.host,
                             tab.content.securityInfo.issuer,
                         )
-                    ) { _ -> }
-                }
-        }
-
-        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.changedTabsBy(windowMillis = 25) {
-                listOf(
-                    it.readerState.readerable,
-                    it.readerState.active,
-                )
-            }
-                .collect { tab ->
-                    flutterEvents.onReaderableStateChange(
-                        EventSequence.next(),
-                        tab.id,
-                        ReaderableState(
-                            tab.readerState.readerable,
-                            tab.readerState.active,
-                        )
-                    ) { _ -> }
-                }
-        }
-
-        // Register the WebLibre "pure black" appearance content port whenever a
-        // tab's reader view becomes active. Store-driven (rather than the user's
-        // reader toggle) so it also covers reader views restored on app start.
-        //
-        // Keyed on both readerState.active AND the engine session: a restored
-        // reader tab can already be active before its engine session is linked,
-        // and the active flag never changes afterwards — so we must also react to
-        // the session becoming available to register on the right session.
-        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.mapNotNull { state -> state.tabs }
-                .filterChanged { it.readerState.active to it.engineState.engineSession }
-                .collect { tab ->
-                    if (tab.readerState.active) {
-                        tab.engineState.engineSession?.let { session ->
-                            ReaderViewAppearanceFeature.registerSession(session)
-                        }
-                    }
-                }
-        }
-
-        // Keep the reader appearance (font/settings) button in sync with the
-        // selected tab's actual reader-active state. Driven by the store rather
-        // than the user's reader toggle (ReaderViewIntegration) so the button
-        // also appears for reader views restored on app start ("resume last tab"),
-        // which never go through an explicit toggle.
-        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.map { state -> state.selectedTab?.readerState?.active ?: false }
-                .distinctUntilChanged()
-                .collect { active ->
-                    GlobalComponents.components?.readerViewController?.appearanceButtonVisibility(
-                        EventSequence.next(),
-                        active,
                     ) { _ -> }
                 }
         }

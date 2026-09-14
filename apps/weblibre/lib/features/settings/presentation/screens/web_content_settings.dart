@@ -23,9 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> webContentSettingsSections = [
@@ -81,18 +79,6 @@ const List<SettingsSectionDefinition> webContentSettingsSections = [
         keywords: ['pdf'],
         child: _PdfViewerTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Enable Reader Mode',
-        subtitle: 'Extract and simplify pages for readability',
-        keywords: ['reader', 'readability'],
-        child: _EnableReaderModeTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Enforce Reader Mode',
-        subtitle: 'Always show Reader Mode capabilities',
-        keywords: ['reader'],
-        child: _EnforceReaderModeTile(),
-      ),
     ],
   ),
 ];
@@ -104,7 +90,7 @@ class WebContentSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Web Content',
-      subtitle: 'Text rendering, reader mode, and PDFs.',
+      subtitle: 'Text rendering and PDFs.',
       icon: MdiIcons.fileDocumentOutline,
       sections: webContentSettingsSections,
     );
@@ -363,67 +349,6 @@ class _PdfViewerTile extends HookConsumerWidget {
               (currentSettings) => currentSettings.copyWith.enablePdfJs(value),
             );
       },
-    );
-  }
-}
-
-class _EnableReaderModeTile extends HookConsumerWidget {
-  const _EnableReaderModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Enable Reader Mode'),
-      subtitle: const Text(
-        'Optional browser app bar tool that extracts and simplifies web pages for improved readability by removing ads, sidebars, and other non-essential elements.',
-      ),
-      secondary: const Icon(MdiIcons.bookOpen),
-      value: enableReadability,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enableReadability(value),
-            );
-      },
-    );
-  }
-}
-
-class _EnforceReaderModeTile extends HookConsumerWidget {
-  const _EnforceReaderModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
-    );
-    final enforceReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enforceReadability),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Enforce Reader Mode'),
-      subtitle: const Text(
-        'Override readability probability of websites and always show Reader Mode capabilities even the site might not be compatible.',
-      ),
-      secondary: const Icon(MdiIcons.bookCheck),
-      value: enableReadability && enforceReadability,
-      onChanged: enableReadability
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.enforceReadability(value),
-                  );
-            }
-          : null,
     );
   }
 }

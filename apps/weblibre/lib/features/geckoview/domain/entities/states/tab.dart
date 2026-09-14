@@ -23,7 +23,6 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
@@ -66,7 +65,7 @@ class TabState extends WebPageInfo {
 
   /// Whether the engine has reported this tab's content state.
   ///
-  /// Icons, security info and readerable state all seed an entry from
+  /// Icons and security info both seed an entry from
   /// [TabState.$default], which claims a regular tab sitting at
   /// [defaultUrl]. Those defaults are fine to render, but a caller that acts on
   /// the tab's identity — reopening it in another container, say — would carry
@@ -82,7 +81,6 @@ class TabState extends WebPageInfo {
   final bool showToolbarAsExpanded;
 
   final SecurityState securityInfoState;
-  final ReaderableState readerableState;
 
   TabState({
     required this.id,
@@ -96,7 +94,6 @@ class TabState extends WebPageInfo {
     required this.isLoading,
     required this.showToolbarAsExpanded,
     required this.securityInfoState,
-    required this.readerableState,
   }) : super(title: title.trim());
 
   TabState._({
@@ -111,7 +108,6 @@ class TabState extends WebPageInfo {
     required this.isLoading,
     required this.showToolbarAsExpanded,
     required this.securityInfoState,
-    required this.readerableState,
   });
 
   factory TabState.$default(String tabId) => TabState(
@@ -124,7 +120,6 @@ class TabState extends WebPageInfo {
     isLoading: false,
     showToolbarAsExpanded: false,
     securityInfoState: SecurityState.$default(),
-    readerableState: ReaderableState.$default(),
   );
 
   @override
@@ -139,6 +134,5 @@ class TabState extends WebPageInfo {
     isLoading,
     showToolbarAsExpanded,
     securityInfoState,
-    readerableState,
   ];
 }

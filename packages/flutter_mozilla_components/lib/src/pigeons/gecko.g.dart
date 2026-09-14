@@ -460,93 +460,6 @@ enum PushDistributorStatus {
   unavailable,
 }
 
-/// Value type that represents the state of reader mode/view.
-class ReaderState {
-  ReaderState({
-    required this.readerable,
-    required this.active,
-    required this.checkRequired,
-    required this.connectRequired,
-    this.baseUrl,
-    this.activeUrl,
-    this.scrollY,
-  });
-
-  /// Whether or not the current page can be transformed to
-  /// be displayed in a reader view.
-  bool readerable;
-
-  /// Whether or not reader view is active.
-  bool active;
-
-  /// Whether or not a readerable check is required for the
-  /// current page.
-  bool checkRequired;
-
-  /// Whether or not a new connection to the reader view
-  /// content script is required.
-  bool connectRequired;
-
-  /// The base URL of the reader view extension page.
-  String? baseUrl;
-
-  /// The URL of the page currently displayed in reader view.
-  String? activeUrl;
-
-  /// The vertical scroll position of the page currently
-  /// displayed in reader view.
-  int? scrollY;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      readerable,
-      active,
-      checkRequired,
-      connectRequired,
-      baseUrl,
-      activeUrl,
-      scrollY,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static ReaderState decode(Object result) {
-    result as List<Object?>;
-    return ReaderState(
-      readerable: result[0]! as bool,
-      active: result[1]! as bool,
-      checkRequired: result[2]! as bool,
-      connectRequired: result[3]! as bool,
-      baseUrl: result[4] as String?,
-      activeUrl: result[5] as String?,
-      scrollY: result[6] as int?,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! ReaderState || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(readerable, other.readerable) && _deepEquals(active, other.active) && _deepEquals(checkRequired, other.checkRequired) && _deepEquals(connectRequired, other.connectRequired) && _deepEquals(baseUrl, other.baseUrl) && _deepEquals(activeUrl, other.activeUrl) && _deepEquals(scrollY, other.scrollY);
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
-
-  @override
-  String toString() {
-    return 'ReaderState(readerable: $readerable, active: $active, checkRequired: $checkRequired, connectRequired: $connectRequired, baseUrl: $baseUrl, activeUrl: $activeUrl, scrollY: $scrollY)';
-  }
-}
-
 /// Parameters for adding a new tab.
 class AddTabParams {
   AddTabParams({
@@ -979,7 +892,6 @@ class TabState {
     required this.title,
     required this.searchTerm,
     this.contextId,
-    required this.readerState,
     required this.lastAccess,
     required this.createdAt,
     required this.lastMediaAccessState,
@@ -1009,9 +921,6 @@ class TabState {
 
   /// The context ID ("container") this tab used (or null).
   String? contextId;
-
-  /// The last [ReaderState] of the tab.
-  ReaderState readerState;
 
   /// The last time this tab was selected.
   int lastAccess;
@@ -1045,7 +954,6 @@ class TabState {
       title,
       searchTerm,
       contextId,
-      readerState,
       lastAccess,
       createdAt,
       lastMediaAccessState,
@@ -1069,15 +977,14 @@ class TabState {
       title: result[3]! as String,
       searchTerm: result[4]! as String,
       contextId: result[5] as String?,
-      readerState: result[6]! as ReaderState,
-      lastAccess: result[7]! as int,
-      createdAt: result[8]! as int,
-      lastMediaAccessState: result[9]! as LastMediaAccessState,
-      private: result[10]! as bool,
-      historyMetadata: result[11] as HistoryMetadataKey?,
-      source: result[12]! as SourceValue,
-      index: result[13]! as int,
-      hasFormData: result[14]! as bool,
+      lastAccess: result[6]! as int,
+      createdAt: result[7]! as int,
+      lastMediaAccessState: result[8]! as LastMediaAccessState,
+      private: result[9]! as bool,
+      historyMetadata: result[10] as HistoryMetadataKey?,
+      source: result[11]! as SourceValue,
+      index: result[12]! as int,
+      hasFormData: result[13]! as bool,
     );
   }
 
@@ -1090,7 +997,7 @@ class TabState {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) && _deepEquals(url, other.url) && _deepEquals(parentId, other.parentId) && _deepEquals(title, other.title) && _deepEquals(searchTerm, other.searchTerm) && _deepEquals(contextId, other.contextId) && _deepEquals(readerState, other.readerState) && _deepEquals(lastAccess, other.lastAccess) && _deepEquals(createdAt, other.createdAt) && _deepEquals(lastMediaAccessState, other.lastMediaAccessState) && _deepEquals(private, other.private) && _deepEquals(historyMetadata, other.historyMetadata) && _deepEquals(source, other.source) && _deepEquals(index, other.index) && _deepEquals(hasFormData, other.hasFormData);
+    return _deepEquals(id, other.id) && _deepEquals(url, other.url) && _deepEquals(parentId, other.parentId) && _deepEquals(title, other.title) && _deepEquals(searchTerm, other.searchTerm) && _deepEquals(contextId, other.contextId) && _deepEquals(lastAccess, other.lastAccess) && _deepEquals(createdAt, other.createdAt) && _deepEquals(lastMediaAccessState, other.lastMediaAccessState) && _deepEquals(private, other.private) && _deepEquals(historyMetadata, other.historyMetadata) && _deepEquals(source, other.source) && _deepEquals(index, other.index) && _deepEquals(hasFormData, other.hasFormData);
   }
 
   @override
@@ -1099,7 +1006,7 @@ class TabState {
 
   @override
   String toString() {
-    return 'TabState(id: $id, url: $url, parentId: $parentId, title: $title, searchTerm: $searchTerm, contextId: $contextId, readerState: $readerState, lastAccess: $lastAccess, createdAt: $createdAt, lastMediaAccessState: $lastMediaAccessState, private: $private, historyMetadata: $historyMetadata, source: $source, index: $index, hasFormData: $hasFormData)';
+    return 'TabState(id: $id, url: $url, parentId: $parentId, title: $title, searchTerm: $searchTerm, contextId: $contextId, lastAccess: $lastAccess, createdAt: $createdAt, lastMediaAccessState: $lastMediaAccessState, private: $private, historyMetadata: $historyMetadata, source: $source, index: $index, hasFormData: $hasFormData)';
   }
 }
 
@@ -2095,59 +2002,6 @@ class HistoryState {
   @override
   String toString() {
     return 'HistoryState(items: $items, currentIndex: $currentIndex, canGoBack: $canGoBack, canGoForward: $canGoForward)';
-  }
-}
-
-class ReaderableState {
-  ReaderableState({
-    required this.readerable,
-    required this.active,
-  });
-
-  /// Whether or not the current page can be transformed to
-  /// be displayed in a reader view.
-  bool readerable;
-
-  /// Whether or not reader view is active.
-  bool active;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      readerable,
-      active,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static ReaderableState decode(Object result) {
-    result as List<Object?>;
-    return ReaderableState(
-      readerable: result[0]! as bool,
-      active: result[1]! as bool,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! ReaderableState || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(readerable, other.readerable) && _deepEquals(active, other.active);
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
-
-  @override
-  String toString() {
-    return 'ReaderableState(readerable: $readerable, active: $active)';
   }
 }
 
@@ -6862,10 +6716,6 @@ class _PigeonCodecOverflow {
 
     switch (type) {
       case 0:
-        return PushDistributor.decode(wrapped!);
-      case 1:
-        return PushStatus.decode(wrapped!);
-      case 2:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -6999,274 +6849,266 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is PushDistributorStatus) {
       buffer.putUint8(168);
       writeValue(buffer, value.index);
-    }    else if (value is ReaderState) {
+    }    else if (value is AddTabParams) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is AddTabParams) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is TabState) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is Resource) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is IconResult) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is Cookie) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is HistoryHighlightWeights) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlightWeights) {
+    }    else if (value is HistoryHighlight) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlight) {
+    }    else if (value is TopFrecentSiteInfo) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is TopFrecentSiteInfo) {
+    }    else if (value is HistoryMetadata) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadata) {
+    }    else if (value is HistorySuggestion) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is HistorySuggestion) {
+    }    else if (value is PageObservation) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is PageObservation) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is AddonInfo) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is AddonListingPreview) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonInfo) {
+    }    else if (value is AddonListing) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListingPreview) {
+    }    else if (value is AddonStoreInfo) {
       buffer.putUint8(201);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListing) {
+    }    else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(202);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonStoreInfo) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(203);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonUpdateAttemptInfo) {
+    }    else if (value is TabContent) {
       buffer.putUint8(204);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(205);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(206);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(207);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(208);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is SyncEngineStatus) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is SyncAccountInfo) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncEngineStatus) {
+    }    else if (value is SyncDevice) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncAccountInfo) {
+    }    else if (value is SyncIncomingTab) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDevice) {
+    }    else if (value is SyncRemoteTab) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncIncomingTab) {
+    }    else if (value is SyncDeviceTabs) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncRemoteTab) {
+    }    else if (value is SyncCredentials) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDeviceTabs) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncCredentials) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is ProxyLoadError) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    }    else if (value is ProxyLoadError) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is GeckoFetchResponse) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is BookmarkNode) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is BookmarkImportNode) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkNode) {
+    }    else if (value is BookmarkInsertTreeResult) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkImportNode) {
+    }    else if (value is BookmarkInfo) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkInsertTreeResult) {
+    }    else if (value is SitePermissions) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkInfo) {
+    }    else if (value is TrackingProtectionException) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    }    else if (value is SitePermissions) {
+    }    else if (value is AppLinkTarget) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    }    else if (value is TrackingProtectionException) {
+    }    else if (value is ProtectedTargetPattern) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    }    else if (value is AppLinkTarget) {
+    }    else if (value is NativeAppLinkRule) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    }    else if (value is ProtectedTargetPattern) {
+    }    else if (value is NativeContextAppLinkPolicy) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    }    else if (value is NativeAppLinkRule) {
+    }    else if (value is AppLinkPolicySnapshot) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    }    else if (value is NativeContextAppLinkPolicy) {
+    }    else if (value is AppLinkPromptRequest) {
       buffer.putUint8(244);
       writeValue(buffer, value.encode());
-    }    else if (value is AppLinkPolicySnapshot) {
+    }    else if (value is AppLinkResolutionResult) {
       buffer.putUint8(245);
       writeValue(buffer, value.encode());
-    }    else if (value is AppLinkPromptRequest) {
+    }    else if (value is PwaIcon) {
       buffer.putUint8(246);
       writeValue(buffer, value.encode());
-    }    else if (value is AppLinkResolutionResult) {
+    }    else if (value is ShareTargetFiles) {
       buffer.putUint8(247);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaIcon) {
+    }    else if (value is ShareTargetParams) {
       buffer.putUint8(248);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetFiles) {
+    }    else if (value is ShareTarget) {
       buffer.putUint8(249);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetParams) {
+    }    else if (value is ExternalApplicationResource) {
       buffer.putUint8(250);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTarget) {
+    }    else if (value is PwaManifest) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalApplicationResource) {
+    }    else if (value is GestureConfig) {
       buffer.putUint8(252);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaManifest) {
+    }    else if (value is PushDistributor) {
       buffer.putUint8(253);
       writeValue(buffer, value.encode());
-    }    else if (value is GestureConfig) {
+    }    else if (value is PushStatus) {
       buffer.putUint8(254);
       writeValue(buffer, value.encode());
-    }    else if (value is PushDistributor) {
-      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 0, wrapped: value.encode());
-      buffer.putUint8(255);
-      writeValue(buffer, wrap.encode());
-    }    else if (value is PushStatus) {
-      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 1, wrapped: value.encode());
-      buffer.putUint8(255);
-      writeValue(buffer, wrap.encode());
     }    else if (value is PushSubscription) {
-      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 2, wrapped: value.encode());
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 0, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
     } else {
@@ -7398,177 +7240,177 @@ class _PigeonCodec extends StandardMessageCodec {
         final value = readValue(buffer) as int?;
         return value == null ? null : PushDistributorStatus.values[value];
       case 169:
-        return ReaderState.decode(readValue(buffer)!);
-      case 170:
         return AddTabParams.decode(readValue(buffer)!);
-      case 171:
+      case 170:
         return LastMediaAccessState.decode(readValue(buffer)!);
-      case 172:
+      case 171:
         return HistoryMetadataKey.decode(readValue(buffer)!);
-      case 173:
+      case 172:
         return PackageCategoryValue.decode(readValue(buffer)!);
-      case 174:
+      case 173:
         return ExternalPackage.decode(readValue(buffer)!);
-      case 175:
+      case 174:
         return LoadUrlFlagsValue.decode(readValue(buffer)!);
-      case 176:
+      case 175:
         return SourceValue.decode(readValue(buffer)!);
-      case 177:
+      case 176:
         return TabState.decode(readValue(buffer)!);
-      case 178:
+      case 177:
         return RecoverableTab.decode(readValue(buffer)!);
-      case 179:
+      case 178:
         return IconRequest.decode(readValue(buffer)!);
-      case 180:
+      case 179:
         return ResourceSize.decode(readValue(buffer)!);
-      case 181:
+      case 180:
         return Resource.decode(readValue(buffer)!);
-      case 182:
+      case 181:
         return IconResult.decode(readValue(buffer)!);
-      case 183:
+      case 182:
         return CookiePartitionKey.decode(readValue(buffer)!);
-      case 184:
+      case 183:
         return Cookie.decode(readValue(buffer)!);
-      case 185:
+      case 184:
         return VisitInfo.decode(readValue(buffer)!);
-      case 186:
+      case 185:
         return HistoryHighlightWeights.decode(readValue(buffer)!);
-      case 187:
+      case 186:
         return HistoryHighlight.decode(readValue(buffer)!);
-      case 188:
+      case 187:
         return TopFrecentSiteInfo.decode(readValue(buffer)!);
-      case 189:
+      case 188:
         return HistoryMetadata.decode(readValue(buffer)!);
-      case 190:
+      case 189:
         return HistorySuggestion.decode(readValue(buffer)!);
-      case 191:
+      case 190:
         return PageObservation.decode(readValue(buffer)!);
-      case 192:
+      case 191:
         return HistoryItem.decode(readValue(buffer)!);
-      case 193:
+      case 192:
         return HistoryState.decode(readValue(buffer)!);
-      case 194:
-        return ReaderableState.decode(readValue(buffer)!);
-      case 195:
+      case 193:
         return SecurityInfoState.decode(readValue(buffer)!);
-      case 196:
+      case 194:
         return TabContentState.decode(readValue(buffer)!);
-      case 197:
+      case 195:
         return FindResultState.decode(readValue(buffer)!);
-      case 198:
+      case 196:
         return CustomSelectionAction.decode(readValue(buffer)!);
-      case 199:
+      case 197:
         return WebExtensionData.decode(readValue(buffer)!);
-      case 200:
+      case 198:
         return AddonInfo.decode(readValue(buffer)!);
-      case 201:
+      case 199:
         return AddonListingPreview.decode(readValue(buffer)!);
-      case 202:
+      case 200:
         return AddonListing.decode(readValue(buffer)!);
-      case 203:
+      case 201:
         return AddonStoreInfo.decode(readValue(buffer)!);
-      case 204:
+      case 202:
         return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
-      case 205:
+      case 203:
         return GeckoSuggestion.decode(readValue(buffer)!);
-      case 206:
+      case 204:
         return TabContent.decode(readValue(buffer)!);
-      case 207:
+      case 205:
         return ContentBlocking.decode(readValue(buffer)!);
-      case 208:
+      case 206:
         return DohSettings.decode(readValue(buffer)!);
-      case 209:
+      case 207:
         return GeckoEngineSettings.decode(readValue(buffer)!);
-      case 210:
+      case 208:
         return AutocompleteResult.decode(readValue(buffer)!);
-      case 211:
+      case 209:
         return UnknownHitResult.decode(readValue(buffer)!);
-      case 212:
+      case 210:
         return ImageHitResult.decode(readValue(buffer)!);
-      case 213:
+      case 211:
         return VideoHitResult.decode(readValue(buffer)!);
-      case 214:
+      case 212:
         return AudioHitResult.decode(readValue(buffer)!);
-      case 215:
+      case 213:
         return ImageSrcHitResult.decode(readValue(buffer)!);
-      case 216:
+      case 214:
         return PhoneHitResult.decode(readValue(buffer)!);
-      case 217:
+      case 215:
         return EmailHitResult.decode(readValue(buffer)!);
-      case 218:
+      case 216:
         return GeoHitResult.decode(readValue(buffer)!);
-      case 219:
+      case 217:
         return DownloadState.decode(readValue(buffer)!);
-      case 220:
+      case 218:
         return ShareInternetResourceState.decode(readValue(buffer)!);
-      case 221:
+      case 219:
         return AddonCollection.decode(readValue(buffer)!);
-      case 222:
+      case 220:
         return SyncEngineStatus.decode(readValue(buffer)!);
-      case 223:
+      case 221:
         return SyncAccountInfo.decode(readValue(buffer)!);
-      case 224:
+      case 222:
         return SyncDevice.decode(readValue(buffer)!);
-      case 225:
+      case 223:
         return SyncIncomingTab.decode(readValue(buffer)!);
-      case 226:
+      case 224:
         return SyncRemoteTab.decode(readValue(buffer)!);
-      case 227:
+      case 225:
         return SyncDeviceTabs.decode(readValue(buffer)!);
-      case 228:
+      case 226:
         return SyncCredentials.decode(readValue(buffer)!);
-      case 229:
+      case 227:
         return GeckoPref.decode(readValue(buffer)!);
-      case 230:
+      case 228:
         return ContainerSiteAssignment.decode(readValue(buffer)!);
-      case 231:
+      case 229:
         return ProxyLoadError.decode(readValue(buffer)!);
-      case 232:
+      case 230:
         return GeckoHeader.decode(readValue(buffer)!);
-      case 233:
+      case 231:
         return GeckoFetchRequest.decode(readValue(buffer)!);
-      case 234:
+      case 232:
         return GeckoFetchResponse.decode(readValue(buffer)!);
-      case 235:
+      case 233:
         return BookmarkNode.decode(readValue(buffer)!);
-      case 236:
+      case 234:
         return BookmarkImportNode.decode(readValue(buffer)!);
-      case 237:
+      case 235:
         return BookmarkInsertTreeResult.decode(readValue(buffer)!);
-      case 238:
+      case 236:
         return BookmarkInfo.decode(readValue(buffer)!);
-      case 239:
+      case 237:
         return SitePermissions.decode(readValue(buffer)!);
-      case 240:
+      case 238:
         return TrackingProtectionException.decode(readValue(buffer)!);
-      case 241:
+      case 239:
         return AppLinkTarget.decode(readValue(buffer)!);
-      case 242:
+      case 240:
         return ProtectedTargetPattern.decode(readValue(buffer)!);
-      case 243:
+      case 241:
         return NativeAppLinkRule.decode(readValue(buffer)!);
-      case 244:
+      case 242:
         return NativeContextAppLinkPolicy.decode(readValue(buffer)!);
-      case 245:
+      case 243:
         return AppLinkPolicySnapshot.decode(readValue(buffer)!);
-      case 246:
+      case 244:
         return AppLinkPromptRequest.decode(readValue(buffer)!);
-      case 247:
+      case 245:
         return AppLinkResolutionResult.decode(readValue(buffer)!);
-      case 248:
+      case 246:
         return PwaIcon.decode(readValue(buffer)!);
-      case 249:
+      case 247:
         return ShareTargetFiles.decode(readValue(buffer)!);
-      case 250:
+      case 248:
         return ShareTargetParams.decode(readValue(buffer)!);
-      case 251:
+      case 249:
         return ShareTarget.decode(readValue(buffer)!);
-      case 252:
+      case 250:
         return ExternalApplicationResource.decode(readValue(buffer)!);
-      case 253:
+      case 251:
         return PwaManifest.decode(readValue(buffer)!);
-      case 254:
+      case 252:
         return GestureConfig.decode(readValue(buffer)!);
+      case 253:
+        return PushDistributor.decode(readValue(buffer)!);
+      case 254:
+        return PushStatus.decode(readValue(buffer)!);
       case 255:
         final _PigeonCodecOverflow wrapper = _PigeonCodecOverflow.decode(readValue(buffer)!);
         return wrapper.unwrap();
@@ -8204,28 +8046,6 @@ class GeckoEngineSettingsApi {
     ;
   }
 
-  /// Sets whether the reader view dark color scheme should be rendered as pure
-  /// black (AMOLED). Mirrors WebLibre's "pure black" theme setting into
-  /// Mozilla's reader view extension. Persisted in SharedPreferences so a
-  /// cold-started reader view resolves the right value before Flutter runs.
-  Future<void> setReaderViewPureBlack(bool enabled) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setReaderViewPureBlack$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enabled]);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-
   /// Snapshot of which sessions must NOT write to Mozilla Places (hard
   /// exclude-from-history / "incognito container"). Every engine session runs a
   /// tab-scoped history delegate that consults this snapshot, so the decision is
@@ -8572,14 +8392,14 @@ class GeckoTabsApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onRestoreComplete, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, }) async {
+  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onRestoreComplete, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, }) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onRestoreComplete, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onRestoreComplete, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
@@ -9257,8 +9077,6 @@ abstract class GeckoStateEvents {
 
   void onHistoryStateChange(int sequence, String id, HistoryState state);
 
-  void onReaderableStateChange(int sequence, String id, ReaderableState state);
-
   void onSecurityInfoStateChange(int sequence, String id, SecurityInfoState state);
 
   void onIconChange(int sequence, String id, Uint8List? bytes);
@@ -9472,29 +9290,6 @@ abstract class GeckoStateEvents {
           final HistoryState arg_state = args[2]! as HistoryState;
           try {
             api.onHistoryStateChange(arg_sequence, arg_id, arg_state);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
-    {
-      final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onReaderableStateChange$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          final List<Object?> args = message! as List<Object?>;
-          final int arg_sequence = args[0]! as int;
-          final String arg_id = args[1]! as String;
-          final ReaderableState arg_state = args[2]! as ReaderableState;
-          try {
-            api.onReaderableStateChange(arg_sequence, arg_id, arg_state);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
@@ -9855,88 +9650,6 @@ abstract class GeckoLogging {
           final String arg_message = args[1]! as String;
           try {
             api.onLog(arg_level, arg_message);
-            return wrapResponse(empty: true);
-          } on PlatformException catch (e) {
-            return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
-          }
-        });
-      }
-    }
-  }
-}
-
-class ReaderViewEvents {
-  /// Constructor for [ReaderViewEvents]. The [binaryMessenger] named argument is
-  /// available for dependency injection. If it is left null, the default
-  /// BinaryMessenger will be used which routes to the host platform.
-  ReaderViewEvents({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
-  final BinaryMessenger? pigeonVar_binaryMessenger;
-
-  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
-
-  final String pigeonVar_messageChannelSuffix;
-
-  Future<void> onToggleReaderView(bool enable) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onToggleReaderView$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enable]);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-
-  Future<void> onAppearanceButtonTap() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewEvents.onAppearanceButtonTap$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
-  }
-}
-
-abstract class ReaderViewController {
-  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
-
-  void appearanceButtonVisibility(int sequence, bool visible);
-
-  static void setUp(ReaderViewController? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
-    {
-      final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.ReaderViewController.appearanceButtonVisibility$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
-      if (api == null) {
-        pigeonVar_channel.setMessageHandler(null);
-      } else {
-        pigeonVar_channel.setMessageHandler((Object? message) async {
-          final List<Object?> args = message! as List<Object?>;
-          final int arg_sequence = args[0]! as int;
-          final bool arg_visible = args[1]! as bool;
-          try {
-            api.appearanceButtonVisibility(arg_sequence, arg_visible);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

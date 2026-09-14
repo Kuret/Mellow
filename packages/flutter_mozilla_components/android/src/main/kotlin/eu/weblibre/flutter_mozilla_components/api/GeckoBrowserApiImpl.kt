@@ -70,8 +70,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.LogLevel
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
-import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewEvents
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import mozilla.components.browser.state.action.CustomTabListAction
@@ -318,9 +316,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                 withoutProcessText + processTextActions
             }
 
-        val readerViewController =
-            ReaderViewController(_flutterPluginBinding.binaryMessenger)
-
         val extensionEvents = BrowserExtensionEvents(_flutterPluginBinding.binaryMessenger)
 
         val addonEvents = GeckoAddonEvents(_flutterPluginBinding.binaryMessenger)
@@ -355,7 +350,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GlobalComponents.setUp(
             profileApplicationContext,
             _flutterEvents,
-            readerViewController,
             selectionActionDelegate,
             addonEvents,
             tabContentEvents,
@@ -444,11 +438,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoPushApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             pushApi
-        )
-
-        ReaderViewEvents.setUp(
-            _flutterPluginBinding.binaryMessenger,
-            components.events.readerViewEvents
         )
 
         val intent =

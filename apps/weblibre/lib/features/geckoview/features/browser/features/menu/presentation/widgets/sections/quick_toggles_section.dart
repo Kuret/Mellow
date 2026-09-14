@@ -23,15 +23,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// The segmented Desktop / Reader / Gestures bar at the top of the sheet.
 ///
@@ -63,46 +59,6 @@ class QuickTogglesSection extends ConsumerWidget {
           ref
               .read(desktopModeProvider(selectedTabId).notifier)
               .enabled(!desktopEnabled);
-        },
-      );
-    }
-
-    if (items.contains(MenuItemType.readerMode)) {
-      final isReaderLoading = ref
-          .watch(readerableScreenControllerProvider)
-          .isLoading;
-      final readerabilityState = ref.watch(
-        selectedTabStateProvider.select(
-          (state) => state?.readerableState ?? ReaderableState.$default(),
-        ),
-      );
-      final isReaderActive = readerabilityState.active;
-      final enableReadability = ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enableReadability,
-        ),
-      );
-      final enforceReadability = ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enforceReadability,
-        ),
-      );
-      final readerVisible =
-          (readerabilityState.readerable &&
-              (enableReadability || readerabilityState.active)) ||
-          (enforceReadability && enableReadability);
-
-      toggles[MenuItemType.readerMode] = _QuickToggle(
-        icon: (readerVisible && isReaderActive)
-            ? MdiIcons.bookOpen
-            : MdiIcons.bookOpenOutline,
-        label: MenuItemType.readerMode.label,
-        active: readerVisible && isReaderActive,
-        enabled: readerVisible && !isReaderLoading,
-        onTap: () async {
-          await ref
-              .read(readerableScreenControllerProvider.notifier)
-              .toggleReaderView(!isReaderActive);
         },
       );
     }
@@ -150,7 +106,6 @@ class _QuickToggle {
   final IconData icon;
   final String label;
   final bool active;
-  final bool enabled;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -159,7 +114,6 @@ class _QuickToggle {
     required this.label,
     required this.active,
     required this.onTap,
-    this.enabled = true,
     this.onLongPress,
   });
 }
@@ -229,9 +183,7 @@ class _QuickToggleSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final foregroundColor = !toggle.enabled
-        ? colorScheme.onSurface.withValues(alpha: 0.38)
-        : toggle.active
+    final foregroundColor = toggle.active
         ? colorScheme.onSecondaryContainer
         : colorScheme.onSurfaceVariant;
 
@@ -240,8 +192,8 @@ class _QuickToggleSegment extends StatelessWidget {
           ? colorScheme.secondaryContainer
           : Colors.transparent,
       child: InkWell(
-        onTap: toggle.enabled ? toggle.onTap : null,
-        onLongPress: toggle.enabled ? toggle.onLongPress : null,
+        onTap: toggle.onTap,
+        onLongPress: toggle.onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Column(

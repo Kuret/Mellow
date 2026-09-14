@@ -20,9 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
 class NavigateForwardButtonView extends StatelessWidget {
@@ -158,18 +156,8 @@ class NavigateBackButton extends HookConsumerWidget {
             tabSessionProvider(tabId: selectedTabId).notifier,
           );
 
-          final isReaderActive = ref.read(
-            selectedTabStateProvider.select(
-              (state) => state?.readerableState.active ?? false,
-            ),
-          );
-
           if (showStop) {
             await controller.stopLoading();
-          } else if (isReaderActive) {
-            await ref
-                .read(readerableScreenControllerProvider.notifier)
-                .toggleReaderView(false);
           } else {
             await controller.goBack();
           }

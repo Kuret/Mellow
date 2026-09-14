@@ -58,7 +58,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -1765,14 +1764,6 @@ class _Browser extends HookConsumerWidget {
                   final controller = ref.read(selectedTabSessionProvider);
 
                   await controller.stopLoading();
-                  return true;
-                } else if (tabState?.readerableState.active == true) {
-                  lastBackButtonPress.value = null;
-
-                  await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(false);
-
                   return true;
                 } else if (ref
                     .read(tabHistoryStateProvider(tabState?.id))

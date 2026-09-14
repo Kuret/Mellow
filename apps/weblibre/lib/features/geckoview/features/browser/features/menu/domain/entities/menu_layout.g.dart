@@ -24,7 +24,6 @@ Map<String, dynamic> _$MenuItemEntryToJson(MenuItemEntry instance) =>
 
 const _$MenuItemTypeEnumMap = {
   MenuItemType.desktopMode: 'desktopMode',
-  MenuItemType.readerMode: 'readerMode',
   MenuItemType.gestures: 'gestures',
   MenuItemType.addBookmark: 'addBookmark',
   MenuItemType.findInPage: 'findInPage',

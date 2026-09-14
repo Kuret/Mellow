@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart'
-    show ReaderableState;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -75,7 +73,7 @@ void main() {
   // Each seed below leaves an entry whose fields are indistinguishable from a
   // regular about:blank tab, which is why the flag and not the fields decides
   // whether the tab may be acted on.
-  for (final seed in ['security', 'icon', 'readerable']) {
+  for (final seed in ['security', 'icon']) {
     for (final (name, mode, contextId, isPrivate) in [
       ('a private', TabMode.private, 'private-context', true),
       ('a regular', TabMode.regular, null, false),
@@ -104,12 +102,6 @@ void main() {
             );
           case 'icon':
             events.onIconChange(1, 'tab', null);
-          case 'readerable':
-            events.onReaderableStateChange(
-              1,
-              'tab',
-              ReaderableState(readerable: true, active: false),
-            );
         }
         await pumpEventQueue();
 

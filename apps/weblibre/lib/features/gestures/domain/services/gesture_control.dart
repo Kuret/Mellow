@@ -37,7 +37,6 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositori
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -189,15 +188,6 @@ class GestureControlService extends _$GestureControlService {
         await _switchContainer(ContainerCycleDirection.next);
       case GestureAction.previousContainer:
         await _switchContainer(ContainerCycleDirection.previous);
-      case GestureAction.toggleReaderMode:
-        // One-shot reads from this keep-alive service take no subscription,
-        // so nothing auto-disposed is pinned by them.
-        final readerActive =
-            // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-            ref.read(tabStateProvider(tabId))?.readerableState.active ?? false;
-        await ref
-            .read(readerableScreenControllerProvider.notifier)
-            .toggleReaderView(!readerActive);
       case GestureAction.toggleDesktopMode:
         ref.read(desktopModeProvider(tabId).notifier).toggle();
       case GestureAction.findInPage:

@@ -5,10 +5,8 @@
 package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
-import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
-import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
@@ -183,13 +181,6 @@ object EngineProvider {
                 "resource://android/assets/extensions/readability_extract/",
                 "mozacReaderExtract",
             ).install(it)
-
-            // Installs Mozilla's reader view extension early and wires the
-            // WebLibre "pure black" (AMOLED) appearance bridge into it.
-            ReaderViewAppearanceFeature.install(
-                it,
-                PreferenceManager.getDefaultSharedPreferences(context),
-            )
         }
     }
 

@@ -30,7 +30,6 @@ enum ToolbarButtonId {
   tabsCount,
   navigationMenu,
   reload,
-  readerMode,
   desktop,
   findInPage,
   closeTab,

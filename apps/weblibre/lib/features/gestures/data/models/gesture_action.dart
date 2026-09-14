@@ -130,12 +130,6 @@ enum GestureAction {
   ),
 
   // Page tools
-  toggleReaderMode(
-    'Reader Mode',
-    'Toggle reader mode for the current page',
-    MdiIcons.bookOpenOutline,
-    GestureActionCategory.page,
-  ),
   toggleDesktopMode(
     'Desktop Site',
     'Toggle desktop site for the current page',

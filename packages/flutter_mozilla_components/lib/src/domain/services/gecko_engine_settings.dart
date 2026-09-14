@@ -210,10 +210,6 @@ class GeckoEngineSettingsService {
     return _api.setGlobalDesktopMode(enable, applyToExistingTabs);
   }
 
-  Future<void> setReaderViewPureBlack(bool enabled) {
-    return _api.setReaderViewPureBlack(enabled);
-  }
-
   Future<void> setHistoryExclusions({
     required List<String> excludedTabIds,
     required List<String> knownTabIds,

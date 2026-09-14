@@ -50,8 +50,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'disableAnimations': DriftSqlType.bool,
   'refreshRateMode': DriftSqlType.string,
   'showModalBarrier': DriftSqlType.bool,
-  'enableReadability': DriftSqlType.bool,
-  'enforceReadability': DriftSqlType.bool,
   'screenshotProtectionEnabled': DriftSqlType.bool,
   'allowPrivateTabScreenshots': DriftSqlType.bool,
   'defaultSearchProvider': DriftSqlType.string,

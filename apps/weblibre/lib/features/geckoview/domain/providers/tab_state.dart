@@ -29,7 +29,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -252,21 +251,6 @@ class TabStates extends _$TabStates {
         );
   }
 
-  void _onReaderableStateChange(ReaderableEvent event) {
-    final ReaderableEvent(:tabId, :readerable) = event;
-
-    final current = state[tabId] ?? TabState.$default(tabId);
-    _put(
-      tabId,
-      current.copyWith.readerableState(
-        ReaderableState(
-          readerable: readerable.readerable,
-          active: readerable.active,
-        ),
-      ),
-    );
-  }
-
   void _onFindResultsChange(FindResultsEvent event) {
     final FindResultsEvent(:tabId, :results) = event;
     final findResults = ref.read(tabFindResultStatesProvider.notifier);
@@ -348,18 +332,6 @@ class TabStates extends _$TabStates {
         onError: (Object error, StackTrace stackTrace) {
           logger.e(
             'Error in history events',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        },
-      ),
-      eventService.readerableEvents.listen(
-        (event) {
-          _onReaderableStateChange(event);
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          logger.e(
-            'Error in readerable events',
             error: error,
             stackTrace: stackTrace,
           );
@@ -457,7 +429,7 @@ class TabSortKeys with FastEquatable {
 /// Projection of [tabStatesProvider] for consumers that order or filter tabs
 /// but render nothing from the state itself. Watching this instead of the full
 /// map keeps the (expensive) grouping/sorting passes off the path of every
-/// icon, security-info and readerable event.
+/// icon and security-info event.
 @Riverpod(keepAlive: true)
 EquatableValue<Map<String, TabSortKeys>> tabSortKeys(Ref ref) {
   return ref.watch(

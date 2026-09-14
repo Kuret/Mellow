@@ -97,7 +97,6 @@ class TabContextMenuDraggable extends HookConsumerWidget {
       controller: menuController,
       enableFindInPage: false,
       enableDesktopMode: false,
-      enableReaderMode: false,
       enableReloadButton: false,
       enableNavigationButtons: false,
       enableAddToHomeScreen: false,
