@@ -46,10 +46,19 @@ class SettingsSectionDefinition {
   final List<String> keywords;
   final List<SettingsEntryDefinition> entries;
 
+  /// Whether the section renders its [title] as a heading above its card.
+  ///
+  /// A category whose whole content is one list of rows has nothing to
+  /// distinguish with a heading, so it renders as a single bare card. The
+  /// title stays required either way: search matches against it, and the
+  /// highlight keys are built from it.
+  final bool showTitle;
+
   const SettingsSectionDefinition({
     required this.title,
     required this.entries,
     this.keywords = const [],
+    this.showTitle = true,
   });
 }
 
@@ -299,14 +308,16 @@ List<Widget> buildSettingsSectionWidgets(
       sectionIndex++
     ) ...[
       if (sectionIndex > 0) const SizedBox(height: 24),
-      Text(
-        sections[sectionIndex].title,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: colorScheme.primary,
-          fontWeight: FontWeight.w700,
+      if (sections[sectionIndex].showTitle) ...[
+        Text(
+          sections[sectionIndex].title,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-      ),
-      const SizedBox(height: 12),
+        const SizedBox(height: 12),
+      ],
       Card.filled(
         margin: EdgeInsets.zero,
         color: colorScheme.surfaceContainer,
@@ -452,6 +463,7 @@ List<SettingsSectionDefinition> filterSettingsSections({
           title: section.title,
           keywords: section.keywords,
           entries: filteredEntries,
+          showTitle: section.showTitle,
         ),
       );
     }
