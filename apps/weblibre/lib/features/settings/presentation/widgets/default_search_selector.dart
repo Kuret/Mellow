@@ -19,9 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
-import 'package:weblibre/features/search/presentation/widgets/search_provider_dialog.dart';
 import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -32,44 +30,35 @@ class DefaultSearchSelector extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeProvider = ref.watch(defaultSearchProviderProvider);
+    final providers = ref.watch(allSearchProvidersProvider);
 
-    Future<void> updateSearchProvider(SearchProvider provider) async {
-      await ref
-          .read(saveGeneralSettingsControllerProvider.notifier)
-          .save(
-            (currentSettings) =>
-                currentSettings.copyWith.defaultSearchProvider(provider.id),
-          );
-    }
-
-    Future<void> pickProvider() async {
-      final picked = await showSearchProviderDialog(
-        context,
-        selected: activeProvider,
-      );
-
-      if (picked != null) {
-        await updateSearchProvider(picked);
-      }
-    }
-
-    return SizedBox(
-      height: 48,
-      child: Row(
-        children: [
-          Expanded(
-            child: ActionChip(
-              avatar: SearchProviderIcon(provider: activeProvider),
-              label: Text(activeProvider.name),
-              onPressed: pickProvider,
-            ),
-          ),
-          IconButton(
-            onPressed: pickProvider,
-            icon: const Icon(Icons.chevron_right),
-          ),
-        ],
+    return DropdownMenu(
+      key: ValueKey(activeProvider.id),
+      initialSelection: activeProvider,
+      inputDecorationTheme: InputDecorationTheme(
+        prefixIconConstraints: BoxConstraints.tight(const Size.square(24)),
       ),
+      width: double.infinity,
+      leadingIcon: SearchProviderIcon(provider: activeProvider, iconSize: 20),
+      dropdownMenuEntries: providers.map((provider) {
+        return DropdownMenuEntry(
+          value: provider,
+          label: provider.name,
+          leadingIcon: SearchProviderIcon(provider: provider, iconSize: 20),
+        );
+      }).toList(),
+      onSelected: (provider) async {
+        if (provider != null) {
+          await ref
+              .read(saveGeneralSettingsControllerProvider.notifier)
+              .save(
+                (currentSettings) =>
+                    currentSettings.copyWith.defaultSearchProvider(
+                      provider.id,
+                    ),
+              );
+        }
+      },
     );
   }
 }
