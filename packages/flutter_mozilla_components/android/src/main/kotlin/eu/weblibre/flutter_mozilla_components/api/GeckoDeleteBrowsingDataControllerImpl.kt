@@ -21,9 +21,6 @@ import mozilla.components.browser.state.selector.allTabs
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
-import mozilla.components.concept.engine.translate.ModelManagementOptions
-import mozilla.components.concept.engine.translate.ModelOperation
-import mozilla.components.concept.engine.translate.OperationLevel
 
 class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController {
     companion object {
@@ -106,14 +103,6 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
     override fun deleteCachedFiles(callback: (Result<Unit>) -> Unit) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
-                components.core.engine.manageTranslationsLanguageModel(
-                    options = ModelManagementOptions(
-                        operation = ModelOperation.DELETE,
-                        operationLevel = OperationLevel.CACHE,
-                    ),
-                    onSuccess = { },
-                    onError = { },
-                )
                 components.core.engine.clearData(
                     Engine.BrowsingData.select(Engine.BrowsingData.ALL_CACHES),
                     onSuccess = { callback(Result.success(Unit)) },

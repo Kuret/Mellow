@@ -24,6 +24,7 @@ import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -31,6 +32,22 @@ part 'gesture_settings.g.dart';
 
 typedef UpdateGestureSettingsFunc =
     GestureSettings Function(GestureSettings currentSettings);
+
+/// Decodes the persisted gesture bindings, dropping any stroke bound to an
+/// action name that no longer exists.
+///
+/// `GestureAction` loses values as features are removed, and the generated
+/// `fromJson` throws on a name it does not know. Filtering here means a profile
+/// that still names a deleted action falls back to no binding for that stroke
+/// instead of failing to load its gesture settings at all.
+Map<String, dynamic> _decodeBindings(String json) {
+  final decoded = jsonDecode(json) as Map<String, dynamic>;
+  final knownNames = GestureAction.values.map((action) => action.name).toSet();
+
+  return Map.fromEntries(
+    decoded.entries.where((entry) => knownNames.contains(entry.value)),
+  );
+}
 
 @Riverpod(keepAlive: true)
 class GestureSettingsRepository extends _$GestureSettingsRepository {
@@ -83,7 +100,7 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
           .mapNotNull(jsonDecode),
       'bindings': settings['bindings']
           ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
+          .mapNotNull(_decodeBindings),
     });
   }
 

@@ -24,9 +24,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetParams
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
-import eu.weblibre.flutter_mozilla_components.pigeons.TabTranslationStateData
-import eu.weblibre.flutter_mozilla_components.pigeons.TranslationEngineStateData
-import eu.weblibre.flutter_mozilla_components.pigeons.TranslationLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -357,66 +354,6 @@ class Events(
                             ContentAction.UpdateExpandedToolbarStateAction(tab.id, false)
                         )
                     }
-                }
-        }
-
-        // Translation engine state (browser-level)
-        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.map { state -> state.translationEngine }
-                .distinctUntilChanged { old, new ->
-                    old.isEngineSupported == new.isEngineSupported &&
-                        old.supportedLanguages == new.supportedLanguages
-                }
-                .debounce(50)
-                .collect { translationEngine ->
-                    val fromLanguages = translationEngine.supportedLanguages?.fromLanguages?.map { lang ->
-                        TranslationLanguage(code = lang.code, localizedDisplayName = lang.localizedDisplayName ?: lang.code)
-                    }
-                    val toLanguages = translationEngine.supportedLanguages?.toLanguages?.map { lang ->
-                        TranslationLanguage(code = lang.code, localizedDisplayName = lang.localizedDisplayName ?: lang.code)
-                    }
-
-                    flutterEvents.onTranslationEngineStateChange(
-                        EventSequence.next(),
-                        TranslationEngineStateData(
-                            isEngineSupported = translationEngine.isEngineSupported,
-                            fromLanguages = fromLanguages,
-                            toLanguages = toLanguages,
-                        )
-                    ) { _ -> }
-                }
-        }
-
-        // Per-tab translation state
-        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.changedTabsBy(windowMillis = 25) {
-                listOf(
-                    it.translationsState.isTranslated,
-                    it.translationsState.isTranslateProcessing,
-                    it.translationsState.isOfferTranslate,
-                    it.translationsState.isExpectedTranslate,
-                    it.translationsState.translationEngineState,
-                    it.translationsState.translationError,
-                )
-            }
-                .collect { tab ->
-                    val ts = tab.translationsState
-                    flutterEvents.onTabTranslationStateChange(
-                        EventSequence.next(),
-                        TabTranslationStateData(
-                            tabId = tab.id,
-                            isTranslated = ts.isTranslated,
-                            isTranslateProcessing = ts.isTranslateProcessing,
-                            isOfferTranslate = ts.isOfferTranslate,
-                            isExpectedTranslate = ts.isExpectedTranslate,
-                            detectedLanguageCode = ts.translationEngineState?.detectedLanguages?.documentLangTag,
-                            userPreferredLanguageCode = ts.translationEngineState?.detectedLanguages?.userPreferredLangTag,
-                            requestedFromLanguage = ts.translationEngineState?.requestedTranslationPair?.fromLanguage,
-                            requestedToLanguage = ts.translationEngineState?.requestedTranslationPair?.toLanguage,
-                            translationErrorName = ts.translationError?.errorName,
-                            displayError = ts.translationError?.displayError,
-                        )
-                    ) { _ -> }
                 }
         }
 

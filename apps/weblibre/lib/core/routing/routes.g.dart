@@ -489,12 +489,6 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $ContextMenuRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'container_draft',
-      name: 'ContainerDraftRoute',
-      hasOverriddenOnExit: false,
-      factory: $ContainerDraftRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'containers',
       name: 'ContainerListRoute',
       hasOverriddenOnExit: false,
@@ -655,27 +649,6 @@ mixin $ContextMenuRoute on GoRouteData {
     '/browser/context_menu',
     queryParams: {'hit-result': _self.hitResult},
   );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $ContainerDraftRoute on GoRouteData {
-  static ContainerDraftRoute _fromState(GoRouterState state) =>
-      const ContainerDraftRoute();
-
-  @override
-  String get location => GoRouteData.$location('/browser/container_draft');
 
   @override
   void go(BuildContext context) => context.go(location);

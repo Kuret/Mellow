@@ -17,10 +17,8 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView
-import mozilla.components.concept.engine.translate.TranslationOptions
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.addons.logger
-import eu.weblibre.flutter_mozilla_components.pigeons.TranslationOptions as PigeonTranslationOptions
 
 /**
  * Implementation of GeckoSessionApi that manages browser session operations
@@ -173,36 +171,6 @@ class GeckoSessionApiImpl : GeckoSessionApi {
             components.useCases.sessionUseCases.printContent(tabId = getTabId(tabId))
         } catch (e: Exception) {
             logger.error("$TAG: Failed to print content", e)
-            throw e
-        }
-    }
-
-    override fun translate(
-        tabId: String?,
-        fromLanguage: String,
-        toLanguage: String,
-        options: PigeonTranslationOptions?
-    ) {
-        try {
-            logger.debug("$TAG: Translating from $fromLanguage to $toLanguage for tab: $tabId")
-            components.useCases.sessionUseCases.translate(
-                tabId = getTabId(tabId),
-                fromLanguage = fromLanguage,
-                toLanguage = toLanguage,
-                options = options?.let { TranslationOptions(downloadModel = it.downloadModel) }
-            )
-        } catch (e: Exception) {
-            logger.error("$TAG: Failed to translate", e)
-            throw e
-        }
-    }
-
-    override fun translateRestore(tabId: String?) {
-        try {
-            logger.debug("$TAG: Restoring translation for tab: $tabId")
-            components.useCases.sessionUseCases.translateRestore(tabId = getTabId(tabId))
-        } catch (e: Exception) {
-            logger.error("$TAG: Failed to restore translation", e)
             throw e
         }
     }

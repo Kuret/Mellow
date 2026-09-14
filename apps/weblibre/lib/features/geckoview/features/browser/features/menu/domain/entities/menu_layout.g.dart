@@ -29,7 +29,6 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.addBookmark: 'addBookmark',
   MenuItemType.findInPage: 'findInPage',
   MenuItemType.inspectElement: 'inspectElement',
-  MenuItemType.translatePage: 'translatePage',
   MenuItemType.addToHomeScreen: 'addToHomeScreen',
   MenuItemType.openInApp: 'openInApp',
   MenuItemType.containers: 'containers',

@@ -32,10 +32,6 @@ part of 'routes.dart';
       name: 'ContextMenuRoute',
       path: 'context_menu',
     ),
-    TypedGoRoute<ContainerDraftRoute>(
-      name: 'ContainerDraftRoute',
-      path: 'container_draft',
-    ),
     TypedGoRoute<ContainerListRoute>(
       name: 'ContainerListRoute',
       path: 'containers',
@@ -157,22 +153,6 @@ bool _isContainerUiEnabled(BuildContext context) {
   ).read(generalSettingsWithDefaultsProvider);
 
   return settings.showContainerUi;
-}
-
-class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
-  const ContainerDraftRoute();
-
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ContainerDraftSuggestionsScreen();
-  }
 }
 
 class ContainerListRoute extends GoRouteData with $ContainerListRoute {

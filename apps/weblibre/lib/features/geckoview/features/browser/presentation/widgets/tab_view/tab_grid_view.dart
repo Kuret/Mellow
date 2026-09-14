@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -29,7 +28,6 @@ import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -51,7 +49,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
@@ -203,7 +200,6 @@ class _GridFolderTile extends ConsumerWidget {
 class _TabDraggable extends HookConsumerWidget {
   final String tabId;
   final String? sourceSearchQuery;
-  final String? suggestedContainerId;
   final VoidCallback onClose;
   final int depth;
 
@@ -211,7 +207,6 @@ class _TabDraggable extends HookConsumerWidget {
     required this.tabId,
     required this.onClose,
     this.sourceSearchQuery,
-    this.suggestedContainerId,
     this.depth = 0,
   });
 
@@ -233,32 +228,15 @@ class _TabDraggable extends HookConsumerWidget {
 
     // Cache the tab widget to avoid rebuilding
     final tab = useMemoized(() {
-      return (suggestedContainerId != null)
-          ? SuggestedSingleGridTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onTap: () async {
-                final containerData = await ref
-                    .read(containerRepositoryProvider.notifier)
-                    .getContainerData(suggestedContainerId!);
-
-                if (containerData != null) {
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .assignContainer(tabId, containerData);
-                }
-              },
-            )
-          : SingleGridTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onClose: onClose,
-              sourceSearchQuery: sourceSearchQuery,
-              depth: depth,
-            );
-    }, [tabId, activeTab, suggestedContainerId, depth]);
+      return SingleGridTabPreview(
+        key: ValueKey(tabId),
+        tabId: tabId,
+        activeTabId: activeTab,
+        onClose: onClose,
+        sourceSearchQuery: sourceSearchQuery,
+        depth: depth,
+      );
+    }, [tabId, activeTab, depth]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -369,19 +347,8 @@ class _TabGridView extends HookConsumerWidget {
       ];
     }
 
-    final tabSuggestionsEnabled = ref.watch(
-      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-    );
-
-    final suggestedTabEntities = tabSuggestionsEnabled
-        ? ref.watch(suggestedTabEntitiesProvider(containerId))
-        : EquatableValue(<TabEntity>[]);
-
-    final itemCount =
-        primaryRows.length +
-        //Limit to 3 sugegstions for now
-        math.min<int>(suggestedTabEntities.value.length, 3);
-    final displayItemCount = reorderEnabled ? primaryRows.length : itemCount;
+    final itemCount = primaryRows.length;
+    final displayItemCount = itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -464,9 +431,7 @@ class _TabGridView extends HookConsumerWidget {
 
                 return widget;
               },
-              suggestedContainerId: containerId,
               primaryRows: primaryRows,
-              suggestedTabEntities: suggestedTabEntities,
               onClose: onClose,
             )
           : ReorderableBuilder.builder(
@@ -537,9 +502,7 @@ class _TabGridView extends HookConsumerWidget {
                     }
                     return reorderableItemBuilder(wrapped, index);
                   },
-                  suggestedContainerId: containerId,
                   primaryRows: primaryRows,
-                  suggestedTabEntities: suggestedTabEntities,
                   onClose: onClose,
                 );
               },
@@ -555,18 +518,14 @@ class _TabGrid extends StatelessWidget {
     required this.scrollController,
     required this.itemCount,
     required this.itemBuilder,
-    required this.suggestedContainerId,
     required this.primaryRows,
-    required this.suggestedTabEntities,
     required this.onClose,
   });
 
   final int crossAxisCount;
   final int itemCount;
   final ScrollController? scrollController;
-  final String? suggestedContainerId;
   final List<TabViewItem> primaryRows;
-  final EquatableValue<List<TabEntity>> suggestedTabEntities;
   final Widget Function(Widget, int)? itemBuilder;
   final VoidCallback onClose;
 
@@ -584,49 +543,33 @@ class _TabGrid extends StatelessWidget {
       ),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        if (index < primaryRows.length) {
-          final row = primaryRows[index];
+        final row = primaryRows[index];
 
-          if (row.isFolder) {
-            final folderTile = CustomDraggable(
-              key: Key(row.tabId),
-              child: _GridFolderTile(folderItem: row.folderItem!),
-            );
-            return itemBuilder == null
-                ? folderTile
-                : itemBuilder!(folderTile, index);
-          }
-
-          final tab = CustomDraggable(
+        if (row.isFolder) {
+          final folderTile = CustomDraggable(
             key: Key(row.tabId),
-            data: TabDragData(row.tabId),
-            child: _TabDraggable(
-              tabId: row.tabId,
-              sourceSearchQuery: row.sourceSearchQuery,
-              onClose: onClose,
-              depth: row.depth,
-            ),
+            child: _GridFolderTile(folderItem: row.folderItem!),
           );
-
-          if (itemBuilder == null) {
-            return TabDropTarget(targetTabId: row.tabId, child: tab);
-          }
-          return itemBuilder!(tab, index);
+          return itemBuilder == null
+              ? folderTile
+              : itemBuilder!(folderTile, index);
         }
 
-        final suggestedIndex = index - primaryRows.length;
-        final entity = suggestedTabEntities.value[suggestedIndex];
-
         final tab = CustomDraggable(
-          key: Key('suggested_${entity.tabId}'),
+          key: Key(row.tabId),
+          data: TabDragData(row.tabId),
           child: _TabDraggable(
-            tabId: entity.tabId,
+            tabId: row.tabId,
+            sourceSearchQuery: row.sourceSearchQuery,
             onClose: onClose,
-            suggestedContainerId: suggestedContainerId,
+            depth: row.depth,
           ),
         );
 
-        return (itemBuilder != null) ? itemBuilder!(tab, index) : tab;
+        if (itemBuilder == null) {
+          return TabDropTarget(targetTabId: row.tabId, child: tab);
+        }
+        return itemBuilder!(tab, index);
       },
     );
   }

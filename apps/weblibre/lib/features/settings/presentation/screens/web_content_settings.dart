@@ -93,12 +93,6 @@ const List<SettingsSectionDefinition> webContentSettingsSections = [
         keywords: ['reader'],
         child: _EnforceReaderModeTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'On Device AI',
-        subtitle: 'Local AI features including topic and tab suggestions',
-        keywords: ['local ai', 'suggestions'],
-        child: _OnDeviceAiTile(),
-      ),
     ],
   ),
 ];
@@ -110,7 +104,7 @@ class WebContentSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Web Content',
-      subtitle: 'Text rendering, reader mode, PDFs, and local AI features.',
+      subtitle: 'Text rendering, reader mode, and PDFs.',
       icon: MdiIcons.fileDocumentOutline,
       sections: webContentSettingsSections,
     );
@@ -430,36 +424,6 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
                   );
             }
           : null,
-    );
-  }
-}
-
-class _OnDeviceAiTile extends HookConsumerWidget {
-  const _OnDeviceAiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableLocalAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.enableLocalAiFeatures,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('On Device AI'),
-      subtitle: const Text(
-        'Local on-device features including container topic and tab suggestions',
-      ),
-      secondary: const Icon(MdiIcons.creation),
-      value: enableLocalAiFeatures,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enableLocalAiFeatures(value),
-            );
-      },
     );
   }
 }

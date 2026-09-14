@@ -214,7 +214,7 @@ void main() {
           items: [
             MenuItemDefault(MenuItemType.addBookmark),
             MenuItemDefault(MenuItemType.findInPage),
-            MenuItemDefault(MenuItemType.translatePage, visible: false),
+            MenuItemDefault(MenuItemType.inspectElement, visible: false),
           ],
         ),
       ];
@@ -233,7 +233,7 @@ void main() {
       expect(_itemTypes(merged, MenuSectionType.pageActions), [
         MenuItemType.findInPage,
         MenuItemType.addBookmark,
-        MenuItemType.translatePage,
+        MenuItemType.inspectElement,
       ]);
       expect(merged.single.visibleItemTypes, [
         MenuItemType.findInPage,
@@ -352,16 +352,17 @@ void main() {
     });
 
     test('a layout naming retired menu items still loads', () {
-      // `feeds`, `fetchFeeds`, `smallWeb` and `bangs` shipped as MenuItemType
-      // values and are still named in stored menu layouts. Removing the enum
-      // values must not throw, and must not cost the user the rest of their
-      // arrangement.
+      // `feeds`, `fetchFeeds`, `smallWeb`, `bangs` and `translatePage` shipped
+      // as MenuItemType values and are still named in stored menu layouts.
+      // Removing the enum values must not throw, and must not cost the user the
+      // rest of their arrangement.
       final decoded = menuItemEntriesFromJson([
         {'type': 'history', 'visible': true},
         {'type': 'feeds', 'visible': true},
         {'type': 'fetchFeeds', 'visible': true},
         {'type': 'smallWeb', 'visible': true},
         {'type': 'bangs', 'visible': true},
+        {'type': 'translatePage', 'visible': true},
         {'type': 'bookmarks', 'visible': true},
       ]);
 

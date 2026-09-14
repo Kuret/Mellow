@@ -42,7 +42,6 @@ import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.engine.middleware.SessionPrioritizationMiddleware
-import mozilla.components.browser.state.engine.middleware.TranslationsMiddleware
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
@@ -79,7 +78,6 @@ import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.support.base.worker.Frequency
 import org.mozilla.geckoview.GeckoRuntime
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Job
 import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.concurrent.TimeUnit
@@ -267,13 +265,6 @@ class Core(
                 SaveToPDFMiddleware(),
                 FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
                 LastMediaAccessMiddleware(),
-                // Keep parity with Fenix: do not initialize translations on store init.
-                // EngineObserver will dispatch InitTranslationsBrowserState after first completed page load.
-                TranslationsMiddleware(
-                    engine,
-                    MainScope(),
-                    false,
-                    isTranslationsEnabled = { true }),
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.

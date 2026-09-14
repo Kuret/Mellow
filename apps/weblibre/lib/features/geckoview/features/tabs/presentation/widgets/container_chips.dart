@@ -26,16 +26,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
-import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -184,70 +180,9 @@ class _SyncedTabsChip extends ConsumerWidget {
   }
 }
 
-class _ContainerSuggestionsChip extends ConsumerWidget {
-  const _ContainerSuggestionsChip();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabSuggestionsEnabled = ref.watch(
-      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-    );
-    final enableAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
-      ),
-    );
-
-    if (!enableAiFeatures || !tabSuggestionsEnabled) {
-      return const SizedBox.shrink();
-    }
-
-    final suggestions = ref.watch(suggestClustersProvider);
-
-    return suggestions.when(
-      skipLoadingOnReload: true,
-      data: (data) {
-        if (data.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return FilterChip(
-          avatar: const Icon(MdiIcons.autoFix),
-          label: Text(data!.length.toString()),
-          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
-          side: _chipSide(context, null, false),
-          showCheckmark: false,
-          onSelected: (_) async {
-            await const ContainerDraftRoute().push(context);
-          },
-        );
-      },
-      error: (error, stackTrace) {
-        logger.e(
-          'Error suggesting containers',
-          error: error,
-          stackTrace: stackTrace,
-        );
-        return const SizedBox.shrink();
-      },
-      loading: () {
-        return FilterChip(
-          avatar: const Icon(MdiIcons.autoFix),
-          label: const Skeletonizer(child: Text('0')),
-          color: WidgetStatePropertyAll(_chipColor(context, null, false)),
-          side: _chipSide(context, null, false),
-          showCheckmark: false,
-          onSelected: null,
-        );
-      },
-    );
-  }
-}
-
 class ContainerChips extends HookConsumerWidget {
   final bool displayMenu;
   final bool showUnassignedChip;
-  final bool showGroupSuggestions;
   final bool enableDragAndDrop;
   final bool showSyncedChip;
   final bool syncedChipSelected;
@@ -279,7 +214,6 @@ class ContainerChips extends HookConsumerWidget {
     this.searchTextListenable,
     this.displayMenu = true,
     this.showUnassignedChip = true,
-    this.showGroupSuggestions = false,
     this.enableDragAndDrop = true,
     this.showSyncedChip = false,
     this.syncedChipSelected = false,
@@ -526,8 +460,6 @@ class ContainerChips extends HookConsumerWidget {
                                 onSelected: onSelected,
                               ),
                             ),
-                          if (showGroupSuggestions)
-                            const _ContainerSuggestionsChip(),
                         ],
                         availableItems: availableContainers,
                         selectedItem: selectedContainer,

@@ -32,7 +32,6 @@ enum ToolbarButtonId {
   reload,
   readerMode,
   desktop,
-  translation,
   findInPage,
   closeTab,
   inputUrl,

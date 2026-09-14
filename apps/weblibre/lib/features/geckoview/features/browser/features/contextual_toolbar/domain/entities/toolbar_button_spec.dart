@@ -102,12 +102,6 @@ const desktopToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
-const translationToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.translation,
-  defaultVisible: false,
-  canBeFallbackTarget: false,
-);
-
 const findInPageToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.findInPage,
   defaultVisible: false,
@@ -214,7 +208,6 @@ const toolbarButtonSpecs = [
   reloadToolbarButtonSpec,
   readerModeToolbarButtonSpec,
   desktopToolbarButtonSpec,
-  translationToolbarButtonSpec,
   findInPageToolbarButtonSpec,
   closeTabToolbarButtonSpec,
   inputUrlToolbarButtonSpec,

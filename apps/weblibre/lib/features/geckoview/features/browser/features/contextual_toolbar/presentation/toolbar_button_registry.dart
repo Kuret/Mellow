@@ -26,9 +26,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -48,7 +46,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
@@ -325,27 +322,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         );
       }
       return _DesktopModeToolbarButton(selectedTabId: scope.selectedTabId);
-    },
-  ),
-  ToolbarButtonDefinition(
-    spec: translationToolbarButtonSpec,
-    label: 'Translate',
-    icon: Icons.translate,
-    longPressActions: ['Show Translation Options'],
-    isPrimaryAvailable: (scope, ref) {
-      if (scope.selectedTabId == null) {
-        return false;
-      }
-
-      final engineState = ref.read(translationEngineStateProvider);
-      final readerActive = scope.tabState?.readerableState.active ?? false;
-      return !readerActive && engineState?.isEngineSupported == true;
-    },
-    builder: (scope, context, ref) {
-      if (scope.isPreview) {
-        return IconButton(onPressed: () {}, icon: const Icon(Icons.translate));
-      }
-      return _TranslateToolbarButton(selectedTabId: scope.selectedTabId);
     },
   ),
   ToolbarButtonDefinition(
@@ -1072,44 +1048,6 @@ class _DesktopModeToolbarButton extends ConsumerWidget {
       icon: Icon(
         desktopEnabled ? Icons.desktop_windows : Icons.desktop_windows_outlined,
         color: desktopEnabled ? Theme.of(context).colorScheme.primary : null,
-      ),
-    );
-  }
-}
-
-class _TranslateToolbarButton extends ConsumerWidget {
-  final String? selectedTabId;
-
-  const _TranslateToolbarButton({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isTranslated = ref.watch(
-      tabTranslationStateProvider(selectedTabId).select((s) => s.isTranslated),
-    );
-
-    return IconButton(
-      onPressed: () async {
-        final tabId = selectedTabId;
-        if (tabId != null) {
-          if (isTranslated) {
-            await ref
-                .read(tabSessionProvider(tabId: tabId).notifier)
-                .translateRestore();
-          } else {
-            await showTranslationBottomSheet(context, selectedTabId: tabId);
-          }
-        }
-      },
-      onLongPress: () async {
-        final tabId = selectedTabId;
-        if (tabId != null) {
-          await showTranslationBottomSheet(context, selectedTabId: tabId);
-        }
-      },
-      icon: Icon(
-        isTranslated ? MdiIcons.translateOff : Icons.translate,
-        color: isTranslated ? Theme.of(context).colorScheme.primary : null,
       ),
     );
   }

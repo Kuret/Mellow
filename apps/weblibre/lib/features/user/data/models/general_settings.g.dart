@@ -35,8 +35,6 @@ abstract class _$GeneralSettingsCWProxy {
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
   );
 
-  GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
-
   GeneralSettings showContainerUi(bool showContainerUi);
 
   GeneralSettings showSearchCloseButton(bool showSearchCloseButton);
@@ -205,7 +203,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
-    bool enableLocalAiFeatures,
     bool showContainerUi,
     bool showSearchCloseButton,
     HomeTarget homeTarget,
@@ -327,10 +324,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
   ) => call(defaultSearchSuggestionsProvider: defaultSearchSuggestionsProvider);
-
-  @override
-  GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures) =>
-      call(enableLocalAiFeatures: enableLocalAiFeatures);
 
   @override
   GeneralSettings showContainerUi(bool showContainerUi) =>
@@ -618,7 +611,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
-    Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showSearchCloseButton = const $CopyWithPlaceholder(),
     Object? homeTarget = const $CopyWithPlaceholder(),
@@ -752,12 +744,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchSuggestionsProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchSuggestionsProvider as SearchSuggestionProviders,
-      enableLocalAiFeatures:
-          enableLocalAiFeatures == const $CopyWithPlaceholder() ||
-              enableLocalAiFeatures == null
-          ? _value.enableLocalAiFeatures
-          // ignore: cast_nullable_to_non_nullable
-          : enableLocalAiFeatures as bool,
       showContainerUi:
           showContainerUi == const $CopyWithPlaceholder() ||
               showContainerUi == null
@@ -1151,7 +1137,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$SearchSuggestionProvidersEnumMap,
     json['defaultSearchSuggestionsProvider'],
   ),
-  enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
   showContainerUi: json['showContainerUi'] as bool?,
   showSearchCloseButton: json['showSearchCloseButton'] as bool?,
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
@@ -1293,7 +1278,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'defaultSearchSuggestionsProvider':
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
-  'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
   'showSearchCloseButton': instance.showSearchCloseButton,
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,

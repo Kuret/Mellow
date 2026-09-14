@@ -56,7 +56,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'allowPrivateTabScreenshots': DriftSqlType.bool,
   'defaultSearchProvider': DriftSqlType.string,
   'defaultSearchSuggestionsProvider': DriftSqlType.string,
-  'enableLocalAiFeatures': DriftSqlType.bool,
   'showContainerUi': DriftSqlType.bool,
   'defaultCreateTabType': DriftSqlType.string,
   'tabIntentOpenSetting': DriftSqlType.string,

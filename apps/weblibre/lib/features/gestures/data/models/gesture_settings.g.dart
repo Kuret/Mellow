@@ -260,7 +260,6 @@ const _$GestureActionEnumMap = {
   GestureAction.increaseFontSize: 'increaseFontSize',
   GestureAction.decreaseFontSize: 'decreaseFontSize',
   GestureAction.toggleBookmark: 'toggleBookmark',
-  GestureAction.translatePage: 'translatePage',
   GestureAction.showHome: 'showHome',
   GestureAction.showHistory: 'showHistory',
   GestureAction.showBookmarks: 'showBookmarks',

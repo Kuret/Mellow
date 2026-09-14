@@ -31,7 +31,6 @@ import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dar
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/ai_configuration.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/doh_settings.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/permissions.dart';
@@ -79,25 +78,19 @@ class OnboardingScreen extends HookConsumerWidget {
     }, [isFreshOnboarding, onboardingMode]);
 
     final pages = useMemoized<List<Widget>>(() {
-      switch (currentRevision) {
-        case 1:
-          return [const AiConfigurationPage()];
-        default:
-          if (onboardingMode == OnboardingMode.restore && !isReturningUser) {
-            return [WelcomePage(isReturningUser: isReturningUser)];
-          }
-          return [
-            WelcomePage(isReturningUser: isReturningUser),
-            const DefaultSearchPage(),
-            if (showDetailedPages) const DohSettingsPage(),
-            if (showDetailedPages) const ToolbarLayoutPage(),
-            const PrivacyHardeningPage(),
-            const AiConfigurationPage(),
-            if (showDetailedPages)
-              UBlockOptInPage(formKey: GlobalKey<FormState>()),
-            PermissionsPage(formKey: GlobalKey<FormState>()),
-          ];
+      if (onboardingMode == OnboardingMode.restore && !isReturningUser) {
+        return [WelcomePage(isReturningUser: isReturningUser)];
       }
+
+      return [
+        WelcomePage(isReturningUser: isReturningUser),
+        const DefaultSearchPage(),
+        if (showDetailedPages) const DohSettingsPage(),
+        if (showDetailedPages) const ToolbarLayoutPage(),
+        const PrivacyHardeningPage(),
+        if (showDetailedPages) UBlockOptInPage(formKey: GlobalKey<FormState>()),
+        PermissionsPage(formKey: GlobalKey<FormState>()),
+      ];
     }, [currentRevision, targetRevision, onboardingMode, isReturningUser]);
 
     final lastPage = useRef(pageController.initialPage);

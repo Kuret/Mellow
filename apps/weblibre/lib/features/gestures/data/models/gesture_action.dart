@@ -166,12 +166,6 @@ enum GestureAction {
     Icons.bookmark_border,
     GestureActionCategory.page,
   ),
-  translatePage(
-    'Translate',
-    'Open the page translation sheet',
-    Icons.translate,
-    GestureActionCategory.page,
-  ),
 
   // Open
   showHome(

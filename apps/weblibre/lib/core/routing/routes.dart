@@ -51,7 +51,6 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_panel.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_draft_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';

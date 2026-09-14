@@ -26,12 +26,9 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
@@ -121,19 +118,6 @@ class PageActionsSection extends HookConsumerWidget {
             },
           );
 
-        case MenuItemType.translatePage:
-          final engineState = ref.watch(translationEngineStateProvider);
-          final readerActive = ref.watch(
-            tabStateProvider(
-              selectedTabId,
-            ).select((s) => s?.readerableState.active ?? false),
-          );
-
-          // Hidden while reader mode is active (Fenix-aligned).
-          if (readerActive || engineState?.isEngineSupported != true) continue;
-
-          tiles[item] = _TranslatePageTile(selectedTabId: selectedTabId);
-
         case MenuItemType.addToHomeScreen:
           final isInstallable = ref.watch(isCurrentTabInstallableProvider);
           final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
@@ -180,40 +164,6 @@ class PageActionsSection extends HookConsumerWidget {
         for (final item in items)
           if (tiles[item] case final tile?) tile,
       ],
-    );
-  }
-}
-
-class _TranslatePageTile extends ConsumerWidget {
-  final String selectedTabId;
-
-  const _TranslatePageTile({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isTranslated = ref.watch(
-      tabTranslationStateProvider(
-        selectedTabId,
-      ).select((state) => state.isTranslated),
-    );
-
-    return ListTile(
-      leading: Icon(
-        Icons.translate,
-        color: isTranslated ? Theme.of(context).colorScheme.primary : null,
-      ),
-      title: Text(
-        isTranslated ? 'Translated' : MenuItemType.translatePage.label,
-      ),
-      onTap: () async {
-        Navigator.pop(context);
-        if (context.mounted) {
-          await showTranslationBottomSheet(
-            context,
-            selectedTabId: selectedTabId,
-          );
-        }
-      },
     );
   }
 }

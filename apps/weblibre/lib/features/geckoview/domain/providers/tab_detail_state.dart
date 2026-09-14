@@ -37,7 +37,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 
 part 'tab_detail_state.g.dart';
 
@@ -153,34 +152,6 @@ FindResultState tabFindResultState(Ref ref, String? tabId) {
   return ref.watch(
     tabFindResultStatesProvider.select(
       (s) => s[tabId] ?? FindResultState.$default(),
-    ),
-  );
-}
-
-/// Translation progress/result per tab.
-@Riverpod(keepAlive: true)
-class TabTranslationStates extends _$TabTranslationStates {
-  @override
-  Map<String, TranslationState> build() => const {};
-
-  void update(String tabId, TranslationState translation) {
-    if (state[tabId] == translation) {
-      return;
-    }
-
-    state = {...state}..[tabId] = translation;
-  }
-}
-
-@Riverpod()
-TranslationState tabTranslationState(Ref ref, String? tabId) {
-  if (tabId == null) {
-    return TranslationState.$default();
-  }
-
-  return ref.watch(
-    tabTranslationStatesProvider.select(
-      (s) => s[tabId] ?? TranslationState.$default(),
     ),
   );
 }

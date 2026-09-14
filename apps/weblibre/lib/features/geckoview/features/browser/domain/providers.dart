@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -41,7 +40,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
@@ -377,57 +375,6 @@ EquatableValue<List<TabStateWithContainer>> spaceTabStatesWithContainer(
   }
 
   return EquatableValue(items);
-}
-
-@Riverpod()
-EquatableValue<List<TabEntity>> suggestedTabEntities(
-  Ref ref,
-  String? containerId,
-) {
-  final enableAiFeatures = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.enableLocalAiFeatures,
-    ),
-  );
-
-  if (!enableAiFeatures) {
-    return EquatableValue([]);
-  }
-
-  final excludedTabIds = ref.watch(
-    watchContainerTabIdsProvider(
-      // ignore: provider_parameters
-      ContainerFilterById(containerId: containerId),
-    ).select((value) => EquatableValue(value.value)),
-  );
-
-  final orderKeys = ref.watch(
-    watchTabOrderKeysProvider.select((value) => value.value),
-  );
-
-  final suggestions = ref.watch(
-    containerTabSuggestionsProvider(containerId).select(
-      (value) => EquatableValue(
-        value.value.mapNotNull(
-              (result) => result
-                  .whereNot(
-                    (tabId) => excludedTabIds.value?.contains(tabId) ?? false,
-                  )
-                  .map(
-                    (tabId) => DefaultTabEntity(
-                      tabId: tabId,
-                      orderKey: orderKeys?[tabId] ?? '',
-                      containerId: containerId,
-                    ),
-                  )
-                  .toList(),
-            ) ??
-            const [],
-      ),
-    ),
-  );
-
-  return suggestions;
 }
 
 List<TabEntity> _applyTabFiltersAndSort(

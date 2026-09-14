@@ -27,7 +27,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
@@ -323,14 +322,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                             child: TextField(
                               controller: textController,
                               style: theme.textTheme.titleLarge,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 hintText: 'Container Name',
                                 border: InputBorder.none,
-                                suffixIcon: _buildMagicWandButton(
-                                  context,
-                                  ref,
-                                  textController,
-                                ),
                               ),
                             ),
                           ),
@@ -467,51 +461,6 @@ class ContainerEditScreen extends HookConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget? _buildMagicWandButton(
-    BuildContext context,
-    WidgetRef ref,
-    TextEditingController textController,
-  ) {
-    final predict = switch (_mode) {
-      _DialogMode.edit => switch (initialContainer) {
-        ContainerDataWithCount(:final tabCount?) when tabCount > 0 =>
-          (WidgetRef ref) => ref
-              .read(containerTopicControllerProvider.notifier)
-              .predictDocumentTopic(initialContainer.id),
-        _ => null,
-      },
-      _DialogMode.create => switch (tabIds) {
-        final ids? when ids.isNotEmpty =>
-          (WidgetRef ref) => ref
-              .read(containerTopicControllerProvider.notifier)
-              .predictTopicFromTabIds(ids),
-        _ => null,
-      },
-    };
-
-    if (predict == null) return null;
-
-    return Consumer(
-      builder: (context, ref, child) {
-        final isLoading = ref.watch(
-          containerTopicControllerProvider.select((value) => value.isLoading),
-        );
-
-        return IconButton(
-          onPressed: isLoading
-              ? null
-              : () async {
-                  final topic = await predict(ref);
-                  if (topic != null) {
-                    textController.text = topic;
-                  }
-                },
-          icon: const Icon(MdiIcons.creation),
-        );
-      },
     );
   }
 }

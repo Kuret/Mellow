@@ -124,7 +124,7 @@ final class SelectedSearchProviderProvider
 }
 
 String _$selectedSearchProviderHash() =>
-    r'f3db57c2359c9018371fa6cf0184396e2472d9cd';
+    r'acd099d06e31234ccd5fb213a27c25169088c76a';
 
 /// The engine the user picked for the search they are composing, overriding
 /// their standing default.
@@ -770,92 +770,6 @@ final class SpaceTabStatesWithContainerFamily extends $Family
 
   @override
   String toString() => r'spaceTabStatesWithContainerProvider';
-}
-
-@ProviderFor(suggestedTabEntities)
-final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();
-
-final class SuggestedTabEntitiesProvider
-    extends
-        $FunctionalProvider<
-          EquatableValue<List<TabEntity>>,
-          EquatableValue<List<TabEntity>>,
-          EquatableValue<List<TabEntity>>
-        >
-    with $Provider<EquatableValue<List<TabEntity>>> {
-  SuggestedTabEntitiesProvider._({
-    required SuggestedTabEntitiesFamily super.from,
-    required String? super.argument,
-  }) : super(
-         retry: null,
-         name: r'suggestedTabEntitiesProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$suggestedTabEntitiesHash();
-
-  @override
-  String toString() {
-    return r'suggestedTabEntitiesProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<EquatableValue<List<TabEntity>>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  EquatableValue<List<TabEntity>> create(Ref ref) {
-    final argument = this.argument as String?;
-    return suggestedTabEntities(ref, argument);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(EquatableValue<List<TabEntity>> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<EquatableValue<List<TabEntity>>>(
-        value,
-      ),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SuggestedTabEntitiesProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$suggestedTabEntitiesHash() =>
-    r'b140a1d0badad3d976b91ab9154300873a8bd4e9';
-
-final class SuggestedTabEntitiesFamily extends $Family
-    with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
-  SuggestedTabEntitiesFamily._()
-    : super(
-        retry: null,
-        name: r'suggestedTabEntitiesProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  SuggestedTabEntitiesProvider call(String? containerId) =>
-      SuggestedTabEntitiesProvider._(argument: containerId, from: this);
-
-  @override
-  String toString() => r'suggestedTabEntitiesProvider';
 }
 
 @ProviderFor(seamlessFilteredTabEntities)

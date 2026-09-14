@@ -80,22 +80,6 @@ class TabSession extends _$TabSession {
     return _sessionService.printContent();
   }
 
-  Future<void> translate({
-    required String fromLanguage,
-    required String toLanguage,
-    bool? downloadModel,
-  }) {
-    return _sessionService.translate(
-      fromLanguage: fromLanguage,
-      toLanguage: toLanguage,
-      options: TranslationOptions(downloadModel: downloadModel ?? true),
-    );
-  }
-
-  Future<void> translateRestore() {
-    return _sessionService.translateRestore();
-  }
-
   Future<void> pageUp() {
     // Android KeyEvent.KEYCODE_PAGE_UP = 92
     return _sessionService.dispatchKeyEvent(keyCode: 92);

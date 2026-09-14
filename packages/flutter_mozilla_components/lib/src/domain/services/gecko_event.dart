@@ -21,8 +21,6 @@ typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
 typedef ScrollEvent = ({String tabId, int scrollY});
 typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
-typedef TabTranslationEvent = ({String tabId, TabTranslationStateData state});
-typedef TranslationEngineEvent = TranslationEngineStateData;
 typedef DownloadStoppedEvent = DownloadState;
 
 class GeckoEventService extends GeckoStateEvents {
@@ -64,11 +62,8 @@ class GeckoEventService extends GeckoStateEvents {
   );
 
   final _tabAddedSubject = PublishSubject<String>();
-  final _mlProgressSubject = PublishSubject<MlProgressData>();
   final _downloadStoppedSubject = PublishSubject<DownloadStoppedEvent>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
-  final _translationEngineSubject = BehaviorSubject<TranslationEngineEvent>();
-  final _tabTranslationSubject = ReplaySubject<TabTranslationEvent>();
 
   // Event streams
   ValueStream<bool> get viewReadyStateEvents => _viewStateSubject.stream;
@@ -95,15 +90,10 @@ class GeckoEventService extends GeckoStateEvents {
       _proxyLoadErrorSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
-  Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
   Stream<DownloadStoppedEvent> get downloadStoppedEvents =>
       _downloadStoppedSubject.stream;
   Stream<ManifestUpdateEvent> get manifestUpdateEvents =>
       _manifestUpdateSubject.stream;
-  ValueStream<TranslationEngineEvent> get translationEngineEvents =>
-      _translationEngineSubject.stream;
-  Stream<TabTranslationEvent> get tabTranslationEvents =>
-      _tabTranslationSubject.stream;
 
   @override
   void onViewReadyStateChange(int sequence, bool state) {
@@ -277,11 +267,6 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onMlProgress(int sequence, MlProgressData progress) {
-    _mlProgressSubject.addWhenMoreRecent(sequence, null, progress);
-  }
-
-  @override
   void onDownloadStopped(int sequence, DownloadState state) {
     _downloadStoppedSubject.addWhenMoreRecent(sequence, state.id, state);
   }
@@ -291,25 +276,6 @@ class GeckoEventService extends GeckoStateEvents {
     _manifestUpdateSubject.addWhenMoreRecent(sequence, tabId, (
       tabId: tabId,
       manifest: manifest,
-    ));
-  }
-
-  @override
-  void onTranslationEngineStateChange(
-    int sequence,
-    TranslationEngineStateData state,
-  ) {
-    _translationEngineSubject.addWhenMoreRecent(sequence, null, state);
-  }
-
-  @override
-  void onTabTranslationStateChange(
-    int sequence,
-    TabTranslationStateData state,
-  ) {
-    _tabTranslationSubject.addWhenMoreRecent(sequence, state.tabId, (
-      tabId: state.tabId,
-      state: state,
     ));
   }
 
@@ -343,10 +309,7 @@ class GeckoEventService extends GeckoStateEvents {
     await _prefUpdateSubject.close();
     await _siteAssignementSubject.close();
     await _proxyLoadErrorSubject.close();
-    await _mlProgressSubject.close();
     await _downloadStoppedSubject.close();
     await _manifestUpdateSubject.close();
-    await _translationEngineSubject.close();
-    await _tabTranslationSubject.close();
   }
 }

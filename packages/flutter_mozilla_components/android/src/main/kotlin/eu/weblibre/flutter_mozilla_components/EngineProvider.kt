@@ -8,7 +8,6 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
-import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -177,7 +176,6 @@ object EngineProvider {
             WebCompatFeature.install(it)
             //CookieManagerFeature.install(it)
             BrowserExtensionFeature.install(it, extensionEvents)
-            MLEngineFeature.install(it)
 
             //Install extensions early
             BuiltInWebExtensionController(

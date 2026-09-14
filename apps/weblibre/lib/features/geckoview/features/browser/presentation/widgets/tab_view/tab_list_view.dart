@@ -18,9 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -28,7 +26,6 @@ import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -54,7 +51,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
@@ -201,7 +197,6 @@ class _FolderRow extends ConsumerWidget {
 class _TabDraggable extends HookConsumerWidget {
   final String tabId;
   final String? sourceSearchQuery;
-  final String? suggestedContainerId;
   final VoidCallback onClose;
   final double height;
   final int depth;
@@ -215,7 +210,6 @@ class _TabDraggable extends HookConsumerWidget {
     required this.onClose,
     required this.height,
     this.sourceSearchQuery,
-    this.suggestedContainerId,
     this.depth = 0,
     this.compact = false,
     this.split,
@@ -240,24 +234,6 @@ class _TabDraggable extends HookConsumerWidget {
 
     // Cache the tab widget to avoid rebuilding
     final tab = useMemoized(() {
-      if (suggestedContainerId != null) {
-        return SuggestedSingleListTabPreview(
-          key: ValueKey(tabId),
-          tabId: tabId,
-          activeTabId: activeTab,
-          onTap: () async {
-            final containerData = await ref
-                .read(containerRepositoryProvider.notifier)
-                .getContainerData(suggestedContainerId!);
-
-            if (containerData != null) {
-              await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .assignContainer(tabId, containerData);
-            }
-          },
-        );
-      }
       if (compact) {
         return CompactTabRow(
           key: ValueKey(tabId),
@@ -283,7 +259,7 @@ class _TabDraggable extends HookConsumerWidget {
         depth: depth,
         split: split,
       );
-    }, [tabId, activeTab, suggestedContainerId, depth, compact, split]);
+    }, [tabId, activeTab, depth, compact, split]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -529,19 +505,8 @@ class _TabListView extends HookConsumerWidget {
         _ShelfItemRow(primaryRows[i], i, pinned: false),
     ];
 
-    final tabSuggestionsEnabled = ref.watch(
-      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-    );
-
-    final suggestedTabEntities = tabSuggestionsEnabled
-        ? ref.watch(suggestedTabEntitiesProvider(containerId))
-        : EquatableValue(<TabEntity>[]);
-
-    final itemCount =
-        displayRows.length +
-        //Limit to 3 sugegstions for now
-        math.min<int>(suggestedTabEntities.value.length, 3);
-    final displayItemCount = reorderEnabled ? displayRows.length : itemCount;
+    final itemCount = displayRows.length;
+    final displayItemCount = itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -614,59 +579,40 @@ class _TabListView extends HookConsumerWidget {
               controller: scrollController,
               itemCount: displayItemCount,
               itemBuilder: (context, index) {
-                if (index < displayRows.length) {
-                  final row = displayRows[index];
-                  switch (row) {
-                    case _ShelfHeaderRow():
-                      return buildHeader(row);
-                    case _ShelfItemRow(:final item):
-                      if (item.isFolder) {
-                        return CustomDraggable(
-                          key: Key(item.tabId),
-                          child: _FolderRow(
-                            folderItem: item.folderItem!,
-                            height: _itemHeight,
-                          ),
-                        );
-                      }
-
-                      final tab = CustomDraggable(
+                final row = displayRows[index];
+                switch (row) {
+                  case _ShelfHeaderRow():
+                    return buildHeader(row);
+                  case _ShelfItemRow(:final item):
+                    if (item.isFolder) {
+                      return CustomDraggable(
                         key: Key(item.tabId),
-                        data: TabDragData(item.tabId),
-                        child: buildTabRow(row),
-                      );
-
-                      return TabDropTarget(
-                        targetTabId: item.tabId,
-                        child: TabContextMenuDraggable(
-                          tabId: item.tabId,
-                          data: tab.data! as TabDragData,
-                          feedbackSize: Size(
-                            MediaQuery.of(context).size.width,
-                            _heightOf(row),
-                          ),
-                          child: tab.child,
+                        child: _FolderRow(
+                          folderItem: item.folderItem!,
+                          height: _itemHeight,
                         ),
                       );
-                  }
-                }
+                    }
 
-                final suggestedIndex = index - displayRows.length;
-                final entity = suggestedTabEntities.value[suggestedIndex];
-                final tab = CustomDraggable(
-                  key: Key('suggested_${entity.tabId}'),
-                  child: _TabDraggable(
-                    tabId: entity.tabId,
-                    onClose: onClose,
-                    suggestedContainerId: containerId,
-                    height: _itemHeight,
-                  ),
-                );
-                return TabDropTarget(
-                  targetTabId: entity.tabId,
-                  enabled: false,
-                  child: tab.child,
-                );
+                    final tab = CustomDraggable(
+                      key: Key(item.tabId),
+                      data: TabDragData(item.tabId),
+                      child: buildTabRow(row),
+                    );
+
+                    return TabDropTarget(
+                      targetTabId: item.tabId,
+                      child: TabContextMenuDraggable(
+                        tabId: item.tabId,
+                        data: tab.data! as TabDragData,
+                        feedbackSize: Size(
+                          MediaQuery.of(context).size.width,
+                          _heightOf(row),
+                        ),
+                        child: tab.child,
+                      ),
+                    );
+                }
               },
             )
           : ReorderableListView.builder(

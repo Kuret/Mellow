@@ -25,13 +25,10 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
@@ -175,11 +172,6 @@ class TabViewHeader extends HookConsumerWidget {
       () => searchTextController.text.isNotEmpty,
     );
 
-    final enableAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
-      ),
-    );
     final showContainerUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.showContainerUi,
@@ -536,67 +528,6 @@ class TabViewHeader extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    if (enableAiFeatures)
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final tabSuggestionsEnabled = ref.watch(
-                            persistedBoolProvider(
-                              PersistedBoolKey.tabSuggestions,
-                            ),
-                          );
-                          final downloadProgress = ref.watch(
-                            mlDownloadStateProvider,
-                          );
-
-                          return Badge(
-                            isLabelVisible: downloadProgress != null,
-                            offset: const Offset(-2, 2),
-                            label: downloadProgress != null
-                                ? Text(
-                                    '${downloadProgress.progress.toInt()}%',
-                                    style: const TextStyle(fontSize: 10),
-                                  )
-                                : null,
-                            child: IconButton.filledTonal(
-                              icon: const Icon(MdiIcons.imageAutoAdjust),
-                              isSelected: tabSuggestionsEnabled,
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              tooltip: downloadProgress != null
-                                  ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
-                                  : tabSuggestionsEnabled
-                                  ? 'Disable AI tab suggestions'
-                                  : 'Enable AI tab suggestions',
-                              onPressed: () async {
-                                if (!tabSuggestionsEnabled) {
-                                  final result =
-                                      await showEnableAiTabSuggestionsDialog(
-                                        context,
-                                      );
-
-                                  if (result == true) {
-                                    ref
-                                        .read(
-                                          persistedBoolProvider(
-                                            PersistedBoolKey.tabSuggestions,
-                                          ).notifier,
-                                        )
-                                        .set(true);
-                                  }
-                                } else {
-                                  ref
-                                      .read(
-                                        persistedBoolProvider(
-                                          PersistedBoolKey.tabSuggestions,
-                                        ).notifier,
-                                      )
-                                      .set(false);
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
                     IconButton.filledTonal(
                       icon: const Icon(Icons.swap_vert),
                       isSelected: tabsReorderable,

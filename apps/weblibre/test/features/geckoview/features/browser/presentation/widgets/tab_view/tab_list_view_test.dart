@@ -66,15 +66,6 @@ class _TestSelectedContainer extends SelectedContainer {
 }
 
 /// [PersistedBool] without its persistence (which wants a profile).
-class _TestPersistedBool extends PersistedBool {
-  _TestPersistedBool(this.value);
-
-  final bool value;
-
-  @override
-  bool build(PersistedBoolKey key) => value;
-}
-
 class _TestSelectedSpace extends SelectedSpace {
   @override
   String? build() => 'space-1';
@@ -136,9 +127,7 @@ Future<void> _pumpTray(WidgetTester tester, {required TabDatabase db}) async {
           (ref) => ZenSettings.withDefaults(),
         ),
         generalSettingsWithDefaultsProvider.overrideWith(
-          // The AI tab-suggestion button reads a persisted flag out of the
-          // user database, which a widget test has no profile for.
-          (ref) => GeneralSettings.withDefaults(enableLocalAiFeatures: false),
+          (ref) => GeneralSettings.withDefaults(),
         ),
         watchSpacesProvider.overrideWith(
           (ref) => Stream.value(<SpaceData>[
@@ -147,9 +136,6 @@ Future<void> _pumpTray(WidgetTester tester, {required TabDatabase db}) async {
         ),
         selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
         selectedContainerProvider.overrideWith(_TestSelectedContainer.new),
-        persistedBoolProvider(
-          PersistedBoolKey.tabSuggestions,
-        ).overrideWith(() => _TestPersistedBool(false)),
         selectedTabProvider.overrideWith(_NoSelectedTab.new),
         tabStatesProvider.overrideWith(_EmptyTabStates.new),
         browserRestoreCompleteProvider.overrideWith(_NotRestored.new),

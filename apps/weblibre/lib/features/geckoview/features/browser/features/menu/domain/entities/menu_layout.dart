@@ -35,7 +35,7 @@ enum MenuSectionType {
   /// Segmented Desktop / Reader / Gestures bar at the top of the sheet.
   quickToggles,
 
-  /// Actions on the page in front: bookmark, find, translate, install.
+  /// Actions on the page in front: bookmark, find, install.
   pageActions,
 
   /// The installed extensions list.
@@ -94,7 +94,6 @@ enum MenuItemType {
   addBookmark,
   findInPage,
   inspectElement,
-  translatePage,
   addToHomeScreen,
   openInApp,
 
@@ -150,7 +149,6 @@ enum MenuItemType {
     addBookmark => 'Add Bookmark',
     findInPage => 'Find in Page',
     inspectElement => 'Inspect Element',
-    translatePage => 'Translate Page',
     addToHomeScreen => 'Add to Home Screen',
     openInApp => 'Open in App',
     containers => 'Containers',
@@ -197,7 +195,6 @@ enum MenuItemType {
     addBookmark => MdiIcons.bookmarkPlus,
     findInPage => Icons.search,
     inspectElement => MdiIcons.selectSearch,
-    translatePage => Icons.translate,
     addToHomeScreen => Icons.add_to_home_screen,
     openInApp => Icons.open_in_new,
     containers => MdiIcons.folder,
@@ -293,7 +290,6 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       MenuItemDefault(MenuItemType.addBookmark),
       MenuItemDefault(MenuItemType.findInPage),
       MenuItemDefault(MenuItemType.inspectElement),
-      MenuItemDefault(MenuItemType.translatePage),
       MenuItemDefault(MenuItemType.addToHomeScreen),
       MenuItemDefault(MenuItemType.openInApp),
     ],

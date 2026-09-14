@@ -23,7 +23,6 @@ export 'src/domain/services/gecko_gesture.dart';
 export 'src/domain/services/gecko_history.dart';
 export 'src/domain/services/gecko_icon.dart';
 export 'src/domain/services/gecko_logging.dart';
-export 'src/domain/services/gecko_ml.dart';
 export 'src/domain/services/gecko_pref.dart';
 export 'src/domain/services/gecko_profile.dart';
 export 'src/domain/services/gecko_push.dart';
@@ -107,9 +106,6 @@ export 'src/pigeons/gecko.g.dart'
         ImageHitResult,
         ImageSrcHitResult,
         LogLevel,
-        MlProgressData,
-        MlProgressStatus,
-        MlProgressType,
         NativeAppLinkRule,
         NativeAppLinkRuleDecision,
         NativeContextAppLinkPolicy,
@@ -137,16 +133,10 @@ export 'src/pigeons/gecko.g.dart'
         SyncRemoteTab,
         TabContent,
         TabContentState,
-        TabTranslationStateData,
         TopFrecentSiteInfo,
         TrackingProtectionException,
         TrackingProtectionPolicy,
         TrackingScope,
-        TranslationDetectedLanguages,
-        TranslationEngineStateData,
-        TranslationLanguage,
-        TranslationOptions,
-        TranslationPair,
         UnknownHitResult,
         VideoHitResult,
         VisitInfo,

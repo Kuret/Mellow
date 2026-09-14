@@ -6,87 +6,6 @@
 
 import 'package:pigeon/pigeon.dart';
 
-/// Translation options that map to the Gecko Translations Options.
-///
-/// @property downloadModel If the necessary models should be downloaded on request. If false, then
-/// the translation will not complete and throw an exception if the models are not already available.
-class TranslationOptions {
-  final bool downloadModel;
-
-  TranslationOptions({this.downloadModel = true});
-}
-
-/// A language supported by the translation engine.
-class TranslationLanguage {
-  final String code;
-  final String localizedDisplayName;
-
-  TranslationLanguage({required this.code, required this.localizedDisplayName});
-}
-
-/// Detected languages for a page.
-class TranslationDetectedLanguages {
-  final String? documentLangTag;
-  final bool? supportedDocumentLang;
-  final String? userPreferredLangTag;
-
-  TranslationDetectedLanguages({
-    this.documentLangTag,
-    this.supportedDocumentLang,
-    this.userPreferredLangTag,
-  });
-}
-
-/// A from/to language pair for translation.
-class TranslationPair {
-  final String fromLanguage;
-  final String toLanguage;
-
-  TranslationPair({required this.fromLanguage, required this.toLanguage});
-}
-
-/// Browser-level translation engine state (global).
-class TranslationEngineStateData {
-  final bool? isEngineSupported;
-  final List<TranslationLanguage?>? fromLanguages;
-  final List<TranslationLanguage?>? toLanguages;
-
-  TranslationEngineStateData({
-    this.isEngineSupported,
-    this.fromLanguages,
-    this.toLanguages,
-  });
-}
-
-/// Per-tab translation state.
-class TabTranslationStateData {
-  final String tabId;
-  final bool isTranslated;
-  final bool isTranslateProcessing;
-  final bool isOfferTranslate;
-  final bool isExpectedTranslate;
-  final String? detectedLanguageCode;
-  final String? userPreferredLanguageCode;
-  final String? requestedFromLanguage;
-  final String? requestedToLanguage;
-  final String? translationErrorName;
-  final bool? displayError;
-
-  TabTranslationStateData({
-    required this.tabId,
-    required this.isTranslated,
-    required this.isTranslateProcessing,
-    required this.isOfferTranslate,
-    required this.isExpectedTranslate,
-    this.detectedLanguageCode,
-    this.userPreferredLanguageCode,
-    this.requestedFromLanguage,
-    this.requestedToLanguage,
-    this.translationErrorName,
-    this.displayError,
-  });
-}
-
 /// Value type that represents the state of reader mode/view.
 class ReaderState {
   /// Whether or not the current page can be transformed to
@@ -1704,17 +1623,6 @@ abstract class GeckoSessionApi {
     required String? tabId, //If null = current tab
   });
 
-  void translate({
-    required String? tabId, //If null = current tab
-    required String fromLanguage,
-    required String toLanguage,
-    required TranslationOptions? options,
-  });
-
-  void translateRestore({
-    required String? tabId, //If null = current tab
-  });
-
   void crashRecovery({required List<String>? tabIds});
 
   void purgeHistory();
@@ -1747,7 +1655,6 @@ abstract class GeckoTabsApi {
     required bool onPageExtensionsChange,
     required bool onBrowserExtensionIcons,
     required bool onPageExtensionIcons,
-    required bool onTranslationStateChange,
   });
 
   void selectTab({required String tabId});
@@ -1894,68 +1801,6 @@ abstract class GeckoPrefApi {
   void unregisterPrefForObservation(String name);
 }
 
-/// Type of ML model operation
-enum MlProgressType { downloading, loadingFromCache, runningInference }
-
-/// Status of the ML operation
-enum MlProgressStatus { initiate, sizeEstimate, inProgress, done }
-
-/// Progress information for ML model operations
-class MlProgressData {
-  /// The type of ML model being loaded
-  final String modelType;
-
-  /// Percentage of completion (0-100)
-  final double progress;
-
-  /// Type of operation (download, cache load, or inference)
-  final MlProgressType type;
-
-  /// Current status of the operation
-  final MlProgressStatus status;
-
-  /// Total bytes loaded so far
-  final int totalLoaded;
-
-  /// Bytes loaded in current update
-  final int currentLoaded;
-
-  /// Total size estimate
-  final int total;
-
-  /// Units of measurement (e.g., "bytes")
-  final String units;
-
-  /// Whether the operation completed successfully
-  final bool ok;
-
-  /// Unique identifier for this operation
-  final String? id;
-
-  const MlProgressData({
-    required this.modelType,
-    required this.progress,
-    required this.type,
-    required this.status,
-    required this.totalLoaded,
-    required this.currentLoaded,
-    required this.total,
-    required this.units,
-    required this.ok,
-    this.id,
-  });
-}
-
-@HostApi()
-abstract class GeckoMlApi {
-  @async
-  String predictDocumentTopic(List<String> documents);
-  @async
-  List generateDocumentEmbeddings(List<String> documents);
-  @async
-  void clearMlCache();
-}
-
 @HostApi()
 abstract class GeckoBrowserExtensionApi {
   @async
@@ -2082,17 +1927,9 @@ abstract class GeckoStateEvents {
 
   void onProxyLoadError(int sequence, ProxyLoadError details);
 
-  void onMlProgress(int sequence, MlProgressData progress);
-
   void onDownloadStopped(int sequence, DownloadState state);
 
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
-
-  void onTranslationEngineStateChange(
-    int sequence,
-    TranslationEngineStateData state,
-  );
-  void onTabTranslationStateChange(int sequence, TabTranslationStateData state);
 }
 
 @FlutterApi()

@@ -36,7 +36,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
@@ -231,11 +230,6 @@ class GestureControlService extends _$GestureControlService {
         await _pushLocation(const ContainerListRoute().location);
       case GestureAction.toggleBookmark:
         await _toggleBookmark(tabId);
-      case GestureAction.translatePage:
-        final context = await _navigatorContext();
-        if (context != null && context.mounted) {
-          await showTranslationBottomSheet(context, selectedTabId: tabId);
-        }
       case GestureAction.moveToBackground:
         await moveToBackground();
       case GestureAction.quitBrowser:

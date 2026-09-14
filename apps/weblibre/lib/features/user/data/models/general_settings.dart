@@ -225,7 +225,6 @@ class GeneralSettings with FastEquatable {
   final String? defaultSearchProvider;
 
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
-  final bool enableLocalAiFeatures;
   final bool showContainerUi;
 
   /// Whether the search / new-tab page shows a leading close button so it can
@@ -408,7 +407,6 @@ class GeneralSettings with FastEquatable {
     required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
-    required this.enableLocalAiFeatures,
     required this.showContainerUi,
     required this.showSearchCloseButton,
     required this.homeTarget,
@@ -488,7 +486,6 @@ class GeneralSettings with FastEquatable {
     bool? allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
-    bool? enableLocalAiFeatures,
     bool? showContainerUi,
     bool? showSearchCloseButton,
     HomeTarget? homeTarget,
@@ -563,7 +560,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
-       enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        showContainerUi = showContainerUi ?? true,
        showSearchCloseButton = showSearchCloseButton ?? false,
        // Defaults to `home`, which is exactly what the browser did before this
@@ -759,7 +755,6 @@ class GeneralSettings with FastEquatable {
     allowPrivateTabScreenshots,
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
-    enableLocalAiFeatures,
     showContainerUi,
     showSearchCloseButton,
     homeTarget,

@@ -84,23 +84,6 @@ class GeckoSessionService {
     return _api.printContent(tabId: tabId);
   }
 
-  Future<void> translate({
-    required String fromLanguage,
-    required String toLanguage,
-    TranslationOptions? options,
-  }) {
-    return _api.translate(
-      tabId: tabId,
-      fromLanguage: fromLanguage,
-      toLanguage: toLanguage,
-      options: options,
-    );
-  }
-
-  Future<void> translateRestore() {
-    return _api.translateRestore(tabId: tabId);
-  }
-
   Future<void> crashRecovery({List<String>? tabIds}) {
     return _api.crashRecovery(tabIds: tabIds);
   }

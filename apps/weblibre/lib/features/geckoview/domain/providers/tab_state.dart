@@ -32,14 +32,12 @@ import 'package:weblibre/features/geckoview/domain/entities/states/history.dart'
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
@@ -121,12 +119,6 @@ class TabStates extends _$TabStates {
     ref
         .read(tabProgressStatesProvider.notifier)
         .update(contentState.id, contentState.progress);
-
-    if (!contentState.isLoading && contentState.progress == 100) {
-      ref
-          .read(geckoInferenceRepositoryProvider.notifier)
-          .markInitialLoadComplete();
-    }
   }
 
   /// Waits until [tabId] carries the engine's content state, and returns it.
@@ -275,14 +267,6 @@ class TabStates extends _$TabStates {
     );
   }
 
-  void _onTabTranslationStateChange(TabTranslationEvent event) {
-    final TabTranslationEvent(:tabId, :state) = event;
-
-    ref
-        .read(tabTranslationStatesProvider.notifier)
-        .update(tabId, TranslationState.fromData(state));
-  }
-
   void _onFindResultsChange(FindResultsEvent event) {
     final FindResultsEvent(:tabId, :results) = event;
     final findResults = ref.read(tabFindResultStatesProvider.notifier);
@@ -402,18 +386,6 @@ class TabStates extends _$TabStates {
               );
             },
           ),
-      eventService.tabTranslationEvents.listen(
-        (event) {
-          _onTabTranslationStateChange(event);
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          logger.e(
-            'Error in tab translation events',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        },
-      ),
     ];
 
     ref.listen(
@@ -428,7 +400,6 @@ class TabStates extends _$TabStates {
             onSecurityInfoStateChange: true,
             onHistoryStateChange: true,
             onFindResults: true,
-            onTranslationStateChange: true,
           );
         }
       },

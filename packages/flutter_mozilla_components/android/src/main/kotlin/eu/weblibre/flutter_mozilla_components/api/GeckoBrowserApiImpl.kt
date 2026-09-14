@@ -50,7 +50,6 @@ import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
@@ -391,7 +390,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
         GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
-        GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
         GeckoSelectionActionController.setUp(
