@@ -143,15 +143,22 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
     entries: [
       SettingsEntryDefinition(
         title: 'Customize Toolbar Buttons',
-        subtitle: 'Choose which actions appear in the contextual toolbar',
-        keywords: ['buttons', 'contextual toolbar'],
+        subtitle: 'Choose which actions appear in the toolbar',
+        keywords: ['buttons', 'toolbar'],
         child: _CustomizeToolbarButtonsTile(),
       ),
       SettingsEntryDefinition(
         title: 'Customize Menu',
         subtitle:
             'Choose and order the sections and rows of the three-dot menu',
-        keywords: ['sections', 'rows', 'reorder', 'menu', 'three dot', 'overflow'],
+        keywords: [
+          'sections',
+          'rows',
+          'reorder',
+          'menu',
+          'three dot',
+          'overflow',
+        ],
         child: _CustomizeMenuTile(),
       ),
     ],
@@ -574,9 +581,8 @@ class _AccentColorTile extends HookConsumerWidget {
       return ref
           .read(saveZenSettingsControllerProvider.notifier)
           .save(
-            (currentSettings) => currentSettings.copyWith.accentColor(
-              color?.toARGB32(),
-            ),
+            (currentSettings) =>
+                currentSettings.copyWith.accentColor(color?.toARGB32()),
           );
     }
 

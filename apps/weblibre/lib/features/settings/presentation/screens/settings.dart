@@ -173,7 +173,7 @@ _CategoryGroups _buildCategories() {
       keywords: const [
         'appearance',
         'theme',
-        'contextual toolbar',
+        'toolbar buttons',
         'quick tab switcher',
         'menu',
       ],
