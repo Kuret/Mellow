@@ -95,17 +95,18 @@ typedef _CategoryGroups = ({
 _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
-      title: 'Links & Sites',
-      subtitle: 'App links, desktop mode, installed sites',
-      icon: MdiIcons.linkVariant,
+      title: 'Appearance & Layout',
+      subtitle: 'Theme, side rail, compact bar, customization',
+      icon: MdiIcons.paletteOutline,
       keywords: const [
-        'navigation',
-        'external links',
-        'desktop mode',
-        'pwa',
+        'appearance',
+        'theme',
+        'contextual toolbar',
+        'quick tab switcher',
+        'menu',
       ],
-      sections: linksSitesSettingsSections,
-      onTap: (context) => LinksSitesSettingsRoute().push(context),
+      sections: appearanceLayoutSettingsSections,
+      onTap: (context) => AppearanceLayoutSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Tabs & Spaces',
@@ -122,18 +123,17 @@ _CategoryGroups _buildCategories() {
       onTap: (context) => TabsSpacesSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Appearance & Layout',
-      subtitle: 'Theme, side rail, compact bar, customization',
-      icon: MdiIcons.paletteOutline,
+      title: 'Links & Sites',
+      subtitle: 'App links, desktop mode, installed sites',
+      icon: MdiIcons.linkVariant,
       keywords: const [
-        'appearance',
-        'theme',
-        'contextual toolbar',
-        'quick tab switcher',
-        'menu',
+        'navigation',
+        'external links',
+        'desktop mode',
+        'pwa',
       ],
-      sections: appearanceLayoutSettingsSections,
-      onTap: (context) => AppearanceLayoutSettingsRoute().push(context),
+      sections: linksSitesSettingsSections,
+      onTap: (context) => LinksSitesSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Search',
@@ -231,17 +231,26 @@ List<SettingsSectionDefinition> _buildSearchSections(
       sections: category.sections,
       query: normalizedQuery,
     )) {
+      // A category rendered as one heading-less card has no section to name,
+      // and its section title is the category's own — saying it twice would
+      // read as a path that does not exist on the screen.
+      final sectionLabel = section.showTitle && section.title != category.title
+          ? section.title
+          : null;
+
       for (final entry in section.entries) {
         categoryEntries.add(
           SettingsEntryDefinition(
             title: entry.title,
-            subtitle: '${section.title} • ${category.title}',
+            subtitle: sectionLabel == null
+                ? category.title
+                : '$sectionLabel • ${category.title}',
             keywords: entry.keywords,
             child: _SearchResultTile(
               title: entry.title,
               subtitle: entry.subtitle,
               category: category.title,
-              section: section.title,
+              section: sectionLabel,
               icon: category.icon,
               onTap: category.onTap,
             ),
@@ -317,28 +326,30 @@ class _SearchResultTile extends HookConsumerWidget {
   final String title;
   final String? subtitle;
   final String category;
-  final String section;
+  final String? section;
   final IconData icon;
   final Future<void> Function(BuildContext context) onTap;
 
   const _SearchResultTile({
     required this.title,
     required this.category,
-    required this.section,
     required this.icon,
     required this.onTap,
+    this.section,
     this.subtitle,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final breadcrumb = section == null ? category : '$category • $section';
+
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
       subtitle: Text(
         subtitle == null || subtitle!.isEmpty
-            ? '$category • $section'
-            : '$category • $section\n$subtitle',
+            ? breadcrumb
+            : '$breadcrumb\n$subtitle',
       ),
       isThreeLine: subtitle != null && subtitle!.isNotEmpty,
       contentPadding: const EdgeInsets.symmetric(
