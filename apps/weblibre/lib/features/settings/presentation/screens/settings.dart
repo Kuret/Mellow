@@ -29,6 +29,7 @@ import 'package:weblibre/features/settings/presentation/screens/browsing_setting
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 
@@ -95,18 +96,25 @@ _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
       title: 'Browsing',
-      subtitle: 'Tabs, navigation, external links',
+      subtitle: 'Navigation, desktop mode, external links',
       icon: MdiIcons.compassOutline,
-      keywords: const ['tabs', 'navigation', 'external links'],
+      keywords: const ['navigation', 'external links', 'desktop mode'],
       sections: browsingSettingsSections,
       onTap: (context) => BrowsingSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Spaces',
-      subtitle: 'Create, reorder and edit spaces',
+      title: 'Tabs & Spaces',
+      subtitle: 'Spaces, tab budget, containers',
       icon: MdiIcons.viewDashboardOutline,
-      keywords: const ['workspaces', 'zen', 'spaces', 'containers'],
-      onTap: (context) => const SpaceListRoute().push(context),
+      keywords: const [
+        'workspaces',
+        'zen',
+        'spaces',
+        'containers',
+        'tabs',
+      ],
+      sections: tabsSpacesSettingsSections,
+      onTap: (context) => TabsSpacesSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Appearance & Layout',

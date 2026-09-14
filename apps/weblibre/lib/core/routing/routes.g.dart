@@ -1073,6 +1073,12 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $AppearanceLayoutSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'tabs_spaces',
+      name: 'TabsSpacesSettingsRoute',
+      hasOverriddenOnExit: false,
+      factory: $TabsSpacesSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'search',
       name: 'SearchSettingsRoute',
       hasOverriddenOnExit: false,
@@ -1256,6 +1262,27 @@ mixin $AppearanceLayoutSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/appearance_layout');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TabsSpacesSettingsRoute on GoRouteData {
+  static TabsSpacesSettingsRoute _fromState(GoRouterState state) =>
+      TabsSpacesSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/tabs_spaces');
 
   @override
   void go(BuildContext context) => context.go(location);

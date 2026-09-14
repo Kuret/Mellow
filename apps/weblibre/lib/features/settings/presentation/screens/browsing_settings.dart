@@ -18,44 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 const List<SettingsSectionDefinition> browsingSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Tabs',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Keep at most N tabs loaded',
-        subtitle: 'Unload the least recently used tabs beyond this many',
-        keywords: ['memory', 'unload', 'cold', 'live', 'loaded'],
-        child: _MaxLiveTabsSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Separate essentials per container',
-        subtitle: 'Each container keeps its own Essentials strip',
-        keywords: ['essentials', 'pinned', 'spaces', 'containers', 'zen'],
-        child: _SeparateEssentialsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Container UI',
-        subtitle: 'Show container selectors, menus, and management',
-        keywords: ['containers'],
-        child: _ShowContainerUiTile(),
-      ),
-    ],
-  ),
   SettingsSectionDefinition(
     title: 'Navigation',
     entries: [
@@ -110,69 +83,6 @@ class BrowsingSettingsScreen extends StatelessWidget {
     );
   }
 }
-
-/// Zen's `zen.workspaces.separate-essentials` (PLAN §6.4): whether the
-/// Essentials strip is keyed on the current space's container or shared by
-/// every space.
-class _SeparateEssentialsTile extends ConsumerWidget {
-  const _SeparateEssentialsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final separateEssentials = ref.watch(
-      zenSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Separate essentials per container'),
-      subtitle: const Text(
-        'A space shows the essentials of its own container, as on the Zen '
-        'desktop; off, every space shows all essentials',
-      ),
-      secondary: const Icon(MdiIcons.starBoxMultipleOutline),
-      value: separateEssentials,
-      onChanged: (value) async {
-        await ref
-            .read(saveZenSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.separateEssentials(value),
-            );
-      },
-    );
-  }
-}
-
-class _ShowContainerUiTile extends HookConsumerWidget {
-  const _ShowContainerUiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Container UI'),
-      subtitle: const Text('Show container selectors, menus, and management'),
-      secondary: const Icon(MdiIcons.folder),
-      value: showContainerUi,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.showContainerUi(value),
-            );
-
-        if (!value) {
-          ref.read(selectedContainerProvider.notifier).clearContainer();
-        }
-      },
-    );
-  }
-}
-
 class _AppLinksModeSection extends HookConsumerWidget {
   const _AppLinksModeSection();
 
@@ -375,70 +285,6 @@ class _AllowNonManifestPwaInstallTile extends HookConsumerWidget {
                   currentSettings.copyWith.allowNonManifestPwaInstall(value),
             );
       },
-    );
-  }
-}
-
-/// "Keep at most N tabs loaded" — [GeneralSettings.maxLiveTabs], the budget
-/// `LiveTabBudget` enforces (PLAN §7.4). Steps of five between
-/// [minMaxLiveTabs] and [maxMaxLiveTabs].
-class _MaxLiveTabsSection extends HookConsumerWidget {
-  static const _step = 5;
-
-  const _MaxLiveTabsSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final maxLiveTabs = ref.watch(
-      zenSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
-    );
-    final sliderValue = useState(maxLiveTabs.toDouble());
-    useEffect(() {
-      sliderValue.value = maxLiveTabs.toDouble();
-      return null;
-    }, [maxLiveTabs]);
-    final shown = sliderValue.value.round();
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          leading: const Icon(MdiIcons.snowflakeVariant),
-          title: Text('Keep at most $shown tabs loaded'),
-          subtitle: const Text(
-            'Tabs beyond this are unloaded, least recently used first, and '
-            'load again when tapped',
-          ),
-          contentPadding: EdgeInsets.zero,
-        ),
-        Slider(
-          min: minMaxLiveTabs.toDouble(),
-          max: maxMaxLiveTabs.toDouble(),
-          divisions: (maxMaxLiveTabs - minMaxLiveTabs) ~/ _step,
-          label: '$shown',
-          value: sliderValue.value.clamp(
-            minMaxLiveTabs.toDouble(),
-            maxMaxLiveTabs.toDouble(),
-          ),
-          onChanged: (value) {
-            sliderValue.value = value;
-          },
-          onChangeEnd: (value) async {
-            final rounded = ((value / _step).round() * _step).clamp(
-              minMaxLiveTabs,
-              maxMaxLiveTabs,
-            );
-            sliderValue.value = rounded.toDouble();
-            await ref
-                .read(saveZenSettingsControllerProvider.notifier)
-                .save(
-                  (currentSettings) =>
-                      currentSettings.copyWith.maxLiveTabs(rounded),
-                );
-          },
-        ),
-      ],
     );
   }
 }

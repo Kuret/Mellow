@@ -67,6 +67,7 @@ import 'package:weblibre/features/settings/presentation/screens/privacy_security
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings_transfer.dart';
+import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tracking_protection_exceptions.dart';
 import 'package:weblibre/features/settings/presentation/screens/ublock_filter_lists.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';

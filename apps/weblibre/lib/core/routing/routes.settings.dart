@@ -39,6 +39,10 @@ part of 'routes.dart';
       name: 'AppearanceLayoutSettingsRoute',
       path: 'appearance_layout',
     ),
+    TypedGoRoute<TabsSpacesSettingsRoute>(
+      name: 'TabsSpacesSettingsRoute',
+      path: 'tabs_spaces',
+    ),
     TypedGoRoute<SearchSettingsRoute>(
       name: 'SearchSettingsRoute',
       path: 'search',
@@ -130,6 +134,14 @@ class AppearanceLayoutSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AppearanceLayoutSettingsScreen();
+  }
+}
+
+class TabsSpacesSettingsRoute extends GoRouteData
+    with $TabsSpacesSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TabsSpacesSettingsScreen();
   }
 }
 
