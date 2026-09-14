@@ -180,6 +180,13 @@ class ZenSettings with FastEquatable {
   /// [defaultRailWidth].
   final double railWidth;
 
+  /// Whether the wide side rail shows its main toolbar row (back, forward,
+  /// reload, tabs, menu...) above the address row. When off, those actions
+  /// stay reachable through a long-press on the rail's "+" (see
+  /// `SpaceIconRail`); the narrow compact bar is unaffected and always shows
+  /// its toolbar row.
+  final bool showRailToolbar;
+
   /// How many tabs may hold a live engine session at once (PLAN §7.4). Above
   /// it, `LiveTabBudget` unloads the least recently used regular tabs back to
   /// cold rows. Clamped to [minMaxLiveTabs]..[maxMaxLiveTabs]; defaults to
@@ -227,6 +234,7 @@ class ZenSettings with FastEquatable {
     required this.spacesSyncMaxTombstoneCount,
     required this.railSide,
     required this.railWidth,
+    required this.showRailToolbar,
     required this.maxLiveTabs,
     required this.separateEssentials,
     required this.customSearchProviders,
@@ -245,6 +253,7 @@ class ZenSettings with FastEquatable {
     int? spacesSyncMaxTombstoneCount,
     RailSide? railSide,
     double? railWidth,
+    bool? showRailToolbar,
     int? maxLiveTabs,
     bool? separateEssentials,
     List<CustomSearchEngine>? customSearchProviders,
@@ -266,6 +275,7 @@ class ZenSettings with FastEquatable {
          minRailWidth,
          maxRailWidth,
        ),
+       showRailToolbar = showRailToolbar ?? true,
        maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
          minMaxLiveTabs,
          maxMaxLiveTabs,
@@ -291,6 +301,7 @@ class ZenSettings with FastEquatable {
     spacesSyncMaxTombstoneCount,
     railSide,
     railWidth,
+    showRailToolbar,
     maxLiveTabs,
     separateEssentials,
     customSearchProviders,

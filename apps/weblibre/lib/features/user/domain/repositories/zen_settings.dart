@@ -57,6 +57,7 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'spacesSyncMaxTombstoneCount': DriftSqlType.int,
   'railSide': DriftSqlType.string,
   'railWidth': DriftSqlType.double,
+  'showRailToolbar': DriftSqlType.bool,
   'maxLiveTabs': DriftSqlType.int,
   'separateEssentials': DriftSqlType.bool,
   'profileDefaultsRevision': DriftSqlType.int,

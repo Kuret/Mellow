@@ -102,6 +102,8 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings railWidth(double railWidth);
 
+  ZenSettings showRailToolbar(bool showRailToolbar);
+
   ZenSettings maxLiveTabs(int maxLiveTabs);
 
   ZenSettings separateEssentials(bool separateEssentials);
@@ -132,6 +134,7 @@ abstract class _$ZenSettingsCWProxy {
     int spacesSyncMaxTombstoneCount,
     RailSide railSide,
     double railWidth,
+    bool showRailToolbar,
     int maxLiveTabs,
     bool separateEssentials,
     List<CustomSearchEngine> customSearchProviders,
@@ -187,6 +190,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings railWidth(double railWidth) => call(railWidth: railWidth);
 
   @override
+  ZenSettings showRailToolbar(bool showRailToolbar) =>
+      call(showRailToolbar: showRailToolbar);
+
+  @override
   ZenSettings maxLiveTabs(int maxLiveTabs) => call(maxLiveTabs: maxLiveTabs);
 
   @override
@@ -224,6 +231,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? spacesSyncMaxTombstoneCount = const $CopyWithPlaceholder(),
     Object? railSide = const $CopyWithPlaceholder(),
     Object? railWidth = const $CopyWithPlaceholder(),
+    Object? showRailToolbar = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? customSearchProviders = const $CopyWithPlaceholder(),
@@ -284,6 +292,12 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.railWidth
           // ignore: cast_nullable_to_non_nullable
           : railWidth as double,
+      showRailToolbar:
+          showRailToolbar == const $CopyWithPlaceholder() ||
+              showRailToolbar == null
+          ? _value.showRailToolbar
+          // ignore: cast_nullable_to_non_nullable
+          : showRailToolbar as bool,
       maxLiveTabs:
           maxLiveTabs == const $CopyWithPlaceholder() || maxLiveTabs == null
           ? _value.maxLiveTabs
@@ -355,6 +369,7 @@ ZenSettings _$ZenSettingsFromJson(
       ?.toInt(),
   railSide: $enumDecodeNullable(_$RailSideEnumMap, json['railSide']),
   railWidth: (json['railWidth'] as num?)?.toDouble(),
+  showRailToolbar: json['showRailToolbar'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
   separateEssentials: json['separateEssentials'] as bool?,
   customSearchProviders: (json['customSearchProviders'] as List<dynamic>?)
@@ -376,6 +391,7 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'spacesSyncMaxTombstoneCount': instance.spacesSyncMaxTombstoneCount,
       'railSide': _$RailSideEnumMap[instance.railSide]!,
       'railWidth': instance.railWidth,
+      'showRailToolbar': instance.showRailToolbar,
       'maxLiveTabs': instance.maxLiveTabs,
       'separateEssentials': instance.separateEssentials,
       'customSearchProviders': instance.customSearchProviders
