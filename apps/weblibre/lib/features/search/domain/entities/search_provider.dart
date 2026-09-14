@@ -19,6 +19,26 @@
  */
 import 'package:flutter/foundation.dart';
 
+/// The provider in [providers] with [id], or null if there is none.
+///
+/// The catalogue is a handful of entries, so a list scan is the whole lookup.
+SearchProvider? findSearchProvider(
+  Iterable<SearchProvider> providers,
+  String? id,
+) {
+  if (id == null) {
+    return null;
+  }
+
+  for (final provider in providers) {
+    if (provider.id == id) {
+      return provider;
+    }
+  }
+
+  return null;
+}
+
 /// The engine an address-bar query is sent to.
 ///
 /// A provider is a URL template and a name; there is deliberately no database
