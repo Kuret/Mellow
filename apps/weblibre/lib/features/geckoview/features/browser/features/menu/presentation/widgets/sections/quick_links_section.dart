@@ -26,16 +26,9 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 
-/// Icon grid of the browser's other screens.
-///
-/// Laid out at a fixed four per row: the width each tile gets is derived from
-/// the space available, so the grid already adapts without the row count being
-/// something the user has to decide.
+/// Rows linking to the browser's other screens.
 class QuickLinksSection extends ConsumerWidget {
   final List<MenuItemType> items;
-
-  static const _spacing = 8.0;
-  static const _itemsPerRow = 4;
 
   const QuickLinksSection({super.key, required this.items});
 
@@ -46,38 +39,25 @@ class QuickLinksSection extends ConsumerWidget {
         if (_destinations.contains(item)) item,
     ];
 
-    if (links.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: menuSectionSpacing),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width =
-              (constraints.maxWidth - _spacing * (_itemsPerRow - 1)) /
-              _itemsPerRow;
-
-          return Wrap(
-            spacing: _spacing,
-            runSpacing: _spacing,
-            children: [
-              for (final link in links)
-                SizedBox(
-                  width: width,
-                  child: _QuickLinkTile(
-                    icon: link.icon,
-                    label: link.label,
-                    onTap: () => _open(context, link),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
+    // Rows, like every other section of this menu. These used to be a grid of
+    // square tiles, which made sense when there were six of them; the ones that
+    // filled the grid out are gone and three squares among a column of rows
+    // only read as a different kind of thing than they are.
+    return buildMenuCard(
+      context,
+      children: [
+        for (final link in links)
+          ListTile(
+            leading: Icon(link.icon),
+            title: Text(link.label),
+            onTap: () => _open(context, link),
+          ),
+      ],
     );
   }
 
-  /// The rows this grid knows how to open. Their icons and labels come from
-  /// [MenuItemType] itself, so the grid and the arrangement UI cannot drift.
+  /// The rows this section knows how to open. Their icons and labels come from
+  /// [MenuItemType] itself, so the menu and the arrangement UI cannot drift.
   static const _destinations = {
     MenuItemType.history,
     MenuItemType.bookmarks,
@@ -98,47 +78,5 @@ class QuickLinksSection extends ConsumerWidget {
       default:
         break;
     }
-  }
-}
-
-class _QuickLinkTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _QuickLinkTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: colorScheme.onSurface),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: TextStyle(color: colorScheme.onSurface, fontSize: 12),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
