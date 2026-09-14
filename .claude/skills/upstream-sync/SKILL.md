@@ -26,6 +26,10 @@ Measured on this fork: 188 hand-modified upstream files, 131 new ones, 312 delet
 | Fixes to files we do not touch | **Take.** |
 | Anything under `apps/weblibre/lib/features/geckoview/features/{browser,tabs}/**`, the tab repository/providers, the tab views, the menu, `general_settings.dart` | **Review, do not auto-merge.** We replaced the semantics underneath these. A textually clean merge here can still be wrong. |
 | Their work on proxy / Tor / isolated tabs / strict mode | **Skip.** We deleted it (W0). Resolution is always "stays deleted". |
+| Their work on the hosted service tier — `features/account`, `search_credits`, `web_search`, `privacypass_client` | **Skip.** Deleted 2026-09-13. This was ~137 of their commits per six months. |
+| Their work on `bangs`, `small_web`, `web_feed`, `quotes`, `popular_sites`, `wallpaper`, history highlights | **Skip.** All deleted. Bangs were replaced by our own `features/search` provider model — if upstream changes search-engine handling, it does not apply here. |
+| Their work on tab direction settings or parent/child tab trees | **Skip.** Both removed: Zen's `order_key` is the only order, folders are the only nesting. |
+| Their changes to `general_settings.dart` | **Take more freely than before.** Phase 8 moved this fork's twelve settings into `ZenSettings`, so their file is nearly theirs again — most of their edits should now apply cleanly. |
 
 When in doubt, leave it out and say so in the PR. An upstream feature we skipped can be taken next time; a bad merge into the tab model costs a day.
 

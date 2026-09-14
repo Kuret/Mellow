@@ -111,14 +111,45 @@ async function load() {
   await loading;
 }
 
+/**
+ * Eruda mounts itself as `<div id="eruda">`. Its absence after `init()` means
+ * the build silently failed — the case in the wild is Trusted Types
+ * (`require-trusted-types-for 'script'`, which YouTube sets), because Eruda
+ * builds its UI through `innerHTML` and the policy rejects the string. The
+ * page's console shows a violation; the page world reports nothing.
+ */
+function erudaMounted() {
+  return document.getElementById('eruda') != null;
+}
+
 async function ensureReady() {
   await load();
-  const tools = eruda();
+  let tools = eruda();
   if (!tools) throw new Error('eruda did not load');
   if (!initialised) {
     tools.init();
     initialised = true;
   }
+
+  // The sandbox is not subject to the page's policy, so retry there once when
+  // the page world came up empty. Elements and styles work from there; Console
+  // and Network only see the sandbox, which the app is told about via `world`.
+  if (world === 'page' && !erudaMounted()) {
+    try {
+      tools.destroy();
+    } catch (error) {
+      // Nothing built, nothing to tear down.
+    }
+    initialised = false;
+    sandboxEruda = await injectIntoSandbox();
+    world = 'isolated';
+    tools = sandboxEruda;
+    if (!tools) throw new Error('eruda did not load in the sandbox either');
+    tools.init();
+    initialised = true;
+    report({ fellBackToSandbox: true });
+  }
+
   return tools;
 }
 
