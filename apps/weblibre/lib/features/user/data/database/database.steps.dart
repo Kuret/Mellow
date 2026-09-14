@@ -1916,6 +1916,105 @@ final class Schema14 extends i0.VersionedSchema {
   );
 }
 
+final class Schema15 extends i0.VersionedSchema {
+  Schema15({required super.database}) : super(version: 15);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    setting,
+    iconCache,
+    riverpod,
+    toolbarButtonConfigs,
+    idxToolbarOrderKey,
+    searchTokens,
+    idxSearchTokensInsertedAt,
+    idxSearchTokensReservedAt,
+    searchHistory,
+    idxSearchHistoryDate,
+  ];
+  late final Shape0 setting = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 iconCache = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'icon_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_3, _column_4, _column_5],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 riverpod = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'riverpod',
+      withoutRowId: true,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 toolbarButtonConfigs = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'toolbar_button_configs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_11, _column_12, _column_13, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxToolbarOrderKey = i1.Index(
+    'idx_toolbar_order_key',
+    'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
+  );
+  late final Shape6 searchTokens = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'search_tokens',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_15, _column_16, _column_17, _column_18, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxSearchTokensInsertedAt = i1.Index(
+    'idx_search_tokens_inserted_at',
+    'CREATE INDEX idx_search_tokens_inserted_at ON search_tokens (inserted_at)',
+  );
+  final i1.Index idxSearchTokensReservedAt = i1.Index(
+    'idx_search_tokens_reserved_at',
+    'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
+  );
+  late final Shape11 searchHistory = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'search_history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_34, _column_35],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxSearchHistoryDate = i1.Index(
+    'idx_search_history_date',
+    'CREATE INDEX idx_search_history_date ON search_history (search_date)',
+  );
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -1930,6 +2029,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
+  required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -1998,6 +2098,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from13To14(migrator, schema);
         return 14;
+      case 14:
+        final schema = Schema15(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from14To15(migrator, schema);
+        return 15;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -2018,6 +2123,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
+  required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -2033,5 +2139,6 @@ i1.OnUpgrade stepByStep({
     from11To12: from11To12,
     from12To13: from12To13,
     from13To14: from13To14,
+    from14To15: from14To15,
   ),
 );

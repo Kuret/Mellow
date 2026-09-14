@@ -22,7 +22,6 @@ import 'package:drift/internal/versioned_schema.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
-import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
 import 'package:weblibre/features/user/data/database/daos/search_history.dart';
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
@@ -36,14 +35,13 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
     SettingDao,
     CacheDao,
     ToolbarButtonConfigDao,
-    QuickSwitcherButtonConfigDao,
     SearchTokensDao,
     SearchHistoryDao,
   ],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 14;
+  final int schemaVersion = 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -178,6 +176,23 @@ WHERE partition_key = 'general' AND "key" IN (
       // not drift with the current schema. Losing the row is safe: nothing
       // reads it, and there is no wizard left for it to gate.
       await m.database.customStatement('DROP TABLE IF EXISTS onboarding');
+    },
+    from14To15: (m, schema) async {
+      // The quick switcher button cluster is gone (along with
+      // `QuickSwitcherButtonRow`, `QuickSwitcherToolbarConfigRepository` and
+      // `QuickSwitcherButtonConfigDao`), and with it the only code that ever
+      // read or wrote this table. Its defaults shipped with every button
+      // hidden, so no user ever saw the cluster or configured it. Frozen
+      // DROP rather than `m.deleteTable(schema.quickSwitcherButtonConfigs)`,
+      // matching the from7To8/from11To12/from13To14 precedent — this step's
+      // meaning must not drift with the current schema. Losing the rows is
+      // safe: nothing reads them, and there is no cluster left for them to
+      // configure. Dropping the table takes its index
+      // (`idx_quick_switcher_order_key`) with it, so there is no separate
+      // DROP INDEX.
+      await m.database.customStatement(
+        'DROP TABLE IF EXISTS quick_switcher_button_configs',
+      );
     },
   );
 }
