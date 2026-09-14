@@ -13,6 +13,25 @@ import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 import 'generated/schema.dart';
 
+/// The fork's settings as they stood when the v12 -> v13 step was written, and
+/// therefore the only keys that can ever have a row in the `general` partition
+/// for it to move. Frozen on purpose, mirroring the literal key list in the
+/// step itself.
+const _forkSettingsAtV13 = <String>[
+  'spacesSyncEnabled',
+  'spacesSyncWritesEnabled',
+  'spacesSyncLastSyncId',
+  'spacesSyncLastModified',
+  'spacesSyncBaselineDone',
+  'spacesSyncApplierVersion',
+  'spacesSyncMaxTombstoneFraction',
+  'spacesSyncMaxTombstoneCount',
+  'railSide',
+  'railWidth',
+  'maxLiveTabs',
+  'separateEssentials',
+];
+
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   late SchemaVerifier verifier;
@@ -110,7 +129,13 @@ void main() {
         row.read<String>('key'): row.read<String?>('partition_key'),
     };
     expect(partitions['themeMode'], 'general');
-    for (final key in zenSettingColumnTypes.keys) {
+    // The keys seeded above, not today's `zenSettingColumnTypes`. The step in
+    // `database.dart` spells its key list out as frozen literals precisely so
+    // its meaning cannot drift with the model, and this assertion has to be
+    // frozen with it: a fork setting added after v13 never had a row in the
+    // `general` partition to move, so demanding one of the current model would
+    // fail on the next field we add rather than on a real regression.
+    for (final key in _forkSettingsAtV13) {
       expect(partitions[key], 'zen', reason: '$key stayed behind');
     }
   });
