@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class ToolbarLayoutPage extends HookConsumerWidget {
@@ -31,6 +32,7 @@ class ToolbarLayoutPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final zenSettings = ref.watch(zenSettingsWithDefaultsProvider);
 
     return BrowserPage(
       child: CustomScrollView(
@@ -50,6 +52,7 @@ class ToolbarLayoutPage extends HookConsumerWidget {
             pinned: true,
             delegate: TabBarPreviewHeaderDelegate(
               settings: settings,
+              zenSettings: zenSettings,
               backgroundColor: Colors.transparent,
               compact: true,
               padding: const EdgeInsets.symmetric(

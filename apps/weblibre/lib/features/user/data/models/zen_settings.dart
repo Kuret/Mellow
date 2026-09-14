@@ -20,6 +20,8 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart'
+    show TabBarPosition;
 
 part 'zen_settings.g.dart';
 
@@ -44,14 +46,14 @@ const maxRailWidth = 320.0;
 const railWidthStep = 8.0;
 
 /// Which edge the wide-viewport side rail docks to. Independent of
-/// `TabBarPosition`, which only places the narrow-viewport compact bar.
+/// [TabBarPosition], which only places the narrow-viewport compact bar.
 enum RailSide { left, right }
 
 /// Viewport width, in logical px, from which the browser lays its chrome out
-/// as the side rail ([RailSide]) instead of the compact horizontal bar:
-/// tablets, landscape and unfolded foldables clear it; phones in portrait and
-/// folded foldables get the bar. Decided per frame from the viewport, so
-/// rotating or unfolding switches live.
+/// as the side rail ([RailSide]) instead of the compact horizontal bar
+/// ([TabBarPosition]): tablets, landscape and unfolded foldables clear it;
+/// phones in portrait and folded foldables get the bar. Decided per frame
+/// from the viewport, so rotating or unfolding switches live.
 const narrowRailViewportBreakpoint = 600.0;
 
 /// Whether a viewport of [viewportWidth] gets the side rail layout.
@@ -64,6 +66,25 @@ bool isWideViewport(double viewportWidth) =>
 /// least the expanded rail can show.
 double effectiveRailWidth({required double railWidth}) =>
     railWidth.clamp(minRailWidth, maxRailWidth);
+
+/// The edge the browser chrome occupies on a viewport of [viewportWidth]: the
+/// side rail's [railSide] on a wide viewport ([isWideViewport]), the compact
+/// bar's [narrowPosition] on a narrow one. The layers of the browser screen
+/// share [TabBarPosition] as their edge vocabulary, so the rail answers with
+/// its (legacy) left/right values.
+TabBarPosition chromeEdge({
+  required double viewportWidth,
+  required RailSide railSide,
+  required TabBarPosition narrowPosition,
+}) {
+  if (isWideViewport(viewportWidth)) {
+    return switch (railSide) {
+      RailSide.left => TabBarPosition.left,
+      RailSide.right => TabBarPosition.right,
+    };
+  }
+  return narrowPosition;
+}
 
 /// The settings this fork owns: the Zen Spaces sync client's switches and
 /// bookkeeping, and the Zen tab model's rail and tab-budget options.

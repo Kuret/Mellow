@@ -46,12 +46,14 @@ import 'package:weblibre/features/user/data/models/zen_settings.dart';
 class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   const TabBarPreviewHeaderDelegate({
     required this.settings,
+    required this.zenSettings,
     this.backgroundColor,
     this.compact = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 
   final GeneralSettings settings;
+  final ZenSettings zenSettings;
   final Color? backgroundColor;
   final bool compact;
   final EdgeInsets padding;
@@ -76,7 +78,11 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: padding,
-        child: TabBarPreviewCard(settings: settings, compact: compact),
+        child: TabBarPreviewCard(
+          settings: settings,
+          zenSettings: zenSettings,
+          compact: compact,
+        ),
       ),
     );
   }
@@ -84,6 +90,7 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant TabBarPreviewHeaderDelegate oldDelegate) {
     return oldDelegate.settings != settings ||
+        oldDelegate.zenSettings != zenSettings ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.compact != compact;
   }
@@ -93,10 +100,12 @@ class TabBarPreviewCard extends StatelessWidget {
   const TabBarPreviewCard({
     super.key,
     required this.settings,
+    required this.zenSettings,
     this.compact = false,
   });
 
   final GeneralSettings settings;
+  final ZenSettings zenSettings;
   final bool compact;
 
   static const wideScreensLabel = 'Wide screens';
@@ -302,7 +311,7 @@ class TabBarPreviewCard extends StatelessWidget {
 
     // --- Wide screens: the rail on the configured side. -------------------
 
-    final railWidth = effectiveRailWidth(railWidth: settings.railWidth);
+    final railWidth = effectiveRailWidth(railWidth: zenSettings.railWidth);
     final closeMode = settings.quickTabSwitcherCloseButtonMode;
     final rail = SizedBox(
       width: railWidth,
@@ -360,7 +369,7 @@ class TabBarPreviewCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: frame(),
       child: Row(
-        children: settings.railSide == RailSide.left
+        children: zenSettings.railSide == RailSide.left
             ? [rail, Expanded(child: pageContent())]
             : [Expanded(child: pageContent()), rail],
       ),

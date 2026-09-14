@@ -33,7 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 /// Zen's `zen.tabs.essentials.max`: how many essentials a strip is laid out
 /// for. A layout hint only — the grid wraps and grows past it, since the
@@ -56,7 +56,7 @@ const essentialsMaxRows = 2;
 /// `null` while the shelves are still loading.
 List<String>? watchEssentialShelfTabIds(WidgetRef ref) {
   final separate = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
+    zenSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
   );
 
   if (separate) {

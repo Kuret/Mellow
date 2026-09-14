@@ -31,12 +31,12 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 part 'live_tab_budget.g.dart';
 
 /// Keeps the number of live engine sessions within
-/// [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+/// [ZenSettings.maxLiveTabs] (PLAN §7.4 item 5).
 ///
 /// Whenever the engine's tab list or the budget changes, and once the list
 /// has been quiet for [settleDelay], the least recently used regular tabs
@@ -62,7 +62,7 @@ class LiveTabBudget extends _$LiveTabBudget with WidgetsBindingObserver {
 
     ref.listen(tabListProvider, (_, _) => _scheduleEnforcement());
     ref.listen(
-      generalSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
+      zenSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
       (_, _) => _scheduleEnforcement(),
     );
     ref.listen(
@@ -77,8 +77,7 @@ class LiveTabBudget extends _$LiveTabBudget with WidgetsBindingObserver {
     });
   }
 
-  int get _maxLiveTabs =>
-      ref.read(generalSettingsWithDefaultsProvider).maxLiveTabs;
+  int get _maxLiveTabs => ref.read(zenSettingsWithDefaultsProvider).maxLiveTabs;
 
   void _scheduleEnforcement() {
     _settleTimer?.cancel();

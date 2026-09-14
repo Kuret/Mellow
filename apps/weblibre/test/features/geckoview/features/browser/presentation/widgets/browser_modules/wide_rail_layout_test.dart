@@ -47,7 +47,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 class _EmptyTabStates extends TabStates {
   @override
@@ -161,10 +163,10 @@ List<Override> _railOverrides(
 }) => [
   tabDatabaseProvider.overrideWith((ref) => db),
   generalSettingsWithDefaultsProvider.overrideWith(
-    (ref) => GeneralSettings.withDefaults(
-      tabBarPosition: TabBarPosition.left,
-      railWidth: railWidth,
-    ),
+    (ref) => GeneralSettings.withDefaults(tabBarPosition: TabBarPosition.left),
+  ),
+  zenSettingsWithDefaultsProvider.overrideWith(
+    (ref) => ZenSettings.withDefaults(railWidth: railWidth),
   ),
   watchSpacesProvider.overrideWith(
     (ref) => Stream.value(<SpaceData>[

@@ -41,7 +41,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 import '../../features/tabs/data/database/tab_db_test_helpers.dart';
 
@@ -165,7 +167,7 @@ typedef _Harness = ({
 _Harness _openHarness({
   required List<String> liveTabIds,
   String? selectedTabId,
-  GeneralSettings? settings,
+  ZenSettings? settings,
 }) {
   TestWidgetsFlutterBinding.ensureInitialized();
   final db = openTestTabDatabase();
@@ -183,7 +185,10 @@ _Harness _openHarness({
         _DefaultTabViewFilterController.new,
       ),
       generalSettingsWithDefaultsProvider.overrideWith(
-        (ref) => settings ?? GeneralSettings.withDefaults(),
+        (ref) => GeneralSettings.withDefaults(),
+      ),
+      zenSettingsWithDefaultsProvider.overrideWith(
+        (ref) => settings ?? ZenSettings.withDefaults(),
       ),
     ],
   );
@@ -418,7 +423,7 @@ void main() {
       final h = _openHarness(
         liveTabIds: _liveIds(30),
         selectedTabId: 'live-00',
-        settings: GeneralSettings.withDefaults(maxLiveTabs: 25),
+        settings: ZenSettings.withDefaults(maxLiveTabs: 25),
       );
       await _seed(h.db, cold: 0, live: 30, pinnedLive: {1}, essentialLive: {2});
 

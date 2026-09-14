@@ -31,6 +31,7 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 const List<SettingsSectionDefinition> browsingSettingsSections = [
   SettingsSectionDefinition(
@@ -406,7 +407,7 @@ class _SeparateEssentialsTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final separateEssentials = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
+      zenSettingsWithDefaultsProvider.select((s) => s.separateEssentials),
     );
 
     return SwitchListTile.adaptive(
@@ -419,7 +420,7 @@ class _SeparateEssentialsTile extends ConsumerWidget {
       value: separateEssentials,
       onChanged: (value) async {
         await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
+            .read(saveZenSettingsControllerProvider.notifier)
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.separateEssentials(value),
@@ -990,7 +991,7 @@ class _MaxLiveTabsSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final maxLiveTabs = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
+      zenSettingsWithDefaultsProvider.select((s) => s.maxLiveTabs),
     );
     final sliderValue = useState(maxLiveTabs.toDouble());
     useEffect(() {
@@ -1031,7 +1032,7 @@ class _MaxLiveTabsSection extends HookConsumerWidget {
             );
             sliderValue.value = rounded.toDouble();
             await ref
-                .read(saveGeneralSettingsControllerProvider.notifier)
+                .read(saveZenSettingsControllerProvider.notifier)
                 .save(
                   (currentSettings) =>
                       currentSettings.copyWith.maxLiveTabs(rounded),

@@ -34,7 +34,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 import '../../data/database/tab_db_test_helpers.dart';
 
@@ -131,9 +133,11 @@ Future<_RecordingTabRepository> _pump(
         tabDatabaseProvider.overrideWith((ref) => db),
         tabRepositoryProvider.overrideWith(() => repository),
         generalSettingsWithDefaultsProvider.overrideWith(
-          (ref) => GeneralSettings.withDefaults(
-            separateEssentials: separateEssentials,
-          ),
+          (ref) => GeneralSettings.withDefaults(),
+        ),
+        zenSettingsWithDefaultsProvider.overrideWith(
+          (ref) =>
+              ZenSettings.withDefaults(separateEssentials: separateEssentials),
         ),
         selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
         selectedTabProvider.overrideWith(_NoSelectedTab.new),

@@ -846,21 +846,6 @@ class GeneralSettings with FastEquatable {
       // ignore: deprecated_member_use_from_same_package
       TabBarStackingMode.spaceTabs;
 
-  /// The edge the browser chrome occupies on a viewport of [viewportWidth]:
-  /// the side rail's [railSide] on a wide viewport ([isWideViewport]), the
-  /// compact bar's [effectiveTabBarPosition] on a narrow one. The layers of
-  /// the browser screen share [TabBarPosition] as their edge vocabulary, so
-  /// the rail answers with its (legacy) left/right values.
-  TabBarPosition chromeEdge({required double viewportWidth}) {
-    if (isWideViewport(viewportWidth)) {
-      return switch (railSide) {
-        RailSide.left => TabBarPosition.left,
-        RailSide.right => TabBarPosition.right,
-      };
-    }
-    return effectiveTabBarPosition;
-  }
-
   @override
   List<Object?> get hashParameters => [
     themeMode,

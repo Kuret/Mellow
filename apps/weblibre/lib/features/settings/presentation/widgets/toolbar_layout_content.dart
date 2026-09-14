@@ -26,6 +26,7 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
@@ -222,7 +223,7 @@ class _RailSideSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final railSide = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.railSide),
+      zenSettingsWithDefaultsProvider.select((s) => s.railSide),
     );
 
     return Padding(
@@ -244,7 +245,7 @@ class _RailSideSection extends HookConsumerWidget {
             onChanged: (value) async {
               if (value != null) {
                 await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .read(saveZenSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.railSide(value),
@@ -616,7 +617,7 @@ class _RailWidthTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final width = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      zenSettingsWithDefaultsProvider.select(
         (s) => effectiveRailWidth(railWidth: s.railWidth),
       ),
     );
@@ -652,7 +653,7 @@ class _RailWidthTile extends HookConsumerWidget {
                         (value / railWidthStep).round() * railWidthStep;
                     sliderValue.value = normalized;
                     await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .read(saveZenSettingsControllerProvider.notifier)
                         .save(
                           (currentSettings) =>
                               currentSettings.copyWith.railWidth(normalized),

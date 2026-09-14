@@ -28,12 +28,17 @@ Future<void> _pumpPreview(
   WidgetTester tester,
   GeneralSettings settings, {
   required bool compact,
+  ZenSettings? zenSettings,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: SingleChildScrollView(
-          child: TabBarPreviewCard(settings: settings, compact: compact),
+          child: TabBarPreviewCard(
+            settings: settings,
+            zenSettings: zenSettings ?? ZenSettings.withDefaults(),
+            compact: compact,
+          ),
         ),
       ),
     ),
@@ -67,7 +72,8 @@ void main() {
       testWidgets('docks the rail on the configured side', (tester) async {
         await _pumpPreview(
           tester,
-          GeneralSettings.withDefaults(railSide: RailSide.left),
+          GeneralSettings.withDefaults(),
+          zenSettings: ZenSettings.withDefaults(railSide: RailSide.left),
           compact: compact,
         );
         expect(
@@ -77,7 +83,8 @@ void main() {
 
         await _pumpPreview(
           tester,
-          GeneralSettings.withDefaults(railSide: RailSide.right),
+          GeneralSettings.withDefaults(),
+          zenSettings: ZenSettings.withDefaults(railSide: RailSide.right),
           compact: compact,
         );
         expect(

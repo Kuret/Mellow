@@ -66,6 +66,7 @@ import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/utils/move_to_background.dart';
@@ -260,7 +261,7 @@ class _TabBar extends HookConsumerWidget {
     );
 
     final railWidthSetting = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.railWidth),
+      zenSettingsWithDefaultsProvider.select((s) => s.railWidth),
     );
     final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
 
@@ -919,9 +920,15 @@ class BrowserScreen extends HookConsumerWidget {
     // The resolved edge of the chrome. [TabBarPosition] doubles as the edge
     // type for the layers below: its (legacy) left/right values name the
     // rail's edge, top/bottom the compact bar's.
-    final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.chromeEdge(viewportWidth: viewportWidth),
+    final tabBarPosition = chromeEdge(
+      viewportWidth: viewportWidth,
+      railSide: ref.watch(
+        zenSettingsWithDefaultsProvider.select((value) => value.railSide),
+      ),
+      narrowPosition: ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (value) => value.effectiveTabBarPosition,
+        ),
       ),
     );
     final isRail = tabBarPosition.isVertical;
@@ -936,7 +943,7 @@ class BrowserScreen extends HookConsumerWidget {
     const quickTabSwitcherRowCount = 1;
 
     final railWidthSetting = ref.watch(
-      generalSettingsWithDefaultsProvider.select((value) => value.railWidth),
+      zenSettingsWithDefaultsProvider.select((value) => value.railWidth),
     );
     final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
 

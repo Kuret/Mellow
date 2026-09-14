@@ -23,6 +23,7 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
   const ToolbarLayoutSettingsScreen({super.key});
@@ -30,6 +31,7 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final zenSettings = ref.watch(zenSettingsWithDefaultsProvider);
     final search = useSettingsSearch();
 
     return SettingsCustomScrollScaffold(
@@ -42,6 +44,7 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
           pinned: true,
           delegate: TabBarPreviewHeaderDelegate(
             settings: settings,
+            zenSettings: zenSettings,
             compact: true,
           ),
         ),

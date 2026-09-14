@@ -22,11 +22,24 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 void main() {
+  /// The call the browser screen makes: the rail side from `ZenSettings`, the
+  /// narrow-viewport edge from upstream's `GeneralSettings`.
+  TabBarPosition edge({
+    required double viewportWidth,
+    RailSide railSide = RailSide.left,
+    TabBarPosition tabBarPosition = TabBarPosition.bottom,
+  }) => chromeEdge(
+    viewportWidth: viewportWidth,
+    railSide: railSide,
+    narrowPosition: GeneralSettings.withDefaults(
+      tabBarPosition: tabBarPosition,
+    ).effectiveTabBarPosition,
+  );
+
   group('chromeEdge', () {
     test('the same settings give the rail at 800 and the bar at 400', () {
-      final settings = GeneralSettings.withDefaults();
-      final wide = settings.chromeEdge(viewportWidth: 800);
-      final narrow = settings.chromeEdge(viewportWidth: 400);
+      final wide = edge(viewportWidth: 800);
+      final narrow = edge(viewportWidth: 400);
 
       expect(wide.isVertical, isTrue, reason: 'side rail on a wide viewport');
       expect(wide, TabBarPosition.left, reason: 'RailSide defaults to left');
@@ -36,19 +49,18 @@ void main() {
 
     test('railSide.right docks the rail on the right', () {
       expect(
-        GeneralSettings.withDefaults(
-          railSide: RailSide.right,
-        ).chromeEdge(viewportWidth: 800),
+        edge(viewportWidth: 800, railSide: RailSide.right),
         TabBarPosition.right,
       );
     });
 
     test('the rail side is ignored on a narrow viewport', () {
       expect(
-        GeneralSettings.withDefaults(
+        edge(
+          viewportWidth: 400,
           railSide: RailSide.right,
           tabBarPosition: TabBarPosition.top,
-        ).chromeEdge(viewportWidth: 400),
+        ),
         TabBarPosition.top,
       );
     });
@@ -56,9 +68,7 @@ void main() {
     test('a stored side position reads as a bottom compact bar', () {
       for (final legacy in const [TabBarPosition.left, TabBarPosition.right]) {
         expect(
-          GeneralSettings.withDefaults(
-            tabBarPosition: legacy,
-          ).chromeEdge(viewportWidth: 400),
+          edge(viewportWidth: 400, tabBarPosition: legacy),
           TabBarPosition.bottom,
           reason: 'stored $legacy',
         );
@@ -66,17 +76,12 @@ void main() {
     });
 
     test('switches exactly at the breakpoint', () {
-      final settings = GeneralSettings.withDefaults();
       expect(
-        settings
-            .chromeEdge(viewportWidth: narrowRailViewportBreakpoint - 1)
-            .isHorizontal,
+        edge(viewportWidth: narrowRailViewportBreakpoint - 1).isHorizontal,
         isTrue,
       );
       expect(
-        settings
-            .chromeEdge(viewportWidth: narrowRailViewportBreakpoint)
-            .isVertical,
+        edge(viewportWidth: narrowRailViewportBreakpoint).isVertical,
         isTrue,
       );
     });

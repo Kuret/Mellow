@@ -43,7 +43,9 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 import '../../../../tabs/data/database/tab_db_test_helpers.dart';
 
@@ -130,6 +132,9 @@ Future<void> _pumpTray(WidgetTester tester, {required TabDatabase db}) async {
     ProviderScope(
       overrides: [
         tabDatabaseProvider.overrideWith((ref) => db),
+        zenSettingsWithDefaultsProvider.overrideWith(
+          (ref) => ZenSettings.withDefaults(),
+        ),
         generalSettingsWithDefaultsProvider.overrideWith(
           // The AI tab-suggestion button reads a persisted flag out of the
           // user database, which a widget test has no profile for.

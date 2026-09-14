@@ -50,7 +50,9 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 class _EmptyTabStates extends TabStates {
   @override
@@ -195,6 +197,9 @@ Future<_RecordingTabRepository> _pumpBar(
       overrides: [
         tabDatabaseProvider.overrideWith((ref) => db),
         tabRepositoryProvider.overrideWith(() => repository),
+        zenSettingsWithDefaultsProvider.overrideWith(
+          (ref) => ZenSettings.withDefaults(),
+        ),
         generalSettingsWithDefaultsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(),
         ),
