@@ -51,8 +51,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
-import 'package:weblibre/features/gestures/domain/services/gesture_control.dart';
-import 'package:weblibre/features/gestures/presentation/widgets/gesture_feedback_overlay.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
@@ -349,7 +347,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         // constraints down. Under a loose fit the stack would size itself from
         // its only non-positioned child — the engine — and collapse to nothing
         // whenever that child is offstage, taking the [Positioned.fill] home
-        // surface and gesture overlay down with it.
+        // surface down with it.
         fit: StackFit.expand,
         children: [
           // Two separate concerns, deliberately not folded into one flag:
@@ -443,7 +441,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             ),
           ),
           if (showHome) const Positioned.fill(child: BrowserHome()),
-          const Positioned.fill(child: GestureFeedbackOverlay()),
         ],
       ),
     );
@@ -656,19 +653,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to desktopModeRuleApplierProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      gestureControlServiceProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to gestureControlServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );

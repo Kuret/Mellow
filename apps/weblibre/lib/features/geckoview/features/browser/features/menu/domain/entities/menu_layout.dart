@@ -85,9 +85,6 @@ enum MenuSectionType {
 /// Device — because pinning an order onto a list that comes and go leaves
 /// configuration behind for things that no longer exist.
 enum MenuItemType {
-  // Quick toggles
-  gestures,
-
   // Page actions
   desktopMode,
   addBookmark,
@@ -142,7 +139,6 @@ enum MenuItemType {
 
   String get label => switch (this) {
     desktopMode => 'Desktop',
-    gestures => 'Gestures',
     addBookmark => 'Add Bookmark',
     findInPage => 'Find in Page',
     inspectElement => 'Inspect Element',
@@ -186,7 +182,6 @@ enum MenuItemType {
   /// loading.
   IconData get icon => switch (this) {
     desktopMode => MdiIcons.monitor,
-    gestures => MdiIcons.gestureSwipe,
     addBookmark => MdiIcons.bookmarkPlus,
     findInPage => Icons.search,
     inspectElement => MdiIcons.selectSearch,
@@ -270,10 +265,7 @@ class MenuSectionDefault {
 /// A section or row that lays its own contents out from live data (Extensions,
 /// Connection, Send To Device) offers nothing to arrange beneath it.
 const List<MenuSectionDefault> menuLayoutDefaults = [
-  MenuSectionDefault(
-    MenuSectionType.quickToggles,
-    items: [MenuItemDefault(MenuItemType.gestures)],
-  ),
+  MenuSectionDefault(MenuSectionType.quickToggles),
   MenuSectionDefault(
     MenuSectionType.pageActions,
     items: [

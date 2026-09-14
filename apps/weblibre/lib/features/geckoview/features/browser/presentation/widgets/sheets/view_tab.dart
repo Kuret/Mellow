@@ -28,7 +28,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/app_link_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/desktop_mode_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/gesture_exclusion_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
@@ -141,9 +140,6 @@ class ViewTabSheetWidget extends HookConsumerWidget {
         children: [
           // Tracking Protection Section
           TrackingProtectionSection(tabId: initialTabState.id),
-          const Divider(),
-          // Gesture Exclusion Section
-          GestureExclusionSection(url: initialTabState.url),
           const Divider(),
           // Desktop Mode Section
           DesktopModeSection(

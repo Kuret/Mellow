@@ -190,18 +190,6 @@ GeckoViewportService viewportService(Ref ref) {
   return service;
 }
 
-@Riverpod(keepAlive: true)
-GeckoGestureService gestureService(Ref ref) {
-  final service = GeckoGestureService();
-  service.setUp();
-
-  ref.onDispose(() async {
-    await service.dispose();
-  });
-
-  return service;
-}
-
 /// Whether native has reported that the engine and its components are up.
 ///
 /// Native reports this once `GeckoBrowserApi.initialize` has built the

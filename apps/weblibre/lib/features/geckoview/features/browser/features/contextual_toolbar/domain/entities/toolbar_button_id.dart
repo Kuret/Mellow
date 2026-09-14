@@ -44,7 +44,6 @@ enum ToolbarButtonId {
   pageDown,
   font,
   extensionShortcut,
-  toggleGestures,
   hideTabBar,
   quit,
 }

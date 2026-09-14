@@ -17,24 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
-import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 
 /// The segmented toggle bar at the top of the sheet.
 ///
-/// Only the toggles the user kept are built, so a hidden toggle costs nothing:
-/// the state it would otherwise watch is never subscribed to. Renders nothing
-/// at all when none of its toggles apply, so the sheet is not left with a gap
-/// where the bar would have been.
-class QuickTogglesSection extends ConsumerWidget {
+/// Nothing is left to put in it: Desktop is a page action now and the other
+/// toggles it carried are gone. Kept as an empty section only so a stored
+/// layout that still names it has somewhere to land.
+class QuickTogglesSection extends StatelessWidget {
   final String selectedTabId;
   final List<MenuItemType> items;
 
@@ -45,161 +36,5 @@ class QuickTogglesSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final toggles = <MenuItemType, _QuickToggle>{};
-
-    if (items.contains(MenuItemType.gestures)) {
-      final gestureSettings = ref.watch(gestureSettingsWithDefaultsProvider);
-
-      if (gestureSettings.enabled) {
-        toggles[MenuItemType.gestures] = _QuickToggle(
-          icon: MdiIcons.gestureSwipe,
-          label: MenuItemType.gestures.label,
-          active: gestureSettings.active,
-          onTap: () async {
-            await ref
-                .read(gestureSettingsRepositoryProvider.notifier)
-                .updateSettings(
-                  (s) => s.copyWith(active: !gestureSettings.active),
-                );
-          },
-          onLongPress: () {
-            Navigator.pop(context);
-            unawaited(GestureSettingsRoute().push(context));
-          },
-        );
-      }
-    }
-
-    final ordered = [
-      for (final item in items)
-        if (toggles[item] case final toggle?) toggle,
-    ];
-
-    if (ordered.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: menuSectionSpacing),
-      child: _QuickToggleBar(toggles: ordered),
-    );
-  }
-}
-
-/// A single quick toggle's display + behavior, rendered as one segment of a
-/// [_QuickToggleBar].
-class _QuickToggle {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-
-  const _QuickToggle({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-    this.onLongPress,
-  });
-}
-
-/// Connected, equal-width segmented bar (icon over label) for the quick
-/// toggles. Segments are split across rows of at most [_maxPerRow] so the bar
-/// stays compact and resizes to however many toggles are present.
-class _QuickToggleBar extends StatelessWidget {
-  final List<_QuickToggle> toggles;
-
-  static const int _maxPerRow = 4;
-
-  const _QuickToggleBar({required this.toggles});
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = <List<_QuickToggle>>[];
-    for (var i = 0; i < toggles.length; i += _maxPerRow) {
-      final end = i + _maxPerRow <= toggles.length
-          ? i + _maxPerRow
-          : toggles.length;
-      rows.add(toggles.sublist(i, end));
-    }
-
-    return Column(
-      children: [
-        for (var r = 0; r < rows.length; r++) ...[
-          if (r > 0) const SizedBox(height: 8),
-          _buildRow(context, rows[r]),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildRow(BuildContext context, List<_QuickToggle> items) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0)
-                VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: colorScheme.outlineVariant,
-                ),
-              Expanded(child: _QuickToggleSegment(toggle: items[i])),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickToggleSegment extends StatelessWidget {
-  final _QuickToggle toggle;
-
-  const _QuickToggleSegment({required this.toggle});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final foregroundColor = toggle.active
-        ? colorScheme.onSecondaryContainer
-        : colorScheme.onSurfaceVariant;
-
-    return Material(
-      color: toggle.active
-          ? colorScheme.secondaryContainer
-          : Colors.transparent,
-      child: InkWell(
-        onTap: toggle.onTap,
-        onLongPress: toggle.onLongPress,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(toggle.icon, color: foregroundColor, size: 22),
-              const SizedBox(height: 6),
-              Text(
-                toggle.label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: foregroundColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

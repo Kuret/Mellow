@@ -18,7 +18,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
@@ -27,7 +26,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GestureConfig
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
@@ -154,11 +152,6 @@ object GlobalComponents {
     // Engine settings API for managing engine-specific settings
     var engineSettingsApi: GeckoEngineSettingsApiImpl? = null
 
-    // Touch-gesture recognition: event sink (Kotlin → Dart) and the current
-    // configuration pushed from Dart. Read by the browser container's
-    // GestureRecognizer on the UI thread.
-    var gestureEvents: GeckoGestureEvents? = null
-
     // Native -> Dart history visit notifications, consumed by Core's history
     // delegate to forward the visit's WebLibre container. Null on the headless
     // path (no Flutter engine); the delegate still hard-excludes persisted
@@ -174,53 +167,6 @@ object GlobalComponents {
     // only (no buffering/replay): null when Flutter is detached, in which case the
     // Flutter surface picks the prompt up on its next getPendingAppLinkPrompts query.
     var appLinkEvents: GeckoAppLinkEvents? = null
-
-    @Volatile
-    var gestureConfig: GestureConfig? = null
-
-    /**
-     * Set true when the in-flight touch sequence was recognized as a configured
-     * gesture, so pull-to-refresh ([GestureAwareSwipeRefreshFeature]) can
-     * suppress the otherwise-redundant reload for down-leading gestures started
-     * at the top of the page. Reset on each ACTION_DOWN by the gesture
-     * container. Read and written on the UI thread.
-     */
-    @Volatile
-    var touchConsumedByGesture: Boolean = false
-
-    // Current dynamic-toolbar viewport insets (physical px), tracked from the
-    // viewport API so gesture edge-detection can exclude the bottom toolbar
-    // area the engine view never receives touches in.
-    @Volatile
-    var dynamicToolbarMaxHeightPx: Int = 0
-
-    @Volatile
-    var verticalClippingPx: Int = 0
-
-    /** Currently visible bottom inset: full toolbar height when shown, 0 when
-     *  auto-hidden (clipping cancels it out). */
-    val bottomViewportInsetPx: Int
-        get() = (dynamicToolbarMaxHeightPx + verticalClippingPx).coerceAtLeast(0)
-
-    // Listeners notified when [bottomViewportInsetPx] may have changed (i.e. when
-    // the dynamic toolbar height or vertical clipping is updated). Lets native
-    // views that align to the bottom chrome (e.g. the reader view controls bar)
-    // re-apply their inset while visible, not only when first shown.
-    private val bottomViewportInsetListeners =
-        java.util.concurrent.CopyOnWriteArraySet<(Int) -> Unit>()
-
-    fun addBottomViewportInsetListener(listener: (Int) -> Unit) {
-        bottomViewportInsetListeners.add(listener)
-    }
-
-    fun removeBottomViewportInsetListener(listener: (Int) -> Unit) {
-        bottomViewportInsetListeners.remove(listener)
-    }
-
-    fun notifyBottomViewportInsetChanged() {
-        val inset = bottomViewportInsetPx
-        bottomViewportInsetListeners.forEach { it(inset) }
-    }
 
     // External download manager setting
     var useExternalDownloadManager: Boolean = false

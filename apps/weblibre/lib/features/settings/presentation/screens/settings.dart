@@ -135,13 +135,6 @@ _CategoryGroups _buildCategories() {
       onTap: (context) => const HomeSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Gestures',
-      subtitle: 'Stroke gestures for browser actions',
-      icon: MdiIcons.gestureSwipe,
-      keywords: const ['gesture', 'swipe', 'stroke'],
-      onTap: (context) => GestureSettingsRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
       title: 'Toolbar & Layout',
       subtitle: 'Tab bar, toolbar, quick switcher, tab view',
       icon: MdiIcons.viewDashboardOutline,

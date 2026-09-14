@@ -54,7 +54,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_list.dart';
-import 'package:weblibre/features/gestures/presentation/screens/gesture_settings_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';

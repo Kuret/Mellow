@@ -35,10 +35,6 @@ part of 'routes.dart';
       name: 'BrowsingSettingsRoute',
       path: 'browsing',
     ),
-    TypedGoRoute<GestureSettingsRoute>(
-      name: 'GestureSettingsRoute',
-      path: 'gestures',
-    ),
     TypedGoRoute<PrivacySecuritySettingsRoute>(
       name: 'PrivacySecuritySettingsRoute',
       path: 'privacy_security',
@@ -158,13 +154,6 @@ class BrowsingSettingsRoute extends GoRouteData with $BrowsingSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const BrowsingSettingsScreen();
-  }
-}
-
-class GestureSettingsRoute extends GoRouteData with $GestureSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const GestureSettingsScreen();
   }
 }
 

@@ -31,7 +31,7 @@ import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadState
 import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
-import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
+import eu.weblibre.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
@@ -99,7 +99,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     // had nothing to answer an install prompt with. `WebExtensionPromptHost` owns
     // them against the resumed activity instead.
     private val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
-    private val swipeRefreshFeature = ViewBoundFeatureWrapper<GestureAwareSwipeRefreshFeature>()
+    private val swipeRefreshFeature = ViewBoundFeatureWrapper<ZoomAwareSwipeRefreshFeature>()
     private val secureWindowFeature = ViewBoundFeatureWrapper<SecureWindowFeature>()
     private val fullScreenFeature = ViewBoundFeatureWrapper<FullScreenFeature>()
     private val mediaSessionFullscreenFeature =
@@ -360,7 +360,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             )
 
             swipeRefreshFeature.set(
-                feature = GestureAwareSwipeRefreshFeature(
+                feature = ZoomAwareSwipeRefreshFeature(
                     components.core.store,
                     components.useCases.sessionUseCases.reload,
                     binding.swipeToRefresh,

@@ -177,11 +177,6 @@ const quitToolbarButtonSpec = ToolbarButtonSpec(
   canBeFallbackTarget: false,
 );
 
-const toggleGesturesToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.toggleGestures,
-  defaultVisible: false,
-);
-
 const hideTabBarToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.hideTabBar,
   defaultVisible: false,
@@ -214,7 +209,6 @@ const toolbarButtonSpecs = [
   pageDownToolbarButtonSpec,
   fontToolbarButtonSpec,
   extensionShortcutToolbarButtonSpec,
-  toggleGesturesToolbarButtonSpec,
   hideTabBarToolbarButtonSpec,
   quitToolbarButtonSpec,
 ];
