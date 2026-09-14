@@ -218,9 +218,7 @@ class TabBarPreviewCard extends StatelessWidget {
       if (showMainToolbarActionButtons) NavigationMenuButtonView(onTap: () {}),
     ];
 
-    Widget title() => settings.tabBarLayout == TabBarLayout.compact
-        ? _CompactPreviewTitle(tabState: previewTabState)
-        : _RegularPreviewTitle(tabState: previewTabState);
+    Widget title() => _CompactPreviewTitle(tabState: previewTabState);
 
     Widget pageContent({double? height}) => Container(
       width: double.infinity,
@@ -569,25 +567,6 @@ class _CompactBarPreview extends StatelessWidget {
   }
 }
 
-class _RegularPreviewTitle extends StatelessWidget {
-  const _RegularPreviewTitle({required this.tabState});
-
-  final TabState tabState;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBarTitleView(
-      tabState: tabState,
-      isTabTunneled: false,
-      siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
-      onSiteSettingsTap: _noop,
-      onTitleTap: _noop,
-      tabIcon: const Icon(MdiIcons.web, size: 24),
-      longPressUrlCopy: false,
-    );
-  }
-}
-
 class _CompactPreviewTitle extends StatelessWidget {
   const _CompactPreviewTitle({required this.tabState});
 
@@ -601,7 +580,6 @@ class _CompactPreviewTitle extends StatelessWidget {
       siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
-      tabIcon: const Icon(MdiIcons.web, size: 24),
     );
   }
 }

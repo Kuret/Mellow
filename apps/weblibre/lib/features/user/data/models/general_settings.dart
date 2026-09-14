@@ -100,8 +100,6 @@ enum TabBarPosition {
   Axis get axis => isVertical ? Axis.vertical : Axis.horizontal;
 }
 
-enum TabBarLayout { withTitle, compact }
-
 /// Which tab chips in the quick tab switcher and the tab bar carry a close
 /// button.
 ///
@@ -203,7 +201,6 @@ class GeneralSettings with FastEquatable {
   final Duration historyAutoCleanInterval;
   final bool tabBarShowContextualBar;
   final TabBarPosition tabBarPosition;
-  final TabBarLayout tabBarLayout;
   @Deprecated('Retired; the bar has one layout')
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
@@ -217,7 +214,6 @@ class GeneralSettings with FastEquatable {
 
   final String syncServerOverride;
   final String syncTokenServerOverride;
-  final bool tabBarLongPressUrlCopy;
   final bool allowNonManifestPwaInstall;
   final bool blockExternalAppsEnabled;
   final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
@@ -264,7 +260,6 @@ class GeneralSettings with FastEquatable {
     required this.historyAutoCleanInterval,
     required this.tabBarShowContextualBar,
     required this.tabBarPosition,
-    required this.tabBarLayout,
     @Deprecated('Retired; the bar has one layout')
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
@@ -275,7 +270,6 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherTitleWidth,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
-    required this.tabBarLongPressUrlCopy,
     required this.allowNonManifestPwaInstall,
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
@@ -301,7 +295,6 @@ class GeneralSettings with FastEquatable {
     Duration? historyAutoCleanInterval,
     bool? tabBarShowContextualBar,
     TabBarPosition? tabBarPosition,
-    TabBarLayout? tabBarLayout,
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
     Duration? unassignedTabsAutoCleanInterval,
@@ -311,7 +304,6 @@ class GeneralSettings with FastEquatable {
     double? quickTabSwitcherTitleWidth,
     String? syncServerOverride,
     String? syncTokenServerOverride,
-    bool? tabBarLongPressUrlCopy,
     bool? allowNonManifestPwaInstall,
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
@@ -341,7 +333,6 @@ class GeneralSettings with FastEquatable {
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
-       tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
        // ignore: deprecated_member_use_from_same_package
        tabBarStackingMode =
            // ignore: deprecated_member_use_from_same_package
@@ -356,7 +347,6 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
-       tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
@@ -437,7 +427,6 @@ class GeneralSettings with FastEquatable {
     historyAutoCleanInterval,
     tabBarShowContextualBar,
     tabBarPosition,
-    tabBarLayout,
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
     unassignedTabsAutoCleanInterval,
@@ -447,7 +436,6 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherTitleWidth,
     syncServerOverride,
     syncTokenServerOverride,
-    tabBarLongPressUrlCopy,
     allowNonManifestPwaInstall,
     blockExternalAppsEnabled,
     externalAppIntentPolicies,

@@ -56,7 +56,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   // Legacy: folded into tabBarStackingMode.
   'tabBarShowQuickTabSwitcherBar': DriftSqlType.bool,
   'tabBarPosition': DriftSqlType.string,
-  'tabBarLayout': DriftSqlType.string,
   // Legacy: folded into tabBarStackingMode.
   'quickTabSwitcherMode': DriftSqlType.string,
   'tabBarStackingMode': DriftSqlType.string,
@@ -67,7 +66,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'quickTabSwitcherTitleWidth': DriftSqlType.double,
   'syncServerOverride': DriftSqlType.string,
   'syncTokenServerOverride': DriftSqlType.string,
-  'tabBarLongPressUrlCopy': DriftSqlType.bool,
   'allowNonManifestPwaInstall': DriftSqlType.bool,
   'blockExternalAppsEnabled': DriftSqlType.bool,
   'appLinksMode': DriftSqlType.string,

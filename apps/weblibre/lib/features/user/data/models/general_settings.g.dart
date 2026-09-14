@@ -42,8 +42,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
 
-  GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
-
   GeneralSettings tabBarStackingMode(
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
@@ -66,8 +64,6 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings syncServerOverride(String syncServerOverride);
 
   GeneralSettings syncTokenServerOverride(String syncTokenServerOverride);
-
-  GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy);
 
   GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall);
 
@@ -109,7 +105,6 @@ abstract class _$GeneralSettingsCWProxy {
     Duration historyAutoCleanInterval,
     bool tabBarShowContextualBar,
     TabBarPosition tabBarPosition,
-    TabBarLayout tabBarLayout,
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
     Duration unassignedTabsAutoCleanInterval,
@@ -119,7 +114,6 @@ abstract class _$GeneralSettingsCWProxy {
     double quickTabSwitcherTitleWidth,
     String syncServerOverride,
     String syncTokenServerOverride,
-    bool tabBarLongPressUrlCopy,
     bool allowNonManifestPwaInstall,
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
@@ -195,10 +189,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarPosition: tabBarPosition);
 
   @override
-  GeneralSettings tabBarLayout(TabBarLayout tabBarLayout) =>
-      call(tabBarLayout: tabBarLayout);
-
-  @override
   GeneralSettings tabBarStackingMode(
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
@@ -237,10 +227,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings syncTokenServerOverride(String syncTokenServerOverride) =>
       call(syncTokenServerOverride: syncTokenServerOverride);
-
-  @override
-  GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy) =>
-      call(tabBarLongPressUrlCopy: tabBarLongPressUrlCopy);
 
   @override
   GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall) =>
@@ -298,7 +284,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
-    Object? tabBarLayout = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
@@ -309,7 +294,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
-    Object? tabBarLongPressUrlCopy = const $CopyWithPlaceholder(),
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
@@ -391,11 +375,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarPosition
           // ignore: cast_nullable_to_non_nullable
           : tabBarPosition as TabBarPosition,
-      tabBarLayout:
-          tabBarLayout == const $CopyWithPlaceholder() || tabBarLayout == null
-          ? _value.tabBarLayout
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarLayout as TabBarLayout,
       tabBarStackingMode:
           tabBarStackingMode == const $CopyWithPlaceholder() ||
               tabBarStackingMode == null
@@ -445,12 +424,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.syncTokenServerOverride
           // ignore: cast_nullable_to_non_nullable
           : syncTokenServerOverride as String,
-      tabBarLongPressUrlCopy:
-          tabBarLongPressUrlCopy == const $CopyWithPlaceholder() ||
-              tabBarLongPressUrlCopy == null
-          ? _value.tabBarLongPressUrlCopy
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarLongPressUrlCopy as bool,
       allowNonManifestPwaInstall:
           allowNonManifestPwaInstall == const $CopyWithPlaceholder() ||
               allowNonManifestPwaInstall == null
@@ -546,10 +519,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$TabBarPositionEnumMap,
         json['tabBarPosition'],
       ),
-      tabBarLayout: $enumDecodeNullable(
-        _$TabBarLayoutEnumMap,
-        json['tabBarLayout'],
-      ),
       tabBarStackingMode: $enumDecodeNullable(
         _$TabBarStackingModeEnumMap,
         json['tabBarStackingMode'],
@@ -569,7 +538,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           ?.toDouble(),
       syncServerOverride: json['syncServerOverride'] as String?,
       syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
-      tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
       allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
       blockExternalAppsEnabled: json['blockExternalAppsEnabled'] as bool?,
       externalAppIntentPolicies:
@@ -613,7 +581,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
-  'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'unassignedTabsAutoCleanInterval':
@@ -625,7 +592,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
-  'tabBarLongPressUrlCopy': instance.tabBarLongPressUrlCopy,
   'allowNonManifestPwaInstall': instance.allowNonManifestPwaInstall,
   'blockExternalAppsEnabled': instance.blockExternalAppsEnabled,
   'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(
@@ -684,11 +650,6 @@ const _$TabBarPositionEnumMap = {
   TabBarPosition.bottom: 'bottom',
   TabBarPosition.left: 'left',
   TabBarPosition.right: 'right',
-};
-
-const _$TabBarLayoutEnumMap = {
-  TabBarLayout.withTitle: 'withTitle',
-  TabBarLayout.compact: 'compact',
 };
 
 const _$TabBarStackingModeEnumMap = {

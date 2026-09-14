@@ -436,9 +436,9 @@ class BrowserTabBar extends HookConsumerWidget {
       // The rail is the Arc/Zen sidebar (PLAN §9 W1): address row on top,
       // the selected space's shelves filling the height, the toolbar buttons
       // above the space switcher at the foot.
-      final uprightTitle = settings.tabBarLayout == TabBarLayout.compact
-          ? CompactAppBarTitle(containerColor: effectiveContainerColor)
-          : AppBarTitle(containerColor: effectiveContainerColor);
+      final uprightTitle = CompactAppBarTitle(
+        containerColor: effectiveContainerColor,
+      );
       return WideRailLayout(
         backgroundColor: effectiveContainerPalette?.surfaceColor,
         showUrlRow: displayAppBar && showTabTitle,
@@ -491,9 +491,7 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? settings.tabBarLayout == TabBarLayout.compact
-                ? CompactAppBarTitle(containerColor: effectiveContainerColor)
-                : AppBarTitle(containerColor: effectiveContainerColor)
+          ? CompactAppBarTitle(containerColor: effectiveContainerColor)
           : null,
       actions: actions,
       quickTabSwitcher: wrapQuickTabSwitcherWithButtonRow(

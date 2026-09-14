@@ -136,14 +136,14 @@ class WideRailLayout extends StatelessWidget {
 class WideRailUrlRow extends StatelessWidget {
   const WideRailUrlRow({super.key, required this.title, this.collapsed});
 
-  /// The upright title ([CompactAppBarTitle] or [AppBarTitle]).
+  /// The upright title ([CompactAppBarTitle]).
   final Widget title;
 
   /// Icon-only stand-in for narrow rails. When null the row never collapses.
   final Widget? collapsed;
 
-  /// Same as the horizontal bar row: the title's own site-settings button
-  /// carries [kToolbarHeight] of vertical padding.
+  /// Same as the horizontal bar row: the address pill carries
+  /// [kToolbarHeight] of vertical padding.
   static const height = kToolbarHeight;
 
   /// Rail widths below this collapse the row to [collapsed].
