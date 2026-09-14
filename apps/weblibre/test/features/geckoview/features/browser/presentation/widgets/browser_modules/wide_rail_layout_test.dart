@@ -223,8 +223,8 @@ void main() {
     const railWidth = 200.0;
 
     testWidgets(
-      'stacks the URL row on top, the tabs filling the height, then the '
-      'toolbar and the spaces at the foot',
+      'stacks the toolbar on top, then the URL row, the tabs filling the '
+      'height, and the spaces at the foot',
       (tester) async {
         await tester.pumpWidget(
           _railBox(
@@ -245,10 +245,10 @@ void main() {
         final toolbar = tester.getRect(find.byKey(WideRailLayout.toolbarKey));
         final spaces = tester.getRect(find.byKey(WideRailLayout.spacesKey));
 
-        expect(urlRow.top, rail.top);
+        expect(toolbar.top, rail.top);
+        expect(toolbar.bottom, urlRow.top);
         expect(urlRow.bottom, tabs.top);
-        expect(tabs.bottom, toolbar.top);
-        expect(toolbar.bottom, spaces.top);
+        expect(tabs.bottom, spaces.top);
         expect(spaces.bottom, rail.bottom);
 
         // The shelves take every pixel the fixed rows leave over.
@@ -280,9 +280,9 @@ void main() {
       );
 
       final toolbar = tester.getRect(find.byKey(WideRailLayout.toolbarKey));
-      final spaces = tester.getRect(find.byKey(WideRailLayout.spacesKey));
+      final urlRow = tester.getRect(find.byKey(WideRailLayout.urlRowKey));
       expect(toolbar.height, lessThan(WideRailToolbarRow.targetHeight));
-      expect(toolbar.bottom, spaces.top);
+      expect(toolbar.bottom, urlRow.top);
     });
 
     testWidgets(
@@ -369,8 +369,11 @@ void main() {
           tester.getRect(find.byKey(WideRailLayout.spacesKey)),
           spacesBefore,
         );
-        // Nothing opened up between the strip and the toolbar either.
-        expect(toolbarAfter.top, tester.getRect(_contextualStrip).bottom);
+        // Nothing opened up between the strip and the spaces either.
+        expect(
+          tester.getRect(_contextualStrip).bottom,
+          tester.getRect(find.byKey(WideRailLayout.spacesKey)).top,
+        );
       },
     );
 
@@ -419,10 +422,13 @@ void main() {
         final toolbarBefore = tester.getRect(
           find.byKey(WideRailLayout.toolbarKey),
         );
+        final urlRowBefore = tester.getRect(
+          find.byKey(WideRailLayout.urlRowKey),
+        );
         final spacesBefore = tester.getRect(
           find.byKey(WideRailLayout.spacesKey),
         );
-        expect(toolbarBefore.bottom, spacesBefore.top);
+        expect(toolbarBefore.bottom, urlRowBefore.top);
 
         final container = ProviderScope.containerOf(
           tester.element(find.byType(WideRailLayout)),
@@ -435,12 +441,15 @@ void main() {
         final toolbarAfter = tester.getRect(
           find.byKey(WideRailLayout.toolbarKey),
         );
+        final urlRowAfter = tester.getRect(
+          find.byKey(WideRailLayout.urlRowKey),
+        );
         final spacesAfter = tester.getRect(
           find.byKey(WideRailLayout.spacesKey),
         );
         expect(toolbarAfter, toolbarBefore);
         expect(spacesAfter, spacesBefore);
-        expect(toolbarAfter.bottom, spacesAfter.top);
+        expect(toolbarAfter.bottom, urlRowAfter.top);
         // One run: both targets side by side, spanning the rail, and never
         // taller than a single target.
         expect(

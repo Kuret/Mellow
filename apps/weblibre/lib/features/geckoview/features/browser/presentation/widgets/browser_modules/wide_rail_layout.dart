@@ -24,11 +24,12 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 
-/// The wide vertical rail (PLAN §9 W1), laid out like Arc/Zen: the address
-/// field in one upright row at the top, the tab shelves filling the height
-/// below it, the toolbar buttons in a row above the space switcher at the
-/// foot. Purely structural — every block is handed in — so the settings
-/// preview can render the same skeleton around static stand-ins.
+/// The wide vertical rail (PLAN §9 W1), laid out like Zen's sidebar: the
+/// toolbar buttons in a row at the top, the address field in one upright row
+/// below it, the tab shelves filling the height below that, and the space
+/// switcher at the foot. Purely structural — every block is handed in — so
+/// the settings preview can render the same skeleton around static
+/// stand-ins.
 class WideRailLayout extends StatelessWidget {
   const WideRailLayout({
     super.key,
@@ -99,6 +100,11 @@ class WideRailLayout extends StatelessWidget {
         child: Column(
           children: [
             Visibility(
+              visible: showToolbar,
+              maintainState: true,
+              child: KeyedSubtree(key: toolbarKey, child: toolbar),
+            ),
+            Visibility(
               visible: showUrlRow,
               maintainState: true,
               child: KeyedSubtree(key: urlRowKey, child: urlRow),
@@ -108,7 +114,7 @@ class WideRailLayout extends StatelessWidget {
             ),
             // Bounded so a strip that grows (a button with its own padding,
             // an unexpected vertical layout) can only ever push the tabs up,
-            // never open a gap between the toolbar and the spaces.
+            // never open a gap between the strip and the spaces.
             if (contextualToolbar != null)
               ConstrainedBox(
                 constraints: const BoxConstraints(
@@ -116,11 +122,6 @@ class WideRailLayout extends StatelessWidget {
                 ),
                 child: ClipRect(child: contextualToolbar),
               ),
-            Visibility(
-              visible: showToolbar,
-              maintainState: true,
-              child: KeyedSubtree(key: toolbarKey, child: toolbar),
-            ),
             KeyedSubtree(key: spacesKey, child: spaces),
           ],
         ),
