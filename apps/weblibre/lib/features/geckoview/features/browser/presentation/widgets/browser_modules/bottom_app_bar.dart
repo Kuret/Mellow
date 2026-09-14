@@ -447,7 +447,11 @@ class BrowserTabBar extends HookConsumerWidget {
           collapsed: const WideRailCollapsedUrlButton(),
         ),
         tabs: const _RailSpaceTabs(),
-        contextualToolbar: showContextualToolbar
+        // `showRailToolbar` covers this strip too, not just the main row:
+        // with the shipped layout every button the user sees in the rail is
+        // drawn here, so a "hide the toolbar buttons" that left it standing
+        // would look like it did nothing.
+        contextualToolbar: showContextualToolbar && showRailToolbar
             ? ContextualToolbar(
                 selectedTabId: selectedTabId,
                 displayedSheet: displayedSheet,

@@ -369,10 +369,11 @@ void main() {
           tester.getRect(find.byKey(WideRailLayout.spacesKey)),
           spacesBefore,
         );
-        // Nothing opened up between the strip and the spaces either.
+        // Nothing opened up between the strip and the address row below it
+        // either.
         expect(
           tester.getRect(_contextualStrip).bottom,
-          tester.getRect(find.byKey(WideRailLayout.spacesKey)).top,
+          tester.getRect(find.byKey(WideRailLayout.urlRowKey)).top,
         );
       },
     );

@@ -58,9 +58,14 @@ class WideRailLayout extends StatelessWidget {
   /// Block 2: the tab shelves. Takes all remaining height.
   final Widget tabs;
 
-  /// Optional contextual toolbar strip, sitting between the shelves and the
-  /// main toolbar row. Takes height only while it has content, and never
+  /// Optional contextual toolbar strip, sitting between the main toolbar row
+  /// and the address row. Takes height only while it has content, and never
   /// more than [contextualToolbarMaxHeight].
+  ///
+  /// It rides at the top with the main toolbar rather than down by the
+  /// shelves: on a default layout the main row is empty — every button it
+  /// would draw is already in this strip — so this is the row the user
+  /// actually sees, and "the toolbar buttons" means these.
   final Widget? contextualToolbar;
 
   /// Cap on the contextual strip: one row of toolbar buttons. Mirrors the
@@ -104,6 +109,16 @@ class WideRailLayout extends StatelessWidget {
               maintainState: true,
               child: KeyedSubtree(key: toolbarKey, child: toolbar),
             ),
+            // Bounded so a strip that grows (a button with its own padding,
+            // an unexpected vertical layout) can only ever eat into the
+            // shelves, never push the address row off the top.
+            if (contextualToolbar != null)
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: contextualToolbarMaxHeight,
+                ),
+                child: ClipRect(child: contextualToolbar),
+              ),
             Visibility(
               visible: showUrlRow,
               maintainState: true,
@@ -112,16 +127,6 @@ class WideRailLayout extends StatelessWidget {
             Expanded(
               child: KeyedSubtree(key: tabsKey, child: tabs),
             ),
-            // Bounded so a strip that grows (a button with its own padding,
-            // an unexpected vertical layout) can only ever push the tabs up,
-            // never open a gap between the strip and the spaces.
-            if (contextualToolbar != null)
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: contextualToolbarMaxHeight,
-                ),
-                child: ClipRect(child: contextualToolbar),
-              ),
             KeyedSubtree(key: spacesKey, child: spaces),
           ],
         ),
