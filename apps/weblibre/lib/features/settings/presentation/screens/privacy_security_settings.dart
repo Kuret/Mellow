@@ -60,7 +60,8 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Connection Security',
+    title: 'Connection',
+    keywords: ['connection security'],
     entries: [
       SettingsEntryDefinition(
         title: 'DNS over HTTPS',
@@ -71,30 +72,15 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Privacy Signals & Modes',
+    title: 'Data',
+    keywords: ['data management'],
     entries: [
       SettingsEntryDefinition(
         title: 'Incognito Mode',
         subtitle: 'Delete selected browsing data on app restart',
-        keywords: ['private mode'],
+        keywords: ['private mode', 'privacy signals', 'modes'],
         child: _IncognitoModeSection(),
       ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'App-Opening Protection',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Block apps from opening your browser',
-        subtitle: 'Control which apps may launch WebLibre directly',
-        keywords: ['intent gatekeeper', 'external apps'],
-        child: _AppOpeningProtectionSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Data Management',
-    entries: [
       SettingsEntryDefinition(
         title: 'Delete Browsing Data',
         subtitle: 'Clear history, cookies, and other browsing data',
@@ -116,8 +102,19 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Advanced Security',
+    title: 'Advanced',
+    keywords: ['advanced security'],
     entries: [
+      SettingsEntryDefinition(
+        title: 'Block apps from opening your browser',
+        subtitle: 'Control which apps may launch WebLibre directly',
+        keywords: [
+          'intent gatekeeper',
+          'external apps',
+          'app-opening protection',
+        ],
+        child: _AppOpeningProtectionSection(),
+      ),
       SettingsEntryDefinition(
         title: 'Web Engine Hardening',
         subtitle: 'Harden browser engine behavior and defaults',
