@@ -29,7 +29,6 @@ void main() {
       // upgrade. Changing this needs a deliberate decision, not a drive-by.
       expect(GeneralSettings.withDefaults().homeTarget, HomeTarget.home);
       expect(GeneralSettings.withDefaults().homeTargetUrl, isNull);
-      expect(GeneralSettings.withDefaults().homeTargetOnLastTabClosed, isFalse);
     });
   });
 

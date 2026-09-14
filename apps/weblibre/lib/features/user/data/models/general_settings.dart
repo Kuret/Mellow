@@ -200,17 +200,12 @@ class GeneralSettings with FastEquatable {
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool showContainerUi;
 
-  /// What to land on when there is no tab to show — at cold start, and when
-  /// the last tab in scope is closed if [homeTargetOnLastTabClosed] is set.
+  /// What to land on when there is no tab to show at cold start.
   final HomeTarget homeTarget;
 
   /// Address opened when [homeTarget] is [HomeTarget.customUrl]. An unset or
   /// unparseable value falls back to the home surface.
   final String? homeTargetUrl;
-
-  /// Also apply [homeTarget] when the last tab in the current container is
-  /// closed, instead of falling through to a tab from somewhere else.
-  final bool homeTargetOnLastTabClosed;
 
   /// Where the home surface's search entry is rendered. See
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
@@ -321,7 +316,6 @@ class GeneralSettings with FastEquatable {
     required this.showContainerUi,
     required this.homeTarget,
     required this.homeTargetUrl,
-    required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
     required this.tabIntentOpenSetting,
     required this.bookmarkOpenSetting,
@@ -371,7 +365,6 @@ class GeneralSettings with FastEquatable {
     bool? showContainerUi,
     HomeTarget? homeTarget,
     this.homeTargetUrl,
-    bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
     TabIntentOpenSetting? tabIntentOpenSetting,
     BookmarkOpenSetting? bookmarkOpenSetting,
@@ -417,7 +410,6 @@ class GeneralSettings with FastEquatable {
        // Defaults to `home`, which is exactly what the browser did before this
        // setting existed. Anything else would change startup for every user.
        homeTarget = homeTarget ?? HomeTarget.home,
-       homeTargetOnLastTabClosed = homeTargetOnLastTabClosed ?? false,
        // Deliberately not a fixed edge: the placement that matches the user's
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
@@ -547,7 +539,6 @@ class GeneralSettings with FastEquatable {
     showContainerUi,
     homeTarget,
     homeTargetUrl,
-    homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
     tabIntentOpenSetting,
     bookmarkOpenSetting,

@@ -29,8 +29,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings homeTargetUrl(String? homeTargetUrl);
 
-  GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed);
-
   GeneralSettings homeSearchBarPlacement(
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
@@ -130,7 +128,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool showContainerUi,
     HomeTarget homeTarget,
     String? homeTargetUrl,
-    bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
     TabIntentOpenSetting tabIntentOpenSetting,
     BookmarkOpenSetting bookmarkOpenSetting,
@@ -213,10 +210,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings homeTargetUrl(String? homeTargetUrl) =>
       call(homeTargetUrl: homeTargetUrl);
-
-  @override
-  GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed) =>
-      call(homeTargetOnLastTabClosed: homeTargetOnLastTabClosed);
 
   @override
   GeneralSettings homeSearchBarPlacement(
@@ -382,7 +375,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
-    Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
@@ -468,12 +460,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeTargetUrl
           // ignore: cast_nullable_to_non_nullable
           : homeTargetUrl as String?,
-      homeTargetOnLastTabClosed:
-          homeTargetOnLastTabClosed == const $CopyWithPlaceholder() ||
-              homeTargetOnLastTabClosed == null
-          ? _value.homeTargetOnLastTabClosed
-          // ignore: cast_nullable_to_non_nullable
-          : homeTargetOnLastTabClosed as bool,
       homeSearchBarPlacement:
           homeSearchBarPlacement == const $CopyWithPlaceholder() ||
               homeSearchBarPlacement == null
@@ -702,7 +688,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   showContainerUi: json['showContainerUi'] as bool?,
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
   homeTargetUrl: json['homeTargetUrl'] as String?,
-  homeTargetOnLastTabClosed: json['homeTargetOnLastTabClosed'] as bool?,
   homeSearchBarPlacement: $enumDecodeNullable(
     _$HomeSearchBarPlacementEnumMap,
     json['homeSearchBarPlacement'],
@@ -801,7 +786,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showContainerUi': instance.showContainerUi,
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
   'homeTargetUrl': instance.homeTargetUrl,
-  'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
   'tabIntentOpenSetting':

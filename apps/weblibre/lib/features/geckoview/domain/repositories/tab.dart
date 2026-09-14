@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -49,7 +48,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -677,7 +675,6 @@ class TabRepository extends _$TabRepository {
     String tabId, {
     Set<String> excludedTabIds = const {},
   }) async {
-    final tabState = ref.read(tabStatesProvider)[tabId];
     final db = ref.read(tabDatabaseProvider);
     final summary = await db.tabDao.getTabSummaryById(tabId).getSingleOrNull();
     if (!ref.mounted) return;
@@ -748,26 +745,6 @@ class TabRepository extends _$TabRepository {
     }
 
     if (!ref.mounted) return;
-
-    // Out of candidates in this space. By default the search widens to the
-    // other spaces, which drags the user out of the space they were working
-    // in; the home target keeps them here.
-    if (ref
-        .read(generalSettingsWithDefaultsProvider)
-        .homeTargetOnLastTabClosed) {
-      await ref
-          .read(homeTargetControllerProvider.notifier)
-          .applyTarget(
-            scopeToSpace: true,
-            spaceUuid: currentSpaceUuid ?? ref.read(selectedSpaceProvider),
-            closingTabUrl: tabState?.url,
-            // Tab rows outlive this call — they are deleted only after the next
-            // selection is made — so without this the resume would pick the
-            // very tab being closed, which sorts first as the active one.
-            excludedTabIds: {...excludedTabIds, tabId},
-          );
-      return;
-    }
 
     final sameSpaceTabs = await spaceTabIds(
       currentSpaceUuid,

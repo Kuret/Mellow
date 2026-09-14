@@ -42,12 +42,6 @@ const List<SettingsSectionDefinition> homeSettingsSections = [
         keywords: ['startup', 'resume', 'last tab', 'custom url', 'homepage'],
         child: _HomeTargetTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Apply when the last tab closes',
-        subtitle: 'Otherwise a tab from another container is opened instead',
-        keywords: ['close', 'last tab', 'container'],
-        child: _HomeTargetOnLastTabClosedTile(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -187,34 +181,6 @@ class _HomeTargetTile extends HookConsumerWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _HomeTargetOnLastTabClosedTile extends ConsumerWidget {
-  const _HomeTargetOnLastTabClosedTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.homeTargetOnLastTabClosed,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      value: enabled,
-      title: const Text('Apply when the last tab closes'),
-      subtitle: const Text(
-        'Closing the last tab in a container stays there instead of opening a '
-        'tab from somewhere else',
-      ),
-      secondary: const Icon(Icons.tab_unselected),
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save((s) => s.copyWith.homeTargetOnLastTabClosed(value));
-      },
     );
   }
 }
