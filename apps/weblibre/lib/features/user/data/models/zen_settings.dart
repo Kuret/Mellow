@@ -86,6 +86,46 @@ TabBarPosition chromeEdge({
   return narrowPosition;
 }
 
+/// A search engine the user defined, as it is stored.
+///
+/// Only the stored half of a custom engine. The catalogue the browser actually
+/// searches with is `SearchProvider` in `features/search`, which this is turned
+/// into on the way out; keeping the persisted shape here mirrors
+/// `CustomDohProvider` sitting beside `EngineSettings` — the settings model
+/// owns what the setting table holds, and nothing in `features/user` needs to
+/// know how a query reaches an engine.
+///
+/// [iconHost] is not stored: it is derived from [urlTemplate]'s host, so it can
+/// never drift out of step with the engine it decorates.
+@CopyWith()
+@JsonSerializable(includeIfNull: true)
+class CustomSearchEngine with FastEquatable {
+  /// Namespaced `custom:<uuid>`, so a user engine can never take a built-in's
+  /// id. Stable across edits: renaming the engine or fixing its URL keeps the
+  /// id, which is what `GeneralSettings.defaultSearchProvider` persists.
+  final String id;
+
+  /// Name shown in pickers and settings.
+  final String name;
+
+  /// Search URL with `{searchTerms}` standing in for the query.
+  final String urlTemplate;
+
+  CustomSearchEngine({
+    required this.id,
+    required this.name,
+    required this.urlTemplate,
+  });
+
+  factory CustomSearchEngine.fromJson(Map<String, dynamic> json) =>
+      _$CustomSearchEngineFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CustomSearchEngineToJson(this);
+
+  @override
+  List<Object?> get hashParameters => [id, name, urlTemplate];
+}
+
 /// The settings this fork owns: the Zen Spaces sync client's switches and
 /// bookkeeping, and the Zen tab model's rail and tab-budget options.
 ///
@@ -152,6 +192,11 @@ class ZenSettings with FastEquatable {
   /// every space.
   final bool separateEssentials;
 
+  /// Engines the user added themselves, in the order pickers list them after
+  /// the built-ins. Stored as a JSON document, so it is registered in
+  /// `zenSettingJsonKeys` rather than in `zenSettingColumnTypes`.
+  final List<CustomSearchEngine> customSearchProviders;
+
   ZenSettings({
     required this.spacesSyncEnabled,
     required this.spacesSyncWritesEnabled,
@@ -165,6 +210,7 @@ class ZenSettings with FastEquatable {
     required this.railWidth,
     required this.maxLiveTabs,
     required this.separateEssentials,
+    required this.customSearchProviders,
   });
 
   ZenSettings.withDefaults({
@@ -180,6 +226,7 @@ class ZenSettings with FastEquatable {
     double? railWidth,
     int? maxLiveTabs,
     bool? separateEssentials,
+    List<CustomSearchEngine>? customSearchProviders,
   }) : spacesSyncEnabled = spacesSyncEnabled ?? true,
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
@@ -200,7 +247,8 @@ class ZenSettings with FastEquatable {
          minMaxLiveTabs,
          maxMaxLiveTabs,
        ),
-       separateEssentials = separateEssentials ?? true;
+       separateEssentials = separateEssentials ?? true,
+       customSearchProviders = customSearchProviders ?? const [];
 
   factory ZenSettings.fromJson(Map<String, dynamic> json) =>
       _$ZenSettingsFromJson(json);
@@ -221,5 +269,6 @@ class ZenSettings with FastEquatable {
     railWidth,
     maxLiveTabs,
     separateEssentials,
+    customSearchProviders,
   ];
 }

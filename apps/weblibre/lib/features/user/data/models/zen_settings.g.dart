@@ -6,6 +6,79 @@ part of 'zen_settings.dart';
 // CopyWithGenerator
 // **************************************************************************
 
+abstract class _$CustomSearchEngineCWProxy {
+  CustomSearchEngine id(String id);
+
+  CustomSearchEngine name(String name);
+
+  CustomSearchEngine urlTemplate(String urlTemplate);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomSearchEngine(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CustomSearchEngine(...).copyWith(id: 12, name: "My name")
+  /// ```
+  CustomSearchEngine call({String id, String name, String urlTemplate});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfCustomSearchEngine.copyWith(...)` or call `instanceOfCustomSearchEngine.copyWith.fieldName(value)` for a single field.
+class _$CustomSearchEngineCWProxyImpl implements _$CustomSearchEngineCWProxy {
+  const _$CustomSearchEngineCWProxyImpl(this._value);
+
+  final CustomSearchEngine _value;
+
+  @override
+  CustomSearchEngine id(String id) => call(id: id);
+
+  @override
+  CustomSearchEngine name(String name) => call(name: name);
+
+  @override
+  CustomSearchEngine urlTemplate(String urlTemplate) =>
+      call(urlTemplate: urlTemplate);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomSearchEngine(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CustomSearchEngine(...).copyWith(id: 12, name: "My name")
+  /// ```
+  @override
+  CustomSearchEngine call({
+    Object? id = const $CopyWithPlaceholder(),
+    Object? name = const $CopyWithPlaceholder(),
+    Object? urlTemplate = const $CopyWithPlaceholder(),
+  }) {
+    return CustomSearchEngine(
+      id: id == const $CopyWithPlaceholder() || id == null
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      name: name == const $CopyWithPlaceholder() || name == null
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String,
+      urlTemplate:
+          urlTemplate == const $CopyWithPlaceholder() || urlTemplate == null
+          ? _value.urlTemplate
+          // ignore: cast_nullable_to_non_nullable
+          : urlTemplate as String,
+    );
+  }
+}
+
+extension $CustomSearchEngineCopyWith on CustomSearchEngine {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfCustomSearchEngine.copyWith(...)` or `instanceOfCustomSearchEngine.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$CustomSearchEngineCWProxy get copyWith =>
+      _$CustomSearchEngineCWProxyImpl(this);
+}
+
 abstract class _$ZenSettingsCWProxy {
   ZenSettings spacesSyncEnabled(bool spacesSyncEnabled);
 
@@ -33,6 +106,10 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings separateEssentials(bool separateEssentials);
 
+  ZenSettings customSearchProviders(
+    List<CustomSearchEngine> customSearchProviders,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -53,6 +130,7 @@ abstract class _$ZenSettingsCWProxy {
     double railWidth,
     int maxLiveTabs,
     bool separateEssentials,
+    List<CustomSearchEngine> customSearchProviders,
   });
 }
 
@@ -109,6 +187,11 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings separateEssentials(bool separateEssentials) =>
       call(separateEssentials: separateEssentials);
 
+  @override
+  ZenSettings customSearchProviders(
+    List<CustomSearchEngine> customSearchProviders,
+  ) => call(customSearchProviders: customSearchProviders);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -130,6 +213,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? railWidth = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
+    Object? customSearchProviders = const $CopyWithPlaceholder(),
   }) {
     return ZenSettings(
       spacesSyncEnabled:
@@ -196,6 +280,12 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.separateEssentials
           // ignore: cast_nullable_to_non_nullable
           : separateEssentials as bool,
+      customSearchProviders:
+          customSearchProviders == const $CopyWithPlaceholder() ||
+              customSearchProviders == null
+          ? _value.customSearchProviders
+          // ignore: cast_nullable_to_non_nullable
+          : customSearchProviders as List<CustomSearchEngine>,
     );
   }
 }
@@ -210,6 +300,20 @@ extension $ZenSettingsCopyWith on ZenSettings {
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
+
+CustomSearchEngine _$CustomSearchEngineFromJson(Map<String, dynamic> json) =>
+    CustomSearchEngine(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      urlTemplate: json['urlTemplate'] as String,
+    );
+
+Map<String, dynamic> _$CustomSearchEngineToJson(CustomSearchEngine instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'urlTemplate': instance.urlTemplate,
+    };
 
 ZenSettings _$ZenSettingsFromJson(
   Map<String, dynamic> json,
@@ -228,6 +332,9 @@ ZenSettings _$ZenSettingsFromJson(
   railWidth: (json['railWidth'] as num?)?.toDouble(),
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
   separateEssentials: json['separateEssentials'] as bool?,
+  customSearchProviders: (json['customSearchProviders'] as List<dynamic>?)
+      ?.map((e) => CustomSearchEngine.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
@@ -244,6 +351,9 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'railWidth': instance.railWidth,
       'maxLiveTabs': instance.maxLiveTabs,
       'separateEssentials': instance.separateEssentials,
+      'customSearchProviders': instance.customSearchProviders
+          .map((e) => e.toJson())
+          .toList(),
     };
 
 const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};

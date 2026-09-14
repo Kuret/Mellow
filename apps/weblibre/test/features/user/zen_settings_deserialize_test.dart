@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
@@ -32,21 +34,28 @@ void main() {
     // re-fetch of the collection.
     test('every serialized field is read back by the deserializer', () {
       final serializedKeys = ZenSettings.withDefaults().toJson().keys.toSet();
+      final readKeys = {...zenSettingColumnTypes.keys, ...zenSettingJsonKeys};
 
       expect(
-        serializedKeys.difference(zenSettingColumnTypes.keys.toSet()),
+        serializedKeys.difference(readKeys),
         isEmpty,
         reason:
             'These ZenSettings fields are written but never read back. '
-            'Add each one to zenSettingColumnTypes with its DriftSqlType.',
+            'Add each one to zenSettingColumnTypes (with its DriftSqlType) '
+            'or, for JSON documents, to zenSettingJsonKeys.',
       );
     });
 
-    test('the column map carries no key the model does not write', () {
+    test('the read keys carry nothing the model does not write', () {
       final serializedKeys = ZenSettings.withDefaults().toJson().keys.toSet();
+      final readKeys = {...zenSettingColumnTypes.keys, ...zenSettingJsonKeys};
 
+      expect(readKeys.difference(serializedKeys), isEmpty);
+    });
+
+    test('a key is never both a plain column and a JSON document', () {
       expect(
-        zenSettingColumnTypes.keys.toSet().difference(serializedKeys),
+        zenSettingColumnTypes.keys.toSet().intersection(zenSettingJsonKeys),
         isEmpty,
       );
     });
@@ -79,9 +88,47 @@ void main() {
         railWidth: 200,
         maxLiveTabs: 42,
         separateEssentials: false,
+        customSearchProviders: [
+          CustomSearchEngine(
+            id: 'custom:1cb2',
+            name: 'Searx',
+            urlTemplate: 'https://searx.be/search?q={searchTerms}',
+          ),
+          CustomSearchEngine(
+            id: 'custom:9fa4',
+            name: 'Internal wiki',
+            urlTemplate: 'https://wiki.example.com/find?query={searchTerms}',
+          ),
+        ],
       );
 
       expect(ZenSettings.fromJson(settings.toJson()), settings);
+    });
+
+    // The custom engine list reaches the database as a JSON string, so it makes
+    // the same trip the deserializer makes: encode on the way in, decode before
+    // `fromJson` ever sees it.
+    test('custom engines survive the encode/decode the setting row makes', () {
+      final settings = ZenSettings.withDefaults(
+        customSearchProviders: [
+          CustomSearchEngine(
+            id: 'custom:1cb2',
+            name: 'Searx',
+            urlTemplate: 'https://searx.be/search?q={searchTerms}',
+          ),
+        ],
+      );
+
+      final json = settings.toJson();
+      final encoded = jsonEncode(json['customSearchProviders']);
+
+      final restored = ZenSettings.fromJson({
+        ...json,
+        'customSearchProviders': jsonDecode(encoded),
+      });
+
+      expect(restored.customSearchProviders, settings.customSearchProviders);
+      expect(restored, settings);
     });
   });
 }

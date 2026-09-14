@@ -18,9 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
@@ -39,10 +41,10 @@ const zenSettingsPartitionKey = 'zen';
 
 /// Column type for every persisted `zen` setting, keyed by its JSON name.
 ///
-/// **Every field on [ZenSettings] must appear here.** A missing entry means
-/// the setting writes fine but silently reverts to its default on the next
-/// launch, because it is never read back out of the database.
-/// `zen_settings_deserialize_test.dart` guards this.
+/// **Every field on [ZenSettings] must appear here or in
+/// [zenSettingJsonKeys].** A missing entry means the setting writes fine but
+/// silently reverts to its default on the next launch, because it is never read
+/// back out of the database. `zen_settings_deserialize_test.dart` guards this.
 @visibleForTesting
 const zenSettingColumnTypes = <String, DriftSqlType>{
   'spacesSyncEnabled': DriftSqlType.bool,
@@ -59,6 +61,17 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'separateEssentials': DriftSqlType.bool,
 };
 
+/// Settings stored as a JSON document in a TEXT column. Their value has to be
+/// decoded before it reaches [ZenSettings.fromJson], which expects the
+/// already-parsed list/map — listing one in [zenSettingColumnTypes] as well
+/// would hand `fromJson` the raw encoded string.
+///
+/// These keys need no database migration: the `setting` table is a key/value
+/// store partitioned by name, so a JSON document is another TEXT row in the
+/// `zen` partition.
+@visibleForTesting
+const zenSettingJsonKeys = <String>{'customSearchProviders'};
+
 @Riverpod(keepAlive: true)
 class ZenSettingsRepository extends _$ZenSettingsRepository {
   final _partitionKey = zenSettingsPartitionKey;
@@ -72,6 +85,10 @@ class ZenSettingsRepository extends _$ZenSettingsRepository {
       for (final MapEntry(key: key, value: type)
           in zenSettingColumnTypes.entries)
         key: settings[key]?.readAs(type, typeMapping),
+      for (final key in zenSettingJsonKeys)
+        key: settings[key]
+            ?.readAs(DriftSqlType.string, typeMapping)
+            .mapNotNull(jsonDecode),
     });
   }
 

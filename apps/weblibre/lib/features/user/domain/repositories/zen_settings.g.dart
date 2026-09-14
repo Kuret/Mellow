@@ -34,7 +34,7 @@ final class ZenSettingsRepositoryProvider
 }
 
 String _$zenSettingsRepositoryHash() =>
-    r'085ec69e34ff183195e5052a34131c33d030df56';
+    r'efbe78a35c094f86cba05c7690c01800f0a50c80';
 
 abstract class _$ZenSettingsRepository extends $StreamNotifier<ZenSettings> {
   Stream<ZenSettings> build();
