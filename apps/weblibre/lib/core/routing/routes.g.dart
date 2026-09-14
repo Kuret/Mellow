@@ -1049,12 +1049,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
   factory: $SettingsRoute._fromState,
   routes: [
     GoRouteData.$route(
-      path: 'general',
-      name: 'GeneralSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $GeneralSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'transfer',
       name: 'SettingsTransferRoute',
       hasOverriddenOnExit: false,
@@ -1178,27 +1172,6 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $GeneralSettingsRoute on GoRouteData {
-  static GeneralSettingsRoute _fromState(GoRouterState state) =>
-      GeneralSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/general');
 
   @override
   void go(BuildContext context) => context.go(location);

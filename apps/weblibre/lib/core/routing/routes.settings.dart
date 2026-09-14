@@ -23,10 +23,6 @@ part of 'routes.dart';
   name: 'SettingsRoute',
   path: '/settings',
   routes: [
-    TypedGoRoute<GeneralSettingsRoute>(
-      name: 'GeneralSettingsRoute',
-      path: 'general',
-    ),
     TypedGoRoute<SettingsTransferRoute>(
       name: 'SettingsTransferRoute',
       path: 'transfer',
@@ -102,13 +98,6 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreen();
-  }
-}
-
-class GeneralSettingsRoute extends GoRouteData with $GeneralSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const GeneralSettingsScreen();
   }
 }
 

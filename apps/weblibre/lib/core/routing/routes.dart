@@ -62,7 +62,6 @@ import 'package:weblibre/features/settings/presentation/screens/desktop_mode_sit
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/menu_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';

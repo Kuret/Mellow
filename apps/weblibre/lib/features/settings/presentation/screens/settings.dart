@@ -27,7 +27,6 @@ import 'package:weblibre/features/settings/domain/providers/pending_settings_hig
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
@@ -95,14 +94,6 @@ typedef _CategoryGroups = ({
 _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
-      title: 'General',
-      subtitle: 'Profile and browser defaults',
-      icon: Icons.tune,
-      keywords: const ['default browser', 'profile'],
-      sections: generalSettingsSections,
-      onTap: (context) => GeneralSettingsRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
       title: 'Browsing',
       subtitle: 'Tabs, navigation, external links',
       icon: MdiIcons.compassOutline,
@@ -167,9 +158,16 @@ _CategoryGroups _buildCategories() {
     ),
     _SettingsCategoryDefinition(
       title: 'Advanced',
-      subtitle: 'JavaScript, user agent, debugging',
+      subtitle: 'Web engine, developer tools, profile',
       icon: Icons.developer_mode,
-      keywords: const ['error logs', 'javascript', 'user agent'],
+      keywords: const [
+        'error logs',
+        'javascript',
+        'user agent',
+        'profile',
+        'backup',
+        'default browser',
+      ],
       sections: advancedSettingsSections,
       onTap: (context) => AdvancedSettingsRoute().push(context),
     ),
