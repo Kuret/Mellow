@@ -34,7 +34,6 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/quick_switcher_button_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
@@ -449,15 +448,9 @@ class BrowserTabBar extends HookConsumerWidget {
             : null,
         toolbar: WideRailToolbarRow(
           buttons: [
-            // The switcher-bar buttons (new tab, …) sit in the same row as
-            // the main actions: the rail has one toolbar row, not two bars.
-            QuickSwitcherButtonRow(
-              selectedTabId: selectedTabId,
-              displayedSheet: displayedSheet,
-            ),
             // The add-on bar is a rigid row of however many add-ons the tab
             // pinned; in the rail's share of one row it has to scroll rather
-            // than overflow. The switcher row already scrolls itself.
+            // than overflow.
             for (final action in actions)
               if (action is PinnedAddonBar)
                 const SingleChildScrollView(
@@ -487,13 +480,7 @@ class BrowserTabBar extends HookConsumerWidget {
           ? CompactAppBarTitle(containerColor: effectiveContainerColor)
           : null,
       actions: actions,
-      quickTabSwitcher: wrapQuickTabSwitcherWithButtonRow(
-        buttonRow: QuickSwitcherButtonRow(
-          selectedTabId: selectedTabId,
-          displayedSheet: displayedSheet,
-        ),
-        child: const CompactTabBar(),
-      ),
+      quickTabSwitcher: const CompactTabBar(),
       contextualToolbar: ContextualToolbar(
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
@@ -609,36 +596,4 @@ class BrowserTabBarView extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Pins [buttonRow] to the trailing end of the quick tab switcher bar while
-/// [child] (the scrollable chips) fills the remaining space. The cluster is
-/// capped to a fraction of the bar so it can never starve the chips;
-/// [QuickSwitcherButtonRow] scrolls any overflow beyond that cap. [buttonRow]
-/// collapses to nothing when no buttons are enabled, so the default state is
-/// unchanged.
-Widget wrapQuickTabSwitcherWithButtonRow({
-  required Widget buttonRow,
-  required Widget child,
-}) {
-  // Never let the button cluster take more than this share of the bar; the tab
-  // chips keep the rest.
-  const maxClusterFraction = 0.6;
-
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      final maxExtent = constraints.maxWidth.isFinite
-          ? constraints.maxWidth * maxClusterFraction
-          : double.infinity;
-      return Row(
-        children: [
-          Expanded(child: child),
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxExtent),
-            child: buttonRow,
-          ),
-        ],
-      );
-    },
-  );
 }
