@@ -80,6 +80,24 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         keywords: ['rail', 'width', 'side', 'vertical', 'sidebar'],
         child: _RailWidthTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Show Toolbar Buttons',
+        subtitle:
+            'Off, the rail shows only tabs and spaces. Back, forward, '
+            'reload, tabs and settings stay available by long-pressing + '
+            'in the space row.',
+        keywords: [
+          'toolbar',
+          'buttons',
+          'hide',
+          'navigation',
+          'back',
+          'forward',
+          'refresh',
+          'settings',
+        ],
+        child: _RailToolbarTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -443,6 +461,36 @@ class _RailWidthTile extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RailToolbarTile extends HookConsumerWidget {
+  const _RailToolbarTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showRailToolbar = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.showRailToolbar),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Toolbar Buttons'),
+      subtitle: const Text(
+        'Off, the rail shows only tabs and spaces. Back, forward, reload, '
+        'tabs and settings stay available by long-pressing + in the space '
+        'row.',
+      ),
+      secondary: const Icon(MdiIcons.dockTop),
+      value: showRailToolbar,
+      onChanged: (value) async {
+        await ref
+            .read(saveZenSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.showRailToolbar(value),
+            );
+      },
     );
   }
 }
