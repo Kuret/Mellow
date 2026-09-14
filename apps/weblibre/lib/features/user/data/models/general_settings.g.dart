@@ -49,8 +49,6 @@ abstract class _$GeneralSettingsCWProxy {
     Duration unassignedTabsAutoCleanInterval,
   );
 
-  GeneralSettings tabListShowFavicons(bool tabListShowFavicons);
-
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
   );
@@ -103,7 +101,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
     Duration unassignedTabsAutoCleanInterval,
-    bool tabListShowFavicons,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
     String syncServerOverride,
@@ -190,10 +187,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(unassignedTabsAutoCleanInterval: unassignedTabsAutoCleanInterval);
 
   @override
-  GeneralSettings tabListShowFavicons(bool tabListShowFavicons) =>
-      call(tabListShowFavicons: tabListShowFavicons);
-
-  @override
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
   ) => call(
@@ -272,7 +265,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
-    Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
@@ -365,12 +357,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unassignedTabsAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : unassignedTabsAutoCleanInterval as Duration,
-      tabListShowFavicons:
-          tabListShowFavicons == const $CopyWithPlaceholder() ||
-              tabListShowFavicons == null
-          ? _value.tabListShowFavicons
-          // ignore: cast_nullable_to_non_nullable
-          : tabListShowFavicons as bool,
       quickTabSwitcherShowHistorySuggestions:
           quickTabSwitcherShowHistorySuggestions ==
                   const $CopyWithPlaceholder() ||
@@ -501,7 +487,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
               microseconds: (json['unassignedTabsAutoCleanInterval'] as num)
                   .toInt(),
             ),
-      tabListShowFavicons: json['tabListShowFavicons'] as bool?,
       quickTabSwitcherShowHistorySuggestions:
           json['quickTabSwitcherShowHistorySuggestions'] as bool?,
       quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
@@ -554,7 +539,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
-  'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,

@@ -41,7 +41,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shel
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
@@ -469,16 +468,6 @@ class ListTabPreview extends HookConsumerWidget {
     final displayUrl = tabState.url;
     final displayTitle = tabState.titleOrAuthority;
 
-    final tabListShowFavicons = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
-    );
-
-    // Only the leading tile renders the thumbnail, and only when favicons are
-    // off — don't subscribe to screenshot churn otherwise.
-    final thumbnail = tabListShowFavicons
-        ? null
-        : ref.watch(tabThumbnailProvider(tabId));
-
     final extendedDeleteMenuController = useMenuController();
 
     // ignore: avoid_bool_literals_in_conditional_expressions
@@ -486,19 +475,15 @@ class ListTabPreview extends HookConsumerWidget {
         ? ref.watch(pinnedTabIdsProvider.select((v) => v.contains(tabId)))
         : false;
 
-    final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
-      (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        child: RepaintBoundary(
-          child: SafeRawImage(image: thumbnail, fit: BoxFit.fitHeight),
-        ),
-      ),
-      _ when isCold => ColdTabBadge(
-        size: 32,
-        child: TabIcon(tabState: tabState, iconSize: 32),
-      ),
-      _ => TabIcon(tabState: tabState, iconSize: 32),
-    };
+    // A list row always leads with the site's favicon: the row is too short
+    // for a screenshot to read as anything, and never subscribing to the
+    // thumbnail keeps the list clear of screenshot churn.
+    final leadingWidget = isCold
+        ? ColdTabBadge(
+            size: 32,
+            child: TabIcon(tabState: tabState, iconSize: 32),
+          )
+        : TabIcon(tabState: tabState, iconSize: 32);
 
     final listBgColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabBackground.withAlpha(80),

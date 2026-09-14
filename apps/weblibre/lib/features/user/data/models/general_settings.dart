@@ -204,7 +204,6 @@ class GeneralSettings with FastEquatable {
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
   final Duration unassignedTabsAutoCleanInterval;
-  final bool tabListShowFavicons;
   final bool quickTabSwitcherShowHistorySuggestions;
 
   /// Max width (logical px) for chip titles on the horizontal compact bar.
@@ -265,7 +264,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
     required this.unassignedTabsAutoCleanInterval,
-    required this.tabListShowFavicons,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
     required this.syncServerOverride,
@@ -297,7 +295,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
     Duration? unassignedTabsAutoCleanInterval,
-    bool? tabListShowFavicons,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
     String? syncServerOverride,
@@ -336,7 +333,6 @@ class GeneralSettings with FastEquatable {
            tabBarStackingMode ?? TabBarStackingMode.accordion,
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
-       tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
@@ -425,7 +421,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
     unassignedTabsAutoCleanInterval,
-    tabListShowFavicons,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
     syncServerOverride,

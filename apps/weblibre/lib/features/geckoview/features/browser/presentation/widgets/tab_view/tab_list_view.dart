@@ -865,7 +865,10 @@ class ViewTabListWidget extends HookConsumerWidget {
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!isSyncedScope) EssentialsGrid(onSelected: onClose),
+              // A tile the size of a list row's favicon block, not the big
+              // square the strip used to stretch to.
+              if (!isSyncedScope)
+                EssentialsGrid(onSelected: onClose, tileSize: 40),
               Expanded(
                 child: _TabListView(
                   scrollController: scrollController,

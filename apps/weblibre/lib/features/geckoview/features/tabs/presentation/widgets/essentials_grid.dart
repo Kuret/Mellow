@@ -102,7 +102,8 @@ class EssentialsGrid extends ConsumerWidget {
   /// Called after a tap selected a tab (the tray closes itself with this).
   final VoidCallback? onSelected;
 
-  /// Edge length of one cell.
+  /// Edge length of one cell. A hard cap, not a minimum: a cell never grows
+  /// past it, however wide the surface the strip is pinned to.
   final double tileSize;
 
   final EdgeInsetsGeometry padding;
@@ -145,32 +146,41 @@ class EssentialsGrid extends ConsumerWidget {
                 essentialsMaxColumns,
               );
               const spacing = 4.0;
-              // Square cells, so one row is as tall as a cell is wide.
-              final rowExtent = (width - spacing * (columns - 1)) / columns;
+              // Square cells, so one row is as tall as a cell is wide — and
+              // never wider than [tileSize]. Letting them stretch to fill the
+              // surface turned the strip into a row of big squares next to
+              // the much shorter rows it is pinned above.
+              final cellExtent = math.min(
+                tileSize,
+                (width - spacing * (columns - 1)) / columns,
+              );
               final rows = (tabIds.length / columns).ceil();
               final visibleRows = math.min(rows, essentialsMaxRows);
               return SizedBox(
                 key: viewportKey,
-                height: visibleRows * rowExtent + (visibleRows - 1) * spacing,
+                height: visibleRows * cellExtent + (visibleRows - 1) * spacing,
                 child: SingleChildScrollView(
                   physics: rows > visibleRows
                       ? const ClampingScrollPhysics()
                       : const NeverScrollableScrollPhysics(),
-                  child: GridView.count(
-                    crossAxisCount: columns,
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: spacing,
-                    crossAxisSpacing: spacing,
-                    children: [
-                      for (final tabId in tabIds)
-                        EssentialTile(
-                          key: ValueKey('essential-$tabId'),
-                          tabId: tabId,
-                          onSelected: onSelected,
-                        ),
-                    ],
+                  child: SizedBox(
+                    width: columns * cellExtent + (columns - 1) * spacing,
+                    child: GridView.count(
+                      crossAxisCount: columns,
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: spacing,
+                      crossAxisSpacing: spacing,
+                      children: [
+                        for (final tabId in tabIds)
+                          EssentialTile(
+                            key: ValueKey('essential-$tabId'),
+                            tabId: tabId,
+                            onSelected: onSelected,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               );
