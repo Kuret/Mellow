@@ -52,7 +52,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'autoHideTabBar': DriftSqlType.bool,
   'tabBarSwipeAction': DriftSqlType.string,
   'historyAutoCleanInterval': DriftSqlType.int,
-  'tabBarShowContextualBar': DriftSqlType.bool,
   // Legacy: folded into tabBarStackingMode.
   'tabBarShowQuickTabSwitcherBar': DriftSqlType.bool,
   'tabBarPosition': DriftSqlType.string,

@@ -38,8 +38,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
-  GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
-
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
 
   GeneralSettings tabBarStackingMode(
@@ -103,7 +101,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
-    bool tabBarShowContextualBar,
     TabBarPosition tabBarPosition,
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
@@ -179,10 +176,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval) =>
       call(historyAutoCleanInterval: historyAutoCleanInterval);
-
-  @override
-  GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar) =>
-      call(tabBarShowContextualBar: tabBarShowContextualBar);
 
   @override
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition) =>
@@ -282,7 +275,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
-    Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
@@ -363,12 +355,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.historyAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : historyAutoCleanInterval as Duration,
-      tabBarShowContextualBar:
-          tabBarShowContextualBar == const $CopyWithPlaceholder() ||
-              tabBarShowContextualBar == null
-          ? _value.tabBarShowContextualBar
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarShowContextualBar as bool,
       tabBarPosition:
           tabBarPosition == const $CopyWithPlaceholder() ||
               tabBarPosition == null
@@ -514,7 +500,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           : Duration(
               microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
             ),
-      tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
       tabBarPosition: $enumDecodeNullable(
         _$TabBarPositionEnumMap,
         json['tabBarPosition'],
@@ -579,7 +564,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
-  'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,

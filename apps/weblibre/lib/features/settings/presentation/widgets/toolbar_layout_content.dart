@@ -72,12 +72,6 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
     title: 'Contextual Toolbar',
     entries: [
       SettingsEntryDefinition(
-        title: 'Show Contextual Toolbar',
-        subtitle: 'Show an additional toolbar for navigation and actions',
-        keywords: ['bottom toolbar'],
-        child: _ShowContextualTabBarTile(),
-      ),
-      SettingsEntryDefinition(
         title: 'Customize Toolbar Buttons',
         subtitle: 'Choose which actions appear in the contextual toolbar',
         keywords: ['buttons'],
@@ -301,52 +295,15 @@ class _TabBarPositionSection extends HookConsumerWidget {
   }
 }
 
-class _ShowContextualTabBarTile extends HookConsumerWidget {
-  const _ShowContextualTabBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowContextualBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Contextual Toolbar'),
-      subtitle: const Text(
-        'Show additional bottom toolbar for navigation and actions',
-      ),
-      secondary: const Icon(MdiIcons.dockBottom),
-      value: tabBarShowContextualBar,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabBarShowContextualBar(value),
-            );
-      },
-    );
-  }
-}
-
-class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
+class _CustomizeToolbarButtonsTile extends StatelessWidget {
   const _CustomizeToolbarButtonsTile();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowContextualBar,
-      ),
-    );
-
+  Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.tune),
       title: const Text('Customize Toolbar Buttons'),
       trailing: const Icon(Icons.chevron_right),
-      enabled: tabBarShowContextualBar,
       onTap: () async {
         await const ContextualToolbarSettingsRoute().push(context);
       },

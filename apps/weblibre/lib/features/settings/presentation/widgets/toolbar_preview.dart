@@ -125,13 +125,10 @@ class TabBarPreviewCard extends StatelessWidget {
 
   /// The compact bar's chrome: the address row, one switcher row and, when
   /// on, the contextual strip.
-  static double toolbarHeight(GeneralSettings settings) {
-    var height = kToolbarHeight + BrowserTabBar.quickTabSwitcherHeight;
-    if (settings.tabBarShowContextualBar) {
-      height += BrowserTabBar.contextualToolabarHeight;
-    }
-    return height;
-  }
+  static double toolbarHeight(GeneralSettings settings) =>
+      kToolbarHeight +
+      BrowserTabBar.quickTabSwitcherHeight +
+      BrowserTabBar.contextualToolabarHeight;
 
   /// Height of the narrow-screen preview box (content plus its border).
   static double narrowPreviewHeight(
@@ -160,7 +157,6 @@ class TabBarPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final showMainToolbarActionButtons = !settings.tabBarShowContextualBar;
 
     final previewTabState = TabState.$default('preview-tab').copyWith(
       url: Uri.parse('https://weblibre.eu/docs'),
@@ -214,8 +210,6 @@ class TabBarPreviewCard extends StatelessWidget {
     }
 
     final mainToolbarActions = <Widget>[
-      if (showMainToolbarActionButtons) tabCountButton,
-      if (showMainToolbarActionButtons) NavigationMenuButtonView(onTap: () {}),
     ];
 
     Widget title() => _CompactPreviewTitle(tabState: previewTabState);
@@ -270,7 +264,7 @@ class TabBarPreviewCard extends StatelessWidget {
           pageContent(height: pageHeight),
           BrowserTabBarView(
             showMainToolbar: false,
-            showContextualToolbar: settings.tabBarShowContextualBar,
+            showContextualToolbar: true,
             showQuickTabSwitcherBar: true,
             displayAppBar: false,
             displayQuickTabSwitcher: true,
@@ -288,7 +282,7 @@ class TabBarPreviewCard extends StatelessWidget {
           pageContent(height: pageHeight),
           BrowserTabBarView(
             showMainToolbar: true,
-            showContextualToolbar: settings.tabBarShowContextualBar,
+            showContextualToolbar: true,
             showQuickTabSwitcherBar: true,
             displayAppBar: true,
             displayQuickTabSwitcher: true,
@@ -339,9 +333,7 @@ class TabBarPreviewCard extends StatelessWidget {
             ),
           ],
         ),
-        contextualToolbar: settings.tabBarShowContextualBar
-            ? buildContextualToolbar()
-            : null,
+        contextualToolbar: buildContextualToolbar(),
         toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
         spaces: const SpaceIconRailView(
           entries: [

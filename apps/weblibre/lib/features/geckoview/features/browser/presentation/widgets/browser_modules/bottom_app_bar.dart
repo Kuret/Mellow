@@ -54,7 +54,6 @@ export 'package:weblibre/features/geckoview/features/browser/presentation/widget
 
 class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final bool enableGestures;
   final bool suppressMainToolbar;
@@ -65,7 +64,6 @@ class BrowserTopAppBar extends StatelessWidget {
   BrowserTopAppBar({
     super.key,
     required this.showMainToolbar,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
@@ -73,11 +71,12 @@ class BrowserTopAppBar extends StatelessWidget {
     _tabBar = BrowserTabBar(
       showMainToolbar: showMainToolbar,
       displayedSheet: null,
+      // The contextual toolbar is always drawn, but always at the bottom: a
+      // top bar gets its own BrowserBottomAppBar for it.
       showContextualToolbar: false,
       quickTabSwitcherRowCount: 0,
       enableGestures: enableGestures,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar:
-          showContextualToolbar,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
     );
   }
@@ -94,7 +93,6 @@ class BrowserTopAppBar extends StatelessWidget {
 
 class BrowserBottomAppBar extends StatelessWidget {
   final bool showMainToolbar;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final Sheet? displayedSheet;
   final bool enableGestures;
@@ -107,7 +105,6 @@ class BrowserBottomAppBar extends StatelessWidget {
     super.key,
     required this.showMainToolbar,
     required this.displayedSheet,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
@@ -115,11 +112,10 @@ class BrowserBottomAppBar extends StatelessWidget {
     _tabBar = BrowserTabBar(
       displayedSheet: displayedSheet,
       showMainToolbar: showMainToolbar,
-      showContextualToolbar: showContextualToolbar,
+      showContextualToolbar: true,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       enableGestures: enableGestures,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar:
-          showContextualToolbar,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
     );
   }
@@ -149,7 +145,6 @@ class BrowserBottomAppBar extends StatelessWidget {
 /// [preferredSize] width; the caller adds the horizontal safe-area inset on
 /// the rail's outer edge to compute the browser content offset.
 class BrowserSideRail extends ConsumerWidget {
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
 
   /// Which edge the rail is docked to.
@@ -166,7 +161,6 @@ class BrowserSideRail extends ConsumerWidget {
 
   BrowserSideRail({
     super.key,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.side,
     required this.railWidth,
@@ -175,11 +169,10 @@ class BrowserSideRail extends ConsumerWidget {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
       showMainToolbar: true,
-      showContextualToolbar: showContextualToolbar,
+      showContextualToolbar: true,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       enableGestures: true,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar:
-          showContextualToolbar,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
       railSide: side,
     );

@@ -199,7 +199,6 @@ class GeneralSettings with FastEquatable {
   final TabBarSwipeAction tabBarSwipeAction;
 
   final Duration historyAutoCleanInterval;
-  final bool tabBarShowContextualBar;
   final TabBarPosition tabBarPosition;
   @Deprecated('Retired; the bar has one layout')
   // ignore: deprecated_member_use_from_same_package
@@ -258,7 +257,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
-    required this.tabBarShowContextualBar,
     required this.tabBarPosition,
     @Deprecated('Retired; the bar has one layout')
     // ignore: deprecated_member_use_from_same_package
@@ -293,7 +291,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
-    bool? tabBarShowContextualBar,
     TabBarPosition? tabBarPosition,
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
@@ -331,7 +328,6 @@ class GeneralSettings with FastEquatable {
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
-       tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
        // ignore: deprecated_member_use_from_same_package
        tabBarStackingMode =
@@ -425,7 +421,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,
     historyAutoCleanInterval,
-    tabBarShowContextualBar,
     tabBarPosition,
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,

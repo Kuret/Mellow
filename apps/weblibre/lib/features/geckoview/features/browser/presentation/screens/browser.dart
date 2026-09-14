@@ -150,24 +150,18 @@ class _AnimatedToolbar extends HookWidget {
 /// constructors, outside the widget tree, where no provider can be read.
 bool _suppressMainToolbarForHome({
   required bool showBrowserHome,
-  required bool showContextualToolbar,
   required HomeSearchBarPlacement placement,
-}) =>
-    showBrowserHome &&
-    showContextualToolbar &&
-    placement != HomeSearchBarPlacement.tabBar;
+}) => showBrowserHome && placement != HomeSearchBarPlacement.tabBar;
 
 /// Animation is handled by the parent _AnimatedToolbar wrapper.
 class _TabBar extends HookConsumerWidget {
   final bool showMainToolbar;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final Stream<Offset>? pointerMoveEvents;
   final TabBarPosition tabBarPosition;
 
   const _TabBar({
     required this.showMainToolbar,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
@@ -250,7 +244,6 @@ class _TabBar extends HookConsumerWidget {
 
     final suppressMainToolbar = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
-      showContextualToolbar: showContextualToolbar,
       placement: ref.watch(
         generalSettingsWithDefaultsProvider.select(
           (settings) => settings.effectiveHomeSearchBarPlacement(),
@@ -269,14 +262,12 @@ class _TabBar extends HookConsumerWidget {
     return switch (tabBarPosition) {
       TabBarPosition.top => BrowserTopAppBar(
         showMainToolbar: showMainToolbar,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
       ),
       TabBarPosition.bottom => BrowserBottomAppBar(
         displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
       ),
@@ -284,7 +275,6 @@ class _TabBar extends HookConsumerWidget {
         side: tabBarPosition == TabBarPosition.left
             ? RailSide.left
             : RailSide.right,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         railWidth: railWidth,
         suppressMainToolbar: suppressMainToolbar,
@@ -511,7 +501,6 @@ class _BottomToolbarLayer extends StatelessWidget {
   final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final String? selectedTabId;
   final StreamController<Offset> pointerMoveEventsController;
@@ -520,7 +509,6 @@ class _BottomToolbarLayer extends StatelessWidget {
     required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
     required this.pointerMoveEventsController,
@@ -538,7 +526,6 @@ class _BottomToolbarLayer extends StatelessWidget {
       child: _TabBar(
         tabBarPosition: TabBarPosition.bottom,
         showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         pointerMoveEvents: tabBarPosition == TabBarPosition.bottom
             ? pointerMoveEventsController.stream
@@ -552,7 +539,6 @@ class _BottomToolbarLayer extends StatelessWidget {
 class _TopToolbarLayer extends StatelessWidget {
   final bool sheetDisplayed;
   final bool tabInFullScreen;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final String? selectedTabId;
   final StreamController<Offset> pointerMoveEventsController;
@@ -560,7 +546,6 @@ class _TopToolbarLayer extends StatelessWidget {
   const _TopToolbarLayer({
     required this.sheetDisplayed,
     required this.tabInFullScreen,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
     required this.pointerMoveEventsController,
@@ -576,7 +561,6 @@ class _TopToolbarLayer extends StatelessWidget {
       child: _TabBar(
         tabBarPosition: TabBarPosition.top,
         showMainToolbar: true,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         pointerMoveEvents: pointerMoveEventsController.stream,
       ),
@@ -589,7 +573,6 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final String? selectedTabId;
 
@@ -605,7 +588,6 @@ class _SideRailToolbarLayer extends StatelessWidget {
     required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
     required this.suppressMainToolbar,
@@ -623,7 +605,6 @@ class _SideRailToolbarLayer extends StatelessWidget {
         side: tabBarPosition == TabBarPosition.left
             ? RailSide.left
             : RailSide.right,
-        showContextualToolbar: showContextualToolbar,
         railWidth: railWidth,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
@@ -931,12 +912,6 @@ class BrowserScreen extends HookConsumerWidget {
     );
     final isRail = tabBarPosition.isVertical;
 
-    final showContextualToolbar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarShowContextualBar,
-      ),
-    );
-
     // The compact bar is one row, always; the rail has no bar row at all.
     const quickTabSwitcherRowCount = 1;
 
@@ -1045,7 +1020,6 @@ class BrowserScreen extends HookConsumerWidget {
     // row that is not drawn.
     final suppressMainToolbarForHome = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
-      showContextualToolbar: showContextualToolbar,
       placement: ref.watch(
         generalSettingsWithDefaultsProvider.select(
           (settings) => settings.effectiveHomeSearchBarPlacement(),
@@ -1074,7 +1048,6 @@ class BrowserScreen extends HookConsumerWidget {
       // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
       bottomAppBarContentSize = BrowserBottomAppBar(
         showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-        showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         displayedSheet: displayedSheet,
         suppressMainToolbar: suppressMainToolbarForHome,
@@ -1083,7 +1056,6 @@ class BrowserScreen extends HookConsumerWidget {
           ? bottomAppBarContentSize
           : BrowserBottomAppBar(
               showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-              showContextualToolbar: showContextualToolbar,
               quickTabSwitcherRowCount: quickTabSwitcherRowCount,
               displayedSheet: null,
               suppressMainToolbar: suppressMainToolbarForHome,
@@ -1116,7 +1088,6 @@ class BrowserScreen extends HookConsumerWidget {
     final topSafeArea = MediaQuery.of(context).padding.top;
     final topAppBarContentSize = BrowserTopAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.top,
-      showContextualToolbar: showContextualToolbar,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       suppressMainToolbar: suppressMainToolbarForHome,
     ).preferredSize;
@@ -1392,7 +1363,6 @@ class BrowserScreen extends HookConsumerWidget {
                     sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     tabBarPosition: tabBarPosition,
-                    showContextualToolbar: showContextualToolbar,
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
                     pointerMoveEventsController: pointerMoveEventsController,
@@ -1408,7 +1378,6 @@ class BrowserScreen extends HookConsumerWidget {
                   child: _TopToolbarLayer(
                     sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
-                    showContextualToolbar: showContextualToolbar,
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
                     pointerMoveEventsController: pointerMoveEventsController,
@@ -1427,7 +1396,6 @@ class BrowserScreen extends HookConsumerWidget {
                     sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     tabBarPosition: tabBarPosition,
-                    showContextualToolbar: showContextualToolbar,
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
                     suppressMainToolbar: suppressMainToolbarForHome,
