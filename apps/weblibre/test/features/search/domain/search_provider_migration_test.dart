@@ -20,6 +20,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
 import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
 
 void main() {
@@ -112,6 +113,18 @@ void main() {
 
     test('drops an unknown value so the caller can fall back', () {
       expect(converter.fromJson('general::yt'), isNull);
+    });
+
+    // This converter has no catalogue of custom engines to check an id
+    // against, so it has to take a namespaced id on trust. Dropping it here
+    // moved the user silently back to the fallback the next time the setting
+    // was read — which is exactly what picking a custom engine as the default
+    // used to do.
+    test('passes a custom engine id through untouched', () {
+      final id = newCustomSearchProviderId();
+
+      expect(converter.fromJson(id), id);
+      expect(searchProviderIdFromStoredValue(id), id);
     });
 
     test('writes the id unchanged', () {

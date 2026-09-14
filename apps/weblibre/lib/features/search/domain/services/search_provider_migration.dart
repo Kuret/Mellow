@@ -19,6 +19,7 @@
  */
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
 
 /// Bang triggers that named an engine we still ship, mapped to its provider id.
 ///
@@ -58,7 +59,12 @@ String? searchProviderIdFromStoredValue(String? stored) {
     return null;
   }
 
-  if (builtinSearchProviderById(stored) != null) {
+  // A user engine's id is ours the moment it is namespaced: this converter has
+  // no catalogue of custom engines to check it against, and must not discard an
+  // id it cannot see the engine for — doing so silently moved the user back to
+  // the fallback the next time the setting was read.
+  if (isCustomSearchProviderId(stored) ||
+      builtinSearchProviderById(stored) != null) {
     return stored;
   }
 

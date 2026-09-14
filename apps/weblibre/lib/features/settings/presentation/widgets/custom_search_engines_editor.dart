@@ -243,6 +243,10 @@ class _CustomSearchEngineDialog extends HookWidget {
                     '${SearchProvider.searchTermsPlaceholder} is replaced '
                     'with what you type.',
                 helperMaxLines: 2,
+                // The placeholder message is longer than one line in this
+                // dialog, and a validation message cut off mid-sentence is
+                // worse than none.
+                errorMaxLines: 3,
               ),
               validator: (value) => customSearchEngineUrlError(value ?? ''),
             ),
