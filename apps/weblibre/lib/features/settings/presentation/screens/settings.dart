@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/appearance_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/links_sites_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
@@ -32,6 +33,7 @@ import 'package:weblibre/features/settings/presentation/screens/search_settings.
 import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/sync/presentation/screens/sync_settings.dart';
 
 class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
@@ -107,6 +109,7 @@ _CategoryGroups _buildCategories() {
       ],
       sections: appearanceLayoutSettingsSections,
       onTap: (context) => AppearanceLayoutSettingsRoute().push(context),
+      screen: (context) => const AppearanceLayoutSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Tabs & Spaces',
@@ -121,6 +124,7 @@ _CategoryGroups _buildCategories() {
       ],
       sections: tabsSpacesSettingsSections,
       onTap: (context) => TabsSpacesSettingsRoute().push(context),
+      screen: (context) => const TabsSpacesSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Links & Sites',
@@ -134,6 +138,7 @@ _CategoryGroups _buildCategories() {
       ],
       sections: linksSitesSettingsSections,
       onTap: (context) => LinksSitesSettingsRoute().push(context),
+      screen: (context) => const LinksSitesSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Search',
@@ -142,6 +147,7 @@ _CategoryGroups _buildCategories() {
       keywords: const ['engines', 'suggestions', 'local search index'],
       sections: searchSettingsSections,
       onTap: (context) => SearchSettingsRoute().push(context),
+      screen: (context) => const SearchSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Privacy & Security',
@@ -150,6 +156,7 @@ _CategoryGroups _buildCategories() {
       keywords: const ['tracking protection', 'doh', 'incognito'],
       sections: privacySecuritySettingsSections,
       onTap: (context) => PrivacySecuritySettingsRoute().push(context),
+      screen: (context) => const PrivacySecuritySettingsScreen(),
     ),
   ];
 
@@ -161,6 +168,7 @@ _CategoryGroups _buildCategories() {
       keywords: const ['addons', 'unsigned extensions'],
       sections: extensionsSettingsSections,
       onTap: (context) => ExtensionsSettingsRoute().push(context),
+      screen: (context) => const ExtensionsSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Firefox Sync',
@@ -168,6 +176,7 @@ _CategoryGroups _buildCategories() {
       icon: Icons.sync,
       keywords: const ['pair', 'device name', 'engines'],
       onTap: (context) => SyncSettingsRoute().push(context),
+      screen: (context) => const SyncSettingsScreen(),
     ),
     _SettingsCategoryDefinition(
       title: 'Advanced',
@@ -183,6 +192,7 @@ _CategoryGroups _buildCategories() {
       ],
       sections: advancedSettingsSections,
       onTap: (context) => AdvancedSettingsRoute().push(context),
+      screen: (context) => const AdvancedSettingsScreen(),
     ),
   ];
 
@@ -289,11 +299,17 @@ class _SettingsCategoryDefinition {
   final List<SettingsSectionDefinition> sections;
   final Future<void> Function(BuildContext context) onTap;
 
+  /// Builds the screen this category opens. Used to host it directly in the
+  /// two-pane layout's right pane; the narrow layout still gets there by
+  /// pushing the route via [onTap].
+  final WidgetBuilder screen;
+
   const _SettingsCategoryDefinition({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    required this.screen,
     this.keywords = const [],
     this.sections = const [],
   });
