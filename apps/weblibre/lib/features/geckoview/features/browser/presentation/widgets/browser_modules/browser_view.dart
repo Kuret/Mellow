@@ -236,12 +236,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     final topRoute = ref.watch(currentTopRouteProvider);
     final androidInfoAsync = ref.watch(androidDeviceInfoProvider);
-    final unmountGeckoViewOffRoute = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.unmountGeckoViewOffRoute,
-      ),
-    );
-
     final isOnBrowserRoute =
         topRoute is GoRoute && topRoute.name == BrowserRoute.name;
 
@@ -296,7 +290,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         // any more; [GeckoView.isPainted] is, on every version and for the home
         // surface too. What this decides is only whether the engine is worth
         // keeping warm while it cannot be seen.
-        if (androidInfo.sdkInt <= 31 || unmountGeckoViewOffRoute) {
+        if (androidInfo.sdkInt <= 31) {
           return isOnBrowserRoute;
         }
         // Android 13+: always show GeckoView

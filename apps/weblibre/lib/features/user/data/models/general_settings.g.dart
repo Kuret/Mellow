@@ -95,8 +95,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings desktopModeSites(List<String> desktopModeSites);
 
-  GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -141,7 +139,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool pureBlack,
     bool globalDesktopMode,
     List<String> desktopModeSites,
-    bool unmountGeckoViewOffRoute,
   });
 }
 
@@ -303,10 +300,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings desktopModeSites(List<String> desktopModeSites) =>
       call(desktopModeSites: desktopModeSites);
 
-  @override
-  GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute) =>
-      call(unmountGeckoViewOffRoute: unmountGeckoViewOffRoute);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -353,7 +346,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? pureBlack = const $CopyWithPlaceholder(),
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
-    Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -549,12 +541,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.desktopModeSites
           // ignore: cast_nullable_to_non_nullable
           : desktopModeSites as List<String>,
-      unmountGeckoViewOffRoute:
-          unmountGeckoViewOffRoute == const $CopyWithPlaceholder() ||
-              unmountGeckoViewOffRoute == null
-          ? _value.unmountGeckoViewOffRoute
-          // ignore: cast_nullable_to_non_nullable
-          : unmountGeckoViewOffRoute as bool,
     );
   }
 }
@@ -659,7 +645,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
       desktopModeSites: (json['desktopModeSites'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
     );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -713,7 +698,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'pureBlack': instance.pureBlack,
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,
-  'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
 };
 
 const _$ThemeModeEnumMap = {

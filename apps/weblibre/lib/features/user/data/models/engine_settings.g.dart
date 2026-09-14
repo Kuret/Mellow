@@ -78,8 +78,6 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings userAgent(String? userAgent);
 
-  EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled);
-
   EngineSettings addonCollection(AddonCollection? addonCollection);
 
   EngineSettings ublockFilterListSettings(
@@ -102,10 +100,6 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings screenHeightOverride(int? screenHeightOverride);
 
-  EngineSettings isolatedProcessEnabled(bool? isolatedProcessEnabled);
-
-  EngineSettings appZygoteProcessEnabled(bool? appZygoteProcessEnabled);
-
   EngineSettings remoteDebuggingEnabled(bool? remoteDebuggingEnabled);
 
   /// Creates a new instance with the provided field values.
@@ -120,7 +114,6 @@ abstract class _$EngineSettingsCWProxy {
     TrackingProtectionPolicy? trackingProtectionPolicy,
     ColorScheme? preferredColorScheme,
     String? userAgent,
-    bool? enterpriseRootsEnabled,
     AddonCollection? addonCollection,
     UBlockFilterListSettings ublockFilterListSettings,
     DohSettingsMode dohSettingsMode,
@@ -131,8 +124,6 @@ abstract class _$EngineSettingsCWProxy {
     double? displayDensityOverride,
     int? screenWidthOverride,
     int? screenHeightOverride,
-    bool? isolatedProcessEnabled,
-    bool? appZygoteProcessEnabled,
     bool? remoteDebuggingEnabled,
   });
 }
@@ -159,10 +150,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
 
   @override
   EngineSettings userAgent(String? userAgent) => call(userAgent: userAgent);
-
-  @override
-  EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled) =>
-      call(enterpriseRootsEnabled: enterpriseRootsEnabled);
 
   @override
   EngineSettings addonCollection(AddonCollection? addonCollection) =>
@@ -207,14 +194,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(screenHeightOverride: screenHeightOverride);
 
   @override
-  EngineSettings isolatedProcessEnabled(bool? isolatedProcessEnabled) =>
-      call(isolatedProcessEnabled: isolatedProcessEnabled);
-
-  @override
-  EngineSettings appZygoteProcessEnabled(bool? appZygoteProcessEnabled) =>
-      call(appZygoteProcessEnabled: appZygoteProcessEnabled);
-
-  @override
   EngineSettings remoteDebuggingEnabled(bool? remoteDebuggingEnabled) =>
       call(remoteDebuggingEnabled: remoteDebuggingEnabled);
 
@@ -231,7 +210,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? trackingProtectionPolicy = const $CopyWithPlaceholder(),
     Object? preferredColorScheme = const $CopyWithPlaceholder(),
     Object? userAgent = const $CopyWithPlaceholder(),
-    Object? enterpriseRootsEnabled = const $CopyWithPlaceholder(),
     Object? addonCollection = const $CopyWithPlaceholder(),
     Object? ublockFilterListSettings = const $CopyWithPlaceholder(),
     Object? dohSettingsMode = const $CopyWithPlaceholder(),
@@ -242,8 +220,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? displayDensityOverride = const $CopyWithPlaceholder(),
     Object? screenWidthOverride = const $CopyWithPlaceholder(),
     Object? screenHeightOverride = const $CopyWithPlaceholder(),
-    Object? isolatedProcessEnabled = const $CopyWithPlaceholder(),
-    Object? appZygoteProcessEnabled = const $CopyWithPlaceholder(),
     Object? remoteDebuggingEnabled = const $CopyWithPlaceholder(),
   }) {
     return EngineSettings(
@@ -264,11 +240,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.userAgent
           // ignore: cast_nullable_to_non_nullable
           : userAgent as String?,
-      enterpriseRootsEnabled:
-          enterpriseRootsEnabled == const $CopyWithPlaceholder()
-          ? _value.enterpriseRootsEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : enterpriseRootsEnabled as bool?,
       addonCollection: addonCollection == const $CopyWithPlaceholder()
           ? _value.addonCollection
           // ignore: cast_nullable_to_non_nullable
@@ -322,16 +293,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.screenHeightOverride
           // ignore: cast_nullable_to_non_nullable
           : screenHeightOverride as int?,
-      isolatedProcessEnabled:
-          isolatedProcessEnabled == const $CopyWithPlaceholder()
-          ? _value.isolatedProcessEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : isolatedProcessEnabled as bool?,
-      appZygoteProcessEnabled:
-          appZygoteProcessEnabled == const $CopyWithPlaceholder()
-          ? _value.appZygoteProcessEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : appZygoteProcessEnabled as bool?,
       remoteDebuggingEnabled:
           remoteDebuggingEnabled == const $CopyWithPlaceholder()
           ? _value.remoteDebuggingEnabled
@@ -373,7 +334,6 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
           json['preferredColorScheme'],
         ),
         userAgent: json['userAgent'] as String?,
-        enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
         addonCollection: EngineSettings._addonCollectionFromJson(
           json['addonCollection'] as String?,
         ),
@@ -397,8 +357,6 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
             ?.toDouble(),
         screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
         screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
-        isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
-        appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
         remoteDebuggingEnabled: json['remoteDebuggingEnabled'] as bool?,
       )
       ..cookieBannerHandlingMode = $enumDecodeNullable(
@@ -433,9 +391,6 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'trackingProtectionPolicy':
       _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
   'preferredColorScheme': _$ColorSchemeEnumMap[instance.preferredColorScheme]!,
-  'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
-  'isolatedProcessEnabled': instance.isolatedProcessEnabled,
-  'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,
   'remoteDebuggingEnabled': instance.remoteDebuggingEnabled,
   'addonCollection': EngineSettings._addonCollectionToJson(
     instance.addonCollection,

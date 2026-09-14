@@ -182,7 +182,7 @@ _CategoryGroups _buildCategories() {
       title: 'Advanced',
       subtitle: 'JavaScript, user agent, debugging',
       icon: Icons.developer_mode,
-      keywords: const ['experimental', 'error logs', 'javascript'],
+      keywords: const ['error logs', 'javascript', 'user agent'],
       sections: advancedSettingsSections,
       onTap: (context) => AdvancedSettingsRoute().push(context),
     ),

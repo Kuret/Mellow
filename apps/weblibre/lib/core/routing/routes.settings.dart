@@ -55,10 +55,6 @@ part of 'routes.dart';
       name: 'AdvancedSettingsRoute',
       path: 'advanced',
     ),
-    TypedGoRoute<ExperimentalSettingsRoute>(
-      name: 'ExperimentalSettingsRoute',
-      path: 'experimental',
-    ),
     TypedGoRoute<WebEngineHardeningRoute>(
       name: 'WebEngineHardeningRoute',
       path: 'hardening',
@@ -176,14 +172,6 @@ class AdvancedSettingsRoute extends GoRouteData with $AdvancedSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AdvancedSettingsScreen();
-  }
-}
-
-class ExperimentalSettingsRoute extends GoRouteData
-    with $ExperimentalSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ExperimentalSettingsScreen();
   }
 }
 

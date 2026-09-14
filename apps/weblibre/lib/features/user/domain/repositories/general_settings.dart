@@ -79,7 +79,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'homeTargetUrl': DriftSqlType.string,
   'homeSearchBarPlacement': DriftSqlType.string,
   'globalDesktopMode': DriftSqlType.bool,
-  'unmountGeckoViewOffRoute': DriftSqlType.bool,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be

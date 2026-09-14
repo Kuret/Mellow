@@ -46,7 +46,6 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'javascriptEnabled': DriftSqlType.bool,
   'trackingProtectionPolicy': DriftSqlType.string,
   'userAgent': DriftSqlType.string,
-  'enterpriseRootsEnabled': DriftSqlType.bool,
   'remoteDebuggingEnabled': DriftSqlType.bool,
   'addonCollection': DriftSqlType.string,
   'ublockFilterListSettings': DriftSqlType.string,
@@ -59,8 +58,6 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'screenWidthOverride': DriftSqlType.int,
   'screenHeightOverride': DriftSqlType.int,
   // Process Isolation Settings
-  'isolatedProcessEnabled': DriftSqlType.bool,
-  'appZygoteProcessEnabled': DriftSqlType.bool,
   // LNA Settings
   // No writer today: nothing calls copyWith for these, so no row for them can
   // exist yet. Listed so that wiring up a writer later cannot silently revert.

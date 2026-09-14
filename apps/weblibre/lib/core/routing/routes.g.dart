@@ -1097,12 +1097,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $AdvancedSettingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'experimental',
-      name: 'ExperimentalSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $ExperimentalSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'hardening',
       name: 'WebEngineHardeningRoute',
       hasOverriddenOnExit: false,
@@ -1370,27 +1364,6 @@ mixin $AdvancedSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/advanced');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $ExperimentalSettingsRoute on GoRouteData {
-  static ExperimentalSettingsRoute _fromState(GoRouterState state) =>
-      ExperimentalSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/experimental');
 
   @override
   void go(BuildContext context) => context.go(location);

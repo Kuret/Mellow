@@ -61,7 +61,6 @@ import 'package:weblibre/features/settings/presentation/screens/contextual_toolb
 import 'package:weblibre/features/settings/presentation/screens/desktop_mode_sites_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
-import 'package:weblibre/features/settings/presentation/screens/experimental_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';

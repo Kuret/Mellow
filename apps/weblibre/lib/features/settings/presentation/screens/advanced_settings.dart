@@ -17,11 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,13 +30,10 @@ import 'package:weblibre/features/settings/presentation/dialogs/user_agent_resta
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 const List<SettingsSectionDefinition> advancedSettingsSections = [
   SettingsSectionDefinition(
@@ -58,12 +52,6 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
         keywords: ['ua'],
         child: _UserAgentTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Use third party CA certificates',
-        subtitle: 'Allow Android CA store certificates',
-        keywords: ['certificates', 'enterprise roots', 'ca'],
-        child: _EnterpriseRootsTile(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -78,28 +66,9 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Experimental',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Experimental Features',
-        subtitle: 'Low-level runtime features and startup behavior',
-        keywords: ['runtime', 'startup'],
-        child: _ExperimentalSettingsTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
     title: 'Developer Tools',
     keywords: ['debug'],
     entries: [
-      SettingsEntryDefinition(
-        title: 'Unmount Engine Off-Screen',
-        subtitle:
-            'Rebuild the web engine after an overlay, instead of '
-            'keeping it warm',
-        keywords: ['geckoview', 'memory', 'performance', 'suspend'],
-        child: _UnmountGeckoViewOffRouteTile(),
-      ),
       SettingsEntryDefinition(
         title: 'Icon Cache',
         subtitle: 'Stored favicons',
@@ -111,12 +80,6 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
         subtitle: 'View and copy logs for issue reporting',
         keywords: ['logs'],
         child: _ErrorLogsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Dart VM',
-        subtitle: 'Copy Dart VM service URL',
-        keywords: ['service url'],
-        child: _DartVmTile(),
       ),
       SettingsEntryDefinition(
         title: 'Reset UI',
@@ -214,36 +177,6 @@ class _UserAgentTile extends HookConsumerWidget {
   }
 }
 
-class _EnterpriseRootsTile extends HookConsumerWidget {
-  const _EnterpriseRootsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enterpriseRootsEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.enterpriseRootsEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Use third party CA certificates'),
-      subtitle: const Text(
-        'Allows the use of third party certificates from the Android CA store',
-      ),
-      secondary: const Icon(MdiIcons.certificate),
-      value: enterpriseRootsEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enterpriseRootsEnabled(value),
-            );
-      },
-    );
-  }
-}
-
 class _RemoteDebuggingTile extends HookConsumerWidget {
   const _RemoteDebuggingTile();
 
@@ -269,61 +202,6 @@ class _RemoteDebuggingTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.remoteDebuggingEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _ExperimentalSettingsTile extends StatelessWidget {
-  const _ExperimentalSettingsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Experimental Features'),
-      subtitle: const Text('Low-level runtime features and startup behavior'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.flaskOutline),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await ExperimentalSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _UnmountGeckoViewOffRouteTile extends HookConsumerWidget {
-  const _UnmountGeckoViewOffRouteTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final unmountGeckoViewOffRoute = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.unmountGeckoViewOffRoute,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Unmount Engine Off-Screen'),
-      subtitle: const Text(
-        'Tear the web engine down while a full-screen overlay (settings, tabs, '
-        'search) is on top, and build it again on the way back, freeing its '
-        'resources in between. Returning to the page costs a reattach and can '
-        'flicker or reload, so this is a memory trade rather than a fix for '
-        'anything. On Android 12 and lower it is always done.',
-      ),
-      secondary: const Icon(Icons.memory),
-      value: unmountGeckoViewOffRoute,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.unmountGeckoViewOffRoute(value),
             );
       },
     );
@@ -396,45 +274,6 @@ class _ErrorLogsTile extends StatelessWidget {
       onTap: () async {
         await ErrorLogsRoute().push(context);
       },
-    );
-  }
-}
-
-class _DartVmTile extends StatelessWidget {
-  const _DartVmTile();
-
-  @override
-  Widget build(BuildContext context) {
-    if (!kDebugMode) return const SizedBox.shrink();
-
-    return CustomListTile(
-      title: 'Dart VM',
-      subtitle: 'Copy Dart VM service URL',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          Icons.bug_report,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          final serviceProtocolInfo = await Service.getInfo();
-
-          await Clipboard.setData(
-            ClipboardData(
-              text: serviceProtocolInfo.serverUri?.toString() ?? 'Error',
-            ),
-          );
-
-          if (context.mounted) {
-            showInfoMessage(context, 'Service URL copied');
-          }
-        },
-        icon: const Icon(Icons.copy),
-        label: const Text('Copy'),
-      ),
     );
   }
 }

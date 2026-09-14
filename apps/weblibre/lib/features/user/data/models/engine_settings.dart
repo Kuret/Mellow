@@ -118,7 +118,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool get globalPrivacyControlEnabled => true;
   @override
-  bool get enterpriseRootsEnabled => super.enterpriseRootsEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get enterpriseRootsEnabled => false;
 
   /// The OS locale list, read fresh every time: the browser presents the
   /// languages the device is configured for and nothing else.
@@ -208,9 +209,11 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool get fissionEnabled => true;
   @override
-  bool get isolatedProcessEnabled => super.isolatedProcessEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get isolatedProcessEnabled => false;
   @override
-  bool get appZygoteProcessEnabled => super.appZygoteProcessEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get appZygoteProcessEnabled => false;
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool get extensionsWebAPIEnabled => true;
@@ -284,7 +287,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.trackingProtectionPolicy,
     required super.preferredColorScheme,
     required super.userAgent,
-    required super.enterpriseRootsEnabled,
     required this.addonCollection,
     required this.ublockFilterListSettings,
     required this.dohSettingsMode,
@@ -295,8 +297,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.displayDensityOverride,
     required super.screenWidthOverride,
     required super.screenHeightOverride,
-    required super.isolatedProcessEnabled,
-    required super.appZygoteProcessEnabled,
     required super.remoteDebuggingEnabled,
   });
 
@@ -305,7 +305,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     TrackingProtectionPolicy? trackingProtectionPolicy,
     ColorScheme? preferredColorScheme,
     super.userAgent,
-    bool? enterpriseRootsEnabled,
     this.addonCollection,
     UBlockFilterListSettings? ublockFilterListSettings,
     DohSettingsMode? dohSettingsMode,
@@ -316,8 +315,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.displayDensityOverride,
     super.screenWidthOverride,
     super.screenHeightOverride,
-    bool? isolatedProcessEnabled,
-    bool? appZygoteProcessEnabled,
     bool? remoteDebuggingEnabled,
   }) : ublockFilterListSettings =
            ublockFilterListSettings ?? UBlockFilterListSettings(),
@@ -335,15 +332,12 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          trackingProtectionPolicy:
              trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
          preferredColorScheme: preferredColorScheme ?? ColorScheme.system,
-         enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
          webFontsEnabled: true,
          automaticFontSizeAdjustment: true,
          fontSizeFactor: 1.0,
          fontInflationEnabled: false,
          inputAutoZoomEnabled: true,
          forceUserScalableContent: false,
-         isolatedProcessEnabled: isolatedProcessEnabled ?? false,
-         appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
          remoteDebuggingEnabled: remoteDebuggingEnabled ?? false,
        );
 
@@ -380,7 +374,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     trackingProtectionPolicy,
     preferredColorScheme,
     userAgent,
-    enterpriseRootsEnabled,
     addonCollection,
     ublockFilterListSettings,
     dohSettingsMode,
@@ -391,8 +384,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     displayDensityOverride,
     screenWidthOverride,
     screenHeightOverride,
-    isolatedProcessEnabled,
-    appZygoteProcessEnabled,
     remoteDebuggingEnabled,
   ];
 }
