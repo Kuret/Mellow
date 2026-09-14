@@ -153,8 +153,8 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
 
 /// The browser menu's own arrangement entry.
 ///
-/// Kept out of [toolbarLayoutSettingsSections] because onboarding renders those
-/// too, and arranging the menu is not a first-run decision. Offered to the
+/// Kept out of [toolbarLayoutSettingsSections] because arranging the menu is
+/// a separate concern from the toolbar layout. Offered to the
 /// settings screen as [ToolbarLayoutContent.extraSections] so it takes part in
 /// the same filtering — a row rendered beside the filtered list would survive a
 /// query that empties the list, leaving a match sitting above "No settings

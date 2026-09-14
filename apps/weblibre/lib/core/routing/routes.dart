@@ -55,7 +55,6 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_list.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_settings_screen.dart';
-import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
@@ -109,31 +108,6 @@ class AboutRoute extends GoRouteData with $AboutRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const AboutDialogScreen());
-  }
-}
-
-@TypedGoRoute<OnboardingRoute>(
-  name: OnboardingRoute.name,
-  path: '${OnboardingRoute.pathPrefix}/:currentRevision/:targetRevision',
-)
-class OnboardingRoute extends GoRouteData with $OnboardingRoute {
-  static const name = 'OnboardingRoute';
-  static const pathPrefix = '/onboarding';
-
-  final int currentRevision;
-  final int targetRevision;
-
-  const OnboardingRoute({
-    required this.currentRevision,
-    required this.targetRevision,
-  });
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return OnboardingScreen(
-      currentRevision: currentRevision,
-      targetRevision: targetRevision,
-    );
   }
 }
 

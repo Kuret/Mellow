@@ -57,9 +57,8 @@ class BrowserPage extends ConsumerWidget {
   }
 }
 
-/// The decorative background shared by the browser home and the onboarding
-/// pages: a diagonal wash with three soft coloured orbs bleeding in from the
-/// edges.
+/// The decorative background used behind the browser home: a diagonal wash
+/// with three soft coloured orbs bleeding in from the edges.
 ///
 /// This used to be three solid circles under a full-viewport
 /// `BackdropFilter(ImageFilter.blur(sigma: 72))`. That cost a save-layer plus a
