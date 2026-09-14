@@ -8,15 +8,36 @@ part of 'home_target_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Applies the configured [HomeTarget] when the browser has nothing to show.
+/// Resumes the last opened tab when the browser has nothing to show.
+///
+/// There is deliberately no choice here. Zen's synced state is the source of
+/// truth for what tabs exist, so launching must never *conjure* one: the
+/// browser either picks up a tab that is already in that state, or it falls
+/// back to the home surface and waits. A configurable "open this address on
+/// startup" would add a tab nothing upstream knows about, and sync would then
+/// have to carry it back out.
 
 @ProviderFor(HomeTargetController)
 final homeTargetControllerProvider = HomeTargetControllerProvider._();
 
-/// Applies the configured [HomeTarget] when the browser has nothing to show.
+/// Resumes the last opened tab when the browser has nothing to show.
+///
+/// There is deliberately no choice here. Zen's synced state is the source of
+/// truth for what tabs exist, so launching must never *conjure* one: the
+/// browser either picks up a tab that is already in that state, or it falls
+/// back to the home surface and waits. A configurable "open this address on
+/// startup" would add a tab nothing upstream knows about, and sync would then
+/// have to carry it back out.
 final class HomeTargetControllerProvider
     extends $NotifierProvider<HomeTargetController, void> {
-  /// Applies the configured [HomeTarget] when the browser has nothing to show.
+  /// Resumes the last opened tab when the browser has nothing to show.
+  ///
+  /// There is deliberately no choice here. Zen's synced state is the source of
+  /// truth for what tabs exist, so launching must never *conjure* one: the
+  /// browser either picks up a tab that is already in that state, or it falls
+  /// back to the home surface and waits. A configurable "open this address on
+  /// startup" would add a tab nothing upstream knows about, and sync would then
+  /// have to carry it back out.
   HomeTargetControllerProvider._()
     : super(
         from: null,
@@ -45,9 +66,16 @@ final class HomeTargetControllerProvider
 }
 
 String _$homeTargetControllerHash() =>
-    r'07efe1222c415d90c1a9c31cdc846d55f8e2f47f';
+    r'f13865cf1d797cceed57360a826f1ef1407fd7b2';
 
-/// Applies the configured [HomeTarget] when the browser has nothing to show.
+/// Resumes the last opened tab when the browser has nothing to show.
+///
+/// There is deliberately no choice here. Zen's synced state is the source of
+/// truth for what tabs exist, so launching must never *conjure* one: the
+/// browser either picks up a tab that is already in that state, or it falls
+/// back to the home surface and waits. A configurable "open this address on
+/// startup" would add a tab nothing upstream knows about, and sync would then
+/// have to carry it back out.
 
 abstract class _$HomeTargetController extends $Notifier<void> {
   void build();

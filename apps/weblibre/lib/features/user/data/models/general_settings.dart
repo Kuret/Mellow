@@ -24,7 +24,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinksMode;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
@@ -182,13 +181,6 @@ class GeneralSettings with FastEquatable {
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool showContainerUi;
 
-  /// What to land on when there is no tab to show at cold start.
-  final HomeTarget homeTarget;
-
-  /// Address opened when [homeTarget] is [HomeTarget.customUrl]. An unset or
-  /// unparseable value falls back to the home surface.
-  final String? homeTargetUrl;
-
   /// Where the home surface's search entry is rendered. See
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
   final HomeSearchBarPlacement homeSearchBarPlacement;
@@ -251,8 +243,6 @@ class GeneralSettings with FastEquatable {
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.showContainerUi,
-    required this.homeTarget,
-    required this.homeTargetUrl,
     required this.homeSearchBarPlacement,
     required this.autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
@@ -284,8 +274,6 @@ class GeneralSettings with FastEquatable {
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? showContainerUi,
-    HomeTarget? homeTarget,
-    this.homeTargetUrl,
     HomeSearchBarPlacement? homeSearchBarPlacement,
     bool? autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
@@ -312,9 +300,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        showContainerUi = showContainerUi ?? true,
-       // Defaults to `home`, which is exactly what the browser did before this
-       // setting existed. Anything else would change startup for every user.
-       homeTarget = homeTarget ?? HomeTarget.home,
        // Deliberately not a fixed edge: the placement that matches the user's
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
@@ -410,8 +395,6 @@ class GeneralSettings with FastEquatable {
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     showContainerUi,
-    homeTarget,
-    homeTargetUrl,
     homeSearchBarPlacement,
     autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package

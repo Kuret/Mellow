@@ -17,33 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 const List<SettingsSectionDefinition> homeSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Startup',
-    keywords: ['startup', 'home', 'resume', 'last tab', 'custom url'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'When there is no tab to show',
-        subtitle: 'On startup, and after closing the last tab',
-        keywords: ['startup', 'resume', 'last tab', 'custom url', 'homepage'],
-        child: _HomeTargetTile(),
-      ),
-    ],
-  ),
   SettingsSectionDefinition(
     title: 'Layout',
     keywords: ['home', 'new tab', 'sections', 'modules', 'layout'],
@@ -101,94 +85,6 @@ class HomeSettingsScreen extends StatelessWidget {
   }
 }
 
-class _HomeTargetTile extends HookConsumerWidget {
-  const _HomeTargetTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-
-    Future<void> save(GeneralSettings Function(GeneralSettings) update) {
-      return ref
-          .read(saveGeneralSettingsControllerProvider.notifier)
-          .save(update);
-    }
-
-    final urlController = useTextEditingController(
-      text: settings.homeTargetUrl ?? '',
-    );
-
-    // Persist on focus loss as well as on submit. Settings screens have no
-    // save button, so a user who types an address and taps back would
-    // otherwise lose it silently.
-    Future<void> saveUrlIfChanged() async {
-      final text = urlController.text.trim();
-      if (text == (settings.homeTargetUrl ?? '')) return;
-      if (text.isNotEmpty && uri_parser.tryParseUrl(text) == null) return;
-
-      await save((s) => s.copyWith.homeTargetUrl(text));
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RadioGroup<HomeTarget>(
-          groupValue: settings.homeTarget,
-          onChanged: (value) async {
-            if (value != null) {
-              await save((s) => s.copyWith.homeTarget(value));
-            }
-          },
-          child: Column(
-            children: [
-              for (final target in HomeTarget.values)
-                RadioListTile<HomeTarget>(
-                  value: target,
-                  title: Text(target.label),
-                  subtitle: Text(target.description),
-                ),
-            ],
-          ),
-        ),
-        if (settings.homeTarget == HomeTarget.customUrl)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Focus(
-              onFocusChange: (hasFocus) {
-                if (!hasFocus) unawaited(saveUrlIfChanged());
-              },
-              child: TextFormField(
-                controller: urlController,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                keyboardType: TextInputType.url,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  hintText: 'https://example.com',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  final text = value?.trim() ?? '';
-                  if (text.isEmpty) {
-                    return 'Enter an address, or the home page is shown instead';
-                  }
-                  if (uri_parser.tryParseUrl(text) == null) {
-                    return 'Not a valid address';
-                  }
-                  return null;
-                },
-                onFieldSubmitted: (_) => unawaited(saveUrlIfChanged()),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Where the home surface's search entry sits.
-///
-/// A placement, not a visibility toggle: the home surface has no address field
-/// of its own, so one of the two positions always holds it. There is no "off".
 class _HomeSearchBarPlacementTile extends ConsumerWidget {
   const _HomeSearchBarPlacementTile();
 

@@ -26,147 +26,59 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 part 'home_target_controller.g.dart';
-
-/// A custom-URL target reopened within this window of the last one is treated
-/// as a loop and suppressed.
-const _customUrlLoopWindow = Duration(seconds: 2);
 
 /// How long the startup check waits for the restored selection to arrive before
 /// concluding that there is none. Covers the native selected-tab debounce (50ms)
 /// plus the channel hop, with room to spare.
 const _restoredSelectionWindow = Duration(milliseconds: 300);
 
-/// What [HomeTargetController] should actually do, given the configuration and
-/// the current state.
+/// Resumes the last opened tab when the browser has nothing to show.
 ///
-/// Pure so the fallbacks and the loop guards can be tested without a browser.
-HomeTarget resolveHomeTarget({
-  required HomeTarget target,
-  required String? customUrl,
-  DateTime? lastCustomUrlOpenedAt,
-  DateTime? now,
-  Uri? closingTabUrl,
-}) {
-  switch (target) {
-    case HomeTarget.home:
-      return HomeTarget.home;
-
-    case HomeTarget.resumeLastTab:
-      // Whether there is anything to resume is only known once the repository
-      // has looked; the caller falls back to home when it reports none.
-      return HomeTarget.resumeLastTab;
-
-    case HomeTarget.customUrl:
-      final parsed = uri_parser.tryParseUrl(customUrl ?? '');
-      if (parsed == null) {
-        return HomeTarget.home;
-      }
-
-      // Closing the custom-URL tab must not immediately reopen it. Two guards,
-      // because either alone is escapable: the URL check misses redirects away
-      // from the configured address, and the time check misses a slow user.
-      if (closingTabUrl != null && _sameTarget(closingTabUrl, parsed)) {
-        return HomeTarget.home;
-      }
-
-      if (lastCustomUrlOpenedAt != null) {
-        final elapsed = (now ?? DateTime.now()).difference(
-          lastCustomUrlOpenedAt,
-        );
-        if (elapsed < _customUrlLoopWindow) {
-          return HomeTarget.home;
-        }
-      }
-
-      return HomeTarget.customUrl;
-  }
-}
-
-bool _sameTarget(Uri a, Uri b) =>
-    a.host.toLowerCase() == b.host.toLowerCase() && a.path == b.path;
-
-/// Applies the configured [HomeTarget] when the browser has nothing to show.
+/// There is deliberately no choice here. Zen's synced state is the source of
+/// truth for what tabs exist, so launching must never *conjure* one: the
+/// browser either picks up a tab that is already in that state, or it falls
+/// back to the home surface and waits. A configurable "open this address on
+/// startup" would add a tab nothing upstream knows about, and sync would then
+/// have to carry it back out.
 @Riverpod(keepAlive: true)
 class HomeTargetController extends _$HomeTargetController {
-  DateTime? _lastCustomUrlOpenedAt;
   var _startupHandled = false;
 
-  /// Runs the configured target.
+  /// Selects the most recently used tab, or shows the home surface if there is
+  /// none to resume.
   ///
-  /// With [scopeToContainer] the target is confined to [containerId], so
-  /// closing the last tab in a container keeps the user there. A null
-  /// [containerId] under that flag means the *unassigned* container, which is a
-  /// real scope — not the absence of one. Without the flag (cold start) the
-  /// target is unscoped and follows the selected container.
+  /// With [scopeToSpace] the resume is confined to [spaceUuid], so closing the
+  /// last tab in a space keeps the user there. A null [spaceUuid] under that
+  /// flag means the tabs *without* a space (private, essential), which is a
+  /// real scope — not the absence of one.
   ///
-  /// [closingTabUrl] is the tab that triggered this, used to break the
-  /// custom-URL reopen loop. [excludedTabIds] are tabs that are being closed
-  /// but not yet deleted, which a resume must not select.
+  /// [excludedTabIds] are tabs that are on their way out — closed but not yet
+  /// deleted, which a resume must not select.
   Future<void> applyTarget({
     bool scopeToSpace = false,
     String? spaceUuid,
-    Uri? closingTabUrl,
     Set<String> excludedTabIds = const {},
   }) async {
-    final settings = ref.read(generalSettingsWithDefaultsProvider);
     final tabs = ref.read(tabRepositoryProvider.notifier);
 
-    final resolved = resolveHomeTarget(
-      target: settings.homeTarget,
-      customUrl: settings.homeTargetUrl,
-      lastCustomUrlOpenedAt: _lastCustomUrlOpenedAt,
-      closingTabUrl: closingTabUrl,
-    );
+    final resumed = scopeToSpace
+        ? await tabs.resumeLatestSpaceTab(
+            spaceUuid,
+            excludedTabIds: excludedTabIds,
+          )
+        : await tabs.resumeLatestTab(excludedTabIds: excludedTabIds);
 
-    switch (resolved) {
-      case HomeTarget.home:
-        ref.read(forceBrowserHomeProvider.notifier).request();
-
-      case HomeTarget.resumeLastTab:
-        // Scoped resume goes through the space query even for a null space:
-        // that selects the newest tab *without* a space (private, essential),
-        // where the unscoped call would happily jump into some other space.
-        final resumed = scopeToSpace
-            ? await tabs.resumeLatestSpaceTab(
-                spaceUuid,
-                excludedTabIds: excludedTabIds,
-              )
-            : await tabs.resumeLatestTab(excludedTabIds: excludedTabIds);
-
-        // Nothing to resume: home beats leaving a blank viewport.
-        if (!resumed && ref.mounted) {
-          ref.read(forceBrowserHomeProvider.notifier).request();
-        }
-
-      case HomeTarget.customUrl:
-        final url = uri_parser.tryParseUrl(settings.homeTargetUrl ?? '');
-        if (url == null) {
-          ref.read(forceBrowserHomeProvider.notifier).request();
-          return;
-        }
-
-        _lastCustomUrlOpenedAt = DateTime.now();
-
-        await tabs.addTab(
-          url: url,
-          tabMode: TabMode.regular,
-          selectTab: true,
-          // A scoped target stays in the space the tab was closed in; the
-          // container follows from the space (or the selected container).
-          spaceUuid: scopeToSpace ? spaceUuid : null,
-        );
+    if (!resumed && ref.mounted) {
+      // Nothing to resume: home beats leaving a blank viewport.
+      ref.read(forceBrowserHomeProvider.notifier).request();
     }
   }
 
-  /// Runs the configured target at cold start, unless the engine restored a
-  /// selection of its own — the user is then already looking at a page.
+  /// Runs the resume at cold start, unless the engine restored a selection of
+  /// its own — the user is then already looking at a page.
   Future<void> _applyStartupTarget() async {
     if (await _hasRestoredSelection()) return;
     if (!ref.mounted) return;
@@ -210,8 +122,8 @@ class HomeTargetController extends _$HomeTargetController {
 
     // Bounds the wait for a session that genuinely restored nothing. Paid only
     // in that case, and against the home surface — which is already on screen
-    // while no tab is selected, so the delay costs a target that opens or
-    // resumes a tab slightly later, not a visible stall.
+    // while no tab is selected, so the delay costs a resume that happens
+    // slightly later, not a visible stall.
     final timeout = Timer(_restoredSelectionWindow, () {
       if (!completer.isCompleted) {
         completer.complete(false);
@@ -243,15 +155,15 @@ class HomeTargetController extends _$HomeTargetController {
   @override
   void build() {
     ref.listen(
-      // This controller is created lazily by the browser view. Restore can
-      // already be complete by then, and a plain listen would sit waiting for
-      // an edge that has been and gone, silently skipping the startup target.
       fireImmediately: true,
       browserRestoreCompleteProvider,
       (previous, next) {
         if (!next || _startupHandled) return;
         _startupHandled = true;
 
+        // This controller is created lazily by the browser view. Restore can
+        // already be complete by then, and a plain listen would sit waiting for
+        // an edge that has been and gone, silently skipping the startup resume.
         unawaited(_applyStartupTarget());
       },
     );

@@ -21,10 +21,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showContainerUi(bool showContainerUi);
 
-  GeneralSettings homeTarget(HomeTarget homeTarget);
-
-  GeneralSettings homeTargetUrl(String? homeTargetUrl);
-
   GeneralSettings homeSearchBarPlacement(
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
@@ -90,8 +86,6 @@ abstract class _$GeneralSettingsCWProxy {
     String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool showContainerUi,
-    HomeTarget homeTarget,
-    String? homeTargetUrl,
     HomeSearchBarPlacement homeSearchBarPlacement,
     bool autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
@@ -143,14 +137,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showContainerUi(bool showContainerUi) =>
       call(showContainerUi: showContainerUi);
-
-  @override
-  GeneralSettings homeTarget(HomeTarget homeTarget) =>
-      call(homeTarget: homeTarget);
-
-  @override
-  GeneralSettings homeTargetUrl(String? homeTargetUrl) =>
-      call(homeTargetUrl: homeTargetUrl);
 
   @override
   GeneralSettings homeSearchBarPlacement(
@@ -254,8 +240,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
-    Object? homeTarget = const $CopyWithPlaceholder(),
-    Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar swipe switches spaces')
@@ -306,15 +290,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showContainerUi
           // ignore: cast_nullable_to_non_nullable
           : showContainerUi as bool,
-      homeTarget:
-          homeTarget == const $CopyWithPlaceholder() || homeTarget == null
-          ? _value.homeTarget
-          // ignore: cast_nullable_to_non_nullable
-          : homeTarget as HomeTarget,
-      homeTargetUrl: homeTargetUrl == const $CopyWithPlaceholder()
-          ? _value.homeTargetUrl
-          // ignore: cast_nullable_to_non_nullable
-          : homeTargetUrl as String?,
       homeSearchBarPlacement:
           homeSearchBarPlacement == const $CopyWithPlaceholder() ||
               homeSearchBarPlacement == null
@@ -456,8 +431,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         json['defaultSearchSuggestionsProvider'],
       ),
       showContainerUi: json['showContainerUi'] as bool?,
-      homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
-      homeTargetUrl: json['homeTargetUrl'] as String?,
       homeSearchBarPlacement: $enumDecodeNullable(
         _$HomeSearchBarPlacementEnumMap,
         json['homeSearchBarPlacement'],
@@ -527,8 +500,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
   'showContainerUi': instance.showContainerUi,
-  'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
-  'homeTargetUrl': instance.homeTargetUrl,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
   'autoHideTabBar': instance.autoHideTabBar,
@@ -578,12 +549,6 @@ const _$SearchSuggestionProvidersEnumMap = {
   SearchSuggestionProviders.ddg: 'ddg',
   SearchSuggestionProviders.kagi: 'kagi',
   SearchSuggestionProviders.qwant: 'qwant',
-};
-
-const _$HomeTargetEnumMap = {
-  HomeTarget.home: 'home',
-  HomeTarget.resumeLastTab: 'resumeLastTab',
-  HomeTarget.customUrl: 'customUrl',
 };
 
 const _$HomeSearchBarPlacementEnumMap = {

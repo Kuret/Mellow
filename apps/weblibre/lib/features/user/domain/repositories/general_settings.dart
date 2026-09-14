@@ -67,8 +67,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'blockExternalAppsEnabled': DriftSqlType.bool,
   'appLinksMode': DriftSqlType.string,
   'pureBlack': DriftSqlType.bool,
-  'homeTarget': DriftSqlType.string,
-  'homeTargetUrl': DriftSqlType.string,
   'homeSearchBarPlacement': DriftSqlType.string,
   'globalDesktopMode': DriftSqlType.bool,
 };
