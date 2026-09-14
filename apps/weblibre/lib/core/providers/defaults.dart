@@ -23,11 +23,12 @@ import 'package:weblibre/core/design/app_colors.dart';
 
 part 'defaults.g.dart';
 
+/// The accent used when there is no explicit `ZenSettings.accentColor` and no
+/// platform dynamic color to fall back on (`AppColors.light.seedColor` and
+/// `AppColors.dark.seedColor` are the same value, so one provider covers both
+/// brightnesses).
 @Riverpod(keepAlive: true)
 Color lightSeedColorFallback(Ref ref) => AppColors.light.seedColor;
-
-@Riverpod(keepAlive: true)
-Color darkSeedColorFallback(Ref ref) => AppColors.dark.seedColor;
 
 @Riverpod(keepAlive: true)
 Uri docsUri(Ref ref) => Uri.parse('https://docs.weblibre.eu/');

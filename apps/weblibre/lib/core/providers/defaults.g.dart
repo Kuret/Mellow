@@ -8,13 +8,26 @@ part of 'defaults.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// The accent used when there is no explicit `ZenSettings.accentColor` and no
+/// platform dynamic color to fall back on (`AppColors.light.seedColor` and
+/// `AppColors.dark.seedColor` are the same value, so one provider covers both
+/// brightnesses).
 
 @ProviderFor(lightSeedColorFallback)
 final lightSeedColorFallbackProvider = LightSeedColorFallbackProvider._();
 
+/// The accent used when there is no explicit `ZenSettings.accentColor` and no
+/// platform dynamic color to fall back on (`AppColors.light.seedColor` and
+/// `AppColors.dark.seedColor` are the same value, so one provider covers both
+/// brightnesses).
+
 final class LightSeedColorFallbackProvider
     extends $FunctionalProvider<Color, Color, Color>
     with $Provider<Color> {
+  /// The accent used when there is no explicit `ZenSettings.accentColor` and no
+  /// platform dynamic color to fall back on (`AppColors.light.seedColor` and
+  /// `AppColors.dark.seedColor` are the same value, so one provider covers both
+  /// brightnesses).
   LightSeedColorFallbackProvider._()
     : super(
         from: null,
@@ -50,48 +63,6 @@ final class LightSeedColorFallbackProvider
 
 String _$lightSeedColorFallbackHash() =>
     r'851efdcb11e4367ea2e54f1884a73fd4cd841d4a';
-
-@ProviderFor(darkSeedColorFallback)
-final darkSeedColorFallbackProvider = DarkSeedColorFallbackProvider._();
-
-final class DarkSeedColorFallbackProvider
-    extends $FunctionalProvider<Color, Color, Color>
-    with $Provider<Color> {
-  DarkSeedColorFallbackProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'darkSeedColorFallbackProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$darkSeedColorFallbackHash();
-
-  @$internal
-  @override
-  $ProviderElement<Color> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Color create(Ref ref) {
-    return darkSeedColorFallback(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Color value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Color>(value),
-    );
-  }
-}
-
-String _$darkSeedColorFallbackHash() =>
-    r'161a8c4318108c31d5c300441bc3332d08c24496';
 
 @ProviderFor(docsUri)
 final docsUriProvider = DocsUriProvider._();

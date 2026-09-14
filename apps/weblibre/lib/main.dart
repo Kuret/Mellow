@@ -41,9 +41,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 // than in the main barrel; see [_activateService].
 import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:logger/logger.dart';
-import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/app_theme.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
@@ -70,65 +69,12 @@ import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_defaults.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 import 'package:weblibre/presentation/startup_phase_host.dart';
-
-ColorScheme _fixSurfaceContainerColors(
-  ColorScheme scheme,
-  TonalPalette neutralPalette,
-  Brightness brightness,
-) {
-  if (brightness == Brightness.light) {
-    return scheme.copyWith(
-      surfaceContainerLowest: Color(neutralPalette.get(100)),
-      surfaceContainerLow: Color(neutralPalette.get(96)),
-      surfaceContainer: Color(neutralPalette.get(94)),
-      surfaceContainerHigh: Color(neutralPalette.get(92)),
-      surfaceContainerHighest: Color(neutralPalette.get(90)),
-    );
-  } else {
-    return scheme.copyWith(
-      surfaceContainerLowest: Color(neutralPalette.get(4)),
-      surfaceContainerLow: Color(neutralPalette.get(10)),
-      surfaceContainer: Color(neutralPalette.get(12)),
-      surfaceContainerHigh: Color(neutralPalette.get(17)),
-      surfaceContainerHighest: Color(neutralPalette.get(22)),
-    );
-  }
-}
-
-/// Rewrites a dark [ColorScheme] to use pure-black ("OLED"/high-contrast)
-/// surfaces.
-///
-/// Only the *base* tones (the scaffold/page background and the lowest
-/// containers) become true black for the power saving. The elevated container
-/// tones keep meaningful grey steps so cards, sheets and menus stay visibly
-/// separated from the black background — Material elevation shadows are
-/// invisible on black, so the surface-tint step is the only separation cue and
-/// it must stay perceptible. Steps below ~`#12` are imperceptible near black, so
-/// the elevated tones climb in larger increments than the default dark scheme.
-ColorScheme _applyPureBlackSurfaces(ColorScheme scheme) {
-  return scheme.copyWith(
-    surface: const Color(0xFF000000),
-    surfaceDim: const Color(0xFF000000),
-    surfaceContainerLowest: const Color(0xFF000000),
-    surfaceContainerLow: const Color(0xFF121212),
-    surfaceContainer: const Color(0xFF1B1B1B),
-    surfaceContainerHigh: const Color(0xFF242424),
-    surfaceContainerHighest: const Color(0xFF2E2E2E),
-  );
-}
-
-bool _hasBrokenSurfaceContainerColors(ColorScheme scheme) {
-  return scheme.surfaceContainerLowest == scheme.surface &&
-      scheme.surfaceContainerLow == scheme.surface &&
-      scheme.surfaceContainer == scheme.surface &&
-      scheme.surfaceContainerHigh == scheme.surface &&
-      scheme.surfaceContainerHighest == scheme.surface;
-}
 
 /// Starts a long-lived service provider **and keeps it reacting**.
 ///
@@ -206,6 +152,9 @@ class _MainWidget extends HookConsumerWidget {
     );
     final pureBlack = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.pureBlack),
+    );
+    final accentColorSetting = ref.watch(
+      zenSettingsWithDefaultsProvider.select((value) => value.accentColor),
     );
 
     useOnInitialization(() async {
@@ -460,73 +409,39 @@ class _MainWidget extends HookConsumerWidget {
       }
     });
 
-    final corePaletteSnapshot = useFuture(
-      useMemoized(() => DynamicColorPlugin.getCorePalette()),
-    );
-
+    // Surfaces always come from `buildAppColorScheme`: neutral greys built
+    // explicitly, never `ColorScheme.fromSeed` or a device's raw dynamic
+    // scheme (both of which tint every surface toward the accent's hue).
+    // `DynamicColorBuilder` survives only as the *source of the accent* when
+    // the user has not chosen one — `lightDynamic`/`darkDynamic`'s `primary`
+    // is Android's wallpaper color, harmonized as before so it lands on a
+    // color Material's harmonization already considers legible.
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
-        ColorScheme lightColorScheme;
-        ColorScheme darkColorScheme;
+        final fallbackAccent = ref.read(lightSeedColorFallbackProvider);
 
-        if (lightDynamic != null && darkDynamic != null) {
-          final corePalette = corePaletteSnapshot.data;
-
-          // On Android S+ devices, use the provided dynamic color scheme.
-          // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
-          final harmonizedLight = lightDynamic.harmonized();
-          final harmonizedDark = darkDynamic.harmonized();
-
-          // Workaround for https://github.com/material-foundation/flutter-packages/issues/649
-          // dynamic_color package returns broken surfaceContainer* colors.
-          // Fix them using the neutral tonal palette from CorePalette.
-          if (corePalette != null) {
-            lightColorScheme = _hasBrokenSurfaceContainerColors(harmonizedLight)
-                ? _fixSurfaceContainerColors(
-                    harmonizedLight,
-                    corePalette.neutral,
-                    Brightness.light,
-                  )
-                : harmonizedLight;
-            darkColorScheme = _hasBrokenSurfaceContainerColors(harmonizedDark)
-                ? _fixSurfaceContainerColors(
-                    harmonizedDark,
-                    corePalette.neutral,
-                    Brightness.dark,
-                  )
-                : harmonizedDark;
-          } else {
-            lightColorScheme = harmonizedLight;
-            darkColorScheme = harmonizedDark;
+        Color accentFor(ColorScheme? dynamicScheme) {
+          if (accentColorSetting != null) {
+            return Color(accentColorSetting);
           }
-        } else {
-          // Otherwise, use fallback schemes.
-          lightColorScheme = ColorScheme.fromSeed(
-            seedColor: ref.read(lightSeedColorFallbackProvider),
-          );
-          darkColorScheme = ColorScheme.fromSeed(
-            seedColor: ref.read(darkSeedColorFallbackProvider),
-            brightness: Brightness.dark,
-          );
+          return dynamicScheme?.harmonized().primary ?? fallbackAccent;
         }
 
-        if (pureBlack) {
-          darkColorScheme = _applyPureBlackSurfaces(darkColorScheme);
-        }
+        final lightAccent = accentFor(lightDynamic);
+        final darkAccent = accentColorSetting != null
+            ? lightAccent
+            : accentFor(darkDynamic);
 
         return MainApp(
           key: rootKey,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: lightColorScheme,
-            extensions: const <ThemeExtension<dynamic>>[AppColors.light],
+          theme: buildAppTheme(
+            brightness: Brightness.light,
+            accent: lightAccent,
           ),
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            colorScheme: darkColorScheme,
-            extensions: <ThemeExtension<dynamic>>[
-              if (pureBlack) AppColors.darkOled else AppColors.dark,
-            ],
+          darkTheme: buildAppTheme(
+            brightness: Brightness.dark,
+            accent: darkAccent,
+            pureBlack: pureBlack,
           ),
           themeMode: themeMode,
         );
