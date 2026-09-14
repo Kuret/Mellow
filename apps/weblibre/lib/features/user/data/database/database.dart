@@ -22,7 +22,6 @@ import 'package:drift/internal/versioned_schema.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
-import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
 import 'package:weblibre/features/user/data/database/daos/search_history.dart';
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
@@ -36,7 +35,6 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
   daos: [
     SettingDao,
     CacheDao,
-    OnboardingDao,
     ToolbarButtonConfigDao,
     QuickSwitcherButtonConfigDao,
     SearchTokensDao,
