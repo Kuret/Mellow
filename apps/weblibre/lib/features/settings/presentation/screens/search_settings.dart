@@ -25,6 +25,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/custom_search_engines_editor.dart';
 import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -41,6 +42,12 @@ const List<SettingsSectionDefinition> searchSettingsSections = [
         subtitle: 'Choose the default engine for searches',
         keywords: ['search engine'],
         child: _DefaultSearchProviderSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Search engines',
+        subtitle: 'Add and manage your own search engines',
+        keywords: ['custom search engine', 'add engine'],
+        child: _SearchEnginesSection(),
       ),
       SettingsEntryDefinition(
         title: 'Default Autocomplete Provider',
@@ -133,6 +140,36 @@ class _DefaultSearchProviderSection extends StatelessWidget {
             padding: EdgeInsets.only(left: 40),
             child: DefaultSearchSelector(),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchEnginesSection extends StatelessWidget {
+  const _SearchEnginesSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: ListTile(
+              title: Text('Search engines'),
+              subtitle: Text(
+                'The engines every picker offers. Add your own with a URL '
+                'that has {searchTerms} where the query goes.',
+              ),
+              leading: Icon(MdiIcons.magnify),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+          CustomSearchEnginesEditor(),
         ],
       ),
     );

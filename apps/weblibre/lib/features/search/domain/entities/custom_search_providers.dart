@@ -53,20 +53,18 @@ Uri? _parseTemplate(String urlTemplate) => Uri.tryParse(
   ),
 );
 
-/// Why [name] and [urlTemplate] cannot be saved as an engine, phrased for the
-/// user, or null when they can.
-///
-/// Saving a template with no placeholder, or one that is not a web address,
-/// would produce an engine that silently fails to search — the user would only
-/// find out the next time they typed a query.
-String? customSearchEngineError({
-  required String name,
-  required String urlTemplate,
-}) {
-  if (name.trim().isEmpty) {
-    return 'Give the engine a name.';
-  }
+/// Why [name] is not a usable engine name, phrased for the user, or null when
+/// it is one.
+String? customSearchEngineNameError(String name) =>
+    name.trim().isEmpty ? 'Give the engine a name.' : null;
 
+/// Why [urlTemplate] is not a usable search URL, phrased for the user, or null
+/// when it is one.
+///
+/// A template with no placeholder, or one that is not a web address, would
+/// produce an engine that silently fails to search — the user would only find
+/// out the next time they typed a query.
+String? customSearchEngineUrlError(String urlTemplate) {
   final template = urlTemplate.trim();
   if (template.isEmpty) {
     return "Enter the engine's search URL.";
@@ -86,6 +84,16 @@ String? customSearchEngineError({
 
   return null;
 }
+
+/// Why [name] and [urlTemplate] cannot be saved as an engine, or null when they
+/// can. The form judges each field on its own; this is the same judgement for
+/// everything that has the pair in hand.
+String? customSearchEngineError({
+  required String name,
+  required String urlTemplate,
+}) =>
+    customSearchEngineNameError(name) ??
+    customSearchEngineUrlError(urlTemplate);
 
 /// The host [urlTemplate] searches, which is what represents the engine in
 /// pickers and where an empty query lands.
