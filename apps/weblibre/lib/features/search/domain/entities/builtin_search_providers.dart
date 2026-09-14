@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 
 /// Every engine the browser can search with, in the order pickers show them.
@@ -86,8 +87,12 @@ const fallbackSearchProvider = SearchProvider(
 );
 
 /// The built-in provider with [id], or null if there is none.
+///
+/// A user-defined id is rejected outright rather than scanned for: the two id
+/// spaces are namespaced apart ([customSearchProviderIdPrefix]), so a custom id
+/// reaching here is a caller that should have asked `searchProviderById`.
 SearchProvider? builtinSearchProviderById(String? id) {
-  if (id == null) {
+  if (id == null || isCustomSearchProviderId(id)) {
     return null;
   }
 
