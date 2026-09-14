@@ -20,22 +20,24 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/home/home_search_pill.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_section_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/widgets/active_profile_chip.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -44,122 +46,56 @@ import 'package:weblibre/presentation/widgets/sliver_center_on_underflow.dart';
 
 /// The home surface creates tabs of the user's configured default type; the
 /// child type is meaningless here because there is no tab to be a child of.
-TabMode _tabModeFor(TabType tabType) => switch (tabType) {
-  TabType.regular => TabMode.regular,
-  TabType.private => TabMode.private,
-};
-
-/// The browser home: what fills the viewport when no tab is selected, or when
-/// the selected tab belongs to a different container than the selected one.
-///
-/// Renders the same configurable module list as the new-tab page, under
-/// [ModuleSurface.home] so the two keep separate layouts. Everything below the
-/// header is user-arrangeable; only the brand/container header, the search pill
-/// and the supporter banner are fixed chrome.
-///
-/// Each piece owns its own provider subscriptions rather than watching
-/// everything at the root, so a settings write or a toolbar-inset animation
-/// does not rebuild the module list underneath.
-class BrowserHome extends ConsumerWidget {
+class BrowserHome extends HookConsumerWidget {
   const BrowserHome({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<void> openNewTab() =>
-        const SearchRoute(tabType: TabType.regular).push(context);
+    // Recent searches fill a text field, and this surface owns none — its
+    // search entry is a pill that pushes the search screen. The chips get a
+    // controller of their own so the long-press-to-fill affordance still has
+    // somewhere to write, and a tap goes straight to a new tab.
+    final searchTextController = useTextEditingController();
 
-    Future<void> viewTabs() => const TabViewRoute().push(context);
+    Future<void> submitSearch(String query) async {
+      final SearchProvider provider =
+          ref.read(selectedSearchProviderProvider()) ??
+          ref.read(defaultSearchProviderProvider);
+      final container = ref.read(selectedContainerDataProvider).value;
 
-    Future<void> resumeLastTab() async {
-      final spaceUuid = ref.read(selectedSpaceProvider);
-      final repository = ref.read(tabRepositoryProvider.notifier);
-
-      // Resume within the space in scope; falling back to the global
-      // "latest tab" would silently jump the user into another space.
-      if (spaceUuid != null) {
-        await repository.resumeLatestSpaceTab(spaceUuid);
-      } else {
-        await repository.resumeLatestTab();
-      }
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: provider.searchUrl(query),
+            tabMode: TabMode.regular,
+            selectTab: true,
+            containerSelection: container == null
+                ? const TabContainerSelection.unassigned()
+                : TabContainerSelection.specific(container),
+          );
     }
 
-    final callbacks = ModuleSurfaceCallbacks(
-      onUriSelected: (uri) async {
-        final container = ref.read(selectedContainerDataProvider).value;
-
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: uri,
-              tabMode: _tabModeFor(
-                TabType.regular,
-              ),
-              selectTab: true,
-              containerSelection: container == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(container),
-            );
-      },
-      onTabSelected: (tabId) async {
-        await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-      },
-      onContainerSelected: (container) async {
-        await ref
-            .read(selectedContainerProvider.notifier)
-            .setContainerId(container.id);
-      },
-      onNewTab: openNewTab,
-      onViewTabs: viewTabs,
-      onResumeLastTab: resumeLastTab,
-    );
-
     return BrowserPage(
-      // The viewport, not just its first sliver, has to clear the status bar:
-      // BrowserSystemBars fills that inset with an opaque strip painted over
-      // this surface, and the pinned pill below would scroll underneath it
-      // and disappear. Bottom stays excluded — [_HomeBottomInsetSpacer] owns
-      // it, because that inset animates with the toolbar.
       child: SafeArea(
         bottom: false,
         child: RepaintBoundary(
-          child: ModuleSurfaceScope(
-            surface: ModuleSurface.home,
-            // Unpinned: the sections here are short, and the pinned search pill
-            // above already holds the top of the viewport. Backing each header
-            // so it could pin would lay opaque bands across the aura gradient.
+          child: SearchSectionScope(
+            host: SearchSectionHost.home,
+            // Unpinned: on the BrowserPage aura gradient an opaque band per
+            // header would cut a slab across the backdrop.
             pinnedHeaderBackgroundColor: null,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                // Centred as one block while it all fits, so a home page cut
-                // back to a couple of sections reads as a page rather than as
-                // content stranded against the top edge. The pill travels
-                // with it: under [HomeSearchBarPlacement.top] the brand mark,
-                // the search entry and the sections are one composition, and
-                // leaving the pill pinned at the top while the rest sank to
-                // the middle would split it in two.
-                //
-                // The trailing spacer is inside the block, which is what
-                // makes the result land in the middle of what the user can
-                // *see*: it carries the toolbar inset, so the content ends up
-                // centred in the viewport minus the toolbar rather than
-                // centred behind it.
                 SliverCenterOnUnderflow(
                   sliver: SliverMainAxisGroup(
                     slivers: [
                       const SliverToBoxAdapter(child: SizedBox(height: 20)),
                       const SliverToBoxAdapter(child: _HomeHeader()),
-                      // Pinned, because under [HomeSearchBarPlacement.top]
-                      // the browser toolbar's address field is suppressed
-                      // while home is showing: this is then the only way into
-                      // search, so it has to survive scrolling. Pinning it
-                      // above the section headers also gives them something
-                      // to slide under. Nothing scrolls while the block is
-                      // centred, so the two never fight.
                       const _HomeSearchPillSliver(),
-                      ModuleSurfaceSliverList(
-                        surface: ModuleSurface.home,
-                        callbacks: callbacks,
+                      RecentSearchesSection(
+                        searchTextController: searchTextController,
+                        submitSearch: submitSearch,
                       ),
                       const _HomeBottomInsetSpacer(),
                     ],
@@ -174,13 +110,6 @@ class BrowserHome extends ConsumerWidget {
   }
 }
 
-/// The pinned search pill, present only when the search entry is placed here
-/// rather than in the tab bar.
-///
-/// Its own widget so the placement watch does not rebuild [BrowserHome] — and
-/// so the sliver disappears entirely rather than collapsing to a zero-height
-/// pinned header, which would still hold a scroll offset the section headers
-/// slide under.
 class _HomeSearchPillSliver extends ConsumerWidget {
   const _HomeSearchPillSliver();
 

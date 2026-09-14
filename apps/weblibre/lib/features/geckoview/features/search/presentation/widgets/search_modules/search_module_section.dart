@@ -22,10 +22,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/design/aura_surface.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_header.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_section_scope.dart';
 
 const previewItemsPerModule = 3;
 
@@ -34,15 +33,14 @@ const previewItemsPerModule = 3;
 /// - Pinned header with collapse/expand and show-all/show-less controls
 /// - Visible item count calculation
 ///
-/// **Always render this widget, even when [totalCount] is 0.** The header
-/// carries the long-press affordance that activates reorder mode and the
-/// visibility toggle — short-circuiting to `SizedBox.shrink()` at the call
-/// site means the user can lose their only entry-point to module
-/// configuration. Set [hideWhenEmpty] explicitly if the section should
+/// **Always render this widget, even when [totalCount] is 0.** The header is
+/// the only thing that says which section is empty, and a section that
+/// vanishes and returns as results arrive makes the panel jump under the
+/// user's thumb. Set [hideWhenEmpty] explicitly if the section should
 /// collapse silently.
 class SearchModuleSection extends ConsumerWidget {
   final String title;
-  final SearchModuleType moduleType;
+  final SearchSection section;
   final int totalCount;
 
   /// Builds the content slivers for this module.
@@ -78,10 +76,10 @@ class SearchModuleSection extends ConsumerWidget {
   })
   contentSliverBuilder;
 
-  /// Overrides the surface this section configures itself from. Normally left
-  /// null so it is inherited from the enclosing [ModuleSurfaceScope]; set it in
+  /// Overrides the host this section keys its view state to. Normally left
+  /// null so it is inherited from the enclosing [SearchSectionScope]; set it in
   /// tests that render a section without a host.
-  final ModuleSurface? surface;
+  final SearchSectionHost? host;
 
   /// Draws the section as a single self-contained card — header included —
   /// instead of a bare heading over content on the page background.
@@ -102,41 +100,35 @@ class SearchModuleSection extends ConsumerWidget {
   const SearchModuleSection({
     super.key,
     required this.title,
-    required this.moduleType,
+    required this.section,
     required this.totalCount,
     required this.contentSliverBuilder,
     this.headerTrailing,
     this.previewLimit = previewItemsPerModule,
     this.hideWhenEmpty = false,
     this.showPagination = true,
-    this.surface,
+    this.host,
     this.card = false,
     this.headerLeading,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scope = this.surface == null ? ModuleSurfaceScope.of(context) : null;
-    final surface = this.surface ?? scope!.surface;
-
-    final moduleOrder = ref.watch(searchModuleOrderProvider(surface));
-    final isVisible = moduleOrder.any((e) => e.type == moduleType && e.visible);
-    if (!isVisible) {
-      return MultiSliver(children: const []);
-    }
+    final scope = this.host == null ? SearchSectionScope.of(context) : null;
+    final host = this.host ?? scope!.host;
 
     if (hideWhenEmpty && totalCount == 0) {
       return MultiSliver(children: const []);
     }
 
     final displayState = ref.watch(
-      searchModuleDisplayStateControllerProvider(surface, moduleType),
+      searchSectionDisplayStateControllerProvider(host, section),
     );
 
-    final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
+    final isCollapsed = displayState == SearchSectionDisplayState.collapsed;
     final showAllItems =
         !showPagination ||
-        displayState == SearchModuleDisplayState.expanded ||
+        displayState == SearchSectionDisplayState.expanded ||
         totalCount <= previewLimit;
     final visibleCount = isCollapsed
         ? 0
@@ -163,22 +155,14 @@ class SearchModuleSection extends ConsumerWidget {
       showPagination: showPagination,
       onToggleCollapse: () => ref
           .read(
-            searchModuleDisplayStateControllerProvider(
-              surface,
-              moduleType,
-            ).notifier,
+            searchSectionDisplayStateControllerProvider(host, section).notifier,
           )
           .toggleCollapse(),
       onToggleExpansion: () => ref
           .read(
-            searchModuleDisplayStateControllerProvider(
-              surface,
-              moduleType,
-            ).notifier,
+            searchSectionDisplayStateControllerProvider(host, section).notifier,
           )
           .toggleExpansion(),
-      onLongPress: () =>
-          ref.read(searchReorderModeProvider(surface).notifier).activate(),
       leading: headerLeading,
       emphasized: card,
     );

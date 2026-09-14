@@ -33,22 +33,15 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_presentation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/combined_history_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/local_history_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_term_suggestions_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_panel.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_section_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
@@ -438,81 +431,6 @@ class SearchScreen extends HookConsumerWidget {
 
     final scrollController = useScrollController();
 
-    // The screen is two surfaces in one: before anything is typed it is the
-    // new-tab page, afterwards it is the search results page. They are mutually
-    // exclusive, so a single scope covers both.
-    final activeSurface = showNoInputSections
-        ? ModuleSurface.newTab
-        : ModuleSurface.search;
-
-    final reorderActive = ref.watch(searchReorderModeProvider(activeSurface));
-
-    final moduleCallbacks = ModuleSurfaceCallbacks(
-      onUriSelected: openUriInTab,
-      searchTextController: searchTextController,
-      submitSearch: submitSearch,
-      onTabSelected: (tabId) async {
-        await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-
-        if (context.mounted) {
-          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-          const BrowserRoute().go(context);
-        }
-      },
-      onContainerSelected: (container) async {
-        final result = await ref
-            .read(selectedContainerProvider.notifier)
-            .setContainerId(container.id);
-
-        if (context.mounted && result == SetContainerResult.success) {
-          const TabViewRoute().go(context);
-        }
-      },
-    );
-
-    final searchWidgets = <SearchModuleType, Widget>{
-      SearchModuleType.searchProviders: SearchProvidersSection(
-        domain: isEditMode ? existingTabState.url.host : null,
-      ),
-      SearchModuleType.searchSuggestions: SearchTermSuggestionsSection(
-        searchTextController: searchTextController,
-        submitSearch: submitSearch,
-      ),
-      SearchModuleType.tabs: TabSearch(searchTextListenable: sampledQueryText),
-      SearchModuleType.bookmarks: BookmarkSearch(
-        searchTextListenable: sampledQueryText,
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.history: HistorySuggestions(
-        searchTextListenable: sampledQueryText,
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.localHistory: LocalHistorySuggestions(
-        searchTextListenable: sampledQueryText,
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.combinedHistory: CombinedHistorySuggestions(
-        searchTextListenable: sampledQueryText,
-        onUriSelected: openUriInTab,
-      ),
-    };
-
-    final searchOrder = ref.watch(
-      searchModuleOrderProvider(ModuleSurface.search),
-    );
-
-    bool canShowSearchModule(SearchModuleType type) {
-      if (!isUrlInput.value) {
-        return true;
-      }
-
-      return switch (type) {
-        SearchModuleType.searchProviders ||
-        SearchModuleType.searchSuggestions ||
-        _ => true,
-      };
-    }
-
     final isPanel = presentation == SearchPresentation.panel;
 
     // The card shrink-wraps its content, so it needs an upper bound to stop it
@@ -673,20 +591,24 @@ class SearchScreen extends HookConsumerWidget {
       SliverToBoxAdapter(
         child: ClipboardFillLink(controller: searchTextController),
       ),
-      if (reorderActive)
-        SearchModuleReorderView(surface: activeSurface)
-      else if (showNoInputSections)
-        ModuleSurfaceSliverList(
-          surface: ModuleSurface.newTab,
-          callbacks: moduleCallbacks,
+      // A fixed pair, in this order: what the autocomplete provider thinks you
+      // are typing, then where you have already been. Before anything is typed
+      // neither has a query to work from, so the panel offers the searches you
+      // ran last instead.
+      if (showNoInputSections)
+        RecentSearchesSection(
+          searchTextController: searchTextController,
+          submitSearch: submitSearch,
         )
       else ...[
-        for (final entry in searchOrder)
-          if (searchWidgets.containsKey(entry.type) &&
-              entry.visible &&
-              canShowSearchModule(entry.type))
-            searchWidgets[entry.type]!,
-        const CustomizeSectionsButton(surface: ModuleSurface.search),
+        SearchTermSuggestionsSection(
+          searchTextController: searchTextController,
+          submitSearch: submitSearch,
+        ),
+        CombinedHistorySuggestions(
+          searchTextListenable: sampledQueryText,
+          onUriSelected: openUriInTab,
+        ),
       ],
       // Keeps the last row clear of the card's rounded bottom edge.
       if (isPanel) const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -694,8 +616,8 @@ class SearchScreen extends HookConsumerWidget {
 
     final content = Form(
       key: formKey,
-      child: ModuleSurfaceScope(
-        surface: activeSurface,
+      child: SearchSectionScope(
+        host: SearchSectionHost.panel,
         pinnedHeaderBackgroundColor: isPanel
             ? colorScheme.surfaceContainerHigh
             : Theme.of(context).canvasColor,
@@ -709,18 +631,6 @@ class SearchScreen extends HookConsumerWidget {
       ),
     );
 
-    // Arranging this surface's sections is a mode on top of the screen, not a
-    // route, so back leaves the arrangement before it leaves the screen — the
-    // same ladder the "Done" button offers.
-    return PopScope(
-      canPop: !reorderActive,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        ref
-            .read(searchReorderModeProvider(activeSurface).notifier)
-            .deactivate();
-      },
-      child: isPanel ? content : Scaffold(body: SafeArea(child: content)),
-    );
+    return isPanel ? content : Scaffold(body: SafeArea(child: content));
   }
 }

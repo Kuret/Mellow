@@ -540,58 +540,6 @@ final class PendingRestoreTabIdsProvider
 String _$pendingRestoreTabIdsHash() =>
     r'94ae740b08dbdf592df4f8502f8988a4e2888c56';
 
-@ProviderFor(fifoTabStates)
-final fifoTabStatesProvider = FifoTabStatesProvider._();
-
-final class FifoTabStatesProvider
-    extends
-        $FunctionalProvider<
-          EquatableValue<List<TabStateWithContainer>>,
-          EquatableValue<List<TabStateWithContainer>>,
-          EquatableValue<List<TabStateWithContainer>>
-        >
-    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
-  FifoTabStatesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'fifoTabStatesProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$fifoTabStatesHash();
-
-  @$internal
-  @override
-  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
-    return fifoTabStates(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(
-    EquatableValue<List<TabStateWithContainer>> value,
-  ) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride:
-          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
-            value,
-          ),
-    );
-  }
-}
-
-String _$fifoTabStatesHash() => r'8d5f507f144ba9672e33f951d56969bc8db11bcf';
-
 /// The selected space's tabs (pinned and normal shelves) with their
 /// containers, in the order the quick tab switcher and the tab bar draw them.
 /// Cold and restoring rows render as placeholders.

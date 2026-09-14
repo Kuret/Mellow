@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 
 /// A reusable header widget for search modules that displays a collapse/expand
 /// chevron on the left, the section title, and a "Show all N" / "Show less"
@@ -26,7 +26,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 class SearchModuleHeader extends StatelessWidget {
   final String title;
   final int totalCount;
-  final SearchModuleDisplayState displayState;
+  final SearchSectionDisplayState displayState;
   final VoidCallback onToggleCollapse;
   final VoidCallback onToggleExpansion;
 
@@ -44,7 +44,6 @@ class SearchModuleHeader extends StatelessWidget {
   final bool showPagination;
 
   /// Called when the header is long-pressed (e.g. to enter reorder mode).
-  final VoidCallback? onLongPress;
 
   /// Optional widget between the collapse chevron and the title.
   final Widget? leading;
@@ -68,7 +67,6 @@ class SearchModuleHeader extends StatelessWidget {
     this.headerTrailing,
     this.previewLimit = 3,
     this.showPagination = true,
-    this.onLongPress,
     this.leading,
     this.emphasized = false,
   });
@@ -76,8 +74,8 @@ class SearchModuleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
-    final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
-    final isExpanded = displayState == SearchModuleDisplayState.expanded;
+    final isCollapsed = displayState == SearchSectionDisplayState.collapsed;
+    final isExpanded = displayState == SearchSectionDisplayState.expanded;
     final showTrailing =
         showPagination && !isCollapsed && totalCount > previewLimit;
 
@@ -90,7 +88,6 @@ class SearchModuleHeader extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: onToggleCollapse,
-              onLongPress: onLongPress,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
                 // Tighter when collapsed: a run of collapsed sections is

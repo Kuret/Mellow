@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
@@ -66,7 +66,7 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
 
     return SearchModuleSection(
       title: 'Suggestions',
-      moduleType: SearchModuleType.searchSuggestions,
+      section: SearchSection.suggestions,
       totalCount: queries.length,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [

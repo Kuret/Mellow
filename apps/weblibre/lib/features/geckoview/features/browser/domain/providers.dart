@@ -239,39 +239,6 @@ EquatableValue<Set<String>> pendingRestoreTabIds(Ref ref) {
   });
 }
 
-@Riverpod(keepAlive: true)
-EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
-  final containerData = ref
-      .watch(watchContainersWithCountProvider.select((value) => value.value))
-      .mapNotNull(
-        (value) => Map.fromEntries(value.map((c) => MapEntry(c.id, c))),
-      );
-
-  final sortedTabs = ref.watch(
-    watchTabsFifoProvider.select((value) => value.value),
-  );
-  final tabStates = ref.watch(tabStatesProvider);
-  final restoreComplete = ref.watch(browserRestoreCompleteProvider);
-
-  TabState? stateFor(TabSummary tab) =>
-      tabStates[tab.id] ??
-      (_showsAsPlaceholder(tab, restoreComplete: restoreComplete)
-          ? _placeholderTabState(tab)
-          : null);
-
-  return EquatableValue([
-    if (sortedTabs != null)
-      for (final tab in sortedTabs)
-        if (stateFor(tab) case final state?)
-          (
-            state,
-            tab.containerId.mapNotNull(
-              (containerId) => containerData?[containerId],
-            ),
-          ),
-  ]);
-}
-
 /// The selected space's tabs (pinned and normal shelves) with their
 /// containers, in the order the quick tab switcher and the tab bar draw them.
 /// Cold and restoring rows render as placeholders.

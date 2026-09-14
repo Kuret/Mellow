@@ -24,7 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/combined_history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
@@ -98,7 +98,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
 
     return SearchModuleSection(
       title: 'History',
-      moduleType: SearchModuleType.combinedHistory,
+      section: SearchSection.history,
       totalCount: items.length,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [

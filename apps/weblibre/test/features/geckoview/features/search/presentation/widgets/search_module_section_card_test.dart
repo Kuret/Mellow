@@ -21,44 +21,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 
-/// The persisted order without its storage: [SearchModuleOrder.build] normally
-/// goes through `persist()` and a database this test has no use for.
-class _FixedOrder extends SearchModuleOrder {
-  @override
-  List<ModuleOrderEntry> build(ModuleSurface surface) => [
-    ModuleOrderEntry(type: SearchModuleType.recentTabs, visible: true),
-  ];
-}
-
 void main() {
-  // The scope is built inside `pumpWidget` rather than returned from here: a
-  // `ProviderScope` handed to it directly is the root one, and only a *scoped*
-  // scope has to declare `dependencies` for the providers it overrides.
   Future<void> pumpHarness(WidgetTester tester, {required bool card}) {
     return tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          searchModuleOrderProvider(
-            ModuleSurface.search,
-          ).overrideWith(_FixedOrder.new),
-        ],
         child: MaterialApp(
           home: Scaffold(
             body: CustomScrollView(
               slivers: [
                 SearchModuleSection(
-                  title: 'Recent Tabs',
-                  moduleType: SearchModuleType.recentTabs,
+                  title: 'History',
+                  section: SearchSection.history,
                   totalCount: 0,
                   showPagination: false,
                   card: card,
-                  // Without a ModuleSurfaceScope the section behaves like the
-                  // search screen, which is the surface that pins its headers.
-                  surface: ModuleSurface.search,
+                  // Without a SearchSectionScope the section behaves like the
+                  // search panel, which is the host that pins its headers.
+                  host: SearchSectionHost.panel,
                   headerLeading: const Icon(Icons.history),
                   contentSliverBuilder:
                       ({required isCollapsed, required visibleCount}) => [
@@ -96,7 +78,7 @@ void main() {
     await pumpHarness(tester, card: true);
 
     // Sentence case, not the list surfaces' uppercase micro-label.
-    expect(find.text('Recent Tabs'), findsOneWidget);
+    expect(find.text('History'), findsOneWidget);
     expect(find.byIcon(Icons.history), findsOneWidget);
     expect(find.text('body'), findsOneWidget);
   });
@@ -106,7 +88,7 @@ void main() {
 
     expect(find.text('body'), findsOneWidget);
 
-    await tester.tap(find.text('Recent Tabs'));
+    await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
 
     expect(find.text('body'), findsNothing);

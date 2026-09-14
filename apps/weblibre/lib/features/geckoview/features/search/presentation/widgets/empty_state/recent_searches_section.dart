@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
 import 'package:weblibre/features/search/domain/repositories/search_history.dart';
@@ -43,7 +43,7 @@ class RecentSearchesSection extends ConsumerWidget {
 
     return SearchModuleSection(
       title: 'Recent Searches',
-      moduleType: SearchModuleType.recentSearches,
+      section: SearchSection.recentSearches,
       totalCount: queries.length,
       contentSliverBuilder:
           ({required bool isCollapsed, required int visibleCount}) => [

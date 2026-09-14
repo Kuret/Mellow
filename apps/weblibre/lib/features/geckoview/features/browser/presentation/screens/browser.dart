@@ -58,7 +58,6 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -1687,21 +1686,6 @@ class _Browser extends HookConsumerWidget {
 
                 if (overlayBuilder != null) {
                   ref.read(overlayControllerProvider.notifier).dismiss();
-                  return true;
-                }
-
-                // Arranging the home page's sections is a mode on top of the
-                // home page, not a route, so back has to leave it here — the
-                // browser's own back would otherwise navigate the tab (or
-                // close it) out from under a user who was only reordering.
-                // The search screen's surfaces answer back themselves; this
-                // listener never runs while that screen is on top.
-                if (ref.read(searchReorderModeProvider(ModuleSurface.home))) {
-                  ref
-                      .read(
-                        searchReorderModeProvider(ModuleSurface.home).notifier,
-                      )
-                      .deactivate();
                   return true;
                 }
 
