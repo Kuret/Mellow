@@ -36,9 +36,12 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_space_selector.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:weblibre/features/share_intent/domain/services/share_intent_space.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
@@ -74,6 +77,37 @@ class OpenSharedContent extends HookConsumerWidget {
           : null,
     );
     final containerSelectionTouched = useRef(false);
+
+    final globalSelectedSpaceUuid = ref.watch(selectedSpaceProvider);
+    final selectedSpaceUuid = useState<String?>(globalSelectedSpaceUuid);
+    final spaceSelectionTouched = useRef(false);
+
+    useEffect(() {
+      if (spaceSelectionTouched.value) {
+        return null;
+      }
+
+      var cancelled = false;
+
+      unawaited(
+        Future(() async {
+          final resolved =
+              await ref.read(resolveShareIntentSpaceUuidProvider.future) ??
+              globalSelectedSpaceUuid;
+
+          if (cancelled || spaceSelectionTouched.value) {
+            return;
+          }
+
+          selectedSpaceUuid.value = resolved;
+        }),
+      );
+
+      return () {
+        cancelled = true;
+      };
+    }, [globalSelectedSpaceUuid]);
+
     final defaultTabType = ref.read(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.effectiveDefaultCreateTabType,
@@ -184,6 +218,7 @@ class OpenSharedContent extends HookConsumerWidget {
               containerSelection: selectedContainer.value == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(selectedContainer.value!),
+              spaceUuid: selectedSpaceUuid.value,
               launchedFromIntent: true,
               selectTab: true,
             );
@@ -281,45 +316,70 @@ class OpenSharedContent extends HookConsumerWidget {
                       },
                     );
 
-                    if (!settings.showContainerUi) {
+                    // Private tabs never belong to a space (invariant I3 in
+                    // TabRepository), so offering the choice would be a lie.
+                    final showSpaceSelector =
+                        selectedTabType.value != TabType.private;
+
+                    if (!settings.showContainerUi && !showSpaceSelector) {
                       return Center(child: tabTypeSwitcher);
                     }
 
                     return Row(
                       children: [
                         Expanded(
-                          flex: 4,
+                          flex: 3,
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: tabTypeSwitcher,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          flex: 2,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: CompactContainerSelector(
-                              selectedContainer: selectedContainer.value,
-                              emphasizeSelection: false,
-                              onSelectionChanged: (selection) async {
-                                containerSelectionTouched.value = true;
-                                switch (selection) {
-                                  case ContainerSelectionSelected(
-                                    :final containerId,
-                                  ):
-                                    selectedContainer.value = await ref
-                                        .read(
-                                          containerRepositoryProvider.notifier,
-                                        )
-                                        .getContainerData(containerId);
-                                  case ContainerSelectionUnassigned():
-                                    selectedContainer.value = null;
-                                }
-                              },
+                        if (showSpaceSelector) ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            flex: 2,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: CompactSpaceSelector(
+                                selectedSpaceUuid: selectedSpaceUuid.value,
+                                emphasizeSelection: false,
+                                onSelectionChanged: (uuid) {
+                                  spaceSelectionTouched.value = true;
+                                  selectedSpaceUuid.value = uuid;
+                                },
+                              ),
                             ),
                           ),
-                        ),
+                        ],
+                        if (settings.showContainerUi) ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            flex: 2,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: CompactContainerSelector(
+                                selectedContainer: selectedContainer.value,
+                                emphasizeSelection: false,
+                                onSelectionChanged: (selection) async {
+                                  containerSelectionTouched.value = true;
+                                  switch (selection) {
+                                    case ContainerSelectionSelected(
+                                      :final containerId,
+                                    ):
+                                      selectedContainer.value = await ref
+                                          .read(
+                                            containerRepositoryProvider
+                                                .notifier,
+                                          )
+                                          .getContainerData(containerId);
+                                    case ContainerSelectionUnassigned():
+                                      selectedContainer.value = null;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     );
                   },

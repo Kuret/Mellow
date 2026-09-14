@@ -61,6 +61,7 @@ import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
+import 'package:weblibre/features/share_intent/domain/services/share_intent_space.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -547,6 +548,14 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 _ => TabMode.regular,
               };
 
+              // The user is not being asked here (that is the `ask` branch
+              // below), so a `fixed` share-intent space preference is the
+              // only chance to honour it. For a private tab addTab discards
+              // this anyway (I3), so resolving it unconditionally is fine.
+              final shareIntentSpaceUuid = await ref.read(
+                resolveShareIntentSpaceUuidProvider.future,
+              );
+
               switch (sharedContent) {
                 case SharedUrl():
                   final containerSelection = await _resolveContainerSelection(
@@ -563,6 +572,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         launchedFromIntent: true,
                         selectTab: true,
                         containerSelection: containerSelection,
+                        spaceUuid: shareIntentSpaceUuid,
                       );
                 case SharedText():
                   final SearchProvider provider =
@@ -576,6 +586,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         tabMode: tabMode,
                         launchedFromIntent: true,
                         selectTab: true,
+                        spaceUuid: shareIntentSpaceUuid,
                       );
               }
             case TabIntentOpenSetting.ask:
