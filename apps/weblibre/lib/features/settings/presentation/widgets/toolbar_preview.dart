@@ -477,10 +477,7 @@ class _CompactBarPreview extends StatelessWidget {
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
     ];
-    final decoration = buildQuickTabSwitcherChipDecoration(
-      context,
-      showTitles: settings.quickTabSwitcherShowTitles,
-    );
+    final decoration = buildQuickTabSwitcherChipDecoration(context);
 
     Widget essential() => Padding(
       padding: const EdgeInsets.only(right: 4.0),
@@ -537,7 +534,6 @@ class _CompactBarPreview extends StatelessWidget {
                         context,
                         item,
                         isSelected: item.isActive,
-                        showTitles: settings.quickTabSwitcherShowTitles,
                         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
                       ),
                       padding: const EdgeInsets.only(right: 8.0),

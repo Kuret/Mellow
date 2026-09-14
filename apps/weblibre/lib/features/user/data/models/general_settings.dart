@@ -46,7 +46,7 @@ part 'general_settings.g.dart';
 const _fallbackSearchProvider = 'brave';
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.brave;
 
-/// Max width (logical px) of the title text on a quick tab switcher chip.
+/// Max width (logical px) of the title text on a compact bar tab chip.
 /// The default of 64 sits at the 1/3 position of the slider scale.
 const defaultQuickTabSwitcherTitleWidth = 64.0;
 const minQuickTabSwitcherTitleWidth = 32.0;
@@ -205,10 +205,13 @@ class GeneralSettings with FastEquatable {
   final TabBarStackingMode tabBarStackingMode;
   final Duration unassignedTabsAutoCleanInterval;
   final bool tabListShowFavicons;
-  final bool quickTabSwitcherShowTitles;
   final bool quickTabSwitcherShowHistorySuggestions;
 
-  /// Max width (logical px) for chip titles in the quick tab switcher.
+  /// Max width (logical px) for chip titles on the horizontal compact bar.
+  ///
+  /// Only the compact bar: it lays its chips out along a row, so a narrower
+  /// title is what lets a narrow screen fit more of them. The vertical rail
+  /// gives every row the rail's full width and ignores this.
   final double quickTabSwitcherTitleWidth;
 
   final String syncServerOverride;
@@ -263,7 +266,6 @@ class GeneralSettings with FastEquatable {
     required this.tabBarStackingMode,
     required this.unassignedTabsAutoCleanInterval,
     required this.tabListShowFavicons,
-    required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
     required this.syncServerOverride,
@@ -296,7 +298,6 @@ class GeneralSettings with FastEquatable {
     TabBarStackingMode? tabBarStackingMode,
     Duration? unassignedTabsAutoCleanInterval,
     bool? tabListShowFavicons,
-    bool? quickTabSwitcherShowTitles,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
     String? syncServerOverride,
@@ -336,7 +337,6 @@ class GeneralSettings with FastEquatable {
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
        tabListShowFavicons = tabListShowFavicons ?? false,
-       quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
@@ -426,7 +426,6 @@ class GeneralSettings with FastEquatable {
     tabBarStackingMode,
     unassignedTabsAutoCleanInterval,
     tabListShowFavicons,
-    quickTabSwitcherShowTitles,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
     syncServerOverride,

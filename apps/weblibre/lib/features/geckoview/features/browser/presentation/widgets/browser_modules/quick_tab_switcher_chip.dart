@@ -133,7 +133,6 @@ class QuickTabSwitcherItem with FastEquatable {
 SelectableChipDecoration<QuickTabSwitcherItem>
 buildQuickTabSwitcherChipDecoration(
   BuildContext context, {
-  required bool showTitles,
   // On the vertical rail nesting is shown as a corner badge on the favicon (not
   // a leading pill), so a nested chip carries no extra inline width and can use
   // the same zero label padding as a leaf chip instead of overflowing.
@@ -182,13 +181,6 @@ buildQuickTabSwitcherChipDecoration(
       ).borderSide,
       null => null,
     },
-    labelPadding: (item) =>
-        (!showTitles &&
-            !item.isHistory &&
-            !item.isPinned &&
-            item.tabMode is! PrivateTabMode)
-        ? EdgeInsets.zero
-        : null,
     canDelete: canDelete,
     deleteIcon: (_) => const Icon(Icons.close, size: 18),
   );
@@ -198,12 +190,10 @@ Widget buildQuickTabSwitcherChipLabel(
   BuildContext context,
   QuickTabSwitcherItem item, {
   required bool isSelected,
-  required bool showTitles,
   required double titleMaxWidth,
   bool isVertical = false,
 }) {
   final appColors = AppColors.of(context);
-  final hasTitle = item.isHistory || showTitles;
   final avatar = item.isCold
       ? ColdTabBadge(size: 20, child: item.avatar)
       : item.avatar;
@@ -211,14 +201,13 @@ Widget buildQuickTabSwitcherChipLabel(
     mainAxisSize: MainAxisSize.min,
     children: [
       Padding(
-        padding: EdgeInsets.only(right: hasTitle ? 6.0 : 0.0),
+        padding: const EdgeInsets.only(right: 6.0),
         child: avatar,
       ),
-      if (hasTitle)
-        ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: titleMaxWidth),
-          child: Text(item.title),
-        ),
+      ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: titleMaxWidth),
+        child: Text(item.title),
+      ),
       if (item.tabMode is PrivateTabMode)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),

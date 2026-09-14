@@ -90,15 +90,11 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         child: _CustomizeQuickSwitcherButtonsTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Show Titles on Tab Chips',
-        subtitle: 'Display page titles on the chips of the compact bar',
-        keywords: ['page titles'],
-        child: _QuickTabSwitcherShowTitlesTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Title Width on Tab Chips',
-        subtitle: 'Maximum width of tab titles on chips',
-        keywords: ['width', 'title', 'chip', 'length'],
+        title: 'Title Width on Compact Bar Chips',
+        subtitle:
+            'Maximum width of a tab title on the compact bar, so a narrower '
+            'screen fits more chips; the side rail always uses its full width',
+        keywords: ['width', 'title', 'chip', 'length', 'compact bar'],
         child: _QuickTabSwitcherTitleWidthTile(),
       ),
     ],
@@ -348,15 +344,7 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
-    final showTitles = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowTitles,
-      ),
-    );
-
     final sliderValue = useKeyedState(titleWidth, [titleWidth]);
-
-    final enabled = showTitles;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -364,12 +352,15 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: const Text('Title Width on Tab Chips'),
-            subtitle: const Text('Maximum width of tab titles on chips'),
-            leading: const Icon(MdiIcons.arrowExpandHorizontal),
+          const ListTile(
+            title: Text('Title Width on Compact Bar Chips'),
+            subtitle: Text(
+              'Maximum width of a tab title on the compact bar, so a narrower '
+              'screen fits more chips; the side rail always uses its full '
+              'width',
+            ),
+            leading: Icon(MdiIcons.arrowExpandHorizontal),
             contentPadding: EdgeInsets.zero,
-            enabled: enabled,
           ),
           Row(
             children: [
@@ -383,27 +374,21 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
                     minQuickTabSwitcherTitleWidth,
                     maxQuickTabSwitcherTitleWidth,
                   ),
-                  onChanged: enabled
-                      ? (value) {
-                          sliderValue.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final normalized =
-                              (value / quickTabSwitcherTitleWidthStep).round() *
-                              quickTabSwitcherTitleWidthStep;
-                          sliderValue.value = normalized;
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .quickTabSwitcherTitleWidth(normalized),
-                              );
-                        }
-                      : null,
+                  onChanged: (value) {
+                    sliderValue.value = value;
+                  },
+                  onChangeEnd: (value) async {
+                    final normalized =
+                        (value / quickTabSwitcherTitleWidthStep).round() *
+                        quickTabSwitcherTitleWidthStep;
+                    sliderValue.value = normalized;
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (currentSettings) => currentSettings.copyWith
+                              .quickTabSwitcherTitleWidth(normalized),
+                        );
+                  },
                 ),
               ),
               Text(
@@ -481,36 +466,6 @@ class _RailWidthTile extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
-  const _QuickTabSwitcherShowTitlesTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final quickTabSwitcherShowTitles = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowTitles,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Titles on Tab Chips'),
-      subtitle: const Text(
-        'Display tab titles alongside icons on the chips of the compact bar',
-      ),
-      secondary: const Icon(MdiIcons.textRecognition),
-      value: quickTabSwitcherShowTitles,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.quickTabSwitcherShowTitles(value),
-            );
-      },
     );
   }
 }

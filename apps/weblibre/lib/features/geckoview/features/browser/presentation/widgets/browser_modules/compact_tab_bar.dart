@@ -156,7 +156,6 @@ class _CompactChipStrip extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final showTitles = settings.quickTabSwitcherShowTitles;
     final titleMaxWidth = settings.quickTabSwitcherTitleWidth;
     const closeButtonMode = TabChipCloseButtonMode.activeTabOnly;
 
@@ -436,10 +435,7 @@ class _CompactChipStrip extends HookConsumerWidget {
       isUserScrolling: () => isUserScrolling.value || folderToggleGuard.value,
     );
 
-    final decoration = buildQuickTabSwitcherChipDecoration(
-      context,
-      showTitles: showTitles,
-    );
+    final decoration = buildQuickTabSwitcherChipDecoration(context);
 
     Widget buildTabChip(QuickTabSwitcherItem item) {
       final canClose =
@@ -454,7 +450,6 @@ class _CompactChipStrip extends HookConsumerWidget {
           context,
           item,
           isSelected: item.isActive,
-          showTitles: showTitles,
           titleMaxWidth: titleMaxWidth,
         ),
         padding: const EdgeInsets.only(right: 8.0),

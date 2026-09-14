@@ -60,7 +60,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'tabBarStackingMode': DriftSqlType.string,
   'unassignedTabsAutoCleanInterval': DriftSqlType.int,
   'tabListShowFavicons': DriftSqlType.bool,
-  'quickTabSwitcherShowTitles': DriftSqlType.bool,
   'quickTabSwitcherShowHistorySuggestions': DriftSqlType.bool,
   'quickTabSwitcherTitleWidth': DriftSqlType.double,
   'syncServerOverride': DriftSqlType.string,
