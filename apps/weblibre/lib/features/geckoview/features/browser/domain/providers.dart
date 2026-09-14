@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
@@ -84,6 +85,17 @@ class SelectedSearchProvider extends _$SelectedSearchProvider {
 
   @override
   SearchProvider? build({String? domain}) {
+    // An override outlives the engine it names: it is held in memory, not
+    // resolved from the catalogue on every read. Deleting a custom engine while
+    // it is the override would otherwise keep sending searches to it until the
+    // app restarted — the standing default falls back, but this would not.
+    ref.listen(allSearchProvidersProvider, (previous, next) {
+      final selected = state;
+      if (selected != null && findSearchProvider(next, selected.id) == null) {
+        state = null;
+      }
+    });
+
     return null;
   }
 }

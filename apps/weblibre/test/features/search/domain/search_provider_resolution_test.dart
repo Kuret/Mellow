@@ -19,7 +19,9 @@
  */
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
@@ -163,6 +165,53 @@ void main() {
         container.read(defaultSearchProviderProvider),
         fallbackSearchProvider,
       );
+    });
+  });
+
+  // The per-search override is held in memory rather than resolved from the
+  // catalogue on every read, so deleting the engine it names used to keep
+  // sending searches to it until the app restarted — the standing default fell
+  // back, the override did not.
+  group('selectedSearchProvider', () {
+    test('drops an override whose engine has been deleted', () {
+      var engines = [_searx];
+      final container = ProviderContainer(
+        overrides: [
+          generalSettingsWithDefaultsProvider.overrideWith(
+            (ref) => GeneralSettings.withDefaults(),
+          ),
+          zenSettingsWithDefaultsProvider.overrideWith(
+            (ref) => ZenSettings.withDefaults(customSearchProviders: engines),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(
+        selectedSearchProviderProvider().notifier,
+      );
+      notifier.select(customSearchProvider(_searx));
+
+      expect(container.read(selectedSearchProviderProvider())?.id, _searx.id);
+
+      engines = [];
+      container.invalidate(zenSettingsWithDefaultsProvider);
+      container.read(allSearchProvidersProvider);
+
+      expect(container.read(selectedSearchProviderProvider()), isNull);
+    });
+
+    test('leaves an override whose engine is still there alone', () {
+      final container = _container(engines: [_searx]);
+
+      container
+          .read(selectedSearchProviderProvider().notifier)
+          .select(customSearchProvider(_searx));
+
+      container.invalidate(zenSettingsWithDefaultsProvider);
+      container.read(allSearchProvidersProvider);
+
+      expect(container.read(selectedSearchProviderProvider())?.id, _searx.id);
     });
   });
 }
