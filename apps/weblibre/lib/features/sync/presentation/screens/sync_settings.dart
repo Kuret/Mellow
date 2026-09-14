@@ -382,6 +382,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                     _spacesStatusText(spacesStatus, hasAccount: hasAccount),
                   ),
                   isThreeLine: true,
+                  titleAlignment: ListTileTitleAlignment.center,
                   onTap:
                       (spacesStatus.syncing ||
                           !hasAccount ||
