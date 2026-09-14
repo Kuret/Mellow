@@ -20,6 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/features/share_intent/domain/entities/share_intent_space_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart'
     show TabBarPosition;
 
@@ -209,6 +210,17 @@ class ZenSettings with FastEquatable {
   /// profile that has since overridden them.
   final int profileDefaultsRevision;
 
+  /// Which space a link shared in from another app opens in. See
+  /// [ShareIntentSpaceMode].
+  final ShareIntentSpaceMode shareIntentSpaceMode;
+
+  /// The space [ShareIntentSpaceMode.fixed] sends shared links to.
+  ///
+  /// Nullable and only advisory: a space can be deleted long after it was
+  /// picked here, so whoever opens the tab has to fall back to the selected
+  /// space rather than trust this uuid still resolves.
+  final String? shareIntentSpaceUuid;
+
   ZenSettings({
     required this.spacesSyncEnabled,
     required this.spacesSyncWritesEnabled,
@@ -224,6 +236,8 @@ class ZenSettings with FastEquatable {
     required this.separateEssentials,
     required this.customSearchProviders,
     required this.profileDefaultsRevision,
+    required this.shareIntentSpaceMode,
+    required this.shareIntentSpaceUuid,
   });
 
   ZenSettings.withDefaults({
@@ -241,6 +255,8 @@ class ZenSettings with FastEquatable {
     bool? separateEssentials,
     List<CustomSearchEngine>? customSearchProviders,
     int? profileDefaultsRevision,
+    ShareIntentSpaceMode? shareIntentSpaceMode,
+    this.shareIntentSpaceUuid,
   }) : spacesSyncEnabled = spacesSyncEnabled ?? true,
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
@@ -263,7 +279,9 @@ class ZenSettings with FastEquatable {
        ),
        separateEssentials = separateEssentials ?? true,
        customSearchProviders = customSearchProviders ?? const [],
-       profileDefaultsRevision = profileDefaultsRevision ?? 0;
+       profileDefaultsRevision = profileDefaultsRevision ?? 0,
+       shareIntentSpaceMode =
+           shareIntentSpaceMode ?? ShareIntentSpaceMode.ask;
 
   factory ZenSettings.fromJson(Map<String, dynamic> json) =>
       _$ZenSettingsFromJson(json);
@@ -286,5 +304,7 @@ class ZenSettings with FastEquatable {
     separateEssentials,
     customSearchProviders,
     profileDefaultsRevision,
+    shareIntentSpaceMode,
+    shareIntentSpaceUuid,
   ];
 }

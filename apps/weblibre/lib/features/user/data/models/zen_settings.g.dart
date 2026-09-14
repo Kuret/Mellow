@@ -112,6 +112,10 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings profileDefaultsRevision(int profileDefaultsRevision);
 
+  ZenSettings shareIntentSpaceMode(ShareIntentSpaceMode shareIntentSpaceMode);
+
+  ZenSettings shareIntentSpaceUuid(String? shareIntentSpaceUuid);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -134,6 +138,8 @@ abstract class _$ZenSettingsCWProxy {
     bool separateEssentials,
     List<CustomSearchEngine> customSearchProviders,
     int profileDefaultsRevision,
+    ShareIntentSpaceMode shareIntentSpaceMode,
+    String? shareIntentSpaceUuid,
   });
 }
 
@@ -199,6 +205,14 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings profileDefaultsRevision(int profileDefaultsRevision) =>
       call(profileDefaultsRevision: profileDefaultsRevision);
 
+  @override
+  ZenSettings shareIntentSpaceMode(ShareIntentSpaceMode shareIntentSpaceMode) =>
+      call(shareIntentSpaceMode: shareIntentSpaceMode);
+
+  @override
+  ZenSettings shareIntentSpaceUuid(String? shareIntentSpaceUuid) =>
+      call(shareIntentSpaceUuid: shareIntentSpaceUuid);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -222,6 +236,8 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? customSearchProviders = const $CopyWithPlaceholder(),
     Object? profileDefaultsRevision = const $CopyWithPlaceholder(),
+    Object? shareIntentSpaceMode = const $CopyWithPlaceholder(),
+    Object? shareIntentSpaceUuid = const $CopyWithPlaceholder(),
   }) {
     return ZenSettings(
       spacesSyncEnabled:
@@ -300,6 +316,16 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.profileDefaultsRevision
           // ignore: cast_nullable_to_non_nullable
           : profileDefaultsRevision as int,
+      shareIntentSpaceMode:
+          shareIntentSpaceMode == const $CopyWithPlaceholder() ||
+              shareIntentSpaceMode == null
+          ? _value.shareIntentSpaceMode
+          // ignore: cast_nullable_to_non_nullable
+          : shareIntentSpaceMode as ShareIntentSpaceMode,
+      shareIntentSpaceUuid: shareIntentSpaceUuid == const $CopyWithPlaceholder()
+          ? _value.shareIntentSpaceUuid
+          // ignore: cast_nullable_to_non_nullable
+          : shareIntentSpaceUuid as String?,
     );
   }
 }
@@ -350,6 +376,11 @@ ZenSettings _$ZenSettingsFromJson(
       ?.map((e) => CustomSearchEngine.fromJson(e as Map<String, dynamic>))
       .toList(),
   profileDefaultsRevision: (json['profileDefaultsRevision'] as num?)?.toInt(),
+  shareIntentSpaceMode: $enumDecodeNullable(
+    _$ShareIntentSpaceModeEnumMap,
+    json['shareIntentSpaceMode'],
+  ),
+  shareIntentSpaceUuid: json['shareIntentSpaceUuid'] as String?,
 );
 
 Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
@@ -370,6 +401,14 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
           .map((e) => e.toJson())
           .toList(),
       'profileDefaultsRevision': instance.profileDefaultsRevision,
+      'shareIntentSpaceMode':
+          _$ShareIntentSpaceModeEnumMap[instance.shareIntentSpaceMode]!,
+      'shareIntentSpaceUuid': instance.shareIntentSpaceUuid,
     };
 
 const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};
+
+const _$ShareIntentSpaceModeEnumMap = {
+  ShareIntentSpaceMode.ask: 'ask',
+  ShareIntentSpaceMode.fixed: 'fixed',
+};
