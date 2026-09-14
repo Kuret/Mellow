@@ -66,7 +66,7 @@ final class IsDefaultBrowserProvider
   IsDefaultBrowser create() => IsDefaultBrowser();
 }
 
-String _$isDefaultBrowserHash() => r'53dd8ddc2e95d40acf2db13c48ac9d3e7c544524';
+String _$isDefaultBrowserHash() => r'ddc4f33db2a8325502a83331c99faf524412ae81';
 
 /// Whether this app currently holds the system's default-browser role.
 ///
