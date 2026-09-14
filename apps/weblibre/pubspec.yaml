@@ -120,13 +120,6 @@ flutter:
     - assets/preferences/
     - assets/legal/
     - assets/ublock/
-  fonts:
-    - family: TorIcons
-      fonts:
-        - asset: assets/fonts/tor-icons.ttf
-    - family: WebLibre
-      fonts:
-        - asset: assets/fonts/WebLibre.ttf
 
 flutter_launcher_icons:
   android: "launcher_icon"
