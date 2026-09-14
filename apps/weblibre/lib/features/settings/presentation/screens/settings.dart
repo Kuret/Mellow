@@ -30,60 +30,130 @@ import 'package:weblibre/features/settings/presentation/screens/extensions_setti
 import 'package:weblibre/features/settings/presentation/screens/links_sites_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/settings_layout.dart';
 import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/sync/presentation/screens/sync_settings.dart';
+
+/// Activates [category] — either by pushing its route (narrow layout) or by
+/// selecting it into the two-pane layout's right-hand pane (wide layout).
+/// Shared by [_CategoryTile] and [_SearchResultTile] so neither tile encodes
+/// which layout it is running in.
+typedef _CategoryActivate =
+    Future<void> Function(
+      BuildContext context,
+      _SettingsCategoryDefinition category,
+    );
 
 class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final search = useSettingsSearch();
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final isTwoPane = useTwoPaneSettings(viewportWidth);
 
+    final search = useSettingsSearch();
     final categories = _buildCategories();
+    final allCategories = [...categories.browser, ...categories.services];
+
+    // Local to the widget: which category is shown in the right pane, and a
+    // counter bumped on every selection so the pane can be keyed on it and
+    // remounted even when the same category is picked again (a settings
+    // search result can point back into the category already open).
+    final selectedIndex = useState(0);
+    final selectionCounter = useState(0);
+    final selectedCategory = allCategories[selectedIndex.value];
+
+    Future<void> pushRoute(
+      BuildContext context,
+      _SettingsCategoryDefinition category,
+    ) => category.onTap(context);
+
+    Future<void> selectCategory(
+      BuildContext context,
+      _SettingsCategoryDefinition category,
+    ) async {
+      final index = allCategories.indexOf(category);
+      if (index == -1) return;
+      selectedIndex.value = index;
+      selectionCounter.value++;
+    }
+
+    final activate = isTwoPane ? selectCategory : pushRoute;
+
     final sections = search.normalizedQuery.isEmpty
-        ? _buildCategorySections(categories)
-        : _buildSearchSections([
-            ...categories.browser,
-            ...categories.services,
-          ], search.normalizedQuery);
+        ? _buildCategorySections(
+            categories,
+            activate,
+            selected: isTwoPane ? selectedCategory : null,
+          )
+        : _buildSearchSections(allCategories, search.normalizedQuery, activate);
+
+    final indexContent = SafeArea(
+      child: FadingScroll(
+        fadingSize: 25,
+        builder: (context, controller) {
+          return CustomScrollView(
+            controller: controller,
+            slivers: [
+              const SliverAppBar.large(
+                centerTitle: false,
+                title: Text('Settings'),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: SettingsSearchField(
+                    controller: search.controller,
+                    hintText: 'Search all settings',
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+                sliver: SliverToBoxAdapter(
+                  child: SettingsSectionList(
+                    sections: sections,
+                    query: search.rawQuery,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (!isTwoPane) {
+      return Scaffold(body: indexContent);
+    }
+
+    final paneWidth = (viewportWidth * 0.34).clamp(320.0, 420.0);
 
     return Scaffold(
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                const SliverAppBar.large(
-                  centerTitle: false,
-                  title: Text('Settings'),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSearchField(
-                      controller: search.controller,
-                      hintText: 'Search all settings',
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSectionList(
-                      sections: sections,
-                      query: search.rawQuery,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(width: paneWidth, child: indexContent),
+          const VerticalDivider(key: Key('settingsTwoPaneDivider'), width: 1),
+          Expanded(
+            // Its own Navigator, with the selected category's screen as the
+            // sole (root) route: that keeps `ModalRoute.canPop` false inside
+            // the pane, so the screen's SliverAppBar.large does not grow a
+            // back arrow that would pop the whole Settings route. Keyed on
+            // the selection counter so choosing a category — even the one
+            // already shown — remounts the pane from scratch, which is what
+            // lets a settings-search result re-trigger the pending-highlight
+            // scroll/flash on a category already open.
+            child: Navigator(
+              key: ValueKey(selectionCounter.value),
+              onGenerateRoute: (_) =>
+                  MaterialPageRoute<void>(builder: selectedCategory.screen),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -115,13 +185,7 @@ _CategoryGroups _buildCategories() {
       title: 'Tabs & Spaces',
       subtitle: 'Spaces, tab budget, containers',
       icon: MdiIcons.viewDashboardOutline,
-      keywords: const [
-        'workspaces',
-        'zen',
-        'spaces',
-        'containers',
-        'tabs',
-      ],
+      keywords: const ['workspaces', 'zen', 'spaces', 'containers', 'tabs'],
       sections: tabsSpacesSettingsSections,
       onTap: (context) => TabsSpacesSettingsRoute().push(context),
       screen: (context) => const TabsSpacesSettingsScreen(),
@@ -130,12 +194,7 @@ _CategoryGroups _buildCategories() {
       title: 'Links & Sites',
       subtitle: 'App links, desktop mode, installed sites',
       icon: MdiIcons.linkVariant,
-      keywords: const [
-        'navigation',
-        'external links',
-        'desktop mode',
-        'pwa',
-      ],
+      keywords: const ['navigation', 'external links', 'desktop mode', 'pwa'],
       sections: linksSitesSettingsSections,
       onTap: (context) => LinksSitesSettingsRoute().push(context),
       screen: (context) => const LinksSitesSettingsScreen(),
@@ -201,20 +260,30 @@ _CategoryGroups _buildCategories() {
 
 List<SettingsSectionDefinition> _buildCategorySections(
   _CategoryGroups categories,
-) {
+  _CategoryActivate activate, {
+  _SettingsCategoryDefinition? selected,
+}) {
   return [
     SettingsSectionDefinition(
       title: 'Browser',
       entries: [
         for (final category in categories.browser)
-          _buildCategoryEntry(category),
+          _buildCategoryEntry(
+            category,
+            activate,
+            selected: category == selected,
+          ),
       ],
     ),
     SettingsSectionDefinition(
       title: 'Services & Advanced',
       entries: [
         for (final category in categories.services)
-          _buildCategoryEntry(category),
+          _buildCategoryEntry(
+            category,
+            activate,
+            selected: category == selected,
+          ),
       ],
     ),
   ];
@@ -223,6 +292,7 @@ List<SettingsSectionDefinition> _buildCategorySections(
 List<SettingsSectionDefinition> _buildSearchSections(
   List<_SettingsCategoryDefinition> categories,
   String normalizedQuery,
+  _CategoryActivate activate,
 ) {
   final results = <String, List<SettingsEntryDefinition>>{};
 
@@ -234,7 +304,7 @@ List<SettingsSectionDefinition> _buildSearchSections(
       category.subtitle,
       ...category.keywords,
     ])) {
-      categoryEntries.add(_buildCategoryEntry(category));
+      categoryEntries.add(_buildCategoryEntry(category, activate));
     }
 
     for (final section in filterSettingsSections(
@@ -262,7 +332,7 @@ List<SettingsSectionDefinition> _buildSearchSections(
               category: category.title,
               section: sectionLabel,
               icon: category.icon,
-              onTap: category.onTap,
+              onTap: (context) => activate(context, category),
             ),
           ),
         );
@@ -282,12 +352,18 @@ List<SettingsSectionDefinition> _buildSearchSections(
 
 SettingsEntryDefinition _buildCategoryEntry(
   _SettingsCategoryDefinition category,
-) {
+  _CategoryActivate activate, {
+  bool selected = false,
+}) {
   return SettingsEntryDefinition(
     title: category.title,
     subtitle: category.subtitle,
     keywords: category.keywords,
-    child: _CategoryTile(category: category),
+    child: _CategoryTile(
+      category: category,
+      selected: selected,
+      onTap: (context) => activate(context, category),
+    ),
   );
 }
 
@@ -318,7 +394,17 @@ class _SettingsCategoryDefinition {
 class _CategoryTile extends StatelessWidget {
   final _SettingsCategoryDefinition category;
 
-  const _CategoryTile({required this.category});
+  /// Whether this tile is the category currently shown in the two-pane
+  /// layout's right pane. Never true in the narrow layout, where a tile
+  /// only ever pushes a route and nothing stays "open" beside it.
+  final bool selected;
+  final Future<void> Function(BuildContext context) onTap;
+
+  const _CategoryTile({
+    required this.category,
+    required this.onTap,
+    this.selected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -330,9 +416,11 @@ class _CategoryTile extends StatelessWidget {
         horizontal: 16.0,
       ),
       leading: Icon(category.icon),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: selected ? null : const Icon(Icons.chevron_right),
+      selected: selected,
+      selectedTileColor: Theme.of(context).colorScheme.secondaryContainer,
       onTap: () async {
-        await category.onTap(context);
+        await onTap(context);
       },
     );
   }
