@@ -146,6 +146,12 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _ExternalLinkHandlingSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Shared Link Space',
+        subtitle: 'Choose which space a shared link opens in',
+        keywords: ['share', 'shared link', 'space', 'spaces', 'send to'],
+        child: _ShareIntentSpaceSection(),
+      ),
+      SettingsEntryDefinition(
         title: 'Custom Tabs',
         subtitle:
             'Let other apps open links in a lightweight in-app tab, instead '
@@ -310,8 +316,6 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          const _ShareIntentSpaceSection(),
         ],
       ),
     );
