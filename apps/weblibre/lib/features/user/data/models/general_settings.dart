@@ -128,9 +128,9 @@ enum TabChipCloseButtonMode {
 /// Where the browser home surface offers its entry into search.
 ///
 /// The home surface has no address field of its own, so exactly one of these
-/// two has to be present: the pinned pill at the top of the home content, or
-/// the tab bar's own (empty) address field — the behaviour that predates the
-/// home surface. [auto] picks whichever sits on the same edge the user already
+/// two has to be present: the pinned pill above the recent searches, or the
+/// tab bar's own (empty) address field — the behaviour that predates the home
+/// surface. [auto] picks whichever sits on the same edge the user already
 /// chose for the tab bar, so a bottom tab bar keeps the search entry within
 /// thumb reach instead of moving it to the top of the screen.
 enum HomeSearchBarPlacement {
@@ -146,7 +146,7 @@ enum HomeSearchBarPlacement {
 
   String get description => switch (this) {
     auto => 'Whichever edge the tab bar is on',
-    top => 'A pinned search bar above the home sections',
+    top => 'A pinned search bar at the top of the home page',
     tabBar => "The tab bar's address field, with QR and voice search",
   };
 }
