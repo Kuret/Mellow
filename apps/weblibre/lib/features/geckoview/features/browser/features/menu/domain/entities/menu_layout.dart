@@ -124,6 +124,7 @@ enum MenuItemType {
   downloads,
 
   // Profile & App
+  setDefaultBrowser,
   profileSwitch,
   syncNow,
   appSettings,
@@ -162,6 +163,7 @@ enum MenuItemType {
     history => 'History',
     bookmarks => 'Bookmarks',
     downloads => 'Downloads',
+    setDefaultBrowser => 'Set as Default Browser',
     profileSwitch => 'Profile',
     syncNow => 'Sync Now',
     appSettings => 'Settings',
@@ -207,6 +209,7 @@ enum MenuItemType {
     history => Icons.history,
     bookmarks => MdiIcons.bookmarkMultiple,
     downloads => MdiIcons.fileDownload,
+    setDefaultBrowser => Icons.public,
     profileSwitch => Icons.person,
     syncNow => Icons.sync,
     appSettings => Icons.settings,
@@ -219,6 +222,8 @@ enum MenuItemType {
   String? get description => switch (this) {
     moreDisclosure => 'Folds everything below it behind a "More" row',
     sendToDevice => 'The devices themselves come from your account',
+    setDefaultBrowser =>
+      'Only shown until WebLibre is your default browser',
     _ => null,
   };
 }
@@ -324,6 +329,7 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
   MenuSectionDefault(
     MenuSectionType.profile,
     items: [
+      MenuItemDefault(MenuItemType.setDefaultBrowser),
       MenuItemDefault(MenuItemType.profileSwitch),
       MenuItemDefault(MenuItemType.syncNow),
       MenuItemDefault(MenuItemType.appSettings),

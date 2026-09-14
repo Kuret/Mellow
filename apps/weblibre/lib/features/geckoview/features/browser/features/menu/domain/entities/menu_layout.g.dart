@@ -52,6 +52,7 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.history: 'history',
   MenuItemType.bookmarks: 'bookmarks',
   MenuItemType.downloads: 'downloads',
+  MenuItemType.setDefaultBrowser: 'setDefaultBrowser',
   MenuItemType.profileSwitch: 'profileSwitch',
   MenuItemType.syncNow: 'syncNow',
   MenuItemType.appSettings: 'appSettings',

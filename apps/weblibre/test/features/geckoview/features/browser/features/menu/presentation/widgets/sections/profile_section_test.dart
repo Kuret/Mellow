@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
+import 'package:weblibre/features/user/domain/providers/default_browser.dart';
 
 /// Opens the menu sheet the way the browser does, so the quit row runs inside a
 /// modal route that is torn down the moment it is tapped.
@@ -58,6 +59,50 @@ Future<void> _pumpMenu(
   await tester.pumpAndSettle();
 
   expect(find.byType(ProfileSection), findsOneWidget);
+}
+
+/// Stands in for the platform call behind the default-browser row.
+class _FakeIsDefaultBrowser extends IsDefaultBrowser {
+  _FakeIsDefaultBrowser({required this.isDefault, this.isDefaultOnRefresh});
+
+  final bool isDefault;
+
+  /// What every read after the first answers, when that differs — which is how
+  /// a test tells whether the row asked for a fresh answer at all.
+  final bool? isDefaultOnRefresh;
+
+  bool _read = false;
+
+  @override
+  Future<bool> build() async {
+    final answer = _read ? (isDefaultOnRefresh ?? isDefault) : isDefault;
+    _read = true;
+    return answer;
+  }
+}
+
+/// Renders just the default-browser row, with the role answered by a fake.
+Future<void> _pumpDefaultBrowserRow(
+  WidgetTester tester, {
+  required bool isDefault,
+  bool? isDefaultOnRefresh,
+}) async {
+  final fake = _FakeIsDefaultBrowser(
+    isDefault: isDefault,
+    isDefaultOnRefresh: isDefaultOnRefresh,
+  );
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [isDefaultBrowserProvider.overrideWith(() => fake)],
+      child: const MaterialApp(
+        home: Scaffold(
+          body: ProfileSection(items: [MenuItemType.setDefaultBrowser]),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -121,5 +166,34 @@ void main() {
     expect(find.text('Quit Browser'), findsNothing);
     expect(containers, hasLength(1));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('offers the default-browser row while the role is not held', (
+    tester,
+  ) async {
+    await _pumpDefaultBrowserRow(tester, isDefault: false);
+
+    expect(find.text(MenuItemType.setDefaultBrowser.label), findsOneWidget);
+  });
+
+  testWidgets('re-reads the role when the menu opens', (tester) async {
+    // The role can be handed to another browser in Android's own settings,
+    // where nothing tells this app about it, so a stale "not default" would go
+    // on offering a row with nothing left to do.
+    await _pumpDefaultBrowserRow(
+      tester,
+      isDefault: false,
+      isDefaultOnRefresh: true,
+    );
+
+    expect(find.text(MenuItemType.setDefaultBrowser.label), findsNothing);
+  });
+
+  testWidgets('drops the default-browser row once the role is held', (
+    tester,
+  ) async {
+    await _pumpDefaultBrowserRow(tester, isDefault: true);
+
+    expect(find.text(MenuItemType.setDefaultBrowser.label), findsNothing);
   });
 }

@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
@@ -30,6 +31,7 @@ import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dar
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/domain/providers/default_browser.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -49,10 +51,58 @@ class ProfileSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    // Re-read the default-browser role whenever the menu opens with the row in
+    // its layout. Nothing notifies an app that it gained or lost the role, and
+    // Android's own settings are one of the places it changes.
+    final showsDefaultBrowserRow = items.contains(
+      MenuItemType.setDefaultBrowser,
+    );
+    useEffect(() {
+      if (showsDefaultBrowserRow) {
+        // Off the build phase: on a first build this effect runs inside it,
+        // and invalidating a provider the tree is still building against
+        // throws.
+        unawaited(
+          Future.microtask(
+            () => ref.read(isDefaultBrowserProvider.notifier).refresh(),
+          ),
+        );
+      }
+      return null;
+    }, [showsDefaultBrowserRow]);
+
     final tiles = <MenuItemType, Widget>{};
 
     for (final item in items) {
       switch (item) {
+        case MenuItemType.setDefaultBrowser:
+          // The row exists to claim the role, so it goes away for good once the
+          // role is held. Also hidden while the answer is still unknown (the
+          // very first read of the session): a row that appears late is worse
+          // than one that appears a beat after the sheet does.
+          final isDefault = ref.watch(isDefaultBrowserProvider).value;
+          if (isDefault != false) continue;
+
+          tiles[item] = ListTile(
+            leading: const Icon(Icons.public),
+            title: Text(item.label),
+            subtitle: Text(
+              'Open links from other apps in WebLibre',
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+            ),
+            onTap: () async {
+              final browserService = GeckoBrowserService();
+              final notifier = ref.read(isDefaultBrowserProvider.notifier);
+              Navigator.pop(context);
+              await browserService.requestDefaultBrowser();
+              notifier.refresh();
+            },
+          );
+
         case MenuItemType.profileSwitch:
           final profile = ref.watch(selectedProfileProvider);
           tiles[item] = ListTile(
