@@ -16,14 +16,12 @@ dependencies:
   country_flags: ^4.1.2
   crypto: ^3.0.7
   cryptography: ^2.9.0
-  cryptography_flutter: ^2.3.4
   device_info_plus: ^13.2.0
   drift: ^2.34.3
   drift_dev: ^2.34.5
   dynamic_color: ^1.9.0
   exceptions: ^0.6.1
   fading_scroll: ^0.9.4
-  fancy_password_field: ^3.0.0
   fast_equatable: ^1.3.1
   file_picker: ^12.1.1
   flutter:
@@ -37,11 +35,9 @@ dependencies:
     path: ../../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.7.0
   flutter_secure_storage: ^11.0.0
-  flutter_slidable: ^4.0.3
   flutter_svg: ^2.3.0
   go_router: ^18.0.0
   google_fonts: ^8.2.1
-  graphview: ^1.5.1
   home_widget: ^0.9.3
   hooks_riverpod: ^3.4.2
   html: ^0.15.6
@@ -68,7 +64,6 @@ dependencies:
   quick_actions: ^1.1.0
   riverpod: ^3.4.2
   riverpod_annotation: ^4.0.6
-  rss_dart: ^1.0.14
   rxdart: ^0.28.0
   saf_stream: ^4.0.1
   saf_util: ^3.1.0
@@ -86,7 +81,6 @@ dependencies:
   speech_to_text_dialog:
     path: ../../packages/speech_to_text_dialog
   sqlite3: ^3.5.2
-  supabase: ^2.16.1
   synchronized: ^3.4.1+2
   text_scroll: ^0.2.1
   timeago: ^3.7.1
@@ -95,7 +89,6 @@ dependencies:
       url: https://github.com/FaFre/uri-to-file.git
   url_launcher: ^6.3.2
   uuid: ^4.6.0
-  web_socket_channel: ^3.0.3
   xxh3: ^1.2.0
 
 dev_dependencies:
