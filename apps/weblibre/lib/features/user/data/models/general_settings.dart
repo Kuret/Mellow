@@ -130,26 +130,9 @@ enum TabChipCloseButtonMode {
 /// The home surface has no address field of its own, so exactly one of these
 /// two has to be present: the pinned pill above the recent searches, or the
 /// tab bar's own (empty) address field — the behaviour that predates the home
-/// surface. [auto] picks whichever sits on the same edge the user already
-/// chose for the tab bar, so a bottom tab bar keeps the search entry within
-/// thumb reach instead of moving it to the top of the screen.
-enum HomeSearchBarPlacement {
-  auto,
-  top,
-  tabBar;
-
-  String get label => switch (this) {
-    auto => 'Follow the tab bar',
-    top => 'Top of the home page',
-    tabBar => 'In the tab bar',
-  };
-
-  String get description => switch (this) {
-    auto => 'Whichever edge the tab bar is on',
-    top => 'A pinned search bar at the top of the home page',
-    tabBar => "The tab bar's address field, with QR and voice search",
-  };
-}
+/// surface. Resolved from the tab bar's position; see
+/// [GeneralSettings.effectiveHomeSearchBarPlacement].
+enum HomeSearchBarPlacement { top, tabBar }
 
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
@@ -180,10 +163,6 @@ class GeneralSettings with FastEquatable {
 
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool showContainerUi;
-
-  /// Where the home surface's search entry is rendered. See
-  /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
-  final HomeSearchBarPlacement homeSearchBarPlacement;
 
   final bool autoHideTabBar;
   @Deprecated('Retired; the bar swipe switches spaces')
@@ -243,7 +222,6 @@ class GeneralSettings with FastEquatable {
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.showContainerUi,
-    required this.homeSearchBarPlacement,
     required this.autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
     // ignore: deprecated_member_use_from_same_package
@@ -274,7 +252,6 @@ class GeneralSettings with FastEquatable {
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? showContainerUi,
-    HomeSearchBarPlacement? homeSearchBarPlacement,
     bool? autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
@@ -300,10 +277,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        showContainerUi = showContainerUi ?? true,
-       // Deliberately not a fixed edge: the placement that matches the user's
-       // tab bar position is the one they can reach.
-       homeSearchBarPlacement =
-           homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
        autoHideTabBar = autoHideTabBar ?? true,
        // ignore: deprecated_member_use_from_same_package
        tabBarSwipeAction =
@@ -356,22 +329,17 @@ class GeneralSettings with FastEquatable {
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
-  /// [homeSearchBarPlacement] with [HomeSearchBarPlacement.auto] resolved
-  /// against the tab bar's position, so callers never have to. Never returns
-  /// [HomeSearchBarPlacement.auto].
+  /// Where the home surface's search entry is rendered, resolved from
+  /// [effectiveTabBarPosition] so callers never have to.
   ///
   /// Only a bottom tab bar resolves to [HomeSearchBarPlacement.tabBar]: a top
   /// bar puts its address field next to the pill's own position anyway, and on
   /// the vertical side rail the address field is rotated 90 degrees, which is
   /// a poor search entry to hand someone as their only one.
   HomeSearchBarPlacement effectiveHomeSearchBarPlacement() =>
-      switch (homeSearchBarPlacement) {
-        HomeSearchBarPlacement.auto =>
-          effectiveTabBarPosition == TabBarPosition.bottom
-              ? HomeSearchBarPlacement.tabBar
-              : HomeSearchBarPlacement.top,
-        final placement => placement,
-      };
+      effectiveTabBarPosition == TabBarPosition.bottom
+          ? HomeSearchBarPlacement.tabBar
+          : HomeSearchBarPlacement.top;
 
   /// Where the compact bar sits on a narrow viewport: [tabBarPosition]
   /// reduced to top or bottom. The legacy side values predate the
@@ -395,7 +363,6 @@ class GeneralSettings with FastEquatable {
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     showContainerUi,
-    homeSearchBarPlacement,
     autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,

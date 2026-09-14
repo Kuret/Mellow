@@ -87,12 +87,6 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         child: _AutoHideTabBarTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Home Search Bar',
-        subtitle: 'Where the home page offers its search field',
-        keywords: ['home', 'search', 'address', 'url', 'top', 'tab bar'],
-        child: _HomeSearchBarPlacementTile(),
-      ),
-      SettingsEntryDefinition(
         title: 'Title Width on Compact Bar Chips',
         subtitle:
             'Maximum width of a tab title on the compact bar, so a narrower '
@@ -466,63 +460,6 @@ class _RailWidthTile extends HookConsumerWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Where the home surface puts its search entry.
-///
-/// Lives with the bar settings rather than on a home screen of its own because
-/// one of its values *is* the compact bar: [HomeSearchBarPlacement.tabBar]
-/// hands the field to the bar configured just above.
-class _HomeSearchBarPlacementTile extends ConsumerWidget {
-  const _HomeSearchBarPlacementTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final resolved = settings.effectiveHomeSearchBarPlacement();
-
-    // Headed like the two radio groups above it: without a title of its own a
-    // bare column of radios between two switches reads as a continuation of
-    // whichever row happens to precede it.
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Home Search Bar'),
-            subtitle: Text('Where the home page offers its search field'),
-            leading: Icon(MdiIcons.magnify),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup<HomeSearchBarPlacement>(
-            groupValue: settings.homeSearchBarPlacement,
-            onChanged: (value) async {
-              if (value == null) return;
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save((s) => s.copyWith.homeSearchBarPlacement(value));
-            },
-            child: Column(
-              children: [
-                for (final placement in HomeSearchBarPlacement.values)
-                  RadioListTile<HomeSearchBarPlacement>(
-                    value: placement,
-                    title: Text(placement.label),
-                    subtitle: Text(
-                      placement == HomeSearchBarPlacement.auto
-                          ? 'Currently: ${resolved.label.toLowerCase()}'
-                          : placement.description,
-                    ),
-                  ),
-              ],
-            ),
           ),
         ],
       ),

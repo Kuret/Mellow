@@ -22,22 +22,10 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 void main() {
   group('effectiveHomeSearchBarPlacement', () {
-    GeneralSettings settingsWith({
-      HomeSearchBarPlacement? placement,
-      required TabBarPosition position,
-    }) => GeneralSettings.withDefaults(
-      homeSearchBarPlacement: placement,
-      tabBarPosition: position,
-    );
+    GeneralSettings settingsWith({required TabBarPosition position}) =>
+        GeneralSettings.withDefaults(tabBarPosition: position);
 
-    test('defaults to auto', () {
-      expect(
-        GeneralSettings.withDefaults().homeSearchBarPlacement,
-        HomeSearchBarPlacement.auto,
-      );
-    });
-
-    test('auto follows a bottom tab bar into the tab bar', () {
+    test('follows a bottom tab bar into the tab bar', () {
       expect(
         settingsWith(
           position: TabBarPosition.bottom,
@@ -48,7 +36,7 @@ void main() {
 
     // The side values predate the viewport-driven layout and read as bottom
     // (effectiveTabBarPosition), so they resolve the way bottom does.
-    test('auto reads the legacy side positions as a bottom tab bar', () {
+    test('reads the legacy side positions as a bottom tab bar', () {
       for (final position in const [
         TabBarPosition.left,
         TabBarPosition.right,
@@ -61,48 +49,13 @@ void main() {
       }
     });
 
-    test('auto resolves to the pill for a top tab bar', () {
+    test('resolves to the pill for a top tab bar', () {
       expect(
         settingsWith(
           position: TabBarPosition.top,
         ).effectiveHomeSearchBarPlacement(),
         HomeSearchBarPlacement.top,
       );
-    });
-
-    test('an explicit choice wins over the tab bar position', () {
-      expect(
-        settingsWith(
-          placement: HomeSearchBarPlacement.top,
-          position: TabBarPosition.bottom,
-        ).effectiveHomeSearchBarPlacement(),
-        HomeSearchBarPlacement.top,
-      );
-      expect(
-        settingsWith(
-          placement: HomeSearchBarPlacement.tabBar,
-          position: TabBarPosition.top,
-        ).effectiveHomeSearchBarPlacement(),
-        HomeSearchBarPlacement.tabBar,
-      );
-    });
-
-    // The home surface has no address field of its own: the pill and the tab
-    // bar's field are the only two entries into search, and exactly one of them
-    // has to be present. A resolution that returned auto would leave callers
-    // deciding for themselves, which is how both end up off.
-    test('never resolves to auto', () {
-      for (final placement in HomeSearchBarPlacement.values) {
-        for (final position in TabBarPosition.values) {
-          expect(
-            settingsWith(
-              placement: placement,
-              position: position,
-            ).effectiveHomeSearchBarPlacement(),
-            isNot(HomeSearchBarPlacement.auto),
-          );
-        }
-      }
     });
   });
 }
