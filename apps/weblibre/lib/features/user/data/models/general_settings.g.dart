@@ -29,12 +29,6 @@ abstract class _$GeneralSettingsCWProxy {
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
 
-  GeneralSettings tabIntentOpenSetting(
-    TabIntentOpenSetting tabIntentOpenSetting,
-  );
-
-  GeneralSettings bookmarkOpenSetting(BookmarkOpenSetting bookmarkOpenSetting);
-
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
   GeneralSettings tabBarSwipeAction(
@@ -83,8 +77,6 @@ abstract class _$GeneralSettingsCWProxy {
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
   );
 
-  GeneralSettings customTabsEnabled(bool customTabsEnabled);
-
   GeneralSettings appLinksMode(AppLinksMode appLinksMode);
 
   GeneralSettings appLinkRules(Map<String, PersistedAppLinkRule> appLinkRules);
@@ -111,8 +103,6 @@ abstract class _$GeneralSettingsCWProxy {
     HomeTarget homeTarget,
     String? homeTargetUrl,
     HomeSearchBarPlacement homeSearchBarPlacement,
-    TabIntentOpenSetting tabIntentOpenSetting,
-    BookmarkOpenSetting bookmarkOpenSetting,
     bool autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
@@ -133,7 +123,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowNonManifestPwaInstall,
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
-    bool customTabsEnabled,
     AppLinksMode appLinksMode,
     Map<String, PersistedAppLinkRule> appLinkRules,
     bool pureBlack,
@@ -182,16 +171,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings homeSearchBarPlacement(
     HomeSearchBarPlacement homeSearchBarPlacement,
   ) => call(homeSearchBarPlacement: homeSearchBarPlacement);
-
-  @override
-  GeneralSettings tabIntentOpenSetting(
-    TabIntentOpenSetting tabIntentOpenSetting,
-  ) => call(tabIntentOpenSetting: tabIntentOpenSetting);
-
-  @override
-  GeneralSettings bookmarkOpenSetting(
-    BookmarkOpenSetting bookmarkOpenSetting,
-  ) => call(bookmarkOpenSetting: bookmarkOpenSetting);
 
   @override
   GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
@@ -277,10 +256,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(externalAppIntentPolicies: externalAppIntentPolicies);
 
   @override
-  GeneralSettings customTabsEnabled(bool customTabsEnabled) =>
-      call(customTabsEnabled: customTabsEnabled);
-
-  @override
   GeneralSettings appLinksMode(AppLinksMode appLinksMode) =>
       call(appLinksMode: appLinksMode);
 
@@ -317,8 +292,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
-    Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
-    Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar swipe switches spaces')
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
@@ -340,7 +313,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
-    Object? customTabsEnabled = const $CopyWithPlaceholder(),
     Object? appLinksMode = const $CopyWithPlaceholder(),
     Object? appLinkRules = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
@@ -389,18 +361,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeSearchBarPlacement
           // ignore: cast_nullable_to_non_nullable
           : homeSearchBarPlacement as HomeSearchBarPlacement,
-      tabIntentOpenSetting:
-          tabIntentOpenSetting == const $CopyWithPlaceholder() ||
-              tabIntentOpenSetting == null
-          ? _value.tabIntentOpenSetting
-          // ignore: cast_nullable_to_non_nullable
-          : tabIntentOpenSetting as TabIntentOpenSetting,
-      bookmarkOpenSetting:
-          bookmarkOpenSetting == const $CopyWithPlaceholder() ||
-              bookmarkOpenSetting == null
-          ? _value.bookmarkOpenSetting
-          // ignore: cast_nullable_to_non_nullable
-          : bookmarkOpenSetting as BookmarkOpenSetting,
       autoHideTabBar:
           autoHideTabBar == const $CopyWithPlaceholder() ||
               autoHideTabBar == null
@@ -509,12 +469,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.externalAppIntentPolicies
           // ignore: cast_nullable_to_non_nullable
           : externalAppIntentPolicies as Map<String, IntentSourcePolicy>,
-      customTabsEnabled:
-          customTabsEnabled == const $CopyWithPlaceholder() ||
-              customTabsEnabled == null
-          ? _value.customTabsEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : customTabsEnabled as bool,
       appLinksMode:
           appLinksMode == const $CopyWithPlaceholder() || appLinksMode == null
           ? _value.appLinksMode
@@ -577,16 +531,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$HomeSearchBarPlacementEnumMap,
         json['homeSearchBarPlacement'],
       ),
-      tabIntentOpenSetting: $enumDecodeNullable(
-        _$TabIntentOpenSettingEnumMap,
-        json['tabIntentOpenSetting'],
-        unknownValue: TabIntentOpenSetting.regular,
-      ),
-      bookmarkOpenSetting: $enumDecodeNullable(
-        _$BookmarkOpenSettingEnumMap,
-        json['bookmarkOpenSetting'],
-        unknownValue: BookmarkOpenSetting.regular,
-      ),
       autoHideTabBar: json['autoHideTabBar'] as bool?,
       tabBarSwipeAction: $enumDecodeNullable(
         _$TabBarSwipeActionEnumMap,
@@ -632,7 +576,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
             (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
           ),
-      customTabsEnabled: json['customTabsEnabled'] as bool?,
       appLinksMode: $enumDecodeNullable(
         _$AppLinksModeEnumMap,
         json['appLinksMode'],
@@ -665,10 +608,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'homeTargetUrl': instance.homeTargetUrl,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
-  'tabIntentOpenSetting':
-      _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
-  'bookmarkOpenSetting':
-      _$BookmarkOpenSettingEnumMap[instance.bookmarkOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
@@ -692,7 +631,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(
     (k, e) => MapEntry(k, _$IntentSourcePolicyEnumMap[e]!),
   ),
-  'customTabsEnabled': instance.customTabsEnabled,
   'appLinksMode': _$AppLinksModeEnumMap[instance.appLinksMode]!,
   'appLinkRules': instance.appLinkRules.map((k, e) => MapEntry(k, e.toJson())),
   'pureBlack': instance.pureBlack,
@@ -734,19 +672,6 @@ const _$HomeSearchBarPlacementEnumMap = {
   HomeSearchBarPlacement.auto: 'auto',
   HomeSearchBarPlacement.top: 'top',
   HomeSearchBarPlacement.tabBar: 'tabBar',
-};
-
-const _$TabIntentOpenSettingEnumMap = {
-  TabIntentOpenSetting.regular: 'regular',
-  TabIntentOpenSetting.private: 'private',
-  TabIntentOpenSetting.ask: 'ask',
-};
-
-const _$BookmarkOpenSettingEnumMap = {
-  BookmarkOpenSetting.regular: 'regular',
-  BookmarkOpenSetting.private: 'private',
-  BookmarkOpenSetting.customTab: 'customTab',
-  BookmarkOpenSetting.ask: 'ask',
 };
 
 const _$TabBarSwipeActionEnumMap = {

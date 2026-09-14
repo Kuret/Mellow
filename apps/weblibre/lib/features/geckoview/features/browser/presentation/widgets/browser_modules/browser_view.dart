@@ -32,21 +32,18 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -55,12 +52,7 @@ import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_sourc
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/search/domain/providers/search_provider.dart';
-import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
-import 'package:weblibre/features/share_intent/domain/services/share_intent_space.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -525,81 +517,26 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       engineBoundIntentStreamProvider,
       (previous, next) {
         next.whenData((sharedContent) async {
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
+          // A link that arrives from outside never lands in a tab on its own:
+          // it opens the custom tab, and the sheet pushed here is the only way
+          // to promote it into one — which is also where its space is chosen.
+          final router = await ref.read(routerProvider.future);
 
-          switch (settings.effectiveTabIntentOpenSetting) {
-            case TabIntentOpenSetting.regular:
-            case TabIntentOpenSetting.private:
-              await ref
-                  .read(engineReadyStateProvider.notifier)
-                  .waitUntilReady();
-
-              final tabMode = switch (settings.effectiveTabIntentOpenSetting) {
-                TabIntentOpenSetting.private => TabMode.private,
-                _ => TabMode.regular,
-              };
-
-              // The user is not being asked here (that is the `ask` branch
-              // below), so a `fixed` share-intent space preference is the
-              // only chance to honour it. For a private tab addTab discards
-              // this anyway (I3), so resolving it unconditionally is fine.
-              final shareIntentSpaceUuid = await ref.read(
-                resolveShareIntentSpaceUuidProvider.future,
+          switch (sharedContent) {
+            case SharedUrl():
+              final route = OpenSharedContentRoute(
+                sharedUrl: sharedContent.url.toString(),
+                contextId: sharedContent.contextId,
+                containerMode: sharedContent.containerMode.queryValueOrNull,
               );
-
-              switch (sharedContent) {
-                case SharedUrl():
-                  final containerSelection = await _resolveContainerSelection(
-                    ref,
-                    sharedContent.contextId,
-                    sharedContent.containerMode,
-                  );
-
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: sharedContent.url,
-                        tabMode: tabMode,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                        containerSelection: containerSelection,
-                        spaceUuid: shareIntentSpaceUuid,
-                      );
-                case SharedText():
-                  final SearchProvider provider =
-                      ref.read(selectedSearchProviderProvider()) ??
-                      ref.read(defaultSearchProviderProvider);
-
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: provider.searchUrl(sharedContent.text),
-                        tabMode: tabMode,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                        spaceUuid: shareIntentSpaceUuid,
-                      );
-              }
-            case TabIntentOpenSetting.ask:
-              final router = await ref.read(routerProvider.future);
-
-              switch (sharedContent) {
-                case SharedUrl():
-                  final route = OpenSharedContentRoute(
-                    sharedUrl: sharedContent.url.toString(),
-                    contextId: sharedContent.contextId,
-                    containerMode: sharedContent.containerMode.queryValueOrNull,
-                  );
-                  await router.push(route.location);
-                case SharedText():
-                  final route = SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ?? TabType.regular,
-                    searchText: sharedContent.text,
-                    launchedFromIntent: true, //launched from intent
-                  );
-                  await router.push(route.location);
-              }
+              await router.push(route.location);
+            case SharedText():
+              final route = SearchRoute(
+                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
+                searchText: sharedContent.text,
+                launchedFromIntent: true, //launched from intent
+              );
+              await router.push(route.location);
           }
         });
       },
@@ -764,34 +701,4 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     super.dispose();
   }
-}
-
-/// Resolves a [TabContainerSelection] from incoming launch container metadata.
-Future<TabContainerSelection> _resolveContainerSelection(
-  WidgetRef ref,
-  String? contextId,
-  IntentContainerMode containerMode,
-) async {
-  if (contextId == null) {
-    return switch (containerMode) {
-      IntentContainerMode.unassigned =>
-        const TabContainerSelection.unassigned(),
-      _ => const TabContainerSelection.useSelected(),
-    };
-  }
-
-  // A container's Gecko contextId is its id.
-  final container = await ref
-      .read(containerRepositoryProvider.notifier)
-      .getContainerData(contextId);
-
-  if (container != null) {
-    return TabContainerSelection.specific(container);
-  }
-
-  return switch (containerMode) {
-    IntentContainerMode.useSelected =>
-      const TabContainerSelection.useSelected(),
-    _ => const TabContainerSelection.unassigned(),
-  };
 }

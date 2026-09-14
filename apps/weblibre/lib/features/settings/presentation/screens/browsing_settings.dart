@@ -22,14 +22,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_space_selector.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/share_intent/domain/entities/share_intent_space_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -98,48 +95,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
       ),
     ],
   ),
-  SettingsSectionDefinition(
-    title: 'External Links',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'External Link Handling',
-        subtitle: 'Choose how external links open in WebLibre',
-        keywords: ['intents'],
-        child: _ExternalLinkHandlingSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Shared Link Space',
-        subtitle: 'Choose which space a shared link opens in',
-        keywords: ['share', 'shared link', 'space', 'spaces', 'send to'],
-        child: _ShareIntentSpaceSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Custom Tabs',
-        subtitle:
-            'Let other apps open links in a lightweight in-app tab, instead '
-            'of the main browser',
-        keywords: [
-          'custom tabs',
-          'in-app browser',
-          'chrome custom tabs',
-          'external app',
-          'share',
-        ],
-        child: _CustomTabsTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Bookmarks',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Bookmark Open Behavior',
-        subtitle: 'Choose how tapping a bookmark opens it',
-        keywords: ['bookmarks', 'open', 'custom tab'],
-        child: _BookmarkOpenBehaviorSection(),
-      ),
-    ],
-  ),
 ];
 
 class BrowsingSettingsScreen extends StatelessWidget {
@@ -152,217 +107,6 @@ class BrowsingSettingsScreen extends StatelessWidget {
       subtitle: 'Tabs, navigation and app links.',
       icon: MdiIcons.compassOutline,
       sections: browsingSettingsSections,
-    );
-  }
-}
-
-class _ExternalLinkHandlingSection extends HookConsumerWidget {
-  const _ExternalLinkHandlingSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final tabIntentOpenSetting = settings.tabIntentOpenSetting;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('External Link Handling'),
-            subtitle: Text('Choose how external links open in WebLibre'),
-            leading: Icon(MdiIcons.tabPlus),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: tabIntentOpenSetting,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabIntentOpenSetting(value),
-                    );
-              }
-            },
-            child: Column(
-              children: [
-                const RadioListTile.adaptive(
-                  value: TabIntentOpenSetting.ask,
-                  title: Text('Prompt'),
-                  subtitle: Text('Ask how external links should open'),
-                  secondary: Icon(MdiIcons.messageQuestion),
-                ),
-                const RadioListTile.adaptive(
-                  value: TabIntentOpenSetting.regular,
-                  title: Text('Regular'),
-                  subtitle: Text('Open external links in a regular tab'),
-                  secondary: Icon(MdiIcons.tab),
-                ),
-                RadioListTile.adaptive(
-                  value: TabIntentOpenSetting.private,
-                  title: const Text('Private'),
-                  subtitle: const Text('Open external links in a private tab'),
-                  secondary: Icon(
-                    MdiIcons.dominoMask,
-                    color: AppColors.of(context).privateTabPurple,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Which space a link shared in from another app opens in — a separate
-/// question from [_ExternalLinkHandlingSection] above, which decides regular
-/// vs. private vs. asking. This decides *where among spaces*, and only
-/// matters once a link is actually going to land in a tab (so it applies to
-/// every branch above, `ask` included: `OpenSharedContent` asks it there
-/// too).
-class _ShareIntentSpaceSection extends ConsumerWidget {
-  const _ShareIntentSpaceSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(zenSettingsWithDefaultsProvider);
-    final mode = settings.shareIntentSpaceMode;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const ListTile(
-          title: Text('Shared Link Space'),
-          subtitle: Text('Choose which space a shared link opens in'),
-          leading: Icon(MdiIcons.viewDashboardOutline),
-          contentPadding: EdgeInsets.zero,
-        ),
-        RadioGroup(
-          groupValue: mode,
-          onChanged: (value) async {
-            if (value != null) {
-              await ref
-                  .read(saveZenSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.shareIntentSpaceMode(value),
-                  );
-            }
-          },
-          child: const Column(
-            children: [
-              RadioListTile.adaptive(
-                value: ShareIntentSpaceMode.ask,
-                title: Text('Ask'),
-                subtitle: Text('Choose the space each time a link arrives'),
-                secondary: Icon(MdiIcons.messageQuestion),
-              ),
-              RadioListTile.adaptive(
-                value: ShareIntentSpaceMode.fixed,
-                title: Text('Always the same space'),
-                subtitle: Text('Shared links always open in one chosen space'),
-                secondary: Icon(MdiIcons.pin),
-              ),
-            ],
-          ),
-        ),
-        if (mode == ShareIntentSpaceMode.fixed)
-          ListTile(
-            contentPadding: const EdgeInsets.only(left: 16),
-            title: const Text('Space'),
-            trailing: CompactSpaceSelector(
-              selectedSpaceUuid: settings.shareIntentSpaceUuid,
-              emphasizeSelection: false,
-              onSelectionChanged: (uuid) async {
-                await ref
-                    .read(saveZenSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .shareIntentSpaceUuid(uuid),
-                    );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
-  const _BookmarkOpenBehaviorSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final bookmarkOpenSetting = settings.effectiveBookmarkOpenSetting;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Bookmark Open Behavior'),
-            subtitle: Text('Choose how tapping a bookmark opens it'),
-            leading: Icon(MdiIcons.bookmarkMultiple),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: bookmarkOpenSetting,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.bookmarkOpenSetting(value),
-                    );
-              }
-            },
-            child: Column(
-              children: [
-                const RadioListTile.adaptive(
-                  value: BookmarkOpenSetting.ask,
-                  title: Text('Prompt'),
-                  subtitle: Text('Ask how the bookmark should open'),
-                  secondary: Icon(MdiIcons.messageQuestion),
-                ),
-                const RadioListTile.adaptive(
-                  value: BookmarkOpenSetting.regular,
-                  title: Text('Regular'),
-                  subtitle: Text('Open the bookmark in a regular tab'),
-                  secondary: Icon(MdiIcons.tab),
-                ),
-                RadioListTile.adaptive(
-                  value: BookmarkOpenSetting.private,
-                  title: const Text('Private'),
-                  subtitle: const Text('Open the bookmark in a private tab'),
-                  secondary: Icon(
-                    MdiIcons.dominoMask,
-                    color: AppColors.of(context).privateTabPurple,
-                  ),
-                ),
-                const RadioListTile.adaptive(
-                  value: BookmarkOpenSetting.customTab,
-                  title: Text('Custom Tab'),
-                  subtitle: Text(
-                    'Open the bookmark in a lightweight custom tab',
-                  ),
-                  secondary: Icon(MdiIcons.applicationOutline),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -600,35 +344,6 @@ class _DesktopModeSitesTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await const DesktopModeSitesRoute().push(context);
-      },
-    );
-  }
-}
-
-class _CustomTabsTile extends HookConsumerWidget {
-  const _CustomTabsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final customTabsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.customTabsEnabled),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Custom Tabs'),
-      subtitle: const Text(
-        'Let other apps open links in a lightweight in-app tab. When off, '
-        'these links and shared URLs open as normal tabs in the main browser.',
-      ),
-      secondary: const Icon(Icons.web_asset),
-      value: customTabsEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.customTabsEnabled(value),
-            );
       },
     );
   }

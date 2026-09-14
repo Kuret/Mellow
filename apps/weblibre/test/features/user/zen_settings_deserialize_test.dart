@@ -21,7 +21,6 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/share_intent/domain/entities/share_intent_space_mode.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
@@ -90,8 +89,6 @@ void main() {
         maxLiveTabs: 42,
         separateEssentials: false,
         profileDefaultsRevision: 3,
-        shareIntentSpaceMode: ShareIntentSpaceMode.fixed,
-        shareIntentSpaceUuid: 'f4b1c0de-0000-4000-8000-000000000001',
         customSearchProviders: [
           CustomSearchEngine(
             id: 'custom:1cb2',

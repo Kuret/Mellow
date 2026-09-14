@@ -31,7 +31,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
@@ -52,8 +51,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -1014,67 +1011,31 @@ class BookmarkListScreen extends HookConsumerWidget {
 
   // -- Tab Opening Helper --
 
-  /// Opens a tapped bookmark according to [BookmarkOpenSetting]. `ask` shows
-  /// the "open in..." sheet (the historical, default behavior); the other
-  /// values open the bookmark directly with no intermediate prompt.
+  /// Opens a tapped bookmark in the custom tab, the one way any link reaches
+  /// the browser from outside a tab. Promoting it into a real tab — and
+  /// picking the space it lands in — is the custom tab's "Open in space"
+  /// action, so a bookmark and a shared link take the same path.
   Future<void> _openBookmark(
     BuildContext context,
     WidgetRef ref,
     Uri url,
   ) async {
-    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    final containerRepo = ref.read(containerRepositoryProvider.notifier);
 
-    switch (settings.effectiveBookmarkOpenSetting) {
-      case BookmarkOpenSetting.ask:
-        final result = await OpenSharedContentRoute(
-          sharedUrl: url.toString(),
-        ).push<bool>(context);
-
-        if (result == true && context.mounted) {
-          const BrowserRoute().go(context);
-        }
-      case BookmarkOpenSetting.regular:
-      case BookmarkOpenSetting.private:
-        final effective = settings.effectiveBookmarkOpenSetting;
-        final tabMode = switch (effective) {
-          BookmarkOpenSetting.private => TabMode.private,
-          _ => TabMode.regular,
-        };
-
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: url,
-              tabMode: tabMode,
-              selectTab: true,
-              containerSelection: const TabContainerSelection.useSelected(),
-            );
-
-        if (context.mounted) {
-          const BrowserRoute().go(context);
-        }
-      case BookmarkOpenSetting.customTab:
-        final containerRepo = ref.read(containerRepositoryProvider.notifier);
-
-        ContainerData? container;
-        if (url.hasAuthority && url.isHttpOrHttps) {
-          final siteAssignedId = await containerRepo.siteAssignedContainerId(
-            url,
-          );
-          if (siteAssignedId != null) {
-            container = await containerRepo.getContainerData(siteAssignedId);
-          }
-        }
-        container ??= await ref
-            .read(selectedContainerProvider.notifier)
-            .fetchData();
-
-        await GeckoBrowserService().openInCustomTab(
-          url: url,
-          private: false,
-          contextId: container?.id,
-        );
+    ContainerData? container;
+    if (url.hasAuthority && url.isHttpOrHttps) {
+      final siteAssignedId = await containerRepo.siteAssignedContainerId(url);
+      if (siteAssignedId != null) {
+        container = await containerRepo.getContainerData(siteAssignedId);
+      }
     }
+    container ??= await ref.read(selectedContainerProvider.notifier).fetchData();
+
+    await GeckoBrowserService().openInCustomTab(
+      url: url,
+      private: false,
+      contextId: container?.id,
+    );
   }
 
   Future<void> _openInNewTab(

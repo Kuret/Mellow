@@ -45,12 +45,7 @@ class NativeIntentGatekeeperReplicator
   Future<void>? _pendingAllowSync;
 
   Future<void> _push(
-    ({
-      bool enabled,
-      Map<String, IntentSourcePolicy> policies,
-      bool customTabsEnabled,
-    })
-    config,
+    ({bool enabled, Map<String, IntentSourcePolicy> policies}) config,
   ) async {
     final blocked = config.policies.entries
         .where((entry) => entry.value == IntentSourcePolicy.block)
@@ -59,7 +54,9 @@ class NativeIntentGatekeeperReplicator
 
     try {
       await _api.setConfig(config.enabled, blocked);
-      await _api.setCustomTabsEnabled(config.customTabsEnabled);
+      // Custom tabs are the one way an inbound link opens, so the native side
+      // is told so unconditionally; there is no setting behind this any more.
+      await _api.setCustomTabsEnabled(true);
     } catch (error, stackTrace) {
       logger.e(
         'Failed to replicate intent gatekeeper config to native',
@@ -122,7 +119,6 @@ class NativeIntentGatekeeperReplicator
         (settings) => EquatableValue((
           enabled: settings.blockExternalAppsEnabled,
           policies: settings.externalAppIntentPolicies,
-          customTabsEnabled: settings.customTabsEnabled,
         )),
       ),
       fireImmediately: true,
@@ -132,7 +128,6 @@ class NativeIntentGatekeeperReplicator
 
         if (previous != null &&
             previous.enabled == next.enabled &&
-            previous.customTabsEnabled == next.customTabsEnabled &&
             const DeepCollectionEquality.unordered().equals(
               previous.policies,
               next.policies,
@@ -147,7 +142,6 @@ class NativeIntentGatekeeperReplicator
           await _push((
             enabled: settings.blockExternalAppsEnabled,
             policies: settings.externalAppIntentPolicies,
-            customTabsEnabled: settings.customTabsEnabled,
           ));
         }());
       },

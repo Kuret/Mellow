@@ -39,7 +39,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
-import 'package:weblibre/features/share_intent/domain/services/share_intent_space.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -88,30 +87,12 @@ class OpenSharedContent extends HookConsumerWidget {
     final globalSelectedSpaceUuid = ref.watch(selectedSpaceProvider);
 
     // Which row is the one the app would have picked on its own. It only
-    // highlights a row — every space stays one tap away — but it is where
-    // `ShareIntentSpaceMode.fixed` shows up in this sheet.
+    // highlights a row — every space stays one tap away.
     final defaultSpaceUuid = useState<String?>(globalSelectedSpaceUuid);
 
     useEffect(() {
-      var cancelled = false;
-
-      unawaited(
-        Future(() async {
-          final resolved =
-              await ref.read(resolveShareIntentSpaceUuidProvider.future) ??
-              globalSelectedSpaceUuid;
-
-          if (cancelled) {
-            return;
-          }
-
-          defaultSpaceUuid.value = resolved;
-        }),
-      );
-
-      return () {
-        cancelled = true;
-      };
+      defaultSpaceUuid.value = globalSelectedSpaceUuid;
+      return null;
     }, [globalSelectedSpaceUuid]);
 
     final currentUrl = useValueListenable(textController).text;

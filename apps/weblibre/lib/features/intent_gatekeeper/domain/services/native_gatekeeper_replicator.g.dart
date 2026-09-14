@@ -65,7 +65,7 @@ final class NativeIntentGatekeeperReplicatorProvider
 }
 
 String _$nativeIntentGatekeeperReplicatorHash() =>
-    r'1425d7d540d872d82a2d97e0a9fff6a4f6d9ae7b';
+    r'c7cc10a24321c53747ffc72212c213fa5da0cf30';
 
 /// Mirrors the Flutter-side block list to the native side so the
 /// `IntentReceiverActivity` can reject intents without launching Flutter.

@@ -77,13 +77,6 @@ enum TabBarStackingMode {
   spaceTabs,
 }
 
-enum TabIntentOpenSetting { regular, private, ask }
-
-/// Determines what happens when a bookmark is tapped in the bookmark list.
-/// [ask] shows the "open in..." sheet (today's behavior, and the default);
-/// the other values open the bookmark directly with no intermediate prompt.
-enum BookmarkOpenSetting { regular, private, customTab, ask }
-
 /// Edge of the compact tab bar on narrow viewports. Only [top] and [bottom]
 /// place anything today: [left] and [right] are legacy values from when the
 /// position setting alone decided between a bar and a side rail, kept so
@@ -202,14 +195,6 @@ class GeneralSettings with FastEquatable {
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
   final HomeSearchBarPlacement homeSearchBarPlacement;
 
-  @JsonKey(unknownEnumValue: TabIntentOpenSetting.regular)
-  final TabIntentOpenSetting tabIntentOpenSetting;
-
-  /// Determines what happens when a bookmark is tapped. See
-  /// [BookmarkOpenSetting] and [effectiveBookmarkOpenSetting].
-  @JsonKey(unknownEnumValue: BookmarkOpenSetting.regular)
-  final BookmarkOpenSetting bookmarkOpenSetting;
-
   final bool autoHideTabBar;
   @Deprecated('Retired; the bar swipe switches spaces')
   // ignore: deprecated_member_use_from_same_package
@@ -236,12 +221,6 @@ class GeneralSettings with FastEquatable {
   final bool allowNonManifestPwaInstall;
   final bool blockExternalAppsEnabled;
   final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
-
-  /// Whether external Custom Tab intents (and URLs shared into WebLibre) open
-  /// in a lightweight custom-tab activity. When false, they open as normal
-  /// tabs in the main browser instead. Read natively by `IntentReceiverActivity`
-  /// via the intent gatekeeper prefs bridge. Defaults to true.
-  final bool customTabsEnabled;
 
   /// Global app-links behaviour: always open in native apps, ask each time, or
   /// never leave the browser. Defaults to [AppLinksMode.ask]. Per-site rules in
@@ -278,8 +257,6 @@ class GeneralSettings with FastEquatable {
     required this.homeTarget,
     required this.homeTargetUrl,
     required this.homeSearchBarPlacement,
-    required this.tabIntentOpenSetting,
-    required this.bookmarkOpenSetting,
     required this.autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
     // ignore: deprecated_member_use_from_same_package
@@ -302,7 +279,6 @@ class GeneralSettings with FastEquatable {
     required this.allowNonManifestPwaInstall,
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
-    required this.customTabsEnabled,
     required this.appLinksMode,
     required this.appLinkRules,
     required this.pureBlack,
@@ -319,8 +295,6 @@ class GeneralSettings with FastEquatable {
     HomeTarget? homeTarget,
     this.homeTargetUrl,
     HomeSearchBarPlacement? homeSearchBarPlacement,
-    TabIntentOpenSetting? tabIntentOpenSetting,
-    BookmarkOpenSetting? bookmarkOpenSetting,
     bool? autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
@@ -341,7 +315,6 @@ class GeneralSettings with FastEquatable {
     bool? allowNonManifestPwaInstall,
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
-    bool? customTabsEnabled,
     AppLinksMode? appLinksMode,
     Map<String, PersistedAppLinkRule>? appLinkRules,
     bool? pureBlack,
@@ -359,8 +332,6 @@ class GeneralSettings with FastEquatable {
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
            homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
-       tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
-       bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        // ignore: deprecated_member_use_from_same_package
        tabBarSwipeAction =
@@ -389,7 +360,6 @@ class GeneralSettings with FastEquatable {
        allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
-       customTabsEnabled = customTabsEnabled ?? true,
        appLinksMode = appLinksMode ?? AppLinksMode.ask,
        appLinkRules = appLinkRules ?? const {},
        pureBlack = pureBlack ?? false,
@@ -397,17 +367,6 @@ class GeneralSettings with FastEquatable {
        desktopModeSites = desktopModeSites ?? const [];
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
-    // The isolated tab mode was removed; map any previously persisted
-    // `isolated` values for these settings back to `regular` so old profiles
-    // still decode.
-    // TODO: Drop this fallback once enough releases have shipped that
-    // rolling back to a version with isolated tabs is no longer a concern.
-    for (final key in const ['tabIntentOpenSetting', 'bookmarkOpenSetting']) {
-      if (json[key] == 'isolated') {
-        json[key] = 'regular';
-      }
-    }
-
     // Migrate the legacy `tabBarShowQuickTabSwitcherBar` toggle and
     // `quickTabSwitcherMode` selection to the merged `tabBarStackingMode`.
     // The legacy mode names are a subset of the new enum's, so values map
@@ -429,11 +388,6 @@ class GeneralSettings with FastEquatable {
   }
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
-
-  TabIntentOpenSetting get effectiveTabIntentOpenSetting =>
-      tabIntentOpenSetting;
-
-  BookmarkOpenSetting get effectiveBookmarkOpenSetting => bookmarkOpenSetting;
 
   /// [homeSearchBarPlacement] with [HomeSearchBarPlacement.auto] resolved
   /// against the tab bar's position, so callers never have to. Never returns
@@ -477,8 +431,6 @@ class GeneralSettings with FastEquatable {
     homeTarget,
     homeTargetUrl,
     homeSearchBarPlacement,
-    tabIntentOpenSetting,
-    bookmarkOpenSetting,
     autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,
@@ -499,7 +451,6 @@ class GeneralSettings with FastEquatable {
     allowNonManifestPwaInstall,
     blockExternalAppsEnabled,
     externalAppIntentPolicies,
-    customTabsEnabled,
     appLinksMode,
     appLinkRules,
     pureBlack,
