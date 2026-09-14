@@ -18,8 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
 import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_defaults.dart';
+
+PreferenceSetting _setting(Object value, {bool requireUserOptIn = false}) {
+  return PreferenceSetting(
+    value: value,
+    title: 'title',
+    description: 'description',
+    requireUserOptIn: requireUserOptIn,
+  );
+}
 
 void main() {
   group('isPristineUBlockFilterListSettings', () {
@@ -70,6 +80,93 @@ void main() {
         ),
         isFalse,
       );
+    });
+  });
+
+  group('selectDefaultHardeningPrefs', () {
+    test('omits the opt-in-only groups entirely', () {
+      final groups = {
+        'Resist Fingerprinting': PreferenceSettingGroup(
+          description: null,
+          settings: {'privacy.resistFingerprinting': _setting(true)},
+        ),
+        'WebGL': PreferenceSettingGroup(
+          description: null,
+          settings: {'webgl.disabled': _setting(true)},
+        ),
+        'Attack Surface Reduction': PreferenceSettingGroup(
+          description: null,
+          settings: {'javascript.options.main_process_disable_jit': _setting(true)},
+        ),
+        'Telemetry': PreferenceSettingGroup(
+          description: null,
+          settings: {'toolkit.telemetry.enabled': _setting(false)},
+        ),
+      };
+
+      final result = selectDefaultHardeningPrefs(groups, {});
+
+      expect(result.keys, ['toolkit.telemetry.enabled']);
+    });
+
+    test('omits prefs that require explicit user opt-in', () {
+      final groups = {
+        'Telemetry': PreferenceSettingGroup(
+          description: null,
+          settings: {
+            'toolkit.telemetry.enabled': _setting(false),
+            'toolkit.telemetry.optional': _setting(
+              true,
+              requireUserOptIn: true,
+            ),
+          },
+        ),
+      };
+
+      final result = selectDefaultHardeningPrefs(groups, {});
+
+      expect(result.keys, ['toolkit.telemetry.enabled']);
+    });
+
+    test('omits prefs the profile has already changed on the user branch', () {
+      final groups = {
+        'Telemetry': PreferenceSettingGroup(
+          description: null,
+          settings: {'toolkit.telemetry.enabled': _setting(false)},
+        ),
+      };
+
+      final result = selectDefaultHardeningPrefs(groups, {
+        'toolkit.telemetry.enabled',
+      });
+
+      expect(result, isEmpty);
+    });
+
+    test('includes a pref the profile has never touched', () {
+      final groups = {
+        'Telemetry': PreferenceSettingGroup(
+          description: null,
+          settings: {'toolkit.telemetry.enabled': _setting(false)},
+        ),
+      };
+
+      final result = selectDefaultHardeningPrefs(groups, {'some.other.pref'});
+
+      expect(result, {'toolkit.telemetry.enabled': false});
+    });
+
+    test('includes a pref absent from the current-prefs map entirely', () {
+      final groups = {
+        'Telemetry': PreferenceSettingGroup(
+          description: null,
+          settings: {'toolkit.telemetry.enabled': _setting(false)},
+        ),
+      };
+
+      final result = selectDefaultHardeningPrefs(groups, <String>{});
+
+      expect(result, {'toolkit.telemetry.enabled': false});
     });
   });
 }

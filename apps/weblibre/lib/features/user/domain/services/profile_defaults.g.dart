@@ -42,7 +42,7 @@ final class ProfileDefaultsServiceProvider
 }
 
 String _$profileDefaultsServiceHash() =>
-    r'2b9b1bf9bef70c90a4f58469e66b0045bb543470';
+    r'a50c68e382dddf2fb752484483f71cec52ddb0a2';
 
 abstract class _$ProfileDefaultsService extends $Notifier<void> {
   void build();
