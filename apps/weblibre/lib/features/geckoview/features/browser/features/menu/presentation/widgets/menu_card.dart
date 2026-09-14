@@ -36,12 +36,17 @@ const double menuSectionSpacing = 16.0;
 Widget buildMenuCard(BuildContext context, {required List<Widget> children}) {
   if (children.isEmpty) return const SizedBox.shrink();
 
+  final colorScheme = Theme.of(context).colorScheme;
+
   return Padding(
     padding: const EdgeInsets.only(bottom: menuSectionSpacing),
     child: Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(16),
+      color: colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
       child: Column(
         children: [
           for (var i = 0; i < children.length; i++) ...[

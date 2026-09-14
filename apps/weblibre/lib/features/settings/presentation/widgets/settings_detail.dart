@@ -321,6 +321,10 @@ List<Widget> buildSettingsSectionWidgets(
       Card.filled(
         margin: EdgeInsets.zero,
         color: colorScheme.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
         clipBehavior: Clip.antiAlias,
         child: Column(
           children: [

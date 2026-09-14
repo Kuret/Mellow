@@ -212,7 +212,10 @@ class SearchPanel extends StatelessWidget {
       shadowColor: Colors.black.withValues(alpha: 0.4),
       elevation: 12,
       clipBehavior: Clip.antiAlias,
-      borderRadius: BorderRadius.circular(kSearchPanelRadius),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(kSearchPanelRadius),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
       child: builder(context, metrics),
     );
 
