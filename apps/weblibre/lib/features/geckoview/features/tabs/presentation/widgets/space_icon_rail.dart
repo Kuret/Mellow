@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -97,6 +100,11 @@ enum _SpaceRailMenuAction {
 /// (see `toolbar_button_registry.dart`), rather than a second
 /// implementation of "go back"/"reload"/etc.
 Future<void> _showAddMenu(BuildContext context, WidgetRef ref) async {
+  // Fired before the menu is built: the tick is the acknowledgement that the
+  // press was long enough, so it has to land when the finger is still down,
+  // not when the menu finishes animating in.
+  unawaited(HapticFeedback.mediumImpact());
+
   final button = context.findRenderObject()! as RenderBox;
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   final position = RelativeRect.fromRect(
@@ -292,6 +300,12 @@ class SpaceIconRailView extends StatelessWidget {
             ),
           Tooltip(
             message: 'New tab',
+            // Manual, or the tooltip's own long-press recognizer joins the
+            // gesture arena beside the one that opens the menu and sometimes
+            // wins it — which is how a long-press on "+" occasionally put a
+            // "New tab" bubble on screen instead of the menu. Hover and
+            // semantics still get the label.
+            triggerMode: TooltipTriggerMode.manual,
             child: Builder(
               builder: (context) => GestureDetector(
                 onLongPress: onAddLongPress == null
@@ -368,6 +382,9 @@ class _SpaceGlyphButton extends StatelessWidget {
 
     return Tooltip(
       message: displayName,
+      // Manual for the same reason as the "+" above: this glyph's long-press
+      // opens the space editor, and the tooltip must not race it.
+      triggerMode: TooltipTriggerMode.manual,
       child: InkResponse(
         onTap: onTap,
         onLongPress: onLongPress,
