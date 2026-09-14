@@ -23,8 +23,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
-    show GeckoBrowserService;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/app_state.dart';
@@ -37,7 +35,6 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
 const List<SettingsSectionDefinition> advancedSettingsSections = [
@@ -121,12 +118,6 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
           'migrate',
         ],
         child: _SettingsTransferTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Default Browser',
-        subtitle: 'Set WebLibre as your default browser',
-        keywords: ['system browser', 'browser defaults', 'default browser'],
-        child: _DefaultBrowserTile(),
       ),
     ],
   ),
@@ -401,53 +392,6 @@ class _SettingsTransferTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const SettingsTransferRoute().push(context),
-    );
-  }
-}
-
-class _DefaultBrowserTile extends HookConsumerWidget {
-  const _DefaultBrowserTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final defaultBrowserRefreshKey = useState(0);
-
-    useOnAppLifecycleStateChange((previous, current) {
-      if (current == AppLifecycleState.resumed) {
-        defaultBrowserRefreshKey.value++;
-      }
-    });
-
-    final isDefault = useCachedFuture(
-      () => GeckoBrowserService().isDefaultBrowser(),
-      [defaultBrowserRefreshKey.value],
-    );
-
-    final isCurrentDefaultBrowser = isDefault.data == true;
-
-    return CustomListTile(
-      title: 'Default Browser',
-      subtitle: isCurrentDefaultBrowser
-          ? 'WebLibre is your default browser'
-          : 'Set WebLibre as your default browser',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          Icons.public,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-      suffix: FilledButton.icon(
-        onPressed: isCurrentDefaultBrowser
-            ? null
-            : () async {
-                await GeckoBrowserService().requestDefaultBrowser();
-                defaultBrowserRefreshKey.value++;
-              },
-        icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
-        label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
-      ),
     );
   }
 }
