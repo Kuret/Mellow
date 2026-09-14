@@ -486,26 +486,44 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final resolved = settings.effectiveHomeSearchBarPlacement();
 
-    return RadioGroup<HomeSearchBarPlacement>(
-      groupValue: settings.homeSearchBarPlacement,
-      onChanged: (value) async {
-        if (value == null) return;
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save((s) => s.copyWith.homeSearchBarPlacement(value));
-      },
+    // Headed like the two radio groups above it: without a title of its own a
+    // bare column of radios between two switches reads as a continuation of
+    // whichever row happens to precede it.
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final placement in HomeSearchBarPlacement.values)
-            RadioListTile<HomeSearchBarPlacement>(
-              value: placement,
-              title: Text(placement.label),
-              subtitle: Text(
-                placement == HomeSearchBarPlacement.auto
-                    ? 'Currently: ${resolved.label.toLowerCase()}'
-                    : placement.description,
-              ),
+          const ListTile(
+            title: Text('Home Search Bar'),
+            subtitle: Text('Where the home page offers its search field'),
+            leading: Icon(MdiIcons.magnify),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup<HomeSearchBarPlacement>(
+            groupValue: settings.homeSearchBarPlacement,
+            onChanged: (value) async {
+              if (value == null) return;
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save((s) => s.copyWith.homeSearchBarPlacement(value));
+            },
+            child: Column(
+              children: [
+                for (final placement in HomeSearchBarPlacement.values)
+                  RadioListTile<HomeSearchBarPlacement>(
+                    value: placement,
+                    title: Text(placement.label),
+                    subtitle: Text(
+                      placement == HomeSearchBarPlacement.auto
+                          ? 'Currently: ${resolved.label.toLowerCase()}'
+                          : placement.description,
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );
