@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_theme.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -47,6 +48,19 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
             'screens',
         keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
         child: _PureBlackTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Accent Color',
+        subtitle: 'The highlight color used for toggles and selections',
+        keywords: [
+          'accent',
+          'color',
+          'colour',
+          'highlight',
+          'primary',
+          'theme',
+        ],
+        child: _AccentColorTile(),
       ),
     ],
   ),
@@ -494,6 +508,113 @@ class _PureBlackTile extends HookConsumerWidget {
                   );
             }
           : null,
+    );
+  }
+}
+
+class _AccentColorTile extends HookConsumerWidget {
+  const _AccentColorTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accentColor = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.accentColor),
+    );
+    final colorScheme = Theme.of(context).colorScheme;
+
+    Future<void> setAccent(Color? color) {
+      return ref
+          .read(saveZenSettingsControllerProvider.notifier)
+          .save(
+            (currentSettings) => currentSettings.copyWith.accentColor(
+              color?.toARGB32(),
+            ),
+          );
+    }
+
+    Widget swatch({
+      required Color? color,
+      required bool selected,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      final swatchColor = color ?? colorScheme.surfaceContainerHighest;
+      final borderColor = selected ? colorScheme.primary : colorScheme.outline;
+
+      return Semantics(
+        label: label,
+        selected: selected,
+        button: true,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: swatchColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: borderColor,
+                  width: selected ? 2.5 : 1,
+                ),
+              ),
+              child: color == null
+                  ? Icon(
+                      MdiIcons.themeLightDark,
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    )
+                  : selected
+                  ? Icon(
+                      Icons.check,
+                      size: 18,
+                      color: contrastingOnColor(color),
+                    )
+                  : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Accent Color'),
+            subtitle: Text(
+              'The highlight color used for toggles and selections',
+            ),
+            leading: Icon(Icons.color_lens),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              swatch(
+                color: null,
+                selected: accentColor == null,
+                label: 'System',
+                onTap: () => setAccent(null),
+              ),
+              for (final choice in kAccentChoices)
+                swatch(
+                  color: choice,
+                  selected: accentColor == choice.toARGB32(),
+                  label: 'Custom color',
+                  onTap: () => setAccent(choice),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
