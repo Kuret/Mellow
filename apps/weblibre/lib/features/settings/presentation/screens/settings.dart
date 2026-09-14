@@ -109,7 +109,7 @@ _CategoryGroups _buildCategories() {
       title: 'Browsing',
       subtitle: 'Tabs, navigation, external links',
       icon: MdiIcons.compassOutline,
-      keywords: const ['tabs', 'url cleaner', 'unshortener'],
+      keywords: const ['tabs', 'navigation', 'external links'],
       sections: browsingSettingsSections,
       onTap: (context) => BrowsingSettingsRoute().push(context),
     ),

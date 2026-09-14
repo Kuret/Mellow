@@ -22,7 +22,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -31,15 +30,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -65,71 +58,24 @@ class ShareBottomSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
 
     final tabUrl = ref.watch(
       tabStateProvider(selectedTabId).select((v) => v?.url),
     );
 
-    final cleanedUrl = useState<Uri?>(null);
-    final cleaner = useUrlCleanerController(
-      sourceUrl: (cleanedUrl.value ?? tabUrl)?.toString(),
-      rules: catalogAsync.value,
-      cleanerEnabled: settings.urlCleanerEnabled,
-      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-      autoApply: settings.urlCleanerAutoApply,
-      getCurrentUrl: () => (cleanedUrl.value ?? tabUrl)?.toString(),
-      onApplyCleanedUrl: (cleanedUrlValue) {
-        cleanedUrl.value = Uri.parse(cleanedUrlValue);
-      },
-    );
-
-    void applyCleanUrl() {
-      if (cleaner.applyCleanUrl()) {
-        ui_helper.showInfoMessage(context, 'URL cleaned');
-      }
-    }
-
-    void applySelectedTrackingRemovals(String previewUrl) {
-      if (cleaner.applyPreviewUrl(previewUrl)) {
-        ui_helper.showInfoMessage(context, 'URL preview applied');
-      }
-    }
-
-    final effectiveUrl = cleanedUrl.value ?? tabUrl;
-    final cleaningHappened = cleanedUrl.value != null;
-    final hasActiveTracking = cleaner.result?.removedParams.isNotEmpty ?? false;
-    final trackingStatusTrailing = cleaningHappened
-        ? Icon(
-            hasActiveTracking
-                ? MdiIcons.shieldLinkVariantOutline
-                : MdiIcons.shieldLinkVariant,
-            size: 18,
-            color: Theme.of(context).colorScheme.primary,
-          )
-        : null;
-    final showCleanerTile = tabUrl != null && cleaner.showTile;
+    final effectiveUrl = tabUrl;
 
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with URL and tracking status
-            _ShareHeader(
-              url: effectiveUrl,
-              cleanerResult: showCleanerTile ? cleaner.details : null,
-              allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-              onClean: applyCleanUrl,
-              onApplySelectedRemovals: applySelectedTrackingRemovals,
-            ),
+            _ShareHeader(url: effectiveUrl),
 
             // Copy Address
             ListTile(
               leading: const Icon(MdiIcons.contentCopy),
               title: const Text('Copy Address'),
-              trailing: trackingStatusTrailing,
               onTap: () async {
                 await Clipboard.setData(
                   ClipboardData(text: effectiveUrl.toString()),
@@ -172,7 +118,6 @@ class ShareBottomSheet extends HookConsumerWidget {
             ListTile(
               leading: const Icon(Icons.share),
               title: const Text('Share Link'),
-              trailing: trackingStatusTrailing,
               onTap: () async {
                 await SharePlus.instance.share(ShareParams(uri: effectiveUrl));
                 if (context.mounted) Navigator.pop(context);
@@ -186,7 +131,6 @@ class ShareBottomSheet extends HookConsumerWidget {
             ListTile(
               leading: const Icon(Icons.qr_code),
               title: const Text('Show QR Code'),
-              trailing: trackingStatusTrailing,
               onTap: () async {
                 if (context.mounted) {
                   Navigator.pop(context);
@@ -203,124 +147,26 @@ class ShareBottomSheet extends HookConsumerWidget {
 
 class _ShareHeader extends StatelessWidget {
   final Uri? url;
-  final UrlCleanerResult? cleanerResult;
-  final bool allowReferralMarketing;
-  final VoidCallback? onClean;
-  final ValueChanged<String>? onApplySelectedRemovals;
 
-  const _ShareHeader({
-    required this.url,
-    required this.allowReferralMarketing,
-    this.cleanerResult,
-    this.onClean,
-    this.onApplySelectedRemovals,
-  });
+  const _ShareHeader({required this.url});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasTappableDetails = cleanerResult?.removedParams.isNotEmpty ?? false;
 
-    // Mirrors UrlCleanerTile: the header reports what the URL in hand still
-    // carries, so a partially cleaned URL keeps showing the warning.
-    final progress = cleanerResult == null
-        ? null
-        : urlCleanerProgress(url?.toString() ?? '', cleanerResult!);
-    final paramCount = progress?.remaining.length ?? 0;
-    final hasTracking = paramCount > 0;
-    final urlWasCleaned = progress?.isFullyCleaned ?? false;
-
-    return InkWell(
-      onTap: hasTappableDetails
-          ? () {
-              unawaited(
-                showDialog(
-                  context: context,
-                  builder: (context) => TrackingDetailsDialog(
-                    currentUrl: url.toString(),
-                    result: cleanerResult!,
-                    allowReferralMarketing: allowReferralMarketing,
-                    onApplySelectedRemovals: onApplySelectedRemovals,
-                  ),
-                ),
-              );
-            }
-          : null,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (url != null)
-                    UriBreadcrumb(
-                      uri: url!,
-                      icon: UrlIcon([url!], iconSize: 20),
-                      style: TextStyle(
-                        color: urlWasCleaned
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    )
-                  else
-                    const SizedBox.shrink(),
-                  const SizedBox(height: 4),
-                  if (hasTracking)
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.warning_amber_rounded,
-                          size: 14,
-                          color: colorScheme.error,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          paramCount == 1
-                              ? '1 tracking parameter detected'
-                              : '$paramCount tracking parameters detected',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    )
-                  else if (urlWasCleaned)
-                    Row(
-                      children: [
-                        Icon(
-                          MdiIcons.checkCircle,
-                          size: 14,
-                          color: colorScheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Link is clean',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            if (hasTracking && onClean != null)
-              IconButton.filledTonal(
-                onPressed: onClean,
-                icon: const Icon(MdiIcons.linkVariantRemove),
-                tooltip: 'Remove tracking',
-              ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
+      child: (url != null)
+          ? UriBreadcrumb(
+              uri: url!,
+              icon: UrlIcon([url!], iconSize: 20),
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

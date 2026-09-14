@@ -60,7 +60,6 @@ import 'package:weblibre/features/geckoview/domain/services/live_tab_budget.dart
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
@@ -452,24 +451,6 @@ class _MainWidget extends HookConsumerWidget {
       await secureStorageClaim;
 
       await ref.read(appInitializationServiceProvider.notifier).initialize();
-
-      Future<void> preloadUrlCleanerCatalog() async {
-        if (!generalSettings.urlCleanerEnabled) {
-          return;
-        }
-
-        try {
-          await ref.read(urlCleanerCatalogServiceProvider.future);
-        } catch (e, s) {
-          logger.w(
-            'Failed preloading URL cleaner catalog',
-            error: e,
-            stackTrace: s,
-          );
-        }
-      }
-
-      unawaited(preloadUrlCleanerCatalog());
 
       // Wire settings → local_index_setting (tab.db) so the trigger gate
       // is in sync from the moment tabs start writing.

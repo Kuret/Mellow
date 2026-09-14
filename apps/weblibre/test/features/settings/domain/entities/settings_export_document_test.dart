@@ -44,7 +44,7 @@ void main() {
           ),
         },
         exportedAt: DateTime.utc(2026, 9, 4, 12, 30),
-        redacted: const ['general.unshortenerToken'],
+        redacted: const ['general.someToken'],
         appVersion: '1.2.3+45',
       );
 
@@ -53,7 +53,7 @@ void main() {
       expect(document.formatVersion, settingsExportFormatVersion);
       expect(document.appVersion, '1.2.3+45');
       expect(document.exportedAt, DateTime.utc(2026, 9, 4, 12, 30));
-      expect(document.redacted, ['general.unshortenerToken']);
+      expect(document.redacted, ['general.someToken']);
       expect(document.documents.keys, ['weblibre_settings', 'gecko_user_js']);
       expect(
         document.documents['gecko_user_js']!.content,
@@ -194,82 +194,97 @@ void main() {
   });
 
   group('scrubGeneralSettings', () {
+    // `deviceOwnedGeneralSettingsKeys` is empty today, so these pass their own
+    // key set: the subject is the scrubbing, not the current contents of the
+    // set.
+    const owned = {'someToken'};
+
     test('nulls a credential that is set and reports it', () {
       final result = scrubGeneralSettings({
         'themeMode': 'dark',
-        'unshortenerToken': 'super-secret',
-      });
+        'someToken': 'super-secret',
+      }, ownedKeys: owned);
 
-      expect(result.values['unshortenerToken'], isNull);
+      expect(result.values['someToken'], isNull);
       expect(result.values['themeMode'], 'dark');
-      expect(result.keys, ['unshortenerToken']);
+      expect(result.keys, ['someToken']);
     });
 
     test('does not claim a redaction for a credential that was never set', () {
-      final result = scrubGeneralSettings({'unshortenerToken': ''});
+      final result = scrubGeneralSettings({
+        'someToken': '',
+      }, ownedKeys: owned);
 
       expect(result.keys, isEmpty);
     });
 
     test('empties a credential that was never set anyway', () {
       // An honest empty string still clears whatever the importing device had.
-      final result = scrubGeneralSettings({'unshortenerToken': ''});
+      final result = scrubGeneralSettings({
+        'someToken': '',
+      }, ownedKeys: owned);
 
-      expect(result.values['unshortenerToken'], isNull);
+      expect(result.values['someToken'], isNull);
     });
 
     test("leaves the caller's map alone", () {
-      final general = {'unshortenerToken': 'super-secret'};
-      scrubGeneralSettings(general);
+      final general = {'someToken': 'super-secret'};
+      scrubGeneralSettings(general, ownedKeys: owned);
 
-      expect(general['unshortenerToken'], 'super-secret');
+      expect(general['someToken'], 'super-secret');
     });
 
     test('redacts every key it declares', () {
       final result = scrubGeneralSettings({
-        for (final key in deviceOwnedGeneralSettingsKeys) key: 'set',
-      });
+        for (final key in owned) key: 'set',
+      }, ownedKeys: owned);
 
-      expect(result.keys.toSet(), deviceOwnedGeneralSettingsKeys);
+      expect(result.keys.toSet(), owned);
     });
   });
 
   group('restoreDeviceOwnedValues', () {
+    const owned = {'someToken'};
+
     test('puts the local credential back where the file has none', () {
       final restored = restoreDeviceOwnedValues(
-        imported: {'themeMode': 'dark', 'unshortenerToken': null},
-        local: {'themeMode': 'light', 'unshortenerToken': 'local-token'},
+        imported: {'themeMode': 'dark', 'someToken': null},
+        local: {'themeMode': 'light', 'someToken': 'local-token'},
+        ownedKeys: owned,
       );
 
-      expect(restored['unshortenerToken'], 'local-token');
+      expect(restored['someToken'], 'local-token');
       expect(restored['themeMode'], 'dark');
     });
 
     test('protects a credential the file omits entirely', () {
       final restored = restoreDeviceOwnedValues(
         imported: {'themeMode': 'dark'},
-        local: {'unshortenerToken': 'local-token'},
+        local: {'someToken': 'local-token'},
+        ownedKeys: owned,
       );
 
-      expect(restored['unshortenerToken'], 'local-token');
+      expect(restored['someToken'], 'local-token');
     });
 
     test('treats an empty credential in the file as no credential', () {
       final restored = restoreDeviceOwnedValues(
-        imported: {'unshortenerToken': ''},
-        local: {'unshortenerToken': 'local-token'},
+        imported: {'someToken': ''},
+        local: {'someToken': 'local-token'},
+        ownedKeys: owned,
       );
 
-      expect(restored['unshortenerToken'], 'local-token');
+      expect(restored['someToken'], 'local-token');
     });
 
     test('keeps a credential the file actually carries', () {
       final restored = restoreDeviceOwnedValues(
-        imported: {'unshortenerToken': 'from-file'},
-        local: {'unshortenerToken': 'local-token'},
+        imported: {'someToken': 'from-file'},
+        local: {'someToken': 'local-token'},
+        ownedKeys: owned,
       );
 
-      expect(restored['unshortenerToken'], 'from-file');
+      expect(restored['someToken'], 'from-file');
     });
   });
 
@@ -368,7 +383,7 @@ void main() {
     test('leaves ordinary values alone', () {
       final result = stripEmbeddedUrlCredentials({
         'general': {
-          'urlCleanerCatalogUrl': 'https://example.org/rules.json',
+          'syncServerOverride': 'https://example.org/sync',
           'maxSearchHistoryEntries': 50,
           'themeMode': 'dark',
         },
@@ -376,7 +391,7 @@ void main() {
 
       expect(result.paths, isEmpty);
       final general = (result.value! as Map)['general'] as Map;
-      expect(general['urlCleanerCatalogUrl'], 'https://example.org/rules.json');
+      expect(general['syncServerOverride'], 'https://example.org/sync');
     });
   });
 

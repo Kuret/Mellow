@@ -31,12 +31,6 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_unshortener_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/controllers/open_shared_content_unshorten_controller.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -91,8 +85,6 @@ class OpenSharedContent extends HookConsumerWidget {
     TabMode resolveTabMode() => TabMode.fromTabType(selectedTabType.value);
 
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
-    final supportedShortenerHosts = ref.watch(urlUnshortenerServiceProvider);
 
     final currentUrl = useValueListenable(textController).text;
 
@@ -173,43 +165,6 @@ class OpenSharedContent extends HookConsumerWidget {
           : Future.value(null),
       [parsedDebouncedUrl],
     );
-
-    final shouldShowUnshortenerTile =
-        settings.unshortenerEnabled &&
-        ref
-            .read(urlUnshortenerServiceProvider.notifier)
-            .isSupportedShortenerUrl(
-              debouncedUrl.value,
-              supportedShortenerHosts.value ?? const <String>{},
-            );
-
-    final unshortenState = ref.watch(
-      openSharedContentUnshortenControllerProvider,
-    );
-    final cleaner = useUrlCleanerController(
-      // Avoid expensive matching work on every keystroke.
-      sourceUrl: debouncedUrl.value,
-      rules: catalogAsync.value,
-      cleanerEnabled: settings.urlCleanerEnabled,
-      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-      autoApply: settings.urlCleanerAutoApply,
-      getCurrentUrl: () => textController.text,
-      onApplyCleanedUrl: (cleanedUrl) {
-        textController.text = cleanedUrl;
-      },
-    );
-
-    void applyCleanUrl() {
-      if (cleaner.applyCleanUrl()) {
-        showInfoMessage(context, 'URL cleaned');
-      }
-    }
-
-    void applySelectedTrackingRemovals(String previewUrl) {
-      if (cleaner.applyPreviewUrl(previewUrl)) {
-        showInfoMessage(context, 'URL preview applied');
-      }
-    }
 
     Future<void> openTab(TabMode tabMode) async {
       if (formKey.currentState?.validate() == true) {
@@ -304,103 +259,6 @@ class OpenSharedContent extends HookConsumerWidget {
                 },
               ),
               const SizedBox(height: 8),
-              // URL Cleaner tile
-              if (settings.urlCleanerEnabled && cleaner.result != null) ...[
-                if (cleaner.result!.blocked)
-                  ListTile(
-                    leading: Icon(
-                      MdiIcons.alertCircle,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    title: const Text('URL blocked by ClearURLs'),
-                    dense: true,
-                  )
-                else if (cleaner.showTile)
-                  UrlCleanerTile(
-                    result: cleaner.details!,
-                    currentUrl: currentUrl,
-                    allowReferralMarketing:
-                        settings.urlCleanerAllowReferralMarketing,
-                    onClean: applyCleanUrl,
-                    onApplySelectedRemovals: applySelectedTrackingRemovals,
-                  ),
-              ],
-              // Unshortener UI
-              if (shouldShowUnshortenerTile) ...[
-                if (unshortenState != null)
-                  unshortenState.when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: LinearProgressIndicator(),
-                    ),
-                    error: (error, _) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        'Unshorten failed: $error',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    data: (result) {
-                      if (!result.success) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            'Unshorten failed: ${result.error}',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 12,
-                            ),
-                          ),
-                        );
-                      }
-                      final remaining = result.remainingCalls;
-                      final limit = result.usageCount;
-                      if (remaining != null &&
-                          limit != null &&
-                          limit > 0 &&
-                          remaining < limit ~/ 2) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            'Remaining calls: $remaining/$limit',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                _OpenActionTile(
-                  title: 'Unshorten',
-                  subtitle: 'Resolve shortened URL',
-                  icon: MdiIcons.linkVariant,
-                  showTrailingDivider: false,
-                  trailing: IconButton(
-                    icon: const Icon(Icons.info_outline),
-                    tooltip: 'Unshortener info',
-                    onPressed: () {
-                      unawaited(_showUnshortenerInfoDialog(context));
-                    },
-                  ),
-                  onTap: () async {
-                    final result = await ref
-                        .read(
-                          openSharedContentUnshortenControllerProvider.notifier,
-                        )
-                        .unshorten(
-                          url: textController.text,
-                          token: settings.unshortenerToken,
-                        );
-                    if (!context.mounted) return;
-                    if (result?.success == true && result?.finalUrl != null) {
-                      textController.text = result!.finalUrl!;
-                    }
-                  },
-                ),
-              ],
               if (appLink.data != null)
                 _OpenActionTile(
                   title: appLink.data?.appName != null
@@ -487,101 +345,16 @@ class OpenSharedContent extends HookConsumerWidget {
   }
 }
 
-Future<void> _showUnshortenerInfoDialog(BuildContext context) {
-  final textColor = Theme.of(context).textTheme.bodyMedium?.color;
-  final linkStyle = TextStyle(
-    color: Theme.of(context).colorScheme.primary,
-    decoration: TextDecoration.underline,
-    decorationColor: Theme.of(context).colorScheme.primary,
-  );
-
-  return showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Unshortener Attribution'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: textColor),
-                children: [
-                  const TextSpan(
-                    text: 'This module will unshort links by sending them to ',
-                  ),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: AttributionLink(
-                      label: 'https://unshorten.me/',
-                      url: 'https://unshorten.me/',
-                      style: linkStyle,
-                    ),
-                  ),
-                  const TextSpan(
-                    text:
-                        ', which evaluates them on their servers and saves the redirection for future requests. '
-                        'Avoid unshortening links with private or sensitive data.',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'The free API is rate limited to 10 requests per hour for new checks.',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-            RichText(
-              text: TextSpan(
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: textColor),
-                children: [
-                  const TextSpan(text: 'Privacy policy: '),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: AttributionLink(
-                      label: 'https://unshorten.me/privacy-policy',
-                      url: 'https://unshorten.me/privacy-policy',
-                      style: linkStyle,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: Navigator.of(context).pop,
-          child: const Text('Close'),
-        ),
-      ],
-    ),
-  );
-}
-
 class _OpenActionTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
-  final Widget? trailing;
-  final bool showTrailingDivider;
   final VoidCallback? onTap;
 
   const _OpenActionTile({
     required this.title,
     this.subtitle,
     required this.icon,
-    this.trailing,
-    this.showTrailingDivider = true,
     this.onTap,
   });
 
@@ -591,16 +364,6 @@ class _OpenActionTile extends StatelessWidget {
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
       leading: Icon(icon),
-      trailing: trailing == null
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showTrailingDivider)
-                  const SizedBox(height: 24, child: VerticalDivider(width: 16)),
-                trailing!,
-              ],
-            ),
       onTap: onTap,
     );
   }

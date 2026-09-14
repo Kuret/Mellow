@@ -38,12 +38,8 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_email.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_image.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/share_link.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 class ContextMenuDialog extends HookConsumerWidget {
   final HitResult hitResult;
@@ -54,40 +50,8 @@ class ContextMenuDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final showContainerUi = settings.showContainerUi;
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
 
-    final effectiveHitResult = useState(hitResult);
-
-    final url = hitResult.tryGetLink()?.toString();
-    final isCleanable = hitResult.isHttpLink();
-    final cleaner = useUrlCleanerController(
-      sourceUrl: isCleanable
-          ? effectiveHitResult.value.tryGetLink()?.toString()
-          : null,
-      rules: catalogAsync.value,
-      cleanerEnabled: settings.urlCleanerEnabled,
-      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-      autoApply: settings.urlCleanerAutoApply,
-      getCurrentUrl: () => effectiveHitResult.value.tryGetLink()?.toString(),
-      onApplyCleanedUrl: (cleanedUrl) {
-        effectiveHitResult.value = hitResult.withCleanedLink(cleanedUrl);
-      },
-    );
-
-    void applyCleanUrl() {
-      if (cleaner.applyCleanUrl()) {
-        showInfoMessage(context, 'URL cleaned');
-      }
-    }
-
-    void applySelectedTrackingRemovals(String previewUrl) {
-      if (cleaner.applyPreviewUrl(previewUrl)) {
-        showInfoMessage(context, 'URL preview applied');
-      }
-    }
-
-    final effective = effectiveHitResult.value;
-    final showCleanerTile = isCleanable && cleaner.showTile;
+    final effective = hitResult;
 
     return SimpleDialog(
       title: AutoSizeText(
@@ -99,14 +63,6 @@ class ContextMenuDialog extends HookConsumerWidget {
         softWrap: true,
       ),
       children: [
-        if (showCleanerTile)
-          UrlCleanerTile(
-            result: cleaner.details!,
-            currentUrl: effective.tryGetLink()?.toString() ?? url ?? '',
-            allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-            onClean: applyCleanUrl,
-            onApplySelectedRemovals: applySelectedTrackingRemovals,
-          ),
         if (OpenInNewTab.isSupported(effective))
           OpenInNewTab(hitResult: effective),
         if (showContainerUi && OpenInContainer.isSupported(effective))

@@ -157,18 +157,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         ],
         child: _CustomTabsTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'URL Cleaner',
-        subtitle: 'Tracking removal rules and catalog updates',
-        keywords: ['utm', 'tracking parameters'],
-        child: _UrlCleanerSettingsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Unshortener',
-        subtitle: 'Short link resolver and API token',
-        keywords: ['short links', 'redirects'],
-        child: _UnshortenerSettingsTile(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -963,23 +951,6 @@ class _AllowNonManifestPwaInstallTile extends HookConsumerWidget {
   }
 }
 
-class _UrlCleanerSettingsTile extends StatelessWidget {
-  const _UrlCleanerSettingsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.broom),
-      title: const Text('URL Cleaner'),
-      subtitle: const Text('Tracking removal rules and catalog updates'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await UrlCleanerSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
 /// "Keep at most N tabs loaded" — [GeneralSettings.maxLiveTabs], the budget
 /// `LiveTabBudget` enforces (PLAN §7.4). Steps of five between
 /// [minMaxLiveTabs] and [maxMaxLiveTabs].
@@ -1040,23 +1011,6 @@ class _MaxLiveTabsSection extends HookConsumerWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-class _UnshortenerSettingsTile extends StatelessWidget {
-  const _UnshortenerSettingsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.linkVariant),
-      title: const Text('Unshortener'),
-      subtitle: const Text('Short link resolver and API token'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await UnshortenerSettingsRoute().push(context);
-      },
     );
   }
 }

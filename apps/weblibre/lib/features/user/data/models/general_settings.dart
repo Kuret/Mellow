@@ -301,17 +301,7 @@ class GeneralSettings with FastEquatable {
   final TabChipCloseButtonMode quickTabSwitcherCloseButtonMode;
   final String syncServerOverride;
   final String syncTokenServerOverride;
-  final bool urlCleanerEnabled;
-  final bool urlCleanerAutoApply;
-  final bool urlCleanerAllowReferralMarketing;
-  final String urlCleanerCatalogUrl;
-  final String urlCleanerHashUrl;
-  final bool urlCleanerAutoUpdate;
-  final int? urlCleanerLastCheckEpochMs;
-  final bool urlCleanerLastUpdateWasAuto;
   final bool tabBarLongPressUrlCopy;
-  final bool unshortenerEnabled;
-  final String unshortenerToken;
   final bool allowNonManifestPwaInstall;
   final bool blockExternalAppsEnabled;
   final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
@@ -444,17 +434,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
-    required this.urlCleanerEnabled,
-    required this.urlCleanerAutoApply,
-    required this.urlCleanerAllowReferralMarketing,
-    required this.urlCleanerCatalogUrl,
-    required this.urlCleanerHashUrl,
-    required this.urlCleanerAutoUpdate,
-    required this.urlCleanerLastCheckEpochMs,
-    required this.urlCleanerLastUpdateWasAuto,
     required this.tabBarLongPressUrlCopy,
-    required this.unshortenerEnabled,
-    required this.unshortenerToken,
     required this.allowNonManifestPwaInstall,
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
@@ -521,17 +501,7 @@ class GeneralSettings with FastEquatable {
     TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
     String? syncTokenServerOverride,
-    bool? urlCleanerEnabled,
-    bool? urlCleanerAutoApply,
-    bool? urlCleanerAllowReferralMarketing,
-    String? urlCleanerCatalogUrl,
-    String? urlCleanerHashUrl,
-    bool? urlCleanerAutoUpdate,
-    this.urlCleanerLastCheckEpochMs,
-    bool? urlCleanerLastUpdateWasAuto,
     bool? tabBarLongPressUrlCopy,
-    bool? unshortenerEnabled,
-    String? unshortenerToken,
     bool? allowNonManifestPwaInstall,
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
@@ -614,21 +584,7 @@ class GeneralSettings with FastEquatable {
            TabChipCloseButtonMode.activeTabOnly,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
-       urlCleanerEnabled = urlCleanerEnabled ?? true,
-       urlCleanerAutoApply = urlCleanerAutoApply ?? false,
-       urlCleanerAllowReferralMarketing =
-           urlCleanerAllowReferralMarketing ?? false,
-       urlCleanerCatalogUrl =
-           urlCleanerCatalogUrl ??
-           'https://rules2.clearurls.xyz/data.minify.json',
-       urlCleanerHashUrl =
-           urlCleanerHashUrl ??
-           'https://rules2.clearurls.xyz/rules.minify.hash',
-       urlCleanerAutoUpdate = urlCleanerAutoUpdate ?? false,
-       urlCleanerLastUpdateWasAuto = urlCleanerLastUpdateWasAuto ?? false,
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
-       unshortenerEnabled = unshortenerEnabled ?? false,
-       unshortenerToken = unshortenerToken ?? '',
        allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
@@ -790,17 +746,7 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherCloseButtonMode,
     syncServerOverride,
     syncTokenServerOverride,
-    urlCleanerEnabled,
-    urlCleanerAutoApply,
-    urlCleanerAllowReferralMarketing,
-    urlCleanerCatalogUrl,
-    urlCleanerHashUrl,
-    urlCleanerAutoUpdate,
-    urlCleanerLastCheckEpochMs,
-    urlCleanerLastUpdateWasAuto,
     tabBarLongPressUrlCopy,
-    unshortenerEnabled,
-    unshortenerToken,
     allowNonManifestPwaInstall,
     blockExternalAppsEnabled,
     externalAppIntentPolicies,

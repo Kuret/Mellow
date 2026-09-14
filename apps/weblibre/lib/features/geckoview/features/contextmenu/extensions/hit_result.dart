@@ -140,18 +140,4 @@ extension HitResultX on HitResult {
         hasLink &&
         tryGetLink()?.scheme == 'mailto';
   }
-
-  HitResult withCleanedLink(String cleanedUrl) {
-    return switch (this) {
-      UnknownHitResult(:final linkText) => UnknownHitResult(
-        src: cleanedUrl,
-        linkText: linkText,
-      ),
-      ImageSrcHitResult(:final src) => ImageSrcHitResult(
-        src: src,
-        uri: cleanedUrl,
-      ),
-      _ => this,
-    };
-  }
 }

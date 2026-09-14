@@ -40,12 +40,10 @@ import 'package:weblibre/features/geckoview/features/bookmarks/presentation/scre
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/browser.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/screens/tab_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/screens/history.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/open_shared_content.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/unshortener_settings.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_presentation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';

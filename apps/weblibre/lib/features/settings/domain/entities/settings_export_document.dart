@@ -50,7 +50,11 @@ const settingsExportFormatVersion = 1;
 /// by `toJson`). Add to this set whenever a settings field starts holding a
 /// secret; nothing detects one automatically. Credentials that arrive inside a
 /// URL are caught separately by [stripEmbeddedUrlCredentials].
-const redactedGeneralSettingsKeys = <String>{'unshortenerToken'};
+///
+/// Empty since the unshortener's API token was removed: no `GeneralSettings`
+/// field holds a secret today. The machinery stays because the next one will,
+/// and because it is easier to keep working than to reconstruct.
+const redactedGeneralSettingsKeys = <String>{};
 
 /// Every `GeneralSettings` key whose value belongs to the device rather than to
 /// the export.
@@ -288,13 +292,16 @@ List<String> _optionalStringList(Map<String, dynamic> json, String key) {
 /// Only values that were actually set are *reported*, though. A file that
 /// announced a secret it never carried would be a lie a reader has to go and
 /// check.
+/// [ownedKeys] exists so the behaviour stays under test while
+/// [deviceOwnedGeneralSettingsKeys] is empty; callers pass nothing.
 ({Map<String, dynamic> values, List<String> keys}) scrubGeneralSettings(
-  Map<String, dynamic> general,
-) {
+  Map<String, dynamic> general, {
+  Set<String> ownedKeys = deviceOwnedGeneralSettingsKeys,
+}) {
   final values = Map<String, dynamic>.of(general);
   final keys = <String>[];
 
-  for (final key in deviceOwnedGeneralSettingsKeys) {
+  for (final key in ownedKeys) {
     if (!values.containsKey(key)) continue;
 
     final value = values[key];
@@ -319,15 +326,18 @@ List<String> _optionalStringList(Map<String, dynamic> json, String key) {
 ///
 /// Profile-local references come from the device *always*, with no way for a
 /// file to override them. See the loop below for why.
+/// [ownedKeys] exists so the behaviour stays under test while
+/// [redactedGeneralSettingsKeys] is empty; callers pass nothing.
 Map<String, dynamic> restoreDeviceOwnedValues({
   required Map<String, dynamic> imported,
   required Map<String, dynamic> local,
+  Set<String> ownedKeys = redactedGeneralSettingsKeys,
 }) {
   final values = Map<String, dynamic>.of(imported);
 
   // A credential the file carries deliberately still wins, so a hand-written
   // import can set one.
-  for (final key in redactedGeneralSettingsKeys) {
+  for (final key in ownedKeys) {
     final value = values[key];
     if (value != null && value != '') continue;
     values[key] = local[key];

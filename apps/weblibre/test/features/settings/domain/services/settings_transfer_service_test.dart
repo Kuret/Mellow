@@ -71,21 +71,16 @@ void main() {
   const settingsOnly = {SettingsTransferSection.settings};
 
   group('export', () {
-    test('carries settings and leaves credentials behind', () async {
+    test('carries settings', () async {
       await generalSettings().updateSettings(
-        (current) => current.copyWith
-            .disableAnimations(true)
-            .copyWith
-            .unshortenerToken('super-secret'),
+        (current) => current.copyWith.disableAnimations(true),
       );
 
       final text = await service().export(sections: settingsOnly);
 
-      expect(text, isNot(contains('super-secret')));
       expect(text, contains('"disableAnimations": true'));
 
       final document = decodeSettingsExport(text);
-      expect(document.redacted, ['general.unshortenerToken']);
       expect(service().availableSections(document), {
         SettingsTransferSection.settings,
       });
@@ -109,27 +104,6 @@ void main() {
       );
 
       expect((await generalSettings().fetchSettings()).disableAnimations, true);
-    });
-
-    // The failure this guards is silent: the export writes the token as null,
-    // and settings are applied by replacing the whole object, so an import
-    // would hand the user back a default-empty token they never cleared.
-    test('keeps the credentials already on this device', () async {
-      final exported = await service().export(sections: settingsOnly);
-
-      await generalSettings().updateSettings(
-        (current) => current.copyWith.unshortenerToken('local-token'),
-      );
-
-      await service().import(
-        document: decodeSettingsExport(exported),
-        sections: settingsOnly,
-      );
-
-      expect(
-        (await generalSettings().fetchSettings()).unshortenerToken,
-        'local-token',
-      );
     });
 
     test('leaves sections the caller did not pick alone', () async {

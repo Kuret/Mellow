@@ -123,29 +123,7 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings syncTokenServerOverride(String syncTokenServerOverride);
 
-  GeneralSettings urlCleanerEnabled(bool urlCleanerEnabled);
-
-  GeneralSettings urlCleanerAutoApply(bool urlCleanerAutoApply);
-
-  GeneralSettings urlCleanerAllowReferralMarketing(
-    bool urlCleanerAllowReferralMarketing,
-  );
-
-  GeneralSettings urlCleanerCatalogUrl(String urlCleanerCatalogUrl);
-
-  GeneralSettings urlCleanerHashUrl(String urlCleanerHashUrl);
-
-  GeneralSettings urlCleanerAutoUpdate(bool urlCleanerAutoUpdate);
-
-  GeneralSettings urlCleanerLastCheckEpochMs(int? urlCleanerLastCheckEpochMs);
-
-  GeneralSettings urlCleanerLastUpdateWasAuto(bool urlCleanerLastUpdateWasAuto);
-
   GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy);
-
-  GeneralSettings unshortenerEnabled(bool unshortenerEnabled);
-
-  GeneralSettings unshortenerToken(String unshortenerToken);
 
   GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall);
 
@@ -238,17 +216,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
     String syncTokenServerOverride,
-    bool urlCleanerEnabled,
-    bool urlCleanerAutoApply,
-    bool urlCleanerAllowReferralMarketing,
-    String urlCleanerCatalogUrl,
-    String urlCleanerHashUrl,
-    bool urlCleanerAutoUpdate,
-    int? urlCleanerLastCheckEpochMs,
-    bool urlCleanerLastUpdateWasAuto,
     bool tabBarLongPressUrlCopy,
-    bool unshortenerEnabled,
-    String unshortenerToken,
     bool allowNonManifestPwaInstall,
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
@@ -479,50 +447,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(syncTokenServerOverride: syncTokenServerOverride);
 
   @override
-  GeneralSettings urlCleanerEnabled(bool urlCleanerEnabled) =>
-      call(urlCleanerEnabled: urlCleanerEnabled);
-
-  @override
-  GeneralSettings urlCleanerAutoApply(bool urlCleanerAutoApply) =>
-      call(urlCleanerAutoApply: urlCleanerAutoApply);
-
-  @override
-  GeneralSettings urlCleanerAllowReferralMarketing(
-    bool urlCleanerAllowReferralMarketing,
-  ) => call(urlCleanerAllowReferralMarketing: urlCleanerAllowReferralMarketing);
-
-  @override
-  GeneralSettings urlCleanerCatalogUrl(String urlCleanerCatalogUrl) =>
-      call(urlCleanerCatalogUrl: urlCleanerCatalogUrl);
-
-  @override
-  GeneralSettings urlCleanerHashUrl(String urlCleanerHashUrl) =>
-      call(urlCleanerHashUrl: urlCleanerHashUrl);
-
-  @override
-  GeneralSettings urlCleanerAutoUpdate(bool urlCleanerAutoUpdate) =>
-      call(urlCleanerAutoUpdate: urlCleanerAutoUpdate);
-
-  @override
-  GeneralSettings urlCleanerLastCheckEpochMs(int? urlCleanerLastCheckEpochMs) =>
-      call(urlCleanerLastCheckEpochMs: urlCleanerLastCheckEpochMs);
-
-  @override
-  GeneralSettings urlCleanerLastUpdateWasAuto(
-    bool urlCleanerLastUpdateWasAuto,
-  ) => call(urlCleanerLastUpdateWasAuto: urlCleanerLastUpdateWasAuto);
-
-  @override
   GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy) =>
       call(tabBarLongPressUrlCopy: tabBarLongPressUrlCopy);
-
-  @override
-  GeneralSettings unshortenerEnabled(bool unshortenerEnabled) =>
-      call(unshortenerEnabled: unshortenerEnabled);
-
-  @override
-  GeneralSettings unshortenerToken(String unshortenerToken) =>
-      call(unshortenerToken: unshortenerToken);
 
   @override
   GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall) =>
@@ -648,17 +574,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
-    Object? urlCleanerEnabled = const $CopyWithPlaceholder(),
-    Object? urlCleanerAutoApply = const $CopyWithPlaceholder(),
-    Object? urlCleanerAllowReferralMarketing = const $CopyWithPlaceholder(),
-    Object? urlCleanerCatalogUrl = const $CopyWithPlaceholder(),
-    Object? urlCleanerHashUrl = const $CopyWithPlaceholder(),
-    Object? urlCleanerAutoUpdate = const $CopyWithPlaceholder(),
-    Object? urlCleanerLastCheckEpochMs = const $CopyWithPlaceholder(),
-    Object? urlCleanerLastUpdateWasAuto = const $CopyWithPlaceholder(),
     Object? tabBarLongPressUrlCopy = const $CopyWithPlaceholder(),
-    Object? unshortenerEnabled = const $CopyWithPlaceholder(),
-    Object? unshortenerToken = const $CopyWithPlaceholder(),
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
@@ -940,71 +856,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.syncTokenServerOverride
           // ignore: cast_nullable_to_non_nullable
           : syncTokenServerOverride as String,
-      urlCleanerEnabled:
-          urlCleanerEnabled == const $CopyWithPlaceholder() ||
-              urlCleanerEnabled == null
-          ? _value.urlCleanerEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerEnabled as bool,
-      urlCleanerAutoApply:
-          urlCleanerAutoApply == const $CopyWithPlaceholder() ||
-              urlCleanerAutoApply == null
-          ? _value.urlCleanerAutoApply
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerAutoApply as bool,
-      urlCleanerAllowReferralMarketing:
-          urlCleanerAllowReferralMarketing == const $CopyWithPlaceholder() ||
-              urlCleanerAllowReferralMarketing == null
-          ? _value.urlCleanerAllowReferralMarketing
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerAllowReferralMarketing as bool,
-      urlCleanerCatalogUrl:
-          urlCleanerCatalogUrl == const $CopyWithPlaceholder() ||
-              urlCleanerCatalogUrl == null
-          ? _value.urlCleanerCatalogUrl
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerCatalogUrl as String,
-      urlCleanerHashUrl:
-          urlCleanerHashUrl == const $CopyWithPlaceholder() ||
-              urlCleanerHashUrl == null
-          ? _value.urlCleanerHashUrl
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerHashUrl as String,
-      urlCleanerAutoUpdate:
-          urlCleanerAutoUpdate == const $CopyWithPlaceholder() ||
-              urlCleanerAutoUpdate == null
-          ? _value.urlCleanerAutoUpdate
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerAutoUpdate as bool,
-      urlCleanerLastCheckEpochMs:
-          urlCleanerLastCheckEpochMs == const $CopyWithPlaceholder()
-          ? _value.urlCleanerLastCheckEpochMs
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerLastCheckEpochMs as int?,
-      urlCleanerLastUpdateWasAuto:
-          urlCleanerLastUpdateWasAuto == const $CopyWithPlaceholder() ||
-              urlCleanerLastUpdateWasAuto == null
-          ? _value.urlCleanerLastUpdateWasAuto
-          // ignore: cast_nullable_to_non_nullable
-          : urlCleanerLastUpdateWasAuto as bool,
       tabBarLongPressUrlCopy:
           tabBarLongPressUrlCopy == const $CopyWithPlaceholder() ||
               tabBarLongPressUrlCopy == null
           ? _value.tabBarLongPressUrlCopy
           // ignore: cast_nullable_to_non_nullable
           : tabBarLongPressUrlCopy as bool,
-      unshortenerEnabled:
-          unshortenerEnabled == const $CopyWithPlaceholder() ||
-              unshortenerEnabled == null
-          ? _value.unshortenerEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : unshortenerEnabled as bool,
-      unshortenerToken:
-          unshortenerToken == const $CopyWithPlaceholder() ||
-              unshortenerToken == null
-          ? _value.unshortenerToken
-          // ignore: cast_nullable_to_non_nullable
-          : unshortenerToken as String,
       allowNonManifestPwaInstall:
           allowNonManifestPwaInstall == const $CopyWithPlaceholder() ||
               allowNonManifestPwaInstall == null
@@ -1216,19 +1073,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   ),
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
-  urlCleanerEnabled: json['urlCleanerEnabled'] as bool?,
-  urlCleanerAutoApply: json['urlCleanerAutoApply'] as bool?,
-  urlCleanerAllowReferralMarketing:
-      json['urlCleanerAllowReferralMarketing'] as bool?,
-  urlCleanerCatalogUrl: json['urlCleanerCatalogUrl'] as String?,
-  urlCleanerHashUrl: json['urlCleanerHashUrl'] as String?,
-  urlCleanerAutoUpdate: json['urlCleanerAutoUpdate'] as bool?,
-  urlCleanerLastCheckEpochMs: (json['urlCleanerLastCheckEpochMs'] as num?)
-      ?.toInt(),
-  urlCleanerLastUpdateWasAuto: json['urlCleanerLastUpdateWasAuto'] as bool?,
   tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
-  unshortenerEnabled: json['unshortenerEnabled'] as bool?,
-  unshortenerToken: json['unshortenerToken'] as String?,
   allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
   blockExternalAppsEnabled: json['blockExternalAppsEnabled'] as bool?,
   externalAppIntentPolicies:
@@ -1322,17 +1167,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
           .quickTabSwitcherCloseButtonMode]!,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
-  'urlCleanerEnabled': instance.urlCleanerEnabled,
-  'urlCleanerAutoApply': instance.urlCleanerAutoApply,
-  'urlCleanerAllowReferralMarketing': instance.urlCleanerAllowReferralMarketing,
-  'urlCleanerCatalogUrl': instance.urlCleanerCatalogUrl,
-  'urlCleanerHashUrl': instance.urlCleanerHashUrl,
-  'urlCleanerAutoUpdate': instance.urlCleanerAutoUpdate,
-  'urlCleanerLastCheckEpochMs': instance.urlCleanerLastCheckEpochMs,
-  'urlCleanerLastUpdateWasAuto': instance.urlCleanerLastUpdateWasAuto,
   'tabBarLongPressUrlCopy': instance.tabBarLongPressUrlCopy,
-  'unshortenerEnabled': instance.unshortenerEnabled,
-  'unshortenerToken': instance.unshortenerToken,
   'allowNonManifestPwaInstall': instance.allowNonManifestPwaInstall,
   'blockExternalAppsEnabled': instance.blockExternalAppsEnabled,
   'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(

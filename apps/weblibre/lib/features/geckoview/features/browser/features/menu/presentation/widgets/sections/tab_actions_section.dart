@@ -39,9 +39,6 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/domai
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
-import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -220,49 +217,8 @@ class _ShareExpansion extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
     final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final tabUrl = tabState?.url;
-
-    final cleanedUrl = useState<Uri?>(null);
-    final cleaner = useUrlCleanerController(
-      sourceUrl: (cleanedUrl.value ?? tabUrl)?.toString(),
-      rules: catalogAsync.value,
-      cleanerEnabled: settings.urlCleanerEnabled,
-      allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-      autoApply: settings.urlCleanerAutoApply,
-      getCurrentUrl: () => (cleanedUrl.value ?? tabUrl)?.toString(),
-      onApplyCleanedUrl: (cleanedUrlValue) {
-        cleanedUrl.value = Uri.parse(cleanedUrlValue);
-      },
-    );
-
-    void applyCleanUrl() {
-      if (cleaner.applyCleanUrl()) {
-        ui_helper.showInfoMessage(context, 'URL cleaned');
-      }
-    }
-
-    void applySelectedTrackingRemovals(String previewUrl) {
-      if (cleaner.applyPreviewUrl(previewUrl)) {
-        ui_helper.showInfoMessage(context, 'URL preview applied');
-      }
-    }
-
-    final effectiveUrl = cleanedUrl.value ?? tabUrl;
-    final cleaningHappened = cleanedUrl.value != null;
-    final hasActiveTracking = cleaner.result?.removedParams.isNotEmpty ?? false;
-    final cleanedTrailing = cleaningHappened
-        ? Icon(
-            hasActiveTracking
-                ? MdiIcons.shieldLinkVariantOutline
-                : MdiIcons.shieldLinkVariant,
-            size: 18,
-            color: Theme.of(context).colorScheme.primary,
-          )
-        : null;
-    final showCleanerTile = tabUrl != null && cleaner.showTile;
+    final effectiveUrl = tabState?.url;
 
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -270,19 +226,10 @@ class _ShareExpansion extends HookConsumerWidget {
         leading: const Icon(Icons.share),
         title: const Text('Share'),
         children: [
-          if (showCleanerTile)
-            UrlCleanerTile(
-              result: cleaner.details!,
-              currentUrl: effectiveUrl?.toString() ?? '',
-              allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-              onClean: applyCleanUrl,
-              onApplySelectedRemovals: applySelectedTrackingRemovals,
-            ),
           ...orderMenuChildren(items, {
             MenuItemType.copyAddress: () => buildMenuSubTile(
               'Copy Address',
               icon: MdiIcons.contentCopy,
-              trailing: cleanedTrailing,
               onTap: () async {
                 await Clipboard.setData(
                   ClipboardData(text: effectiveUrl.toString()),
@@ -318,7 +265,6 @@ class _ShareExpansion extends HookConsumerWidget {
             MenuItemType.shareLink: () => buildMenuSubTile(
               'Share Link',
               icon: Icons.share,
-              trailing: cleanedTrailing,
               onTap: () async {
                 await SharePlus.instance.share(ShareParams(uri: effectiveUrl));
                 if (context.mounted) Navigator.pop(context);
@@ -329,7 +275,6 @@ class _ShareExpansion extends HookConsumerWidget {
             MenuItemType.showQrCode: () => buildMenuSubTile(
               'Show QR Code',
               icon: Icons.qr_code,
-              trailing: cleanedTrailing,
               onTap: () async {
                 if (context.mounted) {
                   Navigator.pop(context);
