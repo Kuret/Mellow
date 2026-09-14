@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 void main() {
@@ -56,22 +55,16 @@ void main() {
     });
   });
 
-  group('GeneralSettings.railWidth', () {
+  group('ZenSettings.railWidth', () {
     test('defaults to defaultRailWidth', () {
-      expect(GeneralSettings.withDefaults().railWidth, defaultRailWidth);
+      expect(ZenSettings.withDefaults().railWidth, defaultRailWidth);
       expect(defaultRailWidth, 260);
       expect(minRailWidth, 160);
     });
 
     test('a stored value below minRailWidth reads as minRailWidth', () {
-      expect(
-        GeneralSettings.withDefaults(railWidth: 56).railWidth,
-        minRailWidth,
-      );
-      expect(
-        GeneralSettings.fromJson({'railWidth': 56.0}).railWidth,
-        minRailWidth,
-      );
+      expect(ZenSettings.withDefaults(railWidth: 56).railWidth, minRailWidth);
+      expect(ZenSettings.fromJson({'railWidth': 56.0}).railWidth, minRailWidth);
     });
   });
 }

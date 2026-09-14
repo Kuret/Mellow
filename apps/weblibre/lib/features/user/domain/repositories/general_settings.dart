@@ -86,7 +86,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'quickTabSwitcherShowTitles': DriftSqlType.bool,
   'quickTabSwitcherShowHistorySuggestions': DriftSqlType.bool,
   'quickTabSwitcherTitleWidth': DriftSqlType.double,
-  'railWidth': DriftSqlType.double,
   // Legacy: superseded by quickTabSwitcherCloseButtonMode.
   'quickTabSwitcherShowCloseButtonOnAllTabs': DriftSqlType.bool,
   'quickTabSwitcherCloseButtonMode': DriftSqlType.string,
@@ -121,17 +120,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'homeSearchBarPlacement': DriftSqlType.string,
   'globalDesktopMode': DriftSqlType.bool,
   'unmountGeckoViewOffRoute': DriftSqlType.bool,
-  'maxLiveTabs': DriftSqlType.int,
-  'spacesSyncEnabled': DriftSqlType.bool,
-  'spacesSyncWritesEnabled': DriftSqlType.bool,
-  'spacesSyncLastSyncId': DriftSqlType.string,
-  'spacesSyncLastModified': DriftSqlType.double,
-  'spacesSyncBaselineDone': DriftSqlType.bool,
-  'separateEssentials': DriftSqlType.bool,
-  'spacesSyncApplierVersion': DriftSqlType.int,
-  'railSide': DriftSqlType.string,
-  'spacesSyncMaxTombstoneFraction': DriftSqlType.double,
-  'spacesSyncMaxTombstoneCount': DriftSqlType.int,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be

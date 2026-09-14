@@ -297,10 +297,6 @@ class GeneralSettings with FastEquatable {
   /// Max width (logical px) for chip titles in the quick tab switcher.
   final double quickTabSwitcherTitleWidth;
 
-  /// Width (logical px) of the vertical tab bar side rail. See
-  /// [defaultRailWidth].
-  final double railWidth;
-
   /// Which tab chips show a close button in the quick tab switcher and the
   /// tab bar.
   final TabChipCloseButtonMode quickTabSwitcherCloseButtonMode;
@@ -399,58 +395,6 @@ class GeneralSettings with FastEquatable {
   /// is left here is the memory trade this describes.
   final bool unmountGeckoViewOffRoute;
 
-  /// How many tabs may hold a live engine session at once (PLAN §7.4). Above
-  /// it, [LiveTabBudget] unloads the least recently used regular tabs back to
-  /// cold rows. Clamped to [minMaxLiveTabs]..[maxMaxLiveTabs]; defaults to
-  /// [defaultMaxLiveTabs].
-  final int maxLiveTabs;
-
-  /// Zen's `zen.workspaces.separate-essentials` (PLAN §6.4, DESIGN OPEN-3):
-  /// with it on, the Essentials strip is keyed on the current space's
-  /// container; with it off, every essential shows in every space.
-  /// Whether the Zen Spaces sync client runs at all. Inert without a Firefox
-  /// account (PLAN §8).
-  final bool spacesSyncEnabled;
-
-  /// The kill switch (PLAN §8.6 item 6): when off, the spaces client keeps
-  /// reading the collection but uploads nothing.
-  final bool spacesSyncWritesEnabled;
-
-  /// `meta/global.engines.spaces.syncID` last seen; a change resets local
-  /// sync state (PLAN §8.3 item 4).
-  final String? spacesSyncLastSyncId;
-
-  /// The `spaces` collection's last-modified timestamp (seconds) this device
-  /// has fetched up to.
-  final double? spacesSyncLastModified;
-
-  /// Whether a full baseline of the collection has been fetched and applied;
-  /// until then no tombstone is ever uploaded (PLAN §8.6 item 4).
-  final bool spacesSyncBaselineDone;
-
-  /// Local stand-in for Zen's `zen.workspaces.separate-essentials`
-  /// (DESIGN.md OPEN-3).
-  final bool separateEssentials;
-
-  /// The `spacesApplierVersion` whose rules every applied record on this
-  /// device follows; a mismatch makes the next sync refetch and re-apply the
-  /// whole collection. `0` until the first sync after the field appeared.
-  final int spacesSyncApplierVersion;
-
-  /// Which edge the side rail docks to on wide viewports. See [RailSide].
-  final RailSide railSide;
-
-  /// Destructive-batch canary (DESIGN "Hardening against Zen's stale-projection
-  /// race", defence 5): the largest share of the syncable tabs one sync may
-  /// tombstone before the whole upload is refused and surfaced to the user.
-  /// Clamped to 0..1.
-  final double spacesSyncMaxTombstoneFraction;
-
-  /// The absolute companion to [spacesSyncMaxTombstoneFraction]: the effective
-  /// limit is the smaller of the two, so a huge tab count cannot turn 20 % into
-  /// a harmless-looking number. Clamped to >= 0.
-  final int spacesSyncMaxTombstoneCount;
-
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -499,7 +443,6 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
-    required this.railWidth,
     required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
@@ -530,17 +473,6 @@ class GeneralSettings with FastEquatable {
     required this.globalDesktopMode,
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
-    required this.maxLiveTabs,
-    required this.spacesSyncEnabled,
-    required this.spacesSyncWritesEnabled,
-    required this.spacesSyncLastSyncId,
-    required this.spacesSyncLastModified,
-    required this.spacesSyncBaselineDone,
-    required this.separateEssentials,
-    required this.spacesSyncApplierVersion,
-    required this.railSide,
-    required this.spacesSyncMaxTombstoneFraction,
-    required this.spacesSyncMaxTombstoneCount,
   });
 
   GeneralSettings.withDefaults({
@@ -589,7 +521,6 @@ class GeneralSettings with FastEquatable {
     bool? quickTabSwitcherShowTitles,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
-    double? railWidth,
     TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
     String? syncTokenServerOverride,
@@ -620,17 +551,6 @@ class GeneralSettings with FastEquatable {
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
-    int? maxLiveTabs,
-    bool? spacesSyncEnabled,
-    bool? spacesSyncWritesEnabled,
-    this.spacesSyncLastSyncId,
-    this.spacesSyncLastModified,
-    bool? spacesSyncBaselineDone,
-    bool? separateEssentials,
-    int? spacesSyncApplierVersion,
-    RailSide? railSide,
-    double? spacesSyncMaxTombstoneFraction,
-    int? spacesSyncMaxTombstoneCount,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -693,10 +613,6 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
-       railWidth = (railWidth ?? defaultRailWidth).clamp(
-         minRailWidth,
-         maxRailWidth,
-       ),
        quickTabSwitcherCloseButtonMode =
            quickTabSwitcherCloseButtonMode ??
            TabChipCloseButtonMode.activeTabOnly,
@@ -732,24 +648,7 @@ class GeneralSettings with FastEquatable {
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
-       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false,
-       maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
-         minMaxLiveTabs,
-         maxMaxLiveTabs,
-       ),
-       spacesSyncEnabled = spacesSyncEnabled ?? true,
-       spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
-       spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
-       separateEssentials = separateEssentials ?? true,
-       spacesSyncApplierVersion = spacesSyncApplierVersion ?? 0,
-       railSide = railSide ?? RailSide.left,
-       spacesSyncMaxTombstoneFraction =
-           (spacesSyncMaxTombstoneFraction ??
-                   defaultSpacesSyncMaxTombstoneFraction)
-               .clamp(0.0, 1.0),
-       spacesSyncMaxTombstoneCount =
-           (spacesSyncMaxTombstoneCount ?? defaultSpacesSyncMaxTombstoneCount)
-               .clamp(0, 1 << 30);
+       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // The isolated tab mode was removed; map any previously persisted
@@ -893,7 +792,6 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherShowTitles,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
-    railWidth,
     quickTabSwitcherCloseButtonMode,
     syncServerOverride,
     syncTokenServerOverride,
@@ -924,16 +822,5 @@ class GeneralSettings with FastEquatable {
     globalDesktopMode,
     desktopModeSites,
     unmountGeckoViewOffRoute,
-    maxLiveTabs,
-    spacesSyncEnabled,
-    spacesSyncWritesEnabled,
-    spacesSyncLastSyncId,
-    spacesSyncLastModified,
-    spacesSyncBaselineDone,
-    separateEssentials,
-    spacesSyncApplierVersion,
-    railSide,
-    spacesSyncMaxTombstoneFraction,
-    spacesSyncMaxTombstoneCount,
   ];
 }

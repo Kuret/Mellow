@@ -117,8 +117,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
 
-  GeneralSettings railWidth(double railWidth);
-
   GeneralSettings quickTabSwitcherCloseButtonMode(
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
   );
@@ -187,30 +185,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute);
 
-  GeneralSettings maxLiveTabs(int maxLiveTabs);
-
-  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled);
-
-  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled);
-
-  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId);
-
-  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified);
-
-  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone);
-
-  GeneralSettings separateEssentials(bool separateEssentials);
-
-  GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion);
-
-  GeneralSettings railSide(RailSide railSide);
-
-  GeneralSettings spacesSyncMaxTombstoneFraction(
-    double spacesSyncMaxTombstoneFraction,
-  );
-
-  GeneralSettings spacesSyncMaxTombstoneCount(int spacesSyncMaxTombstoneCount);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -264,7 +238,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowTitles,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
-    double railWidth,
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
     String syncTokenServerOverride,
@@ -295,17 +268,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool globalDesktopMode,
     List<String> desktopModeSites,
     bool unmountGeckoViewOffRoute,
-    int maxLiveTabs,
-    bool spacesSyncEnabled,
-    bool spacesSyncWritesEnabled,
-    String? spacesSyncLastSyncId,
-    double? spacesSyncLastModified,
-    bool spacesSyncBaselineDone,
-    bool separateEssentials,
-    int spacesSyncApplierVersion,
-    RailSide railSide,
-    double spacesSyncMaxTombstoneFraction,
-    int spacesSyncMaxTombstoneCount,
   });
 }
 
@@ -511,9 +473,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
 
   @override
-  GeneralSettings railWidth(double railWidth) => call(railWidth: railWidth);
-
-  @override
   GeneralSettings quickTabSwitcherCloseButtonMode(
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
   ) => call(quickTabSwitcherCloseButtonMode: quickTabSwitcherCloseButtonMode);
@@ -638,51 +597,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings unmountGeckoViewOffRoute(bool unmountGeckoViewOffRoute) =>
       call(unmountGeckoViewOffRoute: unmountGeckoViewOffRoute);
 
-  @override
-  GeneralSettings maxLiveTabs(int maxLiveTabs) =>
-      call(maxLiveTabs: maxLiveTabs);
-
-  @override
-  GeneralSettings spacesSyncEnabled(bool spacesSyncEnabled) =>
-      call(spacesSyncEnabled: spacesSyncEnabled);
-
-  @override
-  GeneralSettings spacesSyncWritesEnabled(bool spacesSyncWritesEnabled) =>
-      call(spacesSyncWritesEnabled: spacesSyncWritesEnabled);
-
-  @override
-  GeneralSettings spacesSyncLastSyncId(String? spacesSyncLastSyncId) =>
-      call(spacesSyncLastSyncId: spacesSyncLastSyncId);
-
-  @override
-  GeneralSettings spacesSyncLastModified(double? spacesSyncLastModified) =>
-      call(spacesSyncLastModified: spacesSyncLastModified);
-
-  @override
-  GeneralSettings spacesSyncBaselineDone(bool spacesSyncBaselineDone) =>
-      call(spacesSyncBaselineDone: spacesSyncBaselineDone);
-
-  @override
-  GeneralSettings separateEssentials(bool separateEssentials) =>
-      call(separateEssentials: separateEssentials);
-
-  @override
-  GeneralSettings spacesSyncApplierVersion(int spacesSyncApplierVersion) =>
-      call(spacesSyncApplierVersion: spacesSyncApplierVersion);
-
-  @override
-  GeneralSettings railSide(RailSide railSide) => call(railSide: railSide);
-
-  @override
-  GeneralSettings spacesSyncMaxTombstoneFraction(
-    double spacesSyncMaxTombstoneFraction,
-  ) => call(spacesSyncMaxTombstoneFraction: spacesSyncMaxTombstoneFraction);
-
-  @override
-  GeneralSettings spacesSyncMaxTombstoneCount(
-    int spacesSyncMaxTombstoneCount,
-  ) => call(spacesSyncMaxTombstoneCount: spacesSyncMaxTombstoneCount);
-
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -739,7 +653,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
-    Object? railWidth = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
@@ -770,17 +683,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
     Object? unmountGeckoViewOffRoute = const $CopyWithPlaceholder(),
-    Object? maxLiveTabs = const $CopyWithPlaceholder(),
-    Object? spacesSyncEnabled = const $CopyWithPlaceholder(),
-    Object? spacesSyncWritesEnabled = const $CopyWithPlaceholder(),
-    Object? spacesSyncLastSyncId = const $CopyWithPlaceholder(),
-    Object? spacesSyncLastModified = const $CopyWithPlaceholder(),
-    Object? spacesSyncBaselineDone = const $CopyWithPlaceholder(),
-    Object? separateEssentials = const $CopyWithPlaceholder(),
-    Object? spacesSyncApplierVersion = const $CopyWithPlaceholder(),
-    Object? railSide = const $CopyWithPlaceholder(),
-    Object? spacesSyncMaxTombstoneFraction = const $CopyWithPlaceholder(),
-    Object? spacesSyncMaxTombstoneCount = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -1034,10 +936,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherTitleWidth
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherTitleWidth as double,
-      railWidth: railWidth == const $CopyWithPlaceholder() || railWidth == null
-          ? _value.railWidth
-          // ignore: cast_nullable_to_non_nullable
-          : railWidth as double,
       quickTabSwitcherCloseButtonMode:
           quickTabSwitcherCloseButtonMode == const $CopyWithPlaceholder() ||
               quickTabSwitcherCloseButtonMode == null
@@ -1213,66 +1111,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unmountGeckoViewOffRoute
           // ignore: cast_nullable_to_non_nullable
           : unmountGeckoViewOffRoute as bool,
-      maxLiveTabs:
-          maxLiveTabs == const $CopyWithPlaceholder() || maxLiveTabs == null
-          ? _value.maxLiveTabs
-          // ignore: cast_nullable_to_non_nullable
-          : maxLiveTabs as int,
-      spacesSyncEnabled:
-          spacesSyncEnabled == const $CopyWithPlaceholder() ||
-              spacesSyncEnabled == null
-          ? _value.spacesSyncEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncEnabled as bool,
-      spacesSyncWritesEnabled:
-          spacesSyncWritesEnabled == const $CopyWithPlaceholder() ||
-              spacesSyncWritesEnabled == null
-          ? _value.spacesSyncWritesEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncWritesEnabled as bool,
-      spacesSyncLastSyncId: spacesSyncLastSyncId == const $CopyWithPlaceholder()
-          ? _value.spacesSyncLastSyncId
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncLastSyncId as String?,
-      spacesSyncLastModified:
-          spacesSyncLastModified == const $CopyWithPlaceholder()
-          ? _value.spacesSyncLastModified
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncLastModified as double?,
-      spacesSyncBaselineDone:
-          spacesSyncBaselineDone == const $CopyWithPlaceholder() ||
-              spacesSyncBaselineDone == null
-          ? _value.spacesSyncBaselineDone
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncBaselineDone as bool,
-      separateEssentials:
-          separateEssentials == const $CopyWithPlaceholder() ||
-              separateEssentials == null
-          ? _value.separateEssentials
-          // ignore: cast_nullable_to_non_nullable
-          : separateEssentials as bool,
-      spacesSyncApplierVersion:
-          spacesSyncApplierVersion == const $CopyWithPlaceholder() ||
-              spacesSyncApplierVersion == null
-          ? _value.spacesSyncApplierVersion
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncApplierVersion as int,
-      railSide: railSide == const $CopyWithPlaceholder() || railSide == null
-          ? _value.railSide
-          // ignore: cast_nullable_to_non_nullable
-          : railSide as RailSide,
-      spacesSyncMaxTombstoneFraction:
-          spacesSyncMaxTombstoneFraction == const $CopyWithPlaceholder() ||
-              spacesSyncMaxTombstoneFraction == null
-          ? _value.spacesSyncMaxTombstoneFraction
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncMaxTombstoneFraction as double,
-      spacesSyncMaxTombstoneCount:
-          spacesSyncMaxTombstoneCount == const $CopyWithPlaceholder() ||
-              spacesSyncMaxTombstoneCount == null
-          ? _value.spacesSyncMaxTombstoneCount
-          // ignore: cast_nullable_to_non_nullable
-          : spacesSyncMaxTombstoneCount as int,
     );
   }
 }
@@ -1387,7 +1225,6 @@ GeneralSettings _$GeneralSettingsFromJson(
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
       ?.toDouble(),
-  railWidth: (json['railWidth'] as num?)?.toDouble(),
   quickTabSwitcherCloseButtonMode: $enumDecodeNullable(
     _$TabChipCloseButtonModeEnumMap,
     json['quickTabSwitcherCloseButtonMode'],
@@ -1433,19 +1270,6 @@ GeneralSettings _$GeneralSettingsFromJson(
       ?.map((e) => e as String)
       .toList(),
   unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
-  maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
-  spacesSyncEnabled: json['spacesSyncEnabled'] as bool?,
-  spacesSyncWritesEnabled: json['spacesSyncWritesEnabled'] as bool?,
-  spacesSyncLastSyncId: json['spacesSyncLastSyncId'] as String?,
-  spacesSyncLastModified: (json['spacesSyncLastModified'] as num?)?.toDouble(),
-  spacesSyncBaselineDone: json['spacesSyncBaselineDone'] as bool?,
-  separateEssentials: json['separateEssentials'] as bool?,
-  spacesSyncApplierVersion: (json['spacesSyncApplierVersion'] as num?)?.toInt(),
-  railSide: $enumDecodeNullable(_$RailSideEnumMap, json['railSide']),
-  spacesSyncMaxTombstoneFraction:
-      (json['spacesSyncMaxTombstoneFraction'] as num?)?.toDouble(),
-  spacesSyncMaxTombstoneCount: (json['spacesSyncMaxTombstoneCount'] as num?)
-      ?.toInt(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1509,7 +1333,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
-  'railWidth': instance.railWidth,
   'quickTabSwitcherCloseButtonMode':
       _$TabChipCloseButtonModeEnumMap[instance
           .quickTabSwitcherCloseButtonMode]!,
@@ -1544,17 +1367,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,
   'unmountGeckoViewOffRoute': instance.unmountGeckoViewOffRoute,
-  'maxLiveTabs': instance.maxLiveTabs,
-  'spacesSyncEnabled': instance.spacesSyncEnabled,
-  'spacesSyncWritesEnabled': instance.spacesSyncWritesEnabled,
-  'spacesSyncLastSyncId': instance.spacesSyncLastSyncId,
-  'spacesSyncLastModified': instance.spacesSyncLastModified,
-  'spacesSyncBaselineDone': instance.spacesSyncBaselineDone,
-  'separateEssentials': instance.separateEssentials,
-  'spacesSyncApplierVersion': instance.spacesSyncApplierVersion,
-  'railSide': _$RailSideEnumMap[instance.railSide]!,
-  'spacesSyncMaxTombstoneFraction': instance.spacesSyncMaxTombstoneFraction,
-  'spacesSyncMaxTombstoneCount': instance.spacesSyncMaxTombstoneCount,
 };
 
 const _$ThemeModeEnumMap = {
@@ -1664,5 +1476,3 @@ const _$AppLinksModeEnumMap = {
   AppLinksMode.ask: 'ask',
   AppLinksMode.never: 'never',
 };
-
-const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};

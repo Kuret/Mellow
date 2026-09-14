@@ -9,7 +9,7 @@ part of 'live_tab_budget.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Keeps the number of live engine sessions within
-/// [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+/// [ZenSettings.maxLiveTabs] (PLAN §7.4 item 5).
 ///
 /// Whenever the engine's tab list or the budget changes, and once the list
 /// has been quiet for [settleDelay], the least recently used regular tabs
@@ -26,7 +26,7 @@ part of 'live_tab_budget.dart';
 final liveTabBudgetProvider = LiveTabBudgetProvider._();
 
 /// Keeps the number of live engine sessions within
-/// [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+/// [ZenSettings.maxLiveTabs] (PLAN §7.4 item 5).
 ///
 /// Whenever the engine's tab list or the budget changes, and once the list
 /// has been quiet for [settleDelay], the least recently used regular tabs
@@ -41,7 +41,7 @@ final liveTabBudgetProvider = LiveTabBudgetProvider._();
 final class LiveTabBudgetProvider
     extends $NotifierProvider<LiveTabBudget, void> {
   /// Keeps the number of live engine sessions within
-  /// [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+  /// [ZenSettings.maxLiveTabs] (PLAN §7.4 item 5).
   ///
   /// Whenever the engine's tab list or the budget changes, and once the list
   /// has been quiet for [settleDelay], the least recently used regular tabs
@@ -80,10 +80,10 @@ final class LiveTabBudgetProvider
   }
 }
 
-String _$liveTabBudgetHash() => r'5c1f811381d855d8dd6f6c147247fe6a119d0427';
+String _$liveTabBudgetHash() => r'8cdea8e8b9493afbf4da372f655abef69ff16766';
 
 /// Keeps the number of live engine sessions within
-/// [GeneralSettings.maxLiveTabs] (PLAN §7.4 item 5).
+/// [ZenSettings.maxLiveTabs] (PLAN §7.4 item 5).
 ///
 /// Whenever the engine's tab list or the budget changes, and once the list
 /// has been quiet for [settleDelay], the least recently used regular tabs
