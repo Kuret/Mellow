@@ -182,7 +182,16 @@ class ProfileDefaultsService extends _$ProfileDefaultsService {
   /// cannot retry on every single launch. It simply stays un-applied until
   /// fixed, same as the onboarding wizard's failures used to.
   Future<void> applyIfOwed() async {
-    final settings = ref.read(zenSettingsWithDefaultsProvider);
+    // `fetchSettings`, not `zenSettingsWithDefaultsProvider`: that provider
+    // falls back to `ZenSettings.withDefaults()` until its watching query has
+    // emitted, and this runs during startup, before it has. Reading it would
+    // see revision 0 on a profile that was seeded long ago and seed it again on
+    // every launch — re-imposing the optimized uBlock lists and the hardening
+    // prefs over whatever the user had since chosen, which is the exact damage
+    // the revision gate exists to prevent.
+    final settings = await ref
+        .read(zenSettingsRepositoryProvider.notifier)
+        .fetchSettings();
 
     if (settings.profileDefaultsRevision >= profileDefaultsTargetRevision) {
       return;
