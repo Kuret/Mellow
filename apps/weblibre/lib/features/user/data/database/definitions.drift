@@ -10,11 +10,6 @@ CREATE TABLE icon_cache (
   fetch_date DATETIME NOT NULL
 );
 
-CREATE TABLE onboarding (
-  revision INTEGER NOT NULL,
-  completion_date DATETIME NOT NULL
-);
-
 CREATE TABLE riverpod (
   "key" TEXT PRIMARY KEY NOT NULL,
   json TEXT NOT NULL,

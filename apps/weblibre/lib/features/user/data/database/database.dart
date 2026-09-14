@@ -43,7 +43,7 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 13;
+  final int schemaVersion = 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -168,6 +168,16 @@ WHERE partition_key = 'general' AND "key" IN (
   'maxLiveTabs',
   'separateEssentials'
 )''');
+    },
+    from13To14: (m, schema) async {
+      // The onboarding wizard is gone (along with `OnboardingRepository` and
+      // `OnboardingDao`), and with it the only code that ever wrote this
+      // table: a single row recording which wizard revision a profile had
+      // completed. Frozen DROP rather than `m.deleteTable(schema.onboarding)`,
+      // matching the from7To8/from11To12 precedent — this step's meaning must
+      // not drift with the current schema. Losing the row is safe: nothing
+      // reads it, and there is no wizard left for it to gate.
+      await m.database.customStatement('DROP TABLE IF EXISTS onboarding');
     },
   );
 }

@@ -22,7 +22,6 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   $UserDatabaseManager get managers => $UserDatabaseManager(this);
   late final i1.Setting setting = i1.Setting(this);
   late final i1.IconCache iconCache = i1.IconCache(this);
-  late final i1.Onboarding onboarding = i1.Onboarding(this);
   late final i1.Riverpod riverpod = i1.Riverpod(this);
   late final i1.ToolbarButtonConfigs toolbarButtonConfigs =
       i1.ToolbarButtonConfigs(this);
@@ -52,7 +51,6 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     setting,
     iconCache,
-    onboarding,
     riverpod,
     toolbarButtonConfigs,
     i1.idxToolbarOrderKey,
@@ -101,8 +99,6 @@ class $UserDatabaseManager {
       i1.$SettingTableManager(_db, _db.setting);
   i1.$IconCacheTableManager get iconCache =>
       i1.$IconCacheTableManager(_db, _db.iconCache);
-  i1.$OnboardingTableManager get onboarding =>
-      i1.$OnboardingTableManager(_db, _db.onboarding);
   i1.$RiverpodTableManager get riverpod =>
       i1.$RiverpodTableManager(_db, _db.riverpod);
   i1.$ToolbarButtonConfigsTableManager get toolbarButtonConfigs =>
