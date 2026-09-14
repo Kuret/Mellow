@@ -28,12 +28,15 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/services/toolbar_button_resolution.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
@@ -71,12 +74,10 @@ class BrowserTopAppBar extends StatelessWidget {
     _tabBar = BrowserTabBar(
       showMainToolbar: showMainToolbar,
       displayedSheet: null,
-      // The contextual toolbar is always drawn, but always at the bottom: a
-      // top bar gets its own BrowserBottomAppBar for it.
-      showContextualToolbar: false,
+      // The quick tab switcher row is always drawn at the bottom: a top bar
+      // gets its own BrowserBottomAppBar for it.
       quickTabSwitcherRowCount: 0,
       enableGestures: enableGestures,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
     );
   }
@@ -112,10 +113,8 @@ class BrowserBottomAppBar extends StatelessWidget {
     _tabBar = BrowserTabBar(
       displayedSheet: displayedSheet,
       showMainToolbar: showMainToolbar,
-      showContextualToolbar: true,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       enableGestures: enableGestures,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
     );
   }
@@ -169,10 +168,8 @@ class BrowserSideRail extends ConsumerWidget {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
       showMainToolbar: true,
-      showContextualToolbar: true,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       enableGestures: true,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar: true,
       suppressMainToolbar: suppressMainToolbar,
       railSide: side,
     );
@@ -218,26 +215,23 @@ class BrowserSideRail extends ConsumerWidget {
 
 class BrowserTabBar extends HookConsumerWidget {
   final bool showMainToolbar;
-  final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final Sheet? displayedSheet;
-  final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
   final bool enableGestures;
 
   /// Drops the main toolbar row entirely — not just its contents.
   ///
   /// Set on the home surface, where this row has nothing left to say: its
   /// address field is replaced by the home surface's own pinned search pill,
-  /// and what sits beside it — the pinned add-ons, the reader button — acts on
-  /// a page that is not open. Blanking only the title would strand the add-ons
-  /// at the right of an empty strip and still reserve [kToolbarHeight] here.
+  /// and what sits beside it — the pinned add-ons, the configured toolbar
+  /// buttons — acts on a page that is not open. Blanking only the title would
+  /// strand the add-ons at the right of an empty strip and still reserve
+  /// [kToolbarHeight] here.
   ///
   /// The caller resolves this rather than deriving it from
-  /// `shouldShowBrowserHomeProvider`, for two reasons: [getToolbarHeight] runs
-  /// outside the widget tree (from the wrappers' constructors, to size the bar
-  /// before it is built), and the decision also depends on whether a contextual
-  /// toolbar exists to take over the tab count and navigation menu — which the
-  /// wrappers rewrite before it reaches this widget.
+  /// `shouldShowBrowserHomeProvider`, because [getToolbarHeight] runs outside
+  /// the widget tree (from the wrappers' constructors, to size the bar before
+  /// it is built).
   final bool suppressMainToolbar;
 
   /// Set when this bar is the wide-viewport side rail, docked to that edge;
@@ -249,21 +243,18 @@ class BrowserTabBar extends HookConsumerWidget {
     super.key,
     required this.showMainToolbar,
     required this.displayedSheet,
-    required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.enableGestures,
-    this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
     this.railSide,
   });
 
-  static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = CompactTabBar.height;
 
   bool get displayAppBar =>
       showMainToolbar &&
       !suppressMainToolbar &&
-      (!showContextualToolbar || displayedSheet is! ViewTabsSheet);
+      displayedSheet is! ViewTabsSheet;
 
   bool get displayQuickTabSwitcher =>
       quickTabSwitcherRowCount > 0 && displayedSheet is! ViewTabsSheet;
@@ -273,10 +264,6 @@ class BrowserTabBar extends HookConsumerWidget {
 
     if (displayAppBar) {
       height += kToolbarHeight;
-    }
-
-    if (showContextualToolbar) {
-      height += contextualToolabarHeight;
     }
 
     if (displayQuickTabSwitcher) {
@@ -294,31 +281,39 @@ class BrowserTabBar extends HookConsumerWidget {
       zenSettingsWithDefaultsProvider.select((s) => s.showRailToolbar),
     );
 
-    // Determine which buttons are actually visible in the contextual toolbar
-    // so we only hide them from the main toolbar when they're genuinely present there.
-    final contextualConfigs = ref
-        .watch(
-          effectiveToolbarButtonConfigsProvider(
-            ToolbarConfigLocation.contextual,
-          ),
+    // The toolbar's configured button set — the same set the Customize
+    // Toolbar Buttons screen edits — resolved to concrete widgets for
+    // whichever fallback chain applies right now.
+    final tabState = ref.watch(tabStateProvider(selectedTabId));
+    final historyState = ref.watch(tabHistoryStateProvider(selectedTabId));
+    final toolbarConfigs = ref.watch(effectiveToolbarButtonConfigsProvider);
+
+    final toolbarScope = ContextualToolbarScope(
+      selectedTabId: selectedTabId,
+      displayedSheet: displayedSheet,
+      tabState: tabState,
+      historyState: historyState,
+      isPreview: false,
+    );
+
+    final resolvedToolbarButtons = useMemoized(
+      () => resolveVisibleContextualToolbarButtons(
+        configs: toolbarConfigs.value,
+        knownButtonIds: knownToolbarButtonIds,
+        isPrimaryAvailable: (buttonId) {
+          final def = toolbarButtonRegistryById[buttonId];
+          return def?.isPrimaryAvailable?.call(toolbarScope, ref) ?? true;
+        },
+      ),
+      [toolbarConfigs, toolbarScope],
+    );
+
+    final configuredToolbarButtons = resolvedToolbarButtons
+        .map(
+          (button) =>
+              _buildConfiguredToolbarButton(toolbarScope, context, ref, button),
         )
-        .value;
-
-    final tabsCountInContextual =
-        hideMainToolbarButtonsDuplicatedInContextualToolbar &&
-        contextualConfigs.any(
-          (c) => c.buttonId == ToolbarButtonId.tabsCount.name && c.isVisible,
-        );
-
-    final menuInContextual =
-        hideMainToolbarButtonsDuplicatedInContextualToolbar &&
-        contextualConfigs.any(
-          (c) =>
-              c.buttonId == ToolbarButtonId.navigationMenu.name && c.isVisible,
-        );
-
-    final showMainToolbarTabsCount = !tabsCountInContextual;
-    final showMainToolbarNavigationButton = !menuInContextual;
+        .toList();
 
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
@@ -416,16 +411,19 @@ class BrowserTabBar extends HookConsumerWidget {
       }
     }
 
+    // The rail spreads every button evenly across its own width (see
+    // [WideRailToolbarRow]), so it gets the plain list; the horizontal bar
+    // shares its row with the address field, so its share of the configured
+    // buttons goes through [ToolbarButtonsRow] instead — scrolling rather
+    // than overflowing the `AppBar` when they don't all fit beside the title.
     final actions = <Widget>[
       const PinnedAddonBar(),
-      if (showMainToolbarTabsCount)
-        TabsCountButton(
-          selectedTabId: selectedTabId,
-          displayedSheet: displayedSheet,
-          showLongPressMenu: true,
-        ),
-      if (showMainToolbarNavigationButton)
-        NavigationMenuButton(selectedTabId: selectedTabId),
+      ...configuredToolbarButtons,
+    ];
+    final compactActions = <Widget>[
+      const PinnedAddonBar(),
+      if (configuredToolbarButtons.isNotEmpty)
+        Flexible(child: ToolbarButtonsRow(buttons: configuredToolbarButtons)),
     ];
 
     if (railSide != null) {
@@ -447,16 +445,6 @@ class BrowserTabBar extends HookConsumerWidget {
           collapsed: const WideRailCollapsedUrlButton(),
         ),
         tabs: const _RailSpaceTabs(),
-        // `showRailToolbar` covers this strip too, not just the main row:
-        // with the shipped layout every button the user sees in the rail is
-        // drawn here, so a "hide the toolbar buttons" that left it standing
-        // would look like it did nothing.
-        contextualToolbar: showContextualToolbar && showRailToolbar
-            ? ContextualToolbar(
-                selectedTabId: selectedTabId,
-                displayedSheet: displayedSheet,
-              )
-            : null,
         toolbar: WideRailToolbarRow(
           buttons: [
             // The add-on bar is a rigid row of however many add-ons the tab
@@ -482,7 +470,6 @@ class BrowserTabBar extends HookConsumerWidget {
 
     return BrowserTabBarView(
       showMainToolbar: showMainToolbar,
-      showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: quickTabSwitcherRowCount > 0,
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
@@ -490,16 +477,33 @@ class BrowserTabBar extends HookConsumerWidget {
       title: showTabTitle
           ? CompactAppBarTitle(containerColor: effectiveContainerColor)
           : null,
-      actions: actions,
+      actions: compactActions,
       quickTabSwitcher: const CompactTabBar(),
-      contextualToolbar: ContextualToolbar(
-        selectedTabId: selectedTabId,
-        displayedSheet: displayedSheet,
-      ),
       onVerticalDragStart: enableGestures ? dragStartHandler : null,
       onVerticalDragEnd: enableGestures ? barVerticalDragEndHandler : null,
     );
   }
+}
+
+/// Builds a resolved toolbar button, dimming it (rather than dropping it) when
+/// it isn't enabled — e.g. reload while nothing is loading — so its slot in
+/// the row stays stable instead of the row reflowing around it.
+Widget _buildConfiguredToolbarButton(
+  ContextualToolbarScope scope,
+  BuildContext context,
+  WidgetRef ref,
+  ContextualToolbarButtonResolution button,
+) {
+  final def = toolbarButtonRegistryById[button.buttonId];
+  if (def == null) return const SizedBox.shrink();
+
+  final child = def.builder(scope, context, ref);
+
+  if (button.isEnabled) {
+    return child;
+  }
+
+  return Opacity(opacity: 0.38, child: IgnorePointer(child: child));
 }
 
 /// The rail's shelves: a horizontal swipe anywhere on the list steps to the
@@ -519,15 +523,14 @@ class _RailSpaceTabs extends ConsumerWidget {
   }
 }
 
-/// The horizontal bar's structure: the quick tab switcher row, the main
-/// toolbar row (address field and actions) and the contextual strip stacked
+/// The horizontal bar's structure: the quick tab switcher row, then the main
+/// toolbar row (address field and the configured toolbar buttons), stacked
 /// in that order. Purely structural, so the settings preview renders the
 /// same skeleton around static stand-ins.
 class BrowserTabBarView extends StatelessWidget {
   const BrowserTabBarView({
     super.key,
     required this.showMainToolbar,
-    required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
     required this.displayAppBar,
     required this.displayQuickTabSwitcher,
@@ -535,13 +538,11 @@ class BrowserTabBarView extends StatelessWidget {
     required this.title,
     required this.actions,
     required this.quickTabSwitcher,
-    required this.contextualToolbar,
     this.onVerticalDragStart,
     this.onVerticalDragEnd,
   });
 
   final bool showMainToolbar;
-  final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
   final bool displayAppBar;
   final bool displayQuickTabSwitcher;
@@ -549,7 +550,6 @@ class BrowserTabBarView extends StatelessWidget {
   final Widget? title;
   final List<Widget> actions;
   final Widget quickTabSwitcher;
-  final Widget contextualToolbar;
   final GestureDragStartCallback? onVerticalDragStart;
   final GestureDragEndCallback? onVerticalDragEnd;
 
@@ -561,9 +561,9 @@ class BrowserTabBarView extends StatelessWidget {
 
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior. No
-      // horizontal handler here: the chip strip scrolls horizontally, so a
-      // drag over it belongs to the strip. The address row below it takes
-      // the space swipe instead (see its SpaceSwipeDetector).
+      // horizontal handler here: the quick tab switcher row scrolls
+      // horizontally, so a drag over it belongs to that row. The address row
+      // below it takes the space swipe instead (see its SpaceSwipeDetector).
       onVerticalDragStart: onVerticalDragStart,
       onVerticalDragEnd: onVerticalDragEnd,
       child: ColoredBox(
@@ -581,9 +581,9 @@ class BrowserTabBarView extends StatelessWidget {
               Visibility(
                 visible: displayAppBar,
                 maintainState: true,
-                // The address row is the strip's full-width neighbour and
-                // never scrolls sideways itself, so it can carry the space
-                // swipe: reaching the end of a long chip strip to overscroll
+                // The address row never scrolls sideways itself, so it can
+                // carry the space swipe: reaching the end of a long chip
+                // strip (the quick tab switcher row above it) to overscroll
                 // is not a gesture anyone would find.
                 child: SpaceSwipeDetector(
                   child: AppBar(
@@ -601,7 +601,6 @@ class BrowserTabBarView extends StatelessWidget {
                   ),
                 ),
               ),
-            if (showContextualToolbar) contextualToolbar,
           ],
         ),
       ),

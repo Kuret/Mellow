@@ -21,7 +21,6 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 
 class ContextualToolbarScope with FastEquatable {
   final String? selectedTabId;
@@ -35,18 +34,12 @@ class ContextualToolbarScope with FastEquatable {
 
   final bool isPreview;
 
-  /// Which configuration set this scope renders for, so shared registry
-  /// builders that read sibling button config (e.g. the back button's
-  /// stop-loading fallback) consult the correct location.
-  final ToolbarConfigLocation location;
-
   ContextualToolbarScope({
     required this.selectedTabId,
     required this.displayedSheet,
     required this.tabState,
     required this.isPreview,
     HistoryState? historyState,
-    this.location = ToolbarConfigLocation.contextual,
   }) : historyState = historyState ?? HistoryState.$default();
 
   @override
@@ -56,6 +49,5 @@ class ContextualToolbarScope with FastEquatable {
     tabState,
     historyState,
     isPreview,
-    location,
   ];
 }

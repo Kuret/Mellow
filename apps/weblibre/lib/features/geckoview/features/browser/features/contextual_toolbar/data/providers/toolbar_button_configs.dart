@@ -23,7 +23,6 @@ import 'package:lexo_rank/lexo_rank.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
@@ -50,26 +49,19 @@ List<ToolbarButtonConfig> _buildDefaultToolbarButtonConfigs({
   }).toList();
 }
 
-final _contextualDefaultConfigs = EquatableValue(
+final _defaultToolbarButtonConfigs = EquatableValue(
   _buildDefaultToolbarButtonConfigs(allHidden: false),
 );
 
-/// Default configuration set for [location], used as the reset target and as the
-/// fallback while the persisted set is still loading.
-EquatableValue<List<ToolbarButtonConfig>> defaultToolbarButtonConfigsFor(
-  ToolbarConfigLocation location,
-) {
-  return switch (location) {
-    ToolbarConfigLocation.contextual => _contextualDefaultConfigs,
-  };
+/// Default configuration set, used as the reset target and as the fallback
+/// while the persisted set is still loading.
+EquatableValue<List<ToolbarButtonConfig>> defaultToolbarButtonConfigsFor() {
+  return _defaultToolbarButtonConfigs;
 }
 
 @Riverpod(keepAlive: true)
-Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(
-  Ref ref,
-  ToolbarConfigLocation location,
-) async* {
-  final repository = ref.watch(toolbarConfigRepositoryProvider(location));
+Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(Ref ref) async* {
+  final repository = ref.watch(toolbarConfigRepositoryProvider);
   await repository.seedMissingDefaults();
   yield* repository.watchAll();
 }
@@ -77,9 +69,8 @@ Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(
 @Riverpod(keepAlive: true)
 EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
   Ref ref,
-  ToolbarConfigLocation location,
 ) {
-  final configsAsync = ref.watch(toolbarButtonConfigsProvider(location));
+  final configsAsync = ref.watch(toolbarButtonConfigsProvider);
 
   return configsAsync.when(
     data: (configs) {
@@ -88,12 +79,12 @@ EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
           .toList();
 
       if (filtered.isEmpty) {
-        return defaultToolbarButtonConfigsFor(location);
+        return defaultToolbarButtonConfigsFor();
       }
 
       return EquatableValue(filtered);
     },
-    loading: () => defaultToolbarButtonConfigsFor(location),
-    error: (_, _) => defaultToolbarButtonConfigsFor(location),
+    loading: defaultToolbarButtonConfigsFor,
+    error: (_, _) => defaultToolbarButtonConfigsFor(),
   );
 }

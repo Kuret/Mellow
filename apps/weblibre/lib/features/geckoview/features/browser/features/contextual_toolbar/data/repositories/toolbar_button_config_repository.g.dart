@@ -10,7 +10,7 @@ part of 'toolbar_button_config_repository.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(toolbarConfigRepository)
-final toolbarConfigRepositoryProvider = ToolbarConfigRepositoryFamily._();
+final toolbarConfigRepositoryProvider = ToolbarConfigRepositoryProvider._();
 
 final class ToolbarConfigRepositoryProvider
     extends
@@ -20,26 +20,19 @@ final class ToolbarConfigRepositoryProvider
           ToolbarButtonConfigRepository
         >
     with $Provider<ToolbarButtonConfigRepository> {
-  ToolbarConfigRepositoryProvider._({
-    required ToolbarConfigRepositoryFamily super.from,
-    required ToolbarConfigLocation super.argument,
-  }) : super(
-         retry: null,
-         name: r'toolbarConfigRepositoryProvider',
-         isAutoDispose: false,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  ToolbarConfigRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'toolbarConfigRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$toolbarConfigRepositoryHash();
-
-  @override
-  String toString() {
-    return r'toolbarConfigRepositoryProvider'
-        ''
-        '($argument)';
-  }
 
   @$internal
   @override
@@ -49,8 +42,7 @@ final class ToolbarConfigRepositoryProvider
 
   @override
   ToolbarButtonConfigRepository create(Ref ref) {
-    final argument = this.argument as ToolbarConfigLocation;
-    return toolbarConfigRepository(ref, argument);
+    return toolbarConfigRepository(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -62,40 +54,7 @@ final class ToolbarConfigRepositoryProvider
       ),
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ToolbarConfigRepositoryProvider &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
 String _$toolbarConfigRepositoryHash() =>
-    r'de80416adcfe5c99d3d6d217a9436fa9cc7b4eaf';
-
-final class ToolbarConfigRepositoryFamily extends $Family
-    with
-        $FunctionalFamilyOverride<
-          ToolbarButtonConfigRepository,
-          ToolbarConfigLocation
-        > {
-  ToolbarConfigRepositoryFamily._()
-    : super(
-        retry: null,
-        name: r'toolbarConfigRepositoryProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: false,
-      );
-
-  ToolbarConfigRepositoryProvider call(ToolbarConfigLocation location) =>
-      ToolbarConfigRepositoryProvider._(argument: location, from: this);
-
-  @override
-  String toString() => r'toolbarConfigRepositoryProvider';
-}
+    r'c6d6b5e12eb1b02560ae0735670281f1de492320';

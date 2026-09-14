@@ -22,7 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
@@ -123,12 +123,9 @@ class TabBarPreviewCard extends StatelessWidget {
   static const _kWideCanvasWidth = 640.0;
   static const _kWideCanvasHeight = 300.0;
 
-  /// The compact bar's chrome: the address row, one switcher row and, when
-  /// on, the contextual strip.
+  /// The compact bar's chrome: the address/toolbar row and one switcher row.
   static double toolbarHeight(GeneralSettings settings) =>
-      kToolbarHeight +
-      BrowserTabBar.quickTabSwitcherHeight +
-      BrowserTabBar.contextualToolabarHeight;
+      kToolbarHeight + BrowserTabBar.quickTabSwitcherHeight;
 
   /// Height of the narrow-screen preview box (content plus its border).
   static double narrowPreviewHeight(
@@ -188,28 +185,31 @@ class TabBarPreviewCard extends StatelessWidget {
       },
     );
 
-    Widget buildContextualToolbar() {
-      return ContextualToolbarView(
-        buttons: [
-          NavigateBackButtonView(
-            canGoBack: true,
-            isLoading: false,
-            onPressed: () {},
-            onLongPress: () {},
-          ),
-          NavigateForwardButtonView(
-            canGoForward: true,
-            onPressed: () {},
-            onLongPress: () {},
-          ),
-          AddTabButtonView(onPressed: () {}, onLongPress: () {}),
-          tabCountButton,
-          NavigationMenuButtonView(onTap: () {}),
-        ],
-      );
-    }
-
+    // The toolbar's configured button set, as a static stand-in: the live bar
+    // resolves this from the registry and the user's saved configuration,
+    // which the preview does not have.
     final mainToolbarActions = <Widget>[
+      NavigateBackButtonView(
+        canGoBack: true,
+        isLoading: false,
+        onPressed: () {},
+        onLongPress: () {},
+      ),
+      NavigateForwardButtonView(
+        canGoForward: true,
+        onPressed: () {},
+        onLongPress: () {},
+      ),
+      AddTabButtonView(onPressed: () {}, onLongPress: () {}),
+      tabCountButton,
+      NavigationMenuButtonView(onTap: () {}),
+    ];
+
+    // The compact bar shares its row with the address field, so its share of
+    // the buttons scrolls rather than overflows when they don't all fit
+    // beside the title — same as the live bar (see [ToolbarButtonsRow]).
+    final compactMainToolbarActions = <Widget>[
+      Flexible(child: ToolbarButtonsRow(buttons: mainToolbarActions)),
     ];
 
     Widget title() => _CompactPreviewTitle(tabState: previewTabState);
@@ -251,20 +251,17 @@ class TabBarPreviewCard extends StatelessWidget {
         children: [
           BrowserTabBarView(
             showMainToolbar: true,
-            showContextualToolbar: false,
             showQuickTabSwitcherBar: false,
             displayAppBar: true,
             displayQuickTabSwitcher: false,
             backgroundColor: chromeColor,
             title: title(),
-            actions: mainToolbarActions,
+            actions: compactMainToolbarActions,
             quickTabSwitcher: const SizedBox.shrink(),
-            contextualToolbar: const SizedBox.shrink(),
           ),
           pageContent(height: pageHeight),
           BrowserTabBarView(
             showMainToolbar: false,
-            showContextualToolbar: true,
             showQuickTabSwitcherBar: true,
             displayAppBar: false,
             displayQuickTabSwitcher: true,
@@ -272,7 +269,6 @@ class TabBarPreviewCard extends StatelessWidget {
             title: null,
             actions: const [],
             quickTabSwitcher: compactBar,
-            contextualToolbar: buildContextualToolbar(),
           ),
         ],
       );
@@ -282,15 +278,13 @@ class TabBarPreviewCard extends StatelessWidget {
           pageContent(height: pageHeight),
           BrowserTabBarView(
             showMainToolbar: true,
-            showContextualToolbar: true,
             showQuickTabSwitcherBar: true,
             displayAppBar: true,
             displayQuickTabSwitcher: true,
             backgroundColor: chromeColor,
             title: title(),
-            actions: mainToolbarActions,
+            actions: compactMainToolbarActions,
             quickTabSwitcher: compactBar,
-            contextualToolbar: buildContextualToolbar(),
           ),
         ],
       );
@@ -333,7 +327,6 @@ class TabBarPreviewCard extends StatelessWidget {
             ),
           ],
         ),
-        contextualToolbar: buildContextualToolbar(),
         toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
         spaces: const SpaceIconRailView(
           entries: [

@@ -20,7 +20,6 @@
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
@@ -59,13 +58,6 @@ abstract interface class ToolbarButtonConfigRepository {
 }
 
 @Riverpod(keepAlive: true)
-ToolbarButtonConfigRepository toolbarConfigRepository(
-  Ref ref,
-  ToolbarConfigLocation location,
-) {
-  return switch (location) {
-    ToolbarConfigLocation.contextual => ref.watch(
-      contextualToolbarConfigRepositoryProvider,
-    ),
-  };
+ToolbarButtonConfigRepository toolbarConfigRepository(Ref ref) {
+  return ref.watch(contextualToolbarConfigRepositoryProvider);
 }

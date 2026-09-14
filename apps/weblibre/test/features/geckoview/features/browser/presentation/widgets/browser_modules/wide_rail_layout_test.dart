@@ -300,16 +300,12 @@ void main() {
               child: WideRailLayout(
                 urlRow: const SizedBox(height: 56, width: double.infinity),
                 tabs: const SizedBox.expand(),
-                contextualToolbar: const SizedBox(
-                  height: 40,
-                  width: double.infinity,
-                ),
                 toolbar: WideRailToolbarRow(
                   buttons: [
                     // Stands in for the pinned add-on bar: one composite child
                     // whose width follows the tab. Wide enough on tab-2 to
                     // overflow the rail, which is what used to open a second
-                    // run and push the contextual strip up.
+                    // run and push the address row below it down.
                     Consumer(
                       builder: (context, ref, _) {
                         final tab = ref.watch(selectedTabProvider);
@@ -369,10 +365,10 @@ void main() {
           tester.getRect(find.byKey(WideRailLayout.spacesKey)),
           spacesBefore,
         );
-        // Nothing opened up between the strip and the address row below it
-        // either.
+        // Nothing opened up between the toolbar row and the address row
+        // below it either.
         expect(
-          tester.getRect(_contextualStrip).bottom,
+          toolbarAfter.bottom,
           tester.getRect(find.byKey(WideRailLayout.urlRowKey)).top,
         );
       },
@@ -612,12 +608,3 @@ void main() {
     });
   });
 }
-
-/// The stand-in contextual strip of the overflow test: the 40-tall box the
-/// layout wraps in its own ClipRect.
-final _contextualStrip = find.byWidgetPredicate(
-  (widget) =>
-      widget is SizedBox &&
-      widget.height == 40 &&
-      widget.width == double.infinity,
-);

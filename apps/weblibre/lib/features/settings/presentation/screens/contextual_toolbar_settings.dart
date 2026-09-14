@@ -24,32 +24,26 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   const ContextualToolbarSettingsScreen({
     super.key,
-    this.location = ToolbarConfigLocation.contextual,
     this.title = 'Customize Toolbar',
   });
-
-  /// Which independently-configured toolbar this screen edits.
-  final ToolbarConfigLocation location;
 
   /// App bar title, so the quick switcher variant reads distinctly.
   final String title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final configs = ref.watch(effectiveToolbarButtonConfigsProvider(location));
-    final repository = ref.watch(toolbarConfigRepositoryProvider(location));
+    final configs = ref.watch(effectiveToolbarButtonConfigsProvider);
+    final repository = ref.watch(toolbarConfigRepositoryProvider);
     final search = useSettingsSearch();
     final query = search.normalizedQuery;
 
@@ -98,7 +92,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
           menuChildren: [
             MenuItemButton(
               leadingIcon: const Icon(Icons.restore),
-              onPressed: () => _resetToDefaults(ref, location),
+              onPressed: () => _resetToDefaults(ref),
               child: const Text('Reset to Defaults'),
             ),
           ],
@@ -108,10 +102,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverPersistentHeader(
           pinned: true,
-          delegate: _ToolbarPreviewDelegate(
-            configs: configs.value,
-            location: location,
-          ),
+          delegate: _ToolbarPreviewDelegate(configs: configs.value),
         ),
         const SliverPadding(
           padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
@@ -262,12 +253,9 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     await repository.assignOrderKey(movedId, orderKey: orderKey);
   }
 
-  Future<void> _resetToDefaults(
-    WidgetRef ref,
-    ToolbarConfigLocation location,
-  ) async {
-    final repository = ref.read(toolbarConfigRepositoryProvider(location));
-    await repository.replaceAll(defaultToolbarButtonConfigsFor(location).value);
+  Future<void> _resetToDefaults(WidgetRef ref) async {
+    final repository = ref.read(toolbarConfigRepositoryProvider);
+    await repository.replaceAll(defaultToolbarButtonConfigsFor().value);
   }
 }
 
@@ -528,15 +516,14 @@ class _FallbackPicker extends StatelessWidget {
 }
 
 class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
-  const _ToolbarPreviewDelegate({
-    required this.configs,
-    required this.location,
-  });
+  const _ToolbarPreviewDelegate({required this.configs});
 
   final List<ToolbarButtonConfig> configs;
-  final ToolbarConfigLocation location;
 
-  static const _previewHeight = BrowserTabBar.contextualToolabarHeight;
+  /// Mirrors the toolbar row's own height (a `ToolbarButton` with its own
+  /// vertical padding is 54, with a little slack so the buttons are never
+  /// clipped).
+  static const _previewHeight = 56.0;
 
   @override
   double get minExtent => _previewHeight;
@@ -553,21 +540,19 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
       height: maxExtent,
       child: ColoredBox(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        child: _ToolbarPreview(configs: configs, location: location),
+        child: _ToolbarPreview(configs: configs),
       ),
     );
   }
 
   @override
-  bool shouldRebuild(_ToolbarPreviewDelegate old) =>
-      old.configs != configs || old.location != location;
+  bool shouldRebuild(_ToolbarPreviewDelegate old) => old.configs != configs;
 }
 
 class _ToolbarPreview extends ConsumerWidget {
-  const _ToolbarPreview({required this.configs, required this.location});
+  const _ToolbarPreview({required this.configs});
 
   final List<ToolbarButtonConfig> configs;
-  final ToolbarConfigLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -578,7 +563,6 @@ class _ToolbarPreview extends ConsumerWidget {
       displayedSheet: null,
       tabState: null,
       isPreview: true,
-      location: location,
     );
 
     final buttons = visibleConfigs.map((config) {
@@ -587,6 +571,6 @@ class _ToolbarPreview extends ConsumerWidget {
       return def.builder(scope, context, ref);
     }).toList();
 
-    return ContextualToolbarView(buttons: buttons);
+    return ToolbarButtonsRow(buttons: buttons);
   }
 }

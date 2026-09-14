@@ -37,7 +37,6 @@ class WideRailLayout extends StatelessWidget {
     required this.tabs,
     required this.toolbar,
     required this.spaces,
-    this.contextualToolbar,
     this.showUrlRow = true,
     this.showToolbar = true,
     this.backgroundColor,
@@ -57,21 +56,6 @@ class WideRailLayout extends StatelessWidget {
 
   /// Block 2: the tab shelves. Takes all remaining height.
   final Widget tabs;
-
-  /// Optional contextual toolbar strip, sitting between the main toolbar row
-  /// and the address row. Takes height only while it has content, and never
-  /// more than [contextualToolbarMaxHeight].
-  ///
-  /// It rides at the top with the main toolbar rather than down by the
-  /// shelves: on a default layout the main row is empty — every button it
-  /// would draw is already in this strip — so this is the row the user
-  /// actually sees, and "the toolbar buttons" means these.
-  final Widget? contextualToolbar;
-
-  /// Cap on the contextual strip: one row of toolbar buttons. Mirrors the
-  /// horizontal bar's `BrowserTabBar.contextualToolabarHeight` (54), with a
-  /// little slack so the buttons are never clipped.
-  static const contextualToolbarMaxHeight = 56.0;
 
   /// Block 3: the main toolbar buttons.
   final Widget toolbar;
@@ -109,16 +93,6 @@ class WideRailLayout extends StatelessWidget {
               maintainState: true,
               child: KeyedSubtree(key: toolbarKey, child: toolbar),
             ),
-            // Bounded so a strip that grows (a button with its own padding,
-            // an unexpected vertical layout) can only ever eat into the
-            // shelves, never push the address row off the top.
-            if (contextualToolbar != null)
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: contextualToolbarMaxHeight,
-                ),
-                child: ClipRect(child: contextualToolbar),
-              ),
             Visibility(
               visible: showUrlRow,
               maintainState: true,
@@ -248,7 +222,7 @@ class WideRailToolbarRow extends StatelessWidget {
     // Three ways this row has gone wrong, all of them visible as a band of
     // dead space above the spaces row:
     //  * a Wrap flips to a second run when the bars stop fitting, doubling
-    //    the height and pushing the contextual strip up;
+    //    the height and pushing the address row below it down;
     //  * a horizontal scroll view or a FittedBox hands the bars *unbounded*
     //    width, which a bar that sizes itself to its width cannot lay out
     //    against, so the row renders empty at full height;
