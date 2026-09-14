@@ -54,19 +54,13 @@ final _contextualDefaultConfigs = EquatableValue(
   _buildDefaultToolbarButtonConfigs(allHidden: false),
 );
 
-final _quickSwitcherDefaultConfigs = EquatableValue(
-  _buildDefaultToolbarButtonConfigs(allHidden: true),
-);
-
 /// Default configuration set for [location], used as the reset target and as the
-/// fallback while the persisted set is still loading. The quick switcher starts
-/// with every button hidden.
+/// fallback while the persisted set is still loading.
 EquatableValue<List<ToolbarButtonConfig>> defaultToolbarButtonConfigsFor(
   ToolbarConfigLocation location,
 ) {
   return switch (location) {
     ToolbarConfigLocation.contextual => _contextualDefaultConfigs,
-    ToolbarConfigLocation.quickSwitcher => _quickSwitcherDefaultConfigs,
   };
 }
 

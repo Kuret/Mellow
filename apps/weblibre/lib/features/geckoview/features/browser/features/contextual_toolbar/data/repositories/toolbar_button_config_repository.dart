@@ -20,19 +20,16 @@
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/quick_switcher_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
 part 'toolbar_button_config_repository.g.dart';
 
-/// Shared contract for a single toolbar button configuration set. Both the
-/// contextual toolbar and the quick tab switcher cluster persist to their own
-/// table but expose this same interface, so the resolution logic, providers and
-/// customization UI are location-agnostic. [ToolbarButtonConfig] (the contextual
-/// drift row) is used as the shared transport type; the quick switcher
-/// repository maps its own row type at the boundary.
+/// Shared contract for a single toolbar button configuration set, so the
+/// resolution logic, providers and customization UI are location-agnostic.
+/// [ToolbarButtonConfig] (the contextual drift row) is used as the shared
+/// transport type.
 abstract interface class ToolbarButtonConfigRepository {
   Stream<List<ToolbarButtonConfig>> watchAll();
 
@@ -69,9 +66,6 @@ ToolbarButtonConfigRepository toolbarConfigRepository(
   return switch (location) {
     ToolbarConfigLocation.contextual => ref.watch(
       contextualToolbarConfigRepositoryProvider,
-    ),
-    ToolbarConfigLocation.quickSwitcher => ref.watch(
-      quickSwitcherToolbarConfigRepositoryProvider,
     ),
   };
 }

@@ -19,13 +19,11 @@
  */
 
 /// Identifies which independently-configured toolbar a button configuration
-/// belongs to. Each location persists its own enabled set, ordering and
-/// fallbacks (backed by a separate drift table) while sharing the button
-/// registry, resolution logic and customization UI.
+/// belongs to. Kept as an enum (rather than being collapsed away now that it
+/// has a single value) because the repositories, providers and customization
+/// UI still thread it through; the contextual toolbar persists its own
+/// enabled set, ordering and fallbacks behind this location.
 enum ToolbarConfigLocation {
   /// The contextual toolbar row that sits below the URL bar.
   contextual,
-
-  /// The trailing fixed button cluster on the quick tab switcher bar.
-  quickSwitcher,
 }
