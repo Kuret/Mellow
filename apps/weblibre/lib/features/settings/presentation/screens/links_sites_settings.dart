@@ -28,9 +28,10 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-const List<SettingsSectionDefinition> browsingSettingsSections = [
+const List<SettingsSectionDefinition> linksSitesSettingsSections = [
   SettingsSectionDefinition(
-    title: 'Navigation',
+    title: 'Opening Links',
+    keywords: ['navigation'],
     entries: [
       SettingsEntryDefinition(
         title: 'Open Links in Apps',
@@ -58,7 +59,8 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Home Screen',
+    title: 'Web Apps',
+    keywords: ['home screen', 'pwa'],
     entries: [
       SettingsEntryDefinition(
         title: 'Install Sites as Apps',
@@ -70,16 +72,16 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
   ),
 ];
 
-class BrowsingSettingsScreen extends StatelessWidget {
-  const BrowsingSettingsScreen({super.key});
+class LinksSitesSettingsScreen extends StatelessWidget {
+  const LinksSitesSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
-      title: 'Browsing',
-      subtitle: 'Tabs, navigation and app links.',
+      title: 'Links & Sites',
+      subtitle: 'How links open, and what individual sites are served.',
       icon: MdiIcons.compassOutline,
-      sections: browsingSettingsSections,
+      sections: linksSitesSettingsSections,
     );
   }
 }

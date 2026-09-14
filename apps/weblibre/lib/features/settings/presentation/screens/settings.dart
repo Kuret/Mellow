@@ -25,8 +25,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/links_sites_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
@@ -95,12 +95,17 @@ typedef _CategoryGroups = ({
 _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
-      title: 'Browsing',
-      subtitle: 'Navigation, desktop mode, external links',
-      icon: MdiIcons.compassOutline,
-      keywords: const ['navigation', 'external links', 'desktop mode'],
-      sections: browsingSettingsSections,
-      onTap: (context) => BrowsingSettingsRoute().push(context),
+      title: 'Links & Sites',
+      subtitle: 'App links, desktop mode, installed sites',
+      icon: MdiIcons.linkVariant,
+      keywords: const [
+        'navigation',
+        'external links',
+        'desktop mode',
+        'pwa',
+      ],
+      sections: linksSitesSettingsSections,
+      onTap: (context) => LinksSitesSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Tabs & Spaces',

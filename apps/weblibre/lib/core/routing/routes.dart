@@ -56,12 +56,12 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/s
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/appearance_layout_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/contextual_toolbar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/desktop_mode_sites_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/links_sites_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/menu_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';

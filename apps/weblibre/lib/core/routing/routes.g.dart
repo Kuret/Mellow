@@ -1055,10 +1055,10 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $SettingsTransferRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'browsing',
-      name: 'BrowsingSettingsRoute',
+      path: 'links_sites',
+      name: 'LinksSitesSettingsRoute',
       hasOverriddenOnExit: false,
-      factory: $BrowsingSettingsRoute._fromState,
+      factory: $LinksSitesSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'privacy_security',
@@ -1214,12 +1214,12 @@ mixin $SettingsTransferRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $BrowsingSettingsRoute on GoRouteData {
-  static BrowsingSettingsRoute _fromState(GoRouterState state) =>
-      BrowsingSettingsRoute();
+mixin $LinksSitesSettingsRoute on GoRouteData {
+  static LinksSitesSettingsRoute _fromState(GoRouterState state) =>
+      LinksSitesSettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings/browsing');
+  String get location => GoRouteData.$location('/settings/links_sites');
 
   @override
   void go(BuildContext context) => context.go(location);

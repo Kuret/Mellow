@@ -27,9 +27,9 @@ part of 'routes.dart';
       name: 'SettingsTransferRoute',
       path: 'transfer',
     ),
-    TypedGoRoute<BrowsingSettingsRoute>(
-      name: 'BrowsingSettingsRoute',
-      path: 'browsing',
+    TypedGoRoute<LinksSitesSettingsRoute>(
+      name: 'LinksSitesSettingsRoute',
+      path: 'links_sites',
     ),
     TypedGoRoute<PrivacySecuritySettingsRoute>(
       name: 'PrivacySecuritySettingsRoute',
@@ -114,10 +114,11 @@ class SettingsTransferRoute extends GoRouteData with $SettingsTransferRoute {
   }
 }
 
-class BrowsingSettingsRoute extends GoRouteData with $BrowsingSettingsRoute {
+class LinksSitesSettingsRoute extends GoRouteData
+    with $LinksSitesSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const BrowsingSettingsScreen();
+    return const LinksSitesSettingsScreen();
   }
 }
 
