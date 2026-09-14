@@ -36,8 +36,16 @@ part 'general_settings.g.dart';
 /// Id of the engine a user who never touched the setting searches with. A
 /// literal rather than `fallbackSearchProvider.id` because a const initializer
 /// cannot read a field off another const object.
-const _fallbackSearchProvider = 'wikipedia';
-const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
+///
+/// Deliberately *not* [fallbackSearchProvider]: that const is the last-resort
+/// engine for a stored id that resolves to nothing, and Wikipedia is the right
+/// answer there precisely because it is inert. A profile that never made a
+/// choice wants a general-purpose engine instead, and Brave is the one this
+/// fork ships as its default — it is a real web index, it does not need an
+/// account, and it is the same engine [_fallbackAutocompleteProvider] queries,
+/// so suggestions and results come from one place.
+const _fallbackSearchProvider = 'brave';
+const _fallbackAutocompleteProvider = SearchSuggestionProviders.brave;
 
 const defaultUiScaleFactor = 1.0;
 
