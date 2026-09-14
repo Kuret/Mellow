@@ -88,10 +88,6 @@ part of 'routes.dart';
       name: 'MenuLayoutSettingsRoute',
       path: 'menu_layout',
     ),
-    TypedGoRoute<QuickSwitcherToolbarSettingsRoute>(
-      name: 'QuickSwitcherToolbarSettingsRoute',
-      path: 'quick_switcher_toolbar',
-    ),
     TypedGoRoute<DesktopModeSitesRoute>(
       name: 'DesktopModeSitesRoute',
       path: 'desktop_mode_sites',
@@ -248,19 +244,6 @@ class MenuLayoutSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MenuLayoutSettingsScreen();
-  }
-}
-
-class QuickSwitcherToolbarSettingsRoute extends GoRouteData
-    with $QuickSwitcherToolbarSettingsRoute {
-  const QuickSwitcherToolbarSettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ContextualToolbarSettingsScreen(
-      location: ToolbarConfigLocation.quickSwitcher,
-      title: 'Customize Switcher Buttons',
-    );
   }
 }
 

@@ -116,20 +116,6 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         child: _CustomizeToolbarButtonsTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Customize Switcher Buttons',
-        subtitle: 'Choose which action buttons appear at the end of the bar',
-        keywords: [
-          'buttons',
-          'new tab',
-          'actions',
-          'trailing',
-          'tab chips',
-          'quick tab switcher',
-          'switcher',
-        ],
-        child: _CustomizeQuickSwitcherButtonsTile(),
-      ),
-      SettingsEntryDefinition(
         title: 'Customize Menu',
         subtitle:
             'Choose and order the sections and rows of the three-dot menu',
@@ -299,26 +285,6 @@ class _CustomizeToolbarButtonsTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await const ContextualToolbarSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _CustomizeQuickSwitcherButtonsTile extends StatelessWidget {
-  const _CustomizeQuickSwitcherButtonsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.tune),
-      title: const Text('Customize Switcher Buttons'),
-      subtitle: const Text(
-        'Action buttons pinned at the end of the compact bar and in the rail '
-        'toolbar (independent of the contextual toolbar)',
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await const QuickSwitcherToolbarSettingsRoute().push(context);
       },
     );
   }
