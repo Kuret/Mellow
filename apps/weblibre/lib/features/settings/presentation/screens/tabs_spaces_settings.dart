@@ -182,46 +182,49 @@ class _MaxLiveTabsSection extends HookConsumerWidget {
     }, [maxLiveTabs]);
     final shown = sliderValue.value.round();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          leading: const Icon(MdiIcons.snowflakeVariant),
-          title: Text('Keep at most $shown tabs loaded'),
-          subtitle: const Text(
-            'Tabs beyond this are unloaded, least recently used first, and '
-            'load again when tapped',
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: const Icon(MdiIcons.snowflakeVariant),
+            title: Text('Keep at most $shown tabs loaded'),
+            subtitle: const Text(
+              'Tabs beyond this are unloaded, least recently used first, and '
+              'load again when tapped',
+            ),
+            contentPadding: EdgeInsets.zero,
           ),
-          contentPadding: EdgeInsets.zero,
-        ),
-        Slider(
-          min: minMaxLiveTabs.toDouble(),
-          max: maxMaxLiveTabs.toDouble(),
-          divisions: (maxMaxLiveTabs - minMaxLiveTabs) ~/ _step,
-          label: '$shown',
-          value: sliderValue.value.clamp(
-            minMaxLiveTabs.toDouble(),
-            maxMaxLiveTabs.toDouble(),
+          Slider(
+            min: minMaxLiveTabs.toDouble(),
+            max: maxMaxLiveTabs.toDouble(),
+            divisions: (maxMaxLiveTabs - minMaxLiveTabs) ~/ _step,
+            label: '$shown',
+            value: sliderValue.value.clamp(
+              minMaxLiveTabs.toDouble(),
+              maxMaxLiveTabs.toDouble(),
+            ),
+            onChanged: (value) {
+              sliderValue.value = value;
+            },
+            onChangeEnd: (value) async {
+              final rounded = ((value / _step).round() * _step).clamp(
+                minMaxLiveTabs,
+                maxMaxLiveTabs,
+              );
+              sliderValue.value = rounded.toDouble();
+              await ref
+                  .read(saveZenSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.maxLiveTabs(rounded),
+                  );
+            },
           ),
-          onChanged: (value) {
-            sliderValue.value = value;
-          },
-          onChangeEnd: (value) async {
-            final rounded = ((value / _step).round() * _step).clamp(
-              minMaxLiveTabs,
-              maxMaxLiveTabs,
-            );
-            sliderValue.value = rounded.toDouble();
-            await ref
-                .read(saveZenSettingsControllerProvider.notifier)
-                .save(
-                  (currentSettings) =>
-                      currentSettings.copyWith.maxLiveTabs(rounded),
-                );
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
