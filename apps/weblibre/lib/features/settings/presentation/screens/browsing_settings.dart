@@ -191,7 +191,7 @@ class BrowsingSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Browsing',
-      subtitle: 'Tabs, navigation, app links, and Small Web behavior.',
+      subtitle: 'Tabs, navigation and app links.',
       icon: MdiIcons.compassOutline,
       sections: browsingSettingsSections,
     );
