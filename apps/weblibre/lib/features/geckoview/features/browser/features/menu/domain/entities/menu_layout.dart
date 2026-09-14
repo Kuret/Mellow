@@ -32,9 +32,6 @@ part 'menu_layout.g.dart';
 /// is a [MenuItemType], and items never move between sections — the grouping is
 /// part of the design, only the order within it is the user's.
 enum MenuSectionType {
-  /// Segmented Gestures bar at the top of the sheet.
-  quickToggles,
-
   /// Actions on the page in front: desktop mode, bookmark, find, install.
   pageActions,
 
@@ -54,7 +51,6 @@ enum MenuSectionType {
   about;
 
   String get label => switch (this) {
-    quickToggles => 'Quick Toggles',
     pageActions => 'Page Actions',
     extensions => 'Extensions',
     tabActions => 'Tab Actions',
@@ -66,7 +62,6 @@ enum MenuSectionType {
   /// Identity icon for the arrangement UI. The sheet itself draws no section
   /// headers, so this exists only to make the section list scannable.
   IconData get icon => switch (this) {
-    quickToggles => MdiIcons.toggleSwitchOutline,
     pageActions => MdiIcons.fileDocumentOutline,
     extensions => MdiIcons.puzzle,
     tabActions => MdiIcons.tab,
@@ -265,7 +260,6 @@ class MenuSectionDefault {
 /// A section or row that lays its own contents out from live data (Extensions,
 /// Connection, Send To Device) offers nothing to arrange beneath it.
 const List<MenuSectionDefault> menuLayoutDefaults = [
-  MenuSectionDefault(MenuSectionType.quickToggles),
   MenuSectionDefault(
     MenuSectionType.pageActions,
     items: [
@@ -438,6 +432,28 @@ List<MenuItemEntry> menuItemEntriesFromJson(Object? json) {
         }
       })
       .whereType<MenuItemEntry>()
+      .toList();
+}
+
+/// Drops section entries that no longer decode, for the same reason
+/// [menuItemEntriesFromJson] drops rows: a retired [MenuSectionType] must cost
+/// the user that section and nothing else.
+///
+/// Not folded into the persistence layer so it can be tested directly — a
+/// throw here would take the whole arrangement with it.
+List<MenuSectionEntry> menuSectionEntriesFromJson(Object? json) {
+  if (json is! List) return const [];
+
+  return json
+      .whereType<Map<String, dynamic>>()
+      .map((section) {
+        try {
+          return MenuSectionEntry.fromJson(section);
+        } catch (_) {
+          return null;
+        }
+      })
+      .whereType<MenuSectionEntry>()
       .toList();
 }
 

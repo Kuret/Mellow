@@ -62,7 +62,7 @@ final class MenuLayoutProvider
   }
 }
 
-String _$menuLayoutHash() => r'f21d2e659c250cd70ccfcecabc82f8be155c7d4e';
+String _$menuLayoutHash() => r'778ac1aa210afba47ada40f6d65e40c3f265ca9e';
 
 /// The user's arrangement of the browser menu sheet: which sections appear, in
 /// what order, how the rows inside each one are ordered, and how the rows an

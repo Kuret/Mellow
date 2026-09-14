@@ -29,7 +29,6 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/page_actions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_links_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_toggles_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -58,10 +57,6 @@ _buildSectionBuilders(String? selectedTabId) {
     // out of the map rather than rendered empty, so their place in the user's
     // order is remembered without leaving a gap on the home screen.
     if (selectedTabId case final tabId?) ...{
-      MenuSectionType.quickToggles: (section) => QuickTogglesSection(
-        selectedTabId: tabId,
-        items: section.visibleItemTypes,
-      ),
       MenuSectionType.pageActions: (section) => PageActionsSection(
         selectedTabId: tabId,
         items: section.visibleItemTypes,

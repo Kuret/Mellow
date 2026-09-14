@@ -127,22 +127,10 @@ class MenuLayout extends _$MenuLayout {
       key: 'BrowserMenuLayout',
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
-      decode: (encoded) {
-        final decoded = (jsonDecode(encoded) as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-            .map((section) {
-              try {
-                return MenuSectionEntry.fromJson(section);
-              } catch (_) {
-                return null;
-              }
-            })
-            .whereType<MenuSectionEntry>()
-            .toList();
-
-        // Merge with defaults to pick up newly added or removed sections/rows.
-        return mergeMenuLayoutWithDefaults(decoded);
-      },
+      // Merge with defaults to pick up newly added or removed sections/rows.
+      decode: (encoded) => mergeMenuLayoutWithDefaults(
+        menuSectionEntriesFromJson(jsonDecode(encoded)),
+      ),
     );
 
     return stateOrNull ?? mergeMenuLayoutWithDefaults(null);

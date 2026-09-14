@@ -76,7 +76,6 @@ Map<String, dynamic> _$MenuSectionEntryToJson(MenuSectionEntry instance) =>
     };
 
 const _$MenuSectionTypeEnumMap = {
-  MenuSectionType.quickToggles: 'quickToggles',
   MenuSectionType.pageActions: 'pageActions',
   MenuSectionType.extensions: 'extensions',
   MenuSectionType.tabActions: 'tabActions',

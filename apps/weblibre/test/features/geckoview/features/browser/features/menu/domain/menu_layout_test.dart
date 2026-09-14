@@ -101,14 +101,14 @@ void main() {
 
     test('preserves a reordered section list and its visibility', () {
       const defaults = <MenuSectionDefault>[
-        MenuSectionDefault(MenuSectionType.quickToggles),
+        MenuSectionDefault(MenuSectionType.pageActions),
         MenuSectionDefault(MenuSectionType.quickLinks),
         MenuSectionDefault(MenuSectionType.profile),
       ];
       final persisted = [
         _section(MenuSectionType.quickLinks),
         _section(MenuSectionType.profile, visible: false),
-        _section(MenuSectionType.quickToggles),
+        _section(MenuSectionType.pageActions),
       ];
 
       final merged = mergeMenuLayoutWithDefaults(persisted, defaults);
@@ -180,14 +180,14 @@ void main() {
 
     test('inserts a newly offered section at its designed position', () {
       const defaults = <MenuSectionDefault>[
-        MenuSectionDefault(MenuSectionType.quickToggles),
+        MenuSectionDefault(MenuSectionType.tabActions),
         MenuSectionDefault(MenuSectionType.pageActions, visible: false),
         MenuSectionDefault(MenuSectionType.quickLinks),
       ];
       // Saved before pageActions existed, and reordered since.
       final persisted = [
         _section(MenuSectionType.quickLinks),
-        _section(MenuSectionType.quickToggles),
+        _section(MenuSectionType.tabActions),
       ];
 
       final merged = mergeMenuLayoutWithDefaults(persisted, defaults);
@@ -197,7 +197,7 @@ void main() {
       expect(_sectionTypes(merged), [
         MenuSectionType.quickLinks,
         MenuSectionType.pageActions,
-        MenuSectionType.quickToggles,
+        MenuSectionType.tabActions,
       ]);
       // And off, because that is how it is offered: adding a section must not
       // change the menu of someone who already arranged theirs.
@@ -353,9 +353,10 @@ void main() {
 
     test('a layout naming retired menu items still loads', () {
       // `feeds`, `fetchFeeds`, `smallWeb`, `bangs`, `translatePage`,
-      // `pinTopSite` and `readerMode` shipped as MenuItemType values and are
-      // still named in stored menu layouts. Removing the enum values must not
-      // throw, and must not cost the user the rest of their arrangement.
+      // `pinTopSite`, `readerMode` and `gestures` shipped as MenuItemType
+      // values and are still named in stored menu layouts. Removing the enum
+      // values must not throw, and must not cost the user the rest of their
+      // arrangement.
       final decoded = menuItemEntriesFromJson([
         {'type': 'history', 'visible': true},
         {'type': 'feeds', 'visible': true},
@@ -365,6 +366,7 @@ void main() {
         {'type': 'translatePage', 'visible': true},
         {'type': 'pinTopSite', 'visible': true},
         {'type': 'readerMode', 'visible': true},
+        {'type': 'gestures', 'visible': true},
         {'type': 'bookmarks', 'visible': true},
       ]);
 
@@ -394,6 +396,71 @@ void main() {
     test('reads anything that is not a list as no arrangement', () {
       expect(menuItemEntriesFromJson(null), isEmpty);
       expect(menuItemEntriesFromJson('items'), isEmpty);
+    });
+  });
+
+  group('menuSectionEntriesFromJson', () {
+    test('drops sections that no longer decode', () {
+      final decoded = menuSectionEntriesFromJson([
+        {'type': 'pageActions', 'visible': true},
+        {'type': 'a_retired_section', 'visible': true},
+        {'type': 'about', 'visible': false},
+      ]);
+
+      // One retired section must not cost the user the rest of the menu.
+      expect(decoded.map((section) => section.type), [
+        MenuSectionType.pageActions,
+        MenuSectionType.about,
+      ]);
+      expect(decoded.last.visible, isFalse);
+    });
+
+    test('a layout naming retired sections still loads', () {
+      // `quickToggles` shipped as a MenuSectionType value and is still named in
+      // stored menu layouts, with rows of its own. Removing the enum value must
+      // not throw, and must not cost the user the rest of their arrangement.
+      final decoded = menuSectionEntriesFromJson([
+        {'type': 'pageActions', 'visible': true},
+        {
+          'type': 'quickToggles',
+          'visible': true,
+          'items': [
+            {'type': 'desktopMode', 'visible': true},
+            {'type': 'gestures', 'visible': true},
+          ],
+        },
+        {'type': 'quickLinks', 'visible': true},
+      ]);
+
+      expect(decoded.map((section) => section.type), [
+        MenuSectionType.pageActions,
+        MenuSectionType.quickLinks,
+      ]);
+    });
+
+    test('keeps the rows arranged inside a section', () {
+      final decoded = menuSectionEntriesFromJson([
+        {
+          'type': 'quickLinks',
+          'visible': true,
+          'items': [
+            {'type': 'downloads', 'visible': true},
+            {'type': 'a_retired_row', 'visible': true},
+            {'type': 'history', 'visible': false},
+          ],
+        },
+      ]);
+
+      expect(decoded.single.items.map((item) => item.type), [
+        MenuItemType.downloads,
+        MenuItemType.history,
+      ]);
+      expect(decoded.single.visibleItemTypes, [MenuItemType.downloads]);
+    });
+
+    test('reads anything that is not a list as no arrangement', () {
+      expect(menuSectionEntriesFromJson(null), isEmpty);
+      expect(menuSectionEntriesFromJson('sections'), isEmpty);
     });
   });
 }
