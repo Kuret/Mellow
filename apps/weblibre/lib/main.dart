@@ -72,6 +72,7 @@ import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/services/profile_defaults.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
@@ -460,6 +461,10 @@ class _MainWidget extends HookConsumerWidget {
       // has forgotten (Places retention, user-initiated clears). Cheap and
       // background; failures are logged and ignored.
       unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+
+      // One-shot: seeds this fork's own defaults (formerly applied by the
+      // now-removed onboarding wizard) into the profile, exactly once.
+      unawaited(ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed());
 
       // Listen for "restart into the shortcut's profile" from the native
       // mismatch dialog. Only this isolate can shut the profile down cleanly.
