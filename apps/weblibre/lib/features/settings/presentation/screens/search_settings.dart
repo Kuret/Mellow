@@ -34,37 +34,38 @@ import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const List<SettingsSectionDefinition> searchSettingsSections = [
   SettingsSectionDefinition(
-    title: 'Providers',
+    title: 'Search',
     keywords: ['engines'],
+    showTitle: false,
     entries: [
       SettingsEntryDefinition(
         title: 'Default Search Provider',
         subtitle: 'Choose the default engine for searches',
-        keywords: ['search engine'],
+        keywords: ['search engine', 'providers'],
         child: _DefaultSearchProviderSection(),
       ),
       SettingsEntryDefinition(
         title: 'Search engines',
         subtitle: 'Add and manage your own search engines',
-        keywords: ['custom search engine', 'add engine'],
+        keywords: ['custom search engine', 'add engine', 'providers'],
         child: _SearchEnginesSection(),
       ),
       SettingsEntryDefinition(
         title: 'Default Autocomplete Provider',
         subtitle: 'Choose the provider for search suggestions',
-        keywords: ['suggestions'],
+        keywords: ['suggestions', 'providers'],
         child: _AutocompleteProviderSection(),
       ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Local Search Index',
-    keywords: ['on device search', 'index'],
-    entries: [
       SettingsEntryDefinition(
         title: 'Indexed pages',
         subtitle: 'View and clear the local index',
-        keywords: ['clear index', 'stats'],
+        keywords: [
+          'clear index',
+          'stats',
+          'local search index',
+          'on device search',
+          'index',
+        ],
         child: _LocalIndexStatsTile(),
       ),
     ],
