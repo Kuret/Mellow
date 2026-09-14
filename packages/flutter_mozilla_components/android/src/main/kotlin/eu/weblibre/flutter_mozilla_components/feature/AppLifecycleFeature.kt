@@ -107,8 +107,8 @@ object AppLifecycleFeature : DefaultLifecycleObserver {
      *
      * Also installed for external-mode setups. Those still front an Activity for
      * custom tabs and PWAs, so the process lifecycle runs and their session is
-     * prioritised exactly like a regular tab's; a genuinely headless setup (push
-     * delivery) never advances past CREATED and simply never calls back.
+     * prioritised exactly like a regular tab's; a genuinely headless setup never
+     * advances past CREATED and simply never calls back.
      */
     fun install() {
         // Components can be built from a background thread on the headless

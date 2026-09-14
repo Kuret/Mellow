@@ -46,9 +46,6 @@ import mozilla.components.support.base.log.logger.Logger
  * shut Gecko down — `nsAppShell` enters `EnterLastWindowClosingSurvivalArea` —
  * and the notifications are one-shot, so the unblocking is permanent for the
  * process.
- *
- * The same technique, for the same underlying reason, is used for headless push
- * delivery in `Push.deliverMessage`.
  */
 object EngineWarmupSession {
     private val logger = Logger("engine_warmup")

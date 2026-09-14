@@ -70,10 +70,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name="org.ironfoxoss.unifiedpush.PushReceiver"
-            tools:node="remove" />
-
         <!-- Merged in by org.mozilla.components:feature-pwa and removed here.
              It is exported, so any app can start it, and it opens ManifestStorage
              — a profile-scoped Room database — before WebLibre has decided which
@@ -84,42 +80,6 @@
             android:name="mozilla.components.feature.pwa.WebAppLauncherActivity"
             tools:node="remove" />
 
-        <!-- Merged in by org.unifiedpush.android:connector and removed here.
-             LinkActivityHelper reaches DBStore.get(activity) with the Activity as
-             context, so linking a distributor through it would write a connector
-             registration into a database rooted at the raw app data directory,
-             outside every profile. That is the one thing §8.4 says must never
-             happen: a registration visible from the raw application context wakes
-             the connector's own MessagingReceiverImpl, which can acknowledge
-             messages WebLibre deliberately left unacknowledged.
-
-             It is worse than a one-off, because DBStore.get memoizes the first
-             context it is given for the whole process — so a single link would
-             repoint every later connector read in that process at the global
-             database.
-
-             Nothing in WebLibre starts it: distributors are chosen from
-             UnifiedPush.getDistributors() and bound with saveDistributor(), which
-             run under a ProfileContext. What is given up is the connector's
-             modern "link activity" auto-selection flow, which WebLibre has never
-             used. -->
-        <activity
-            android:name="org.unifiedpush.android.connector.internal.LinkActivity"
-            tools:node="remove" />
-
-        <receiver
-            android:name="eu.weblibre.flutter_mozilla_components.push.UnifiedPushReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="org.unifiedpush.android.connector.MESSAGE" />
-                <action android:name="org.unifiedpush.android.connector.UNREGISTERED" />
-                <action android:name="org.unifiedpush.android.connector.NEW_ENDPOINT" />
-                <action android:name="org.unifiedpush.android.connector.REGISTRATION_FAILED" />
-                <action android:name="org.unifiedpush.android.connector.TEMP_UNAVAILABLE" />
-            </intent-filter>
-        </receiver>
-        
         <activity
             android:name=".MainActivity"
             android:label="${appName}"

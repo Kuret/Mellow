@@ -103,7 +103,7 @@ Future<BackupResult> backupProfile({
 
     // Participants stage into the archive tree, so what they write here is what
     // a later restore of this archive reads back. State that lives outside the
-    // profile directory — preferences, shortcuts, push records — reaches the
+    // profile directory — preferences, shortcuts, external files — reaches the
     // archive by no other route.
     final participantDir = Directory(
       p.join(staging.path, participantStagingDirName),

@@ -51,8 +51,6 @@ import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
@@ -139,7 +137,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
     private var activity: Activity? = null
     private var isPlatformViewRegistered = false
-    private var pushApi: GeckoPushApiImpl? = null
     private var engineViewVisibility: EngineViewVisibility? = null
 
     private lateinit var _flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
@@ -189,11 +186,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
     fun attachActivity(activity: Activity) {
         this.activity = activity
-    }
-
-    fun disposePushApi() {
-        pushApi?.dispose()
-        pushApi = null
     }
 
     fun detachActivity() {
@@ -343,10 +335,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GlobalComponents.appLinkEvents =
             GeckoAppLinkEvents(_flutterPluginBinding.binaryMessenger)
 
-        // Also set before GlobalComponents.setUp, which calls push.initialize() and can therefore
-        // surface a registration failure before this sink would otherwise exist.
-        GlobalComponents.pushEvents = GeckoPushEvents(_flutterPluginBinding.binaryMessenger)
-
         GlobalComponents.setUp(
             profileApplicationContext,
             _flutterEvents,
@@ -429,15 +417,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoGestureApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoGestureApiImpl()
-        )
-
-        // UnifiedPush distributor management. The event sink was installed above, before
-        // GlobalComponents.setUp initialized push.
-        pushApi?.dispose()
-        pushApi = GeckoPushApiImpl()
-        GeckoPushApi.setUp(
-            _flutterPluginBinding.binaryMessenger,
-            pushApi
         )
 
         val intent =
@@ -623,8 +602,6 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // 2. Stop component-level services
         try {
             GlobalComponents.stopPrivateTabsNotificationFeature()
-            disposePushApi()
-            GlobalComponents.closePush()
 
             GlobalComponents.components?.let { components ->
                 // Stop the FxA web channel feature

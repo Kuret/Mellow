@@ -92,7 +92,6 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_list.
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/presentation/widgets/auth_gate.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
 
 export 'package:weblibre/core/routing/tab_type.dart';
 

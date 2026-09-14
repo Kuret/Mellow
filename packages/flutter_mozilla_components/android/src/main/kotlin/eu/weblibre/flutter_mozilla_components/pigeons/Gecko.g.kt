@@ -791,29 +791,6 @@ enum class AppLinkDecision(val raw: Int) {
   }
 }
 
-/** Lifecycle state of the selected UnifiedPush distributor. */
-enum class PushDistributorStatus(val raw: Int) {
-  /** No distributor app is installed on the device. */
-  NONE_AVAILABLE(0),
-  /** Distributors are installed but the user has not chosen one. */
-  NOT_SELECTED(1),
-  /** A distributor is chosen but has not acknowledged our registration yet. */
-  PENDING(2),
-  /** A distributor is chosen and has acknowledged our registration. */
-  READY(3),
-  /**
-   * A distributor was chosen previously but is no longer installed. Web push
-   * is dead in this state and there is no fallback transport.
-   */
-  UNAVAILABLE(4);
-
-  companion object {
-    fun ofRaw(raw: Int): PushDistributorStatus? {
-      return values().firstOrNull { it.raw == raw }
-    }
-  }
-}
-
 /**
  * Parameters for adding a new tab.
  *
@@ -5968,180 +5945,6 @@ data class GestureConfig (
     return "GestureConfig(enabled=$enabled, strokeSize=$strokeSize, timeoutMs=$timeoutMs, maxFingers=$maxFingers, minStrokeIntervalMs=$minStrokeIntervalMs, activeGestureKeys=$activeGestureKeys)"
   }
 }
-
-/** Generated class from Pigeon that represents data sent in messages. */
-data class PushDistributor (
-  val packageName: String,
-  /** Human-readable app label, or null if the package is no longer installed. */
-  val label: String? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): PushDistributor {
-      val packageName = pigeonVar_list[0] as String
-      val label = pigeonVar_list[1] as String?
-      return PushDistributor(packageName, label)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      packageName,
-      label,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other == null || other.javaClass != javaClass) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    val other = other as PushDistributor
-    return GeckoPigeonUtils.deepEquals(this.packageName, other.packageName) && GeckoPigeonUtils.deepEquals(this.label, other.label)
-  }
-
-  override fun hashCode(): Int {
-    var result = javaClass.hashCode()
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.packageName)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.label)
-    return result
-  }
-  override fun toString(): String {
-    return "PushDistributor(packageName=$packageName, label=$label)"
-  }
-}
-
-/** Generated class from Pigeon that represents data sent in messages. */
-data class PushStatus (
-  val status: PushDistributorStatus,
-  val current: PushDistributor? = null,
-  val available: List<PushDistributor>,
-  /**
-   * Most recent distributor registration failure, or null if none.
-   *
-   * Held natively rather than delivered as a one-shot event: registrations are
-   * attempted at startup and from background broadcasts, both of which can run
-   * long before any Dart listener exists.
-   */
-  val lastError: String? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): PushStatus {
-      val status = pigeonVar_list[0] as PushDistributorStatus
-      val current = pigeonVar_list[1] as PushDistributor?
-      val available = pigeonVar_list[2] as List<PushDistributor>
-      val lastError = pigeonVar_list[3] as String?
-      return PushStatus(status, current, available, lastError)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      status,
-      current,
-      available,
-      lastError,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other == null || other.javaClass != javaClass) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    val other = other as PushStatus
-    return GeckoPigeonUtils.deepEquals(this.status, other.status) && GeckoPigeonUtils.deepEquals(this.current, other.current) && GeckoPigeonUtils.deepEquals(this.available, other.available) && GeckoPigeonUtils.deepEquals(this.lastError, other.lastError)
-  }
-
-  override fun hashCode(): Int {
-    var result = javaClass.hashCode()
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.status)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.current)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.available)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.lastError)
-    return result
-  }
-  override fun toString(): String {
-    return "PushStatus(status=$status, current=$current, available=$available, lastError=$lastError)"
-  }
-}
-
-/** Generated class from Pigeon that represents data sent in messages. */
-data class PushSubscription (
-  /** Subscription identifier, which for web push is the site's origin. */
-  val scope: String,
-  /** Whether the distributor has handed back an endpoint for this scope. */
-  val hasEndpoint: Boolean
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): PushSubscription {
-      val scope = pigeonVar_list[0] as String
-      val hasEndpoint = pigeonVar_list[1] as Boolean
-      return PushSubscription(scope, hasEndpoint)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      scope,
-      hasEndpoint,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other == null || other.javaClass != javaClass) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    val other = other as PushSubscription
-    return GeckoPigeonUtils.deepEquals(this.scope, other.scope) && GeckoPigeonUtils.deepEquals(this.hasEndpoint, other.hasEndpoint)
-  }
-
-  override fun hashCode(): Int {
-    var result = javaClass.hashCode()
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.scope)
-    result = 31 * result + GeckoPigeonUtils.deepHash(this.hasEndpoint)
-    return result
-  }
-  override fun toString(): String {
-    return "PushSubscription(scope=$scope, hasEndpoint=$hasEndpoint)"
-  }
-}
-private data class GeckoPigeonInternalCodecOverflow (
-  val type: Long,
-  val wrapped: Any? = null
-)
- {
-  fun toList(): List<Any?> {
-    return listOf(
-      type,
-      wrapped,
-    )
-  }
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): Any? {
-      val wrapper = GeckoPigeonInternalCodecOverflow(
-        type = pigeonVar_list[0] as Long,
-        wrapped = pigeonVar_list[1],
-      );
-      return wrapper.unwrap()
-    }
-  }
-
-  fun unwrap(): Any? {
-    if (wrapped == null) {
-      return null
-    }
-        
-    when (type.toInt()) {
-      0 ->
-        return PushSubscription.fromList(wrapped as List<Any?>)
-    }
-    return null
-  }
-}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -6341,443 +6144,423 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         }
       }
       168.toByte() -> {
-        return (readValue(buffer) as Long?)?.let {
-          PushDistributorStatus.ofRaw(it.toInt())
-        }
-      }
-      169.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddTabParams.fromList(it)
         }
       }
-      170.toByte() -> {
+      169.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           LastMediaAccessState.fromList(it)
         }
       }
-      171.toByte() -> {
+      170.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryMetadataKey.fromList(it)
         }
       }
-      172.toByte() -> {
+      171.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PackageCategoryValue.fromList(it)
         }
       }
-      173.toByte() -> {
+      172.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ExternalPackage.fromList(it)
         }
       }
-      174.toByte() -> {
+      173.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           LoadUrlFlagsValue.fromList(it)
         }
       }
-      175.toByte() -> {
+      174.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SourceValue.fromList(it)
         }
       }
-      176.toByte() -> {
+      175.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TabState.fromList(it)
         }
       }
-      177.toByte() -> {
+      176.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           RecoverableTab.fromList(it)
         }
       }
-      178.toByte() -> {
+      177.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           IconRequest.fromList(it)
         }
       }
-      179.toByte() -> {
+      178.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ResourceSize.fromList(it)
         }
       }
-      180.toByte() -> {
+      179.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           Resource.fromList(it)
         }
       }
-      181.toByte() -> {
+      180.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           IconResult.fromList(it)
         }
       }
-      182.toByte() -> {
+      181.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           CookiePartitionKey.fromList(it)
         }
       }
-      183.toByte() -> {
+      182.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           Cookie.fromList(it)
         }
       }
-      184.toByte() -> {
+      183.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           VisitInfo.fromList(it)
         }
       }
-      185.toByte() -> {
+      184.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryHighlightWeights.fromList(it)
         }
       }
-      186.toByte() -> {
+      185.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryHighlight.fromList(it)
         }
       }
-      187.toByte() -> {
+      186.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TopFrecentSiteInfo.fromList(it)
         }
       }
-      188.toByte() -> {
+      187.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryMetadata.fromList(it)
         }
       }
-      189.toByte() -> {
+      188.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistorySuggestion.fromList(it)
         }
       }
-      190.toByte() -> {
+      189.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PageObservation.fromList(it)
         }
       }
-      191.toByte() -> {
+      190.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryItem.fromList(it)
         }
       }
-      192.toByte() -> {
+      191.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           HistoryState.fromList(it)
         }
       }
-      193.toByte() -> {
+      192.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SecurityInfoState.fromList(it)
         }
       }
-      194.toByte() -> {
+      193.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TabContentState.fromList(it)
         }
       }
-      195.toByte() -> {
+      194.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           FindResultState.fromList(it)
         }
       }
-      196.toByte() -> {
+      195.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           CustomSelectionAction.fromList(it)
         }
       }
-      197.toByte() -> {
+      196.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           WebExtensionData.fromList(it)
         }
       }
-      198.toByte() -> {
+      197.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonInfo.fromList(it)
         }
       }
-      199.toByte() -> {
+      198.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonListingPreview.fromList(it)
         }
       }
-      200.toByte() -> {
+      199.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonListing.fromList(it)
         }
       }
-      201.toByte() -> {
+      200.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonStoreInfo.fromList(it)
         }
       }
-      202.toByte() -> {
+      201.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonUpdateAttemptInfo.fromList(it)
         }
       }
-      203.toByte() -> {
+      202.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoSuggestion.fromList(it)
         }
       }
-      204.toByte() -> {
+      203.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TabContent.fromList(it)
         }
       }
-      205.toByte() -> {
+      204.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ContentBlocking.fromList(it)
         }
       }
-      206.toByte() -> {
+      205.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           DohSettings.fromList(it)
         }
       }
-      207.toByte() -> {
+      206.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoEngineSettings.fromList(it)
         }
       }
-      208.toByte() -> {
+      207.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AutocompleteResult.fromList(it)
         }
       }
-      209.toByte() -> {
+      208.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           UnknownHitResult.fromList(it)
         }
       }
-      210.toByte() -> {
+      209.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ImageHitResult.fromList(it)
         }
       }
-      211.toByte() -> {
+      210.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           VideoHitResult.fromList(it)
         }
       }
-      212.toByte() -> {
+      211.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AudioHitResult.fromList(it)
         }
       }
-      213.toByte() -> {
+      212.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ImageSrcHitResult.fromList(it)
         }
       }
-      214.toByte() -> {
+      213.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PhoneHitResult.fromList(it)
         }
       }
-      215.toByte() -> {
+      214.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           EmailHitResult.fromList(it)
         }
       }
-      216.toByte() -> {
+      215.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeoHitResult.fromList(it)
         }
       }
-      217.toByte() -> {
+      216.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           DownloadState.fromList(it)
         }
       }
-      218.toByte() -> {
+      217.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ShareInternetResourceState.fromList(it)
         }
       }
-      219.toByte() -> {
+      218.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AddonCollection.fromList(it)
         }
       }
-      220.toByte() -> {
+      219.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncEngineStatus.fromList(it)
         }
       }
-      221.toByte() -> {
+      220.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncAccountInfo.fromList(it)
         }
       }
-      222.toByte() -> {
+      221.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncDevice.fromList(it)
         }
       }
-      223.toByte() -> {
+      222.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncIncomingTab.fromList(it)
         }
       }
-      224.toByte() -> {
+      223.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncRemoteTab.fromList(it)
         }
       }
-      225.toByte() -> {
+      224.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncDeviceTabs.fromList(it)
         }
       }
-      226.toByte() -> {
+      225.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SyncCredentials.fromList(it)
         }
       }
-      227.toByte() -> {
+      226.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoPref.fromList(it)
         }
       }
-      228.toByte() -> {
+      227.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ContainerSiteAssignment.fromList(it)
         }
       }
-      229.toByte() -> {
+      228.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ProxyLoadError.fromList(it)
         }
       }
-      230.toByte() -> {
+      229.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoHeader.fromList(it)
         }
       }
-      231.toByte() -> {
+      230.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoFetchRequest.fromList(it)
         }
       }
-      232.toByte() -> {
+      231.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GeckoFetchResponse.fromList(it)
         }
       }
-      233.toByte() -> {
+      232.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           BookmarkNode.fromList(it)
         }
       }
-      234.toByte() -> {
+      233.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           BookmarkImportNode.fromList(it)
         }
       }
-      235.toByte() -> {
+      234.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           BookmarkInsertTreeResult.fromList(it)
         }
       }
-      236.toByte() -> {
+      235.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           BookmarkInfo.fromList(it)
         }
       }
-      237.toByte() -> {
+      236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SitePermissions.fromList(it)
         }
       }
-      238.toByte() -> {
+      237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           TrackingProtectionException.fromList(it)
         }
       }
-      239.toByte() -> {
+      238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AppLinkTarget.fromList(it)
         }
       }
-      240.toByte() -> {
+      239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ProtectedTargetPattern.fromList(it)
         }
       }
-      241.toByte() -> {
+      240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           NativeAppLinkRule.fromList(it)
         }
       }
-      242.toByte() -> {
+      241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           NativeContextAppLinkPolicy.fromList(it)
         }
       }
-      243.toByte() -> {
+      242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AppLinkPolicySnapshot.fromList(it)
         }
       }
-      244.toByte() -> {
+      243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AppLinkPromptRequest.fromList(it)
         }
       }
-      245.toByte() -> {
+      244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           AppLinkResolutionResult.fromList(it)
         }
       }
-      246.toByte() -> {
+      245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PwaIcon.fromList(it)
         }
       }
-      247.toByte() -> {
+      246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ShareTargetFiles.fromList(it)
         }
       }
-      248.toByte() -> {
+      247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ShareTargetParams.fromList(it)
         }
       }
-      249.toByte() -> {
+      248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ShareTarget.fromList(it)
         }
       }
-      250.toByte() -> {
+      249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           ExternalApplicationResource.fromList(it)
         }
       }
-      251.toByte() -> {
+      250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PwaManifest.fromList(it)
         }
       }
-      252.toByte() -> {
+      251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           GestureConfig.fromList(it)
-        }
-      }
-      253.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          PushDistributor.fromList(it)
-        }
-      }
-      254.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          PushStatus.fromList(it)
-        }
-      }
-      255.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPigeonInternalCodecOverflow.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -6941,358 +6724,341 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(167)
         writeValue(stream, value.raw.toLong())
       }
-      is PushDistributorStatus -> {
-        stream.write(168)
-        writeValue(stream, value.raw.toLong())
-      }
       is AddTabParams -> {
-        stream.write(169)
+        stream.write(168)
         writeValue(stream, value.toList())
       }
       is LastMediaAccessState -> {
-        stream.write(170)
+        stream.write(169)
         writeValue(stream, value.toList())
       }
       is HistoryMetadataKey -> {
-        stream.write(171)
+        stream.write(170)
         writeValue(stream, value.toList())
       }
       is PackageCategoryValue -> {
-        stream.write(172)
+        stream.write(171)
         writeValue(stream, value.toList())
       }
       is ExternalPackage -> {
-        stream.write(173)
+        stream.write(172)
         writeValue(stream, value.toList())
       }
       is LoadUrlFlagsValue -> {
-        stream.write(174)
+        stream.write(173)
         writeValue(stream, value.toList())
       }
       is SourceValue -> {
-        stream.write(175)
+        stream.write(174)
         writeValue(stream, value.toList())
       }
       is TabState -> {
-        stream.write(176)
+        stream.write(175)
         writeValue(stream, value.toList())
       }
       is RecoverableTab -> {
-        stream.write(177)
+        stream.write(176)
         writeValue(stream, value.toList())
       }
       is IconRequest -> {
-        stream.write(178)
+        stream.write(177)
         writeValue(stream, value.toList())
       }
       is ResourceSize -> {
-        stream.write(179)
+        stream.write(178)
         writeValue(stream, value.toList())
       }
       is Resource -> {
-        stream.write(180)
+        stream.write(179)
         writeValue(stream, value.toList())
       }
       is IconResult -> {
-        stream.write(181)
+        stream.write(180)
         writeValue(stream, value.toList())
       }
       is CookiePartitionKey -> {
-        stream.write(182)
+        stream.write(181)
         writeValue(stream, value.toList())
       }
       is Cookie -> {
-        stream.write(183)
+        stream.write(182)
         writeValue(stream, value.toList())
       }
       is VisitInfo -> {
-        stream.write(184)
+        stream.write(183)
         writeValue(stream, value.toList())
       }
       is HistoryHighlightWeights -> {
-        stream.write(185)
+        stream.write(184)
         writeValue(stream, value.toList())
       }
       is HistoryHighlight -> {
-        stream.write(186)
+        stream.write(185)
         writeValue(stream, value.toList())
       }
       is TopFrecentSiteInfo -> {
-        stream.write(187)
+        stream.write(186)
         writeValue(stream, value.toList())
       }
       is HistoryMetadata -> {
-        stream.write(188)
+        stream.write(187)
         writeValue(stream, value.toList())
       }
       is HistorySuggestion -> {
-        stream.write(189)
+        stream.write(188)
         writeValue(stream, value.toList())
       }
       is PageObservation -> {
-        stream.write(190)
+        stream.write(189)
         writeValue(stream, value.toList())
       }
       is HistoryItem -> {
-        stream.write(191)
+        stream.write(190)
         writeValue(stream, value.toList())
       }
       is HistoryState -> {
-        stream.write(192)
+        stream.write(191)
         writeValue(stream, value.toList())
       }
       is SecurityInfoState -> {
-        stream.write(193)
+        stream.write(192)
         writeValue(stream, value.toList())
       }
       is TabContentState -> {
-        stream.write(194)
+        stream.write(193)
         writeValue(stream, value.toList())
       }
       is FindResultState -> {
-        stream.write(195)
+        stream.write(194)
         writeValue(stream, value.toList())
       }
       is CustomSelectionAction -> {
-        stream.write(196)
+        stream.write(195)
         writeValue(stream, value.toList())
       }
       is WebExtensionData -> {
-        stream.write(197)
+        stream.write(196)
         writeValue(stream, value.toList())
       }
       is AddonInfo -> {
-        stream.write(198)
+        stream.write(197)
         writeValue(stream, value.toList())
       }
       is AddonListingPreview -> {
-        stream.write(199)
+        stream.write(198)
         writeValue(stream, value.toList())
       }
       is AddonListing -> {
-        stream.write(200)
+        stream.write(199)
         writeValue(stream, value.toList())
       }
       is AddonStoreInfo -> {
-        stream.write(201)
+        stream.write(200)
         writeValue(stream, value.toList())
       }
       is AddonUpdateAttemptInfo -> {
-        stream.write(202)
+        stream.write(201)
         writeValue(stream, value.toList())
       }
       is GeckoSuggestion -> {
-        stream.write(203)
+        stream.write(202)
         writeValue(stream, value.toList())
       }
       is TabContent -> {
-        stream.write(204)
+        stream.write(203)
         writeValue(stream, value.toList())
       }
       is ContentBlocking -> {
-        stream.write(205)
+        stream.write(204)
         writeValue(stream, value.toList())
       }
       is DohSettings -> {
-        stream.write(206)
+        stream.write(205)
         writeValue(stream, value.toList())
       }
       is GeckoEngineSettings -> {
-        stream.write(207)
+        stream.write(206)
         writeValue(stream, value.toList())
       }
       is AutocompleteResult -> {
-        stream.write(208)
+        stream.write(207)
         writeValue(stream, value.toList())
       }
       is UnknownHitResult -> {
-        stream.write(209)
+        stream.write(208)
         writeValue(stream, value.toList())
       }
       is ImageHitResult -> {
-        stream.write(210)
+        stream.write(209)
         writeValue(stream, value.toList())
       }
       is VideoHitResult -> {
-        stream.write(211)
+        stream.write(210)
         writeValue(stream, value.toList())
       }
       is AudioHitResult -> {
-        stream.write(212)
+        stream.write(211)
         writeValue(stream, value.toList())
       }
       is ImageSrcHitResult -> {
-        stream.write(213)
+        stream.write(212)
         writeValue(stream, value.toList())
       }
       is PhoneHitResult -> {
-        stream.write(214)
+        stream.write(213)
         writeValue(stream, value.toList())
       }
       is EmailHitResult -> {
-        stream.write(215)
+        stream.write(214)
         writeValue(stream, value.toList())
       }
       is GeoHitResult -> {
-        stream.write(216)
+        stream.write(215)
         writeValue(stream, value.toList())
       }
       is DownloadState -> {
-        stream.write(217)
+        stream.write(216)
         writeValue(stream, value.toList())
       }
       is ShareInternetResourceState -> {
-        stream.write(218)
+        stream.write(217)
         writeValue(stream, value.toList())
       }
       is AddonCollection -> {
-        stream.write(219)
+        stream.write(218)
         writeValue(stream, value.toList())
       }
       is SyncEngineStatus -> {
-        stream.write(220)
+        stream.write(219)
         writeValue(stream, value.toList())
       }
       is SyncAccountInfo -> {
-        stream.write(221)
+        stream.write(220)
         writeValue(stream, value.toList())
       }
       is SyncDevice -> {
-        stream.write(222)
+        stream.write(221)
         writeValue(stream, value.toList())
       }
       is SyncIncomingTab -> {
-        stream.write(223)
+        stream.write(222)
         writeValue(stream, value.toList())
       }
       is SyncRemoteTab -> {
-        stream.write(224)
+        stream.write(223)
         writeValue(stream, value.toList())
       }
       is SyncDeviceTabs -> {
-        stream.write(225)
+        stream.write(224)
         writeValue(stream, value.toList())
       }
       is SyncCredentials -> {
-        stream.write(226)
+        stream.write(225)
         writeValue(stream, value.toList())
       }
       is GeckoPref -> {
-        stream.write(227)
+        stream.write(226)
         writeValue(stream, value.toList())
       }
       is ContainerSiteAssignment -> {
-        stream.write(228)
+        stream.write(227)
         writeValue(stream, value.toList())
       }
       is ProxyLoadError -> {
-        stream.write(229)
+        stream.write(228)
         writeValue(stream, value.toList())
       }
       is GeckoHeader -> {
-        stream.write(230)
+        stream.write(229)
         writeValue(stream, value.toList())
       }
       is GeckoFetchRequest -> {
-        stream.write(231)
+        stream.write(230)
         writeValue(stream, value.toList())
       }
       is GeckoFetchResponse -> {
-        stream.write(232)
+        stream.write(231)
         writeValue(stream, value.toList())
       }
       is BookmarkNode -> {
-        stream.write(233)
+        stream.write(232)
         writeValue(stream, value.toList())
       }
       is BookmarkImportNode -> {
-        stream.write(234)
+        stream.write(233)
         writeValue(stream, value.toList())
       }
       is BookmarkInsertTreeResult -> {
-        stream.write(235)
+        stream.write(234)
         writeValue(stream, value.toList())
       }
       is BookmarkInfo -> {
-        stream.write(236)
+        stream.write(235)
         writeValue(stream, value.toList())
       }
       is SitePermissions -> {
-        stream.write(237)
+        stream.write(236)
         writeValue(stream, value.toList())
       }
       is TrackingProtectionException -> {
-        stream.write(238)
+        stream.write(237)
         writeValue(stream, value.toList())
       }
       is AppLinkTarget -> {
-        stream.write(239)
+        stream.write(238)
         writeValue(stream, value.toList())
       }
       is ProtectedTargetPattern -> {
-        stream.write(240)
+        stream.write(239)
         writeValue(stream, value.toList())
       }
       is NativeAppLinkRule -> {
-        stream.write(241)
+        stream.write(240)
         writeValue(stream, value.toList())
       }
       is NativeContextAppLinkPolicy -> {
-        stream.write(242)
+        stream.write(241)
         writeValue(stream, value.toList())
       }
       is AppLinkPolicySnapshot -> {
-        stream.write(243)
+        stream.write(242)
         writeValue(stream, value.toList())
       }
       is AppLinkPromptRequest -> {
-        stream.write(244)
+        stream.write(243)
         writeValue(stream, value.toList())
       }
       is AppLinkResolutionResult -> {
-        stream.write(245)
+        stream.write(244)
         writeValue(stream, value.toList())
       }
       is PwaIcon -> {
-        stream.write(246)
+        stream.write(245)
         writeValue(stream, value.toList())
       }
       is ShareTargetFiles -> {
-        stream.write(247)
+        stream.write(246)
         writeValue(stream, value.toList())
       }
       is ShareTargetParams -> {
-        stream.write(248)
+        stream.write(247)
         writeValue(stream, value.toList())
       }
       is ShareTarget -> {
-        stream.write(249)
+        stream.write(248)
         writeValue(stream, value.toList())
       }
       is ExternalApplicationResource -> {
-        stream.write(250)
+        stream.write(249)
         writeValue(stream, value.toList())
       }
       is PwaManifest -> {
-        stream.write(251)
+        stream.write(250)
         writeValue(stream, value.toList())
       }
       is GestureConfig -> {
-        stream.write(252)
+        stream.write(251)
         writeValue(stream, value.toList())
-      }
-      is PushDistributor -> {
-        stream.write(253)
-        writeValue(stream, value.toList())
-      }
-      is PushStatus -> {
-        stream.write(254)
-        writeValue(stream, value.toList())
-      }
-      is PushSubscription -> {
-        val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
-        stream.write(255)
-        writeValue(stream, wrap.toList())
       }
       else -> super.writeValue(stream, value)
     }
@@ -12241,193 +12007,6 @@ class GeckoGestureEvents(private val binaryMessenger: BinaryMessenger, private v
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureReset$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg)) {
-      if (it is List<*>) {
-        if (it.size > 1) {
-          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
-        } else {
-          callback(Result.success(Unit))
-        }
-      } else {
-        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
-    }
-  }
-}
-/**
- * Dart → Kotlin. UnifiedPush distributor management and web push introspection.
- *
- * Generated interface from Pigeon that represents a handler of messages from Flutter.
- */
-interface GeckoPushApi {
-  fun getPushStatus(callback: (Result<PushStatus>) -> Unit)
-  /**
-   * Selects [packageName], which must be one of [PushStatus.available].
-   *
-   * The picker is built in Dart rather than delegated to the connector's own
-   * dialog, which would save the selection against a non-profile context.
-   */
-  fun setDistributor(packageName: String, callback: (Result<Unit>) -> Unit)
-  /** Forgets the current distributor. This is the off switch for web push. */
-  fun removeDistributor(callback: (Result<Unit>) -> Unit)
-  fun renewRegistration(callback: (Result<Unit>) -> Unit)
-  /**
-   * Pauses push transport for this profile ahead of a restart, taking the
-   * profile lock so an in-flight delivery cannot straddle the boundary. Site
-   * subscriptions and the chosen distributor are retained for restoration when
-   * this profile becomes active again.
-   *
-   * Writes no profile state: under the restart protocol the target lives in the
-   * durable restart request and is applied by the next process.
-   */
-  fun suspendPushForRestart(callback: (Result<Unit>) -> Unit)
-  /**
-   * Subscriptions Gecko has created, read from the UnifiedPush store. Read-only:
-   * there is no app→Gecko channel to revoke a subscription, so removal has to go
-   * through the site's notification permission instead.
-   */
-  fun getSubscriptions(callback: (Result<List<PushSubscription>>) -> Unit)
-
-  companion object {
-    /** The codec used by GeckoPushApi. */
-    val codec: MessageCodec<Any?> by lazy {
-      GeckoPigeonCodec()
-    }
-    /** Sets up an instance of `GeckoPushApi` to handle messages through the `binaryMessenger`. */
-    @JvmOverloads
-    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoPushApi?, messageChannelSuffix: String = "") {
-      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.getPushStatus$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.getPushStatus{ result: Result<PushStatus> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                val data = result.getOrNull()
-                reply.reply(GeckoPigeonUtils.wrapResult(data))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.setDistributor$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val packageNameArg = args[0] as String
-            api.setDistributor(packageNameArg) { result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                reply.reply(GeckoPigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.removeDistributor$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.removeDistributor{ result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                reply.reply(GeckoPigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.renewRegistration$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.renewRegistration{ result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                reply.reply(GeckoPigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.suspendPushForRestart$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.suspendPushForRestart{ result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                reply.reply(GeckoPigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.getSubscriptions$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { _, reply ->
-            api.getSubscriptions{ result: Result<List<PushSubscription>> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(GeckoPigeonUtils.wrapError(error))
-              } else {
-                val data = result.getOrNull()
-                reply.reply(GeckoPigeonUtils.wrapResult(data))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-    }
-  }
-}
-/**
- * Kotlin → Dart. Push registration lifecycle.
- *
- * Registration failures reach Dart through [PushStatus.lastError] rather than a
- * dedicated event, so a failure raised before any Dart listener is attached is
- * still visible the first time the settings screen reads the status.
- *
- * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
- */
-class GeckoPushEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
-  companion object {
-    /** The codec used by GeckoPushEvents. */
-    val codec: MessageCodec<Any?> by lazy {
-      GeckoPigeonCodec()
-    }
-  }
-  /** [sequence] Event sequence number for ordering. */
-  fun onPushStatusChanged(sequenceArg: Long, statusArg: PushStatus, callback: (Result<Unit>) -> Unit)
-{
-    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
-    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushEvents.onPushStatusChanged$separatedMessageChannelSuffix"
-    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, statusArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

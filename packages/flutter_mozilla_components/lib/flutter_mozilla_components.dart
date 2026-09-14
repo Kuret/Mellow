@@ -25,7 +25,6 @@ export 'src/domain/services/gecko_icon.dart';
 export 'src/domain/services/gecko_logging.dart';
 export 'src/domain/services/gecko_pref.dart';
 export 'src/domain/services/gecko_profile.dart';
-export 'src/domain/services/gecko_push.dart';
 export 'src/domain/services/gecko_selection_action.dart';
 export 'src/domain/services/gecko_session.dart';
 export 'src/domain/services/gecko_suggestions.dart';
@@ -111,10 +110,6 @@ export 'src/pigeons/gecko.g.dart'
         PhoneHitResult,
         ProtectedTargetPattern,
         ProxyLoadError,
-        PushDistributor,
-        PushDistributorStatus,
-        PushStatus,
-        PushSubscription,
         PwaIcon,
         PwaManifest,
         QueryParameterStripping,

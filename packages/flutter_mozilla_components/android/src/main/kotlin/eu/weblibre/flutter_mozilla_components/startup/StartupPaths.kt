@@ -91,17 +91,6 @@ class StartupPaths(val filesDir: File) {
      */
     fun pendingLaunchFile(): File = File(restartDir, PENDING_LAUNCH_FILE_NAME)
 
-    /**
-     * The global UnifiedPush ownership map.
-     *
-     * Outside every profile on purpose: it answers "which profile owns this
-     * connector token", and a process that has not committed to a profile — which
-     * is exactly when a push broadcast arrives — cannot read anything that lives
-     * inside one.
-     */
-    val pushOwnershipFile: File
-        get() = File(File(filesDir, PUSH_DIR_NAME), PUSH_OWNERSHIP_FILE_NAME)
-
     val startupIntentsDir: File
         get() = File(filesDir, STARTUP_INTENTS_DIR_NAME)
 
@@ -147,9 +136,6 @@ class StartupPaths(val filesDir: File) {
         const val RESTART_REQUEST_FILE_NAME = "request.json"
         const val RESTART_AUTHORIZATION_FILE_NAME = "authorization.json"
         const val PENDING_LAUNCH_FILE_NAME = "pending_launch.json"
-
-        const val PUSH_DIR_NAME = "weblibre_push"
-        const val PUSH_OWNERSHIP_FILE_NAME = "ownership.json"
 
         const val STARTUP_INTENTS_DIR_NAME = "weblibre_startup_intents"
         const val STARTUP_INTENT_QUEUE_FILE_NAME = "queue.json"

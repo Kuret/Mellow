@@ -39,7 +39,7 @@ const secureKeyProfileSeparator = '@p:';
 /// Used by the one-time migration for credentials that predate profile
 /// qualification. It is deliberately not a profile: attaching a credential to a
 /// profile that may not own it is the same mistake as storing another profile's
-/// push message under whichever profile won startup.
+/// history under whichever profile won startup.
 const secureKeyUnattributedSuffix = '@unattributed';
 
 /// The storage key for [base] owned by [profileId].

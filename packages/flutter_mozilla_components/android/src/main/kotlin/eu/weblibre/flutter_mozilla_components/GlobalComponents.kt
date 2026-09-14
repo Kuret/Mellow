@@ -21,7 +21,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -38,7 +37,6 @@ import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
-import eu.weblibre.flutter_mozilla_components.push.Push
 import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -84,14 +82,6 @@ object GlobalComponents {
     internal val isExternalMode: Boolean
         get() = currentMode == ComponentsMode.EXTERNAL
 
-    /** Resolve a live Push only when it belongs to the supplied profile context. */
-    fun pushForProfile(context: Context): Push? {
-        val profilePath = (context as? ProfileContext)?.relativePath ?: return null
-        val current = _components ?: return null
-        if (current.profileApplicationContext.relativePath != profilePath) return null
-        return current.existingPush?.takeUnless { it.isClosed }
-    }
-
     /**
      * The committed process context, or `null` while the process is undecided.
      *
@@ -101,16 +91,11 @@ object GlobalComponents {
     fun resolveActiveProfileContext(context: Context): ProfileContext? =
         runCatching { ActiveProfile.resolveContext(context.applicationContext) }.getOrNull()
 
-    fun closePush() {
-        _components?.existingPush?.close()
-    }
-
     fun tearDown() {
         // Normally already closed by the shutdown path, which has to do it
         // before the runtime goes away rather than after. Here for the case
         // where it is not.
         EngineWarmupSession.stop()
-        _components?.existingPush?.close()
         _components = null
         currentMode = null
 
@@ -184,11 +169,6 @@ object GlobalComponents {
     // import is in flight or Flutter is detached; progress is purely advisory,
     // so a missing sink only means the UI shows no percentage.
     var bookmarksEvents: GeckoBookmarksEvents? = null
-
-    // Native -> Dart UnifiedPush registration lifecycle. Null when push events
-    // arrive with no Flutter engine attached (the UnifiedPushReceiver cold-start
-    // path), in which case failures are logged natively only.
-    var pushEvents: GeckoPushEvents? = null
 
     // Native -> Dart availability signal for pending app-link prompts. Optimisation
     // only (no buffering/replay): null when Flutter is detached, in which case the
@@ -363,7 +343,7 @@ object GlobalComponents {
         Logger.debug("Creating new components")
 
         // Reject a profile mismatch before anything observable happens — before
-        // history exclusions load, before push state is touched, before a single
+        // history exclusions load, before a single
         // previous component is torn down. A mismatch here is not a switch to
         // perform: the process profile is decided once, and by the time components
         // are built the runtime is either bound to that profile or about to be.
@@ -385,12 +365,9 @@ object GlobalComponents {
 
         // Every setup in a process now targets the same profile, so a rebuild is a
         // mode change (external -> full) rather than a switch: custom tabs survive
-        // it, and the outgoing push instance belongs to the same profile as the
-        // incoming one.
+        // it.
         val previousCustomTabs =
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
-
-        previousComponents?.existingPush?.close()
 
         val newComponents = Components(
             applicationContext,
@@ -573,8 +550,6 @@ object GlobalComponents {
         } else {
             restorePreviousCustomTabs()
         }
-
-        newComponents.push.initialize()
     }
 
     @Synchronized
@@ -640,7 +615,7 @@ object GlobalComponents {
      * Commits the startup candidate, then creates the headless component set.
      *
      * For entry points that legitimately have no profile of their own to name — a
-     * custom tab, a share-as-custom-tab, a queued push delivery. They may bind the
+     * custom tab, a share-as-custom-tab. They may bind the
      * *candidate*, never a profile of their own choosing, and only while the process
      * is still unresolved; anything else returns `false` so the caller retries or
      * fails safely.

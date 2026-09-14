@@ -25,7 +25,6 @@ import android.util.Log
 import eu.weblibre.flutter_mozilla_components.maintenance.MaintenanceParticipantHandler
 import eu.weblibre.flutter_mozilla_components.maintenance.ProfileExternalStorageParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.ProfileJobsParticipant
-import eu.weblibre.flutter_mozilla_components.maintenance.PushOwnershipParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.ProfilePreferencesParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.PwaShortcutParticipant
 import eu.weblibre.flutter_mozilla_components.pigeons.ParticipantStep
@@ -216,8 +215,6 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
             PwaShortcutParticipant(applicationContext)
         ProfileJobsParticipant.ID ->
             ProfileJobsParticipant(applicationContext)
-        PushOwnershipParticipant.ID ->
-            PushOwnershipParticipant(applicationContext)
         else -> null
     }
 
@@ -226,7 +223,6 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         ProfileExternalStorageParticipant.ID,
         PwaShortcutParticipant.ID,
         ProfileJobsParticipant.ID,
-        PushOwnershipParticipant.ID,
     )
 
     override fun runMaintenanceParticipantStep(

@@ -27,7 +27,6 @@ import android.os.Build
 import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
-import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
@@ -72,14 +71,6 @@ class MyApplication : Application() {
         // components. Removing it closes the window rather than handling what
         // arrives through it.
         StalePrivateNotification.clear(this)
-
-        // Both of these create profile-bound state, so neither may run before the
-        // process has committed. Registering them here keeps the ordering explicit:
-        // whichever component commits — the launcher, a worker, a trusted PWA — runs
-        // them at that moment, and a process that never commits never runs them.
-        StartupArbiter.onCommitted { _, _ ->
-            ActiveProfile.resolveContext(this)?.let(PushMessageScheduler::recoverLater)
-        }
     }
 
     /**

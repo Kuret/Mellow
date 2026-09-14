@@ -105,7 +105,7 @@ fun interface StartupClock {
  *
  * ## Lock order
  *
- * `startup arbitration -> ActiveProfile profile lock -> UnifiedPush exclusivity`.
+ * `startup arbitration -> ActiveProfile profile lock`.
  *
  * Callbacks registered through [onCommitted] run *outside* this monitor, and each
  * is isolated so one failure cannot block the others.
@@ -272,8 +272,8 @@ object StartupArbiter {
     }
 
     /**
-     * Registers work that must not run before commitment, such as push recovery
-     * and the sandbox capture bootstrap. Fires immediately when already committed.
+     * Registers work that must not run before commitment, such as the sandbox
+     * capture bootstrap. Fires immediately when already committed.
      */
     fun onCommitted(callback: (profileId: String, relativePath: String) -> Unit) {
         val committed = synchronized(this) {
@@ -944,10 +944,10 @@ object StartupArbiter {
      * Runs every public entry point under the arbitration monitor and then drains
      * any callbacks a commit queued — outside the monitor.
      *
-     * The two halves cannot be merged. `onCommitted` work (push recovery, the
-     * sandbox capture bootstrap) does I/O and takes the profile lock and UnifiedPush
-     * exclusivity. Holding this monitor across those inverts the documented lock
-     * order — `startup arbitration -> profile lock -> UnifiedPush exclusivity` — and
+     * The two halves cannot be merged. `onCommitted` work (the sandbox capture
+     * bootstrap) does I/O and takes the profile lock. Holding this monitor across
+     * those inverts the documented lock order — `startup arbitration -> profile
+     * lock` — and
      * would let a slow callback stall every other component's arbitration query for
      * as long as it runs.
      */

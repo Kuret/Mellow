@@ -190,7 +190,7 @@ object ActiveProfile {
     /**
      * Prevents profile switches from crossing active-profile background work.
      *
-     * Lock order is `startup arbitration -> this lock -> UnifiedPush exclusivity`.
+     * Lock order is `startup arbitration -> this lock`.
      * Kotlin's [Mutex] is not reentrant, so nothing under this lock may call back
      * into a path that takes it again.
      */

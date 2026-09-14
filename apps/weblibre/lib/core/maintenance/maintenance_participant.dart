@@ -31,9 +31,9 @@ enum MaintenanceOperationKind { backup, restore, delete }
 
 /// One category of profile-owned state that lives outside the profile directory.
 ///
-/// Preferences, shortcuts, push registrations, scheduled jobs and credentials all
-/// belong to a profile without being inside it, so a directory-scoped operation
-/// cannot see them. Each becomes a participant.
+/// Preferences, shortcuts, scheduled jobs and credentials all belong to a
+/// profile without being inside it, so a directory-scoped operation cannot see
+/// them. Each becomes a participant.
 ///
 /// The protocol is `discover → prepare → apply → verify → finalize`, with
 /// `rollback` reachable only before the commit barrier. [prepare] must stage new

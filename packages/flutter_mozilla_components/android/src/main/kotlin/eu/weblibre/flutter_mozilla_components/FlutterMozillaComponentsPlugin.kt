@@ -13,7 +13,6 @@ import eu.weblibre.flutter_mozilla_components.api.GeckoWebInspectorApiImpl
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
@@ -119,16 +118,11 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     engineLifecycle?.let { listener -> engine?.removeEngineLifecycleListener(listener) }
     engineLifecycle = null
     engine = null
-    GeckoPushApi.setUp(binding.binaryMessenger, null)
-    browserApi.disposePushApi()
     browserApi.disposeEngineViewVisibility()
     GlobalComponents.historyEvents = null
     // The availability event is optimisation-only; once Flutter detaches, the surface
     // re-queries pending prompts on its next attach/resume, so dropping the sink is safe.
     GlobalComponents.appLinkEvents = null
-    // The UnifiedPush receiver outlives the Flutter engine; without this it would keep dispatching
-    // onto a dead messenger. Failures are still retained on Push.lastError.
-    GlobalComponents.pushEvents = null
     // An import in flight keeps reporting after detach, and would otherwise hold
     // the old messenger across an engine restart. Progress is advisory, so
     // dropping the sink only costs the percentage, never the import itself.

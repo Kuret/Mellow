@@ -145,11 +145,6 @@ dependencies {
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
     implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
-    implementation "org.ironfoxoss.unifiedpush:unifiedpush:$mozillaComponentsVersion"
-    implementation ('org.unifiedpush.android:connector:3.3.3') {
-        exclude group: 'com.google.protobuf', module: 'protobuf-java'
-    }
-
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'

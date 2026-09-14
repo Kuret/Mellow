@@ -17,9 +17,9 @@
 
 /// One category of profile-owned state that lives outside the profile directory.
 ///
-/// The single registry. Preferences, external files, shortcuts, scheduled jobs,
-/// push registrations and credentials all belong to a profile without being
-/// inside it, so a directory-scoped operation cannot see them — each becomes a
+/// The single registry. Preferences, external files, shortcuts, scheduled jobs
+/// and credentials all belong to a profile without being inside it, so a
+/// directory-scoped operation cannot see them — each becomes a
 /// participant, and each has to be described to the user in three different
 /// voices: what a backup carried, what it left behind, and what a delete could
 /// not enumerate.
@@ -91,14 +91,6 @@ enum ParticipantCategory {
     // Re-created from the restored queues rather than archived.
     absentFromArchive: 'Scheduled background jobs',
     unrecordedByDelete: 'Scheduled jobs and notifications',
-  ),
-
-  /// Entries in the global push ownership map.
-  pushOwnership(
-    clonePolicy: ClonePolicy.discard,
-    // Which tokens a distributor still honours cannot be known from here, so
-    // they are re-learned on the next message.
-    absentFromArchive: 'Push ownership entries',
   );
 
   const ParticipantCategory({

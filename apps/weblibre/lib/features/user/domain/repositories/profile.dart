@@ -30,7 +30,6 @@ import 'package:weblibre/core/startup/startup_config_store.dart';
 import 'package:weblibre/core/uuid.dart' as ids;
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
-import 'package:weblibre/features/web_push/domain/providers.dart';
 
 part 'profile.g.dart';
 
@@ -72,19 +71,6 @@ class ProfileRepository extends _$ProfileRepository {
     );
     if (!armed) {
       throw Exception('Could not arm a restart onto $profileId');
-    }
-
-    // Past this point the process is terminal, so a push failure is logged
-    // rather than propagated: refusing to continue would strand a process that
-    // has already given up its ability to serve anything.
-    try {
-      await ref.read(pushServiceProvider).suspendPushForRestart();
-    } catch (error, stackTrace) {
-      logger.w(
-        'Could not quiesce push before restart',
-        error: error,
-        stackTrace: stackTrace,
-      );
     }
   }
 

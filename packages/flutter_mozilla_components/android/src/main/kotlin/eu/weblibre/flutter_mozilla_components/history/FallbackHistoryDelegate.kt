@@ -17,8 +17,8 @@ import mozilla.components.concept.storage.PageVisit
  * Rather than assume "no", it records **only while nothing is excluded at all**.
  * Two kinds of session reach it:
  *
- *  - Sessions created outside the store (add-on popups, the headless push
- *    session). They load `moz-extension:`/`about:` URLs that Places rejects
+ *  - Sessions created outside the store (add-on popups). They load
+ *    `moz-extension:`/`about:` URLs that Places rejects
  *    anyway, so refusing costs nothing.
  *  - A session the engine opened itself (`window.open`), in the window between
  *    Gecko starting its navigation and

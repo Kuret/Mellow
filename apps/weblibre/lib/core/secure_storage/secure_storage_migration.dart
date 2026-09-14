@@ -73,8 +73,8 @@ class SecureStorageMigrationResult {
 /// - **The account record** has no such evidence anywhere — no profile database
 ///   holds account state, it all lives in secure storage. So it is *left alone*
 ///   rather than attributed. Handing it to whichever profile happens to boot
-///   first would be the same mistake as filing another profile's push message
-///   under whichever profile won startup, and this plan refuses that everywhere
+///   first would be the same mistake as filing another profile's history under
+///   whichever profile won startup, and this plan refuses that everywhere
 ///   else.
 ///
 /// Leaving it un-attributed would cost the user a sign-in they never asked for,

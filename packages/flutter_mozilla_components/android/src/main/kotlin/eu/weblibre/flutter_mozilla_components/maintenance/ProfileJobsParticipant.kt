@@ -28,16 +28,15 @@ import java.io.File
 /**
  * Cancels a profile's scheduled WorkManager jobs when its data is replaced or removed.
  *
- * Jobs are the one category here that is *not* user data. A queued push delivery
- * is a pointer into the profile's message store, which is inside the profile
- * directory and therefore already travels in the archive — so nothing is captured
- * on the way out. What matters is the other direction: a job left scheduled across
- * a restore refers to a message id from the data that was replaced, and one left
- * scheduled across a delete wakes against a profile directory that no longer
- * exists.
+ * Jobs are the one category here that is *not* user data: a queued job is a
+ * pointer into state that lives inside the profile directory and therefore
+ * already travels in the archive, so nothing is captured on the way out. What
+ * matters is the other direction: a job left scheduled across a restore refers
+ * to state from the data that was replaced, and one left scheduled across a
+ * delete wakes against a profile directory that no longer exists.
  *
- * Re-scheduling is deliberately not this participant's job. `PushMessageScheduler`
- * re-enqueues from the durable store whenever a profile becomes active, so
+ * Re-scheduling is deliberately not this participant's job: whatever owns a
+ * queue re-enqueues from its durable store whenever a profile becomes active, so
  * cancelling is a complete action rather than a lossy one — which is also why
  * rollback can be a no-op without leaving anything behind.
  */
