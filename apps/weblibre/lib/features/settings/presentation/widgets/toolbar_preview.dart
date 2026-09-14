@@ -312,7 +312,7 @@ class TabBarPreviewCard extends StatelessWidget {
     // --- Wide screens: the rail on the configured side. -------------------
 
     final railWidth = effectiveRailWidth(railWidth: zenSettings.railWidth);
-    final closeMode = settings.quickTabSwitcherCloseButtonMode;
+    const closeMode = TabChipCloseButtonMode.activeTabOnly;
     final rail = SizedBox(
       width: railWidth,
       child: WideRailLayout(
@@ -553,7 +553,7 @@ class _CompactBarPreview extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8.0),
                       onTap: () async {},
                       onDelete:
-                          settings.quickTabSwitcherCloseButtonMode.showsFor(
+                          TabChipCloseButtonMode.activeTabOnly.showsFor(
                             isActive: item.isActive,
                           )
                           ? () async {}

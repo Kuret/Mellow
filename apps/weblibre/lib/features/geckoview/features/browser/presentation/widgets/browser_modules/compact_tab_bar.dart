@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
@@ -157,7 +158,7 @@ class _CompactChipStrip extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final showTitles = settings.quickTabSwitcherShowTitles;
     final titleMaxWidth = settings.quickTabSwitcherTitleWidth;
-    final closeButtonMode = settings.quickTabSwitcherCloseButtonMode;
+    const closeButtonMode = TabChipCloseButtonMode.activeTabOnly;
 
     final selectedTabId = ref.watch(selectedTabProvider);
     final essentialIds = watchEssentialShelfTabIds(ref) ?? const <String>[];

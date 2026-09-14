@@ -1913,19 +1913,7 @@ class _SiteSettingsSheet extends HookConsumerWidget {
             initialTabState: initialTabState,
             sheetScrollController: scrollController,
             draggableScrollableController: draggableScrollableController,
-            onClose: () {
-              final tabViewBottomSheet = ref
-                  .read(generalSettingsWithDefaultsProvider)
-                  .tabViewBottomSheet;
-
-              if (tabViewBottomSheet) {
-                ref
-                    .read(bottomSheetControllerProvider.notifier)
-                    .requestDismiss();
-              } else {
-                const BrowserRoute().go(context);
-              }
-            },
+            onClose: () => const BrowserRoute().go(context),
             initialHeight: initialHeight,
             bottomAppBarHeight: bottomAppBarHeight,
             onClearSiteDataExpandedChanged: handleClearSiteDataExpansion,

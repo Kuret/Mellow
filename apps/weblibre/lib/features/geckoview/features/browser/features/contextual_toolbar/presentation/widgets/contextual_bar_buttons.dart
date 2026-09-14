@@ -22,7 +22,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -36,7 +35,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
     as tab_data;
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
 class ShareMenuButton extends StatelessWidget {
@@ -388,21 +386,7 @@ class TabsCountButton extends HookConsumerWidget {
       child: TabsCountButtonView(
         isActive: displayedSheet is ViewTabsSheet,
         onTap: () async {
-          final tabViewBottomSheet = ref
-              .read(generalSettingsWithDefaultsProvider)
-              .tabViewBottomSheet;
-
-          if (tabViewBottomSheet) {
-            if (displayedSheet case ViewTabsSheet()) {
-              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-            } else {
-              ref
-                  .read(bottomSheetControllerProvider.notifier)
-                  .show(ViewTabsSheet());
-            }
-          } else {
-            await const TabViewRoute().push(context);
-          }
+          await const TabViewRoute().push(context);
         },
         onLongPress: showLongPressMenu
             ? () {

@@ -56,7 +56,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'autoHideTabBar': DriftSqlType.bool,
   'tabBarSwipeAction': DriftSqlType.string,
   'historyAutoCleanInterval': DriftSqlType.int,
-  'tabViewBottomSheet': DriftSqlType.bool,
   'tabBarShowContextualBar': DriftSqlType.bool,
   // Legacy: folded into tabBarStackingMode.
   'tabBarShowQuickTabSwitcherBar': DriftSqlType.bool,
@@ -72,9 +71,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'quickTabSwitcherShowTitles': DriftSqlType.bool,
   'quickTabSwitcherShowHistorySuggestions': DriftSqlType.bool,
   'quickTabSwitcherTitleWidth': DriftSqlType.double,
-  // Legacy: superseded by quickTabSwitcherCloseButtonMode.
-  'quickTabSwitcherShowCloseButtonOnAllTabs': DriftSqlType.bool,
-  'quickTabSwitcherCloseButtonMode': DriftSqlType.string,
   'syncServerOverride': DriftSqlType.string,
   'syncTokenServerOverride': DriftSqlType.string,
   'tabBarLongPressUrlCopy': DriftSqlType.bool,

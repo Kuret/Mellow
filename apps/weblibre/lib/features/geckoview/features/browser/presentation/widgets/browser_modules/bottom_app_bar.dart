@@ -354,11 +354,7 @@ class BrowserTabBar extends HookConsumerWidget {
 
       unawaited(HapticFeedback.lightImpact());
 
-      if (settings.tabViewBottomSheet) {
-        ref.read(bottomSheetControllerProvider.notifier).show(ViewTabsSheet());
-      } else {
-        unawaited(const TabViewRoute().push(context));
-      }
+      unawaited(const TabViewRoute().push(context));
     }
 
     final showTabTitle = displayedSheet is! ViewTabsSheet;

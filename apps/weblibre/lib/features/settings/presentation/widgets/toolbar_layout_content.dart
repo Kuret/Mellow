@@ -113,12 +113,6 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         child: _CustomizeQuickSwitcherButtonsTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Close Buttons on Tab Chips',
-        subtitle: 'Which chips show a close button',
-        keywords: ['close', 'x button', 'active tab'],
-        child: _QuickTabSwitcherCloseButtonsSection(),
-      ),
-      SettingsEntryDefinition(
         title: 'Show Titles on Tab Chips',
         subtitle: 'Display page titles on the chips of the compact bar',
         keywords: ['page titles'],
@@ -135,12 +129,6 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
   SettingsSectionDefinition(
     title: 'Tab View',
     entries: [
-      SettingsEntryDefinition(
-        title: 'Bottom Sheet Tab View',
-        subtitle: 'Open the tab switcher as a bottom sheet',
-        keywords: ['sheet'],
-        child: _BottomSheetTabViewTile(),
-      ),
       SettingsEntryDefinition(
         title: 'Show Favicons in List View',
         subtitle: 'Display site icons in the tab list',
@@ -456,69 +444,6 @@ class _CustomizeQuickSwitcherButtonsTile extends StatelessWidget {
   }
 }
 
-class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
-  const _QuickTabSwitcherCloseButtonsSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final closeButtonMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherCloseButtonMode,
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Close Buttons on Tab Chips'),
-            subtitle: Text('Which chips show a close button'),
-            leading: Icon(MdiIcons.closeCircleOutline),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: closeButtonMode,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .quickTabSwitcherCloseButtonMode(value),
-                    );
-              }
-            },
-            child: const Column(
-              children: [
-                RadioListTile.adaptive(
-                  value: TabChipCloseButtonMode.activeTabOnly,
-                  title: Text('Active Tab Only'),
-                  subtitle: Text('Only the chip of the tab currently open'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabChipCloseButtonMode.all,
-                  title: Text('All Tabs'),
-                  subtitle: Text('Every chip on the bar'),
-                ),
-                RadioListTile.adaptive(
-                  value: TabChipCloseButtonMode.never,
-                  title: Text('Never'),
-                  subtitle: Text(
-                    'No close buttons; close tabs from the long press menu',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
   const _QuickTabSwitcherTitleWidthTile();
 
@@ -725,34 +650,6 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.autoHideTabBar(value),
-            );
-      },
-    );
-  }
-}
-
-class _BottomSheetTabViewTile extends HookConsumerWidget {
-  const _BottomSheetTabViewTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabViewBottomSheet = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabViewBottomSheet),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Bottom Sheet Tab View'),
-      subtitle: const Text(
-        'Display tabs in a bottom sheet instead of fullscreen',
-      ),
-      secondary: const Icon(MdiIcons.dockBottom),
-      value: tabViewBottomSheet,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabViewBottomSheet(value),
             );
       },
     );

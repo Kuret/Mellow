@@ -50,8 +50,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
-  GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet);
-
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
 
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
@@ -80,10 +78,6 @@ abstract class _$GeneralSettingsCWProxy {
   );
 
   GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
-
-  GeneralSettings quickTabSwitcherCloseButtonMode(
-    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
-  );
 
   GeneralSettings syncServerOverride(String syncServerOverride);
 
@@ -144,7 +138,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
-    bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
     TabBarPosition tabBarPosition,
     TabBarLayout tabBarLayout,
@@ -157,7 +150,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowTitles,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
-    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
     String syncTokenServerOverride,
     bool tabBarLongPressUrlCopy,
@@ -256,10 +248,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(historyAutoCleanInterval: historyAutoCleanInterval);
 
   @override
-  GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet) =>
-      call(tabViewBottomSheet: tabViewBottomSheet);
-
-  @override
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar) =>
       call(tabBarShowContextualBar: tabBarShowContextualBar);
 
@@ -310,11 +298,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings quickTabSwitcherTitleWidth(
     double quickTabSwitcherTitleWidth,
   ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
-
-  @override
-  GeneralSettings quickTabSwitcherCloseButtonMode(
-    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
-  ) => call(quickTabSwitcherCloseButtonMode: quickTabSwitcherCloseButtonMode);
 
   @override
   GeneralSettings syncServerOverride(String syncServerOverride) =>
@@ -407,7 +390,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
-    Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? tabBarLayout = const $CopyWithPlaceholder(),
@@ -421,7 +403,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
-    Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
     Object? tabBarLongPressUrlCopy = const $CopyWithPlaceholder(),
@@ -529,12 +510,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.historyAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : historyAutoCleanInterval as Duration,
-      tabViewBottomSheet:
-          tabViewBottomSheet == const $CopyWithPlaceholder() ||
-              tabViewBottomSheet == null
-          ? _value.tabViewBottomSheet
-          // ignore: cast_nullable_to_non_nullable
-          : tabViewBottomSheet as bool,
       tabBarShowContextualBar:
           tabBarShowContextualBar == const $CopyWithPlaceholder() ||
               tabBarShowContextualBar == null
@@ -601,12 +576,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherTitleWidth
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherTitleWidth as double,
-      quickTabSwitcherCloseButtonMode:
-          quickTabSwitcherCloseButtonMode == const $CopyWithPlaceholder() ||
-              quickTabSwitcherCloseButtonMode == null
-          ? _value.quickTabSwitcherCloseButtonMode
-          // ignore: cast_nullable_to_non_nullable
-          : quickTabSwitcherCloseButtonMode as TabChipCloseButtonMode,
       syncServerOverride:
           syncServerOverride == const $CopyWithPlaceholder() ||
               syncServerOverride == null
@@ -758,7 +727,6 @@ GeneralSettings _$GeneralSettingsFromJson(
       : Duration(
           microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
         ),
-  tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
   tabBarPosition: $enumDecodeNullable(
     _$TabBarPositionEnumMap,
@@ -787,10 +755,6 @@ GeneralSettings _$GeneralSettingsFromJson(
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
       ?.toDouble(),
-  quickTabSwitcherCloseButtonMode: $enumDecodeNullable(
-    _$TabChipCloseButtonModeEnumMap,
-    json['quickTabSwitcherCloseButtonMode'],
-  ),
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
   tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
@@ -847,7 +811,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
-  'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
@@ -862,9 +825,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
-  'quickTabSwitcherCloseButtonMode':
-      _$TabChipCloseButtonModeEnumMap[instance
-          .quickTabSwitcherCloseButtonMode]!,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
   'tabBarLongPressUrlCopy': instance.tabBarLongPressUrlCopy,
@@ -958,12 +918,6 @@ const _$TabBarStackingModeEnumMap = {
   TabBarStackingMode.twoLevel: 'twoLevel',
   TabBarStackingMode.disabled: 'disabled',
   TabBarStackingMode.spaceTabs: 'spaceTabs',
-};
-
-const _$TabChipCloseButtonModeEnumMap = {
-  TabChipCloseButtonMode.activeTabOnly: 'activeTabOnly',
-  TabChipCloseButtonMode.all: 'all',
-  TabChipCloseButtonMode.never: 'never',
 };
 
 const _$IntentSourcePolicyEnumMap = {

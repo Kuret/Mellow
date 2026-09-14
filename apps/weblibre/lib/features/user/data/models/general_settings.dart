@@ -230,7 +230,6 @@ class GeneralSettings with FastEquatable {
   final TabBarSwipeAction tabBarSwipeAction;
 
   final Duration historyAutoCleanInterval;
-  final bool tabViewBottomSheet;
   final bool tabBarShowContextualBar;
   final TabBarPosition tabBarPosition;
   final TabBarLayout tabBarLayout;
@@ -247,9 +246,6 @@ class GeneralSettings with FastEquatable {
   /// Max width (logical px) for chip titles in the quick tab switcher.
   final double quickTabSwitcherTitleWidth;
 
-  /// Which tab chips show a close button in the quick tab switcher and the
-  /// tab bar.
-  final TabChipCloseButtonMode quickTabSwitcherCloseButtonMode;
   final String syncServerOverride;
   final String syncTokenServerOverride;
   final bool tabBarLongPressUrlCopy;
@@ -334,7 +330,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
-    required this.tabViewBottomSheet,
     required this.tabBarShowContextualBar,
     required this.tabBarPosition,
     required this.tabBarLayout,
@@ -348,7 +343,6 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
-    required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
     required this.tabBarLongPressUrlCopy,
@@ -385,7 +379,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
-    bool? tabViewBottomSheet,
     bool? tabBarShowContextualBar,
     TabBarPosition? tabBarPosition,
     TabBarLayout? tabBarLayout,
@@ -398,7 +391,6 @@ class GeneralSettings with FastEquatable {
     bool? quickTabSwitcherShowTitles,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
-    TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
     String? syncTokenServerOverride,
     bool? tabBarLongPressUrlCopy,
@@ -439,7 +431,6 @@ class GeneralSettings with FastEquatable {
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
-       tabViewBottomSheet = tabViewBottomSheet ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
        tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
@@ -457,9 +448,6 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
-       quickTabSwitcherCloseButtonMode =
-           quickTabSwitcherCloseButtonMode ??
-           TabChipCloseButtonMode.activeTabOnly,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
@@ -504,18 +492,6 @@ class GeneralSettings with FastEquatable {
       } else if (legacySwitcherMode != null) {
         json['tabBarStackingMode'] = legacySwitcherMode;
       }
-    }
-
-    // Migrate the legacy `quickTabSwitcherShowCloseButtonOnAllTabs` toggle to
-    // the three-state `quickTabSwitcherCloseButtonMode`. The toggle could only
-    // spell out `all` and `activeTabOnly`; `never` is new, so an unset mode
-    // with the toggle off is just the default.
-    // TODO: Drop this fallback (and the legacy row in the user settings DB)
-    // once enough releases have shipped that rolling back to a version
-    // without `quickTabSwitcherCloseButtonMode` is no longer a concern.
-    if (json['quickTabSwitcherCloseButtonMode'] == null &&
-        json['quickTabSwitcherShowCloseButtonOnAllTabs'] == true) {
-      json['quickTabSwitcherCloseButtonMode'] = 'all';
     }
 
     return _$GeneralSettingsFromJson(json);
@@ -579,7 +555,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,
     historyAutoCleanInterval,
-    tabViewBottomSheet,
     tabBarShowContextualBar,
     tabBarPosition,
     tabBarLayout,
@@ -592,7 +567,6 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherShowTitles,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
-    quickTabSwitcherCloseButtonMode,
     syncServerOverride,
     syncTokenServerOverride,
     tabBarLongPressUrlCopy,

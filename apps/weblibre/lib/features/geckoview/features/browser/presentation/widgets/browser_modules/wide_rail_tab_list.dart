@@ -42,7 +42,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
@@ -70,11 +69,7 @@ class WideRailTabList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedSpaceUuid = spaceUuid ?? ref.watch(selectedSpaceProvider);
     final selectedTabId = ref.watch(selectedTabProvider);
-    final closeButtonMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherCloseButtonMode,
-      ),
-    );
+    const closeButtonMode = TabChipCloseButtonMode.activeTabOnly;
     final items = ref
         .watch(
           visibleTabListItemsProvider(
