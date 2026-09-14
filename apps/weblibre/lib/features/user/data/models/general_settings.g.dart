@@ -13,10 +13,6 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
 
-  GeneralSettings screenshotProtectionEnabled(bool screenshotProtectionEnabled);
-
-  GeneralSettings allowPrivateTabScreenshots(bool allowPrivateTabScreenshots);
-
   GeneralSettings defaultSearchProvider(String? defaultSearchProvider);
 
   GeneralSettings defaultSearchSuggestionsProvider(
@@ -111,8 +107,6 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings call({
     ThemeMode themeMode,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-    bool screenshotProtectionEnabled,
-    bool allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool showContainerUi,
@@ -165,15 +159,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
-
-  @override
-  GeneralSettings screenshotProtectionEnabled(
-    bool screenshotProtectionEnabled,
-  ) => call(screenshotProtectionEnabled: screenshotProtectionEnabled);
-
-  @override
-  GeneralSettings allowPrivateTabScreenshots(bool allowPrivateTabScreenshots) =>
-      call(allowPrivateTabScreenshots: allowPrivateTabScreenshots);
 
   @override
   GeneralSettings defaultSearchProvider(String? defaultSearchProvider) =>
@@ -333,8 +318,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
-    Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
-    Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
@@ -382,18 +365,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.deleteBrowsingDataOnQuit
           // ignore: cast_nullable_to_non_nullable
           : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
-      screenshotProtectionEnabled:
-          screenshotProtectionEnabled == const $CopyWithPlaceholder() ||
-              screenshotProtectionEnabled == null
-          ? _value.screenshotProtectionEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : screenshotProtectionEnabled as bool,
-      allowPrivateTabScreenshots:
-          allowPrivateTabScreenshots == const $CopyWithPlaceholder() ||
-              allowPrivateTabScreenshots == null
-          ? _value.allowPrivateTabScreenshots
-          // ignore: cast_nullable_to_non_nullable
-          : allowPrivateTabScreenshots as bool,
       defaultSearchProvider:
           defaultSearchProvider == const $CopyWithPlaceholder()
           ? _value.defaultSearchProvider
@@ -606,8 +577,6 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
           (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
               .toSet(),
-      screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
-      allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
       defaultSearchProvider: const SearchProviderIdConverter().fromJson(
         json['defaultSearchProvider'] as String?,
       ),
@@ -700,8 +669,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
-  'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
-  'allowPrivateTabScreenshots': instance.allowPrivateTabScreenshots,
   'defaultSearchProvider': const SearchProviderIdConverter().toJson(
     instance.defaultSearchProvider,
   ),

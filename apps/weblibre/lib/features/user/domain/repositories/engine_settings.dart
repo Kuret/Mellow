@@ -45,11 +45,7 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'incognitoMode': DriftSqlType.bool,
   'javascriptEnabled': DriftSqlType.bool,
   'trackingProtectionPolicy': DriftSqlType.string,
-  'httpsOnlyMode': DriftSqlType.string,
-  'globalPrivacyControlEnabled': DriftSqlType.bool,
   'userAgent': DriftSqlType.string,
-  'queryParameterStripping': DriftSqlType.string,
-  'bounceTrackingProtectionMode': DriftSqlType.string,
   'enterpriseRootsEnabled': DriftSqlType.bool,
   'remoteDebuggingEnabled': DriftSqlType.bool,
   'addonCollection': DriftSqlType.string,
@@ -57,36 +53,15 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'dohSettingsMode': DriftSqlType.string,
   'dohProviderUrl': DriftSqlType.string,
   'dohDefaultProviderUrl': DriftSqlType.string,
-  'fingerprintingProtectionOverrides': DriftSqlType.string,
-  'safeBrowsingMalwareEnabled': DriftSqlType.bool,
-  'safeBrowsingPhishingEnabled': DriftSqlType.bool,
-  'useContentBlockingDatabase': DriftSqlType.bool,
   // Custom Tracking Protection
-  'blockCookies': DriftSqlType.bool,
-  'customCookiePolicy': DriftSqlType.string,
-  'blockTrackingContent': DriftSqlType.bool,
-  'trackingContentScope': DriftSqlType.string,
-  'blockCryptominers': DriftSqlType.bool,
-  'blockFingerprinters': DriftSqlType.bool,
-  'blockRedirectTrackers': DriftSqlType.bool,
-  'blockSuspectedFingerprinters': DriftSqlType.bool,
-  'suspectedFingerprintersScope': DriftSqlType.string,
-  'allowListBaseline': DriftSqlType.bool,
-  'allowListConvenience': DriftSqlType.bool,
-  'blockAdsAnalyticsSocialTrackers': DriftSqlType.bool,
   // Web Content Settings
   'displayDensityOverride': DriftSqlType.double,
   'screenWidthOverride': DriftSqlType.int,
   'screenHeightOverride': DriftSqlType.int,
   // Process Isolation Settings
-  'fissionEnabled': DriftSqlType.bool,
   'isolatedProcessEnabled': DriftSqlType.bool,
   'appZygoteProcessEnabled': DriftSqlType.bool,
-  'extensionsWebAPIEnabled': DriftSqlType.bool,
   // LNA Settings
-  'lnaBlocking': DriftSqlType.bool,
-  'lnaBlockTrackers': DriftSqlType.bool,
-  'lnaEnabled': DriftSqlType.bool,
   // No writer today: nothing calls copyWith for these, so no row for them can
   // exist yet. Listed so that wiring up a writer later cannot silently revert.
   'preferredColorScheme': DriftSqlType.string,
@@ -103,7 +78,6 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
 const engineSettingJsonKeys = <String>{
   'dohExceptionsList',
   'customDohProviders',
-  'locales',
 };
 
 @Riverpod(keepAlive: true)

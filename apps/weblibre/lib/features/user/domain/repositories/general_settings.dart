@@ -46,8 +46,6 @@ typedef UpdateGeneralSettingsFunc =
 @visibleForTesting
 const generalSettingColumnTypes = <String, DriftSqlType>{
   'themeMode': DriftSqlType.string,
-  'screenshotProtectionEnabled': DriftSqlType.bool,
-  'allowPrivateTabScreenshots': DriftSqlType.bool,
   'defaultSearchProvider': DriftSqlType.string,
   'defaultSearchSuggestionsProvider': DriftSqlType.string,
   'showContainerUi': DriftSqlType.bool,

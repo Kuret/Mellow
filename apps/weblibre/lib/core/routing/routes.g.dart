@@ -1123,18 +1123,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $DohSettingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'fingerprint',
-      name: 'FingerprintSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $FingerprintSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
-      path: 'locales',
-      name: 'LocaleSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $LocaleSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'addon_collection',
       name: 'AddonCollectionRoute',
       hasOverriddenOnExit: false,
@@ -1151,12 +1139,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'TrackingProtectionExceptionsRoute',
       hasOverriddenOnExit: false,
       factory: $TrackingProtectionExceptionsRoute._fromState,
-    ),
-    GoRouteData.$route(
-      path: 'custom_tracking_protection',
-      name: 'CustomTrackingProtectionRoute',
-      hasOverriddenOnExit: false,
-      factory: $CustomTrackingProtectionRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'error_logs',
@@ -1491,48 +1473,6 @@ mixin $DohSettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $FingerprintSettingsRoute on GoRouteData {
-  static FingerprintSettingsRoute _fromState(GoRouterState state) =>
-      FingerprintSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/fingerprint');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $LocaleSettingsRoute on GoRouteData {
-  static LocaleSettingsRoute _fromState(GoRouterState state) =>
-      LocaleSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/locales');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 mixin $AddonCollectionRoute on GoRouteData {
   static AddonCollectionRoute _fromState(GoRouterState state) =>
       AddonCollectionRoute();
@@ -1582,28 +1522,6 @@ mixin $TrackingProtectionExceptionsRoute on GoRouteData {
   @override
   String get location =>
       GoRouteData.$location('/settings/tracking_protection_exceptions');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $CustomTrackingProtectionRoute on GoRouteData {
-  static CustomTrackingProtectionRoute _fromState(GoRouterState state) =>
-      CustomTrackingProtectionRoute();
-
-  @override
-  String get location =>
-      GoRouteData.$location('/settings/custom_tracking_protection');
 
   @override
   void go(BuildContext context) => context.go(location);

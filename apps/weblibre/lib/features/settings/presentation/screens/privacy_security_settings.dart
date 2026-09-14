@@ -31,10 +31,8 @@ import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/exit_app.dart';
 
 const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
   SettingsSectionDefinition(
@@ -46,24 +44,6 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
         subtitle: 'Choose how aggressively trackers are blocked',
         keywords: ['etp', 'standard', 'strict', 'custom'],
         child: _EnhancedTrackingProtectionSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Content Blocking Database',
-        subtitle: 'Use GeckoView blocker lists for ETP categories',
-        keywords: ['ads', 'trackers', 'content blocking'],
-        child: _ContentBlockingDatabaseTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Bounce Tracking Protection',
-        subtitle: 'Remove tracking state left by redirect-based trackers',
-        keywords: ['redirect trackers'],
-        child: _BounceTrackingProtectionTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Query Parameter Stripping',
-        subtitle: 'Remove tracking parameters from URLs',
-        keywords: ['utm'],
-        child: _QueryParameterStrippingSection(),
       ),
       SettingsEntryDefinition(
         title: 'Tracking Protection Exceptions',
@@ -80,65 +60,13 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Fingerprinting',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Browser Languages',
-        subtitle: 'Choose which languages websites can see',
-        keywords: ['locale'],
-        child: _BrowserLanguagesTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Fingerprint Protection',
-        subtitle: 'Granular control over browser fingerprinting',
-        keywords: ['privacy'],
-        child: _FingerprintProtectionTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Resist Fingerprinting',
-        subtitle: 'Advanced fingerprinting protection hardening',
-        keywords: ['rfp'],
-        child: _ResistFingerprintingTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
     title: 'Connection Security',
     entries: [
-      SettingsEntryDefinition(
-        title: 'Block insecure HTTP connections',
-        subtitle: 'Prefer HTTPS and block insecure connections',
-        keywords: ['https only'],
-        child: _HttpsOnlyModeSection(),
-      ),
       SettingsEntryDefinition(
         title: 'DNS over HTTPS',
         subtitle: 'Encrypt DNS lookups',
         keywords: ['doh'],
         child: _DnsTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Network Protection',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Local Network Access',
-        subtitle: 'Enable local network and device access blocking',
-        keywords: ['lan'],
-        child: _LnaEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Block Local Network Requests',
-        subtitle: 'Block requests to local network devices and services',
-        keywords: ['lan'],
-        child: _LnaBlockingTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Block Local Network Trackers',
-        subtitle: 'Block tracker-like local network requests',
-        keywords: ['lan'],
-        child: _LnaBlockTrackersTile(),
       ),
     ],
   ),
@@ -150,24 +78,6 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
         subtitle: 'Delete selected browsing data on app restart',
         keywords: ['private mode'],
         child: _IncognitoModeSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Screenshot protection',
-        subtitle: 'Prevent app content from appearing in screenshots',
-        keywords: ['screenshots'],
-        child: _ScreenshotProtectionTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Allow screenshots in private tabs',
-        subtitle: 'Let the system capture private tabs',
-        keywords: ['screenshots', 'incognito', 'private'],
-        child: _AllowPrivateTabScreenshotsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Global Privacy Control (GPC)',
-        subtitle: 'Send a privacy preference signal to websites',
-        keywords: ['gpc'],
-        child: _GlobalPrivacyControlTile(),
       ),
     ],
   ),
@@ -206,23 +116,6 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Google Safe Browsing',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Safe Browsing Malware Protection',
-        subtitle: 'Warn about malware and harmful downloads',
-        keywords: ['google safe browsing'],
-        child: _SafeBrowsingMalwareTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Safe Browsing Phishing Protection',
-        subtitle: 'Warn about deceptive websites and login pages',
-        keywords: ['google safe browsing'],
-        child: _SafeBrowsingPhishingTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
     title: 'Advanced Security',
     entries: [
       SettingsEntryDefinition(
@@ -230,18 +123,6 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
         subtitle: 'Harden browser engine behavior and defaults',
         keywords: ['hardening'],
         child: _WebEngineHardeningTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Fission (Site Isolation)',
-        subtitle: 'Use stronger site isolation between origins',
-        keywords: ['site isolation'],
-        child: _FissionEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Extensions Web API',
-        subtitle: 'Allow extensions to expose web APIs to pages',
-        keywords: ['extension api'],
-        child: _ExtensionsWebAPIEnabledTile(),
       ),
     ],
   ),
@@ -507,163 +388,6 @@ class _AutoClearUnassignedTabsSection extends HookConsumerWidget {
   }
 }
 
-class _GlobalPrivacyControlTile extends HookConsumerWidget {
-  const _GlobalPrivacyControlTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final globalPrivacyControlEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.globalPrivacyControlEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Global Privacy Control (GPC)'),
-      secondary: const Icon(MdiIcons.incognitoCircleOff),
-      value: globalPrivacyControlEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.globalPrivacyControlEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _ScreenshotProtectionTile extends HookConsumerWidget {
-  const _ScreenshotProtectionTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.screenshotProtectionEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Screenshot protection'),
-      subtitle: const Text(
-        'Blocks screenshots and screen recordings for this app on Android.',
-      ),
-      secondary: const Icon(MdiIcons.cameraOff),
-      value: enabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.screenshotProtectionEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-/// Opt-out from the secure window that private tabs apply by default.
-///
-/// Inert while [_ScreenshotProtectionTile] is on: that setting blocks capture
-/// in every tab, so the stored preference here is shown but cannot take
-/// effect. The tile stays visible with an explanation rather than silently
-/// reverting the preference.
-class _AllowPrivateTabScreenshotsTile extends HookConsumerWidget {
-  const _AllowPrivateTabScreenshotsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final allow = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.allowPrivateTabScreenshots,
-      ),
-    );
-    final overridden = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.screenshotProtectionEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Allow screenshots in private tabs'),
-      subtitle: Text(
-        overridden
-            ? 'Overridden by screenshot protection, which blocks capture in '
-                  'every tab.'
-            : 'Private tabs can be screenshotted and recorded, and appear in '
-                  'the app switcher preview.',
-      ),
-      secondary: const Icon(MdiIcons.incognito),
-      value: allow,
-      onChanged: overridden
-          ? null
-          : (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .allowPrivateTabScreenshots(value),
-                  );
-            },
-    );
-  }
-}
-
-class _HttpsOnlyModeSection extends HookConsumerWidget {
-  const _HttpsOnlyModeSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final httpsOnlyMode = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.httpsOnlyMode),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Block insecure HTTP connections'),
-            leading: Icon(MdiIcons.lockOpen),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton<HttpsOnlyMode>(
-              segments: const [
-                ButtonSegment(
-                  value: HttpsOnlyMode.disabled,
-                  label: Text('Disabled'),
-                ),
-                ButtonSegment(
-                  value: HttpsOnlyMode.enabled,
-                  label: Text('Enabled'),
-                ),
-                ButtonSegment(
-                  value: HttpsOnlyMode.privateOnly,
-                  label: Text('Private mode only'),
-                ),
-              ],
-              selected: {httpsOnlyMode},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveEngineSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.httpsOnlyMode(value.first),
-                    );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DnsTile extends StatelessWidget {
   const _DnsTile();
 
@@ -718,16 +442,6 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                           .trackingProtectionPolicy(value),
                     );
               }
-
-              // Navigate to custom settings screen when Custom is selected
-              if (value == TrackingProtectionPolicy.custom ||
-                  (value == null &&
-                      trackingProtectionPolicy ==
-                          TrackingProtectionPolicy.custom)) {
-                if (context.mounted) {
-                  await CustomTrackingProtectionRoute().push(context);
-                }
-              }
             },
             child: const Column(
               children: [
@@ -753,145 +467,12 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                   value: TrackingProtectionPolicy.custom,
                   toggleable: true,
                   title: Text('Custom'),
-                  subtitle: Text('Choose which trackers and scripts to block.'),
-                  secondary: Icon(Icons.chevron_right),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ContentBlockingDatabaseTile extends HookConsumerWidget {
-  const _ContentBlockingDatabaseTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final useContentBlockingDatabase = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.useContentBlockingDatabase,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Content Blocking Database'),
-      subtitle: const Text(
-        'Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires app restart.',
-      ),
-      secondary: const Icon(Icons.storage),
-      value: useContentBlockingDatabase,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.useContentBlockingDatabase(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _BounceTrackingProtectionTile extends HookConsumerWidget {
-  const _BounceTrackingProtectionTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bounceTrackingProtectionMode = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.contentBlocking.bounceTrackingProtectionMode,
-      ),
-    );
-
-    final isEnabled = switch (bounceTrackingProtectionMode) {
-      BounceTrackingProtectionMode.disabled => false,
-      BounceTrackingProtectionMode.enabled => true,
-      BounceTrackingProtectionMode.enabledStandby => false,
-      BounceTrackingProtectionMode.enabledDryRun => false,
-    };
-
-    return SwitchListTile.adaptive(
-      title: const Text('Bounce Tracking Protection'),
-      subtitle: const Text(
-        'Blocks redirect trackers that collect data through intermediate URL redirects between websites',
-      ),
-      secondary: const Icon(MdiIcons.securityNetwork),
-      value: isEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.bounceTrackingProtectionMode(
-                    value
-                        ? BounceTrackingProtectionMode.enabled
-                        : BounceTrackingProtectionMode.disabled,
+                  subtitle: Text(
+                    'Blocks the strict categories with total cookie '
+                    'protection.',
                   ),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _QueryParameterStrippingSection extends HookConsumerWidget {
-  const _QueryParameterStrippingSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final queryParameterStripping = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.queryParameterStripping,
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Query Parameter Stripping'),
-            subtitle: Text(
-              'Removes tracking parameters from URLs to prevent cross-site user tracking',
-            ),
-            leading: Icon(MdiIcons.closeNetwork),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton<QueryParameterStripping>(
-              segments: const [
-                ButtonSegment(
-                  value: QueryParameterStripping.disabled,
-                  label: Text('Disabled'),
-                ),
-                ButtonSegment(
-                  value: QueryParameterStripping.enabled,
-                  label: Text('Enabled'),
-                ),
-                ButtonSegment(
-                  value: QueryParameterStripping.privateOnly,
-                  label: Text('Private mode only'),
                 ),
               ],
-              selected: {queryParameterStripping},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveEngineSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .queryParameterStripping(value.first),
-                    );
-              },
             ),
           ),
         ],
@@ -938,135 +519,6 @@ class _UBlockFilterListsTile extends StatelessWidget {
         await UBlockFilterListsRoute().push<void>(context);
       },
     );
-  }
-}
-
-class _FissionEnabledTile extends HookConsumerWidget {
-  const _FissionEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final fissionEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.fissionEnabled),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Fission (Site Isolation)'),
-      subtitle: const Text(
-        'Isolates each site into a separate OS process for improved security. Requires app restart.',
-      ),
-      secondary: const Icon(MdiIcons.shieldHalfFull),
-      value: fissionEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.fissionEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _SafeBrowsingMalwareTile extends HookConsumerWidget {
-  const _SafeBrowsingMalwareTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final safeBrowsingMalwareEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.safeBrowsingMalwareEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Safe Browsing Malware Protection'),
-      subtitle: const Text(
-        'Warn about dangerous websites and malicious downloads.',
-      ),
-      secondary: const Icon(Icons.bug_report_outlined),
-      value: safeBrowsingMalwareEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.safeBrowsingMalwareEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _SafeBrowsingPhishingTile extends HookConsumerWidget {
-  const _SafeBrowsingPhishingTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final safeBrowsingPhishingEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.safeBrowsingPhishingEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Safe Browsing Phishing Protection'),
-      subtitle: const Text('Warn about deceptive websites and login pages.'),
-      secondary: const Icon(Icons.gpp_maybe_outlined),
-      value: safeBrowsingPhishingEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.safeBrowsingPhishingEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _ExtensionsWebAPIEnabledTile extends HookConsumerWidget {
-  const _ExtensionsWebAPIEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final extensionsWebAPIEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.extensionsWebAPIEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Extensions Web API'),
-      subtitle: const Text(
-        'Enable mozAddonManager API exposure for web content and extension pages. Requires app restart.',
-      ),
-      secondary: const Icon(Icons.extension),
-      value: extensionsWebAPIEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.extensionsWebAPIEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
-  final result = await showQuitBrowserDialog(context);
-  if (result == true && context.mounted) {
-    await exitApp(ProviderScope.containerOf(context));
   }
 }
 
@@ -1212,161 +664,3 @@ class _ManagedAppPolicyTile extends HookConsumerWidget {
 }
 
 enum _PolicyAction { allow, block, remove }
-
-class _BrowserLanguagesTile extends StatelessWidget {
-  const _BrowserLanguagesTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Browser Languages'),
-      subtitle: const Text(
-        'Configure language preferences exposed to websites',
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(Icons.translate),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await LocaleSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _FingerprintProtectionTile extends StatelessWidget {
-  const _FingerprintProtectionTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Fingerprint Protection'),
-      subtitle: const Text('Granular control over browser fingerprinting'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.fingerprint),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await FingerprintSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _ResistFingerprintingTile extends StatelessWidget {
-  const _ResistFingerprintingTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Resist Fingerprinting'),
-      subtitle: const Text('Advanced fingerprinting protection hardening'),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.shieldLock),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await const WebEngineHardeningGroupRoute(
-          group: 'Resist Fingerprinting',
-        ).push(context);
-      },
-    );
-  }
-}
-
-class _LnaEnabledTile extends HookConsumerWidget {
-  const _LnaEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Local Network Access'),
-      subtitle: const Text('Enable local network and device access blocking'),
-      secondary: const Icon(MdiIcons.lanDisconnect),
-      value: lnaEnabled ?? false,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) => currentSettings.copyWith.lnaEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _LnaBlockingTile extends HookConsumerWidget {
-  const _LnaBlockingTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
-    );
-    final lnaBlocking = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlocking),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Block Local Network Requests'),
-      subtitle: const Text(
-        'Block web page requests to local network addresses',
-      ),
-      secondary: const Icon(MdiIcons.shieldLockOpen),
-      value: lnaBlocking ?? false,
-      onChanged: lnaEnabled == true
-          ? (value) async {
-              await ref
-                  .read(saveEngineSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.lnaBlocking(value),
-                  );
-            }
-          : null,
-    );
-  }
-}
-
-class _LnaBlockTrackersTile extends HookConsumerWidget {
-  const _LnaBlockTrackersTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
-    );
-    final lnaBlockTrackers = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlockTrackers),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Block Local Network Trackers'),
-      subtitle: const Text(
-        'Block trackers from accessing local network resources',
-      ),
-      secondary: const Icon(MdiIcons.shieldBug),
-      value: lnaBlockTrackers ?? false,
-      onChanged: lnaEnabled == true
-          ? (value) async {
-              await ref
-                  .read(saveEngineSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.lnaBlockTrackers(value),
-                  );
-            }
-          : null,
-    );
-  }
-}

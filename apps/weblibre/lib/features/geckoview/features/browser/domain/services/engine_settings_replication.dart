@@ -91,6 +91,8 @@ class EngineSettingsReplicationService
     try {
       await _service.setPullToRefreshEnabled(true);
       await _service.setUseExternalDownloadManager(false);
+      await _service.setScreenshotProtectionEnabled(false);
+      await _service.setAllowPrivateTabScreenshots(false);
     } catch (error, stackTrace) {
       logger.e(
         'Error applying fixed engine flags',
@@ -129,39 +131,7 @@ class EngineSettingsReplicationService
       },
     );
 
-    ref.listen(
-      fireImmediately: true,
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.screenshotProtectionEnabled,
-      ),
-      (previous, next) async {
-        await _service.setScreenshotProtectionEnabled(next);
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to screenshotProtectionEnabled',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
-    ref.listen(
-      fireImmediately: true,
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.allowPrivateTabScreenshots,
-      ),
-      (previous, next) async {
-        await _service.setAllowPrivateTabScreenshots(next);
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to allowPrivateTabScreenshots',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
 
 

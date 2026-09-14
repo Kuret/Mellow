@@ -141,8 +141,7 @@ class Core(
                     ).path
                 },
             ),
-            useContentBlockingDatabase =
-                GlobalComponents.startupSettings?.useContentBlockingDatabase ?: true
+            useContentBlockingDatabase = true
         )
     }
 

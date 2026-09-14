@@ -70,14 +70,6 @@ part of 'routes.dart';
       ],
     ),
     TypedGoRoute<DohSettingsRoute>(name: 'DohSettingsRoute', path: 'doh'),
-    TypedGoRoute<FingerprintSettingsRoute>(
-      name: 'FingerprintSettingsRoute',
-      path: 'fingerprint',
-    ),
-    TypedGoRoute<LocaleSettingsRoute>(
-      name: 'LocaleSettingsRoute',
-      path: 'locales',
-    ),
     TypedGoRoute<AddonCollectionRoute>(
       name: 'AddonCollectionRoute',
       path: 'addon_collection',
@@ -89,10 +81,6 @@ part of 'routes.dart';
     TypedGoRoute<TrackingProtectionExceptionsRoute>(
       name: 'TrackingProtectionExceptionsRoute',
       path: 'tracking_protection_exceptions',
-    ),
-    TypedGoRoute<CustomTrackingProtectionRoute>(
-      name: 'CustomTrackingProtectionRoute',
-      path: 'custom_tracking_protection',
     ),
     TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
     TypedGoRoute<SyncSettingsRoute>(name: 'SyncSettingsRoute', path: 'sync'),
@@ -206,21 +194,6 @@ class DohSettingsRoute extends GoRouteData with $DohSettingsRoute {
   }
 }
 
-class FingerprintSettingsRoute extends GoRouteData
-    with $FingerprintSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const FingerprintSettingsScreen();
-  }
-}
-
-class LocaleSettingsRoute extends GoRouteData with $LocaleSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const LocaleSettingsScreen();
-  }
-}
-
 class AddonCollectionRoute extends GoRouteData with $AddonCollectionRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -267,14 +240,6 @@ class ErrorLogsRoute extends GoRouteData with $ErrorLogsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ErrorLogsScreen();
-  }
-}
-
-class CustomTrackingProtectionRoute extends GoRouteData
-    with $CustomTrackingProtectionRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const CustomTrackingProtectionScreen();
   }
 }
 

@@ -110,47 +110,73 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   TrackingProtectionPolicy get trackingProtectionPolicy =>
       super.trackingProtectionPolicy!;
   @override
-  HttpsOnlyMode get httpsOnlyMode => super.httpsOnlyMode!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  HttpsOnlyMode get httpsOnlyMode => HttpsOnlyMode.enabled;
   @override
   ColorScheme get preferredColorScheme => super.preferredColorScheme!;
   @override
-  bool get globalPrivacyControlEnabled => super.globalPrivacyControlEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get globalPrivacyControlEnabled => true;
   @override
   bool get enterpriseRootsEnabled => super.enterpriseRootsEnabled!;
 
+  /// The OS locale list, read fresh every time: the browser presents the
+  /// languages the device is configured for and nothing else.
   @override
-  List<String> get locales => super.locales!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  List<String> get locales => WidgetsBinding
+      .instance
+      .platformDispatcher
+      .locales
+      .map((locale) => locale.toLanguageTag())
+      .toList();
 
+  /// Nothing reads this any more — `Core.kt` creates the runtime with the
+  /// blocker lists unconditionally — but it is part of the pigeon contract, so
+  /// it is answered with what that hardcoded value is.
   @override
-  bool get useContentBlockingDatabase => super.useContentBlockingDatabase!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get useContentBlockingDatabase => true;
 
-  // Custom Tracking Protection overrides
+  // What the `custom` tracking-protection policy means. There is no screen to
+  // change it any more, so it is the strict answer, spelled out because the
+  // native policy still has to be handed every field.
   @override
-  bool get blockCookies => super.blockCookies!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockCookies => true;
   @override
-  CustomCookiePolicy get customCookiePolicy => super.customCookiePolicy!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  CustomCookiePolicy get customCookiePolicy => CustomCookiePolicy.totalProtection;
   @override
-  bool get blockTrackingContent => super.blockTrackingContent!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockTrackingContent => true;
   @override
-  TrackingScope get trackingContentScope => super.trackingContentScope!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  TrackingScope get trackingContentScope => TrackingScope.all;
   @override
-  bool get blockCryptominers => super.blockCryptominers!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockCryptominers => true;
   @override
-  bool get blockFingerprinters => super.blockFingerprinters!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockFingerprinters => true;
   @override
-  bool get blockRedirectTrackers => super.blockRedirectTrackers!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockRedirectTrackers => true;
   @override
-  bool get blockSuspectedFingerprinters => super.blockSuspectedFingerprinters!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockSuspectedFingerprinters => true;
   @override
-  TrackingScope get suspectedFingerprintersScope =>
-      super.suspectedFingerprintersScope!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  TrackingScope get suspectedFingerprintersScope => TrackingScope.all;
   @override
-  bool get allowListBaseline => super.allowListBaseline!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get allowListBaseline => true;
   @override
-  bool get allowListConvenience => super.allowListConvenience!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get allowListConvenience => false;
   @override
-  bool get blockAdsAnalyticsSocialTrackers =>
-      super.blockAdsAnalyticsSocialTrackers!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get blockAdsAnalyticsSocialTrackers => true;
 
   // Web content rendering. No longer user-editable: the fixed values below are
   // what the engine is told, and they leave the persisted document entirely.
@@ -179,21 +205,44 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   // Process Isolation Settings (require app restart)
   @override
-  bool get fissionEnabled => super.fissionEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get fissionEnabled => true;
   @override
   bool get isolatedProcessEnabled => super.isolatedProcessEnabled!;
   @override
   bool get appZygoteProcessEnabled => super.appZygoteProcessEnabled!;
   @override
-  bool get extensionsWebAPIEnabled => super.extensionsWebAPIEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get extensionsWebAPIEnabled => true;
+
+  // Local network access. Fixed: the gate is on, plain LAN requests are
+  // allowed and tracker-like ones are not.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get lnaEnabled => true;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get lnaBlocking => false;
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get lnaBlockTrackers => true;
+
+  /// Google Safe Browsing, always on for both lists. Registered as engine
+  /// preferences by the replication service.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get safeBrowsingMalwareEnabled => true;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get safeBrowsingPhishingEnabled => true;
+
+  /// The fingerprinting overrides the engine is given: the shipped defaults.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  String get fingerprintingProtectionOverrides =>
+      FingerprintOverrides.defaults().toString();
 
   // Developer Settings
   @override
   bool get remoteDebuggingEnabled => super.remoteDebuggingEnabled!;
-
-  final QueryParameterStripping queryParameterStripping;
-
-  final BounceTrackingProtectionMode bounceTrackingProtectionMode;
 
   @JsonKey(fromJson: _addonCollectionFromJson, toJson: _addonCollectionToJson)
   final AddonCollection? addonCollection;
@@ -223,27 +272,19 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   ContentBlocking get contentBlocking => ContentBlocking(
-    queryParameterStripping: queryParameterStripping,
+    queryParameterStripping: QueryParameterStripping.enabled,
     queryParameterStrippingAllowList: '',
     queryParameterStrippingStripList:
         '__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid',
-    bounceTrackingProtectionMode: bounceTrackingProtectionMode,
+    bounceTrackingProtectionMode: BounceTrackingProtectionMode.enabled,
   );
-
-  final bool safeBrowsingMalwareEnabled;
-
-  final bool safeBrowsingPhishingEnabled;
 
   EngineSettings({
     required super.javascriptEnabled,
     required super.trackingProtectionPolicy,
-    required super.httpsOnlyMode,
-    required super.globalPrivacyControlEnabled,
     required super.preferredColorScheme,
     required super.userAgent,
     required super.enterpriseRootsEnabled,
-    required this.queryParameterStripping,
-    required this.bounceTrackingProtectionMode,
     required this.addonCollection,
     required this.ublockFilterListSettings,
     required this.dohSettingsMode,
@@ -251,44 +292,18 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohDefaultProviderUrl,
     required this.dohExceptionsList,
     required this.customDohProviders,
-    required super.fingerprintingProtectionOverrides,
-    required this.safeBrowsingMalwareEnabled,
-    required this.safeBrowsingPhishingEnabled,
-    required super.locales,
-    required super.useContentBlockingDatabase,
-    required super.blockCookies,
-    required super.customCookiePolicy,
-    required super.blockTrackingContent,
-    required super.trackingContentScope,
-    required super.blockCryptominers,
-    required super.blockFingerprinters,
-    required super.blockRedirectTrackers,
-    required super.blockSuspectedFingerprinters,
-    required super.suspectedFingerprintersScope,
-    required super.allowListBaseline,
-    required super.allowListConvenience,
-    required super.blockAdsAnalyticsSocialTrackers,
     required super.displayDensityOverride,
     required super.screenWidthOverride,
     required super.screenHeightOverride,
-    required super.fissionEnabled,
     required super.isolatedProcessEnabled,
     required super.appZygoteProcessEnabled,
-    required super.extensionsWebAPIEnabled,
-    required super.lnaBlocking,
-    required super.lnaBlockTrackers,
-    required super.lnaEnabled,
     required super.remoteDebuggingEnabled,
   });
 
   EngineSettings.withDefaults({
     bool? javascriptEnabled,
     TrackingProtectionPolicy? trackingProtectionPolicy,
-    HttpsOnlyMode? httpsOnlyMode,
-    bool? globalPrivacyControlEnabled,
     ColorScheme? preferredColorScheme,
-    QueryParameterStripping? queryParameterStripping,
-    BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
     bool? enterpriseRootsEnabled,
     this.addonCollection,
@@ -298,40 +313,14 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? dohDefaultProviderUrl,
     List<String>? dohExceptionsList,
     List<CustomDohProvider>? customDohProviders,
-    String? fingerprintingProtectionOverrides,
-    bool? safeBrowsingMalwareEnabled,
-    bool? safeBrowsingPhishingEnabled,
-    List<String>? locales,
-    bool? useContentBlockingDatabase,
-    bool? blockCookies,
-    CustomCookiePolicy? customCookiePolicy,
-    bool? blockTrackingContent,
-    TrackingScope? trackingContentScope,
-    bool? blockCryptominers,
-    bool? blockFingerprinters,
-    bool? blockRedirectTrackers,
-    bool? blockSuspectedFingerprinters,
-    TrackingScope? suspectedFingerprintersScope,
-    bool? allowListBaseline,
-    bool? allowListConvenience,
-    bool? blockAdsAnalyticsSocialTrackers,
     super.displayDensityOverride,
     super.screenWidthOverride,
     super.screenHeightOverride,
-    bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
-    bool? extensionsWebAPIEnabled,
-    super.lnaBlocking,
-    bool? lnaBlockTrackers,
-    bool? lnaEnabled,
     bool? remoteDebuggingEnabled,
   }) : ublockFilterListSettings =
            ublockFilterListSettings ?? UBlockFilterListSettings(),
-       queryParameterStripping =
-           queryParameterStripping ?? QueryParameterStripping.enabled,
-       bounceTrackingProtectionMode =
-           bounceTrackingProtectionMode ?? BounceTrackingProtectionMode.enabled,
        dohSettingsMode = dohSettingsMode ?? DohSettingsMode.increased,
        dohProviderUrl = dohProviderUrl ?? BuiltInDohProviders.quad9.url,
        dohDefaultProviderUrl =
@@ -341,52 +330,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          customDohProviders ?? [],
          dohProviderUrl ?? BuiltInDohProviders.quad9.url,
        ),
-       safeBrowsingMalwareEnabled = safeBrowsingMalwareEnabled ?? true,
-       safeBrowsingPhishingEnabled = safeBrowsingPhishingEnabled ?? true,
        super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
              trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
-         httpsOnlyMode: httpsOnlyMode ?? HttpsOnlyMode.enabled,
-         globalPrivacyControlEnabled: globalPrivacyControlEnabled ?? true,
          preferredColorScheme: preferredColorScheme ?? ColorScheme.system,
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
-         fingerprintingProtectionOverrides:
-             fingerprintingProtectionOverrides ??
-             FingerprintOverrides.defaults().toString(),
-         locales:
-             locales ??
-             WidgetsBinding.instance.platformDispatcher.locales
-                 .map((x) => x.toLanguageTag())
-                 .toList(),
-         useContentBlockingDatabase: useContentBlockingDatabase ?? true,
-         blockCookies: blockCookies ?? true,
-         customCookiePolicy:
-             customCookiePolicy ?? CustomCookiePolicy.totalProtection,
-         blockTrackingContent: blockTrackingContent ?? true,
-         trackingContentScope: trackingContentScope ?? TrackingScope.all,
-         blockCryptominers: blockCryptominers ?? true,
-         blockFingerprinters: blockFingerprinters ?? true,
-         blockRedirectTrackers: blockRedirectTrackers ?? true,
-         blockSuspectedFingerprinters: blockSuspectedFingerprinters ?? true,
-         suspectedFingerprintersScope:
-             suspectedFingerprintersScope ?? TrackingScope.all,
-         allowListBaseline: allowListBaseline ?? true,
-         allowListConvenience: allowListConvenience ?? false,
-         blockAdsAnalyticsSocialTrackers:
-             blockAdsAnalyticsSocialTrackers ?? true,
          webFontsEnabled: true,
          automaticFontSizeAdjustment: true,
          fontSizeFactor: 1.0,
          fontInflationEnabled: false,
          inputAutoZoomEnabled: true,
          forceUserScalableContent: false,
-         fissionEnabled: fissionEnabled ?? true,
          isolatedProcessEnabled: isolatedProcessEnabled ?? false,
          appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
-         extensionsWebAPIEnabled: extensionsWebAPIEnabled ?? true,
-         lnaBlockTrackers: lnaBlockTrackers ?? true,
-         lnaEnabled: lnaEnabled ?? true,
          remoteDebuggingEnabled: remoteDebuggingEnabled ?? false,
        );
 
@@ -421,13 +378,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   List<Object?> get hashParameters => [
     javascriptEnabled,
     trackingProtectionPolicy,
-    httpsOnlyMode,
-    globalPrivacyControlEnabled,
     preferredColorScheme,
     userAgent,
     enterpriseRootsEnabled,
-    queryParameterStripping,
-    bounceTrackingProtectionMode,
     addonCollection,
     ublockFilterListSettings,
     dohSettingsMode,
@@ -435,33 +388,11 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohDefaultProviderUrl,
     dohExceptionsList,
     customDohProviders,
-    fingerprintingProtectionOverrides,
-    safeBrowsingMalwareEnabled,
-    safeBrowsingPhishingEnabled,
-    locales,
-    useContentBlockingDatabase,
-    blockCookies,
-    customCookiePolicy,
-    blockTrackingContent,
-    trackingContentScope,
-    blockCryptominers,
-    blockFingerprinters,
-    blockRedirectTrackers,
-    blockSuspectedFingerprinters,
-    suspectedFingerprintersScope,
-    allowListBaseline,
-    allowListConvenience,
-    blockAdsAnalyticsSocialTrackers,
     displayDensityOverride,
     screenWidthOverride,
     screenHeightOverride,
-    fissionEnabled,
     isolatedProcessEnabled,
     appZygoteProcessEnabled,
-    extensionsWebAPIEnabled,
-    lnaBlocking,
-    lnaBlockTrackers,
-    lnaEnabled,
     remoteDebuggingEnabled,
   ];
 }

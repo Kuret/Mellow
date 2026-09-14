@@ -181,15 +181,6 @@ enum DeleteBrowsingDataType {
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
-  final bool screenshotProtectionEnabled;
-
-  /// Whether private tabs may be captured by the system (screenshots, screen
-  /// recording, the recents preview). Private tabs mark the window secure by
-  /// default; enabling this lifts that restriction. [screenshotProtectionEnabled]
-  /// still wins when both are on, because it blocks capture app-wide.
-  /// Defaults to false.
-  final bool allowPrivateTabScreenshots;
-
   /// Id of the [SearchProvider] typed queries are sent to.
   ///
   /// Read through [SearchProviderIdConverter], which also translates the
@@ -295,8 +286,6 @@ class GeneralSettings with FastEquatable {
   GeneralSettings({
     required this.themeMode,
     required this.deleteBrowsingDataOnQuit,
-    required this.screenshotProtectionEnabled,
-    required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.showContainerUi,
@@ -339,8 +328,6 @@ class GeneralSettings with FastEquatable {
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
     this.deleteBrowsingDataOnQuit,
-    bool? screenshotProtectionEnabled,
-    bool? allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? showContainerUi,
@@ -377,8 +364,6 @@ class GeneralSettings with FastEquatable {
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
   }) : themeMode = themeMode ?? ThemeMode.dark,
-       screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
-       allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
@@ -503,8 +488,6 @@ class GeneralSettings with FastEquatable {
   List<Object?> get hashParameters => [
     themeMode,
     deleteBrowsingDataOnQuit,
-    screenshotProtectionEnabled,
-    allowPrivateTabScreenshots,
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     showContainerUi,
