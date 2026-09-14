@@ -43,10 +43,6 @@ part of 'routes.dart';
       name: 'ToolbarLayoutSettingsRoute',
       path: 'toolbar_layout',
     ),
-    TypedGoRoute<WebContentSettingsRoute>(
-      name: 'WebContentSettingsRoute',
-      path: 'web_content',
-    ),
     TypedGoRoute<SearchSettingsRoute>(
       name: 'SearchSettingsRoute',
       path: 'search',
@@ -170,14 +166,6 @@ class ToolbarLayoutSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ToolbarLayoutSettingsScreen();
-  }
-}
-
-class WebContentSettingsRoute extends GoRouteData
-    with $WebContentSettingsRoute {
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const WebContentSettingsScreen();
   }
 }
 

@@ -112,8 +112,6 @@ abstract class _$EngineSettingsCWProxy {
     String? fingerprintingProtectionOverrides,
   );
 
-  EngineSettings enablePdfJs(bool enablePdfJs);
-
   EngineSettings safeBrowsingMalwareEnabled(bool safeBrowsingMalwareEnabled);
 
   EngineSettings safeBrowsingPhishingEnabled(bool safeBrowsingPhishingEnabled);
@@ -152,23 +150,11 @@ abstract class _$EngineSettingsCWProxy {
     bool? blockAdsAnalyticsSocialTrackers,
   );
 
-  EngineSettings webFontsEnabled(bool? webFontsEnabled);
-
-  EngineSettings automaticFontSizeAdjustment(bool? automaticFontSizeAdjustment);
-
-  EngineSettings fontSizeFactor(double? fontSizeFactor);
-
-  EngineSettings fontInflationEnabled(bool? fontInflationEnabled);
-
   EngineSettings displayDensityOverride(double? displayDensityOverride);
 
   EngineSettings screenWidthOverride(int? screenWidthOverride);
 
   EngineSettings screenHeightOverride(int? screenHeightOverride);
-
-  EngineSettings inputAutoZoomEnabled(bool? inputAutoZoomEnabled);
-
-  EngineSettings forceUserScalableContent(bool? forceUserScalableContent);
 
   EngineSettings fissionEnabled(bool? fissionEnabled);
 
@@ -211,7 +197,6 @@ abstract class _$EngineSettingsCWProxy {
     List<String> dohExceptionsList,
     List<CustomDohProvider> customDohProviders,
     String? fingerprintingProtectionOverrides,
-    bool enablePdfJs,
     bool safeBrowsingMalwareEnabled,
     bool safeBrowsingPhishingEnabled,
     List<String>? locales,
@@ -228,15 +213,9 @@ abstract class _$EngineSettingsCWProxy {
     bool? allowListBaseline,
     bool? allowListConvenience,
     bool? blockAdsAnalyticsSocialTrackers,
-    bool? webFontsEnabled,
-    bool? automaticFontSizeAdjustment,
-    double? fontSizeFactor,
-    bool? fontInflationEnabled,
     double? displayDensityOverride,
     int? screenWidthOverride,
     int? screenHeightOverride,
-    bool? inputAutoZoomEnabled,
-    bool? forceUserScalableContent,
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
@@ -332,10 +311,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   );
 
   @override
-  EngineSettings enablePdfJs(bool enablePdfJs) =>
-      call(enablePdfJs: enablePdfJs);
-
-  @override
   EngineSettings safeBrowsingMalwareEnabled(bool safeBrowsingMalwareEnabled) =>
       call(safeBrowsingMalwareEnabled: safeBrowsingMalwareEnabled);
 
@@ -403,23 +378,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   ) => call(blockAdsAnalyticsSocialTrackers: blockAdsAnalyticsSocialTrackers);
 
   @override
-  EngineSettings webFontsEnabled(bool? webFontsEnabled) =>
-      call(webFontsEnabled: webFontsEnabled);
-
-  @override
-  EngineSettings automaticFontSizeAdjustment(
-    bool? automaticFontSizeAdjustment,
-  ) => call(automaticFontSizeAdjustment: automaticFontSizeAdjustment);
-
-  @override
-  EngineSettings fontSizeFactor(double? fontSizeFactor) =>
-      call(fontSizeFactor: fontSizeFactor);
-
-  @override
-  EngineSettings fontInflationEnabled(bool? fontInflationEnabled) =>
-      call(fontInflationEnabled: fontInflationEnabled);
-
-  @override
   EngineSettings displayDensityOverride(double? displayDensityOverride) =>
       call(displayDensityOverride: displayDensityOverride);
 
@@ -430,14 +388,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings screenHeightOverride(int? screenHeightOverride) =>
       call(screenHeightOverride: screenHeightOverride);
-
-  @override
-  EngineSettings inputAutoZoomEnabled(bool? inputAutoZoomEnabled) =>
-      call(inputAutoZoomEnabled: inputAutoZoomEnabled);
-
-  @override
-  EngineSettings forceUserScalableContent(bool? forceUserScalableContent) =>
-      call(forceUserScalableContent: forceUserScalableContent);
 
   @override
   EngineSettings fissionEnabled(bool? fissionEnabled) =>
@@ -496,7 +446,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
     Object? customDohProviders = const $CopyWithPlaceholder(),
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
-    Object? enablePdfJs = const $CopyWithPlaceholder(),
     Object? safeBrowsingMalwareEnabled = const $CopyWithPlaceholder(),
     Object? safeBrowsingPhishingEnabled = const $CopyWithPlaceholder(),
     Object? locales = const $CopyWithPlaceholder(),
@@ -513,15 +462,9 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? allowListBaseline = const $CopyWithPlaceholder(),
     Object? allowListConvenience = const $CopyWithPlaceholder(),
     Object? blockAdsAnalyticsSocialTrackers = const $CopyWithPlaceholder(),
-    Object? webFontsEnabled = const $CopyWithPlaceholder(),
-    Object? automaticFontSizeAdjustment = const $CopyWithPlaceholder(),
-    Object? fontSizeFactor = const $CopyWithPlaceholder(),
-    Object? fontInflationEnabled = const $CopyWithPlaceholder(),
     Object? displayDensityOverride = const $CopyWithPlaceholder(),
     Object? screenWidthOverride = const $CopyWithPlaceholder(),
     Object? screenHeightOverride = const $CopyWithPlaceholder(),
-    Object? inputAutoZoomEnabled = const $CopyWithPlaceholder(),
-    Object? forceUserScalableContent = const $CopyWithPlaceholder(),
     Object? fissionEnabled = const $CopyWithPlaceholder(),
     Object? isolatedProcessEnabled = const $CopyWithPlaceholder(),
     Object? appZygoteProcessEnabled = const $CopyWithPlaceholder(),
@@ -620,11 +563,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.fingerprintingProtectionOverrides
           // ignore: cast_nullable_to_non_nullable
           : fingerprintingProtectionOverrides as String?,
-      enablePdfJs:
-          enablePdfJs == const $CopyWithPlaceholder() || enablePdfJs == null
-          ? _value.enablePdfJs
-          // ignore: cast_nullable_to_non_nullable
-          : enablePdfJs as bool,
       safeBrowsingMalwareEnabled:
           safeBrowsingMalwareEnabled == const $CopyWithPlaceholder() ||
               safeBrowsingMalwareEnabled == null
@@ -698,23 +636,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.blockAdsAnalyticsSocialTrackers
           // ignore: cast_nullable_to_non_nullable
           : blockAdsAnalyticsSocialTrackers as bool?,
-      webFontsEnabled: webFontsEnabled == const $CopyWithPlaceholder()
-          ? _value.webFontsEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : webFontsEnabled as bool?,
-      automaticFontSizeAdjustment:
-          automaticFontSizeAdjustment == const $CopyWithPlaceholder()
-          ? _value.automaticFontSizeAdjustment
-          // ignore: cast_nullable_to_non_nullable
-          : automaticFontSizeAdjustment as bool?,
-      fontSizeFactor: fontSizeFactor == const $CopyWithPlaceholder()
-          ? _value.fontSizeFactor
-          // ignore: cast_nullable_to_non_nullable
-          : fontSizeFactor as double?,
-      fontInflationEnabled: fontInflationEnabled == const $CopyWithPlaceholder()
-          ? _value.fontInflationEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : fontInflationEnabled as bool?,
       displayDensityOverride:
           displayDensityOverride == const $CopyWithPlaceholder()
           ? _value.displayDensityOverride
@@ -728,15 +649,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.screenHeightOverride
           // ignore: cast_nullable_to_non_nullable
           : screenHeightOverride as int?,
-      inputAutoZoomEnabled: inputAutoZoomEnabled == const $CopyWithPlaceholder()
-          ? _value.inputAutoZoomEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : inputAutoZoomEnabled as bool?,
-      forceUserScalableContent:
-          forceUserScalableContent == const $CopyWithPlaceholder()
-          ? _value.forceUserScalableContent
-          // ignore: cast_nullable_to_non_nullable
-          : forceUserScalableContent as bool?,
       fissionEnabled: fissionEnabled == const $CopyWithPlaceholder()
           ? _value.fissionEnabled
           // ignore: cast_nullable_to_non_nullable
@@ -845,7 +757,6 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
             .toList(),
         fingerprintingProtectionOverrides:
             json['fingerprintingProtectionOverrides'] as String?,
-        enablePdfJs: json['enablePdfJs'] as bool?,
         safeBrowsingMalwareEnabled: json['safeBrowsingMalwareEnabled'] as bool?,
         safeBrowsingPhishingEnabled:
             json['safeBrowsingPhishingEnabled'] as bool?,
@@ -876,17 +787,10 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         allowListConvenience: json['allowListConvenience'] as bool?,
         blockAdsAnalyticsSocialTrackers:
             json['blockAdsAnalyticsSocialTrackers'] as bool?,
-        webFontsEnabled: json['webFontsEnabled'] as bool?,
-        automaticFontSizeAdjustment:
-            json['automaticFontSizeAdjustment'] as bool?,
-        fontSizeFactor: (json['fontSizeFactor'] as num?)?.toDouble(),
-        fontInflationEnabled: json['fontInflationEnabled'] as bool?,
         displayDensityOverride: (json['displayDensityOverride'] as num?)
             ?.toDouble(),
         screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
         screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
-        inputAutoZoomEnabled: json['inputAutoZoomEnabled'] as bool?,
-        forceUserScalableContent: json['forceUserScalableContent'] as bool?,
         fissionEnabled: json['fissionEnabled'] as bool?,
         isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
         appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
@@ -953,12 +857,6 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'allowListBaseline': instance.allowListBaseline,
   'allowListConvenience': instance.allowListConvenience,
   'blockAdsAnalyticsSocialTrackers': instance.blockAdsAnalyticsSocialTrackers,
-  'webFontsEnabled': instance.webFontsEnabled,
-  'automaticFontSizeAdjustment': instance.automaticFontSizeAdjustment,
-  'fontSizeFactor': instance.fontSizeFactor,
-  'fontInflationEnabled': instance.fontInflationEnabled,
-  'inputAutoZoomEnabled': instance.inputAutoZoomEnabled,
-  'forceUserScalableContent': instance.forceUserScalableContent,
   'fissionEnabled': instance.fissionEnabled,
   'isolatedProcessEnabled': instance.isolatedProcessEnabled,
   'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,
@@ -982,7 +880,6 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'customDohProviders': instance.customDohProviders
       .map((e) => e.toJson())
       .toList(),
-  'enablePdfJs': instance.enablePdfJs,
   'safeBrowsingMalwareEnabled': instance.safeBrowsingMalwareEnabled,
   'safeBrowsingPhishingEnabled': instance.safeBrowsingPhishingEnabled,
 };

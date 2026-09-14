@@ -32,7 +32,6 @@ import 'package:weblibre/features/geckoview/domain/providers/web_extensions_stat
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
@@ -48,8 +47,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
@@ -395,7 +392,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return IconButton(
         onPressed: scope.isPreview
             ? () {}
-            : () => _adjustFontSize(context, ref, increase: true),
+            : () => _adjustFontSize(context),
         icon: const Icon(MdiIcons.formatFontSizeIncrease),
       );
     },
@@ -408,7 +405,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return IconButton(
         onPressed: scope.isPreview
             ? () {}
-            : () => _adjustFontSize(context, ref, increase: false),
+            : () => _adjustFontSize(context),
         icon: const Icon(MdiIcons.formatFontSizeDecrease),
       );
     },
@@ -892,37 +889,14 @@ class _BookmarkToggleToolbarButton extends ConsumerWidget {
   }
 }
 
-Future<void> _adjustFontSize(
-  BuildContext context,
-  WidgetRef ref, {
-  required bool increase,
-}) async {
-  final settings = ref.read(engineSettingsWithDefaultsProvider);
-
-  if (settings.automaticFontSizeAdjustment) {
-    if (context.mounted) {
-      ui_helper.showInfoMessage(
-        context,
-        'Disable automatic font size in settings to adjust manually',
-        duration: const Duration(seconds: 2),
-      );
-    }
-    return;
-  }
-
-  final current = settings.fontSizeFactor;
-  final newValue = increase
-      ? (current + fontSizeStep).clamp(fontSizeMin, fontSizeMax)
-      : (current - fontSizeStep).clamp(fontSizeMin, fontSizeMax);
-  final rounded = (newValue * 10).round() / 10;
-
-  if (rounded == current) return;
-
-  await ref
-      .read(saveEngineSettingsControllerProvider.notifier)
-      .save(
-        (currentSettings) => currentSettings.copyWith.fontSizeFactor(rounded),
-      );
+/// Page text follows the system font size, so there is no factor to step.
+/// The buttons stay on the toolbar and say so rather than doing nothing.
+void _adjustFontSize(BuildContext context) {
+  ui_helper.showInfoMessage(
+    context,
+    'Page text follows your system font size',
+    duration: const Duration(seconds: 2),
+  );
 }
 
 class _DesktopModeToolbarButton extends ConsumerWidget {

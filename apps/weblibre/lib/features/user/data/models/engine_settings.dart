@@ -152,19 +152,30 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get blockAdsAnalyticsSocialTrackers =>
       super.blockAdsAnalyticsSocialTrackers!;
 
-  // Web Content Settings
+  // Web content rendering. No longer user-editable: the fixed values below are
+  // what the engine is told, and they leave the persisted document entirely.
   @override
-  bool get webFontsEnabled => super.webFontsEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get webFontsEnabled => true;
   @override
-  bool get automaticFontSizeAdjustment => super.automaticFontSizeAdjustment!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get automaticFontSizeAdjustment => true;
   @override
-  double get fontSizeFactor => super.fontSizeFactor!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  double get fontSizeFactor => 1.0;
   @override
-  bool get fontInflationEnabled => super.fontInflationEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get fontInflationEnabled => false;
   @override
-  bool get inputAutoZoomEnabled => super.inputAutoZoomEnabled!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get inputAutoZoomEnabled => true;
   @override
-  bool get forceUserScalableContent => super.forceUserScalableContent!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get forceUserScalableContent => false;
+
+  /// Built-in PDF viewer, always on. See the web-content block above.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get enablePdfJs => true;
 
   // Process Isolation Settings (require app restart)
   @override
@@ -219,8 +230,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bounceTrackingProtectionMode: bounceTrackingProtectionMode,
   );
 
-  final bool enablePdfJs;
-
   final bool safeBrowsingMalwareEnabled;
 
   final bool safeBrowsingPhishingEnabled;
@@ -243,7 +252,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohExceptionsList,
     required this.customDohProviders,
     required super.fingerprintingProtectionOverrides,
-    required this.enablePdfJs,
     required this.safeBrowsingMalwareEnabled,
     required this.safeBrowsingPhishingEnabled,
     required super.locales,
@@ -260,15 +268,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.allowListBaseline,
     required super.allowListConvenience,
     required super.blockAdsAnalyticsSocialTrackers,
-    required super.webFontsEnabled,
-    required super.automaticFontSizeAdjustment,
-    required super.fontSizeFactor,
-    required super.fontInflationEnabled,
     required super.displayDensityOverride,
     required super.screenWidthOverride,
     required super.screenHeightOverride,
-    required super.inputAutoZoomEnabled,
-    required super.forceUserScalableContent,
     required super.fissionEnabled,
     required super.isolatedProcessEnabled,
     required super.appZygoteProcessEnabled,
@@ -297,7 +299,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     List<String>? dohExceptionsList,
     List<CustomDohProvider>? customDohProviders,
     String? fingerprintingProtectionOverrides,
-    bool? enablePdfJs,
     bool? safeBrowsingMalwareEnabled,
     bool? safeBrowsingPhishingEnabled,
     List<String>? locales,
@@ -314,15 +315,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? allowListBaseline,
     bool? allowListConvenience,
     bool? blockAdsAnalyticsSocialTrackers,
-    bool? webFontsEnabled,
-    bool? automaticFontSizeAdjustment,
-    double? fontSizeFactor,
-    bool? fontInflationEnabled,
     super.displayDensityOverride,
     super.screenWidthOverride,
     super.screenHeightOverride,
-    bool? inputAutoZoomEnabled,
-    bool? forceUserScalableContent,
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
@@ -346,7 +341,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          customDohProviders ?? [],
          dohProviderUrl ?? BuiltInDohProviders.quad9.url,
        ),
-       enablePdfJs = enablePdfJs ?? true,
        safeBrowsingMalwareEnabled = safeBrowsingMalwareEnabled ?? true,
        safeBrowsingPhishingEnabled = safeBrowsingPhishingEnabled ?? true,
        super(
@@ -381,12 +375,12 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          allowListConvenience: allowListConvenience ?? false,
          blockAdsAnalyticsSocialTrackers:
              blockAdsAnalyticsSocialTrackers ?? true,
-         webFontsEnabled: webFontsEnabled ?? true,
-         automaticFontSizeAdjustment: automaticFontSizeAdjustment ?? true,
-         fontSizeFactor: fontSizeFactor ?? 1.0,
-         fontInflationEnabled: fontInflationEnabled ?? false,
-         inputAutoZoomEnabled: inputAutoZoomEnabled ?? true,
-         forceUserScalableContent: forceUserScalableContent ?? false,
+         webFontsEnabled: true,
+         automaticFontSizeAdjustment: true,
+         fontSizeFactor: 1.0,
+         fontInflationEnabled: false,
+         inputAutoZoomEnabled: true,
+         forceUserScalableContent: false,
          fissionEnabled: fissionEnabled ?? true,
          isolatedProcessEnabled: isolatedProcessEnabled ?? false,
          appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
@@ -442,7 +436,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohExceptionsList,
     customDohProviders,
     fingerprintingProtectionOverrides,
-    enablePdfJs,
     safeBrowsingMalwareEnabled,
     safeBrowsingPhishingEnabled,
     locales,
@@ -459,15 +452,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     allowListBaseline,
     allowListConvenience,
     blockAdsAnalyticsSocialTrackers,
-    webFontsEnabled,
-    automaticFontSizeAdjustment,
-    fontSizeFactor,
-    fontInflationEnabled,
     displayDensityOverride,
     screenWidthOverride,
     screenHeightOverride,
-    inputAutoZoomEnabled,
-    forceUserScalableContent,
     fissionEnabled,
     isolatedProcessEnabled,
     appZygoteProcessEnabled,

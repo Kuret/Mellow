@@ -58,7 +58,6 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'dohProviderUrl': DriftSqlType.string,
   'dohDefaultProviderUrl': DriftSqlType.string,
   'fingerprintingProtectionOverrides': DriftSqlType.string,
-  'enablePdfJs': DriftSqlType.bool,
   'safeBrowsingMalwareEnabled': DriftSqlType.bool,
   'safeBrowsingPhishingEnabled': DriftSqlType.bool,
   'useContentBlockingDatabase': DriftSqlType.bool,
@@ -76,15 +75,9 @@ const engineSettingColumnTypes = <String, DriftSqlType>{
   'allowListConvenience': DriftSqlType.bool,
   'blockAdsAnalyticsSocialTrackers': DriftSqlType.bool,
   // Web Content Settings
-  'webFontsEnabled': DriftSqlType.bool,
-  'automaticFontSizeAdjustment': DriftSqlType.bool,
-  'fontSizeFactor': DriftSqlType.double,
-  'fontInflationEnabled': DriftSqlType.bool,
   'displayDensityOverride': DriftSqlType.double,
   'screenWidthOverride': DriftSqlType.int,
   'screenHeightOverride': DriftSqlType.int,
-  'inputAutoZoomEnabled': DriftSqlType.bool,
-  'forceUserScalableContent': DriftSqlType.bool,
   // Process Isolation Settings
   'fissionEnabled': DriftSqlType.bool,
   'isolatedProcessEnabled': DriftSqlType.bool,

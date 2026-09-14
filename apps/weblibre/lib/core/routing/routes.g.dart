@@ -1079,12 +1079,6 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $ToolbarLayoutSettingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'web_content',
-      name: 'WebContentSettingsRoute',
-      hasOverriddenOnExit: false,
-      factory: $WebContentSettingsRoute._fromState,
-    ),
-    GoRouteData.$route(
       path: 'search',
       name: 'SearchSettingsRoute',
       hasOverriddenOnExit: false,
@@ -1331,27 +1325,6 @@ mixin $ToolbarLayoutSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/toolbar_layout');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $WebContentSettingsRoute on GoRouteData {
-  static WebContentSettingsRoute _fromState(GoRouterState state) =>
-      WebContentSettingsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/settings/web_content');
 
   @override
   void go(BuildContext context) => context.go(location);

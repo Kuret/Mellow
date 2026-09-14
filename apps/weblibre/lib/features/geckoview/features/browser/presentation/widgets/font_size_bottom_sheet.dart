@@ -21,10 +21,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 
 Future<void> showFontSizeBottomSheet(BuildContext context) {
   return showModalBottomSheet(
@@ -41,18 +37,12 @@ class FontSizeBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(engineSettingsWithDefaultsProvider);
-    final factor = settings.fontSizeFactor;
-    final isAutomatic = settings.automaticFontSizeAdjustment;
-    final canDecrease = !isAutomatic && factor > fontSizeMin;
-    final canIncrease = !isAutomatic && factor < fontSizeMax;
-    final isDefault = factor == fontSizeDefault;
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
@@ -67,96 +57,15 @@ class FontSizeBottomSheet extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            if (isAutomatic)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Card(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Automatic font size is enabled. '
-                            'Disable in Settings to adjust manually.',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton.filled(
-                  onPressed: canDecrease
-                      ? () => _adjustFontSize(ref, increase: false)
-                      : null,
-                  icon: const Icon(MdiIcons.formatFontSizeDecrease),
-                ),
-                const SizedBox(width: 24),
-                SizedBox(
-                  width: 72,
-                  child: Text(
-                    '${(factor * 100).round()}%',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                const SizedBox(width: 24),
-                IconButton.filled(
-                  onPressed: canIncrease
-                      ? () => _adjustFontSize(ref, increase: true)
-                      : null,
-                  icon: const Icon(MdiIcons.formatFontSizeIncrease),
-                ),
-              ],
+            const SizedBox(height: 16),
+            Text(
+              "Page text follows your system font size, so there is nothing "
+              "to adjust here. Change it in your device's display settings.",
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
-            if (!isDefault && !isAutomatic) ...[
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => _resetFontSize(ref),
-                child: const Text('Reset to 100%'),
-              ),
-            ],
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _adjustFontSize(WidgetRef ref, {required bool increase}) async {
-    final current = ref.read(engineSettingsWithDefaultsProvider).fontSizeFactor;
-    final newValue = increase
-        ? (current + fontSizeStep).clamp(fontSizeMin, fontSizeMax)
-        : (current - fontSizeStep).clamp(fontSizeMin, fontSizeMax);
-    final rounded = (newValue * 10).round() / 10;
-
-    if (rounded == current) return;
-
-    await ref
-        .read(saveEngineSettingsControllerProvider.notifier)
-        .save(
-          (currentSettings) => currentSettings.copyWith.fontSizeFactor(rounded),
-        );
-  }
-
-  Future<void> _resetFontSize(WidgetRef ref) async {
-    await ref
-        .read(saveEngineSettingsControllerProvider.notifier)
-        .save(
-          (currentSettings) =>
-              currentSettings.copyWith.fontSizeFactor(fontSizeDefault),
-        );
   }
 }

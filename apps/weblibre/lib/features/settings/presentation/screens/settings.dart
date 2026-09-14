@@ -31,7 +31,6 @@ import 'package:weblibre/features/settings/presentation/screens/general_settings
 import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/web_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 
@@ -144,14 +143,6 @@ _CategoryGroups _buildCategories() {
         ...menuLayoutSettingsSections,
       ],
       onTap: (context) => ToolbarLayoutSettingsRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
-      title: 'Web Content',
-      subtitle: 'Page display, PDF, reader mode, AI',
-      icon: MdiIcons.fileDocumentOutline,
-      keywords: const ['reader mode', 'pdf', 'fonts'],
-      sections: webContentSettingsSections,
-      onTap: (context) => WebContentSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Search',
