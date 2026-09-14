@@ -26,8 +26,10 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_space_selector.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/share_intent/domain/entities/share_intent_space_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -308,8 +310,85 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 8),
+          const _ShareIntentSpaceSection(),
         ],
       ),
+    );
+  }
+}
+
+/// Which space a link shared in from another app opens in — a separate
+/// question from [_ExternalLinkHandlingSection] above, which decides regular
+/// vs. private vs. asking. This decides *where among spaces*, and only
+/// matters once a link is actually going to land in a tab (so it applies to
+/// every branch above, `ask` included: `OpenSharedContent` asks it there
+/// too).
+class _ShareIntentSpaceSection extends ConsumerWidget {
+  const _ShareIntentSpaceSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(zenSettingsWithDefaultsProvider);
+    final mode = settings.shareIntentSpaceMode;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ListTile(
+          title: Text('Shared Link Space'),
+          subtitle: Text('Choose which space a shared link opens in'),
+          leading: Icon(MdiIcons.viewDashboardOutline),
+          contentPadding: EdgeInsets.zero,
+        ),
+        RadioGroup(
+          groupValue: mode,
+          onChanged: (value) async {
+            if (value != null) {
+              await ref
+                  .read(saveZenSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.shareIntentSpaceMode(value),
+                  );
+            }
+          },
+          child: const Column(
+            children: [
+              RadioListTile.adaptive(
+                value: ShareIntentSpaceMode.ask,
+                title: Text('Ask'),
+                subtitle: Text('Choose the space each time a link arrives'),
+                secondary: Icon(MdiIcons.messageQuestion),
+              ),
+              RadioListTile.adaptive(
+                value: ShareIntentSpaceMode.fixed,
+                title: Text('Always the same space'),
+                subtitle: Text('Shared links always open in one chosen space'),
+                secondary: Icon(MdiIcons.pin),
+              ),
+            ],
+          ),
+        ),
+        if (mode == ShareIntentSpaceMode.fixed)
+          ListTile(
+            contentPadding: const EdgeInsets.only(left: 16),
+            title: const Text('Space'),
+            trailing: CompactSpaceSelector(
+              selectedSpaceUuid: settings.shareIntentSpaceUuid,
+              emphasizeSelection: false,
+              onSelectionChanged: (uuid) async {
+                await ref
+                    .read(saveZenSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .shareIntentSpaceUuid(uuid),
+                    );
+              },
+            ),
+          ),
+      ],
     );
   }
 }
