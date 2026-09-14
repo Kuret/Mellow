@@ -76,7 +76,7 @@ final class ToolbarConfigRepositoryProvider
 }
 
 String _$toolbarConfigRepositoryHash() =>
-    r'47129b30f01db6ea73d553a8fd1b4f6e8a7b4a3c';
+    r'de80416adcfe5c99d3d6d217a9436fa9cc7b4eaf';
 
 final class ToolbarConfigRepositoryFamily extends $Family
     with
