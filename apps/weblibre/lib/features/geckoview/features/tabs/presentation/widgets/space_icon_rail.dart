@@ -18,17 +18,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 /// The space switcher at the foot of the wide vertical rail (PLAN §9 W1):
-/// one round icon per space, the selected one highlighted, and a trailing
-/// "+" that opens the editor for a new space. Tap selects, long-press opens
-/// the space editor. Scrolls horizontally when the spaces outgrow the rail.
+/// one flat glyph per space, the selected one in the accent color, and a
+/// trailing "+" that opens a new tab in the current space (matching Zen).
+/// Tap a space to select it, long-press a space to edit it. Long-pressing
+/// "+" opens a menu with the rest of the toolbar's actions (see
+/// [_showAddMenu]). Scrolls horizontally when the spaces outgrow the rail.
 class SpaceIconRail extends ConsumerWidget {
   const SpaceIconRail({super.key});
 
@@ -53,8 +60,161 @@ class SpaceIconRail extends ConsumerWidget {
         ref.read(selectedSpaceProvider.notifier).space = id;
       },
       onEdit: (id) => SpaceEditRoute(uuid: id).push(context),
-      onCreate: () => const SpaceCreateRoute().push(context),
+      onNewTab: () => _openNewTab(context, ref),
+      onAddLongPress: (buttonContext) => _showAddMenu(buttonContext, ref),
     );
+  }
+}
+
+/// Opens a new tab in the current space: the same thing the main toolbar's
+/// "New Tab" button ([ToolbarButtonId.addTab]) does on a plain tap.
+Future<void> _openNewTab(BuildContext context, WidgetRef ref) async {
+  await SearchRoute(
+    tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
+  ).push(context);
+
+  if (context.mounted) {
+    const BrowserRoute().go(context);
+  }
+}
+
+/// The actions of the rail's "+" long-press menu, in the order they are
+/// shown: Refresh, Back, Forward, Tabs, Settings, then (after a divider)
+/// New Space and New Tab.
+enum _SpaceRailMenuAction {
+  reload,
+  back,
+  forward,
+  tabs,
+  settings,
+  newSpace,
+  newTab,
+}
+
+/// The "+" long-press menu (PLAN §9 W1 change 5): everything the wide
+/// rail's toolbar row would otherwise carry, reached without it. Each
+/// action reuses the same call the corresponding toolbar button makes
+/// (see `toolbar_button_registry.dart`), rather than a second
+/// implementation of "go back"/"reload"/etc.
+Future<void> _showAddMenu(BuildContext context, WidgetRef ref) async {
+  final button = context.findRenderObject()! as RenderBox;
+  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+  final position = RelativeRect.fromRect(
+    Rect.fromPoints(
+      button.localToGlobal(Offset.zero, ancestor: overlay),
+      button.localToGlobal(
+        button.size.bottomRight(Offset.zero),
+        ancestor: overlay,
+      ),
+    ),
+    Offset.zero & overlay.size,
+  );
+
+  final selectedTabId = ref.read(selectedTabProvider);
+  final historyState = ref.read(tabHistoryStateProvider(selectedTabId));
+
+  const iconTextSpacing = SizedBox(width: 12);
+
+  final action = await showMenu<_SpaceRailMenuAction>(
+    context: context,
+    position: position,
+    items: [
+      const PopupMenuItem(
+        value: _SpaceRailMenuAction.reload,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(Icons.refresh), iconTextSpacing, Text('Refresh')],
+        ),
+      ),
+      PopupMenuItem(
+        value: _SpaceRailMenuAction.back,
+        enabled: historyState.canGoBack,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(Icons.arrow_back), iconTextSpacing, Text('Back')],
+        ),
+      ),
+      PopupMenuItem(
+        value: _SpaceRailMenuAction.forward,
+        enabled: historyState.canGoForward,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.arrow_forward),
+            iconTextSpacing,
+            Text('Forward'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _SpaceRailMenuAction.tabs,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(MdiIcons.tab), iconTextSpacing, Text('Tabs')],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _SpaceRailMenuAction.settings,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(Icons.settings), iconTextSpacing, Text('Settings')],
+        ),
+      ),
+      const PopupMenuDivider(),
+      const PopupMenuItem(
+        value: _SpaceRailMenuAction.newSpace,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(Icons.add), iconTextSpacing, Text('New Space')],
+        ),
+      ),
+      const PopupMenuItem(
+        value: _SpaceRailMenuAction.newTab,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(MdiIcons.tabPlus), iconTextSpacing, Text('New Tab')],
+        ),
+      ),
+    ],
+  );
+
+  if (action == null || !context.mounted) return;
+
+  switch (action) {
+    case _SpaceRailMenuAction.reload:
+      if (selectedTabId != null) {
+        await ref
+            .read(tabSessionProvider(tabId: selectedTabId).notifier)
+            .reload();
+      }
+    case _SpaceRailMenuAction.back:
+      if (selectedTabId != null && historyState.canGoBack) {
+        await ref
+            .read(tabSessionProvider(tabId: selectedTabId).notifier)
+            .goBack();
+      }
+    case _SpaceRailMenuAction.forward:
+      if (selectedTabId != null && historyState.canGoForward) {
+        await ref
+            .read(tabSessionProvider(tabId: selectedTabId).notifier)
+            .goForward();
+      }
+    case _SpaceRailMenuAction.tabs:
+      if (context.mounted) {
+        await const TabViewRoute().push(context);
+      }
+    case _SpaceRailMenuAction.settings:
+      if (context.mounted) {
+        await SettingsRoute().push(context);
+      }
+    case _SpaceRailMenuAction.newSpace:
+      if (context.mounted) {
+        await const SpaceCreateRoute().push(context);
+      }
+    case _SpaceRailMenuAction.newTab:
+      if (context.mounted) {
+        await _openNewTab(context, ref);
+      }
   }
 }
 
@@ -79,21 +239,37 @@ class SpaceIconRailView extends StatelessWidget {
   final List<SpaceIconRailEntry> entries;
   final ValueChanged<String>? onSelected;
   final ValueChanged<String>? onEdit;
-  final VoidCallback? onCreate;
+
+  /// Fired on a plain tap of the trailing "+": opens a new tab.
+  final VoidCallback? onNewTab;
+
+  /// Fired on a long-press of the trailing "+", with the "+" button's own
+  /// [BuildContext] (to anchor a popup menu near it). The rail (a
+  /// [ConsumerWidget]) owns building and acting on that menu, so this view
+  /// stays provider-free.
+  final void Function(BuildContext buttonContext)? onAddLongPress;
 
   const SpaceIconRailView({
     super.key,
     required this.entries,
     this.onSelected,
     this.onEdit,
-    this.onCreate,
+    this.onNewTab,
+    this.onAddLongPress,
   });
 
-  /// Diameter of one space circle.
-  static const circleSize = 40.0;
+  /// Side of one space glyph's square tap target.
+  static const targetSize = 40.0;
 
-  /// Height of the whole row, circles plus their vertical padding.
-  static const height = 56.0;
+  /// Size the glyph itself is drawn at, with no chip behind it (PLAN §9 W1
+  /// change 3: Zen's sidebar icons are bare, only the active one colored).
+  static const glyphSize = 20.0;
+
+  /// Height of the whole row: the tap target plus its vertical padding.
+  static const height = 44.0;
+
+  /// Horizontal gap between tap targets.
+  static const spacing = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -103,29 +279,36 @@ class SpaceIconRailView extends StatelessWidget {
       height: height,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
         children: [
           for (final entry in entries)
             Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: _SpaceCircle(
+              padding: const EdgeInsets.only(right: spacing),
+              child: _SpaceGlyphButton(
                 entry: entry,
                 onTap: onSelected == null ? null : () => onSelected!(entry.id),
                 onLongPress: onEdit == null ? null : () => onEdit!(entry.id),
               ),
             ),
           Tooltip(
-            message: 'New space',
-            child: Material(
-              color: Colors.transparent,
-              shape: CircleBorder(side: BorderSide(color: scheme.outline)),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: onCreate,
-                child: SizedBox(
-                  width: circleSize,
-                  height: circleSize,
-                  child: Icon(Icons.add, size: 20, color: scheme.onSurface),
+            message: 'New tab',
+            child: Builder(
+              builder: (context) => GestureDetector(
+                onLongPress: onAddLongPress == null
+                    ? null
+                    : () => onAddLongPress!(context),
+                child: InkResponse(
+                  onTap: onNewTab,
+                  radius: targetSize / 2,
+                  child: SizedBox(
+                    width: targetSize,
+                    height: targetSize,
+                    child: Icon(
+                      Icons.add,
+                      size: glyphSize,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -136,12 +319,16 @@ class SpaceIconRailView extends StatelessWidget {
   }
 }
 
-class _SpaceCircle extends StatelessWidget {
+/// One space's flat glyph in the [SpaceIconRailView]: no circular chip, no
+/// selected border — only the active space's glyph is colored (PLAN §9 W1
+/// change 3, matching Zen's sidebar). The permanent chip is gone; the
+/// [InkResponse] still gives a circular ripple on tap.
+class _SpaceGlyphButton extends StatelessWidget {
   final SpaceIconRailEntry entry;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  const _SpaceCircle({
+  const _SpaceGlyphButton({
     required this.entry,
     required this.onTap,
     required this.onLongPress,
@@ -150,11 +337,8 @@ class _SpaceCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final fill = entry.selected
-        ? scheme.primaryContainer
-        : scheme.surfaceContainerHigh;
     final foreground = entry.selected
-        ? scheme.onPrimaryContainer
+        ? scheme.primary
         : scheme.onSurfaceVariant;
     final displayName = entry.name.isEmpty ? 'Space' : entry.name;
     final icon = entry.icon?.trim();
@@ -162,12 +346,16 @@ class _SpaceCircle extends StatelessWidget {
     // Zen's icon is a free string (usually an emoji). Fall back to the first
     // letter of the space's name so unlabelled spaces still tell apart.
     final Widget glyph = icon != null && icon.isNotEmpty
-        ? SpaceIcon(icon: icon, size: 20, color: foreground)
+        ? SpaceIcon(
+            icon: icon,
+            size: SpaceIconRailView.glyphSize,
+            color: foreground,
+          )
         : Text(
             entry.name.isEmpty
                 ? '?'
                 : entry.name.characters.first.toUpperCase(),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: foreground,
               fontWeight: FontWeight.w600,
             ),
@@ -175,22 +363,14 @@ class _SpaceCircle extends StatelessWidget {
 
     return Tooltip(
       message: displayName,
-      child: Material(
-        color: fill,
-        shape: CircleBorder(
-          side: entry.selected
-              ? BorderSide(color: scheme.primary, width: 2)
-              : BorderSide.none,
-        ),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: SizedBox(
-            width: SpaceIconRailView.circleSize,
-            height: SpaceIconRailView.circleSize,
-            child: Center(child: glyph),
-          ),
+      child: InkResponse(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        radius: SpaceIconRailView.targetSize / 2,
+        child: SizedBox(
+          width: SpaceIconRailView.targetSize,
+          height: SpaceIconRailView.targetSize,
+          child: Center(child: glyph),
         ),
       ),
     );
