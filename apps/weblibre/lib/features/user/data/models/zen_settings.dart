@@ -197,6 +197,18 @@ class ZenSettings with FastEquatable {
   /// `zenSettingJsonKeys` rather than in `zenSettingColumnTypes`.
   final List<CustomSearchEngine> customSearchProviders;
 
+  /// The [profileDefaultsTargetRevision] this profile has been seeded up to.
+  ///
+  /// Replaces what the onboarding wizard's `onboarding` table used to answer.
+  /// The wizard is gone, but the question it asked survives it: some defaults
+  /// cannot be a constant on a settings model because they need an async
+  /// asset (uBlock's `assets.json`) or a live Gecko pref branch, so they have
+  /// to be *written* once per profile instead. This number is how we know we
+  /// already did — and, unlike a bare bool, bumping the target lets a later
+  /// release seed something new without re-imposing the earlier choices on a
+  /// profile that has since overridden them.
+  final int profileDefaultsRevision;
+
   ZenSettings({
     required this.spacesSyncEnabled,
     required this.spacesSyncWritesEnabled,
@@ -211,6 +223,7 @@ class ZenSettings with FastEquatable {
     required this.maxLiveTabs,
     required this.separateEssentials,
     required this.customSearchProviders,
+    required this.profileDefaultsRevision,
   });
 
   ZenSettings.withDefaults({
@@ -227,6 +240,7 @@ class ZenSettings with FastEquatable {
     int? maxLiveTabs,
     bool? separateEssentials,
     List<CustomSearchEngine>? customSearchProviders,
+    int? profileDefaultsRevision,
   }) : spacesSyncEnabled = spacesSyncEnabled ?? true,
        spacesSyncWritesEnabled = spacesSyncWritesEnabled ?? true,
        spacesSyncBaselineDone = spacesSyncBaselineDone ?? false,
@@ -248,7 +262,8 @@ class ZenSettings with FastEquatable {
          maxMaxLiveTabs,
        ),
        separateEssentials = separateEssentials ?? true,
-       customSearchProviders = customSearchProviders ?? const [];
+       customSearchProviders = customSearchProviders ?? const [],
+       profileDefaultsRevision = profileDefaultsRevision ?? 0;
 
   factory ZenSettings.fromJson(Map<String, dynamic> json) =>
       _$ZenSettingsFromJson(json);
@@ -270,5 +285,6 @@ class ZenSettings with FastEquatable {
     maxLiveTabs,
     separateEssentials,
     customSearchProviders,
+    profileDefaultsRevision,
   ];
 }

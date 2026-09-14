@@ -110,6 +110,8 @@ abstract class _$ZenSettingsCWProxy {
     List<CustomSearchEngine> customSearchProviders,
   );
 
+  ZenSettings profileDefaultsRevision(int profileDefaultsRevision);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -131,6 +133,7 @@ abstract class _$ZenSettingsCWProxy {
     int maxLiveTabs,
     bool separateEssentials,
     List<CustomSearchEngine> customSearchProviders,
+    int profileDefaultsRevision,
   });
 }
 
@@ -192,6 +195,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     List<CustomSearchEngine> customSearchProviders,
   ) => call(customSearchProviders: customSearchProviders);
 
+  @override
+  ZenSettings profileDefaultsRevision(int profileDefaultsRevision) =>
+      call(profileDefaultsRevision: profileDefaultsRevision);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ZenSettings(...).copyWith.fieldName(value)`.
   ///
@@ -214,6 +221,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
     Object? customSearchProviders = const $CopyWithPlaceholder(),
+    Object? profileDefaultsRevision = const $CopyWithPlaceholder(),
   }) {
     return ZenSettings(
       spacesSyncEnabled:
@@ -286,6 +294,12 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.customSearchProviders
           // ignore: cast_nullable_to_non_nullable
           : customSearchProviders as List<CustomSearchEngine>,
+      profileDefaultsRevision:
+          profileDefaultsRevision == const $CopyWithPlaceholder() ||
+              profileDefaultsRevision == null
+          ? _value.profileDefaultsRevision
+          // ignore: cast_nullable_to_non_nullable
+          : profileDefaultsRevision as int,
     );
   }
 }
@@ -335,6 +349,7 @@ ZenSettings _$ZenSettingsFromJson(
   customSearchProviders: (json['customSearchProviders'] as List<dynamic>?)
       ?.map((e) => CustomSearchEngine.fromJson(e as Map<String, dynamic>))
       .toList(),
+  profileDefaultsRevision: (json['profileDefaultsRevision'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
@@ -354,6 +369,7 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'customSearchProviders': instance.customSearchProviders
           .map((e) => e.toJson())
           .toList(),
+      'profileDefaultsRevision': instance.profileDefaultsRevision,
     };
 
 const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};

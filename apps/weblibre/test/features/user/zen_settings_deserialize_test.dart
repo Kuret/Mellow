@@ -88,6 +88,7 @@ void main() {
         railWidth: 200,
         maxLiveTabs: 42,
         separateEssentials: false,
+        profileDefaultsRevision: 3,
         customSearchProviders: [
           CustomSearchEngine(
             id: 'custom:1cb2',

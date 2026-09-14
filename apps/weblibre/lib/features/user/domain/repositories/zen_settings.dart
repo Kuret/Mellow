@@ -59,6 +59,7 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'railWidth': DriftSqlType.double,
   'maxLiveTabs': DriftSqlType.int,
   'separateEssentials': DriftSqlType.bool,
+  'profileDefaultsRevision': DriftSqlType.int,
 };
 
 /// Settings stored as a JSON document in a TEXT column. Their value has to be
