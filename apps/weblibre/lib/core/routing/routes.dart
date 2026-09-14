@@ -55,6 +55,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/s
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/space_list.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/appearance_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/contextual_toolbar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/desktop_mode_sites_screen.dart';
@@ -67,7 +68,6 @@ import 'package:weblibre/features/settings/presentation/screens/privacy_security
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings_transfer.dart';
-import 'package:weblibre/features/settings/presentation/screens/toolbar_layout_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/tracking_protection_exceptions.dart';
 import 'package:weblibre/features/settings/presentation/screens/ublock_filter_lists.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening.dart';

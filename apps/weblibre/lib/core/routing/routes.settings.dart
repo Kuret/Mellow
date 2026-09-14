@@ -39,9 +39,9 @@ part of 'routes.dart';
       name: 'PrivacySecuritySettingsRoute',
       path: 'privacy_security',
     ),
-    TypedGoRoute<ToolbarLayoutSettingsRoute>(
-      name: 'ToolbarLayoutSettingsRoute',
-      path: 'toolbar_layout',
+    TypedGoRoute<AppearanceLayoutSettingsRoute>(
+      name: 'AppearanceLayoutSettingsRoute',
+      path: 'appearance_layout',
     ),
     TypedGoRoute<SearchSettingsRoute>(
       name: 'SearchSettingsRoute',
@@ -136,11 +136,11 @@ class PrivacySecuritySettingsRoute extends GoRouteData
   }
 }
 
-class ToolbarLayoutSettingsRoute extends GoRouteData
-    with $ToolbarLayoutSettingsRoute {
+class AppearanceLayoutSettingsRoute extends GoRouteData
+    with $AppearanceLayoutSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ToolbarLayoutSettingsScreen();
+    return const AppearanceLayoutSettingsScreen();
   }
 }
 

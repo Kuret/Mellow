@@ -26,12 +26,9 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 const List<SettingsSectionDefinition> generalSettingsSections = [
@@ -44,25 +41,6 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
         subtitle: 'Set WebLibre as your default browser',
         keywords: ['system browser'],
         child: _DefaultBrowserTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Appearance',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Theme',
-        subtitle: 'Choose system, light, or dark mode',
-        keywords: ['light', 'dark', 'theme mode'],
-        child: _ThemeSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Pure Black (OLED)',
-        subtitle:
-            'Use true-black surfaces in dark mode to save power on OLED '
-            'screens',
-        keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
-        child: _PureBlackTile(),
       ),
     ],
   ),
@@ -217,99 +195,6 @@ class _DefaultBrowserTile extends HookConsumerWidget {
               },
         icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
         label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
-      ),
-    );
-  }
-}
-
-class _PureBlackTile extends HookConsumerWidget {
-  const _PureBlackTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pureBlack = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pureBlack),
-    );
-    final themeMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
-    );
-
-    // OLED surfaces only apply to dark mode; disable the toggle when the app
-    // is locked to light mode so the setting can't appear to have no effect.
-    final enabled = themeMode != ThemeMode.light;
-
-    return SwitchListTile.adaptive(
-      title: const Text('Pure Black (OLED)'),
-      subtitle: const Text(
-        'Use true-black surfaces in dark mode to save power on OLED screens',
-      ),
-      secondary: const Icon(Icons.contrast),
-      value: pureBlack,
-      onChanged: enabled
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.pureBlack(value),
-                  );
-            }
-          : null,
-    );
-  }
-}
-
-class _ThemeSection extends HookConsumerWidget {
-  const _ThemeSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Theme'),
-            leading: Icon(Icons.palette),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton<ThemeMode>(
-              segments: const [
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: Icon(Icons.brightness_auto),
-                  label: Text('System'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode),
-                  label: Text('Light'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode),
-                  label: Text('Dark'),
-                ),
-              ],
-              selected: {themeMode},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.themeMode(value.first),
-                    );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }

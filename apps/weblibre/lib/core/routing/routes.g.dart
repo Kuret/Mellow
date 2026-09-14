@@ -1073,10 +1073,10 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $PrivacySecuritySettingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'toolbar_layout',
-      name: 'ToolbarLayoutSettingsRoute',
+      path: 'appearance_layout',
+      name: 'AppearanceLayoutSettingsRoute',
       hasOverriddenOnExit: false,
-      factory: $ToolbarLayoutSettingsRoute._fromState,
+      factory: $AppearanceLayoutSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'search',
@@ -1277,12 +1277,12 @@ mixin $PrivacySecuritySettingsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $ToolbarLayoutSettingsRoute on GoRouteData {
-  static ToolbarLayoutSettingsRoute _fromState(GoRouterState state) =>
-      ToolbarLayoutSettingsRoute();
+mixin $AppearanceLayoutSettingsRoute on GoRouteData {
+  static AppearanceLayoutSettingsRoute _fromState(GoRouterState state) =>
+      AppearanceLayoutSettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings/toolbar_layout');
+  String get location => GoRouteData.$location('/settings/appearance_layout');
 
   @override
   void go(BuildContext context) => context.go(location);

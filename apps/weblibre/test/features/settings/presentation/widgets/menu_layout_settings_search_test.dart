@@ -18,15 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 
-/// What the Toolbar & Layout screen renders and what the global settings search
-/// indexes: the toolbar's own sections plus the menu's.
-const _indexed = [
-  ...toolbarLayoutSettingsSections,
-  ...menuLayoutSettingsSections,
-];
+/// What the Appearance & Layout screen renders and what the global settings
+/// search indexes.
+const _indexed = appearanceLayoutSettingsSections;
 
 List<String> _entryTitles(List<SettingsSectionDefinition> sections) => [
   for (final section in sections)
@@ -72,7 +69,7 @@ void main() {
     // only resolves because "customize" and "menu" both sit in this entry's own
     // metadata — a category keyword alone would not have found it.
     test('the row carries both words of its own name', () {
-      final entry = menuLayoutSettingsSections
+      final entry = appearanceLayoutSettingsSections
           .expand((section) => section.entries)
           .singleWhere((entry) => entry.title == 'Customize Menu');
 

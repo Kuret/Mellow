@@ -30,8 +30,8 @@ import 'package:weblibre/features/settings/presentation/screens/extensions_setti
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 
 class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
@@ -96,9 +96,9 @@ _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
       title: 'General',
-      subtitle: 'Appearance, profile',
+      subtitle: 'Profile and browser defaults',
       icon: Icons.tune,
-      keywords: const ['theme', 'default browser'],
+      keywords: const ['default browser', 'profile'],
       sections: generalSettingsSections,
       onTap: (context) => GeneralSettingsRoute().push(context),
     ),
@@ -118,15 +118,18 @@ _CategoryGroups _buildCategories() {
       onTap: (context) => const SpaceListRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Toolbar & Layout',
-      subtitle: 'Tab bar, toolbar, quick switcher, tab view',
-      icon: MdiIcons.viewDashboardOutline,
-      keywords: const ['contextual toolbar', 'quick tab switcher'],
-      sections: [
-        ...toolbarLayoutSettingsSections,
-        ...menuLayoutSettingsSections,
+      title: 'Appearance & Layout',
+      subtitle: 'Theme, side rail, compact bar, customization',
+      icon: MdiIcons.paletteOutline,
+      keywords: const [
+        'appearance',
+        'theme',
+        'contextual toolbar',
+        'quick tab switcher',
+        'menu',
       ],
-      onTap: (context) => ToolbarLayoutSettingsRoute().push(context),
+      sections: appearanceLayoutSettingsSections,
+      onTap: (context) => AppearanceLayoutSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Search',

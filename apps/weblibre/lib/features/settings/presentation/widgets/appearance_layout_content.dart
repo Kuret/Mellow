@@ -29,7 +29,27 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
-const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
+const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Theme',
+    keywords: ['appearance', 'colors'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Theme',
+        subtitle: 'Choose system, light, or dark mode',
+        keywords: ['light', 'dark', 'theme mode'],
+        child: _ThemeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Pure Black (OLED)',
+        subtitle:
+            'Use true-black surfaces in dark mode to save power on OLED '
+            'screens',
+        keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
+        child: _PureBlackTile(),
+      ),
+    ],
+  ),
   SettingsSectionDefinition(
     title: 'Side Rail',
     keywords: ['wide screens', 'tablet', 'landscape', 'sidebar'],
@@ -72,81 +92,69 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         keywords: ['home', 'search', 'address', 'url', 'top', 'tab bar'],
         child: _HomeSearchBarPlacementTile(),
       ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Contextual Toolbar',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Customize Toolbar Buttons',
-        subtitle: 'Choose which actions appear in the contextual toolbar',
-        keywords: ['buttons'],
-        child: _CustomizeToolbarButtonsTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Tab Chips',
-    keywords: ['quick tab switcher', 'switcher'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Customize Switcher Buttons',
-        subtitle: 'Choose which action buttons appear at the end of the bar',
-        keywords: ['buttons', 'new tab', 'actions', 'trailing'],
-        child: _CustomizeQuickSwitcherButtonsTile(),
-      ),
       SettingsEntryDefinition(
         title: 'Title Width on Compact Bar Chips',
         subtitle:
             'Maximum width of a tab title on the compact bar, so a narrower '
             'screen fits more chips; the side rail always uses its full width',
-        keywords: ['width', 'title', 'chip', 'length', 'compact bar'],
+        keywords: [
+          'width',
+          'title',
+          'chip',
+          'length',
+          'compact bar',
+          'tab chips',
+          'quick tab switcher',
+          'switcher',
+        ],
         child: _QuickTabSwitcherTitleWidthTile(),
       ),
     ],
   ),
-];
-
-/// The browser menu's own arrangement entry.
-///
-/// Kept out of [toolbarLayoutSettingsSections] because arranging the menu is
-/// a separate concern from the toolbar layout. Offered to the
-/// settings screen as [ToolbarLayoutContent.extraSections] so it takes part in
-/// the same filtering — a row rendered beside the filtered list would survive a
-/// query that empties the list, leaving a match sitting above "No settings
-/// match".
-const List<SettingsSectionDefinition> menuLayoutSettingsSections = [
   SettingsSectionDefinition(
-    title: 'Menu',
-    keywords: ['three dot', 'overflow'],
+    title: 'Customize',
+    keywords: ['buttons', 'arrange', 'layout'],
     entries: [
+      SettingsEntryDefinition(
+        title: 'Customize Toolbar Buttons',
+        subtitle: 'Choose which actions appear in the contextual toolbar',
+        keywords: ['buttons', 'contextual toolbar'],
+        child: _CustomizeToolbarButtonsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Customize Switcher Buttons',
+        subtitle: 'Choose which action buttons appear at the end of the bar',
+        keywords: [
+          'buttons',
+          'new tab',
+          'actions',
+          'trailing',
+          'tab chips',
+          'quick tab switcher',
+          'switcher',
+        ],
+        child: _CustomizeQuickSwitcherButtonsTile(),
+      ),
       SettingsEntryDefinition(
         title: 'Customize Menu',
         subtitle:
             'Choose and order the sections and rows of the three-dot menu',
-        keywords: ['sections', 'rows', 'reorder'],
+        keywords: ['sections', 'rows', 'reorder', 'menu', 'three dot', 'overflow'],
         child: _CustomizeMenuTile(),
       ),
     ],
   ),
 ];
 
-class ToolbarLayoutContent extends StatelessWidget {
+class AppearanceLayoutContent extends StatelessWidget {
   final String query;
 
-  /// Sections shown after the toolbar's own, filtered by the same [query].
-  final List<SettingsSectionDefinition> extraSections;
-
-  const ToolbarLayoutContent({
-    super.key,
-    this.query = '',
-    this.extraSections = const [],
-  });
+  const AppearanceLayoutContent({super.key, this.query = ''});
 
   @override
   Widget build(BuildContext context) {
     final filteredSections = filterSettingsSections(
-      sections: [...toolbarLayoutSettingsSections, ...extraSections],
+      sections: appearanceLayoutSettingsSections,
       query: query,
     );
 
@@ -528,6 +536,99 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
                   currentSettings.copyWith.autoHideTabBar(value),
             );
       },
+    );
+  }
+}
+
+class _PureBlackTile extends HookConsumerWidget {
+  const _PureBlackTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pureBlack = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.pureBlack),
+    );
+    final themeMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
+    );
+
+    // OLED surfaces only apply to dark mode; disable the toggle when the app
+    // is locked to light mode so the setting can't appear to have no effect.
+    final enabled = themeMode != ThemeMode.light;
+
+    return SwitchListTile.adaptive(
+      title: const Text('Pure Black (OLED)'),
+      subtitle: const Text(
+        'Use true-black surfaces in dark mode to save power on OLED screens',
+      ),
+      secondary: const Icon(Icons.contrast),
+      value: pureBlack,
+      onChanged: enabled
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.pureBlack(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _ThemeSection extends HookConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Theme'),
+            leading: Icon(Icons.palette),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Center(
+            child: SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: Icon(Icons.brightness_auto),
+                  label: Text('System'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: Icon(Icons.light_mode),
+                  label: Text('Light'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: Icon(Icons.dark_mode),
+                  label: Text('Dark'),
+                ),
+              ],
+              selected: {themeMode},
+              onSelectionChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.themeMode(value.first),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

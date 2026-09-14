@@ -19,14 +19,14 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
-class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
-  const ToolbarLayoutSettingsScreen({super.key});
+class AppearanceLayoutSettingsScreen extends HookConsumerWidget {
+  const AppearanceLayoutSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,9 +35,9 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
     final search = useSettingsSearch();
 
     return SettingsCustomScrollScaffold(
-      title: 'Toolbar & Layout',
+      title: 'Appearance & Layout',
       searchController: search.controller,
-      searchHintText: 'Search toolbar and layout settings',
+      searchHintText: 'Search appearance and layout settings',
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverPersistentHeader(
@@ -51,10 +51,7 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
           sliver: SliverToBoxAdapter(
-            child: ToolbarLayoutContent(
-              query: search.rawQuery,
-              extraSections: menuLayoutSettingsSections,
-            ),
+            child: AppearanceLayoutContent(query: search.rawQuery),
           ),
         ),
       ],
