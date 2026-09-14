@@ -115,7 +115,13 @@ Map<String, Object> selectDefaultHardeningPrefs(
   return selected;
 }
 
-@Riverpod()
+// keepAlive, and not for caching: `applyIfOwed` is a long async sequence and
+// its caller stops listening at the first await. Auto-disposed, the provider
+// is gone by the time the seed reads its next dependency, and every `ref.read`
+// after that throws "Ref used after dispose" — which is exactly how this
+// shipped once: the uBlock seed died at its second read, and the revision bump
+// at the end threw uncaught, so nothing was applied and nothing was recorded.
+@Riverpod(keepAlive: true)
 class ProfileDefaultsService extends _$ProfileDefaultsService {
   final _prefManager = GeckoPrefService();
 

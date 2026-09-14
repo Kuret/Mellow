@@ -20,7 +20,7 @@ final class ProfileDefaultsServiceProvider
         argument: null,
         retry: null,
         name: r'profileDefaultsServiceProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -42,7 +42,7 @@ final class ProfileDefaultsServiceProvider
 }
 
 String _$profileDefaultsServiceHash() =>
-    r'a50c68e382dddf2fb752484483f71cec52ddb0a2';
+    r'03db69bfbfe0f9bf7f9ae1971154ca1fe3f8687d';
 
 abstract class _$ProfileDefaultsService extends $Notifier<void> {
   void build();
