@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Follow-up for an action that just created a tab with `selectTab: false`.
@@ -42,22 +39,10 @@ void handleBackgroundTabOpened(
   String? tabName,
 }) {
   final repository = ref.read(tabRepositoryProvider.notifier);
-  final action = ref
-      .read(generalSettingsWithDefaultsProvider)
-      .backgroundTabOpenAction;
 
-  switch (action) {
-    case BackgroundTabOpenAction.switchImmediately:
-      // Drop any pending switch prompt first — mirrors what
-      // `showTabSwitchMessage` does — so a snackbar left over from an earlier
-      // background open can no longer switch back to that older tab.
-      ScaffoldMessenger.of(context).clearSnackBars();
-      unawaited(repository.selectTab(tabId));
-    case BackgroundTabOpenAction.prompt:
-      showTabSwitchMessage(
-        context,
-        tabName: tabName,
-        onSwitch: () => repository.selectTab(tabId),
-      );
-  }
+  showTabSwitchMessage(
+    context,
+    tabName: tabName,
+    onSwitch: () => repository.selectTab(tabId),
+  );
 }

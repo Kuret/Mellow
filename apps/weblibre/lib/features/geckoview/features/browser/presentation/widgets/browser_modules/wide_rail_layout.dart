@@ -23,7 +23,6 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// The wide vertical rail (PLAN §9 W1), laid out like Arc/Zen: the address
 /// field in one upright row at the top, the tab shelves filling the height
@@ -179,11 +178,7 @@ class WideRailCollapsedUrlButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(selectedTabStateProvider);
     final selectedTabType = ref.watch(selectedTabTypeProvider);
-    final defaultTabType = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.effectiveDefaultCreateTabType,
-      ),
-    );
+    const defaultTabType = TabType.regular;
     return IconButton(
       tooltip: 'Search or enter URL',
       icon: const Icon(Icons.search),

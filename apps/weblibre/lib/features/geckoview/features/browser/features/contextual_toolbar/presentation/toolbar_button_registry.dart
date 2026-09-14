@@ -52,7 +52,6 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/exit_app.dart';
@@ -115,9 +114,7 @@ Future<void> _pushSearchWithText(
     searchText: text.isEmpty ? SearchRoute.emptySearchText : text,
     tabType:
         tabState?.tabMode.toTabType() ??
-        ref
-            .read(generalSettingsWithDefaultsProvider)
-            .effectiveDefaultCreateTabType,
+        TabType.regular,
   ).push(context);
 }
 

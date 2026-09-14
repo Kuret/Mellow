@@ -115,12 +115,10 @@ class AddTabButton extends HookConsumerWidget {
       controller: tabMenuController,
       child: AddTabButtonView(
         onPressed: () async {
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
-
           await SearchRoute(
             tabType:
                 ref.read(selectedTabTypeProvider) ??
-                settings.effectiveDefaultCreateTabType,
+                TabType.regular,
           ).push(context);
 
           if (context.mounted) {

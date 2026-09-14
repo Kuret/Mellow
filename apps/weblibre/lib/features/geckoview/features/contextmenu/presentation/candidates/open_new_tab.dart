@@ -29,7 +29,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 class OpenInNewTab extends HookConsumerWidget {
   final HitResult hitResult;
@@ -62,12 +61,11 @@ class OpenInNewTab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final currentTab = ref.watch(selectedTabStateProvider);
 
     final currentTabMode =
         currentTab?.tabMode ??
-        TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
+        TabMode.fromTabType(TabType.regular);
 
     // Alternative tab types the user can explicitly choose, excluding the type
     // that the main tile action already opens (the current tab's type).

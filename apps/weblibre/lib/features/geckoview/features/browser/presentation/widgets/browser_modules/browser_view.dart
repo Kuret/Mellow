@@ -601,7 +601,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   final route = SearchRoute(
                     tabType:
                         ref.read(selectedTabTypeProvider) ??
-                        settings.effectiveDefaultCreateTabType,
+                        TabType.regular,
                     searchText: sharedContent.text,
                     launchedFromIntent: true, //launched from intent
                   );
@@ -754,7 +754,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     await SearchRoute(
                       tabType:
                           ref.read(selectedTabTypeProvider) ??
-                          settings.effectiveDefaultCreateTabType,
+                          TabType.regular,
                       searchText: searchText ?? SearchRoute.emptySearchText,
                     ).push(context);
                   },

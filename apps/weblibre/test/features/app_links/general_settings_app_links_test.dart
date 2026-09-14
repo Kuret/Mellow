@@ -25,33 +25,13 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 void main() {
   group('GeneralSettings app-link fields', () {
-    test('defaults are ask / empty rules / marketplace off', () {
+    test('defaults are ask with no remembered rules', () {
       final settings = GeneralSettings.withDefaults();
       expect(settings.appLinksMode, AppLinksMode.ask);
       expect(settings.appLinkRules, isEmpty);
-      expect(settings.appLinkMarketplaceFallback, isFalse);
     });
 
-    test('blocking while prompting defaults to off', () {
-      // The non-blocking banner is the shipped behaviour; holding a navigation is
-      // opt-in because a stalled load is a worse failure than an early request.
-      expect(
-        GeneralSettings.withDefaults().appLinkBlockWhilePrompting,
-        isFalse,
-      );
-    });
-
-    test('blocking while prompting survives a round-trip', () {
-      final settings = GeneralSettings.withDefaults(
-        appLinkBlockWhilePrompting: true,
-      );
-      expect(
-        GeneralSettings.fromJson(settings.toJson()).appLinkBlockWhilePrompting,
-        isTrue,
-      );
-    });
-
-    test('the three fields survive a toJson -> fromJson round-trip', () {
+    test('mode and rules survive a toJson -> fromJson round-trip', () {
       final rule = PersistedAppLinkRule(
         decision: AppLinkRuleDecision.alwaysOpen,
         scope: 'host:youtu.be',
@@ -60,13 +40,11 @@ void main() {
       final settings = GeneralSettings.withDefaults(
         appLinksMode: AppLinksMode.always,
         appLinkRules: {rule.scope: rule},
-        appLinkMarketplaceFallback: true,
       );
 
       final restored = GeneralSettings.fromJson(settings.toJson());
 
       expect(restored.appLinksMode, AppLinksMode.always);
-      expect(restored.appLinkMarketplaceFallback, isTrue);
       expect(restored.appLinkRules.keys, ['host:youtu.be']);
       expect(restored.appLinkRules['host:youtu.be'], rule);
     });

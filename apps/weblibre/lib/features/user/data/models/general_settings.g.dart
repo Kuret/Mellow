@@ -35,19 +35,11 @@ abstract class _$GeneralSettingsCWProxy {
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
 
-  GeneralSettings storedDefaultCreateTabType(
-    TabType storedDefaultCreateTabType,
-  );
-
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   );
 
   GeneralSettings bookmarkOpenSetting(BookmarkOpenSetting bookmarkOpenSetting);
-
-  GeneralSettings backgroundTabOpenAction(
-    BackgroundTabOpenAction backgroundTabOpenAction,
-  );
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
@@ -55,12 +47,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
   );
-
-  GeneralSettings sequentialTabNavigationCrossContainers(
-    bool sequentialTabNavigationCrossContainers,
-  );
-
-  GeneralSettings sequentialTabNavigationLoop(bool sequentialTabNavigationLoop);
 
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
@@ -76,10 +62,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
   );
-
-  GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
-
-  GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
 
   GeneralSettings unassignedTabsAutoCleanInterval(
     Duration unassignedTabsAutoCleanInterval,
@@ -123,14 +105,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings appLinkRules(Map<String, PersistedAppLinkRule> appLinkRules);
 
-  GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback);
-
-  GeneralSettings appLinkAuthExceptionsEnabled(
-    bool appLinkAuthExceptionsEnabled,
-  );
-
-  GeneralSettings appLinkBlockWhilePrompting(bool appLinkBlockWhilePrompting);
-
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
 
   GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
@@ -164,15 +138,11 @@ abstract class _$GeneralSettingsCWProxy {
     String? homeTargetUrl,
     bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
-    TabType storedDefaultCreateTabType,
     TabIntentOpenSetting tabIntentOpenSetting,
     BookmarkOpenSetting bookmarkOpenSetting,
-    BackgroundTabOpenAction backgroundTabOpenAction,
     bool autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
-    bool sequentialTabNavigationCrossContainers,
-    bool sequentialTabNavigationLoop,
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
@@ -180,8 +150,6 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarLayout tabBarLayout,
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
-    bool pullToRefreshEnabled,
-    bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
     bool allowClipboardAccess,
@@ -199,9 +167,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool customTabsEnabled,
     AppLinksMode appLinksMode,
     Map<String, PersistedAppLinkRule> appLinkRules,
-    bool appLinkMarketplaceFallback,
-    bool appLinkAuthExceptionsEnabled,
-    bool appLinkBlockWhilePrompting,
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
@@ -267,11 +232,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(homeSearchBarPlacement: homeSearchBarPlacement);
 
   @override
-  GeneralSettings storedDefaultCreateTabType(
-    TabType storedDefaultCreateTabType,
-  ) => call(storedDefaultCreateTabType: storedDefaultCreateTabType);
-
-  @override
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   ) => call(tabIntentOpenSetting: tabIntentOpenSetting);
@@ -282,11 +242,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(bookmarkOpenSetting: bookmarkOpenSetting);
 
   @override
-  GeneralSettings backgroundTabOpenAction(
-    BackgroundTabOpenAction backgroundTabOpenAction,
-  ) => call(backgroundTabOpenAction: backgroundTabOpenAction);
-
-  @override
   GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
       call(autoHideTabBar: autoHideTabBar);
 
@@ -295,19 +250,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar swipe switches spaces')
     TabBarSwipeAction tabBarSwipeAction,
   ) => call(tabBarSwipeAction: tabBarSwipeAction);
-
-  @override
-  GeneralSettings sequentialTabNavigationCrossContainers(
-    bool sequentialTabNavigationCrossContainers,
-  ) => call(
-    sequentialTabNavigationCrossContainers:
-        sequentialTabNavigationCrossContainers,
-  );
-
-  @override
-  GeneralSettings sequentialTabNavigationLoop(
-    bool sequentialTabNavigationLoop,
-  ) => call(sequentialTabNavigationLoop: sequentialTabNavigationLoop);
 
   @override
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval) =>
@@ -334,14 +276,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
   ) => call(tabBarStackingMode: tabBarStackingMode);
-
-  @override
-  GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
-      call(pullToRefreshEnabled: pullToRefreshEnabled);
-
-  @override
-  GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab) =>
-      call(doubleBackCloseTab: doubleBackCloseTab);
 
   @override
   GeneralSettings unassignedTabsAutoCleanInterval(
@@ -421,19 +355,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(appLinkRules: appLinkRules);
 
   @override
-  GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback) =>
-      call(appLinkMarketplaceFallback: appLinkMarketplaceFallback);
-
-  @override
-  GeneralSettings appLinkAuthExceptionsEnabled(
-    bool appLinkAuthExceptionsEnabled,
-  ) => call(appLinkAuthExceptionsEnabled: appLinkAuthExceptionsEnabled);
-
-  @override
-  GeneralSettings appLinkBlockWhilePrompting(bool appLinkBlockWhilePrompting) =>
-      call(appLinkBlockWhilePrompting: appLinkBlockWhilePrompting);
-
-  @override
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
       call(enableLocalSearchIndex: enableLocalSearchIndex);
 
@@ -480,16 +401,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
-    Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
-    Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar swipe switches spaces')
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
-    Object? sequentialTabNavigationCrossContainers =
-        const $CopyWithPlaceholder(),
-    Object? sequentialTabNavigationLoop = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
@@ -497,8 +413,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarLayout = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
-    Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
-    Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
@@ -517,9 +431,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? customTabsEnabled = const $CopyWithPlaceholder(),
     Object? appLinksMode = const $CopyWithPlaceholder(),
     Object? appLinkRules = const $CopyWithPlaceholder(),
-    Object? appLinkMarketplaceFallback = const $CopyWithPlaceholder(),
-    Object? appLinkAuthExceptionsEnabled = const $CopyWithPlaceholder(),
-    Object? appLinkBlockWhilePrompting = const $CopyWithPlaceholder(),
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
@@ -588,12 +499,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeSearchBarPlacement
           // ignore: cast_nullable_to_non_nullable
           : homeSearchBarPlacement as HomeSearchBarPlacement,
-      storedDefaultCreateTabType:
-          storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
-              storedDefaultCreateTabType == null
-          ? _value.storedDefaultCreateTabType
-          // ignore: cast_nullable_to_non_nullable
-          : storedDefaultCreateTabType as TabType,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -606,12 +511,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.bookmarkOpenSetting
           // ignore: cast_nullable_to_non_nullable
           : bookmarkOpenSetting as BookmarkOpenSetting,
-      backgroundTabOpenAction:
-          backgroundTabOpenAction == const $CopyWithPlaceholder() ||
-              backgroundTabOpenAction == null
-          ? _value.backgroundTabOpenAction
-          // ignore: cast_nullable_to_non_nullable
-          : backgroundTabOpenAction as BackgroundTabOpenAction,
       autoHideTabBar:
           autoHideTabBar == const $CopyWithPlaceholder() ||
               autoHideTabBar == null
@@ -624,19 +523,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarSwipeAction
           // ignore: cast_nullable_to_non_nullable
           : tabBarSwipeAction as TabBarSwipeAction,
-      sequentialTabNavigationCrossContainers:
-          sequentialTabNavigationCrossContainers ==
-                  const $CopyWithPlaceholder() ||
-              sequentialTabNavigationCrossContainers == null
-          ? _value.sequentialTabNavigationCrossContainers
-          // ignore: cast_nullable_to_non_nullable
-          : sequentialTabNavigationCrossContainers as bool,
-      sequentialTabNavigationLoop:
-          sequentialTabNavigationLoop == const $CopyWithPlaceholder() ||
-              sequentialTabNavigationLoop == null
-          ? _value.sequentialTabNavigationLoop
-          // ignore: cast_nullable_to_non_nullable
-          : sequentialTabNavigationLoop as bool,
       historyAutoCleanInterval:
           historyAutoCleanInterval == const $CopyWithPlaceholder() ||
               historyAutoCleanInterval == null
@@ -672,18 +558,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarStackingMode
           // ignore: cast_nullable_to_non_nullable
           : tabBarStackingMode as TabBarStackingMode,
-      pullToRefreshEnabled:
-          pullToRefreshEnabled == const $CopyWithPlaceholder() ||
-              pullToRefreshEnabled == null
-          ? _value.pullToRefreshEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : pullToRefreshEnabled as bool,
-      doubleBackCloseTab:
-          doubleBackCloseTab == const $CopyWithPlaceholder() ||
-              doubleBackCloseTab == null
-          ? _value.doubleBackCloseTab
-          // ignore: cast_nullable_to_non_nullable
-          : doubleBackCloseTab as bool,
       unassignedTabsAutoCleanInterval:
           unassignedTabsAutoCleanInterval == const $CopyWithPlaceholder() ||
               unassignedTabsAutoCleanInterval == null
@@ -785,24 +659,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.appLinkRules
           // ignore: cast_nullable_to_non_nullable
           : appLinkRules as Map<String, PersistedAppLinkRule>,
-      appLinkMarketplaceFallback:
-          appLinkMarketplaceFallback == const $CopyWithPlaceholder() ||
-              appLinkMarketplaceFallback == null
-          ? _value.appLinkMarketplaceFallback
-          // ignore: cast_nullable_to_non_nullable
-          : appLinkMarketplaceFallback as bool,
-      appLinkAuthExceptionsEnabled:
-          appLinkAuthExceptionsEnabled == const $CopyWithPlaceholder() ||
-              appLinkAuthExceptionsEnabled == null
-          ? _value.appLinkAuthExceptionsEnabled
-          // ignore: cast_nullable_to_non_nullable
-          : appLinkAuthExceptionsEnabled as bool,
-      appLinkBlockWhilePrompting:
-          appLinkBlockWhilePrompting == const $CopyWithPlaceholder() ||
-              appLinkBlockWhilePrompting == null
-          ? _value.appLinkBlockWhilePrompting
-          // ignore: cast_nullable_to_non_nullable
-          : appLinkBlockWhilePrompting as bool,
       enableLocalSearchIndex:
           enableLocalSearchIndex == const $CopyWithPlaceholder() ||
               enableLocalSearchIndex == null
@@ -882,11 +738,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$HomeSearchBarPlacementEnumMap,
     json['homeSearchBarPlacement'],
   ),
-  storedDefaultCreateTabType: $enumDecodeNullable(
-    _$TabTypeEnumMap,
-    json['defaultCreateTabType'],
-    unknownValue: TabType.regular,
-  ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
@@ -897,18 +748,11 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['bookmarkOpenSetting'],
     unknownValue: BookmarkOpenSetting.regular,
   ),
-  backgroundTabOpenAction: $enumDecodeNullable(
-    _$BackgroundTabOpenActionEnumMap,
-    json['backgroundTabOpenAction'],
-  ),
   autoHideTabBar: json['autoHideTabBar'] as bool?,
   tabBarSwipeAction: $enumDecodeNullable(
     _$TabBarSwipeActionEnumMap,
     json['tabBarSwipeAction'],
   ),
-  sequentialTabNavigationCrossContainers:
-      json['sequentialTabNavigationCrossContainers'] as bool?,
-  sequentialTabNavigationLoop: json['sequentialTabNavigationLoop'] as bool?,
   historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
       ? null
       : Duration(
@@ -928,8 +772,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabBarStackingModeEnumMap,
     json['tabBarStackingMode'],
   ),
-  pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
-  doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
   unassignedTabsAutoCleanInterval:
       json['unassignedTabsAutoCleanInterval'] == null
       ? null
@@ -966,9 +808,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   appLinkRules: parseAppLinkRules(
     json['appLinkRules'] as Map<String, dynamic>?,
   ),
-  appLinkMarketplaceFallback: json['appLinkMarketplaceFallback'] as bool?,
-  appLinkAuthExceptionsEnabled: json['appLinkAuthExceptionsEnabled'] as bool?,
-  appLinkBlockWhilePrompting: json['appLinkBlockWhilePrompting'] as bool?,
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
@@ -1001,19 +840,12 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
-  'defaultCreateTabType':
-      _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'bookmarkOpenSetting':
       _$BookmarkOpenSettingEnumMap[instance.bookmarkOpenSetting]!,
-  'backgroundTabOpenAction':
-      _$BackgroundTabOpenActionEnumMap[instance.backgroundTabOpenAction]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
-  'sequentialTabNavigationCrossContainers':
-      instance.sequentialTabNavigationCrossContainers,
-  'sequentialTabNavigationLoop': instance.sequentialTabNavigationLoop,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
@@ -1021,8 +853,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
-  'pullToRefreshEnabled': instance.pullToRefreshEnabled,
-  'doubleBackCloseTab': instance.doubleBackCloseTab,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
   'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
@@ -1046,9 +876,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'customTabsEnabled': instance.customTabsEnabled,
   'appLinksMode': _$AppLinksModeEnumMap[instance.appLinksMode]!,
   'appLinkRules': instance.appLinkRules.map((k, e) => MapEntry(k, e.toJson())),
-  'appLinkMarketplaceFallback': instance.appLinkMarketplaceFallback,
-  'appLinkAuthExceptionsEnabled': instance.appLinkAuthExceptionsEnabled,
-  'appLinkBlockWhilePrompting': instance.appLinkBlockWhilePrompting,
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
@@ -1094,11 +921,6 @@ const _$HomeSearchBarPlacementEnumMap = {
   HomeSearchBarPlacement.tabBar: 'tabBar',
 };
 
-const _$TabTypeEnumMap = {
-  TabType.regular: 'regular',
-  TabType.private: 'private',
-};
-
 const _$TabIntentOpenSettingEnumMap = {
   TabIntentOpenSetting.regular: 'regular',
   TabIntentOpenSetting.private: 'private',
@@ -1110,11 +932,6 @@ const _$BookmarkOpenSettingEnumMap = {
   BookmarkOpenSetting.private: 'private',
   BookmarkOpenSetting.customTab: 'customTab',
   BookmarkOpenSetting.ask: 'ask',
-};
-
-const _$BackgroundTabOpenActionEnumMap = {
-  BackgroundTabOpenAction.prompt: 'prompt',
-  BackgroundTabOpenAction.switchImmediately: 'switchImmediately',
 };
 
 const _$TabBarSwipeActionEnumMap = {

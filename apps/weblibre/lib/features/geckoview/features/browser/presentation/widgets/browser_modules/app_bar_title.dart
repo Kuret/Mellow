@@ -69,7 +69,7 @@ class CompactAppBarTitle extends ConsumerWidget {
 
     if (tabState == null) {
       return _EmptyAppBarAddressField(
-        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        tabType: selectedTabType ?? TabType.regular,
         // The tools turn this field from "no page loaded" into the home
         // surface's search entry, which is only what it is when the pill has
         // stood down for it. Everywhere else the row has a page's worth of
@@ -264,7 +264,7 @@ class AppBarTitle extends ConsumerWidget {
 
     if (tabState == null) {
       return _EmptyAppBarAddressField(
-        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        tabType: selectedTabType ?? TabType.regular,
         // The tools turn this field from "no page loaded" into the home
         // surface's search entry, which is only what it is when the pill has
         // stood down for it. Everywhere else the row has a page's worth of

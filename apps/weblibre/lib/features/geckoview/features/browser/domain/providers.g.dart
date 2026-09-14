@@ -1349,7 +1349,7 @@ final class VisibleTabListItemsFamily extends $Family
 /// strip (issue #603). Sharing one provider with those surfaces is what keeps
 /// the two from drifting apart again.
 ///
-/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// It spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
 /// walk had: each container contributes the rows its switcher would render, and
 /// the containers follow one another in the order the quick tab switcher lays
@@ -1357,10 +1357,6 @@ final class VisibleTabListItemsFamily extends $Family
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their row query never runs.
-///
-/// With the setting off the order holds only the selected container's rows, so
-/// navigation stays inside the container the user is looking at and stops at its
-/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end.
@@ -1404,7 +1400,7 @@ final sequentialTabNavigationOrderProvider =
 /// strip (issue #603). Sharing one provider with those surfaces is what keeps
 /// the two from drifting apart again.
 ///
-/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// It spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
 /// walk had: each container contributes the rows its switcher would render, and
 /// the containers follow one another in the order the quick tab switcher lays
@@ -1412,10 +1408,6 @@ final sequentialTabNavigationOrderProvider =
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their row query never runs.
-///
-/// With the setting off the order holds only the selected container's rows, so
-/// navigation stays inside the container the user is looking at and stops at its
-/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end.
@@ -1463,7 +1455,7 @@ final class SequentialTabNavigationOrderProvider
   /// strip (issue #603). Sharing one provider with those surfaces is what keeps
   /// the two from drifting apart again.
   ///
-  /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+  /// It spans
   /// **all** containers, keeping the boundary-crossing reach the storage-order
   /// walk had: each container contributes the rows its switcher would render, and
   /// the containers follow one another in the order the quick tab switcher lays
@@ -1471,10 +1463,6 @@ final class SequentialTabNavigationOrderProvider
   /// Stepping off the end of one container therefore continues into the next, and
   /// selecting that tab moves the selected container along with it. Named
   /// containers holding no tabs are skipped so their row query never runs.
-  ///
-  /// With the setting off the order holds only the selected container's rows, so
-  /// navigation stays inside the container the user is looking at and stops at its
-  /// edge — the containers themselves are then only switched deliberately.
   ///
   /// "Previous" is a step towards the top of that order and "next" a step
   /// towards its end.
@@ -1533,4 +1521,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'4e82b33b2b8c2ae4a0b75a40dd5889dd26277c62';
+    r'0abb81238f305224e31b2a36c71ede6db6458ed1';

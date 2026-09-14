@@ -43,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
@@ -946,7 +945,7 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// strip (issue #603). Sharing one provider with those surfaces is what keeps
 /// the two from drifting apart again.
 ///
-/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// It spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
 /// walk had: each container contributes the rows its switcher would render, and
 /// the containers follow one another in the order the quick tab switcher lays
@@ -954,10 +953,6 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their row query never runs.
-///
-/// With the setting off the order holds only the selected container's rows, so
-/// navigation stays inside the container the user is looking at and stops at its
-/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end.
@@ -981,25 +976,12 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// alive too.
 @Riverpod(keepAlive: true)
 EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
-  final crossSpaces = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveSequentialTabNavigationCrossContainers,
-    ),
-  );
-
-  final List<String?> spaceUuids;
-  if (crossSpaces) {
-    final spaces = ref.watch(
-      watchSpacesProvider.select((value) => value.value),
-    );
-    if (spaces == null) {
-      return EquatableValue(null);
-    }
-    // The space-less bucket (private tabs) first, then the spaces in order.
-    spaceUuids = <String?>[null, for (final space in spaces) space.uuid];
-  } else {
-    spaceUuids = <String?>[ref.watch(selectedSpaceProvider)];
+  final spaces = ref.watch(watchSpacesProvider.select((value) => value.value));
+  if (spaces == null) {
+    return EquatableValue(null);
   }
+  // The space-less bucket (private tabs) first, then the spaces in order.
+  final spaceUuids = <String?>[null, for (final space in spaces) space.uuid];
 
   final order = <String>[];
   for (final spaceUuid in spaceUuids) {

@@ -12,6 +12,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_enti
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -103,9 +104,12 @@ void main() {
           (ref) => Stream.value(const <String, DateTime>{}),
         ),
         generalSettingsWithDefaultsProvider.overrideWith(
-          (ref) => GeneralSettings.withDefaults(
-            sequentialTabNavigationCrossContainers: false,
-          ),
+          (ref) => GeneralSettings.withDefaults(),
+        ),
+        // The navigation order walks every space; these rows are all unassigned,
+        // so the space-less bucket is the whole of it.
+        watchSpacesProvider.overrideWith(
+          (ref) => Stream.value(const <SpaceData>[]),
         ),
         tabViewFilterControllerProvider.overrideWith(
           () => _FakeFilterController(

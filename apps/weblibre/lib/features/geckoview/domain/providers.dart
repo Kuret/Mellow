@@ -32,7 +32,6 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/search/domain/providers/search_provider.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
@@ -46,7 +45,6 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         if (ref.mounted) {
           final router = await ref.read(routerProvider.future);
           if (ref.mounted) {
-            final settings = ref.read(generalSettingsWithDefaultsProvider);
             final selectedTabState = ref.read(
               tabStatesProvider,
             )[ref.read(selectedTabProvider)];
@@ -55,7 +53,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
 
             final route = SearchRoute(
               tabType:
-                  selectedTabType ?? settings.effectiveDefaultCreateTabType,
+                  selectedTabType ?? TabType.regular,
               searchText: text,
             );
 
@@ -77,9 +75,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         final tabMode =
             currentTab?.tabMode ??
             TabMode.fromTabType(
-              ref
-                  .read(generalSettingsWithDefaultsProvider)
-                  .effectiveDefaultCreateTabType,
+              TabType.regular,
             );
 
         await ref

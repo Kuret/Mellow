@@ -505,8 +505,7 @@ class TabRepository extends _$TabRepository {
   /// filters, collapsed groups or sort (see [TabListScope]). It is
   /// authoritative once it exists, and every outcome stays inside it:
   ///
-  /// - current tab in the order: step one row, stopping at either end — or
-  ///   continuing at the opposite end when `sequentialTabNavigationLoop` is on;
+  /// - current tab in the order: step one row, stopping at either end;
   /// - current tab outside it, or nothing visible at all: do nothing (#603).
   ///
   /// The storage-order walk below serves scope-bound stepping and the window
@@ -523,9 +522,7 @@ class TabRepository extends _$TabRepository {
           order: visibleOrder,
           currentTabId: tabId,
           selectPrevious: selectPrevious,
-          loop: ref
-              .read(generalSettingsWithDefaultsProvider)
-              .sequentialTabNavigationLoop,
+          loop: false,
         );
         // The rendered order is authoritative once it exists: having no step to
         // take within it is an answer, not a reason to consult storage order.

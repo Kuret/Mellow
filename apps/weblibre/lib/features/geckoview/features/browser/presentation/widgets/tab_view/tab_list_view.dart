@@ -56,7 +56,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
 /// Plain list row for a [TabListFolderItem]: icon, name, child count,
@@ -896,14 +895,11 @@ class ViewTabListWidget extends HookConsumerWidget {
                 ),
                 child: FloatingActionButton.small(
                   onPressed: () async {
-                    final settings = ref.read(
-                      generalSettingsWithDefaultsProvider,
-                    );
 
                     await SearchRoute(
                       tabType:
                           ref.read(selectedTabTypeProvider) ??
-                          settings.effectiveDefaultCreateTabType,
+                          TabType.regular,
                     ).push(context);
 
                     onClose();

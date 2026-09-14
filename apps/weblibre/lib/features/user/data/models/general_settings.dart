@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinksMode;
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
@@ -84,17 +83,6 @@ enum TabIntentOpenSetting { regular, private, ask }
 /// [ask] shows the "open in..." sheet (today's behavior, and the default);
 /// the other values open the bookmark directly with no intermediate prompt.
 enum BookmarkOpenSetting { regular, private, customTab, ask }
-
-/// What happens after an action opens a new tab in the background — context
-/// menu "open in new tab"/"open in container", tab cloning, and the contextual
-/// toolbar clone buttons.
-///
-/// [prompt] keeps the "New tab opened" snackbar with its `Switch` action (the
-/// behavior that predates this setting); [switchImmediately] selects the new
-/// tab right away and shows no snackbar. Actions the user explicitly asked to
-/// happen in the background (e.g. the bookmark list's "Open in Background")
-/// always stay in the background and are unaffected.
-enum BackgroundTabOpenAction { prompt, switchImmediately }
 
 /// Edge of the compact tab bar on narrow viewports. Only [top] and [bottom]
 /// place anything today: [left] and [right] are legacy values from when the
@@ -228,8 +216,6 @@ class GeneralSettings with FastEquatable {
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
   final HomeSearchBarPlacement homeSearchBarPlacement;
 
-  @JsonKey(name: 'defaultCreateTabType', unknownEnumValue: TabType.regular)
-  final TabType storedDefaultCreateTabType;
   @JsonKey(unknownEnumValue: TabIntentOpenSetting.regular)
   final TabIntentOpenSetting tabIntentOpenSetting;
 
@@ -238,23 +224,11 @@ class GeneralSettings with FastEquatable {
   @JsonKey(unknownEnumValue: BookmarkOpenSetting.regular)
   final BookmarkOpenSetting bookmarkOpenSetting;
 
-  /// What happens after a tab is opened in the background. See
-  /// [BackgroundTabOpenAction].
-  final BackgroundTabOpenAction backgroundTabOpenAction;
   final bool autoHideTabBar;
   @Deprecated('Retired; the bar swipe switches spaces')
   // ignore: deprecated_member_use_from_same_package
   final TabBarSwipeAction tabBarSwipeAction;
 
-  /// Whether sequential tab navigation (the tab bar swipe and the
-  /// next/previous tab gestures) walks past the current container into the
-  /// neighbouring one, instead of stopping at the container's own edge.
-  final bool sequentialTabNavigationCrossContainers;
-
-  /// Whether sequential tab navigation wraps around: stepping past the last
-  /// visible tab continues at the first one and vice versa, instead of the
-  /// step doing nothing.
-  final bool sequentialTabNavigationLoop;
   final Duration historyAutoCleanInterval;
   final bool tabViewBottomSheet;
   final bool tabBarShowContextualBar;
@@ -263,8 +237,6 @@ class GeneralSettings with FastEquatable {
   @Deprecated('Retired; the bar has one layout')
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
-  final bool pullToRefreshEnabled;
-  final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
   final int maxSearchHistoryEntries;
   final bool allowClipboardAccess;
@@ -301,26 +273,6 @@ class GeneralSettings with FastEquatable {
   /// Malformed entries are dropped on read (see [parseAppLinkRules]).
   @JsonKey(fromJson: parseAppLinkRules)
   final Map<String, PersistedAppLinkRule> appLinkRules;
-
-  /// Whether an install-app (marketplace) intent is offered when an app link
-  /// resolves to no installed app and has no validated http(s) fallback.
-  /// Defaults to false — the wrong default for a de-Googled browser.
-  final bool appLinkMarketplaceFallback;
-
-  /// Whether app-link "never" rules allow a same-caller Custom Tab / ActionView
-  /// login callback to return to the app that opened the browser. Defaults to
-  /// true to keep OAuth-style sign-in flows working while normal app links still
-  /// obey [appLinksMode].
-  final bool appLinkAuthExceptionsEnabled;
-
-  /// Whether an http(s) app-link prompt holds its navigation instead of letting
-  /// the page load behind the banner (§2.2). Defaults to false, which keeps the
-  /// non-blocking behaviour: the page loads while the banner is up, so the site
-  /// sees one request even when the user picks the app. With this on, the tab
-  /// stays on its previous page until the prompt is answered, and declining
-  /// loads the page then. Only meaningful under [AppLinksMode.ask]; prompts for
-  /// unsupported schemes always hold their navigation regardless.
-  final bool appLinkBlockWhilePrompting;
 
   /// Whether the local search index (`history` table populated via tab→
   /// history triggers) is active. When false, the SQL trigger guard returns
@@ -375,16 +327,12 @@ class GeneralSettings with FastEquatable {
     required this.homeTargetUrl,
     required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
-    required this.storedDefaultCreateTabType,
     required this.tabIntentOpenSetting,
     required this.bookmarkOpenSetting,
-    required this.backgroundTabOpenAction,
     required this.autoHideTabBar,
     @Deprecated('Retired; the bar swipe switches spaces')
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarSwipeAction,
-    required this.sequentialTabNavigationCrossContainers,
-    required this.sequentialTabNavigationLoop,
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
     required this.tabBarShowContextualBar,
@@ -393,8 +341,6 @@ class GeneralSettings with FastEquatable {
     @Deprecated('Retired; the bar has one layout')
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
-    required this.pullToRefreshEnabled,
-    required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
     required this.maxSearchHistoryEntries,
     required this.allowClipboardAccess,
@@ -412,9 +358,6 @@ class GeneralSettings with FastEquatable {
     required this.customTabsEnabled,
     required this.appLinksMode,
     required this.appLinkRules,
-    required this.appLinkMarketplaceFallback,
-    required this.appLinkAuthExceptionsEnabled,
-    required this.appLinkBlockWhilePrompting,
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
@@ -436,15 +379,11 @@ class GeneralSettings with FastEquatable {
     this.homeTargetUrl,
     bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
-    TabType? storedDefaultCreateTabType,
     TabIntentOpenSetting? tabIntentOpenSetting,
     BookmarkOpenSetting? bookmarkOpenSetting,
-    BackgroundTabOpenAction? backgroundTabOpenAction,
     bool? autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     TabBarSwipeAction? tabBarSwipeAction,
-    bool? sequentialTabNavigationCrossContainers,
-    bool? sequentialTabNavigationLoop,
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
     bool? tabBarShowContextualBar,
@@ -452,8 +391,6 @@ class GeneralSettings with FastEquatable {
     TabBarLayout? tabBarLayout,
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
-    bool? pullToRefreshEnabled,
-    bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
     int? maxSearchHistoryEntries,
     bool? allowClipboardAccess,
@@ -471,9 +408,6 @@ class GeneralSettings with FastEquatable {
     bool? customTabsEnabled,
     AppLinksMode? appLinksMode,
     Map<String, PersistedAppLinkRule>? appLinkRules,
-    bool? appLinkMarketplaceFallback,
-    bool? appLinkAuthExceptionsEnabled,
-    bool? appLinkBlockWhilePrompting,
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
@@ -496,22 +430,13 @@ class GeneralSettings with FastEquatable {
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
            homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
-       storedDefaultCreateTabType =
-           storedDefaultCreateTabType ?? TabType.regular,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
-       backgroundTabOpenAction =
-           backgroundTabOpenAction ?? BackgroundTabOpenAction.prompt,
        autoHideTabBar = autoHideTabBar ?? true,
        // ignore: deprecated_member_use_from_same_package
        tabBarSwipeAction =
            // ignore: deprecated_member_use_from_same_package
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
-       // Defaults to the behavior sequential navigation shipped with: stepping
-       // off a container's edge continues in the next one.
-       sequentialTabNavigationCrossContainers =
-           sequentialTabNavigationCrossContainers ?? true,
-       sequentialTabNavigationLoop = sequentialTabNavigationLoop ?? false,
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabViewBottomSheet = tabViewBottomSheet ?? false,
@@ -522,8 +447,6 @@ class GeneralSettings with FastEquatable {
        tabBarStackingMode =
            // ignore: deprecated_member_use_from_same_package
            tabBarStackingMode ?? TabBarStackingMode.accordion,
-       pullToRefreshEnabled = pullToRefreshEnabled ?? true,
-       doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
        maxSearchHistoryEntries = maxSearchHistoryEntries ?? 5,
@@ -546,9 +469,6 @@ class GeneralSettings with FastEquatable {
        customTabsEnabled = customTabsEnabled ?? true,
        appLinksMode = appLinksMode ?? AppLinksMode.ask,
        appLinkRules = appLinkRules ?? const {},
-       appLinkMarketplaceFallback = appLinkMarketplaceFallback ?? false,
-       appLinkAuthExceptionsEnabled = appLinkAuthExceptionsEnabled ?? true,
-       appLinkBlockWhilePrompting = appLinkBlockWhilePrompting ?? false,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
@@ -563,11 +483,7 @@ class GeneralSettings with FastEquatable {
     // still decode.
     // TODO: Drop this fallback once enough releases have shipped that
     // rolling back to a version with isolated tabs is no longer a concern.
-    for (final key in const [
-      'defaultCreateTabType',
-      'tabIntentOpenSetting',
-      'bookmarkOpenSetting',
-    ]) {
+    for (final key in const ['tabIntentOpenSetting', 'bookmarkOpenSetting']) {
       if (json[key] == 'isolated') {
         json[key] = 'regular';
       }
@@ -607,18 +523,10 @@ class GeneralSettings with FastEquatable {
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
-  TabType get effectiveDefaultCreateTabType => storedDefaultCreateTabType;
-
   TabIntentOpenSetting get effectiveTabIntentOpenSetting =>
       tabIntentOpenSetting;
 
   BookmarkOpenSetting get effectiveBookmarkOpenSetting => bookmarkOpenSetting;
-
-  /// Keeping sequential navigation inside one container only means something
-  /// while the user can switch containers at all: with the container UI hidden
-  /// there is no selected container to stay in, so the walk spans everything.
-  bool get effectiveSequentialTabNavigationCrossContainers =>
-      sequentialTabNavigationCrossContainers || !showContainerUi;
 
   /// [homeSearchBarPlacement] with [HomeSearchBarPlacement.auto] resolved
   /// against the tab bar's position, so callers never have to. Never returns
@@ -665,15 +573,11 @@ class GeneralSettings with FastEquatable {
     homeTargetUrl,
     homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
-    storedDefaultCreateTabType,
     tabIntentOpenSetting,
     bookmarkOpenSetting,
-    backgroundTabOpenAction,
     autoHideTabBar,
     // ignore: deprecated_member_use_from_same_package
     tabBarSwipeAction,
-    sequentialTabNavigationCrossContainers,
-    sequentialTabNavigationLoop,
     historyAutoCleanInterval,
     tabViewBottomSheet,
     tabBarShowContextualBar,
@@ -681,8 +585,6 @@ class GeneralSettings with FastEquatable {
     tabBarLayout,
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
-    pullToRefreshEnabled,
-    doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
     maxSearchHistoryEntries,
     allowClipboardAccess,
@@ -700,9 +602,6 @@ class GeneralSettings with FastEquatable {
     customTabsEnabled,
     appLinksMode,
     appLinkRules,
-    appLinkMarketplaceFallback,
-    appLinkAuthExceptionsEnabled,
-    appLinkBlockWhilePrompting,
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,

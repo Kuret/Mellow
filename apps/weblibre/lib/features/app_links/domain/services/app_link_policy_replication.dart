@@ -45,9 +45,9 @@ AppLinkPolicySnapshot? appLinkPolicySnapshot(Ref ref) {
       for (final MapEntry(:key, :value) in settings.appLinkRules.entries)
         key: _toNativeRule(value),
     },
-    marketplaceFallbackEnabled: settings.appLinkMarketplaceFallback,
-    authExceptionsEnabled: settings.appLinkAuthExceptionsEnabled,
-    blockWhilePrompting: settings.appLinkBlockWhilePrompting,
+    marketplaceFallbackEnabled: false,
+    authExceptionsEnabled: true,
+    blockWhilePrompting: false,
     protectGeneralContext: false,
     protectedContextIds: const [],
     strictContextIds: const [],

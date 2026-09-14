@@ -97,7 +97,7 @@ class OpenInContainer extends HookConsumerWidget {
         final currentTab = ref.read(selectedTabStateProvider);
         final tabMode =
             currentTab?.tabMode ??
-            TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
+            TabMode.fromTabType(TabType.regular);
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)

@@ -53,7 +53,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/fo
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// Grid tile for a [TabListFolderItem]. Grid cells are all the same fixed
 /// aspect-ratio size (see [_TabGridView]'s `SliverGridDelegateWithFixedCrossAxisCount`),
@@ -720,14 +719,11 @@ class ViewTabGridWidget extends HookConsumerWidget {
                 ),
                 child: FloatingActionButton.small(
                   onPressed: () async {
-                    final settings = ref.read(
-                      generalSettingsWithDefaultsProvider,
-                    );
 
                     await SearchRoute(
                       tabType:
                           ref.read(selectedTabTypeProvider) ??
-                          settings.effectiveDefaultCreateTabType,
+                          TabType.regular,
                     ).push(context);
 
                     onClose();

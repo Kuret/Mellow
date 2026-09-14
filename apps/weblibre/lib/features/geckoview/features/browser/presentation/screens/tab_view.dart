@@ -27,7 +27,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
 
 class TabViewScreen extends HookConsumerWidget {
@@ -98,14 +97,11 @@ class TabViewScreen extends HookConsumerWidget {
                   opacity: isFabVisible.value ? 1.0 : 0.0,
                   child: FloatingActionButton(
                     onPressed: () async {
-                      final settings = ref.read(
-                        generalSettingsWithDefaultsProvider,
-                      );
 
                       await SearchRoute(
                         tabType:
                             ref.read(selectedTabTypeProvider) ??
-                            settings.effectiveDefaultCreateTabType,
+                            TabType.regular,
                       ).push(context);
 
                       if (context.mounted) {

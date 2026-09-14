@@ -36,7 +36,6 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -1613,8 +1612,6 @@ class _SheetContainer extends HookConsumerWidget {
 }
 
 class _Browser extends HookConsumerWidget {
-  Duration get _backButtonPressTimeout => const Duration(seconds: 2);
-
   final OverlayPortalController overlayController;
   final StreamSink<Offset>? pointerMoveEventSink;
   final bool tabInFullScreen;
@@ -1637,9 +1634,6 @@ class _Browser extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final doubleBackCloseTab = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
-    );
 
     final lastBackButtonPress = useRef<DateTime?>(null);
 
@@ -1693,10 +1687,6 @@ class _Browser extends HookConsumerWidget {
                 final promptOnBackBehavior = ref
                     .read(tabRepositoryProvider.notifier)
                     .backPromptBehaviorFor(tabState?.id);
-
-                final tabCount = ref.read(
-                  tabListProvider.select((tabs) => tabs.value.length),
-                );
 
                 //Don't do anything if a child route is active
                 if (GoRouterState.of(context).topRoute?.name !=
@@ -1815,42 +1805,6 @@ class _Browser extends HookConsumerWidget {
                 //Go router has routes to go back to
                 if (context.canPop()) {
                   return true;
-                }
-
-                // Handle double back to close (if enabled)
-                if (doubleBackCloseTab) {
-                  if (lastBackButtonPress.value != null &&
-                      DateTime.now().difference(lastBackButtonPress.value!) <
-                          _backButtonPressTimeout) {
-                    lastBackButtonPress.value = null;
-
-                    if (tabState != null && tabCount > 1) {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .closeTab(tabState.id);
-
-                      if (context.mounted) {
-                        ui_helper.showTabUndoClose(
-                          context,
-                          ref.read(tabRepositoryProvider.notifier).undoClose,
-                        );
-                      }
-
-                      return true;
-                    } else {
-                      await moveToBackground();
-                      return true;
-                    }
-                  } else {
-                    lastBackButtonPress.value = DateTime.now();
-                    ui_helper.showTabBackButtonMessage(
-                      context,
-                      tabCount,
-                      _backButtonPressTimeout,
-                    );
-
-                    return true;
-                  }
                 }
 
                 return true;

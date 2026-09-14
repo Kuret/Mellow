@@ -900,9 +900,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     final tabMode =
         currentTab?.tabMode ??
         TabMode.fromTabType(
-          ref
-              .read(generalSettingsWithDefaultsProvider)
-              .effectiveDefaultCreateTabType,
+          TabType.regular,
         );
 
     for (final entry in entries) {
@@ -1089,9 +1087,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     final tabMode =
         currentTab?.tabMode ??
         TabMode.fromTabType(
-          ref
-              .read(generalSettingsWithDefaultsProvider)
-              .effectiveDefaultCreateTabType,
+          TabType.regular,
         );
 
     final tabId = await ref

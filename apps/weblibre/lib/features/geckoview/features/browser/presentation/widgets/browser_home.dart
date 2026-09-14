@@ -65,12 +65,8 @@ class BrowserHome extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<void> openNewTab() {
-      final tabType = ref
-          .read(generalSettingsWithDefaultsProvider)
-          .effectiveDefaultCreateTabType;
-      return SearchRoute(tabType: tabType).push(context);
-    }
+    Future<void> openNewTab() =>
+        const SearchRoute(tabType: TabType.regular).push(context);
 
     Future<void> viewTabs() => const TabViewRoute().push(context);
 
@@ -96,9 +92,7 @@ class BrowserHome extends ConsumerWidget {
             .addTab(
               url: uri,
               tabMode: _tabModeFor(
-                ref
-                    .read(generalSettingsWithDefaultsProvider)
-                    .effectiveDefaultCreateTabType,
+                TabType.regular,
               ),
               selectTab: true,
               containerSelection: container == null

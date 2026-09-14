@@ -40,12 +40,6 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
     title: 'Tabs',
     entries: [
       SettingsEntryDefinition(
-        title: 'New Tab Default',
-        subtitle: 'Choose the default type for manually created tabs',
-        keywords: ['regular', 'private'],
-        child: _NewTabDefaultSection(),
-      ),
-      SettingsEntryDefinition(
         title: 'Keep at most N tabs loaded',
         subtitle: 'Unload the least recently used tabs beyond this many',
         keywords: ['memory', 'unload', 'cold', 'live', 'loaded'],
@@ -63,43 +57,11 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         keywords: ['containers'],
         child: _ShowContainerUiTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Background Tab Behavior',
-        subtitle: 'Choose what happens after a tab opens in the background',
-        keywords: ['switch', 'background', 'new tab', 'snackbar', 'prompt'],
-        child: _BackgroundTabOpenSection(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
     title: 'Navigation',
     entries: [
-      SettingsEntryDefinition(
-        title: 'Pull to Refresh',
-        subtitle: 'Swipe down on pages to reload them',
-        keywords: ['reload'],
-        child: _PullToRefreshTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Double Back to Close Tab',
-        subtitle: 'Require double back press before closing the current tab',
-        keywords: ['back button'],
-        child: _DoubleBackCloseTabTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Sequential Tab Navigation',
-        subtitle: 'Choose where stepping through tabs in order ends',
-        keywords: [
-          'gestures',
-          'swipe',
-          'next tab',
-          'previous tab',
-          'containers',
-          'loop',
-          'wrap around',
-        ],
-        child: _SequentialTabNavigationSection(),
-      ),
       SettingsEntryDefinition(
         title: 'Open Links in Apps',
         subtitle: 'Choose how external app links open',
@@ -190,70 +152,6 @@ class BrowsingSettingsScreen extends StatelessWidget {
       subtitle: 'Tabs, navigation and app links.',
       icon: MdiIcons.compassOutline,
       sections: browsingSettingsSections,
-    );
-  }
-}
-
-class _NewTabDefaultSection extends HookConsumerWidget {
-  const _NewTabDefaultSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final defaultCreateTabType = settings.effectiveDefaultCreateTabType;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('New Tab Default'),
-            subtitle: Text('Choose the default type for manually created tabs'),
-            leading: Icon(MdiIcons.tab),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton(
-              showSelectedIcon: false,
-              segments: [
-                const ButtonSegment(
-                  value: TabType.regular,
-                  label: Text('Regular'),
-                  icon: Icon(MdiIcons.tab),
-                ),
-                ButtonSegment(
-                  value: TabType.private,
-                  label: const Text('Private'),
-                  icon: Icon(
-                    MdiIcons.dominoMask,
-                    color: defaultCreateTabType == TabType.private
-                        ? null
-                        : appColors.privateTabPurple,
-                  ),
-                ),
-              ],
-              selected: {defaultCreateTabType},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .storedDefaultCreateTabType(value.first),
-                    );
-              },
-              style: switch (defaultCreateTabType) {
-                TabType.regular => null,
-                TabType.private => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.privateSelectionOverlay,
-                ),
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -531,145 +429,6 @@ class _ShowContainerUiTile extends HookConsumerWidget {
   }
 }
 
-class _BackgroundTabOpenSection extends HookConsumerWidget {
-  const _BackgroundTabOpenSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final backgroundTabOpenAction = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.backgroundTabOpenAction,
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Background Tab Behavior'),
-            subtitle: Text(
-              'Applies when an action opens a new tab in the background, e.g. '
-              '"Open in new tab" or cloning a tab',
-            ),
-            leading: Icon(MdiIcons.tabPlus),
-            contentPadding: EdgeInsets.zero,
-          ),
-          RadioGroup(
-            groupValue: backgroundTabOpenAction,
-            onChanged: (value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .backgroundTabOpenAction(value),
-                    );
-              }
-            },
-            child: const Column(
-              children: [
-                RadioListTile.adaptive(
-                  value: BackgroundTabOpenAction.prompt,
-                  title: Text('Stay and Offer to Switch'),
-                  subtitle: Text(
-                    'Keep the current tab and show a notice with a Switch '
-                    'action',
-                  ),
-                ),
-                RadioListTile.adaptive(
-                  value: BackgroundTabOpenAction.switchImmediately,
-                  title: Text('Switch Immediately'),
-                  subtitle: Text('Jump straight to the newly opened tab'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SequentialTabNavigationSection extends HookConsumerWidget {
-  const _SequentialTabNavigationSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final crossContainers = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.sequentialTabNavigationCrossContainers,
-      ),
-    );
-    final loop = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.sequentialTabNavigationLoop,
-      ),
-    );
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Sequential Tab Navigation'),
-            subtitle: Text(
-              'Applies to the tab bar swipe and the next/previous tab gestures',
-            ),
-            leading: Icon(MdiIcons.swapHorizontal),
-            contentPadding: EdgeInsets.zero,
-          ),
-          if (showContainerUi)
-            SwitchListTile.adaptive(
-              title: const Text('Continue Into Next Container'),
-              subtitle: const Text(
-                'Stepping past the first or last tab of a container moves into '
-                'the neighbouring one. When off, navigation stays inside the '
-                'current container.',
-              ),
-              secondary: const Icon(MdiIcons.folderMultipleOutline),
-              contentPadding: EdgeInsets.zero,
-              value: crossContainers,
-              onChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .sequentialTabNavigationCrossContainers(value),
-                    );
-              },
-            ),
-          SwitchListTile.adaptive(
-            title: const Text('Loop Around'),
-            subtitle: const Text(
-              'Stepping past the last tab continues at the first one, and the '
-              'other way round.',
-            ),
-            secondary: const Icon(MdiIcons.repeat),
-            contentPadding: EdgeInsets.zero,
-            value: loop,
-            onChanged: (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .sequentialTabNavigationLoop(value),
-                  );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _AppLinksModeSection extends HookConsumerWidget {
   const _AppLinksModeSection();
 
@@ -677,21 +436,6 @@ class _AppLinksModeSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLinksMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.appLinksMode),
-    );
-    final marketplaceFallback = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkMarketplaceFallback,
-      ),
-    );
-    final authExceptionsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkAuthExceptionsEnabled,
-      ),
-    );
-    final blockWhilePrompting = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkBlockWhilePrompting,
-      ),
     );
     final rules = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.appLinkRules),
@@ -743,66 +487,6 @@ class _AppLinksModeSection extends HookConsumerWidget {
                 ),
               ],
             ),
-          ),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Wait for your answer'),
-            subtitle: const Text(
-              'Hold the page while asking, instead of loading it in the '
-              'background. The site is not contacted unless you stay in the '
-              'browser',
-            ),
-            value: blockWhilePrompting,
-            // Deliberately never disabled on the global mode. Prompts are not the
-            // global mode's alone to grant: a protected container, a private tab
-            // and a wallet scheme all prompt regardless of it, and a container
-            // with isolated app-link settings can sit on `ask` while the global
-            // mode is `never`. Greying this out under those modes would leave
-            // blocking switched on with no way to switch it off.
-            onChanged: (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (current) =>
-                        current.copyWith.appLinkBlockWhilePrompting(value),
-                  );
-            },
-          ),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Offer app store fallback'),
-            subtitle: const Text(
-              "When a link points to an app you don't have installed and there "
-              'is no web fallback, offer to open the app store',
-            ),
-            value: marketplaceFallback,
-            onChanged: appLinksMode == AppLinksMode.never
-                ? null
-                : (value) async {
-                    await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
-                        .save(
-                          (current) => current.copyWith
-                              .appLinkMarketplaceFallback(value),
-                        );
-                  },
-          ),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Allow login app callbacks'),
-            subtitle: const Text(
-              'Let apps that opened a Custom Tab receive their login callback, '
-              'even when links are set to never open in apps',
-            ),
-            value: authExceptionsEnabled,
-            onChanged: (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (current) =>
-                        current.copyWith.appLinkAuthExceptionsEnabled(value),
-                  );
-            },
           ),
           _AppLinkRulesSubsection(rules: rules),
         ],
@@ -921,32 +605,6 @@ class _DesktopModeSitesTile extends StatelessWidget {
   }
 }
 
-class _PullToRefreshTile extends HookConsumerWidget {
-  const _PullToRefreshTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pullToRefreshEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Pull to Refresh'),
-      subtitle: const Text('Swipe down on pages to reload them'),
-      secondary: const Icon(MdiIcons.gestureSwipeDown),
-      value: pullToRefreshEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.pullToRefreshEnabled(value),
-            );
-      },
-    );
-  }
-}
-
 class _CustomTabsTile extends HookConsumerWidget {
   const _CustomTabsTile();
 
@@ -970,34 +628,6 @@ class _CustomTabsTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.customTabsEnabled(value),
-            );
-      },
-    );
-  }
-}
-
-class _DoubleBackCloseTabTile extends HookConsumerWidget {
-  const _DoubleBackCloseTabTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final doubleBackCloseTab = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Double Back to Close Tab'),
-      subtitle: const Text(
-        'When enabled, press back twice to close the tab. When disabled, back button only navigates page history.',
-      ),
-      secondary: const Icon(MdiIcons.gestureDoubleTap),
-      value: doubleBackCloseTab,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.doubleBackCloseTab(value),
             );
       },
     );

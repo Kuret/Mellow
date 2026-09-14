@@ -22,7 +22,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
@@ -49,13 +48,7 @@ class HomeSearchPill extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Selector, not the whole settings object: this rebuilds on every
-    // settings write otherwise, and it sits above the module list.
-    final defaultTabType = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.effectiveDefaultCreateTabType,
-      ),
-    );
+    const defaultTabType = TabType.regular;
 
     void openSearch([String? initialText]) {
       unawaited(
