@@ -19,30 +19,30 @@
  */
 import 'package:flutter/material.dart';
 
-/// Fills for surfaces painted directly onto the home wallpaper.
+/// Fills for surfaces painted directly onto the home surface's aura backdrop.
 ///
-/// Translucency marks what touches the wallpaper, and nothing else. It is
+/// Translucency marks what touches the backdrop, and nothing else. It is
 /// applied to the outermost surface of a group only: whatever sits inside one
-/// of these reads against it rather than against the image, so a second alpha
-/// nested in the first only muddies both. Chips carrying a container's identity
+/// of these reads against it rather than against the backdrop, so a second
+/// alpha nested in the first only muddies both. Chips carrying a container's identity
 /// color and any control that should read as solid stay opaque for the same
 /// reason — alpha shifts a color against whatever happens to be behind it.
 ///
 /// Two levels, and the split is by text density rather than by importance. The
 /// small, densely typeset surface is the one that needs the quieter backdrop.
-extension WallpaperSurfaceFill on Color {
+extension AuraSurfaceFill on Color {
   /// Broad containers: a module card, a banner. Little type per unit of area,
-  /// so they can let more of the image through.
-  Color get wallpaperBroad => withValues(alpha: 0.9);
+  /// so they can let more of the backdrop through.
+  Color get auraBroad => withValues(alpha: 0.9);
 
   /// Small, text-dense cells: a shortcut tile. These carry the smallest type on
-  /// the surface, directly over the image, so they get the more opaque fill.
-  Color get wallpaperDense => withValues(alpha: 0.7);
+  /// the surface, directly over the backdrop, so they get the more opaque fill.
+  Color get auraDense => withValues(alpha: 0.7);
 }
 
-extension WallpaperSurfaceOutline on ColorScheme {
-  /// Hairline edge that belongs with every one of those fills. Over a
-  /// photograph an edge holds the boundary of a surface far better than the
-  /// fill does. A surface with a branded outline of its own substitutes that.
-  Color get wallpaperOutline => outlineVariant.withValues(alpha: 0.4);
+extension AuraSurfaceOutline on ColorScheme {
+  /// Hairline edge that belongs with every one of those fills. Over a gradient
+  /// an edge holds the boundary of a surface far better than the fill does. A
+  /// surface with a branded outline of its own substitutes that.
+  Color get auraOutline => outlineVariant.withValues(alpha: 0.4);
 }

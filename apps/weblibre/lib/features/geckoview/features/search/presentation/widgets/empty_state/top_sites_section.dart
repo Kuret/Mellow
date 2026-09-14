@@ -25,7 +25,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/wallpaper_surface.dart';
+import 'package:weblibre/core/design/aura_surface.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/edit_top_site_dialog.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
@@ -254,10 +254,10 @@ class _TopSitesGrid extends ConsumerWidget {
 /// they did once, when the "+" was the only translucent one among solid tiles.
 ///
 /// The fill is deliberately not opaque: this grid paints straight onto the home
-/// surface, so a wallpaper and the aura gradient behind it read through the
-/// cells the way they read through a module card. It takes the denser of the
-/// two wallpaper-surface levels, because a tile label is the smallest type on
-/// the surface and sits directly over the image.
+/// surface, so the aura gradient behind it reads through the cells the way it
+/// reads through a module card. It takes the denser of the two aura-surface
+/// levels, because a tile label is the smallest type on the surface and sits
+/// directly over the gradient.
 class _TopSiteTileSurface extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -277,9 +277,9 @@ class _TopSiteTileSurface extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHigh.wallpaperDense,
+        color: colorScheme.surfaceContainerHigh.auraDense,
         borderRadius: borderRadius,
-        border: Border.all(color: colorScheme.wallpaperOutline),
+        border: Border.all(color: colorScheme.auraOutline),
       ),
       // Transparent so the ink splash rides on the decoration above rather
       // than painting a second, opaque layer over it.
