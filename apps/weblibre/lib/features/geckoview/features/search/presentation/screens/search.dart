@@ -420,10 +420,9 @@ class SearchScreen extends HookConsumerWidget {
     /// Records the search and returns the URI that runs it.
     Future<Uri> resolveSearchUri(SearchProvider provider, String query) async {
       if (!privateTabMode) {
-        final settings = ref.read(generalSettingsWithDefaultsProvider);
         await ref
             .read(searchHistoryRepositoryProvider.notifier)
-            .addEntry(query, maxEntryCount: settings.maxSearchHistoryEntries);
+            .addEntry(query, maxEntryCount: kMaxSearchHistoryEntries);
       }
 
       return provider.searchUrl(query);
@@ -515,7 +514,6 @@ class SearchScreen extends HookConsumerWidget {
     }
 
     final isPanel = presentation == SearchPresentation.panel;
-
 
     // The card shrink-wraps its content, so it needs an upper bound to stop it
     // from growing into a full-screen page by another name.

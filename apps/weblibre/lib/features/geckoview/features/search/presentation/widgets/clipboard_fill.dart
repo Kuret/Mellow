@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
@@ -32,14 +31,6 @@ class ClipboardFillLink extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allowClipboardAccess = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.allowClipboardAccess),
-    );
-
-    if (!allowClipboardAccess) {
-      return const SizedBox.shrink();
-    }
-
     final clipboardUrl = useCachedFuture(() => tryGetUriFromClipboard());
     final currentText = useValueListenable(controller);
 

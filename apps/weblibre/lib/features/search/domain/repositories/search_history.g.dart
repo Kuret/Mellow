@@ -114,4 +114,4 @@ final class SearchHistoryProvider
   }
 }
 
-String _$searchHistoryHash() => r'f25ff90fcdc8377aa815cbffb83c664fd6b00d2b';
+String _$searchHistoryHash() => r'9e3905e322da93f4e87a9fd6db074b0af8e9ed27';

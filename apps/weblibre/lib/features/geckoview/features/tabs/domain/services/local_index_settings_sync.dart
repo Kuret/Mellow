@@ -23,11 +23,9 @@ import 'dart:async';
 // providers; `riverpod_annotation` re-exports `Ref` but not the
 // ProviderListenable extensions, so this import isn't redundant despite
 // the unused-import lint's opinion.
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'local_index_settings_sync.g.dart';
 
@@ -64,22 +62,8 @@ class LocalIndexSettingsSync extends _$LocalIndexSettingsSync {
 
   @override
   void build() {
-    ref.listen(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => (
-          enabled: s.enableLocalSearchIndex,
-          indexPrivate: s.indexPrivateTabs,
-        ),
-      ),
-      (previous, next) {
-        if (previous == next) return;
-        // Fire-and-forget: `_writeLock` ensures the second flip queues
-        // behind the first instead of racing it.
-        unawaited(
-          _push(enabled: next.enabled, indexPrivate: next.indexPrivate),
-        );
-      },
-      fireImmediately: true,
-    );
+    // Fixed: the index is always on and never sees private tabs, so the values
+    // are pushed once rather than watched.
+    unawaited(_push(enabled: true, indexPrivate: false));
   }
 }

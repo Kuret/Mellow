@@ -66,7 +66,7 @@ final class LocalIndexSettingsSyncProvider
 }
 
 String _$localIndexSettingsSyncHash() =>
-    r'f1e1878741020de80640da72905fce4e56d13789';
+    r'f11cdbfc9825dfe7440ba6dc4188c7ab4d1e19e1';
 
 /// Mirrors `enableLocalSearchIndex` / `indexPrivateTabs` from user.db
 /// settings into tab.db's `local_index_setting` rows. The trigger reads

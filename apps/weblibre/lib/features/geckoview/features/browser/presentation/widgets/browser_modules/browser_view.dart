@@ -600,8 +600,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 case SharedText():
                   final route = SearchRoute(
                     tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        TabType.regular,
+                        ref.read(selectedTabTypeProvider) ?? TabType.regular,
                     searchText: sharedContent.text,
                     launchedFromIntent: true, //launched from intent
                   );
@@ -744,23 +743,18 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
           //Don't do anything if a child route is active
           if (topRoute is GoRoute && topRoute.name == BrowserRoute.name) {
-            final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-            if (settings.allowClipboardAccess) {
-              unawaited(
-                showSuggestNewTabMessage(
-                  context,
-                  onAdd: (searchText) async {
-                    await SearchRoute(
-                      tabType:
-                          ref.read(selectedTabTypeProvider) ??
-                          TabType.regular,
-                      searchText: searchText ?? SearchRoute.emptySearchText,
-                    ).push(context);
-                  },
-                ),
-              );
-            }
+            unawaited(
+              showSuggestNewTabMessage(
+                context,
+                onAdd: (searchText) async {
+                  await SearchRoute(
+                    tabType:
+                        ref.read(selectedTabTypeProvider) ?? TabType.regular,
+                    searchText: searchText ?? SearchRoute.emptySearchText,
+                  ).push(context);
+                },
+              ),
+            );
           }
         }
 

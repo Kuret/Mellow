@@ -16,7 +16,6 @@ const _services = <String>[
   'webExtensionsStateProvider(WebExtensionActionType.page)',
   'nativeIntentGatekeeperReplicatorProvider',
   'cacheRepositoryProvider',
-  'searchHistoryCleanupServiceProvider',
   'localIndexSettingsSyncProvider',
   'profileRestartRequestHandlerProvider',
   'sharingIntentStreamProvider',

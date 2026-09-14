@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 // The `riverpod` table's generated class is also named `Riverpod`, colliding
 // with the annotation of the same name from riverpod_annotation.
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     hide Riverpod;
 import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'search_history.g.dart';
 
@@ -72,13 +70,12 @@ class SearchHistoryRepository extends _$SearchHistoryRepository {
   }
 }
 
+/// Recent searches kept per profile. Fixed: the list is a convenience under
+/// the search field, not an archive.
+const kMaxSearchHistoryEntries = 5;
+
 @Riverpod()
 Stream<List<SearchHistoryData>> searchHistory(Ref ref) {
   final repository = ref.watch(searchHistoryRepositoryProvider.notifier);
-  final maxSearchHistoryEntries = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (s) => s.maxSearchHistoryEntries,
-    ),
-  );
-  return repository.watchEntries(limit: maxSearchHistoryEntries);
+  return repository.watchEntries(limit: kMaxSearchHistoryEntries);
 }

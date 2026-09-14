@@ -25,7 +25,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
@@ -85,12 +84,6 @@ class SearchField extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final acceptSuggestionOnSubmit = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.acceptSuggestionOnSubmit,
-      ),
-    );
-
     final hasText = useListenableSelector(
       textEditingController,
       () => textEditingController.text.isNotEmpty,
@@ -142,8 +135,7 @@ class SearchField extends HookConsumerWidget {
       child: AutoSuggestTextField(
         controller: textEditingController,
         suggestion: suggestion.value,
-        acceptSuggestionOnSubmit:
-            acceptSuggestionOnSubmit && !explicitProviderSelected,
+        acceptSuggestionOnSubmit: !explicitProviderSelected,
         enableSuggestions: true,
         autocorrect: false,
         enableIMEPersonalizedLearning: !privateMode,

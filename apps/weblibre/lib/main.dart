@@ -64,7 +64,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
-import 'package:weblibre/features/search/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -400,7 +399,6 @@ class _MainWidget extends HookConsumerWidget {
       _activateService(ref, liveTabBudgetProvider);
       // Arms the "search history limit was reduced" listener; a reduction made
       // while the browser view was gone used to be missed entirely.
-      _activateService(ref, searchHistoryCleanupServiceProvider);
       // The Zen Spaces sync client: schedules itself off restore completion,
       // app resume, a periodic timer and local tab-model changes.
       _activateService(ref, spacesSyncServiceProvider);
@@ -422,7 +420,9 @@ class _MainWidget extends HookConsumerWidget {
 
       // One-shot: seeds this fork's own defaults (formerly applied by the
       // now-removed onboarding wizard) into the profile, exactly once.
-      unawaited(ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed());
+      unawaited(
+        ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed(),
+      );
 
       // Listen for "restart into the shortcut's profile" from the native
       // mismatch dialog. Only this isolate can shut the profile down cleanly.

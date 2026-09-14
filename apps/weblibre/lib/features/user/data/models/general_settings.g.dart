@@ -63,10 +63,6 @@ abstract class _$GeneralSettingsCWProxy {
     Duration unassignedTabsAutoCleanInterval,
   );
 
-  GeneralSettings maxSearchHistoryEntries(int maxSearchHistoryEntries);
-
-  GeneralSettings allowClipboardAccess(bool allowClipboardAccess);
-
   GeneralSettings tabListShowFavicons(bool tabListShowFavicons);
 
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
@@ -96,12 +92,6 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings appLinksMode(AppLinksMode appLinksMode);
 
   GeneralSettings appLinkRules(Map<String, PersistedAppLinkRule> appLinkRules);
-
-  GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
-
-  GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
-
-  GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit);
 
   GeneralSettings pureBlack(bool pureBlack);
 
@@ -141,8 +131,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
     Duration unassignedTabsAutoCleanInterval,
-    int maxSearchHistoryEntries,
-    bool allowClipboardAccess,
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
     bool quickTabSwitcherShowHistorySuggestions,
@@ -156,9 +144,6 @@ abstract class _$GeneralSettingsCWProxy {
     bool customTabsEnabled,
     AppLinksMode appLinksMode,
     Map<String, PersistedAppLinkRule> appLinkRules,
-    bool enableLocalSearchIndex,
-    bool indexPrivateTabs,
-    bool acceptSuggestionOnSubmit,
     bool pureBlack,
     bool globalDesktopMode,
     List<String> desktopModeSites,
@@ -264,14 +249,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(unassignedTabsAutoCleanInterval: unassignedTabsAutoCleanInterval);
 
   @override
-  GeneralSettings maxSearchHistoryEntries(int maxSearchHistoryEntries) =>
-      call(maxSearchHistoryEntries: maxSearchHistoryEntries);
-
-  @override
-  GeneralSettings allowClipboardAccess(bool allowClipboardAccess) =>
-      call(allowClipboardAccess: allowClipboardAccess);
-
-  @override
   GeneralSettings tabListShowFavicons(bool tabListShowFavicons) =>
       call(tabListShowFavicons: tabListShowFavicons);
 
@@ -331,18 +308,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(appLinkRules: appLinkRules);
 
   @override
-  GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
-      call(enableLocalSearchIndex: enableLocalSearchIndex);
-
-  @override
-  GeneralSettings indexPrivateTabs(bool indexPrivateTabs) =>
-      call(indexPrivateTabs: indexPrivateTabs);
-
-  @override
-  GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit) =>
-      call(acceptSuggestionOnSubmit: acceptSuggestionOnSubmit);
-
-  @override
   GeneralSettings pureBlack(bool pureBlack) => call(pureBlack: pureBlack);
 
   @override
@@ -388,8 +353,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
-    Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
-    Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
@@ -404,9 +367,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? customTabsEnabled = const $CopyWithPlaceholder(),
     Object? appLinksMode = const $CopyWithPlaceholder(),
     Object? appLinkRules = const $CopyWithPlaceholder(),
-    Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
-    Object? indexPrivateTabs = const $CopyWithPlaceholder(),
-    Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
@@ -525,18 +485,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unassignedTabsAutoCleanInterval
           // ignore: cast_nullable_to_non_nullable
           : unassignedTabsAutoCleanInterval as Duration,
-      maxSearchHistoryEntries:
-          maxSearchHistoryEntries == const $CopyWithPlaceholder() ||
-              maxSearchHistoryEntries == null
-          ? _value.maxSearchHistoryEntries
-          // ignore: cast_nullable_to_non_nullable
-          : maxSearchHistoryEntries as int,
-      allowClipboardAccess:
-          allowClipboardAccess == const $CopyWithPlaceholder() ||
-              allowClipboardAccess == null
-          ? _value.allowClipboardAccess
-          // ignore: cast_nullable_to_non_nullable
-          : allowClipboardAccess as bool,
       tabListShowFavicons:
           tabListShowFavicons == const $CopyWithPlaceholder() ||
               tabListShowFavicons == null
@@ -614,24 +562,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.appLinkRules
           // ignore: cast_nullable_to_non_nullable
           : appLinkRules as Map<String, PersistedAppLinkRule>,
-      enableLocalSearchIndex:
-          enableLocalSearchIndex == const $CopyWithPlaceholder() ||
-              enableLocalSearchIndex == null
-          ? _value.enableLocalSearchIndex
-          // ignore: cast_nullable_to_non_nullable
-          : enableLocalSearchIndex as bool,
-      indexPrivateTabs:
-          indexPrivateTabs == const $CopyWithPlaceholder() ||
-              indexPrivateTabs == null
-          ? _value.indexPrivateTabs
-          // ignore: cast_nullable_to_non_nullable
-          : indexPrivateTabs as bool,
-      acceptSuggestionOnSubmit:
-          acceptSuggestionOnSubmit == const $CopyWithPlaceholder() ||
-              acceptSuggestionOnSubmit == null
-          ? _value.acceptSuggestionOnSubmit
-          // ignore: cast_nullable_to_non_nullable
-          : acceptSuggestionOnSubmit as bool,
       pureBlack: pureBlack == const $CopyWithPlaceholder() || pureBlack == null
           ? _value.pureBlack
           // ignore: cast_nullable_to_non_nullable
@@ -669,104 +599,99 @@ extension $GeneralSettingsCopyWith on GeneralSettings {
 // JsonSerializableGenerator
 // **************************************************************************
 
-GeneralSettings _$GeneralSettingsFromJson(
-  Map<String, dynamic> json,
-) => GeneralSettings.withDefaults(
-  themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
-  deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
-      ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
-      .toSet(),
-  screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
-  allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
-  defaultSearchProvider: const SearchProviderIdConverter().fromJson(
-    json['defaultSearchProvider'] as String?,
-  ),
-  defaultSearchSuggestionsProvider: $enumDecodeNullable(
-    _$SearchSuggestionProvidersEnumMap,
-    json['defaultSearchSuggestionsProvider'],
-  ),
-  showContainerUi: json['showContainerUi'] as bool?,
-  homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
-  homeTargetUrl: json['homeTargetUrl'] as String?,
-  homeSearchBarPlacement: $enumDecodeNullable(
-    _$HomeSearchBarPlacementEnumMap,
-    json['homeSearchBarPlacement'],
-  ),
-  tabIntentOpenSetting: $enumDecodeNullable(
-    _$TabIntentOpenSettingEnumMap,
-    json['tabIntentOpenSetting'],
-    unknownValue: TabIntentOpenSetting.regular,
-  ),
-  bookmarkOpenSetting: $enumDecodeNullable(
-    _$BookmarkOpenSettingEnumMap,
-    json['bookmarkOpenSetting'],
-    unknownValue: BookmarkOpenSetting.regular,
-  ),
-  autoHideTabBar: json['autoHideTabBar'] as bool?,
-  tabBarSwipeAction: $enumDecodeNullable(
-    _$TabBarSwipeActionEnumMap,
-    json['tabBarSwipeAction'],
-  ),
-  historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
-      ? null
-      : Duration(
-          microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
-        ),
-  tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
-  tabBarPosition: $enumDecodeNullable(
-    _$TabBarPositionEnumMap,
-    json['tabBarPosition'],
-  ),
-  tabBarLayout: $enumDecodeNullable(
-    _$TabBarLayoutEnumMap,
-    json['tabBarLayout'],
-  ),
-  tabBarStackingMode: $enumDecodeNullable(
-    _$TabBarStackingModeEnumMap,
-    json['tabBarStackingMode'],
-  ),
-  unassignedTabsAutoCleanInterval:
-      json['unassignedTabsAutoCleanInterval'] == null
-      ? null
-      : Duration(
-          microseconds: (json['unassignedTabsAutoCleanInterval'] as num)
-              .toInt(),
-        ),
-  maxSearchHistoryEntries: (json['maxSearchHistoryEntries'] as num?)?.toInt(),
-  allowClipboardAccess: json['allowClipboardAccess'] as bool?,
-  tabListShowFavicons: json['tabListShowFavicons'] as bool?,
-  quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
-  quickTabSwitcherShowHistorySuggestions:
-      json['quickTabSwitcherShowHistorySuggestions'] as bool?,
-  quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
-      ?.toDouble(),
-  syncServerOverride: json['syncServerOverride'] as String?,
-  syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
-  tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
-  allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
-  blockExternalAppsEnabled: json['blockExternalAppsEnabled'] as bool?,
-  externalAppIntentPolicies:
-      (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
+GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
+    GeneralSettings.withDefaults(
+      themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
+      deleteBrowsingDataOnQuit:
+          (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
+              .toSet(),
+      screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
+      allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
+      defaultSearchProvider: const SearchProviderIdConverter().fromJson(
+        json['defaultSearchProvider'] as String?,
       ),
-  customTabsEnabled: json['customTabsEnabled'] as bool?,
-  appLinksMode: $enumDecodeNullable(
-    _$AppLinksModeEnumMap,
-    json['appLinksMode'],
-  ),
-  appLinkRules: parseAppLinkRules(
-    json['appLinkRules'] as Map<String, dynamic>?,
-  ),
-  enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
-  indexPrivateTabs: json['indexPrivateTabs'] as bool?,
-  acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
-  pureBlack: json['pureBlack'] as bool?,
-  globalDesktopMode: json['globalDesktopMode'] as bool?,
-  desktopModeSites: (json['desktopModeSites'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
-);
+      defaultSearchSuggestionsProvider: $enumDecodeNullable(
+        _$SearchSuggestionProvidersEnumMap,
+        json['defaultSearchSuggestionsProvider'],
+      ),
+      showContainerUi: json['showContainerUi'] as bool?,
+      homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
+      homeTargetUrl: json['homeTargetUrl'] as String?,
+      homeSearchBarPlacement: $enumDecodeNullable(
+        _$HomeSearchBarPlacementEnumMap,
+        json['homeSearchBarPlacement'],
+      ),
+      tabIntentOpenSetting: $enumDecodeNullable(
+        _$TabIntentOpenSettingEnumMap,
+        json['tabIntentOpenSetting'],
+        unknownValue: TabIntentOpenSetting.regular,
+      ),
+      bookmarkOpenSetting: $enumDecodeNullable(
+        _$BookmarkOpenSettingEnumMap,
+        json['bookmarkOpenSetting'],
+        unknownValue: BookmarkOpenSetting.regular,
+      ),
+      autoHideTabBar: json['autoHideTabBar'] as bool?,
+      tabBarSwipeAction: $enumDecodeNullable(
+        _$TabBarSwipeActionEnumMap,
+        json['tabBarSwipeAction'],
+      ),
+      historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
+          ? null
+          : Duration(
+              microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
+            ),
+      tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
+      tabBarPosition: $enumDecodeNullable(
+        _$TabBarPositionEnumMap,
+        json['tabBarPosition'],
+      ),
+      tabBarLayout: $enumDecodeNullable(
+        _$TabBarLayoutEnumMap,
+        json['tabBarLayout'],
+      ),
+      tabBarStackingMode: $enumDecodeNullable(
+        _$TabBarStackingModeEnumMap,
+        json['tabBarStackingMode'],
+      ),
+      unassignedTabsAutoCleanInterval:
+          json['unassignedTabsAutoCleanInterval'] == null
+          ? null
+          : Duration(
+              microseconds: (json['unassignedTabsAutoCleanInterval'] as num)
+                  .toInt(),
+            ),
+      tabListShowFavicons: json['tabListShowFavicons'] as bool?,
+      quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
+      quickTabSwitcherShowHistorySuggestions:
+          json['quickTabSwitcherShowHistorySuggestions'] as bool?,
+      quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
+          ?.toDouble(),
+      syncServerOverride: json['syncServerOverride'] as String?,
+      syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
+      tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
+      allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
+      blockExternalAppsEnabled: json['blockExternalAppsEnabled'] as bool?,
+      externalAppIntentPolicies:
+          (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
+          ),
+      customTabsEnabled: json['customTabsEnabled'] as bool?,
+      appLinksMode: $enumDecodeNullable(
+        _$AppLinksModeEnumMap,
+        json['appLinksMode'],
+      ),
+      appLinkRules: parseAppLinkRules(
+        json['appLinkRules'] as Map<String, dynamic>?,
+      ),
+      pureBlack: json['pureBlack'] as bool?,
+      globalDesktopMode: json['globalDesktopMode'] as bool?,
+      desktopModeSites: (json['desktopModeSites'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      unmountGeckoViewOffRoute: json['unmountGeckoViewOffRoute'] as bool?,
+    );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
   GeneralSettings instance,
@@ -802,8 +727,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
-  'maxSearchHistoryEntries': instance.maxSearchHistoryEntries,
-  'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
   'quickTabSwitcherShowHistorySuggestions':
@@ -820,9 +743,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'customTabsEnabled': instance.customTabsEnabled,
   'appLinksMode': _$AppLinksModeEnumMap[instance.appLinksMode]!,
   'appLinkRules': instance.appLinkRules.map((k, e) => MapEntry(k, e.toJson())),
-  'enableLocalSearchIndex': instance.enableLocalSearchIndex,
-  'indexPrivateTabs': instance.indexPrivateTabs,
-  'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
   'pureBlack': instance.pureBlack,
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,

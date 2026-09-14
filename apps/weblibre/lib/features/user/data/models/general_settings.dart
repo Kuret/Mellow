@@ -232,8 +232,6 @@ class GeneralSettings with FastEquatable {
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
   final Duration unassignedTabsAutoCleanInterval;
-  final int maxSearchHistoryEntries;
-  final bool allowClipboardAccess;
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
   final bool quickTabSwitcherShowHistorySuggestions;
@@ -264,18 +262,6 @@ class GeneralSettings with FastEquatable {
   /// Malformed entries are dropped on read (see [parseAppLinkRules]).
   @JsonKey(fromJson: parseAppLinkRules)
   final Map<String, PersistedAppLinkRule> appLinkRules;
-
-  /// Whether the local search index (`history` table populated via tab→
-  /// history triggers) is active. When false, the SQL trigger guard returns
-  /// without writing; existing rows stay until the user clears them.
-  final bool enableLocalSearchIndex;
-
-  /// Whether private tabs feed the local search index. Defaults to false.
-  final bool indexPrivateTabs;
-
-  /// Whether pressing the keyboard submit/enter button should automatically
-  /// accept and complete an inline search suggestion. Defaults to false.
-  final bool acceptSuggestionOnSubmit;
 
   /// Whether dark mode should use pure-black ("OLED"/high-contrast) surfaces.
   /// Only takes effect when the effective brightness is dark. Defaults to false.
@@ -331,8 +317,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
     required this.unassignedTabsAutoCleanInterval,
-    required this.maxSearchHistoryEntries,
-    required this.allowClipboardAccess,
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherShowHistorySuggestions,
@@ -346,9 +330,6 @@ class GeneralSettings with FastEquatable {
     required this.customTabsEnabled,
     required this.appLinksMode,
     required this.appLinkRules,
-    required this.enableLocalSearchIndex,
-    required this.indexPrivateTabs,
-    required this.acceptSuggestionOnSubmit,
     required this.pureBlack,
     required this.globalDesktopMode,
     required this.desktopModeSites,
@@ -378,8 +359,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
     Duration? unassignedTabsAutoCleanInterval,
-    int? maxSearchHistoryEntries,
-    bool? allowClipboardAccess,
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
     bool? quickTabSwitcherShowHistorySuggestions,
@@ -393,9 +372,6 @@ class GeneralSettings with FastEquatable {
     bool? customTabsEnabled,
     AppLinksMode? appLinksMode,
     Map<String, PersistedAppLinkRule>? appLinkRules,
-    bool? enableLocalSearchIndex,
-    bool? indexPrivateTabs,
-    bool? acceptSuggestionOnSubmit,
     bool? pureBlack,
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
@@ -432,8 +408,6 @@ class GeneralSettings with FastEquatable {
            tabBarStackingMode ?? TabBarStackingMode.accordion,
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
-       maxSearchHistoryEntries = maxSearchHistoryEntries ?? 5,
-       allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
        quickTabSwitcherShowHistorySuggestions =
@@ -449,9 +423,6 @@ class GeneralSettings with FastEquatable {
        customTabsEnabled = customTabsEnabled ?? true,
        appLinksMode = appLinksMode ?? AppLinksMode.ask,
        appLinkRules = appLinkRules ?? const {},
-       enableLocalSearchIndex = enableLocalSearchIndex ?? true,
-       indexPrivateTabs = indexPrivateTabs ?? false,
-       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
@@ -552,8 +523,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
     unassignedTabsAutoCleanInterval,
-    maxSearchHistoryEntries,
-    allowClipboardAccess,
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
     quickTabSwitcherShowHistorySuggestions,
@@ -567,9 +536,6 @@ class GeneralSettings with FastEquatable {
     customTabsEnabled,
     appLinksMode,
     appLinkRules,
-    enableLocalSearchIndex,
-    indexPrivateTabs,
-    acceptSuggestionOnSubmit,
     pureBlack,
     globalDesktopMode,
     desktopModeSites,
