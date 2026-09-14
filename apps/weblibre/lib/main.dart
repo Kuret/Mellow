@@ -53,7 +53,6 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/core/startup/background_fetch_entrypoint.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
-import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/services/live_tab_budget.dart';
@@ -132,31 +131,6 @@ bool _hasBrokenSurfaceContainerColors(ColorScheme scheme) {
       scheme.surfaceContainerHighest == scheme.surface;
 }
 
-class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
-  const _NoAnimationPageTransitionsBuilder();
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
-  }
-}
-
-const _noAnimationPageTransitionsTheme = PageTransitionsTheme(
-  builders: {
-    TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.iOS: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.linux: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.macOS: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.windows: _NoAnimationPageTransitionsBuilder(),
-  },
-);
-
 /// Starts a long-lived service provider **and keeps it reacting**.
 ///
 /// [WidgetRef.read] is not enough, and the difference is invisible until it
@@ -188,7 +162,6 @@ class _MainWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Apply the configured display refresh rate from app start and keep it in
     // sync with the setting (Flutter defaults to 60Hz otherwise).
-    ref.watch(displayModeApplierProvider);
 
     final rootKey = ref.watch(appStateKeyProvider);
 
@@ -231,21 +204,6 @@ class _MainWidget extends HookConsumerWidget {
 
     final themeMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.themeMode),
-    );
-    final uiScaleFactor = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.uiScaleFactor,
-      ),
-    );
-    final disableAnimations = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.disableAnimations,
-      ),
-    );
-    final showModalBarrier = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.showModalBarrier,
-      ),
     );
     final pureBlack = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.pureBlack),
@@ -561,36 +519,16 @@ class _MainWidget extends HookConsumerWidget {
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: lightColorScheme,
-            pageTransitionsTheme: disableAnimations
-                ? _noAnimationPageTransitionsTheme
-                : null,
-            dialogTheme: DialogThemeData(
-              barrierColor: showModalBarrier ? null : Colors.transparent,
-            ),
-            bottomSheetTheme: BottomSheetThemeData(
-              modalBarrierColor: showModalBarrier ? null : Colors.transparent,
-            ),
             extensions: const <ThemeExtension<dynamic>>[AppColors.light],
           ),
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: darkColorScheme,
-            pageTransitionsTheme: disableAnimations
-                ? _noAnimationPageTransitionsTheme
-                : null,
-            dialogTheme: DialogThemeData(
-              barrierColor: showModalBarrier ? null : Colors.transparent,
-            ),
-            bottomSheetTheme: BottomSheetThemeData(
-              modalBarrierColor: showModalBarrier ? null : Colors.transparent,
-            ),
             extensions: <ThemeExtension<dynamic>>[
               if (pureBlack) AppColors.darkOled else AppColors.dark,
             ],
           ),
           themeMode: themeMode,
-          uiScaleFactor: uiScaleFactor,
-          disableAnimations: disableAnimations,
         );
       },
     );

@@ -47,27 +47,12 @@ part 'general_settings.g.dart';
 const _fallbackSearchProvider = 'brave';
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.brave;
 
-const defaultUiScaleFactor = 1.0;
-
-const minUiScaleFactor = 0.5;
-const maxUiScaleFactor = 1.5;
-const uiScaleFactorStep = 0.05;
-
 /// Max width (logical px) of the title text on a quick tab switcher chip.
 /// The default of 64 sits at the 1/3 position of the slider scale.
 const defaultQuickTabSwitcherTitleWidth = 64.0;
 const minQuickTabSwitcherTitleWidth = 32.0;
 const maxQuickTabSwitcherTitleWidth = 128.0;
 const quickTabSwitcherTitleWidthStep = 8.0;
-
-/// Controls the Android display refresh rate the app requests at startup.
-///
-/// Flutter does not request a high refresh rate by default, so on many devices
-/// (Samsung, OnePlus, Xiaomi, …) the app is left at 60Hz even on a 90/120Hz
-/// panel. [high] asks the OS for the fastest available mode, [low] for the
-/// slowest (battery saving), and [system] leaves the OS-managed default in
-/// place. Android-only; ignored on other platforms.
-enum RefreshRateMode { system, high, low }
 
 /// What a horizontal swipe on the tab bar used to do. The bar swipe steps
 /// through spaces now; kept so stored profiles still decode.
@@ -207,12 +192,6 @@ enum DeleteBrowsingDataType {
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
-  final double uiScaleFactor;
-  final bool disableAnimations;
-
-  /// Android display refresh rate requested at startup. See [RefreshRateMode].
-  final RefreshRateMode refreshRateMode;
-  final bool showModalBarrier;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
   final bool screenshotProtectionEnabled;
 
@@ -232,11 +211,6 @@ class GeneralSettings with FastEquatable {
 
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool showContainerUi;
-
-  /// Whether the search / new-tab page shows a leading close button so it can
-  /// be dismissed without a system back button or back gesture (e.g. on e-ink
-  /// devices). Defaults to false. Only shown when the route can be popped.
-  final bool showSearchCloseButton;
 
   /// What to land on when there is no tab to show — at cold start, and when
   /// the last tab in scope is closed if [homeTargetOnLastTabClosed] is set.
@@ -290,7 +264,6 @@ class GeneralSettings with FastEquatable {
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
   final bool pullToRefreshEnabled;
-  final bool useExternalDownloadManager;
   final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
   final int maxSearchHistoryEntries;
@@ -392,17 +365,12 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings({
     required this.themeMode,
-    required this.uiScaleFactor,
-    required this.disableAnimations,
-    required this.refreshRateMode,
-    required this.showModalBarrier,
     required this.deleteBrowsingDataOnQuit,
     required this.screenshotProtectionEnabled,
     required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.showContainerUi,
-    required this.showSearchCloseButton,
     required this.homeTarget,
     required this.homeTargetUrl,
     required this.homeTargetOnLastTabClosed,
@@ -426,7 +394,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
     required this.pullToRefreshEnabled,
-    required this.useExternalDownloadManager,
     required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
     required this.maxSearchHistoryEntries,
@@ -459,17 +426,12 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
-    double? uiScaleFactor,
-    bool? disableAnimations,
-    RefreshRateMode? refreshRateMode,
-    bool? showModalBarrier,
     this.deleteBrowsingDataOnQuit,
     bool? screenshotProtectionEnabled,
     bool? allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? showContainerUi,
-    bool? showSearchCloseButton,
     HomeTarget? homeTarget,
     this.homeTargetUrl,
     bool? homeTargetOnLastTabClosed,
@@ -491,7 +453,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
     bool? pullToRefreshEnabled,
-    bool? useExternalDownloadManager,
     bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
     int? maxSearchHistoryEntries,
@@ -521,17 +482,12 @@ class GeneralSettings with FastEquatable {
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
   }) : themeMode = themeMode ?? ThemeMode.dark,
-       uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
-       disableAnimations = disableAnimations ?? false,
-       refreshRateMode = refreshRateMode ?? RefreshRateMode.high,
-       showModalBarrier = showModalBarrier ?? true,
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
        allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        showContainerUi = showContainerUi ?? true,
-       showSearchCloseButton = showSearchCloseButton ?? false,
        // Defaults to `home`, which is exactly what the browser did before this
        // setting existed. Anything else would change startup for every user.
        homeTarget = homeTarget ?? HomeTarget.home,
@@ -567,7 +523,6 @@ class GeneralSettings with FastEquatable {
            // ignore: deprecated_member_use_from_same_package
            tabBarStackingMode ?? TabBarStackingMode.accordion,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
-       useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
            unassignedTabsAutoCleanInterval ?? Duration.zero,
@@ -700,17 +655,12 @@ class GeneralSettings with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     themeMode,
-    uiScaleFactor,
-    disableAnimations,
-    refreshRateMode,
-    showModalBarrier,
     deleteBrowsingDataOnQuit,
     screenshotProtectionEnabled,
     allowPrivateTabScreenshots,
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     showContainerUi,
-    showSearchCloseButton,
     homeTarget,
     homeTargetUrl,
     homeTargetOnLastTabClosed,
@@ -732,7 +682,6 @@ class GeneralSettings with FastEquatable {
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
     pullToRefreshEnabled,
-    useExternalDownloadManager,
     doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
     maxSearchHistoryEntries,

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -83,9 +84,27 @@ class EngineSettingsReplicationService
     extends _$EngineSettingsReplicationService {
   final _service = GeckoEngineSettingsService();
 
+  /// Values the user can no longer change: pull-to-refresh is always on and
+  /// downloads are always handled in-app. Pushed once at startup instead of
+  /// being watched, because nothing can change them afterwards.
+  Future<void> _applyFixedEngineFlags() async {
+    try {
+      await _service.setPullToRefreshEnabled(true);
+      await _service.setUseExternalDownloadManager(false);
+    } catch (error, stackTrace) {
+      logger.e(
+        'Error applying fixed engine flags',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   @override
   void build() {
     var initialSettingsSent = false;
+
+    unawaited(_applyFixedEngineFlags());
 
     ref.listen(
       fireImmediately: true,
@@ -144,39 +163,7 @@ class EngineSettingsReplicationService
       },
     );
 
-    ref.listen(
-      fireImmediately: true,
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.pullToRefreshEnabled,
-      ),
-      (previous, next) async {
-        await _service.setPullToRefreshEnabled(next);
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to pullToRefreshEnabled',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
-    ref.listen(
-      fireImmediately: true,
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.useExternalDownloadManager,
-      ),
-      (previous, next) async {
-        await _service.setUseExternalDownloadManager(next);
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to useExternalDownloadManager',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
 
     ref.listen(
       fireImmediately: true,

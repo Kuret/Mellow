@@ -98,9 +98,9 @@ _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
       title: 'General',
-      subtitle: 'Appearance, downloads',
+      subtitle: 'Appearance, profile',
       icon: Icons.tune,
-      keywords: const ['theme', 'ui zoom', 'default browser'],
+      keywords: const ['theme', 'default browser'],
       sections: generalSettingsSections,
       onTap: (context) => GeneralSettingsRoute().push(context),
     ),

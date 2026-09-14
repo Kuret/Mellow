@@ -33,7 +33,6 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> generalSettingsSections = [
   SettingsSectionDefinition(
@@ -64,58 +63,6 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
             'screens',
         keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
         child: _PureBlackTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'User Interface Zoom',
-        subtitle: 'Make the user interface smaller or larger',
-        keywords: ['ui scale', 'zoom'],
-        child: _UiZoomSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Refresh Rate',
-        subtitle: 'Request a high or low display refresh rate (Android)',
-        keywords: [
-          'fps',
-          'hz',
-          'hertz',
-          'frame rate',
-          'framerate',
-          '60hz',
-          '90hz',
-          '120hz',
-          'smooth',
-          'high refresh',
-          'display mode',
-        ],
-        child: _RefreshRateSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Disable Animations',
-        subtitle: 'Reduce motion and turn off app animations',
-        keywords: ['motion'],
-        child: _DisableAnimationsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Modal Barrier',
-        subtitle: 'Dim the background behind dialogs and bottom sheets',
-        keywords: ['dialogs', 'bottom sheets', 'overlay'],
-        child: _ShowModalBarrierTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Close Button',
-        subtitle:
-            'Add a button to dismiss the search / new-tab page without '
-            'a back gesture',
-        keywords: [
-          'back',
-          'close',
-          'dismiss',
-          'e-ink',
-          'eink',
-          'accessibility',
-          'new tab',
-        ],
-        child: _ShowSearchCloseButtonTile(),
       ),
     ],
   ),
@@ -151,17 +98,6 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
           'migrate',
         ],
         child: _SettingsTransferTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Downloads',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Use external download manager',
-        subtitle: 'Manage downloads with another app',
-        keywords: ['downloads'],
-        child: _ExternalDownloadManagerTile(),
       ),
     ],
   ),
@@ -232,7 +168,7 @@ class GeneralSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'General',
-      subtitle: 'Appearance, downloads, and browser defaults.',
+      subtitle: 'Appearance, profile, and browser defaults.',
       icon: Icons.tune,
       sections: generalSettingsSections,
     );
@@ -282,162 +218,6 @@ class _DefaultBrowserTile extends HookConsumerWidget {
         icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
         label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
       ),
-    );
-  }
-}
-
-class _UiZoomSection extends HookConsumerWidget {
-  const _UiZoomSection();
-
-  static final _sliderDivisions =
-      ((maxUiScaleFactor - minUiScaleFactor) / uiScaleFactorStep).round();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final uiScaleFactor = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.uiScaleFactor),
-    );
-    final sliderValue = useKeyedState(uiScaleFactor, [uiScaleFactor]);
-
-    final sliderLabel = '${(sliderValue.value * 100).round()}%';
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('User Interface Zoom'),
-            subtitle: Text('Make the user interface smaller or larger'),
-            leading: Icon(Icons.zoom_in),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Row(
-            children: [
-              Text(sliderLabel, style: Theme.of(context).textTheme.titleLarge),
-              Expanded(
-                child: Slider(
-                  min: minUiScaleFactor,
-                  max: maxUiScaleFactor,
-                  divisions: _sliderDivisions,
-                  label: sliderLabel,
-                  value: sliderValue.value.clamp(
-                    minUiScaleFactor,
-                    maxUiScaleFactor,
-                  ),
-                  onChanged: (value) {
-                    sliderValue.value = value;
-                  },
-                  onChangeEnd: (value) async {
-                    final normalized = _normalizeUiScale(value);
-                    sliderValue.value = normalized;
-                    await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
-                        .save(
-                          (currentSettings) => currentSettings.copyWith
-                              .uiScaleFactor(normalized),
-                        );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-double _normalizeUiScale(double value) {
-  final clampedValue = value.clamp(minUiScaleFactor, maxUiScaleFactor);
-  final stepIndex = ((clampedValue - minUiScaleFactor) / uiScaleFactorStep)
-      .round();
-  final normalized = minUiScaleFactor + (stepIndex * uiScaleFactorStep);
-  return normalized.clamp(minUiScaleFactor, maxUiScaleFactor);
-}
-
-class _DisableAnimationsTile extends HookConsumerWidget {
-  const _DisableAnimationsTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final disableAnimations = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.disableAnimations),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Disable Animations'),
-      subtitle: const Text('Reduce motion and turn off app animations'),
-      secondary: const Icon(Icons.animation),
-      value: disableAnimations,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.disableAnimations(value),
-            );
-      },
-    );
-  }
-}
-
-class _ShowModalBarrierTile extends HookConsumerWidget {
-  const _ShowModalBarrierTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showModalBarrier = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showModalBarrier),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Modal Barrier'),
-      subtitle: const Text(
-        'Dim the background behind dialogs and bottom sheets',
-      ),
-      secondary: const Icon(Icons.layers),
-      value: showModalBarrier,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.showModalBarrier(value),
-            );
-      },
-    );
-  }
-}
-
-class _ShowSearchCloseButtonTile extends HookConsumerWidget {
-  const _ShowSearchCloseButtonTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showSearchCloseButton = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.showSearchCloseButton,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Close Button'),
-      subtitle: const Text(
-        'Add a button to dismiss the search / new-tab page without a back '
-        'gesture, useful on devices without a back button',
-      ),
-      secondary: const Icon(Icons.close),
-      value: showSearchCloseButton,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.showSearchCloseButton(value),
-            );
-      },
     );
   }
 }
@@ -531,94 +311,6 @@ class _ThemeSection extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _RefreshRateSection extends HookConsumerWidget {
-  const _RefreshRateSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final refreshRateMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.refreshRateMode),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ListTile(
-            title: Text('Refresh Rate'),
-            subtitle: Text(
-              'Choose "High" for the smoothest scrolling and animations on '
-              '90/120Hz screens, or "Low" to save battery.',
-            ),
-            leading: Icon(Icons.speed),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Center(
-            child: SegmentedButton<RefreshRateMode>(
-              segments: const [
-                ButtonSegment(
-                  value: RefreshRateMode.system,
-                  icon: Icon(Icons.smartphone),
-                  label: Text('System'),
-                ),
-                ButtonSegment(
-                  value: RefreshRateMode.high,
-                  icon: Icon(Icons.bolt),
-                  label: Text('High'),
-                ),
-                ButtonSegment(
-                  value: RefreshRateMode.low,
-                  icon: Icon(Icons.battery_saver),
-                  label: Text('Low'),
-                ),
-              ],
-              selected: {refreshRateMode},
-              onSelectionChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.refreshRateMode(value.first),
-                    );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ExternalDownloadManagerTile extends HookConsumerWidget {
-  const _ExternalDownloadManagerTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final useExternalDownloadManager = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.useExternalDownloadManager,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Use external download manager'),
-      subtitle: const Text('Manage downloads with another app'),
-      secondary: const Icon(Icons.download),
-      value: useExternalDownloadManager,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.useExternalDownloadManager(value),
-            );
-      },
     );
   }
 }

@@ -21,7 +21,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -517,13 +516,6 @@ class SearchScreen extends HookConsumerWidget {
 
     final isPanel = presentation == SearchPresentation.panel;
 
-    // Whether to surface an in-app close button so the page can be dismissed
-    // without a system back button/gesture (opt-in, e.g. for e-ink devices).
-    // Only meaningful when there is a route to pop back to. The panel has the
-    // scrim for this, and a full-width bar above the field would only repeat
-    // what tapping outside already does.
-    final showCloseButton =
-        !isPanel && context.canPop() && settings.showSearchCloseButton;
 
     // The card shrink-wraps its content, so it needs an upper bound to stop it
     // from growing into a full-screen page by another name.
@@ -538,22 +530,15 @@ class SearchScreen extends HookConsumerWidget {
         floating: !isPanel,
         pinned: true,
         automaticallyImplyLeading: false,
-        leading: showCloseButton
-            ? IconButton(
-                tooltip: 'Close',
-                icon: const Icon(Icons.close),
-                onPressed: () => context.pop(),
-              )
-            : null,
         backgroundColor: isPanel
             ? colorScheme.surfaceContainerHigh
             : colorScheme.surface,
         scrolledUnderElevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        // Collapse the toolbar in edit mode (no tab-type switcher), but
-        // keep it when the close button needs somewhere to render.
-        toolbarHeight: (isEditMode && !showCloseButton) ? 0 : kToolbarHeight,
+        // Collapse the toolbar in edit mode: there is no tab-type switcher to
+        // show there.
+        toolbarHeight: isEditMode ? 0 : kToolbarHeight,
         titleSpacing: 0.0,
         title: isEditMode
             ? null

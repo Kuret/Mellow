@@ -34,15 +34,11 @@ class MainApp extends HookConsumerWidget {
   final ThemeData? theme;
   final ThemeData? darkTheme;
   final ThemeMode? themeMode;
-  final double uiScaleFactor;
-  final bool disableAnimations;
 
   const MainApp({
     required this.theme,
     required this.darkTheme,
     required this.themeMode,
-    required this.uiScaleFactor,
-    required this.disableAnimations,
     super.key,
   });
 
@@ -59,16 +55,6 @@ class MainApp extends HookConsumerWidget {
             theme: theme,
             darkTheme: darkTheme,
             themeMode: themeMode,
-            themeAnimationStyle: disableAnimations
-                ? AnimationStyle.noAnimation
-                : null,
-            builder: (context, child) {
-              return _AppMediaQueryOverrides(
-                uiScaleFactor: uiScaleFactor,
-                disableAnimations: disableAnimations,
-                child: child ?? const SizedBox.shrink(),
-              );
-            },
             home: Scaffold(
               body: Center(
                 child: Column(
@@ -92,20 +78,13 @@ class MainApp extends HookConsumerWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeMode,
-          themeAnimationStyle: disableAnimations
-              ? AnimationStyle.noAnimation
-              : null,
           routerConfig: router.value,
           builder: (context, child) {
-            return _AppMediaQueryOverrides(
-              uiScaleFactor: uiScaleFactor,
-              disableAnimations: disableAnimations,
-              child: MultiFingerTapGuard(
-                child: _SyncEventListener(
-                  child: _DownloadStoppedListener(
-                    child: _StrictContainerBlockListener(
-                      child: child ?? const SizedBox.shrink(),
-                    ),
+            return MultiFingerTapGuard(
+              child: _SyncEventListener(
+                child: _DownloadStoppedListener(
+                  child: _StrictContainerBlockListener(
+                    child: child ?? const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -119,16 +98,6 @@ class MainApp extends HookConsumerWidget {
           theme: theme,
           darkTheme: darkTheme,
           themeMode: themeMode,
-          themeAnimationStyle: disableAnimations
-              ? AnimationStyle.noAnimation
-              : null,
-          builder: (context, child) {
-            return _AppMediaQueryOverrides(
-              uiScaleFactor: uiScaleFactor,
-              disableAnimations: disableAnimations,
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
           home: Scaffold(
             appBar: AppBar(title: const Text('Initiallization Error')),
             body: Center(
@@ -242,88 +211,6 @@ class _StrictContainerBlockListener extends HookConsumerWidget {
 
     return child;
   }
-}
-
-MediaQueryData applyAppMediaQueryOverrides({
-  required MediaQueryData mediaQuery,
-  required double uiScaleFactor,
-  required bool disableAnimations,
-}) {
-  final textScaler = uiScaleFactor == 1.0
-      ? mediaQuery.textScaler
-      : _AppTextScaler(
-          baseTextScaler: mediaQuery.textScaler,
-          uiScaleFactor: uiScaleFactor,
-        );
-
-  if (disableAnimations) {
-    return mediaQuery.copyWith(textScaler: textScaler, disableAnimations: true);
-  }
-
-  if (uiScaleFactor == 1.0) {
-    return mediaQuery;
-  }
-
-  return mediaQuery.copyWith(textScaler: textScaler);
-}
-
-class _AppMediaQueryOverrides extends StatelessWidget {
-  final double uiScaleFactor;
-  final bool disableAnimations;
-  final Widget child;
-
-  const _AppMediaQueryOverrides({
-    required this.uiScaleFactor,
-    required this.disableAnimations,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (uiScaleFactor == 1.0 && !disableAnimations) {
-      return child;
-    }
-
-    final mediaQuery = MediaQuery.of(context);
-    final overriddenMediaQuery = applyAppMediaQueryOverrides(
-      mediaQuery: mediaQuery,
-      uiScaleFactor: uiScaleFactor,
-      disableAnimations: disableAnimations,
-    );
-
-    return MediaQuery(data: overriddenMediaQuery, child: child);
-  }
-}
-
-class _AppTextScaler extends TextScaler {
-  final TextScaler baseTextScaler;
-  final double uiScaleFactor;
-
-  const _AppTextScaler({
-    required this.baseTextScaler,
-    required this.uiScaleFactor,
-  }) : assert(uiScaleFactor > 0);
-
-  @override
-  double scale(double fontSize) =>
-      baseTextScaler.scale(fontSize) * uiScaleFactor;
-
-  @override
-  double get textScaleFactor => scale(1.0);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-
-    return other is _AppTextScaler &&
-        baseTextScaler == other.baseTextScaler &&
-        uiScaleFactor == other.uiScaleFactor;
-  }
-
-  @override
-  int get hashCode => Object.hash(baseTextScaler, uiScaleFactor);
 }
 
 class _SyncEventListener extends ConsumerWidget {

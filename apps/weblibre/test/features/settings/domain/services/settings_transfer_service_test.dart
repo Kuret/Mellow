@@ -73,12 +73,12 @@ void main() {
   group('export', () {
     test('carries settings', () async {
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(true),
+        (current) => current.copyWith.pureBlack(true),
       );
 
       final text = await service().export(sections: settingsOnly);
 
-      expect(text, contains('"disableAnimations": true'));
+      expect(text, contains('"pureBlack": true'));
 
       final document = decodeSettingsExport(text);
       expect(service().availableSections(document), {
@@ -90,12 +90,12 @@ void main() {
   group('import', () {
     test('replaces settings with the ones in the file', () async {
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(true),
+        (current) => current.copyWith.pureBlack(true),
       );
       final exported = await service().export(sections: settingsOnly);
 
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(false),
+        (current) => current.copyWith.pureBlack(false),
       );
 
       await service().import(
@@ -103,17 +103,17 @@ void main() {
         sections: settingsOnly,
       );
 
-      expect((await generalSettings().fetchSettings()).disableAnimations, true);
+      expect((await generalSettings().fetchSettings()).pureBlack, true);
     });
 
     test('leaves sections the caller did not pick alone', () async {
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(true),
+        (current) => current.copyWith.pureBlack(true),
       );
       final exported = await service().export(sections: settingsOnly);
 
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(false),
+        (current) => current.copyWith.pureBlack(false),
       );
 
       await service().import(
@@ -122,7 +122,7 @@ void main() {
       );
 
       expect(
-        (await generalSettings().fetchSettings()).disableAnimations,
+        (await generalSettings().fetchSettings()).pureBlack,
         false,
       );
     });
@@ -284,7 +284,7 @@ void main() {
 
     test('applies nothing when a later section cannot be read', () async {
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(true),
+        (current) => current.copyWith.pureBlack(true),
       );
       final exported = decodeSettingsExport(
         await service().export(sections: settingsOnly),
@@ -309,7 +309,7 @@ void main() {
       );
 
       await generalSettings().updateSettings(
-        (current) => current.copyWith.disableAnimations(false),
+        (current) => current.copyWith.pureBlack(false),
       );
 
       await expectLater(
@@ -321,7 +321,7 @@ void main() {
       );
 
       expect(
-        (await generalSettings().fetchSettings()).disableAnimations,
+        (await generalSettings().fetchSettings()).pureBlack,
         false,
       );
     });

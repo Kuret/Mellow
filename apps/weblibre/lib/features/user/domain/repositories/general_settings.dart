@@ -46,10 +46,6 @@ typedef UpdateGeneralSettingsFunc =
 @visibleForTesting
 const generalSettingColumnTypes = <String, DriftSqlType>{
   'themeMode': DriftSqlType.string,
-  'uiScaleFactor': DriftSqlType.double,
-  'disableAnimations': DriftSqlType.bool,
-  'refreshRateMode': DriftSqlType.string,
-  'showModalBarrier': DriftSqlType.bool,
   'screenshotProtectionEnabled': DriftSqlType.bool,
   'allowPrivateTabScreenshots': DriftSqlType.bool,
   'defaultSearchProvider': DriftSqlType.string,
@@ -74,7 +70,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'quickTabSwitcherMode': DriftSqlType.string,
   'tabBarStackingMode': DriftSqlType.string,
   'pullToRefreshEnabled': DriftSqlType.bool,
-  'useExternalDownloadManager': DriftSqlType.bool,
   'doubleBackCloseTab': DriftSqlType.bool,
   'unassignedTabsAutoCleanInterval': DriftSqlType.int,
   'maxSearchHistoryEntries': DriftSqlType.int,
@@ -100,7 +95,6 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'indexPrivateTabs': DriftSqlType.bool,
   'acceptSuggestionOnSubmit': DriftSqlType.bool,
   'pureBlack': DriftSqlType.bool,
-  'showSearchCloseButton': DriftSqlType.bool,
   'homeTarget': DriftSqlType.string,
   'homeTargetUrl': DriftSqlType.string,
   'homeTargetOnLastTabClosed': DriftSqlType.bool,

@@ -9,14 +9,6 @@ part of 'general_settings.dart';
 abstract class _$GeneralSettingsCWProxy {
   GeneralSettings themeMode(ThemeMode themeMode);
 
-  GeneralSettings uiScaleFactor(double uiScaleFactor);
-
-  GeneralSettings disableAnimations(bool disableAnimations);
-
-  GeneralSettings refreshRateMode(RefreshRateMode refreshRateMode);
-
-  GeneralSettings showModalBarrier(bool showModalBarrier);
-
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
@@ -32,8 +24,6 @@ abstract class _$GeneralSettingsCWProxy {
   );
 
   GeneralSettings showContainerUi(bool showContainerUi);
-
-  GeneralSettings showSearchCloseButton(bool showSearchCloseButton);
 
   GeneralSettings homeTarget(HomeTarget homeTarget);
 
@@ -88,8 +78,6 @@ abstract class _$GeneralSettingsCWProxy {
   );
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
-
-  GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
 
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
 
@@ -166,17 +154,12 @@ abstract class _$GeneralSettingsCWProxy {
   /// ```
   GeneralSettings call({
     ThemeMode themeMode,
-    double uiScaleFactor,
-    bool disableAnimations,
-    RefreshRateMode refreshRateMode,
-    bool showModalBarrier,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     bool screenshotProtectionEnabled,
     bool allowPrivateTabScreenshots,
     String? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool showContainerUi,
-    bool showSearchCloseButton,
     HomeTarget homeTarget,
     String? homeTargetUrl,
     bool homeTargetOnLastTabClosed,
@@ -198,7 +181,6 @@ abstract class _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
     bool pullToRefreshEnabled,
-    bool useExternalDownloadManager,
     bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
@@ -241,22 +223,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings themeMode(ThemeMode themeMode) => call(themeMode: themeMode);
 
   @override
-  GeneralSettings uiScaleFactor(double uiScaleFactor) =>
-      call(uiScaleFactor: uiScaleFactor);
-
-  @override
-  GeneralSettings disableAnimations(bool disableAnimations) =>
-      call(disableAnimations: disableAnimations);
-
-  @override
-  GeneralSettings refreshRateMode(RefreshRateMode refreshRateMode) =>
-      call(refreshRateMode: refreshRateMode);
-
-  @override
-  GeneralSettings showModalBarrier(bool showModalBarrier) =>
-      call(showModalBarrier: showModalBarrier);
-
-  @override
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
@@ -282,10 +248,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showContainerUi(bool showContainerUi) =>
       call(showContainerUi: showContainerUi);
-
-  @override
-  GeneralSettings showSearchCloseButton(bool showSearchCloseButton) =>
-      call(showSearchCloseButton: showSearchCloseButton);
 
   @override
   GeneralSettings homeTarget(HomeTarget homeTarget) =>
@@ -376,10 +338,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
       call(pullToRefreshEnabled: pullToRefreshEnabled);
-
-  @override
-  GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager) =>
-      call(useExternalDownloadManager: useExternalDownloadManager);
 
   @override
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab) =>
@@ -512,17 +470,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
-    Object? uiScaleFactor = const $CopyWithPlaceholder(),
-    Object? disableAnimations = const $CopyWithPlaceholder(),
-    Object? refreshRateMode = const $CopyWithPlaceholder(),
-    Object? showModalBarrier = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
-    Object? showSearchCloseButton = const $CopyWithPlaceholder(),
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
@@ -545,7 +498,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
-    Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
@@ -581,29 +533,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
           : themeMode as ThemeMode,
-      uiScaleFactor:
-          uiScaleFactor == const $CopyWithPlaceholder() || uiScaleFactor == null
-          ? _value.uiScaleFactor
-          // ignore: cast_nullable_to_non_nullable
-          : uiScaleFactor as double,
-      disableAnimations:
-          disableAnimations == const $CopyWithPlaceholder() ||
-              disableAnimations == null
-          ? _value.disableAnimations
-          // ignore: cast_nullable_to_non_nullable
-          : disableAnimations as bool,
-      refreshRateMode:
-          refreshRateMode == const $CopyWithPlaceholder() ||
-              refreshRateMode == null
-          ? _value.refreshRateMode
-          // ignore: cast_nullable_to_non_nullable
-          : refreshRateMode as RefreshRateMode,
-      showModalBarrier:
-          showModalBarrier == const $CopyWithPlaceholder() ||
-              showModalBarrier == null
-          ? _value.showModalBarrier
-          // ignore: cast_nullable_to_non_nullable
-          : showModalBarrier as bool,
       deleteBrowsingDataOnQuit:
           deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
           ? _value.deleteBrowsingDataOnQuit
@@ -638,12 +567,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showContainerUi
           // ignore: cast_nullable_to_non_nullable
           : showContainerUi as bool,
-      showSearchCloseButton:
-          showSearchCloseButton == const $CopyWithPlaceholder() ||
-              showSearchCloseButton == null
-          ? _value.showSearchCloseButton
-          // ignore: cast_nullable_to_non_nullable
-          : showSearchCloseButton as bool,
       homeTarget:
           homeTarget == const $CopyWithPlaceholder() || homeTarget == null
           ? _value.homeTarget
@@ -755,12 +678,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.pullToRefreshEnabled
           // ignore: cast_nullable_to_non_nullable
           : pullToRefreshEnabled as bool,
-      useExternalDownloadManager:
-          useExternalDownloadManager == const $CopyWithPlaceholder() ||
-              useExternalDownloadManager == null
-          ? _value.useExternalDownloadManager
-          // ignore: cast_nullable_to_non_nullable
-          : useExternalDownloadManager as bool,
       doubleBackCloseTab:
           doubleBackCloseTab == const $CopyWithPlaceholder() ||
               doubleBackCloseTab == null
@@ -945,13 +862,6 @@ GeneralSettings _$GeneralSettingsFromJson(
   Map<String, dynamic> json,
 ) => GeneralSettings.withDefaults(
   themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
-  uiScaleFactor: (json['uiScaleFactor'] as num?)?.toDouble(),
-  disableAnimations: json['disableAnimations'] as bool?,
-  refreshRateMode: $enumDecodeNullable(
-    _$RefreshRateModeEnumMap,
-    json['refreshRateMode'],
-  ),
-  showModalBarrier: json['showModalBarrier'] as bool?,
   deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
@@ -965,7 +875,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['defaultSearchSuggestionsProvider'],
   ),
   showContainerUi: json['showContainerUi'] as bool?,
-  showSearchCloseButton: json['showSearchCloseButton'] as bool?,
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
   homeTargetUrl: json['homeTargetUrl'] as String?,
   homeTargetOnLastTabClosed: json['homeTargetOnLastTabClosed'] as bool?,
@@ -1020,7 +929,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['tabBarStackingMode'],
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
-  useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
   doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
   unassignedTabsAutoCleanInterval:
       json['unassignedTabsAutoCleanInterval'] == null
@@ -1076,10 +984,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   GeneralSettings instance,
 ) => <String, dynamic>{
   'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
-  'uiScaleFactor': instance.uiScaleFactor,
-  'disableAnimations': instance.disableAnimations,
-  'refreshRateMode': _$RefreshRateModeEnumMap[instance.refreshRateMode]!,
-  'showModalBarrier': instance.showModalBarrier,
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
@@ -1092,7 +996,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
   'showContainerUi': instance.showContainerUi,
-  'showSearchCloseButton': instance.showSearchCloseButton,
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
   'homeTargetUrl': instance.homeTargetUrl,
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
@@ -1119,7 +1022,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
-  'useExternalDownloadManager': instance.useExternalDownloadManager,
   'doubleBackCloseTab': instance.doubleBackCloseTab,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
@@ -1160,12 +1062,6 @@ const _$ThemeModeEnumMap = {
   ThemeMode.system: 'system',
   ThemeMode.light: 'light',
   ThemeMode.dark: 'dark',
-};
-
-const _$RefreshRateModeEnumMap = {
-  RefreshRateMode.system: 'system',
-  RefreshRateMode.high: 'high',
-  RefreshRateMode.low: 'low',
 };
 
 const _$DeleteBrowsingDataTypeEnumMap = {
