@@ -19,7 +19,7 @@
     <!-- Custom tab menu items -->
     <string name="custom_tab_share">Share</string>
     <string name="custom_tab_desktop_site">Desktop site</string>
-    <string name="custom_tab_open_in_browser">Open in browser</string>
+    <string name="custom_tab_open_in_browser">Open in space</string>
     <string name="custom_tab_navigate_back">Back</string>
     <string name="custom_tab_navigate_forward">Forward</string>
     <string name="custom_tab_refresh">Refresh</string>
