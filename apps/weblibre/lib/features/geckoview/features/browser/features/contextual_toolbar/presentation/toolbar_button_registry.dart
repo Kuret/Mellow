@@ -41,14 +41,12 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/exit_app.dart';
@@ -385,32 +383,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     },
   ),
   ToolbarButtonDefinition(
-    spec: increaseFontToolbarButtonSpec,
-    label: 'Increase Font',
-    icon: MdiIcons.formatFontSizeIncrease,
-    builder: (scope, context, ref) {
-      return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () => _adjustFontSize(context),
-        icon: const Icon(MdiIcons.formatFontSizeIncrease),
-      );
-    },
-  ),
-  ToolbarButtonDefinition(
-    spec: decreaseFontToolbarButtonSpec,
-    label: 'Decrease Font',
-    icon: MdiIcons.formatFontSizeDecrease,
-    builder: (scope, context, ref) {
-      return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () => _adjustFontSize(context),
-        icon: const Icon(MdiIcons.formatFontSizeDecrease),
-      );
-    },
-  ),
-  ToolbarButtonDefinition(
     spec: moveToBackgroundToolbarButtonSpec,
     label: 'Background',
     icon: MdiIcons.arrowCollapseDown,
@@ -507,20 +479,6 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
               },
         icon: const Icon(MdiIcons.chevronDoubleDown),
       );
-    },
-  ),
-  ToolbarButtonDefinition(
-    spec: fontToolbarButtonSpec,
-    label: 'Text Size',
-    icon: MdiIcons.formatSize,
-    builder: (scope, context, ref) {
-      if (scope.isPreview) {
-        return IconButton(
-          onPressed: () {},
-          icon: const Icon(MdiIcons.formatSize),
-        );
-      }
-      return _FontToolbarButton(selectedTabId: scope.selectedTabId);
     },
   ),
   ToolbarButtonDefinition(
@@ -889,16 +847,6 @@ class _BookmarkToggleToolbarButton extends ConsumerWidget {
   }
 }
 
-/// Page text follows the system font size, so there is no factor to step.
-/// The buttons stay on the toolbar and say so rather than doing nothing.
-void _adjustFontSize(BuildContext context) {
-  ui_helper.showInfoMessage(
-    context,
-    'Page text follows your system font size',
-    duration: const Duration(seconds: 2),
-  );
-}
-
 class _DesktopModeToolbarButton extends ConsumerWidget {
   final String? selectedTabId;
 
@@ -922,29 +870,6 @@ class _DesktopModeToolbarButton extends ConsumerWidget {
       icon: Icon(
         desktopEnabled ? Icons.desktop_windows : Icons.desktop_windows_outlined,
         color: desktopEnabled ? Theme.of(context).colorScheme.primary : null,
-      ),
-    );
-  }
-}
-
-class _FontToolbarButton extends ConsumerWidget {
-  final String? selectedTabId;
-
-  const _FontToolbarButton({required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isCustom = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => !s.automaticFontSizeAdjustment && s.fontSizeFactor != 1.0,
-      ),
-    );
-
-    return IconButton(
-      onPressed: () => showFontSizeBottomSheet(context),
-      icon: Icon(
-        MdiIcons.formatSize,
-        color: isCustom ? Theme.of(context).colorScheme.primary : null,
       ),
     );
   }

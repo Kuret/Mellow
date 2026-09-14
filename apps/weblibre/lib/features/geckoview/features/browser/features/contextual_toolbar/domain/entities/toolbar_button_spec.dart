@@ -132,16 +132,6 @@ const duplicateTabToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
-const increaseFontToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.increaseFont,
-  defaultVisible: false,
-);
-
-const decreaseFontToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.decreaseFont,
-  defaultVisible: false,
-);
-
 const moveToBackgroundToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.moveToBackground,
   defaultVisible: false,
@@ -158,11 +148,6 @@ const pageDownToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.pageDown,
   defaultVisible: false,
   canBeFallbackTarget: false,
-);
-
-const fontToolbarButtonSpec = ToolbarButtonSpec(
-  id: ToolbarButtonId.font,
-  defaultVisible: false,
 );
 
 const extensionShortcutToolbarButtonSpec = ToolbarButtonSpec(
@@ -202,12 +187,9 @@ const toolbarButtonSpecs = [
   qrScanToolbarButtonSpec,
   voiceSearchToolbarButtonSpec,
   duplicateTabToolbarButtonSpec,
-  increaseFontToolbarButtonSpec,
-  decreaseFontToolbarButtonSpec,
   moveToBackgroundToolbarButtonSpec,
   pageUpToolbarButtonSpec,
   pageDownToolbarButtonSpec,
-  fontToolbarButtonSpec,
   extensionShortcutToolbarButtonSpec,
   hideTabBarToolbarButtonSpec,
   quitToolbarButtonSpec,
