@@ -28,7 +28,6 @@ import 'package:weblibre/features/settings/presentation/screens/advanced_setting
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -117,21 +116,6 @@ _CategoryGroups _buildCategories() {
       icon: MdiIcons.viewDashboardOutline,
       keywords: const ['workspaces', 'zen', 'spaces', 'containers'],
       onTap: (context) => const SpaceListRoute().push(context),
-    ),
-    _SettingsCategoryDefinition(
-      title: 'Home & New Tab',
-      subtitle: 'What the home and new tab pages show',
-      icon: MdiIcons.homeOutline,
-      keywords: const [
-        'home',
-        'new tab',
-        'start page',
-        'sections',
-        'shortcuts',
-        'top sites',
-      ],
-      sections: homeSettingsSections,
-      onTap: (context) => const HomeSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Toolbar & Layout',

@@ -80,15 +80,6 @@ part of 'routes.dart';
     ),
     TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
     TypedGoRoute<SyncSettingsRoute>(name: 'SyncSettingsRoute', path: 'sync'),
-    TypedGoRoute<HomeSettingsRoute>(name: 'HomeSettingsRoute', path: 'home'),
-    TypedGoRoute<HomeModulesSettingsRoute>(
-      name: 'HomeModulesSettingsRoute',
-      path: 'home_modules',
-    ),
-    TypedGoRoute<NewTabModulesSettingsRoute>(
-      name: 'NewTabModulesSettingsRoute',
-      path: 'new_tab_modules',
-    ),
     TypedGoRoute<ContextualToolbarSettingsRoute>(
       name: 'ContextualToolbarSettingsRoute',
       path: 'contextual_toolbar',
@@ -235,38 +226,6 @@ class SyncSettingsRoute extends GoRouteData with $SyncSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SyncSettingsScreen();
-  }
-}
-
-class HomeSettingsRoute extends GoRouteData with $HomeSettingsRoute {
-  const HomeSettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const HomeSettingsScreen();
-  }
-}
-
-class HomeModulesSettingsRoute extends GoRouteData
-    with $HomeModulesSettingsRoute {
-  const HomeModulesSettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ModuleSurfaceSettingsScreen();
-  }
-}
-
-class NewTabModulesSettingsRoute extends GoRouteData
-    with $NewTabModulesSettingsRoute {
-  const NewTabModulesSettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ModuleSurfaceSettingsScreen(
-      surface: ModuleSurface.newTab,
-      title: 'Customize New Tab',
-    );
   }
 }
 
