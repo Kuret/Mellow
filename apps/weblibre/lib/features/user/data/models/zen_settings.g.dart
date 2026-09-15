@@ -104,6 +104,8 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings railWidth(double railWidth);
 
+  ZenSettings compactRailSide(RailSide? compactRailSide);
+
   ZenSettings showToolbarButtons(bool showToolbarButtons);
 
   ZenSettings maxLiveTabs(int maxLiveTabs);
@@ -137,6 +139,7 @@ abstract class _$ZenSettingsCWProxy {
     RailSide railSide,
     SpaceIndicatorSide spaceIndicatorSide,
     double railWidth,
+    RailSide? compactRailSide,
     bool showToolbarButtons,
     int maxLiveTabs,
     bool separateEssentials,
@@ -197,6 +200,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings railWidth(double railWidth) => call(railWidth: railWidth);
 
   @override
+  ZenSettings compactRailSide(RailSide? compactRailSide) =>
+      call(compactRailSide: compactRailSide);
+
+  @override
   ZenSettings showToolbarButtons(bool showToolbarButtons) =>
       call(showToolbarButtons: showToolbarButtons);
 
@@ -239,6 +246,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? railSide = const $CopyWithPlaceholder(),
     Object? spaceIndicatorSide = const $CopyWithPlaceholder(),
     Object? railWidth = const $CopyWithPlaceholder(),
+    Object? compactRailSide = const $CopyWithPlaceholder(),
     Object? showToolbarButtons = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
@@ -306,6 +314,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.railWidth
           // ignore: cast_nullable_to_non_nullable
           : railWidth as double,
+      compactRailSide: compactRailSide == const $CopyWithPlaceholder()
+          ? _value.compactRailSide
+          // ignore: cast_nullable_to_non_nullable
+          : compactRailSide as RailSide?,
       showToolbarButtons:
           showToolbarButtons == const $CopyWithPlaceholder() ||
               showToolbarButtons == null
@@ -387,6 +399,10 @@ ZenSettings _$ZenSettingsFromJson(
     json['spaceIndicatorSide'],
   ),
   railWidth: (json['railWidth'] as num?)?.toDouble(),
+  compactRailSide: $enumDecodeNullable(
+    _$RailSideEnumMap,
+    json['compactRailSide'],
+  ),
   showToolbarButtons: json['showRailToolbar'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
   separateEssentials: json['separateEssentials'] as bool?,
@@ -411,6 +427,7 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'spaceIndicatorSide':
           _$SpaceIndicatorSideEnumMap[instance.spaceIndicatorSide]!,
       'railWidth': instance.railWidth,
+      'compactRailSide': _$RailSideEnumMap[instance.compactRailSide],
       'showRailToolbar': instance.showToolbarButtons,
       'maxLiveTabs': instance.maxLiveTabs,
       'separateEssentials': instance.separateEssentials,

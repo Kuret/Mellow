@@ -200,6 +200,15 @@ class ZenSettings with FastEquatable {
   /// [defaultRailWidth].
   final double railWidth;
 
+  /// Which edge, if any, the narrow-viewport compact bar offers the tab rail
+  /// from as a slide-out panel, opened by a system back gesture from that
+  /// edge. `null` (the default) means the panel is off: the compact bar's
+  /// back gesture behaves exactly as it always has. Independent of
+  /// [railSide], which only docks the wide-viewport rail — on a narrow
+  /// viewport there is no docked rail, just this optional slide-out reusing
+  /// [RailSide]'s two edges.
+  final RailSide? compactRailSide;
+
   /// Whether the chrome shows its main toolbar row (back, forward, reload,
   /// tabs, menu...): above the address row on the wide side rail, in its own
   /// row on the narrow compact bar. When off, those actions stay reachable
@@ -260,6 +269,7 @@ class ZenSettings with FastEquatable {
     required this.railSide,
     required this.spaceIndicatorSide,
     required this.railWidth,
+    required this.compactRailSide,
     required this.showToolbarButtons,
     required this.maxLiveTabs,
     required this.separateEssentials,
@@ -280,6 +290,7 @@ class ZenSettings with FastEquatable {
     RailSide? railSide,
     SpaceIndicatorSide? spaceIndicatorSide,
     double? railWidth,
+    this.compactRailSide,
     bool? showToolbarButtons,
     int? maxLiveTabs,
     bool? separateEssentials,
@@ -330,6 +341,7 @@ class ZenSettings with FastEquatable {
     railSide,
     spaceIndicatorSide,
     railWidth,
+    compactRailSide,
     showToolbarButtons,
     maxLiveTabs,
     separateEssentials,
