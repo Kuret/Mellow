@@ -18,6 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 part 'compact_rail_panel.g.dart';
 
@@ -36,6 +37,29 @@ class CompactRailPanelOpen extends _$CompactRailPanelOpen {
   void open() => state = true;
 
   void close() => state = false;
+}
+
+/// Which edge the slide-out panel is open on right now.
+///
+/// Explicit state rather than something re-derived from
+/// [ZenSettings.compactRailSide] wherever the current edge is needed: on
+/// [CompactRailSide.either] the setting alone does not say which edge —
+/// that is decided per gesture by `resolveCompactRailBackGesture` — so the
+/// gesture handler and the plain-back fallback both write the resolved side
+/// here in the same beat they call [CompactRailPanelOpen.open], and the panel
+/// widget reads it back to know which edge to render on.
+///
+/// Stays at its last value once set, including after the panel closes: the
+/// panel widget keeps its content mounted (translated off-screen) between
+/// opens, and re-reads this to lay itself out correctly before the very next
+/// gesture updates it.
+@riverpod
+class CompactRailPanelSide extends _$CompactRailPanelSide {
+  @override
+  RailSide? build() => null;
+
+  // ignore: use_setters_to_change_properties
+  void set(RailSide side) => state = side;
 }
 
 /// Whether this device has ever delivered a predictive back gesture to the

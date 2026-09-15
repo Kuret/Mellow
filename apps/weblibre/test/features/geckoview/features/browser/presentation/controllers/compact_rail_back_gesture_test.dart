@@ -23,21 +23,21 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 
 void main() {
-  group('shouldClaimCompactRailBackGesture', () {
+  group('resolveCompactRailBackGesture', () {
     test('never claims with the setting off, whatever else is true', () {
       for (final swipeEdge in [null, SwipeEdge.left, SwipeEdge.right]) {
         for (final isNarrow in [true, false]) {
           for (final isOpen in [true, false]) {
             for (final isCurrent in [true, false]) {
               expect(
-                shouldClaimCompactRailBackGesture(
+                resolveCompactRailBackGesture(
                   side: null,
                   isNarrowViewport: isNarrow,
                   isOpen: isOpen,
                   swipeEdge: swipeEdge,
                   isCurrentRoute: isCurrent,
                 ),
-                isFalse,
+                isNull,
                 reason:
                     'swipeEdge=$swipeEdge isNarrow=$isNarrow '
                     'isOpen=$isOpen isCurrent=$isCurrent',
@@ -48,79 +48,106 @@ void main() {
       }
     });
 
-    test('claims a predictive gesture from the matching edge', () {
+    test('claims a predictive gesture from the matching edge, opening on it', () {
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.left,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
           isNarrowViewport: true,
           isOpen: false,
           swipeEdge: SwipeEdge.left,
           isCurrentRoute: true,
         ),
-        isTrue,
+        RailSide.left,
       );
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.right,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.right,
           isNarrowViewport: true,
           isOpen: false,
           swipeEdge: SwipeEdge.right,
           isCurrentRoute: true,
         ),
-        isTrue,
+        RailSide.right,
       );
     });
 
     test('never claims a predictive gesture from the other edge, so it keeps '
         'doing what it does today', () {
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.left,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
           isNarrowViewport: true,
           isOpen: false,
           swipeEdge: SwipeEdge.right,
           isCurrentRoute: true,
         ),
-        isFalse,
+        isNull,
       );
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.right,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.right,
           isNarrowViewport: true,
           isOpen: false,
           swipeEdge: SwipeEdge.left,
           isCurrentRoute: true,
         ),
-        isFalse,
+        isNull,
       );
     });
 
-    test('never claims on a wide viewport', () {
-      for (final side in RailSide.values) {
+    test(
+      'on either side, claims a predictive gesture from both edges, opening '
+      'on the edge it came from',
+      () {
         expect(
-          shouldClaimCompactRailBackGesture(
+          resolveCompactRailBackGesture(
+            side: CompactRailSide.either,
+            isNarrowViewport: true,
+            isOpen: false,
+            swipeEdge: SwipeEdge.left,
+            isCurrentRoute: true,
+          ),
+          RailSide.left,
+        );
+        expect(
+          resolveCompactRailBackGesture(
+            side: CompactRailSide.either,
+            isNarrowViewport: true,
+            isOpen: false,
+            swipeEdge: SwipeEdge.right,
+            isCurrentRoute: true,
+          ),
+          RailSide.right,
+        );
+      },
+    );
+
+    test('never claims on a wide viewport', () {
+      for (final side in CompactRailSide.values) {
+        expect(
+          resolveCompactRailBackGesture(
             side: side,
             isNarrowViewport: false,
             isOpen: false,
-            swipeEdge: side == RailSide.left ? SwipeEdge.left : SwipeEdge.right,
+            swipeEdge: SwipeEdge.left,
             isCurrentRoute: true,
           ),
-          isFalse,
+          isNull,
         );
       }
     });
 
     test('never claims while the panel is already open', () {
-      for (final side in RailSide.values) {
+      for (final side in CompactRailSide.values) {
         expect(
-          shouldClaimCompactRailBackGesture(
+          resolveCompactRailBackGesture(
             side: side,
             isNarrowViewport: true,
             isOpen: true,
-            swipeEdge: side == RailSide.left ? SwipeEdge.left : SwipeEdge.right,
+            swipeEdge: SwipeEdge.left,
             isCurrentRoute: true,
           ),
-          isFalse,
+          isNull,
         );
       }
     });
@@ -129,69 +156,92 @@ void main() {
       'never claims when the browser screen is not the current route, so a '
       'pushed screen (Settings, Bookmarks, ...) keeps its own back gesture',
       () {
-        for (final side in RailSide.values) {
+        for (final side in CompactRailSide.values) {
           expect(
-            shouldClaimCompactRailBackGesture(
+            resolveCompactRailBackGesture(
               side: side,
               isNarrowViewport: true,
               isOpen: false,
-              swipeEdge: side == RailSide.left
-                  ? SwipeEdge.left
-                  : SwipeEdge.right,
+              swipeEdge: SwipeEdge.left,
               isCurrentRoute: false,
             ),
-            isFalse,
+            isNull,
           );
         }
       },
     );
 
     test('a plain committed back (no predictive events) claims regardless of '
-        'edge, as long as everything else is right', () {
-      for (final side in RailSide.values) {
+        'edge, opening on the configured edge', () {
+      expect(
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
+          isNarrowViewport: true,
+          isOpen: false,
+          swipeEdge: null,
+          isCurrentRoute: true,
+        ),
+        RailSide.left,
+      );
+      expect(
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.right,
+          isNarrowViewport: true,
+          isOpen: false,
+          swipeEdge: null,
+          isCurrentRoute: true,
+        ),
+        RailSide.right,
+      );
+    });
+
+    test(
+      'a plain committed back on either side falls back to the left edge, '
+      'since there is no gesture edge to prefer one over the other with',
+      () {
         expect(
-          shouldClaimCompactRailBackGesture(
-            side: side,
+          resolveCompactRailBackGesture(
+            side: CompactRailSide.either,
             isNarrowViewport: true,
             isOpen: false,
             swipeEdge: null,
             isCurrentRoute: true,
           ),
-          isTrue,
+          RailSide.left,
         );
-      }
-    });
+      },
+    );
 
     test('a plain committed back still respects narrow/open/current', () {
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.left,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
           isNarrowViewport: false,
           isOpen: false,
           swipeEdge: null,
           isCurrentRoute: true,
         ),
-        isFalse,
+        isNull,
       );
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.left,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
           isNarrowViewport: true,
           isOpen: true,
           swipeEdge: null,
           isCurrentRoute: true,
         ),
-        isFalse,
+        isNull,
       );
       expect(
-        shouldClaimCompactRailBackGesture(
-          side: RailSide.left,
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.left,
           isNarrowViewport: true,
           isOpen: false,
           swipeEdge: null,
           isCurrentRoute: false,
         ),
-        isFalse,
+        isNull,
       );
     });
   });

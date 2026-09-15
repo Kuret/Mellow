@@ -59,6 +59,7 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'spaceIndicatorSide': DriftSqlType.string,
   'railWidth': DriftSqlType.double,
   'compactRailSide': DriftSqlType.string,
+  'swipeToMoveRail': DriftSqlType.bool,
   // Persisted name for ZenSettings.showToolbarButtons: kept as
   // 'showRailToolbar' (its old field name, from before the setting also
   // covered the compact bar) so profiles that already turned it off are not

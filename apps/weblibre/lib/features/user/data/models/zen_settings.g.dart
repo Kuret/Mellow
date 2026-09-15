@@ -104,7 +104,9 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings railWidth(double railWidth);
 
-  ZenSettings compactRailSide(RailSide? compactRailSide);
+  ZenSettings compactRailSide(CompactRailSide? compactRailSide);
+
+  ZenSettings swipeToMoveRail(bool swipeToMoveRail);
 
   ZenSettings showToolbarButtons(bool showToolbarButtons);
 
@@ -139,7 +141,8 @@ abstract class _$ZenSettingsCWProxy {
     RailSide railSide,
     SpaceIndicatorSide spaceIndicatorSide,
     double railWidth,
-    RailSide? compactRailSide,
+    CompactRailSide? compactRailSide,
+    bool swipeToMoveRail,
     bool showToolbarButtons,
     int maxLiveTabs,
     bool separateEssentials,
@@ -200,8 +203,12 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings railWidth(double railWidth) => call(railWidth: railWidth);
 
   @override
-  ZenSettings compactRailSide(RailSide? compactRailSide) =>
+  ZenSettings compactRailSide(CompactRailSide? compactRailSide) =>
       call(compactRailSide: compactRailSide);
+
+  @override
+  ZenSettings swipeToMoveRail(bool swipeToMoveRail) =>
+      call(swipeToMoveRail: swipeToMoveRail);
 
   @override
   ZenSettings showToolbarButtons(bool showToolbarButtons) =>
@@ -247,6 +254,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? spaceIndicatorSide = const $CopyWithPlaceholder(),
     Object? railWidth = const $CopyWithPlaceholder(),
     Object? compactRailSide = const $CopyWithPlaceholder(),
+    Object? swipeToMoveRail = const $CopyWithPlaceholder(),
     Object? showToolbarButtons = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
     Object? separateEssentials = const $CopyWithPlaceholder(),
@@ -317,7 +325,13 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
       compactRailSide: compactRailSide == const $CopyWithPlaceholder()
           ? _value.compactRailSide
           // ignore: cast_nullable_to_non_nullable
-          : compactRailSide as RailSide?,
+          : compactRailSide as CompactRailSide?,
+      swipeToMoveRail:
+          swipeToMoveRail == const $CopyWithPlaceholder() ||
+              swipeToMoveRail == null
+          ? _value.swipeToMoveRail
+          // ignore: cast_nullable_to_non_nullable
+          : swipeToMoveRail as bool,
       showToolbarButtons:
           showToolbarButtons == const $CopyWithPlaceholder() ||
               showToolbarButtons == null
@@ -400,9 +414,10 @@ ZenSettings _$ZenSettingsFromJson(
   ),
   railWidth: (json['railWidth'] as num?)?.toDouble(),
   compactRailSide: $enumDecodeNullable(
-    _$RailSideEnumMap,
+    _$CompactRailSideEnumMap,
     json['compactRailSide'],
   ),
+  swipeToMoveRail: json['swipeToMoveRail'] as bool?,
   showToolbarButtons: json['showRailToolbar'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
   separateEssentials: json['separateEssentials'] as bool?,
@@ -427,7 +442,8 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'spaceIndicatorSide':
           _$SpaceIndicatorSideEnumMap[instance.spaceIndicatorSide]!,
       'railWidth': instance.railWidth,
-      'compactRailSide': _$RailSideEnumMap[instance.compactRailSide],
+      'compactRailSide': _$CompactRailSideEnumMap[instance.compactRailSide],
+      'swipeToMoveRail': instance.swipeToMoveRail,
       'showRailToolbar': instance.showToolbarButtons,
       'maxLiveTabs': instance.maxLiveTabs,
       'separateEssentials': instance.separateEssentials,
@@ -443,4 +459,10 @@ const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};
 const _$SpaceIndicatorSideEnumMap = {
   SpaceIndicatorSide.left: 'left',
   SpaceIndicatorSide.right: 'right',
+};
+
+const _$CompactRailSideEnumMap = {
+  CompactRailSide.left: 'left',
+  CompactRailSide.right: 'right',
+  CompactRailSide.either: 'either',
 };

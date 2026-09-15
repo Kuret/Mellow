@@ -49,6 +49,16 @@ const railWidthStep = 8.0;
 /// [TabBarPosition], which only places the narrow-viewport compact bar.
 enum RailSide { left, right }
 
+/// Which edge, if any, the narrow-viewport compact bar's slide-out tab rail
+/// opens from. Independent of [RailSide]: that enum only has the two edges a
+/// *docked* rail can occupy, but the slide-out also offers [either] — a back
+/// gesture opens the panel on whichever edge it came from, decided per
+/// gesture rather than fixed by this setting. See
+/// `resolveCompactRailBackGesture`, the one place that turns a gesture (or
+/// the setting, when there is no gesture edge to go by) into an actual
+/// [RailSide].
+enum CompactRailSide { left, right, either }
+
 /// Which side of the narrow-viewport compact bar's chip strip carries the
 /// fixed space switcher (`SpaceIndicator`). Independent of [RailSide], which
 /// only docks the wide-viewport side rail — the compact bar has no rail to
@@ -204,10 +214,16 @@ class ZenSettings with FastEquatable {
   /// from as a slide-out panel, opened by a system back gesture from that
   /// edge. `null` (the default) means the panel is off: the compact bar's
   /// back gesture behaves exactly as it always has. Independent of
-  /// [railSide], which only docks the wide-viewport rail — on a narrow
-  /// viewport there is no docked rail, just this optional slide-out reusing
-  /// [RailSide]'s two edges.
-  final RailSide? compactRailSide;
+  /// [railSide], which only docks the wide-viewport rail. See
+  /// [CompactRailSide].
+  final CompactRailSide? compactRailSide;
+
+  /// Whether a back gesture from the edge opposite the docked [railSide]
+  /// moves the wide-viewport side rail there instead of performing the
+  /// ordinary back; a back gesture from the rail's own edge always still goes
+  /// back. Off by default: an existing user's back gesture on a wide
+  /// viewport never changes unless they turn this on.
+  final bool swipeToMoveRail;
 
   /// Whether the chrome shows its main toolbar row (back, forward, reload,
   /// tabs, menu...): above the address row on the wide side rail, in its own
@@ -270,6 +286,7 @@ class ZenSettings with FastEquatable {
     required this.spaceIndicatorSide,
     required this.railWidth,
     required this.compactRailSide,
+    required this.swipeToMoveRail,
     required this.showToolbarButtons,
     required this.maxLiveTabs,
     required this.separateEssentials,
@@ -291,6 +308,7 @@ class ZenSettings with FastEquatable {
     SpaceIndicatorSide? spaceIndicatorSide,
     double? railWidth,
     this.compactRailSide,
+    bool? swipeToMoveRail,
     bool? showToolbarButtons,
     int? maxLiveTabs,
     bool? separateEssentials,
@@ -314,6 +332,7 @@ class ZenSettings with FastEquatable {
          minRailWidth,
          maxRailWidth,
        ),
+       swipeToMoveRail = swipeToMoveRail ?? false,
        showToolbarButtons = showToolbarButtons ?? true,
        maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
          minMaxLiveTabs,
@@ -342,6 +361,7 @@ class ZenSettings with FastEquatable {
     spaceIndicatorSide,
     railWidth,
     compactRailSide,
+    swipeToMoveRail,
     showToolbarButtons,
     maxLiveTabs,
     separateEssentials,

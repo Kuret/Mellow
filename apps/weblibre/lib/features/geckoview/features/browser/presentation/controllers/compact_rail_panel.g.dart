@@ -91,6 +91,117 @@ abstract class _$CompactRailPanelOpen extends $Notifier<bool> {
   }
 }
 
+/// Which edge the slide-out panel is open on right now.
+///
+/// Explicit state rather than something re-derived from
+/// [ZenSettings.compactRailSide] wherever the current edge is needed: on
+/// [CompactRailSide.either] the setting alone does not say which edge —
+/// that is decided per gesture by `resolveCompactRailBackGesture` — so the
+/// gesture handler and the plain-back fallback both write the resolved side
+/// here in the same beat they call [CompactRailPanelOpen.open], and the panel
+/// widget reads it back to know which edge to render on.
+///
+/// Stays at its last value once set, including after the panel closes: the
+/// panel widget keeps its content mounted (translated off-screen) between
+/// opens, and re-reads this to lay itself out correctly before the very next
+/// gesture updates it.
+
+@ProviderFor(CompactRailPanelSide)
+final compactRailPanelSideProvider = CompactRailPanelSideProvider._();
+
+/// Which edge the slide-out panel is open on right now.
+///
+/// Explicit state rather than something re-derived from
+/// [ZenSettings.compactRailSide] wherever the current edge is needed: on
+/// [CompactRailSide.either] the setting alone does not say which edge —
+/// that is decided per gesture by `resolveCompactRailBackGesture` — so the
+/// gesture handler and the plain-back fallback both write the resolved side
+/// here in the same beat they call [CompactRailPanelOpen.open], and the panel
+/// widget reads it back to know which edge to render on.
+///
+/// Stays at its last value once set, including after the panel closes: the
+/// panel widget keeps its content mounted (translated off-screen) between
+/// opens, and re-reads this to lay itself out correctly before the very next
+/// gesture updates it.
+final class CompactRailPanelSideProvider
+    extends $NotifierProvider<CompactRailPanelSide, RailSide?> {
+  /// Which edge the slide-out panel is open on right now.
+  ///
+  /// Explicit state rather than something re-derived from
+  /// [ZenSettings.compactRailSide] wherever the current edge is needed: on
+  /// [CompactRailSide.either] the setting alone does not say which edge —
+  /// that is decided per gesture by `resolveCompactRailBackGesture` — so the
+  /// gesture handler and the plain-back fallback both write the resolved side
+  /// here in the same beat they call [CompactRailPanelOpen.open], and the panel
+  /// widget reads it back to know which edge to render on.
+  ///
+  /// Stays at its last value once set, including after the panel closes: the
+  /// panel widget keeps its content mounted (translated off-screen) between
+  /// opens, and re-reads this to lay itself out correctly before the very next
+  /// gesture updates it.
+  CompactRailPanelSideProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'compactRailPanelSideProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$compactRailPanelSideHash();
+
+  @$internal
+  @override
+  CompactRailPanelSide create() => CompactRailPanelSide();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RailSide? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RailSide?>(value),
+    );
+  }
+}
+
+String _$compactRailPanelSideHash() =>
+    r'ce087792232efff6462e10b2208522626655be8a';
+
+/// Which edge the slide-out panel is open on right now.
+///
+/// Explicit state rather than something re-derived from
+/// [ZenSettings.compactRailSide] wherever the current edge is needed: on
+/// [CompactRailSide.either] the setting alone does not say which edge —
+/// that is decided per gesture by `resolveCompactRailBackGesture` — so the
+/// gesture handler and the plain-back fallback both write the resolved side
+/// here in the same beat they call [CompactRailPanelOpen.open], and the panel
+/// widget reads it back to know which edge to render on.
+///
+/// Stays at its last value once set, including after the panel closes: the
+/// panel widget keeps its content mounted (translated off-screen) between
+/// opens, and re-reads this to lay itself out correctly before the very next
+/// gesture updates it.
+
+abstract class _$CompactRailPanelSide extends $Notifier<RailSide?> {
+  RailSide? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<RailSide?, RailSide?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<RailSide?, RailSide?>,
+              RailSide?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Whether this device has ever delivered a predictive back gesture to the
 /// app — i.e. whether the edge a back gesture came from is knowable.
 ///
