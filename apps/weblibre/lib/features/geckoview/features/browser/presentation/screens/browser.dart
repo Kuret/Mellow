@@ -254,6 +254,9 @@ class _TabBar extends HookConsumerWidget {
       zenSettingsWithDefaultsProvider.select((s) => s.railWidth),
     );
     final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
+    final showToolbarButtons = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.showToolbarButtons),
+    );
 
     // Return the toolbar widget - parent handles animation.
     // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
@@ -263,12 +266,14 @@ class _TabBar extends HookConsumerWidget {
         showMainToolbar: showMainToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
+        showToolbarButtons: showToolbarButtons,
       ),
       TabBarPosition.bottom => BrowserBottomAppBar(
         displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
+        showToolbarButtons: showToolbarButtons,
       ),
       TabBarPosition.left || TabBarPosition.right => BrowserSideRail(
         side: tabBarPosition == TabBarPosition.left
@@ -277,6 +282,7 @@ class _TabBar extends HookConsumerWidget {
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         railWidth: railWidth,
         suppressMainToolbar: suppressMainToolbar,
+        showToolbarButtons: showToolbarButtons,
       ),
     };
   }
@@ -583,6 +589,10 @@ class _SideRailToolbarLayer extends StatelessWidget {
   /// Resolved content width for the rail (see [effectiveRailWidth]).
   final double railWidth;
 
+  /// Resolved by the caller, like [suppressMainToolbar]: see
+  /// [BrowserTopAppBar.showToolbarButtons].
+  final bool showToolbarButtons;
+
   const _SideRailToolbarLayer({
     required this.sheetDisplayed,
     required this.tabInFullScreen,
@@ -591,6 +601,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
     required this.selectedTabId,
     required this.suppressMainToolbar,
     required this.railWidth,
+    required this.showToolbarButtons,
   });
 
   @override
@@ -607,6 +618,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
         railWidth: railWidth,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         suppressMainToolbar: suppressMainToolbar,
+        showToolbarButtons: showToolbarButtons,
       ),
     );
   }
@@ -918,6 +930,11 @@ class BrowserScreen extends HookConsumerWidget {
       zenSettingsWithDefaultsProvider.select((value) => value.railWidth),
     );
     final railWidth = effectiveRailWidth(railWidth: railWidthSetting);
+    final showToolbarButtons = ref.watch(
+      zenSettingsWithDefaultsProvider.select(
+        (value) => value.showToolbarButtons,
+      ),
+    );
 
     final autoHideTabBar =
         tabBarPosition.isHorizontal &&
@@ -1050,6 +1067,7 @@ class BrowserScreen extends HookConsumerWidget {
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         displayedSheet: displayedSheet,
         suppressMainToolbar: suppressMainToolbarForHome,
+        showToolbarButtons: showToolbarButtons,
       ).preferredSize;
       viewportBottomAppBarContentSize = displayedSheet == null
           ? bottomAppBarContentSize
@@ -1058,6 +1076,7 @@ class BrowserScreen extends HookConsumerWidget {
               quickTabSwitcherRowCount: quickTabSwitcherRowCount,
               displayedSheet: null,
               suppressMainToolbar: suppressMainToolbarForHome,
+              showToolbarButtons: showToolbarButtons,
             ).preferredSize;
     }
     // Total height includes safe area padding
@@ -1089,6 +1108,7 @@ class BrowserScreen extends HookConsumerWidget {
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       suppressMainToolbar: suppressMainToolbarForHome,
+      showToolbarButtons: showToolbarButtons,
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
@@ -1399,6 +1419,7 @@ class BrowserScreen extends HookConsumerWidget {
                     selectedTabId: selectedTabId,
                     suppressMainToolbar: suppressMainToolbarForHome,
                     railWidth: railWidth,
+                    showToolbarButtons: showToolbarButtons,
                   ),
                 ),
 

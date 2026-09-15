@@ -180,12 +180,17 @@ class ZenSettings with FastEquatable {
   /// [defaultRailWidth].
   final double railWidth;
 
-  /// Whether the wide side rail shows its main toolbar row (back, forward,
-  /// reload, tabs, menu...) above the address row. When off, those actions
-  /// stay reachable through a long-press on the rail's "+" (see
-  /// `SpaceIconRail`); the narrow compact bar is unaffected and always shows
-  /// its toolbar row.
-  final bool showRailToolbar;
+  /// Whether the chrome shows its main toolbar row (back, forward, reload,
+  /// tabs, menu...): above the address row on the wide side rail, in its own
+  /// row on the narrow compact bar. When off, those actions stay reachable
+  /// through a long-press on the rail's "+" (see `SpaceIconRail`) or the
+  /// compact bar's space indicator (see `SpaceIndicatorView`) instead.
+  ///
+  /// The field was renamed from `showRailToolbar` once it started covering
+  /// the compact bar too; the JSON key stays `showRailToolbar` so existing
+  /// profiles that turned it off do not have it silently reset by the rename.
+  @JsonKey(name: 'showRailToolbar')
+  final bool showToolbarButtons;
 
   /// How many tabs may hold a live engine session at once (PLAN §7.4). Above
   /// it, `LiveTabBudget` unloads the least recently used regular tabs back to
@@ -234,7 +239,7 @@ class ZenSettings with FastEquatable {
     required this.spacesSyncMaxTombstoneCount,
     required this.railSide,
     required this.railWidth,
-    required this.showRailToolbar,
+    required this.showToolbarButtons,
     required this.maxLiveTabs,
     required this.separateEssentials,
     required this.customSearchProviders,
@@ -253,7 +258,7 @@ class ZenSettings with FastEquatable {
     int? spacesSyncMaxTombstoneCount,
     RailSide? railSide,
     double? railWidth,
-    bool? showRailToolbar,
+    bool? showToolbarButtons,
     int? maxLiveTabs,
     bool? separateEssentials,
     List<CustomSearchEngine>? customSearchProviders,
@@ -275,7 +280,7 @@ class ZenSettings with FastEquatable {
          minRailWidth,
          maxRailWidth,
        ),
-       showRailToolbar = showRailToolbar ?? true,
+       showToolbarButtons = showToolbarButtons ?? true,
        maxLiveTabs = (maxLiveTabs ?? defaultMaxLiveTabs).clamp(
          minMaxLiveTabs,
          maxMaxLiveTabs,
@@ -301,7 +306,7 @@ class ZenSettings with FastEquatable {
     spacesSyncMaxTombstoneCount,
     railSide,
     railWidth,
-    showRailToolbar,
+    showToolbarButtons,
     maxLiveTabs,
     separateEssentials,
     customSearchProviders,

@@ -57,6 +57,10 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'spacesSyncMaxTombstoneCount': DriftSqlType.int,
   'railSide': DriftSqlType.string,
   'railWidth': DriftSqlType.double,
+  // Persisted name for ZenSettings.showToolbarButtons: kept as
+  // 'showRailToolbar' (its old field name, from before the setting also
+  // covered the compact bar) so profiles that already turned it off are not
+  // silently reset by the rename. See the @JsonKey on the field itself.
   'showRailToolbar': DriftSqlType.bool,
   'maxLiveTabs': DriftSqlType.int,
   'separateEssentials': DriftSqlType.bool,

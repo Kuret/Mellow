@@ -50,7 +50,6 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 export 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart'
     show QuickTabSwitcherItem;
@@ -61,6 +60,14 @@ class BrowserTopAppBar extends StatelessWidget {
   final bool enableGestures;
   final bool suppressMainToolbar;
 
+  /// Whether the toolbar button row is drawn (and its height reserved).
+  /// Threaded in from the caller rather than watched here: [getToolbarHeight]
+  /// runs from this constructor, which has no `ref`, and every construction
+  /// — including the ones built purely to measure [preferredSize] — must
+  /// agree on the same value or the measured height and the drawn height
+  /// diverge.
+  final bool showToolbarButtons;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
 
@@ -68,6 +75,7 @@ class BrowserTopAppBar extends StatelessWidget {
     super.key,
     required this.showMainToolbar,
     required this.quickTabSwitcherRowCount,
+    required this.showToolbarButtons,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
@@ -79,6 +87,7 @@ class BrowserTopAppBar extends StatelessWidget {
       quickTabSwitcherRowCount: 0,
       enableGestures: enableGestures,
       suppressMainToolbar: suppressMainToolbar,
+      showToolbarButtons: showToolbarButtons,
     );
   }
 
@@ -99,6 +108,11 @@ class BrowserBottomAppBar extends StatelessWidget {
   final bool enableGestures;
   final bool suppressMainToolbar;
 
+  /// See [BrowserTopAppBar.showToolbarButtons]: threaded in rather than
+  /// watched, so every construction — including the ones built purely to
+  /// measure [preferredSize] — agrees with what is actually drawn.
+  final bool showToolbarButtons;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
 
@@ -107,6 +121,7 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.quickTabSwitcherRowCount,
+    required this.showToolbarButtons,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
@@ -116,6 +131,7 @@ class BrowserBottomAppBar extends StatelessWidget {
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       enableGestures: enableGestures,
       suppressMainToolbar: suppressMainToolbar,
+      showToolbarButtons: showToolbarButtons,
     );
   }
 
@@ -155,6 +171,12 @@ class BrowserSideRail extends ConsumerWidget {
   /// [effectiveRailWidth].
   final double railWidth;
 
+  /// See [BrowserTopAppBar.showToolbarButtons]. The rail builds its
+  /// [BrowserTabBar] eagerly in this constructor too, so it needs the value
+  /// threaded in the same way, even though the rail itself does not use it
+  /// for sizing (it sizes by [railWidth], not [BrowserTabBar.getToolbarHeight]).
+  final bool showToolbarButtons;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromWidth(railWidth);
 
@@ -163,6 +185,7 @@ class BrowserSideRail extends ConsumerWidget {
     required this.quickTabSwitcherRowCount,
     required this.side,
     required this.railWidth,
+    required this.showToolbarButtons,
     this.suppressMainToolbar = false,
   }) {
     _tabBar = BrowserTabBar(
@@ -172,6 +195,7 @@ class BrowserSideRail extends ConsumerWidget {
       enableGestures: true,
       suppressMainToolbar: suppressMainToolbar,
       railSide: side,
+      showToolbarButtons: showToolbarButtons,
     );
   }
 
@@ -239,12 +263,19 @@ class BrowserTabBar extends HookConsumerWidget {
   /// width ([isWideViewport]), not from any setting.
   final RailSide? railSide;
 
+  /// Whether the toolbar button row is drawn: above the address row on the
+  /// rail, in its own row under the address row on the compact bar. Threaded
+  /// in from the caller (rather than watched here) because [getToolbarHeight]
+  /// runs from the wrapping widgets' constructors, which have no `ref`.
+  final bool showToolbarButtons;
+
   const BrowserTabBar({
     super.key,
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.quickTabSwitcherRowCount,
     required this.enableGestures,
+    required this.showToolbarButtons,
     this.suppressMainToolbar = false,
     this.railSide,
   });
@@ -269,7 +300,10 @@ class BrowserTabBar extends HookConsumerWidget {
     var height = 0.0;
 
     if (displayAppBar) {
-      height += kToolbarHeight + toolbarButtonsRowHeight;
+      height += kToolbarHeight;
+      if (showToolbarButtons) {
+        height += toolbarButtonsRowHeight;
+      }
     }
 
     if (displayQuickTabSwitcher) {
@@ -283,9 +317,6 @@ class BrowserTabBar extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final showRailToolbar = ref.watch(
-      zenSettingsWithDefaultsProvider.select((s) => s.showRailToolbar),
-    );
 
     // The toolbar's configured button set — the same set the Customize
     // Toolbar Buttons screen edits — resolved to concrete widgets for
@@ -429,7 +460,7 @@ class BrowserTabBar extends HookConsumerWidget {
       ...configuredToolbarButtons,
     ];
     final compactActions = <Widget>[const PinnedAddonBar()];
-    final compactToolbarRow = configuredToolbarButtons.isEmpty
+    final compactToolbarRow = !showToolbarButtons || configuredToolbarButtons.isEmpty
         ? null
         : ToolbarButtonsRow(buttons: configuredToolbarButtons);
 
@@ -443,10 +474,7 @@ class BrowserTabBar extends HookConsumerWidget {
       return WideRailLayout(
         backgroundColor: effectiveContainerPalette?.surfaceColor,
         showUrlRow: displayAppBar && showTabTitle,
-        // Scoped to the wide rail only: the narrow compact bar always shows
-        // its toolbar row, since the "+" long-press menu that replaces it
-        // for the rail only exists there.
-        showToolbar: displayAppBar && showRailToolbar,
+        showToolbar: displayAppBar && showToolbarButtons,
         urlRow: WideRailUrlRow(
           title: uprightTitle,
           collapsed: const WideRailCollapsedUrlButton(),

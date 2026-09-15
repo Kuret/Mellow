@@ -166,6 +166,7 @@ void main() {
                   displayedSheet: null,
                   quickTabSwitcherRowCount: 0,
                   enableGestures: false,
+                  showToolbarButtons: true,
                 ),
               ),
             ),
@@ -201,6 +202,7 @@ void main() {
                       quickTabSwitcherRowCount: 0,
                       enableGestures: false,
                       railSide: RailSide.left,
+                      showToolbarButtons: true,
                     ),
                   ),
                 ),
@@ -224,6 +226,59 @@ void main() {
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+  });
+
+  group('showToolbarButtons height reservation', () {
+    // getToolbarHeight() and the rendered SizedBox in BrowserTabBarView both
+    // key off the same showToolbarButtons value, so the height reserved by
+    // the wrapper's preferredSize must shrink by exactly the button row's
+    // height when the setting is off — anything else leaves a dead band or
+    // clips the page (BrowserScreen offsets content by preferredSize).
+    test(
+      'BrowserBottomAppBar reserves no height for the button row when off',
+      () {
+        final withButtons = BrowserBottomAppBar(
+          showMainToolbar: true,
+          displayedSheet: null,
+          quickTabSwitcherRowCount: 0,
+          showToolbarButtons: true,
+        );
+        final withoutButtons = BrowserBottomAppBar(
+          showMainToolbar: true,
+          displayedSheet: null,
+          quickTabSwitcherRowCount: 0,
+          showToolbarButtons: false,
+        );
+
+        expect(
+          withButtons.preferredSize.height -
+              withoutButtons.preferredSize.height,
+          BrowserTabBar.toolbarButtonsRowHeight,
+        );
+      },
+    );
+
+    test(
+      'BrowserTopAppBar reserves no height for the button row when off',
+      () {
+        final withButtons = BrowserTopAppBar(
+          showMainToolbar: true,
+          quickTabSwitcherRowCount: 0,
+          showToolbarButtons: true,
+        );
+        final withoutButtons = BrowserTopAppBar(
+          showMainToolbar: true,
+          quickTabSwitcherRowCount: 0,
+          showToolbarButtons: false,
+        );
+
+        expect(
+          withButtons.preferredSize.height -
+              withoutButtons.preferredSize.height,
+          BrowserTabBar.toolbarButtonsRowHeight,
+        );
       },
     );
   });
