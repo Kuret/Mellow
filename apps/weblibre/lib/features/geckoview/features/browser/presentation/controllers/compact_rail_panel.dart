@@ -37,3 +37,28 @@ class CompactRailPanelOpen extends _$CompactRailPanelOpen {
 
   void close() => state = false;
 }
+
+/// Whether this device has ever delivered a predictive back gesture to the
+/// app — i.e. whether the edge a back gesture came from is knowable.
+///
+/// The plain-back fallback exists for platforms that never send predictive
+/// events (Android 12 and below, 3-button navigation), where there is no edge
+/// to match and any back opens the panel. Without this flag that fallback also
+/// fires on a *predictive* gesture the observer deliberately let through —
+/// a back swipe from the edge opposite the rail — because the framework then
+/// runs its ordinary pop, which lands in the same `BackButtonListener`. The
+/// result is the rail opening from both edges and the promise that "a back
+/// swipe from the other edge still goes back" being quietly broken.
+///
+/// Set once, on the first `handleStartBackGesture` this app ever sees. That
+/// event always precedes the committed back it belongs to, so the very first
+/// gesture on a predictive-back device is already covered.
+@Riverpod(keepAlive: true)
+class PredictiveBackSeen extends _$PredictiveBackSeen {
+  @override
+  bool build() => false;
+
+  void record() {
+    if (!state) state = true;
+  }
+}

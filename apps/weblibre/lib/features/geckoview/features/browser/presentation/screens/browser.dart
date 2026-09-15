@@ -1701,19 +1701,27 @@ class _Browser extends HookConsumerWidget {
                 // already-committed back. Open the panel here instead of
                 // performing the browser's own back; with the panel already
                 // open, fall through and let that happen exactly as today.
-                if (shouldClaimCompactRailBackGesture(
-                  side: ref.read(
-                    zenSettingsWithDefaultsProvider.select(
-                      (settings) => settings.compactRailSide,
-                    ),
-                  ),
-                  isNarrowViewport: !isWideViewport(
-                    MediaQuery.sizeOf(context).width,
-                  ),
-                  isOpen: ref.read(compactRailPanelOpenProvider),
-                  swipeEdge: null,
-                  isCurrentRoute: true,
-                )) {
+                //
+                // Gated on never having seen a predictive gesture: where they
+                // do arrive, a back swipe from the edge opposite the rail is
+                // deliberately not claimed, and the framework's ordinary pop
+                // then lands right here. Without the gate that swipe would
+                // open the panel too, and the setting's promise that the other
+                // edge still goes back would be false.
+                if (!ref.read(predictiveBackSeenProvider) &&
+                    shouldClaimCompactRailBackGesture(
+                      side: ref.read(
+                        zenSettingsWithDefaultsProvider.select(
+                          (settings) => settings.compactRailSide,
+                        ),
+                      ),
+                      isNarrowViewport: !isWideViewport(
+                        MediaQuery.sizeOf(context).width,
+                      ),
+                      isOpen: ref.read(compactRailPanelOpenProvider),
+                      swipeEdge: null,
+                      isCurrentRoute: true,
+                    )) {
                   ref.read(compactRailPanelOpenProvider.notifier).open();
                   return true;
                 }

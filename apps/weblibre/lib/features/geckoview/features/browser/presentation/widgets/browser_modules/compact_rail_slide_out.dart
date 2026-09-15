@@ -115,6 +115,11 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    // Recorded whether or not this gesture is claimed: what matters is that
+    // the platform sends these at all, which is what tells the plain-back
+    // fallback to stand down.
+    ref.read(predictiveBackSeenProvider.notifier).record();
+
     return shouldClaimCompactRailBackGesture(
       side: _side,
       isNarrowViewport: widget.isNarrowViewport,
