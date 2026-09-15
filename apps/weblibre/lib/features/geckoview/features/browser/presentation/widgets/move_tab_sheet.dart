@@ -231,6 +231,7 @@ class _SpaceSection extends ConsumerWidget {
           ),
         ),
         ListTile(
+          key: ValueKey('move-tab-pin-${spaceUuid ?? 'none'}'),
           dense: true,
           leading: const Icon(MdiIcons.pin),
           title: const Text('Pin tab'),
@@ -241,6 +242,7 @@ class _SpaceSection extends ConsumerWidget {
         ),
         for (final row in rows)
           ListTile(
+            key: ValueKey('move-tab-folder-${row.folder.id}'),
             dense: true,
             contentPadding: EdgeInsetsDirectional.only(
               start: 16 + (row.depth * 20),
