@@ -70,7 +70,7 @@ does, and rebuilt the browser chrome around it.
 
 ## 4. Removed
 
-Twelve phases of deletion, tracked in `plans/REMOVALS.md`. By area:
+Twelve phases of deletion. By area:
 
 | Area | Gone |
 | --- | --- |
