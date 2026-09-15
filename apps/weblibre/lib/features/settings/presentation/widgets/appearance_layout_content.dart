@@ -101,6 +101,21 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         child: _AutoHideTabBarTile(),
       ),
       SettingsEntryDefinition(
+        title: 'Space Switcher Side',
+        subtitle: 'Which side of the tab chips the space switcher sits on',
+        keywords: [
+          'space',
+          'switcher',
+          'indicator',
+          'side',
+          'left',
+          'right',
+          'handed',
+          'compact bar',
+        ],
+        child: _SpaceIndicatorSideSection(),
+      ),
+      SettingsEntryDefinition(
         title: 'Title Width on Compact Bar Chips',
         subtitle:
             'Maximum width of a tab title on the compact bar, so a narrower '
@@ -248,6 +263,54 @@ class _RailSideSection extends HookConsumerWidget {
                   value: RailSide.right,
                   title: Text('Right'),
                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpaceIndicatorSideSection extends HookConsumerWidget {
+  const _SpaceIndicatorSideSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spaceIndicatorSide = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.spaceIndicatorSide),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Space Switcher Side'),
+            subtitle: Text(
+              'Which side of the tab chips the space switcher sits on',
+            ),
+            leading: Icon(MdiIcons.dockLeft),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: spaceIndicatorSide,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveZenSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.spaceIndicatorSide(value),
+                    );
+              }
+            },
+            child: Column(
+              children: [
+                for (final side in SpaceIndicatorSide.values)
+                  RadioListTile.adaptive(value: side, title: Text(side.label)),
               ],
             ),
           ),
