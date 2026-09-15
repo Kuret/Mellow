@@ -64,8 +64,8 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// kept in view.
 ///
 /// Spaces are switched by swiping the indicator, by overscrolling the chip
-/// strip past either end, or from the picker sheet the indicator opens — all
-/// independent of which side of the row the indicator sits on.
+/// strip past either end, or from the quick menu a tap on the indicator
+/// opens — all independent of which side of the row the indicator sits on.
 class CompactTabBar extends ConsumerWidget {
   const CompactTabBar({super.key});
 

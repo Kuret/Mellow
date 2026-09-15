@@ -143,7 +143,8 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         subtitle:
             "Off, the chrome shows only tabs and spaces. Back, forward, "
             "reload, tabs and settings stay available by long-pressing + in "
-            "the rail's space row, or the space icon on the compact bar.",
+            "the rail's space row, or tapping the space icon on the compact "
+            "bar.",
         keywords: [
           'toolbar',
           'buttons',
@@ -552,7 +553,7 @@ class _RailToolbarTile extends HookConsumerWidget {
       subtitle: const Text(
         "Off, the chrome shows only tabs and spaces. Back, forward, reload, "
         "tabs and settings stay available by long-pressing + in the rail's "
-        "space row, or the space icon on the compact bar.",
+        "space row, or tapping the space icon on the compact bar.",
       ),
       secondary: const Icon(MdiIcons.dockTop),
       value: showToolbarButtons,
