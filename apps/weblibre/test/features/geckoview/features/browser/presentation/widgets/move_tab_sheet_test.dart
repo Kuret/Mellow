@@ -34,10 +34,14 @@ typedef _FolderMove = ({String tabId, String? folderId});
 /// One recorded [TabDataRepository.moveToScope] call.
 typedef _ScopeMove = ({List<String> tabIds, TabOrderScope target});
 
+/// One recorded [TabDataRepository.moveTabToSpace] call.
+typedef _SpaceMove = ({String tabId, String spaceUuid});
+
 /// [TabDataRepository] without the database: records what the sheet asks for.
 class _RecordingTabDataRepository extends TabDataRepository {
   final folderMoves = <_FolderMove>[];
   final scopeMoves = <_ScopeMove>[];
+  final spaceMoves = <_SpaceMove>[];
 
   @override
   void build() {}
@@ -66,6 +70,12 @@ class _RecordingTabDataRepository extends TabDataRepository {
   }) async {
     return true;
   }
+
+  @override
+  Future<bool> moveTabToSpace(String tabId, String spaceUuid) async {
+    spaceMoves.add((tabId: tabId, spaceUuid: spaceUuid));
+    return true;
+  }
 }
 
 const _spaceA = 'space-a';
@@ -73,12 +83,7 @@ const _spaceB = 'space-b';
 const _tabId = 'tab-1';
 
 final _spaceAFolders = [
-  TabFolderData(
-    id: 'linux',
-    name: 'Linux',
-    spaceUuid: _spaceA,
-    orderKey: 'a0',
-  ),
+  TabFolderData(id: 'linux', name: 'Linux', spaceUuid: _spaceA, orderKey: 'a0'),
   TabFolderData(
     id: 'linux-de',
     name: 'DE',
@@ -89,12 +94,7 @@ final _spaceAFolders = [
 ];
 
 final _spaceBFolders = [
-  TabFolderData(
-    id: 'macos',
-    name: 'MacOS',
-    spaceUuid: _spaceB,
-    orderKey: 'a0',
-  ),
+  TabFolderData(id: 'macos', name: 'MacOS', spaceUuid: _spaceB, orderKey: 'a0'),
   TabFolderData(
     id: 'macos-de',
     name: 'DE',
@@ -163,9 +163,7 @@ void main() {
     expect(thisSpaceTop, lessThan(spaceBTop));
   });
 
-  testWidgets('shows nested folders with their ancestor path', (
-    tester,
-  ) async {
+  testWidgets('shows nested folders with their ancestor path', (tester) async {
     await pumpSheet(tester);
 
     // Both "DE" folders (Linux/DE in this space, MacOS/DE in the other
@@ -230,5 +228,33 @@ void main() {
     expect(repository.scopeMoves.single.target.spaceUuid, _spaceB);
     expect(repository.scopeMoves.single.target.folderId, isNull);
     expect(repository.scopeMoves.single.target.shelf, TabShelf.pinned);
+  });
+
+  testWidgets('offers a plain move into another space, without pinning', (
+    tester,
+  ) async {
+    await pumpSheet(tester);
+
+    // The picker replaced a "Move to space…" item that could leave a normal
+    // tab normal in its new space; filing every cross-space move into a
+    // folder or the pinned strip would have taken that away.
+    final moveToSpaceB = find.byKey(const ValueKey('move-tab-move-space-b'));
+    await tester.ensureVisible(moveToSpaceB);
+    await tester.tap(moveToSpaceB);
+    await tester.pumpAndSettle();
+
+    expect(repository.spaceMoves, hasLength(1));
+    expect(repository.spaceMoves.single.tabId, _tabId);
+    expect(repository.spaceMoves.single.spaceUuid, _spaceB);
+    expect(repository.scopeMoves, isEmpty);
+    expect(repository.folderMoves, isEmpty);
+  });
+
+  testWidgets("does not offer a plain move for the tab's own space", (
+    tester,
+  ) async {
+    await pumpSheet(tester);
+
+    expect(find.byKey(const ValueKey('move-tab-move-$_spaceA')), findsNothing);
   });
 }

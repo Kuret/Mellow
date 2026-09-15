@@ -166,6 +166,20 @@ class _SpaceSection extends ConsumerWidget {
         .moveTabToFolder(tabId, folderId);
   }
 
+  /// Moves the tab to this space and leaves it where it was on the shelf —
+  /// a normal tab stays normal.
+  ///
+  /// The plain move this sheet replaced ("Move to space…") could do this, and
+  /// filing every cross-space move into a folder or the pinned strip would
+  /// quietly take it away: a tab you just want *over there* is not the same
+  /// ask as a tab you want pinned there.
+  Future<void> _moveHere(WidgetRef ref) {
+    return ref
+        .read(tabDataRepositoryProvider.notifier)
+        .moveTabToSpace(tabId, spaceUuid!)
+        .then((_) {});
+  }
+
   Future<void> _createFolder(BuildContext context, WidgetRef ref) async {
     final currentSpaceUuid = spaceUuid;
     if (currentSpaceUuid == null) return;
@@ -230,6 +244,17 @@ class _SpaceSection extends ConsumerWidget {
             ],
           ),
         ),
+        if (!isCurrentSpace && spaceUuid != null)
+          ListTile(
+            key: ValueKey('move-tab-move-$spaceUuid'),
+            dense: true,
+            leading: const Icon(MdiIcons.arrowRightBottom),
+            title: Text('Move to $label'),
+            onTap: () async {
+              await _moveHere(ref);
+              if (context.mounted) Navigator.of(context).pop();
+            },
+          ),
         ListTile(
           key: ValueKey('move-tab-pin-${spaceUuid ?? 'none'}'),
           dense: true,
