@@ -2,11 +2,14 @@
 #
 # Build a signed Mellow APK and publish it to GitHub Releases.
 #
-# Usage: scripts/release.sh [--skip-tests] [--draft]
+# Usage: scripts/release.sh [--skip-tests] [--draft] [--notes-file PATH]
 #
 # The version comes from apps/mellow/pubspec.yaml — bump it there first. The
-# part before "+" is the release name and tag (0.1.0 -> v0.1.0); the part after
-# is the Android version code, which must only ever go up.
+# part before "+" is the release name (0.1.0 -> tag mellow-v0.1.0); the part
+# after is the Android version code, which must only ever go up.
+#
+# Tags carry the "mellow-" prefix on purpose: WebLibre's own v0.1.0 … v0.30.0
+# tags are in this history, so a bare "v0.1.0" would name one of theirs.
 
 set -euo pipefail
 
@@ -18,13 +21,17 @@ REMOTE="${MELLOW_REMOTE:-mellow}"
 
 SKIP_TESTS=0
 DRAFT=()
-for arg in "$@"; do
-  case "$arg" in
+NOTES_IN=""
+while [ $# -gt 0 ]; do
+  case "$1" in
     --skip-tests) SKIP_TESTS=1 ;;
     --draft) DRAFT=(--draft) ;;
-    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+    --notes-file) NOTES_IN="${2:-}"; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
+  shift
 done
+[ -z "$NOTES_IN" ] || [ -f "$NOTES_IN" ] || { echo "no such notes file: $NOTES_IN" >&2; exit 2; }
 
 # Toolchain and signing environment live outside the repo.
 # shellcheck source=/dev/null
@@ -45,7 +52,7 @@ die() { printf '\n\033[31mrefusing: %s\033[0m\n' "$*" >&2; exit 1; }
 VERSION="$(awk '/^version:/ {print $2; exit}' "$ROOT/apps/mellow/pubspec.yaml")"
 NAME="${VERSION%%+*}"
 CODE="${VERSION##*+}"
-TAG="v$NAME"
+TAG="mellow-v$NAME"
 say "Mellow $NAME (version code $CODE), tag $TAG"
 
 if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
@@ -88,19 +95,26 @@ OUT="$DIST/mellow-$NAME-arm64.apk"
 cp "$APK" "$OUT"
 SHA="$(shasum -a 256 "$OUT" | awk '{print $1}')"
 
-PREV="$(git -C "$ROOT" tag --list 'v*' --sort=-v:refname | head -1)"
+# Notes: a written summary when one is supplied (the `ship` skill writes one),
+# otherwise the commit subjects, which is better than nothing and worse than
+# prose. The header is added either way — it is the same for every release.
+PREV="$(gh release list --repo "$REPO" --limit 1 --json tagName --jq '.[0].tagName // empty' 2>/dev/null || true)"
 NOTES="$(mktemp)"
 {
   echo "Personal build, arm64 only, Android 8.0+. Not affiliated with WebLibre, Zen Browser or Mozilla."
   echo
   echo "\`sha256  $SHA\`"
   echo
-  echo "## Changes"
-  echo
-  if [ -n "$PREV" ]; then
-    git -C "$ROOT" log --no-merges --format='- %s' "$PREV..HEAD"
+  if [ -n "$NOTES_IN" ]; then
+    cat "$NOTES_IN"
   else
-    echo "- First release of the fork under its own name."
+    echo "## Changes"
+    echo
+    if [ -n "$PREV" ]; then
+      git -C "$ROOT" log --no-merges --format='- %s' "$PREV..HEAD"
+    else
+      echo "- First release of the fork under its own name."
+    fi
   fi
 } > "$NOTES"
 
@@ -108,5 +122,9 @@ say "Publishing $TAG to $REPO"
 gh release create "$TAG" "$OUT" --repo "$REPO" \
   --title "Mellow $NAME" --notes-file "$NOTES" "${DRAFT[@]}"
 rm -f "$NOTES"
+
+# gh creates the tag on the remote; without this the local clone never sees it,
+# and the next run computes "changes since" against an upstream tag instead.
+git -C "$ROOT" fetch --quiet "$REMOTE" --tags
 
 say "Done — $OUT"
