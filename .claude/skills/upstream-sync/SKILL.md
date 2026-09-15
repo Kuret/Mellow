@@ -24,7 +24,7 @@ Measured on this fork: 188 hand-modified upstream files, 131 new ones, 312 delet
 | `packages/flutter_mozilla_components/**` (GeckoView / Android Components surface) | **Take.** This is the main reason to keep tracking upstream. |
 | Dependency and build upkeep (`pubspec.*`, `*.gradle`, `gradle.properties`, `.github/workflows/**`) | **Take**, but reconcile by hand — we changed `android/app/build.gradle` (debug-signing fallback when `KEY_PATH` is unset) and our `pubspec.yaml` carries our own deps. |
 | Fixes to files we do not touch | **Take.** |
-| Anything under `apps/weblibre/lib/features/geckoview/features/{browser,tabs}/**`, the tab repository/providers, the tab views, the menu, `general_settings.dart` | **Review, do not auto-merge.** We replaced the semantics underneath these. A textually clean merge here can still be wrong. |
+| Anything under `apps/mellow/lib/features/geckoview/features/{browser,tabs}/**`, the tab repository/providers, the tab views, the menu, `general_settings.dart` | **Review, do not auto-merge.** We replaced the semantics underneath these. A textually clean merge here can still be wrong. |
 | Their work on proxy / Tor / isolated tabs / strict mode | **Skip.** We deleted it (W0). Resolution is always "stays deleted". |
 | Their work on the hosted service tier — `features/account`, `search_credits`, `web_search`, `privacypass_client` | **Skip.** Deleted 2026-09-13. This was ~137 of their commits per six months. |
 | Their work on `bangs`, `small_web`, `web_feed`, `quotes`, `popular_sites`, `wallpaper`, history highlights | **Skip.** All deleted. Bangs were replaced by our own `features/search` provider model — if upstream changes search-engine handling, it does not apply here. |
@@ -72,7 +72,7 @@ git clone --filter=blob:none https://github.com/zen-browser/desktop.git ../zen-d
 Four files own the contract: `ZenSpacesSync.sys.mjs`, `ZenSpacesSyncModel.sys.mjs`, `ZenSpacesSyncApplier.sys.mjs`, `moz.build`. What matters, in order:
 
 - **Engine version.** `get version()` in `ZenSpacesSync.sys.mjs` is currently `3`, mirrored in `state.json`. If it moved, **stop and report** — do not adapt the client on your own judgement. Our client already halts uploads and keeps reading when it sees a version above the one it knows; confirm that still holds, and hand the user the diff and what it implies.
-- **Record shapes** in `ZenSpacesSyncModel.sys.mjs` — the six kinds (container / space / tab / folder / split / layout) and their fields. Compare against our projection and applier in `apps/weblibre/lib/features/spaces_sync/`, and against the fixtures in `apps/weblibre/test/features/spaces_sync/`. A new optional field we round-trip verbatim is harmless; a changed id format or a new required field is not.
+- **Record shapes** in `ZenSpacesSyncModel.sys.mjs` — the six kinds (container / space / tab / folder / split / layout) and their fields. Compare against our projection and applier in `apps/mellow/lib/features/spaces_sync/`, and against the fixtures in `apps/mellow/test/features/spaces_sync/`. A new optional field we round-trip verbatim is harmless; a changed id format or a new required field is not.
 - **Applier semantics** in `ZenSpacesSyncApplier.sys.mjs`. Our client is hardened against Zen's stale-projection race (upstream `zen-browser/desktop#15380`): stateless projection, apply mutex, digests stamped inside the apply transaction, tombstones derived only from the witnessed-deletion ledger, and a destructive-batch canary. If they fixed it upstream, say so in the PR — our defences stay either way, but the canary thresholds may be worth revisiting.
 - **Prefs** the desktop expects (`services.sync.engine.spaces`, `zen.spaces-sync.normal-tabs`). If they were renamed, `dist/SETUP.md` is wrong and must be updated in the same PR.
 
@@ -82,13 +82,24 @@ If nothing under `src/zen/sync` changed, say exactly that — a quiet quarter is
 
 Branch from `zen-model`: `git checkout -b upstream-sync/<YYYY-MM-DD>`.
 
-Prefer **cherry-picking the commits you decided to take**, in upstream order, over merging the range. It keeps authorship, keeps each change reviewable, and stops a skipped commit from riding along:
+**Every upstream patch has to be translated before it will apply.** Mellow renamed the identifiers it inherited — the Dart package (`weblibre` → `mellow`), the app directory (`apps/weblibre` → `apps/mellow`), the Kotlin packages and application id (`eu.weblibre.*` → `app.mellow.browser.*`), the Android resource prefix (`weblibre_` → `mellow_`). Upstream still speaks the old names, so a raw `cherry-pick` conflicts on contact with an import block or a resource reference.
+
+`identifiers.py` in this skill directory is the mapping, and it doubles as a patch filter. Take commits through it:
 
 ```
-git cherry-pick -x <sha>        # -x records the upstream sha in the message
+git format-patch --stdout <sha>^..<sha> \
+  | python3 .claude/skills/upstream-sync/identifiers.py \
+  | git am -3 --keep-non-patch          # -3 falls back to a real merge on drift
 ```
 
-For a large plugin-layer range, `git cherry-pick -x A^..B` is fine when every commit in it is in the take bucket. On conflict: resolve with our semantics winning in our files, upstream winning in theirs; if a conflict needs a judgement call you cannot defend in one sentence, abort that pick and list it under "not taken" instead.
+`git am` preserves upstream authorship the way `cherry-pick -x` did; add the upstream sha to the message yourself when it matters. For a large plugin-layer range, `<A>^..<B>` in one `format-patch` is fine when every commit in it is in the take bucket.
+
+Two things the filter cannot decide for you:
+
+- It rewrites *identifier tokens*, never the word "WebLibre" on its own — licence headers, the `weblibre.eu` and `FaFre/WebLibre` URLs and the settings-export format marker all contain that word and must survive. If a patch adds new user-facing copy saying "WebLibre", rename that by hand.
+- It deliberately restores `weblibre_settings`, the `SyncDocumentKind` wire value that names the document inside settings exports and synced settings records. Anything else that travels off this device — a sync key, a file-format marker — deserves the same treatment; add it to the map rather than letting the broad rules move it.
+
+On conflict: resolve with our semantics winning in our files, upstream winning in theirs; if a conflict needs a judgement call you cannot defend in one sentence, drop that patch and list it under "not taken" instead.
 
 Rules that save the build:
 
@@ -103,9 +114,9 @@ Commit style: small and focused, one concern per commit, following the trailer c
 Nothing gets a PR without these:
 
 ```
-bash -c 'source ../.env.sh && cd apps/weblibre && dart analyze lib test'
-bash -c 'source ../.env.sh && cd apps/weblibre && flutter test'
-bash -c 'source ../.env.sh && export PATH="$HOME/.cargo/bin:$PATH" && cd apps/weblibre && \
+bash -c 'source ../.env.sh && cd apps/mellow && dart analyze lib test'
+bash -c 'source ../.env.sh && cd apps/mellow && flutter test'
+bash -c 'source ../.env.sh && export PATH="$HOME/.cargo/bin:$PATH" && cd apps/mellow && \
   flutter build apk --release --flavor alpha --target-platform android-arm64 --split-per-abi --no-tree-shake-icons'
 ```
 
