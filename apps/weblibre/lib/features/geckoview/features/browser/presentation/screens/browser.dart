@@ -40,6 +40,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -49,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_rail_slide_out.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
@@ -1322,161 +1325,172 @@ class BrowserScreen extends HookConsumerWidget {
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
-          body: Stack(
-            children: [
-              // Layer 0: Browser content
-              // Position changes instantly (no animation) to avoid jarring native view resize
-              // The toolbar itself animates, providing visual continuity
-              _BrowserContentPositioned(
-                overlayController: overlayController,
-                pointerMoveEventsController: pointerMoveEventsController,
-                selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
-                tabInFullScreen: tabInFullScreen,
-                tabBarPosition: tabBarPosition,
-                autoHideTabBar: autoHideTabBar,
-                isRail: isRail,
-                sideRailTotalWidth: sideRailTotalWidth,
-                topAppBarTotalHeight: topAppBarTotalHeight,
-                bottomAppBarTotalHeight: bottomAppBarTotalHeight,
-                keyboardViewportInset: keyboardViewportInset,
-              ),
-
-              // Layer 0.5: System bar tint — fills the status-bar/nav-bar
-              // inset regions with the active container color (or the tab bar
-              // surface fallback) and drives the system bar icon brightness.
-              // Sits above the browser content but below the toolbars, so the
-              // tab bar's transparent safe-area padding reveals the bottom
-              // strip and the top toolbar's SafeArea reveals the top strip.
-              if (!tabInFullScreen)
-                Positioned.fill(
-                  child: BrowserSystemBars(
-                    topInset: topSafeArea,
-                    bottomInset: bottomSafeArea,
-                  ),
+          body: CompactRailSlideOut(
+            isNarrowViewport: !isWideViewport(viewportWidth),
+            viewportWidth: viewportWidth,
+            railWidth: railWidth,
+            topInset: tabBarPosition == TabBarPosition.top
+                ? topAppBarTotalHeight
+                : 0,
+            bottomInset: tabBarPosition == TabBarPosition.bottom
+                ? bottomAppBarTotalHeight
+                : 0,
+            child: Stack(
+              children: [
+                // Layer 0: Browser content
+                // Position changes instantly (no animation) to avoid jarring native view resize
+                // The toolbar itself animates, providing visual continuity
+                _BrowserContentPositioned(
+                  overlayController: overlayController,
+                  pointerMoveEventsController: pointerMoveEventsController,
+                  selectedTabId: selectedTabId,
+                  sheetDisplayed: sheetDisplayed,
+                  tabInFullScreen: tabInFullScreen,
+                  tabBarPosition: tabBarPosition,
+                  autoHideTabBar: autoHideTabBar,
+                  isRail: isRail,
+                  sideRailTotalWidth: sideRailTotalWidth,
+                  topAppBarTotalHeight: topAppBarTotalHeight,
+                  bottomAppBarTotalHeight: bottomAppBarTotalHeight,
+                  keyboardViewportInset: keyboardViewportInset,
                 ),
 
-              // Layer 1: Sheet (when displayed) - positioned above toolbar,
-              // inset past the rail on its docked edge.
-              if (sheetDisplayed)
-                Positioned(
-                  left: railLeftInset,
-                  right: railRightInset,
-                  top: 0,
-                  bottom: bottomAppBarTotalHeight,
-                  child: _SheetContainer(
-                    displayedSheet: displayedSheet,
-                    relativeSafeArea: relativeSafeArea,
-                    bottomAppBarHeight: bottomAppBarTotalHeight,
+                // Layer 0.5: System bar tint — fills the status-bar/nav-bar
+                // inset regions with the active container color (or the tab bar
+                // surface fallback) and drives the system bar icon brightness.
+                // Sits above the browser content but below the toolbars, so the
+                // tab bar's transparent safe-area padding reveals the bottom
+                // strip and the top toolbar's SafeArea reveals the top strip.
+                if (!tabInFullScreen)
+                  Positioned.fill(
+                    child: BrowserSystemBars(
+                      topInset: topSafeArea,
+                      bottomInset: bottomSafeArea,
+                    ),
                   ),
+
+                // Layer 1: Sheet (when displayed) - positioned above toolbar,
+                // inset past the rail on its docked edge.
+                if (sheetDisplayed)
+                  Positioned(
+                    left: railLeftInset,
+                    right: railRightInset,
+                    top: 0,
+                    bottom: bottomAppBarTotalHeight,
+                    child: _SheetContainer(
+                      displayedSheet: displayedSheet,
+                      relativeSafeArea: relativeSafeArea,
+                      bottomAppBarHeight: bottomAppBarTotalHeight,
+                    ),
+                  ),
+
+                // Layer 2: Bottom Toolbar (overlay, slides in/out)
+                // Skipped entirely for the side rail (Layer 3b below).
+                if (!isRail)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: _BottomToolbarLayer(
+                      sheetDisplayed: sheetDisplayed,
+                      tabInFullScreen: tabInFullScreen,
+                      tabBarPosition: tabBarPosition,
+                      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                      selectedTabId: selectedTabId,
+                      pointerMoveEventsController: pointerMoveEventsController,
+                    ),
+                  ),
+
+                // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
+                if (tabBarPosition == TabBarPosition.top)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    child: _TopToolbarLayer(
+                      sheetDisplayed: sheetDisplayed,
+                      tabInFullScreen: tabInFullScreen,
+                      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                      selectedTabId: selectedTabId,
+                      pointerMoveEventsController: pointerMoveEventsController,
+                    ),
+                  ),
+
+                // Layer 3b: Side rail (vertical, left/right). No auto-hide; it
+                // slides horizontally out of view only on manual dismiss.
+                if (isRail)
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    left: tabBarPosition == TabBarPosition.left ? 0 : null,
+                    right: tabBarPosition == TabBarPosition.right ? 0 : null,
+                    child: _SideRailToolbarLayer(
+                      sheetDisplayed: sheetDisplayed,
+                      tabInFullScreen: tabInFullScreen,
+                      tabBarPosition: tabBarPosition,
+                      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                      selectedTabId: selectedTabId,
+                      suppressMainToolbar: suppressMainToolbarForHome,
+                      railWidth: railWidth,
+                      showToolbarButtons: showToolbarButtons,
+                    ),
+                  ),
+
+                // Layer 4: FAB (draggable via long press)
+                _FabPositioner(
+                  selectedTabId: selectedTabId,
+                  sheetDisplayed: sheetDisplayed,
+                  tabInFullScreen: tabInFullScreen,
+                  tabBarPosition: tabBarPosition,
+                  bottomAppBarTotalHeight: bottomAppBarTotalHeight,
+                  bottomSafeArea: bottomSafeArea,
+                  sideRailTotalWidth: sideRailTotalWidth,
+                  child: const BrowserFab(),
                 ),
 
-              // Layer 2: Bottom Toolbar (overlay, slides in/out)
-              // Skipped entirely for the side rail (Layer 3b below).
-              if (!isRail)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: _BottomToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
-                    tabInFullScreen: tabInFullScreen,
-                    tabBarPosition: tabBarPosition,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-                    selectedTabId: selectedTabId,
-                    pointerMoveEventsController: pointerMoveEventsController,
-                  ),
+                // Layer 5: Page load progress indicator (animates with toolbar visibility)
+                _ProgressIndicatorPositioner(
+                  selectedTabId: selectedTabId,
+                  sheetDisplayed: sheetDisplayed,
+                  tabInFullScreen: tabInFullScreen,
+                  tabBarPosition: tabBarPosition,
+                  isRail: isRail,
+                  sideRailTotalWidth: sideRailTotalWidth,
+                  topSafeArea: topSafeArea,
+                  topAppBarTotalHeight: topAppBarTotalHeight,
+                  bottomAppBarTotalHeight: bottomAppBarTotalHeight,
+                  child: const _ProgressIndicatorBar(),
                 ),
 
-              // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
-              if (tabBarPosition == TabBarPosition.top)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  child: _TopToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
-                    tabInFullScreen: tabInFullScreen,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-                    selectedTabId: selectedTabId,
-                    pointerMoveEventsController: pointerMoveEventsController,
-                  ),
+                // Layer 6: Find in Page widget (above toolbar or keyboard, whichever is higher)
+                _FindInPagePositioner(
+                  selectedTabId: selectedTabId,
+                  sheetDisplayed: sheetDisplayed,
+                  tabInFullScreen: tabInFullScreen,
+                  tabBarPosition: tabBarPosition,
+                  isRail: isRail,
+                  sideRailTotalWidth: sideRailTotalWidth,
+                  bottomSafeArea: bottomSafeArea,
+                  bottomAppBarTotalHeight: bottomAppBarTotalHeight,
+                  child: const _FindInPageContent(),
                 ),
 
-              // Layer 3b: Side rail (vertical, left/right). No auto-hide; it
-              // slides horizontally out of view only on manual dismiss.
-              if (isRail)
-                Positioned(
-                  top: 0,
-                  bottom: 0,
-                  left: tabBarPosition == TabBarPosition.left ? 0 : null,
-                  right: tabBarPosition == TabBarPosition.right ? 0 : null,
-                  child: _SideRailToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
-                    tabInFullScreen: tabInFullScreen,
-                    tabBarPosition: tabBarPosition,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-                    selectedTabId: selectedTabId,
-                    suppressMainToolbar: suppressMainToolbarForHome,
-                    railWidth: railWidth,
-                    showToolbarButtons: showToolbarButtons,
-                  ),
+                // Layer 7: App-link prompt banner (§2.6). Anchored above the bottom app
+                // bar / keyboard exactly like find-in-page, so it is never hidden behind
+                // the toolbar. Custom Tab sessions are prompted natively instead; this is
+                // the browser-tab surface only.
+                _AppLinkPromptLayer(
+                  selectedTabId: selectedTabId,
+                  sheetDisplayed: sheetDisplayed,
+                  tabInFullScreen: tabInFullScreen,
+                  tabBarPosition: tabBarPosition,
+                  isRail: isRail,
+                  sideRailTotalWidth: sideRailTotalWidth,
+                  bottomSafeArea: bottomSafeArea,
+                  bottomAppBarTotalHeight: bottomAppBarTotalHeight,
                 ),
-
-              // Layer 4: FAB (draggable via long press)
-              _FabPositioner(
-                selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
-                tabInFullScreen: tabInFullScreen,
-                tabBarPosition: tabBarPosition,
-                bottomAppBarTotalHeight: bottomAppBarTotalHeight,
-                bottomSafeArea: bottomSafeArea,
-                sideRailTotalWidth: sideRailTotalWidth,
-                child: const BrowserFab(),
-              ),
-
-              // Layer 5: Page load progress indicator (animates with toolbar visibility)
-              _ProgressIndicatorPositioner(
-                selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
-                tabInFullScreen: tabInFullScreen,
-                tabBarPosition: tabBarPosition,
-                isRail: isRail,
-                sideRailTotalWidth: sideRailTotalWidth,
-                topSafeArea: topSafeArea,
-                topAppBarTotalHeight: topAppBarTotalHeight,
-                bottomAppBarTotalHeight: bottomAppBarTotalHeight,
-                child: const _ProgressIndicatorBar(),
-              ),
-
-              // Layer 6: Find in Page widget (above toolbar or keyboard, whichever is higher)
-              _FindInPagePositioner(
-                selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
-                tabInFullScreen: tabInFullScreen,
-                tabBarPosition: tabBarPosition,
-                isRail: isRail,
-                sideRailTotalWidth: sideRailTotalWidth,
-                bottomSafeArea: bottomSafeArea,
-                bottomAppBarTotalHeight: bottomAppBarTotalHeight,
-                child: const _FindInPageContent(),
-              ),
-
-              // Layer 7: App-link prompt banner (§2.6). Anchored above the bottom app
-              // bar / keyboard exactly like find-in-page, so it is never hidden behind
-              // the toolbar. Custom Tab sessions are prompted natively instead; this is
-              // the browser-tab surface only.
-              _AppLinkPromptLayer(
-                selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
-                tabInFullScreen: tabInFullScreen,
-                tabBarPosition: tabBarPosition,
-                isRail: isRail,
-                sideRailTotalWidth: sideRailTotalWidth,
-                bottomSafeArea: bottomSafeArea,
-                bottomAppBarTotalHeight: bottomAppBarTotalHeight,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1622,7 +1636,6 @@ class _Browser extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final lastBackButtonPress = useRef<DateTime?>(null);
 
     final overlayBuilder = ref.watch(overlayControllerProvider);
@@ -1680,6 +1693,29 @@ class _Browser extends HookConsumerWidget {
                 if (GoRouterState.of(context).topRoute?.name !=
                     BrowserRoute.name) {
                   return false;
+                }
+
+                // Compact rail slide-out fallback: on Android 12 and below,
+                // or with 3-button navigation, no predictive back events ever
+                // reach CompactRailSlideOut's observer — only this plain,
+                // already-committed back. Open the panel here instead of
+                // performing the browser's own back; with the panel already
+                // open, fall through and let that happen exactly as today.
+                if (shouldClaimCompactRailBackGesture(
+                  side: ref.read(
+                    zenSettingsWithDefaultsProvider.select(
+                      (settings) => settings.compactRailSide,
+                    ),
+                  ),
+                  isNarrowViewport: !isWideViewport(
+                    MediaQuery.sizeOf(context).width,
+                  ),
+                  isOpen: ref.read(compactRailPanelOpenProvider),
+                  swipeEdge: null,
+                  isCurrentRoute: true,
+                )) {
+                  ref.read(compactRailPanelOpenProvider.notifier).open();
+                  return true;
                 }
 
                 // Dismiss modal routes (e.g. showModalBottomSheet).
