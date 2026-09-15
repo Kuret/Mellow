@@ -25,7 +25,7 @@ extension AddonInfoUi on AddonInfo {
             ? 'This extension is soft-blocked. Use caution while it remains enabled.'
             : 'This extension is soft-blocked, but it can still be re-enabled.',
       AddonDisabledReason.unsupported =>
-        'This extension is installed, but WebLibre does not currently support it.',
+        'This extension is installed, but Mellow does not currently support it.',
       _ => null,
     };
   }

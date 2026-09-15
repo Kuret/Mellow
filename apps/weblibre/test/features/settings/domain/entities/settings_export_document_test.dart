@@ -113,7 +113,7 @@ void main() {
           isA<SettingsExportFormatException>().having(
             (error) => error.message,
             'message',
-            contains('not a WebLibre settings export'),
+            contains('not a Mellow settings export'),
           ),
         ),
       );

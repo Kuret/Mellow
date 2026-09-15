@@ -136,7 +136,7 @@ class BackgroundServices(
         get() = syncTokenServerOverride?.trim()?.takeUnless { it.isNullOrEmpty() }
 
     private val deviceConfig = DeviceConfig(
-        name = "WebLibre ${Build.MANUFACTURER} ${Build.MODEL}",
+        name = "Mellow ${Build.MANUFACTURER} ${Build.MODEL}",
         type = DeviceType.MOBILE,
         capabilities = setOf(DeviceCapability.SEND_TAB, DeviceCapability.CLOSE_TABS),
         secureStateAtRest = true,

@@ -39,7 +39,7 @@ Future<bool?> showSwitchProfileDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('WebLibre closes and reopens as "$profileName".'),
+            Text('Mellow closes and reopens as "$profileName".'),
             const SizedBox(height: 12),
             // The two consequences worth knowing, as their own lines rather than
             // one bolded paragraph: emphasising everything emphasises nothing,

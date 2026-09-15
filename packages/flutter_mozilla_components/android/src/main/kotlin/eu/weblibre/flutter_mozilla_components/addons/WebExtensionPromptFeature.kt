@@ -363,7 +363,7 @@ class WebExtensionPromptFeature(
             }
 
             is WebExtensionInstallException.Incompatible -> {
-                val appName = "WebLibre"
+                val appName = "Mellow"
                 val version = context.appVersionName
                 context.getString(
                     MozComp.string.mozac_feature_addons_failed_to_install_incompatible_error,

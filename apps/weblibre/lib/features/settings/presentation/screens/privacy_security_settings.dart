@@ -53,7 +53,7 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
       ),
       SettingsEntryDefinition(
         title: 'uBlock Filter Lists & Hardenings',
-        subtitle: 'Manage filter lists and apply WebLibre hardenings',
+        subtitle: 'Manage filter lists and apply Mellow hardenings',
         keywords: ['ublock', 'filters'],
         child: _UBlockFilterListsTile(),
       ),
@@ -107,7 +107,7 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
     entries: [
       SettingsEntryDefinition(
         title: 'Block apps from opening your browser',
-        subtitle: 'Control which apps may launch WebLibre directly',
+        subtitle: 'Control which apps may launch Mellow directly',
         keywords: [
           'intent gatekeeper',
           'external apps',
@@ -505,7 +505,7 @@ class _UBlockFilterListsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: const Text('uBlock Filter Lists & Hardenings'),
-      subtitle: const Text('Manage filter lists and apply WebLibre hardenings'),
+      subtitle: const Text('Manage filter lists and apply Mellow hardenings'),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -541,7 +541,7 @@ class _AppOpeningProtectionSection extends HookConsumerWidget {
         SwitchListTile.adaptive(
           title: const Text('Block apps from opening your browser'),
           subtitle: const Text(
-            'Ask before opening links that other apps send to WebLibre.',
+            'Ask before opening links that other apps send to Mellow.',
           ),
           secondary: const Icon(MdiIcons.appsBox),
           value: enabled,

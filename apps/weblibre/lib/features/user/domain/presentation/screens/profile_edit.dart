@@ -247,7 +247,7 @@ class _AuthSection extends StatelessWidget {
                       RadioListTile.adaptive(
                         value: AutoLockMode.background,
                         title: Text('Lock in background'),
-                        subtitle: Text('As soon as WebLibre leaves the screen'),
+                        subtitle: Text('As soon as Mellow leaves the screen'),
                       ),
                       RadioListTile.adaptive(
                         value: AutoLockMode.timeout,
@@ -259,7 +259,7 @@ class _AuthSection extends StatelessWidget {
                         title: Text('Lock on startup only'),
                         subtitle: Text(
                           'Unlock once at startup, then stay unlocked until '
-                          'WebLibre is fully closed',
+                          'Mellow is fully closed',
                         ),
                       ),
                     ],

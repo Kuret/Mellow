@@ -310,7 +310,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.info_outline),
                     title: Text(
-                      'A new profile starts without WebLibre sign-in',
+                      'A new profile starts without Mozilla sign-in',
                     ),
                     subtitle: Text(
                       'Tabs, history and bookmarks are restored. Sign-in and '
@@ -435,7 +435,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                   const ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.key_outlined),
-                    title: Text('WebLibre account data is restored'),
+                    title: Text('Mozilla account data is restored'),
                     subtitle: Text(
                       "Replacing restores the backup file's "
                       '$profileSecretDataDescription. $signedInFromBackup '
@@ -482,7 +482,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                       Text(
                         restoreTarget.value == RestoreTarget.createNew
                             ? 'Restoring backup…'
-                            : 'Closing WebLibre to restore…',
+                            : 'Closing Mellow to restore…',
                       ),
                     ],
                   )

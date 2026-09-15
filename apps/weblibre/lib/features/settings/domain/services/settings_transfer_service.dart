@@ -351,7 +351,7 @@ class SettingsTransferService extends _$SettingsTransferService {
     if (claimed > supported) {
       throw SettingsExportFormatException(
         'The "${section.title}" section was written by a newer version of '
-        'WebLibre (schema $claimed, this build reads up to $supported).',
+        'Mellow (schema $claimed, this build reads up to $supported).',
       );
     }
 

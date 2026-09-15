@@ -88,7 +88,7 @@ class ProfileSection extends HookConsumerWidget {
             leading: const Icon(Icons.public),
             title: Text(item.label),
             subtitle: Text(
-              'Open links from other apps in WebLibre',
+              'Open links from other apps in Mellow',
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,

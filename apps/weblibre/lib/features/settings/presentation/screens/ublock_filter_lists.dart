@@ -220,7 +220,7 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
                     ),
                     onApplyHardenings: () => _confirmAndRun(
                       context,
-                      title: 'Apply WebLibre Hardenings?',
+                      title: 'Apply Mellow Hardenings?',
                       message:
                           'This will enable a curated set of additional '
                           'filter lists and add a legitimate URL shortener '
@@ -341,7 +341,7 @@ class _QuickActionsCard extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.shield_outlined),
-            title: const Text('Apply WebLibre Hardenings'),
+            title: const Text('Apply Mellow Hardenings'),
             subtitle: const Text(
               'Enable a curated set of additional filter lists.',
             ),
@@ -435,9 +435,9 @@ class _ManagementCard extends StatelessWidget {
       child: Column(
         children: [
           SwitchListTile.adaptive(
-            title: const Text('Manage with WebLibre'),
+            title: const Text('Manage with Mellow'),
             subtitle: const Text(
-              "WebLibre controls uBlock Origin's enabled filter lists on "
+              "Mellow controls uBlock Origin's enabled filter lists on "
               'next browser start.',
             ),
             value: settings.enabled,
@@ -898,7 +898,7 @@ class _ExternalListsCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Raw URLs are forwarded to uBlock Origin as external lists. '
-                'Descriptions are only shown here in WebLibre.',
+                'Descriptions are only shown here in Mellow.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),

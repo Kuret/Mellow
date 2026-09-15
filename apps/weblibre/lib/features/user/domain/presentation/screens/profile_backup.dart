@@ -90,7 +90,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
               const ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.restart_alt),
-                title: Text('WebLibre restarts to do this'),
+                title: Text('Mellow restarts to do this'),
                 subtitle: Text(
                   '$restartClosesCurrentProfile The backup is then taken with '
                   'nothing writing to the profile it copies, which is what '
@@ -125,7 +125,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                 // Not a toggle any more: the exclusion list is part of the
                 // backup format, so a restored profile can rely on it.
                 subtitle: Text(
-                  'Cache files and other data WebLibre can rebuild are not '
+                  'Cache files and other data Mellow can rebuild are not '
                   'saved. $shortcutsNeedPinningAgain',
                 ),
               ),
@@ -140,7 +140,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                 // profiles is the isolation failure the profile boundary exists
                 // to prevent. Saying only the first half read as a contradiction
                 // of what the restore screen says.
-                title: Text('WebLibre account data is included'),
+                title: Text('Mozilla account data is included'),
                 subtitle: Text(
                   'The backup file includes this profile’s '
                   '$profileSecretDataDescription. Replacing a profile restores '
@@ -156,7 +156,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                     // Not "Creating Backup": nothing is written here. This
                     // records the task and closes the app, and the next
                     // process takes the archive.
-                    Text('Closing WebLibre to take the backup…'),
+                    Text('Closing Mellow to take the backup…'),
                   ],
                 )
               else

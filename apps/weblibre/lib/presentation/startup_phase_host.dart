@@ -326,30 +326,30 @@ class StartupHaltScreen extends StatelessWidget {
         Icons.build_outlined,
         'Unfinished profile work',
         'A backup, restore or deletion from an earlier run did not finish. '
-            'WebLibre must finish it before any profile can open.',
+            'Mellow must finish it before any profile can open.',
       ),
       StartupHaltKind.unavailable => (
         Icons.hourglass_empty,
         'Startup is not ready',
-        'WebLibre needs to restart before it can choose a profile. '
+        'Mellow needs to restart before it can choose a profile. '
             '$reopenToContinue',
       ),
       StartupHaltKind.profileAccessBusy => (
         Icons.lock_clock,
         'Profile is in use',
-        'Another WebLibre task is still using this profile. Try again in a '
+        'Another Mellow task is still using this profile. Try again in a '
             'moment.',
       ),
       StartupHaltKind.noProfile => (
         Icons.person_off_outlined,
         'No usable profile',
-        'WebLibre could not read an existing profile or create a new one. '
+        'Mellow could not read an existing profile or create a new one. '
             'Storage may be full or unavailable.',
       ),
       StartupHaltKind.arbitrationFailed => (
         Icons.error_outline,
         'Cannot tell which profile to open',
-        'WebLibre will not guess which profile to use. $reopenToContinue',
+        'Mellow will not guess which profile to use. $reopenToContinue',
       ),
     };
 

@@ -101,7 +101,7 @@ class AppLinkPromptDialog extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This link is handled by an app outside WebLibre.'),
+          const Text('This link is handled by an app outside Mellow.'),
           const SizedBox(height: 8),
           Text(
             _displayScope(target.scopeKey),

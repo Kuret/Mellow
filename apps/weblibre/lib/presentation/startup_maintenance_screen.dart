@@ -310,7 +310,7 @@ class StartupMaintenanceScreen extends HookWidget {
         // damaged — the boundary check is what stopped the work — but this
         // process can no longer act, and only a restart clears that.
         outcome.value = const _Outcome(
-          'WebLibre can no longer safely work on this profile. '
+          'Mellow can no longer safely work on this profile. '
           '$nothingChanged $reopenToContinue',
           failed: true,
         );
@@ -492,11 +492,11 @@ class StartupMaintenanceScreen extends HookWidget {
               Text(
                 switch ((next, unresolved.value.isEmpty)) {
                   (final MaintenanceTask _, _) =>
-                    'This must finish before any profile can open. WebLibre '
+                    'This must finish before any profile can open. Mellow '
                         'keeps the profile closed while it works.',
                   (null, true) => 'Nothing is left to finish.',
                   (null, false) =>
-                    'WebLibre found interrupted profile work, but cannot read '
+                    'Mellow found interrupted profile work, but cannot read '
                         'its record.',
                 },
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -658,7 +658,7 @@ class StartupMaintenanceScreen extends HookWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'This can take several minutes. Keep WebLibre open.',
+                    'This can take several minutes. Keep Mellow open.',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -738,7 +738,7 @@ class StartupMaintenanceScreen extends HookWidget {
                               'it did not succeed. It cannot be started over '
                               'until it has been finished.',
                         (false, false) =>
-                          'This was interrupted after it started, and WebLibre '
+                          'This was interrupted after it started, and Mellow '
                               'cannot read what it was doing. It cannot be run '
                               'again until that record is dealt with.',
                       },
@@ -806,12 +806,12 @@ Future<bool?> _confirmDiscardEvidence(BuildContext context) => showDialog<bool>(
     icon: const Icon(Icons.report_problem_outlined),
     title: const Text('Discard the interrupted record?'),
     content: const Text(
-      'WebLibre cannot read what a backup, restore or deletion was doing when '
+      'Mellow cannot read what a backup, restore or deletion was doing when '
       'it stopped. Discarding the record lets the browser open again, but a '
       'profile that was being replaced may need to be checked afterwards.\n\n'
-      'If the profile is missing, WebLibre puts back the data it saved before '
+      'If the profile is missing, Mellow puts back the data it saved before '
       'the replacement. If the profile is already there, that saved data is '
-      'removed. If WebLibre cannot tell which profile the saved data belongs '
+      'removed. If Mellow cannot tell which profile the saved data belongs '
       'to, it keeps it rather than removing it.',
     ),
     actions: [
@@ -1045,7 +1045,7 @@ _ActionCopy _copyFor(MaintenanceTask task) => switch (task.action) {
     noun: 'restore',
     describe: 'Restore "${task.profileName}"',
     consequence:
-        'This restore was created by a newer version of WebLibre and cannot '
+        'This restore was created by a newer version of Mellow and cannot '
         'run here.',
     activity: 'Restoring "${task.profileName}"…',
     describeDone: '"${task.profileName}" was restored.',
@@ -1059,7 +1059,7 @@ _ActionCopy _copyFor(MaintenanceTask task) => switch (task.action) {
     noun: 'task',
     describe: 'Unknown task ${task.id}',
     consequence:
-        'This task was created by a newer version of WebLibre and cannot run.',
+        'This task was created by a newer version of Mellow and cannot run.',
     activity: 'Working…',
     describeDone: 'Done.',
   ),

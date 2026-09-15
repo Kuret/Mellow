@@ -62,7 +62,7 @@ private fun SearchBarContent(context: Context) {
 
         // Search text
         Text(
-            text = "Search with WebLibre...",
+            text = "Search with Mellow...",
             style = TextStyle(
                 // Matches @color/widget_search_field_hint, which tints the
                 // microphone; keep the two in step. On Android 12+ this is

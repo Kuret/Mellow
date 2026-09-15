@@ -282,7 +282,7 @@ class _ManagementSection extends ConsumerWidget {
                   title: const Text('Enabled'),
                   subtitle: Text(
                     addon.canUserToggleEnabled
-                        ? 'Allow this extension to run in WebLibre.'
+                        ? 'Allow this extension to run in Mellow.'
                         : 'This extension cannot be safely enabled.',
                   ),
                   value: addon.isEnabled,
@@ -343,7 +343,7 @@ class _ManagementSection extends ConsumerWidget {
                   leading: const Icon(Icons.filter_list),
                   title: const Text('Filter Lists & Hardenings'),
                   subtitle: const Text(
-                    'Manage filter lists and apply WebLibre hardenings',
+                    'Manage filter lists and apply Mellow hardenings',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => UBlockFilterListsRoute().push<void>(context),
@@ -396,7 +396,7 @@ Future<bool?> _showConfirmUninstallDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Remove extension?'),
-      content: Text('Remove ${addon.displayName} from WebLibre?'),
+      content: Text('Remove ${addon.displayName} from Mellow?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

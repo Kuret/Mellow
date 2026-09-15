@@ -150,7 +150,7 @@ class MaintenanceRunner {
         return _fail(
           task,
           const UnknownMaintenanceFailure(
-            'This task was created by a newer version of WebLibre and cannot '
+            'This task was created by a newer version of Mellow and cannot '
             'run here.',
           ),
         );
@@ -258,7 +258,7 @@ class MaintenanceRunner {
       return _fail(
         task,
         const UnknownMaintenanceFailure(
-          'WebLibre cannot restore from this startup screen.',
+          'Mellow cannot restore from this startup screen.',
         ),
       );
     }
@@ -335,7 +335,7 @@ class MaintenanceRunner {
       return _fail(
         task,
         const UnknownMaintenanceFailure(
-          'WebLibre cannot delete a profile from this startup screen.',
+          'Mellow cannot delete a profile from this startup screen.',
         ),
       );
     }

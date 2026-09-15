@@ -160,11 +160,11 @@ class TabBarPreviewCard extends StatelessWidget {
 
     final previewTabState = TabState.$default('preview-tab').copyWith(
       url: Uri.parse('https://weblibre.eu/docs'),
-      title: 'WebLibre Preview',
+      title: 'Mellow Preview',
       securityInfoState: SecurityState(
         secure: true,
         host: 'weblibre.eu',
-        issuer: 'WebLibre',
+        issuer: 'Mellow',
       ),
     );
 

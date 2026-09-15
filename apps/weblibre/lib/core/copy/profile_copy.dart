@@ -33,7 +33,7 @@ const profileDataDescription =
 /// Kept separate from [profileDataDescription] because creating a new profile
 /// from a backup leaves these behind, while replacing a profile restores them.
 const profileSecretDataDescription =
-    'WebLibre account sign-in, sync setup and proxy details';
+    'Mozilla account sign-in, sync setup and proxy details';
 
 /// Said the same way everywhere, so it reads as a property of the operation
 /// rather than as one screen's turn of phrase.
@@ -47,7 +47,7 @@ const cannotBeUndone = 'This cannot be undone.';
 const nothingChanged = 'Nothing has been changed.';
 
 /// Why a destructive action closes the browser first.
-const restartsToWork = 'WebLibre restarts to do this.';
+const restartsToWork = 'Mellow restarts to do this.';
 
 /// The password half of [restartsThenAsksPassword], on its own.
 ///
@@ -60,11 +60,11 @@ const asksPasswordAfterRestart =
 const restartsThenAsksPassword = '$restartsToWork $asksPasswordAfterRestart';
 
 /// The only move a user has when startup will not continue.
-const reopenToContinue = 'Close WebLibre and open it again.';
+const reopenToContinue = 'Close Mellow and open it again.';
 
 /// Replacing a profile installs the archive's WebLibre account state.
 const signedInFromBackup =
-    'The restored profile uses the WebLibre account from the backup.';
+    'The restored profile uses the Mozilla account from the backup.';
 
 /// What a backup made before credentials were archived does to the target's own.
 ///
@@ -77,7 +77,7 @@ const signedInFromBackup =
 /// something the backup knows nothing about, and only the user can tell whether
 /// that is what they wanted.
 const olderBackupKeepsCredentials =
-    'A backup made by an older version of WebLibre carries none of these, and '
+    'A backup made by an older version of Mellow carries none of these, and '
     'the profile keeps the ones it has now.';
 
 /// Shown when the restart a destructive operation needs cannot be scheduled.
@@ -86,7 +86,7 @@ const olderBackupKeepsCredentials =
 /// stop: nothing is pending and nothing was touched. It used to say "could not
 /// arm a restart", which named the internal call rather than the situation.
 const restartCouldNotBeScheduled =
-    'WebLibre could not schedule the restart this needs. $nothingChanged';
+    'Mellow could not schedule the restart this needs. $nothingChanged';
 
 /// Android does not let an app recreate pinned shortcuts.
 const shortcutsNeedPinningAgain =

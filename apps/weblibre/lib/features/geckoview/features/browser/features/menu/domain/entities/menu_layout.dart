@@ -223,7 +223,7 @@ enum MenuItemType {
     moreDisclosure => 'Folds everything below it behind a "More" row',
     sendToDevice => 'The devices themselves come from your account',
     setDefaultBrowser =>
-      'Only shown until WebLibre is your default browser',
+      'Only shown until Mellow is your default browser',
     _ => null,
   };
 }

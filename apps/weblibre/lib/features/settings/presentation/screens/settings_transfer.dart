@@ -298,7 +298,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         if (context.mounted) {
           showErrorMessage(
             context,
-            'This export holds nothing this version of WebLibre can apply.',
+            'This export holds nothing this version of Mellow can apply.',
           );
         }
         return;

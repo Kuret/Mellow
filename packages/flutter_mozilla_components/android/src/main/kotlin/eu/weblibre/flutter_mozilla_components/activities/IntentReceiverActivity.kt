@@ -538,11 +538,11 @@ class IntentReceiverActivity : Activity() {
         // surprise the first time and a reason not to trust the dialog after
         // that.
         val message = "This $typeLabel belongs to the profile \u201C$expectedName\u201D, " +
-            "but WebLibre is currently running \u201C$currentName\u201D.\n\n" +
+            "but Mellow is currently running \u201C$currentName\u201D.\n\n" +
             "Opening it here uses only \u201C$currentName\u201D\u2019s data and settings. " +
             "The original profile\u2019s app state and saved data will not be used." +
             if (canRestart) {
-                "\n\nRestarting closes WebLibre and reopens it as " +
+                "\n\nRestarting closes Mellow and reopens it as " +
                     "\u201C$expectedName\u201D, with this $typeLabel."
             } else {
                 ""

@@ -50,23 +50,23 @@ android {
     productFlavors {
         stable {
             dimension "track"
-            manifestPlaceholders = [appName: "WebLibre", enableImpeller: "false"]
+            manifestPlaceholders = [appName: "Mellow", enableImpeller: "false"]
         }
         stableImpeller {
             dimension "track"
-            manifestPlaceholders = [appName: "WebLibre (Impeller)", enableImpeller: "true"]
+            manifestPlaceholders = [appName: "Mellow (Impeller)", enableImpeller: "true"]
         }
         alpha {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            manifestPlaceholders = [appName: "WebLibre Alpha", enableImpeller: "false"]
+            manifestPlaceholders = [appName: "Mellow Alpha", enableImpeller: "false"]
         }
         alphaImpeller {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            manifestPlaceholders = [appName: "WebLibre Alpha (Impeller)", enableImpeller: "true"]
+            manifestPlaceholders = [appName: "Mellow Alpha (Impeller)", enableImpeller: "true"]
         }
     }
 

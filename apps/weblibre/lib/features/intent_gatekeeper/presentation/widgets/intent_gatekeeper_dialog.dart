@@ -57,7 +57,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
 
     return AlertDialog(
       icon: const Icon(Icons.shield_outlined, size: 32),
-      title: const Text('Open link in WebLibre?'),
+      title: const Text('Open link in Mellow?'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -71,7 +71,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
                 children: [
                   TextSpan(text: displayName, style: bold),
                   const TextSpan(text: ' is trying to open a link in '),
-                  TextSpan(text: 'WebLibre', style: bold),
+                  TextSpan(text: 'Mellow', style: bold),
                   const TextSpan(text: '.'),
                 ],
               ),

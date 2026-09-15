@@ -193,13 +193,13 @@ SettingsExportDocument decodeSettingsExport(String text) {
 
   if (decoded is! Map<String, dynamic>) {
     throw const SettingsExportFormatException(
-      'This is not a WebLibre settings export.',
+      'This is not a Mellow settings export.',
     );
   }
 
   if (decoded['format'] != settingsExportFormat) {
     throw const SettingsExportFormatException(
-      'This is not a WebLibre settings export.',
+      'This is not a Mellow settings export.',
     );
   }
 
@@ -211,7 +211,7 @@ SettingsExportDocument decodeSettingsExport(String text) {
   }
   if (formatVersion > settingsExportFormatVersion) {
     throw SettingsExportFormatException(
-      'This export was written by a newer version of WebLibre '
+      'This export was written by a newer version of Mellow '
       '(format $formatVersion, this build reads up to '
       '$settingsExportFormatVersion). Update the app and try again.',
     );
@@ -746,14 +746,14 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
 
     final shown = line.length > 60 ? '${line.substring(0, 60)}…' : line;
     throw SettingsExportFormatException(
-      'The $name section has a line WebLibre cannot read: "$shown". '
+      'The $name section has a line Mellow cannot read: "$shown". '
       'Importing it would reset preferences rather than restore them.',
     );
   }
 
   if (!sawMarker) {
     throw SettingsExportFormatException(
-      'The $name section is not a WebLibre preferences snapshot.',
+      'The $name section is not a Mellow preferences snapshot.',
     );
   }
 
@@ -772,7 +772,7 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
     if (parsed.prefs.containsKey(prefName)) continue;
 
     throw SettingsExportFormatException(
-      'The $name section holds a preference WebLibre could not read back: '
+      'The $name section holds a preference Mellow could not read back: '
       '"$prefName".',
     );
   }
