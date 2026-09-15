@@ -31,13 +31,6 @@ import 'package:mellow/utils/uri_input_parser.dart';
 /// having to explain that in an error message.
 const settingsExportFormat = 'mellow.settings.export';
 
-/// What the format was called before the fork renamed itself.
-///
-/// A format identifier is a promise to the files already written, not a brand,
-/// so every one of these still imports. New files are only ever written under
-/// [settingsExportFormat].
-const legacySettingsExportFormats = {'weblibre.settings.export'};
-
 /// Version of the *envelope* — the wrapper below, not the documents inside it.
 ///
 /// Each document carries its own `schema_version`, checked by the sync service
@@ -204,9 +197,7 @@ SettingsExportDocument decodeSettingsExport(String text) {
     );
   }
 
-  final declaredFormat = decoded['format'];
-  if (declaredFormat != settingsExportFormat &&
-      !legacySettingsExportFormats.contains(declaredFormat)) {
+  if (decoded['format'] != settingsExportFormat) {
     throw const SettingsExportFormatException(
       'This is not a Mellow settings export.',
     );
@@ -719,8 +710,7 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
     final line = rawLine.trim();
 
     if (line.isEmpty) continue;
-    if (line == geckoPrefsSnapshotMarker ||
-        legacyGeckoPrefsSnapshotMarkers.contains(line)) {
+    if (line == geckoPrefsSnapshotMarker) {
       sawMarker = true;
       continue;
     }

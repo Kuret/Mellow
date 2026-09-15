@@ -19,16 +19,11 @@
  */
 /// The document kinds a settings transfer can carry.
 ///
-/// The [value] is the identifier written into exported settings files (and,
-/// historically, into hosted sync storage). Renaming one is a promise broken
-/// to every file already on disk, so a kind that changes its value keeps the
-/// old one in [legacyValues] and goes on reading it.
+/// The [value] is the identifier written into exported settings files. It was
+/// renamed with the rest of the fork: an export written by an older build no
+/// longer imports, and says so rather than half-applying.
 enum SyncDocumentKind {
-  mellowSettings(
-    'mellow_settings',
-    'Settings',
-    legacyValues: {'weblibre_settings'},
-  ),
+  mellowSettings('mellow_settings', 'Settings'),
   geckoUserJs('gecko_user_js', 'Gecko Prefs'),
 
   /// Small encrypted canary written on first-device sync setup so a second
@@ -39,18 +34,7 @@ enum SyncDocumentKind {
   final String value;
   final String displayName;
 
-  /// Values this kind was written under by earlier builds. Read, never written.
-  final Set<String> legacyValues;
-
-  const SyncDocumentKind(
-    this.value,
-    this.displayName, {
-    this.legacyValues = const {},
-  });
-
-  /// Whether [wireValue] names this kind, under its current name or an old one.
-  bool matches(String wireValue) =>
-      wireValue == value || legacyValues.contains(wireValue);
+  const SyncDocumentKind(this.value, this.displayName);
 }
 
 /// Contract for document kinds that can be synced.

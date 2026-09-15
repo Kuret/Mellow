@@ -41,9 +41,6 @@ bool isSyncablePrefValue(Object value) {
 /// one recognisable as such.
 const geckoPrefsSnapshotMarker = '// Mellow Gecko prefs snapshot';
 
-/// The marker earlier builds wrote, still recognised when reading.
-const legacyGeckoPrefsSnapshotMarkers = {'// WebLibre Gecko prefs snapshot'};
-
 String serializeUserJs({
   required Map<String, Object> userPrefs,
   required int schemaVersion,

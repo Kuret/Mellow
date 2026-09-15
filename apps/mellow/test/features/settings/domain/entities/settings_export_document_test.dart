@@ -180,28 +180,6 @@ void main() {
       );
     });
 
-    test('still reads a file written under the old format name', () {
-      // The fork renamed itself; the files people already exported did not.
-      final text = jsonEncode({
-        'format': 'weblibre.settings.export',
-        'format_version': settingsExportFormatVersion,
-        'documents': {
-          'weblibre_settings': {
-            'schema_version': 1,
-            'content': {
-              'payload': {
-                'general': {'themeMode': 'dark'},
-              },
-            },
-          },
-        },
-      });
-
-      final document = decodeSettingsExport(text);
-
-      expect(document.documents.keys, ['weblibre_settings']);
-    });
-
     test('keeps document kinds it does not know', () {
       final text = jsonEncode({
         'format': settingsExportFormat,
@@ -463,16 +441,6 @@ void main() {
         () => requireGeckoPrefsDocument(''),
         throwsA(isA<SettingsExportFormatException>()),
       );
-    });
-
-    test('accepts a snapshot written under the old marker', () {
-      final parsed = requireGeckoPrefsDocument(
-        '// WebLibre Gecko prefs snapshot\n'
-        '// schema_version=1\n'
-        'user_pref("alpha.pref", true);\n',
-      );
-
-      expect(parsed.prefs.keys, contains('alpha.pref'));
     });
 
     test('accepts a snapshot that genuinely holds no preferences', () {

@@ -106,34 +106,6 @@ void main() {
       expect((await generalSettings().fetchSettings()).pureBlack, true);
     });
 
-    test(
-      'applies a file that names the settings section the old way',
-      () async {
-        // Exports written before the fork renamed its identifiers key the
-        // section "weblibre_settings". Importing one has to still work, or the
-        // rename quietly ate somebody's backup.
-        await generalSettings().updateSettings(
-          (current) => current.copyWith.pureBlack(true),
-        );
-        final exported = (await service().export(
-          sections: settingsOnly,
-        )).replaceAll('"mellow_settings"', '"weblibre_settings"');
-
-        await generalSettings().updateSettings(
-          (current) => current.copyWith.pureBlack(false),
-        );
-
-        final document = decodeSettingsExport(exported);
-        expect(service().availableSections(document), {
-          SettingsTransferSection.settings,
-        });
-
-        await service().import(document: document, sections: settingsOnly);
-
-        expect((await generalSettings().fetchSettings()).pureBlack, true);
-      },
-    );
-
     test('leaves sections the caller did not pick alone', () async {
       await generalSettings().updateSettings(
         (current) => current.copyWith.pureBlack(true),
