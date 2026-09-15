@@ -1,5 +1,0 @@
-* Reorganized several settings into a new group: "Developer Settings"
-* Added a "Get Extensions" menu entry
-* Disabled the Cookie Banner Blocker option, as it is deprecated by Mozilla (consider using uBlock Origin instead)
-* Updated hardening presets
-* Mozilla Components upgraded

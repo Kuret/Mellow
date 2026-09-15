@@ -1,3 +1,0 @@
-* Reworked Tab UI into bottom sheet
-* Adjusted Android permissions
-* Improved Favicon handling

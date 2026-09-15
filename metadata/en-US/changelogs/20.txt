@@ -1,2 +1,0 @@
-* Integrated on-device ai for container naming and tab sugegstions
-* Improved Tab and container UI

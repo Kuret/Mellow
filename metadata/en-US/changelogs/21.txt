@@ -1,2 +1,0 @@
-* Fixed drop animation lag
-* Allow drop into the unassigned container

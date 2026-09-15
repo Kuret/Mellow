@@ -1,3 +1,0 @@
-* Trigger automatic find-in-page when coming from local search results
-* Upgraded gecko
-* Upgraded GoRouter

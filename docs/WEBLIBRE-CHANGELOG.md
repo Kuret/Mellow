@@ -1,3 +1,6 @@
+<!-- WebLibre's own release notes, kept for provenance. Mellow publishes no releases;
+     for what this fork changed, see CHANGES-FROM-WEBLIBRE.md. -->
+
 ## 0.20.0
 ### GeckoView 152.0.4
 

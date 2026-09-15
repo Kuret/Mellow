@@ -1,4 +1,0 @@
-* Improved intent handling
-* Refactored tab grid
-* Several UI improvements
-* Optimized build
