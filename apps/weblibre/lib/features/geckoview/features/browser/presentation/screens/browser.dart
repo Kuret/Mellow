@@ -926,6 +926,22 @@ class BrowserScreen extends HookConsumerWidget {
     );
     final isRail = tabBarPosition.isVertical;
 
+    // Whether the narrow-viewport compact bar's slide-out panel is the
+    // chrome right now, replacing the horizontal bar rather than adding to
+    // it. `tabBarPosition` stays horizontal (top/bottom) here regardless —
+    // it never varies with this setting, only with viewport width and
+    // [GeneralSettings.effectiveTabBarPosition] — so every construction site
+    // below that would otherwise draw or size the horizontal bar has to be
+    // gated on this explicitly, the same way it already is on [isRail].
+    final compactRailActive =
+        ref.watch(
+          zenSettingsWithDefaultsProvider.select(
+            (value) => value.compactRailSide,
+          ),
+        ) !=
+            null &&
+        !isWideViewport(viewportWidth);
+
     // The compact bar is one row, always; the rail has no bar row at all.
     const quickTabSwitcherRowCount = 1;
 
@@ -1059,8 +1075,10 @@ class BrowserScreen extends HookConsumerWidget {
     // reason to change: the inset math below uses this frozen value while the
     // widgets that actually render the bar keep the real one.
     final Size viewportBottomAppBarContentSize;
-    if (isRail) {
-      // The rail occupies a side, not the bottom; no bottom bar is rendered.
+    if (isRail || compactRailActive) {
+      // The rail occupies a side, not the bottom, and the compact rail's
+      // slide-out panel replaces the horizontal bar entirely: either way, no
+      // bottom bar is rendered.
       bottomAppBarContentSize = Size.zero;
       viewportBottomAppBarContentSize = bottomAppBarContentSize;
     } else {
@@ -1107,12 +1125,14 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Calculate top toolbar size for browser offset and progress indicator
     final topSafeArea = MediaQuery.of(context).padding.top;
-    final topAppBarContentSize = BrowserTopAppBar(
-      showMainToolbar: tabBarPosition == TabBarPosition.top,
-      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-      suppressMainToolbar: suppressMainToolbarForHome,
-      showToolbarButtons: showToolbarButtons,
-    ).preferredSize;
+    final topAppBarContentSize = compactRailActive
+        ? Size.zero
+        : BrowserTopAppBar(
+            showMainToolbar: tabBarPosition == TabBarPosition.top,
+            quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+            suppressMainToolbar: suppressMainToolbarForHome,
+            showToolbarButtons: showToolbarButtons,
+          ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
     // Get pixel ratio for converting logical pixels to physical pixels
@@ -1329,12 +1349,8 @@ class BrowserScreen extends HookConsumerWidget {
             isNarrowViewport: !isWideViewport(viewportWidth),
             viewportWidth: viewportWidth,
             railWidth: railWidth,
-            topInset: tabBarPosition == TabBarPosition.top
-                ? topAppBarTotalHeight
-                : 0,
-            bottomInset: tabBarPosition == TabBarPosition.bottom
-                ? bottomAppBarTotalHeight
-                : 0,
+            showToolbarButtons: showToolbarButtons,
+            suppressMainToolbar: suppressMainToolbarForHome,
             child: Stack(
               children: [
                 // Layer 0: Browser content
@@ -1385,8 +1401,10 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
 
                 // Layer 2: Bottom Toolbar (overlay, slides in/out)
-                // Skipped entirely for the side rail (Layer 3b below).
-                if (!isRail)
+                // Skipped entirely for the side rail (Layer 3b below) and
+                // for the compact rail's slide-out panel, which replaces it
+                // (see CompactRailSlideOut).
+                if (!isRail && !compactRailActive)
                   Positioned(
                     left: 0,
                     right: 0,
@@ -1401,8 +1419,10 @@ class BrowserScreen extends HookConsumerWidget {
                     ),
                   ),
 
-                // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
-                if (tabBarPosition == TabBarPosition.top)
+                // Layer 3: Top Toolbar (overlay, slides in/out) - only when
+                // position is top, and not when the compact rail's slide-out
+                // panel replaces it (see CompactRailSlideOut).
+                if (tabBarPosition == TabBarPosition.top && !compactRailActive)
                   Positioned(
                     left: 0,
                     right: 0,
@@ -1708,22 +1728,27 @@ class _Browser extends HookConsumerWidget {
                 // then lands right here. Without the gate that swipe would
                 // open the panel too, and the setting's promise that the other
                 // edge still goes back would be false.
-                if (!ref.read(predictiveBackSeenProvider) &&
-                    shouldClaimCompactRailBackGesture(
-                      side: ref.read(
-                        zenSettingsWithDefaultsProvider.select(
-                          (settings) => settings.compactRailSide,
-                        ),
+                if (!ref.read(predictiveBackSeenProvider)) {
+                  final fallbackPanelSide = resolveCompactRailBackGesture(
+                    side: ref.read(
+                      zenSettingsWithDefaultsProvider.select(
+                        (settings) => settings.compactRailSide,
                       ),
-                      isNarrowViewport: !isWideViewport(
-                        MediaQuery.sizeOf(context).width,
-                      ),
-                      isOpen: ref.read(compactRailPanelOpenProvider),
-                      swipeEdge: null,
-                      isCurrentRoute: true,
-                    )) {
-                  ref.read(compactRailPanelOpenProvider.notifier).open();
-                  return true;
+                    ),
+                    isNarrowViewport: !isWideViewport(
+                      MediaQuery.sizeOf(context).width,
+                    ),
+                    isOpen: ref.read(compactRailPanelOpenProvider),
+                    swipeEdge: null,
+                    isCurrentRoute: true,
+                  );
+                  if (fallbackPanelSide != null) {
+                    ref
+                        .read(compactRailPanelSideProvider.notifier)
+                        .set(fallbackPanelSide);
+                    ref.read(compactRailPanelOpenProvider.notifier).open();
+                    return true;
+                  }
                 }
 
                 // Dismiss modal routes (e.g. showModalBottomSheet).
