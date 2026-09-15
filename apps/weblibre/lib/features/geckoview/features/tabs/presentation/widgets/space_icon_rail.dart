@@ -17,20 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/browser_quick_menu.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 /// The space switcher at the foot of the wide vertical rail (PLAN §9 W1):
@@ -38,7 +31,8 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/s
 /// trailing "+" that opens a new tab in the current space (matching Zen).
 /// Tap a space to select it, long-press a space to edit it. Long-pressing
 /// "+" opens a menu with the rest of the toolbar's actions (see
-/// [_showAddMenu]). Scrolls horizontally when the spaces outgrow the rail.
+/// [showBrowserQuickMenu]). Scrolls horizontally when the spaces outgrow the
+/// rail.
 class SpaceIconRail extends ConsumerWidget {
   const SpaceIconRail({super.key});
 
@@ -63,166 +57,10 @@ class SpaceIconRail extends ConsumerWidget {
         ref.read(selectedSpaceProvider.notifier).space = id;
       },
       onEdit: (id) => SpaceEditRoute(uuid: id).push(context),
-      onNewTab: () => _openNewTab(context, ref),
-      onAddLongPress: (buttonContext) => _showAddMenu(buttonContext, ref),
+      onNewTab: () => openNewTabFromQuickMenu(context, ref),
+      onAddLongPress: (buttonContext) =>
+          showBrowserQuickMenu(buttonContext, ref),
     );
-  }
-}
-
-/// Opens a new tab in the current space: the same thing the main toolbar's
-/// "New Tab" button ([ToolbarButtonId.addTab]) does on a plain tap.
-Future<void> _openNewTab(BuildContext context, WidgetRef ref) async {
-  await SearchRoute(
-    tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
-  ).push(context);
-
-  if (context.mounted) {
-    const BrowserRoute().go(context);
-  }
-}
-
-/// The actions of the rail's "+" long-press menu, in the order they are
-/// shown: Refresh, Back, Forward, Tabs, Settings, then (after a divider)
-/// New Space and New Tab.
-enum _SpaceRailMenuAction {
-  reload,
-  back,
-  forward,
-  tabs,
-  settings,
-  newSpace,
-  newTab,
-}
-
-/// The "+" long-press menu (PLAN §9 W1 change 5): everything the wide
-/// rail's toolbar row would otherwise carry, reached without it. Each
-/// action reuses the same call the corresponding toolbar button makes
-/// (see `toolbar_button_registry.dart`), rather than a second
-/// implementation of "go back"/"reload"/etc.
-Future<void> _showAddMenu(BuildContext context, WidgetRef ref) async {
-  // Fired before the menu is built: the tick is the acknowledgement that the
-  // press was long enough, so it has to land when the finger is still down,
-  // not when the menu finishes animating in.
-  unawaited(HapticFeedback.mediumImpact());
-
-  final button = context.findRenderObject()! as RenderBox;
-  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
-  final position = RelativeRect.fromRect(
-    Rect.fromPoints(
-      button.localToGlobal(Offset.zero, ancestor: overlay),
-      button.localToGlobal(
-        button.size.bottomRight(Offset.zero),
-        ancestor: overlay,
-      ),
-    ),
-    Offset.zero & overlay.size,
-  );
-
-  final selectedTabId = ref.read(selectedTabProvider);
-  final historyState = ref.read(tabHistoryStateProvider(selectedTabId));
-
-  const iconTextSpacing = SizedBox(width: 12);
-
-  final action = await showMenu<_SpaceRailMenuAction>(
-    context: context,
-    position: position,
-    items: [
-      const PopupMenuItem(
-        value: _SpaceRailMenuAction.reload,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.refresh), iconTextSpacing, Text('Refresh')],
-        ),
-      ),
-      PopupMenuItem(
-        value: _SpaceRailMenuAction.back,
-        enabled: historyState.canGoBack,
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.arrow_back), iconTextSpacing, Text('Back')],
-        ),
-      ),
-      PopupMenuItem(
-        value: _SpaceRailMenuAction.forward,
-        enabled: historyState.canGoForward,
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.arrow_forward),
-            iconTextSpacing,
-            Text('Forward'),
-          ],
-        ),
-      ),
-      const PopupMenuItem(
-        value: _SpaceRailMenuAction.tabs,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(MdiIcons.tab), iconTextSpacing, Text('Tabs')],
-        ),
-      ),
-      const PopupMenuItem(
-        value: _SpaceRailMenuAction.settings,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.settings), iconTextSpacing, Text('Settings')],
-        ),
-      ),
-      const PopupMenuDivider(),
-      const PopupMenuItem(
-        value: _SpaceRailMenuAction.newSpace,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(Icons.add), iconTextSpacing, Text('New Space')],
-        ),
-      ),
-      const PopupMenuItem(
-        value: _SpaceRailMenuAction.newTab,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(MdiIcons.tabPlus), iconTextSpacing, Text('New Tab')],
-        ),
-      ),
-    ],
-  );
-
-  if (action == null || !context.mounted) return;
-
-  switch (action) {
-    case _SpaceRailMenuAction.reload:
-      if (selectedTabId != null) {
-        await ref
-            .read(tabSessionProvider(tabId: selectedTabId).notifier)
-            .reload();
-      }
-    case _SpaceRailMenuAction.back:
-      if (selectedTabId != null && historyState.canGoBack) {
-        await ref
-            .read(tabSessionProvider(tabId: selectedTabId).notifier)
-            .goBack();
-      }
-    case _SpaceRailMenuAction.forward:
-      if (selectedTabId != null && historyState.canGoForward) {
-        await ref
-            .read(tabSessionProvider(tabId: selectedTabId).notifier)
-            .goForward();
-      }
-    case _SpaceRailMenuAction.tabs:
-      if (context.mounted) {
-        await const TabViewRoute().push(context);
-      }
-    case _SpaceRailMenuAction.settings:
-      if (context.mounted) {
-        await SettingsRoute().push(context);
-      }
-    case _SpaceRailMenuAction.newSpace:
-      if (context.mounted) {
-        await const SpaceCreateRoute().push(context);
-      }
-    case _SpaceRailMenuAction.newTab:
-      if (context.mounted) {
-        await _openNewTab(context, ref);
-      }
   }
 }
 
