@@ -116,6 +116,24 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         child: _SpaceIndicatorSideSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Slide-out Tab Rail',
+        subtitle:
+            'On narrow screens, swipe back from this edge to slide the tab '
+            'rail in; a back swipe from the other edge still goes back',
+        keywords: [
+          'rail',
+          'drawer',
+          'slide',
+          'tabs',
+          'sidebar',
+          'left',
+          'right',
+          'back gesture',
+          'compact bar',
+        ],
+        child: _CompactRailSideSection(),
+      ),
+      SettingsEntryDefinition(
         title: 'Title Width on Compact Bar Chips',
         subtitle:
             'Maximum width of a tab title on the compact bar, so a narrower '
@@ -261,6 +279,64 @@ class _RailSideSection extends HookConsumerWidget {
                   title: Text('Left'),
                 ),
                 RadioListTile.adaptive(
+                  value: RailSide.right,
+                  title: Text('Right'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactRailSideSection extends HookConsumerWidget {
+  const _CompactRailSideSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final compactRailSide = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.compactRailSide),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Slide-out Tab Rail'),
+            subtitle: Text(
+              'On narrow screens, swipe back from this edge to slide the '
+              'tab rail in; a back swipe from the other edge still goes '
+              'back',
+            ),
+            leading: Icon(MdiIcons.dockLeft),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup<RailSide?>(
+            groupValue: compactRailSide,
+            onChanged: (value) async {
+              await ref
+                  .read(saveZenSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.compactRailSide(value),
+                  );
+            },
+            child: const Column(
+              children: [
+                RadioListTile<RailSide?>.adaptive(
+                  value: null,
+                  title: Text('Off'),
+                ),
+                RadioListTile<RailSide?>.adaptive(
+                  value: RailSide.left,
+                  title: Text('Left'),
+                ),
+                RadioListTile<RailSide?>.adaptive(
                   value: RailSide.right,
                   title: Text('Right'),
                 ),
