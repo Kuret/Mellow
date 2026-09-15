@@ -37,7 +37,7 @@ When in doubt, leave it out and say so in the PR. An upstream feature we skipped
 
 Run everything from the repo root. The shell is fish, so wrap globs and loops in `bash -c '...'`.
 
-- Toolchain (Java 17, Flutter, Android SDK): `bash -c 'source ../.env.sh && …'`. For APK builds also `export PATH="$HOME/.cargo/bin:$PATH"` (cargokit needs rustup for `privacypass_client`).
+- Toolchain (Java 17, Flutter, Android SDK, and the `KEY_*` signing environment): `bash -c 'source ../.env.sh && …'`. Rust is **not** needed — cargokit went with `privacypass_client` when the hosted service tier was deleted.
 - Read `.claude/skills/upstream-sync/state.json`. It records the fork base and the last reviewed commit on each side. Treat it as the source of truth for "where we left off".
 - Check for a remote we control: `git remote -v`. `origin` is **upstream** — it is not a PR target. A PR needs a separate remote (conventionally `fork`) pointing at a repo the user owns. If there is none, you will still do all the work locally; see Step 6.
 
@@ -111,16 +111,18 @@ Commit style: small and focused, one concern per commit, following the trailer c
 
 ## Step 4 — Verify
 
-Nothing gets a PR without these:
+Nothing is handed on without these:
 
 ```
 bash -c 'source ../.env.sh && cd apps/mellow && dart analyze lib test'
 bash -c 'source ../.env.sh && cd apps/mellow && flutter test'
-bash -c 'source ../.env.sh && export PATH="$HOME/.cargo/bin:$PATH" && cd apps/mellow && \
+bash -c 'source ../.env.sh && cd apps/mellow && \
   flutter build apk --release --flavor alpha --target-platform android-arm64 --split-per-abi --no-tree-shake-icons'
 ```
 
-Known failures that pre-date the fork and are **not** yours: `test/drift/bangs/migration_test.dart` (×8) and `test/features/web_search/**/page_preview_test.dart` (×1). Everything else must be green.
+When the run is heading for a release, the third one is redundant — `scripts/release.sh` builds, and builds with signing. Run it anyway if you are stopping here.
+
+**The suite is entirely green — 1612 tests, no known failures.** The two that used to be excused (`bangs`, `web_search`) went with the features they covered. A failure is therefore yours: fix it or stop, never tolerate it.
 
 If the APK build complains about missing assets, the gitignored build inputs are missing from this tree: `../sync-build-inputs.sh <path-to-this-worktree>`.
 
@@ -130,28 +132,19 @@ If a device is attached (`adb devices`), install and smoke-test it — sync sett
 
 In a final commit, set `weblibre.last_reviewed` to the upstream sha you triaged up to (**even for commits you skipped** — they are reviewed, not pending) and `zen.last_reviewed` / `zen.engine_version` to what you just checked. Markers move with the review, not with the merge.
 
-## Step 6 — Open the PR
+## Step 6 — Hand off
 
-With a pushable remote:
+This skill ends with the work committed on a branch and a report. It does not release.
 
-```
-git push -u fork upstream-sync/<date>
-gh pr create --repo <owner>/<repo> --base zen-model --head upstream-sync/<date> --title "…" --body "…"
-```
-
-**If there is no remote other than `origin`, do not create one and do not push.** Publishing this repo is the user's call, not yours. Stop with the branch in place, report everything, and give them the one command that would enable PRs:
-
-```
-gh repo create <name> --private --source=. --remote=fork --push
-```
-
-The PR body must contain, in this order:
+If the run started from **`ship`**, return the report and let that skill carry it: it decides the version, writes the release notes from what you took and skipped, and runs `scripts/release.sh`. What it needs from you, in this order:
 
 1. **Taken** — each upstream commit with its sha and one line on why.
 2. **Skipped** — each one with the reason (replaced by our tab model / deleted feature / deferred).
 3. **Zen contract** — changed or unchanged, and what it means for our client; engine version confirmed.
 4. **Verification** — the analyze/test/build results, the known-failure caveat, and whether it ran on a device.
-5. **Risk** — what a reviewer should look at hardest, especially anything that touched `spaces_sync`, the drift schema, or the tab repository.
+5. **Risk** — what to look at hardest, especially anything touching `spaces_sync`, the drift schema, or the tab repository.
+
+If it was invoked on its own, merge the branch into `zen-model` once that report is on the table, and say that `ship` is what turns it into a release. `mellow` (github.com/Kuret/Mellow) is the fork's own remote; `origin` is upstream and is never a push target.
 
 ## Stop and ask, do not improvise
 
