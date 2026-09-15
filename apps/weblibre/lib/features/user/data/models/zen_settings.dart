@@ -49,6 +49,22 @@ const railWidthStep = 8.0;
 /// [TabBarPosition], which only places the narrow-viewport compact bar.
 enum RailSide { left, right }
 
+/// Which side of the narrow-viewport compact bar's chip strip carries the
+/// fixed space switcher (`SpaceIndicator`). Independent of [RailSide], which
+/// only docks the wide-viewport side rail — the compact bar has no rail to
+/// dock, just a row it can put its one fixed control at either end of, to
+/// suit a left- or right-handed grip.
+enum SpaceIndicatorSide {
+  left,
+  right;
+
+  /// Label the settings UI shows for this side.
+  String get label => switch (this) {
+    SpaceIndicatorSide.left => 'Left',
+    SpaceIndicatorSide.right => 'Right',
+  };
+}
+
 /// Viewport width, in logical px, from which the browser lays its chrome out
 /// as the side rail ([RailSide]) instead of the compact horizontal bar
 /// ([TabBarPosition]): tablets, landscape and unfolded foldables clear it;
@@ -176,6 +192,10 @@ class ZenSettings with FastEquatable {
   /// Which edge the side rail docks to on wide viewports. See [RailSide].
   final RailSide railSide;
 
+  /// Which side of the narrow-viewport compact bar carries the fixed space
+  /// switcher. See [SpaceIndicatorSide].
+  final SpaceIndicatorSide spaceIndicatorSide;
+
   /// Width (logical px) of the vertical tab bar side rail. See
   /// [defaultRailWidth].
   final double railWidth;
@@ -238,6 +258,7 @@ class ZenSettings with FastEquatable {
     required this.spacesSyncMaxTombstoneFraction,
     required this.spacesSyncMaxTombstoneCount,
     required this.railSide,
+    required this.spaceIndicatorSide,
     required this.railWidth,
     required this.showToolbarButtons,
     required this.maxLiveTabs,
@@ -257,6 +278,7 @@ class ZenSettings with FastEquatable {
     double? spacesSyncMaxTombstoneFraction,
     int? spacesSyncMaxTombstoneCount,
     RailSide? railSide,
+    SpaceIndicatorSide? spaceIndicatorSide,
     double? railWidth,
     bool? showToolbarButtons,
     int? maxLiveTabs,
@@ -276,6 +298,7 @@ class ZenSettings with FastEquatable {
            (spacesSyncMaxTombstoneCount ?? defaultSpacesSyncMaxTombstoneCount)
                .clamp(0, 1 << 30),
        railSide = railSide ?? RailSide.left,
+       spaceIndicatorSide = spaceIndicatorSide ?? SpaceIndicatorSide.left,
        railWidth = (railWidth ?? defaultRailWidth).clamp(
          minRailWidth,
          maxRailWidth,
@@ -305,6 +328,7 @@ class ZenSettings with FastEquatable {
     spacesSyncMaxTombstoneFraction,
     spacesSyncMaxTombstoneCount,
     railSide,
+    spaceIndicatorSide,
     railWidth,
     showToolbarButtons,
     maxLiveTabs,

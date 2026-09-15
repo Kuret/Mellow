@@ -100,6 +100,8 @@ abstract class _$ZenSettingsCWProxy {
 
   ZenSettings railSide(RailSide railSide);
 
+  ZenSettings spaceIndicatorSide(SpaceIndicatorSide spaceIndicatorSide);
+
   ZenSettings railWidth(double railWidth);
 
   ZenSettings showToolbarButtons(bool showToolbarButtons);
@@ -133,6 +135,7 @@ abstract class _$ZenSettingsCWProxy {
     double spacesSyncMaxTombstoneFraction,
     int spacesSyncMaxTombstoneCount,
     RailSide railSide,
+    SpaceIndicatorSide spaceIndicatorSide,
     double railWidth,
     bool showToolbarButtons,
     int maxLiveTabs,
@@ -187,6 +190,10 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
   ZenSettings railSide(RailSide railSide) => call(railSide: railSide);
 
   @override
+  ZenSettings spaceIndicatorSide(SpaceIndicatorSide spaceIndicatorSide) =>
+      call(spaceIndicatorSide: spaceIndicatorSide);
+
+  @override
   ZenSettings railWidth(double railWidth) => call(railWidth: railWidth);
 
   @override
@@ -230,6 +237,7 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
     Object? spacesSyncMaxTombstoneFraction = const $CopyWithPlaceholder(),
     Object? spacesSyncMaxTombstoneCount = const $CopyWithPlaceholder(),
     Object? railSide = const $CopyWithPlaceholder(),
+    Object? spaceIndicatorSide = const $CopyWithPlaceholder(),
     Object? railWidth = const $CopyWithPlaceholder(),
     Object? showToolbarButtons = const $CopyWithPlaceholder(),
     Object? maxLiveTabs = const $CopyWithPlaceholder(),
@@ -288,6 +296,12 @@ class _$ZenSettingsCWProxyImpl implements _$ZenSettingsCWProxy {
           ? _value.railSide
           // ignore: cast_nullable_to_non_nullable
           : railSide as RailSide,
+      spaceIndicatorSide:
+          spaceIndicatorSide == const $CopyWithPlaceholder() ||
+              spaceIndicatorSide == null
+          ? _value.spaceIndicatorSide
+          // ignore: cast_nullable_to_non_nullable
+          : spaceIndicatorSide as SpaceIndicatorSide,
       railWidth: railWidth == const $CopyWithPlaceholder() || railWidth == null
           ? _value.railWidth
           // ignore: cast_nullable_to_non_nullable
@@ -368,6 +382,10 @@ ZenSettings _$ZenSettingsFromJson(
   spacesSyncMaxTombstoneCount: (json['spacesSyncMaxTombstoneCount'] as num?)
       ?.toInt(),
   railSide: $enumDecodeNullable(_$RailSideEnumMap, json['railSide']),
+  spaceIndicatorSide: $enumDecodeNullable(
+    _$SpaceIndicatorSideEnumMap,
+    json['spaceIndicatorSide'],
+  ),
   railWidth: (json['railWidth'] as num?)?.toDouble(),
   showToolbarButtons: json['showRailToolbar'] as bool?,
   maxLiveTabs: (json['maxLiveTabs'] as num?)?.toInt(),
@@ -390,6 +408,8 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
       'spacesSyncMaxTombstoneFraction': instance.spacesSyncMaxTombstoneFraction,
       'spacesSyncMaxTombstoneCount': instance.spacesSyncMaxTombstoneCount,
       'railSide': _$RailSideEnumMap[instance.railSide]!,
+      'spaceIndicatorSide':
+          _$SpaceIndicatorSideEnumMap[instance.spaceIndicatorSide]!,
       'railWidth': instance.railWidth,
       'showRailToolbar': instance.showToolbarButtons,
       'maxLiveTabs': instance.maxLiveTabs,
@@ -402,3 +422,8 @@ Map<String, dynamic> _$ZenSettingsToJson(ZenSettings instance) =>
     };
 
 const _$RailSideEnumMap = {RailSide.left: 'left', RailSide.right: 'right'};
+
+const _$SpaceIndicatorSideEnumMap = {
+  SpaceIndicatorSide.left: 'left',
+  SpaceIndicatorSide.right: 'right',
+};

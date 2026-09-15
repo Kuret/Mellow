@@ -56,6 +56,7 @@ const zenSettingColumnTypes = <String, DriftSqlType>{
   'spacesSyncMaxTombstoneFraction': DriftSqlType.double,
   'spacesSyncMaxTombstoneCount': DriftSqlType.int,
   'railSide': DriftSqlType.string,
+  'spaceIndicatorSide': DriftSqlType.string,
   'railWidth': DriftSqlType.double,
   // Persisted name for ZenSettings.showToolbarButtons: kept as
   // 'showRailToolbar' (its old field name, from before the setting also
