@@ -23,13 +23,17 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/browser_quick_menu.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
 
 /// The compact bar's fixed leading control: the selected space's icon (or the
 /// first letter of its name) with a strip of dots underneath marking where it
 /// sits among the spaces. Tapping opens [showSpacePickerSheet]; a horizontal
-/// swipe steps to the neighbouring space.
+/// swipe steps to the neighbouring space; a long-press opens the shared quick
+/// menu (see [showBrowserQuickMenu]) — the compact bar's counterpart to the
+/// wide rail's "+" long-press, since the compact bar's toolbar row can be
+/// switched off the same way the rail's can.
 class SpaceIndicator extends ConsumerWidget {
   const SpaceIndicator({super.key});
 
@@ -54,6 +58,8 @@ class SpaceIndicator extends ConsumerWidget {
         index: index,
         count: spaces.length,
         onTap: () => showSpacePickerSheet(context),
+        onLongPress: (buttonContext) =>
+            showBrowserQuickMenu(buttonContext, ref),
       ),
     );
   }
@@ -70,6 +76,12 @@ class SpaceIndicatorView extends StatelessWidget {
   final int count;
   final VoidCallback? onTap;
 
+  /// Fired on a long-press, with the indicator's own [BuildContext] (to
+  /// anchor a popup menu near it) — the same pattern as
+  /// `SpaceIconRailView.onAddLongPress`. The owner (a [ConsumerWidget])
+  /// builds and acts on the menu, so this view stays provider-free.
+  final void Function(BuildContext buttonContext)? onLongPress;
+
   const SpaceIndicatorView({
     super.key,
     required this.icon,
@@ -77,6 +89,7 @@ class SpaceIndicatorView extends StatelessWidget {
     required this.index,
     required this.count,
     this.onTap,
+    this.onLongPress,
   });
 
   /// Above this many spaces the dot strip would not fit the width; the
@@ -132,22 +145,31 @@ class SpaceIndicatorView extends StatelessWidget {
 
     return Tooltip(
       message: displayName,
+      // Manual, or the tooltip's own long-press recognizer joins the gesture
+      // arena beside the one that opens the quick menu and sometimes wins it
+      // (see the same fix on the rail's "+" in space_icon_rail.dart).
+      triggerMode: TooltipTriggerMode.manual,
       child: Semantics(
         button: true,
         label: 'Space: $displayName',
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 22, child: Center(child: glyph)),
-                const SizedBox(height: 3),
-                SizedBox(height: 9, child: Center(child: position)),
-              ],
+        child: Builder(
+          builder: (context) => InkWell(
+            onTap: onTap,
+            onLongPress: onLongPress == null
+                ? null
+                : () => onLongPress!(context),
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 22, child: Center(child: glyph)),
+                  const SizedBox(height: 3),
+                  SizedBox(height: 9, child: Center(child: position)),
+                ],
+              ),
             ),
           ),
         ),
