@@ -167,7 +167,7 @@ final class ForceBrowserHomeProvider
   }
 }
 
-String _$forceBrowserHomeHash() => r'345e17f502b0c438117a0fe9d3f22c929a02c5db';
+String _$forceBrowserHomeHash() => r'39bfad196c9e0a8ef90af2d84aa840d933927244';
 
 /// Forces the home surface on regardless of what is selected.
 ///
@@ -182,6 +182,84 @@ String _$forceBrowserHomeHash() => r'345e17f502b0c438117a0fe9d3f22c929a02c5db';
 /// deliberately going somewhere.
 
 abstract class _$ForceBrowserHome extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Whether a remembered tab is being restored for a space that was just
+/// selected.
+///
+/// [ShouldShowBrowserHome] holds its previous answer while this is set,
+/// instead of flashing home for the frame or two the restore's DB reads take
+/// — see [TabRepository.restoreSpaceTab], the only writer.
+
+@ProviderFor(RestoringSpaceTab)
+final restoringSpaceTabProvider = RestoringSpaceTabProvider._();
+
+/// Whether a remembered tab is being restored for a space that was just
+/// selected.
+///
+/// [ShouldShowBrowserHome] holds its previous answer while this is set,
+/// instead of flashing home for the frame or two the restore's DB reads take
+/// — see [TabRepository.restoreSpaceTab], the only writer.
+final class RestoringSpaceTabProvider
+    extends $NotifierProvider<RestoringSpaceTab, bool> {
+  /// Whether a remembered tab is being restored for a space that was just
+  /// selected.
+  ///
+  /// [ShouldShowBrowserHome] holds its previous answer while this is set,
+  /// instead of flashing home for the frame or two the restore's DB reads take
+  /// — see [TabRepository.restoreSpaceTab], the only writer.
+  RestoringSpaceTabProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'restoringSpaceTabProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$restoringSpaceTabHash();
+
+  @$internal
+  @override
+  RestoringSpaceTab create() => RestoringSpaceTab();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$restoringSpaceTabHash() => r'47041019254f67dc65f3f9039ae587c97702a7fe';
+
+/// Whether a remembered tab is being restored for a space that was just
+/// selected.
+///
+/// [ShouldShowBrowserHome] holds its previous answer while this is set,
+/// instead of flashing home for the frame or two the restore's DB reads take
+/// — see [TabRepository.restoreSpaceTab], the only writer.
+
+abstract class _$RestoringSpaceTab extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
@@ -214,8 +292,13 @@ abstract class _$ForceBrowserHome extends $Notifier<bool> {
 /// Condition (2) also implicitly covers the case where the selected space has
 /// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
 /// belongs to a different space.
+///
+/// A [Notifier] rather than a plain function so it can hold its previous
+/// answer (`stateOrNull`) while [RestoringSpaceTab] is in flight, instead of
+/// flipping to home and back for the frame or two the restore's DB reads
+/// take.
 
-@ProviderFor(shouldShowBrowserHome)
+@ProviderFor(ShouldShowBrowserHome)
 final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
 
 /// Whether the browser home screen should be displayed instead of the
@@ -233,10 +316,13 @@ final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
 /// Condition (2) also implicitly covers the case where the selected space has
 /// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
 /// belongs to a different space.
-
+///
+/// A [Notifier] rather than a plain function so it can hold its previous
+/// answer (`stateOrNull`) while [RestoringSpaceTab] is in flight, instead of
+/// flipping to home and back for the frame or two the restore's DB reads
+/// take.
 final class ShouldShowBrowserHomeProvider
-    extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
+    extends $NotifierProvider<ShouldShowBrowserHome, bool> {
   /// Whether the browser home screen should be displayed instead of the
   /// active tab's content.
   ///
@@ -252,13 +338,18 @@ final class ShouldShowBrowserHomeProvider
   /// Condition (2) also implicitly covers the case where the selected space has
   /// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
   /// belongs to a different space.
+  ///
+  /// A [Notifier] rather than a plain function so it can hold its previous
+  /// answer (`stateOrNull`) while [RestoringSpaceTab] is in flight, instead of
+  /// flipping to home and back for the frame or two the restore's DB reads
+  /// take.
   ShouldShowBrowserHomeProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'shouldShowBrowserHomeProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -268,13 +359,7 @@ final class ShouldShowBrowserHomeProvider
 
   @$internal
   @override
-  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  bool create(Ref ref) {
-    return shouldShowBrowserHome(ref);
-  }
+  ShouldShowBrowserHome create() => ShouldShowBrowserHome();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(bool value) {
@@ -286,7 +371,46 @@ final class ShouldShowBrowserHomeProvider
 }
 
 String _$shouldShowBrowserHomeHash() =>
-    r'c4e06b75b41738eeac8347bf48924c03749c0615';
+    r'54a6ff16eb2e7e5446ef078bcc0de5e6368948b1';
+
+/// Whether the browser home screen should be displayed instead of the
+/// active tab's content.
+///
+/// Returns `true` when any of the following hold:
+/// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
+/// 1. No tab is selected at all (app just started or all tabs closed).
+/// 2. The selected tab belongs to a different space than the currently
+///    selected space – this implies the user manually switched spaces after
+///    selecting a tab, because tab selection automatically syncs the selected
+///    space to match the tab's space. Tabs without a space (private tabs,
+///    essentials) are visible from every space and never trigger this.
+///
+/// Condition (2) also implicitly covers the case where the selected space has
+/// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
+/// belongs to a different space.
+///
+/// A [Notifier] rather than a plain function so it can hold its previous
+/// answer (`stateOrNull`) while [RestoringSpaceTab] is in flight, instead of
+/// flipping to home and back for the frame or two the restore's DB reads
+/// take.
+
+abstract class _$ShouldShowBrowserHome extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
 
 @ProviderFor(selectedContainerTabCount)
 final selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();

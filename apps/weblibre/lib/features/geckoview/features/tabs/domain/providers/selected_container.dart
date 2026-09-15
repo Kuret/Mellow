@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -174,8 +175,33 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 /// deliberately going somewhere.
 @Riverpod(keepAlive: true)
 class ForceBrowserHome extends _$ForceBrowserHome {
-  void request() => state = true;
+  /// Requests the home surface, and — if a space is selected — remembers
+  /// that this space was last deliberately left on home, so switching back
+  /// to it later comes back to home too instead of a fallback tab.
+  void request() {
+    state = true;
+    final spaceUuid = ref.read(selectedSpaceProvider);
+    if (spaceUuid != null) {
+      unawaited(ref.read(spaceLastTabProvider.notifier).recordHome(spaceUuid));
+    }
+  }
+
   void clear() => state = false;
+
+  @override
+  bool build() => false;
+}
+
+/// Whether a remembered tab is being restored for a space that was just
+/// selected.
+///
+/// [ShouldShowBrowserHome] holds its previous answer while this is set,
+/// instead of flashing home for the frame or two the restore's DB reads take
+/// — see [TabRepository.restoreSpaceTab], the only writer.
+@Riverpod(keepAlive: true)
+class RestoringSpaceTab extends _$RestoringSpaceTab {
+  void start() => state = true;
+  void finish() => state = false;
 
   @override
   bool build() => false;
@@ -196,24 +222,36 @@ class ForceBrowserHome extends _$ForceBrowserHome {
 /// Condition (2) also implicitly covers the case where the selected space has
 /// zero tabs: if the space has no tabs, the selected tab (if any) necessarily
 /// belongs to a different space.
-@Riverpod()
-bool shouldShowBrowserHome(Ref ref) {
-  if (ref.watch(forceBrowserHomeProvider)) return true;
+///
+/// A [Notifier] rather than a plain function so it can hold its previous
+/// answer (`stateOrNull`) while [RestoringSpaceTab] is in flight, instead of
+/// flipping to home and back for the frame or two the restore's DB reads
+/// take.
+@Riverpod(keepAlive: true)
+class ShouldShowBrowserHome extends _$ShouldShowBrowserHome {
+  @override
+  bool build() {
+    if (ref.watch(forceBrowserHomeProvider)) return true;
 
-  final selectedTab = ref.watch(selectedTabProvider);
+    final selectedTab = ref.watch(selectedTabProvider);
 
-  // No tab selected → always show home.
-  if (selectedTab == null) return true;
+    // No tab selected → always show home.
+    if (selectedTab == null) return true;
 
-  final selectedSpace = ref.watch(selectedSpaceProvider);
-  final tabSpaceUuid = ref.watch(selectedTabSpaceUuidProvider);
+    if (ref.watch(restoringSpaceTabProvider)) {
+      return stateOrNull ?? false;
+    }
 
-  // Once we know the tab's space, compare with the selected space.
-  return switch (tabSpaceUuid) {
-    AsyncData(:final value) => value != null && value != selectedSpace,
-    // While loading, keep the current view to avoid flashing.
-    _ => false,
-  };
+    final selectedSpace = ref.watch(selectedSpaceProvider);
+    final tabSpaceUuid = ref.watch(selectedTabSpaceUuidProvider);
+
+    // Once we know the tab's space, compare with the selected space.
+    return switch (tabSpaceUuid) {
+      AsyncData(:final value) => value != null && value != selectedSpace,
+      // While loading, keep the current view to avoid flashing.
+      _ => false,
+    };
+  }
 }
 
 @Riverpod()
