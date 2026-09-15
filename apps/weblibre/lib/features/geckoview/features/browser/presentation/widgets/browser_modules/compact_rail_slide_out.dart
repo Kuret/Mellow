@@ -22,7 +22,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PredictiveBackEvent;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
@@ -49,7 +48,9 @@ import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 ///    `BackButtonListener` fallback also writes to. Either way, while the
 ///    panel is open a back gesture is *not* claimed here: it falls through
 ///    to the browser's ordinary back, which is the point of leaving the
-///    panel open — the scrim and picking a tab are how it closes.
+///    panel open. Tapping the scrim is the only thing that closes it —
+///    picking a tab and switching space both leave it up, so you can tap
+///    through tabs to find the one you meant.
 ///  * On a wide viewport with [ZenSettings.swipeToMoveRail] on, a predictive
 ///    back gesture from the edge opposite the docked rail flips
 ///    [ZenSettings.railSide] there instead of running the ordinary back; a
@@ -260,12 +261,10 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
       }
     });
 
-    // Picking a tab closes the panel.
-    ref.listen(selectedTabProvider, (previous, next) {
-      if (next != previous && ref.read(compactRailPanelOpenProvider)) {
-        _close();
-      }
-    });
+    // Picking a tab deliberately does *not* close the panel, and neither does
+    // switching space from the space row inside it: hunting for the tab you
+    // want means tapping through several, and a panel that shut after each
+    // one made that miserable. Tapping outside — the scrim — is the way out.
 
     if (side == null || !widget.isNarrowViewport) {
       return widget.child;

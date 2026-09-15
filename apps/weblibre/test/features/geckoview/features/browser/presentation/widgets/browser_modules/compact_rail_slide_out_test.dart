@@ -317,7 +317,7 @@ void main() {
     await _disposeTree(tester);
   });
 
-  testWidgets('closes when a tab is selected', (tester) async {
+  testWidgets('stays open when a tab is selected', (tester) async {
     final db = await _memoryDatabaseWithOneTab();
     addTearDown(db.close);
 
@@ -336,9 +336,16 @@ void main() {
     await _settle(tester);
     expect(container.read(compactRailPanelOpenProvider), isTrue);
 
+    // Hunting for a tab means tapping through several of them, so picking one
+    // leaves the panel up; only a tap on the scrim closes it.
     (container.read(selectedTabProvider.notifier) as _SettableSelectedTab)
             .selected =
         'tab-1';
+    await _settle(tester);
+
+    expect(container.read(compactRailPanelOpenProvider), isTrue);
+
+    await tester.tapAt(const Offset(350, 400));
     await _settle(tester);
 
     expect(container.read(compactRailPanelOpenProvider), isFalse);
