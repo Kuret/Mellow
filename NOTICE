@@ -1,0 +1,112 @@
+Mellow
+======
+
+Mellow is a fork of WebLibre, an Android browser by Fabian Freund / OnDevice UG.
+It is distributed under the GNU Affero General Public License, version 3 or (at
+your option) any later version — the licence it inherits from WebLibre. The full
+text is in COPYING.
+
+This file records who made what. It is not a summary of the licences; each of the
+works below carries its own terms, which govern.
+
+
+1. Upstream: WebLibre
+---------------------
+
+  Copyright (c) 2024-2026 Fabian Freund
+  https://weblibre.eu — https://github.com/FaFre/WebLibre
+  AGPL-3.0-or-later
+
+Mellow was forked from WebLibre at v0.30.0-alpha-11 (commit 045de46b, 2026-09-10)
+and is a derivative work of it. Most of this repository is still WebLibre's code:
+the Gecko/Android Components integration, extension support, containers, history,
+bookmarks, the plugin packages, the build.
+
+Every source file keeps its original copyright header. Nothing has been relicensed
+and no authorship notice has been removed. Files added in this fork carry the same
+header, because they are parts of the same AGPL work.
+
+  Modifications made in this fork, from 2026-09-11 onwards:
+  Copyright (c) 2026 the Mellow contributors
+  Licensed under AGPL-3.0-or-later, like the rest.
+
+What was changed, and when, is described in docs/CHANGES-FROM-WEBLIBRE.md, as
+section 5 of the AGPL asks of a modified version.
+
+
+2. Zen Browser
+--------------
+
+  https://zen-browser.app — https://github.com/zen-browser/desktop
+  MPL-2.0
+
+Mellow implements a client for Zen Browser's "spaces" Firefox Sync engine so that
+spaces round-trip between Zen on the desktop and this browser on a phone. The data
+model — spaces, folders, essentials, the vertical rail — follows Zen's.
+
+No Zen Browser code is included in this repository. The sync client is an original
+implementation written to match the record format and behaviour of Zen's engine,
+so that both ends agree on the wire. Zen Browser has not reviewed, endorsed or
+supported it.
+
+
+3. Mozilla
+----------
+
+  GeckoView, Mozilla Android Components, Firefox Sync
+  Copyright (c) Mozilla Foundation and contributors
+  MPL-2.0
+
+The browser engine and the Android component library it is driven through are
+Mozilla's. The plugin packages in this repository wrap them and contain code
+derived from Mozilla's, and are therefore MPL-2.0 in their own right:
+
+  packages/flutter_mozilla_components   (see its LICENSE)
+  packages/locale_resolver              (see its LICENSE)
+  packages/simple_intent_receiver       (see its LICENSE)
+  packages/speech_to_text_dialog        (see its LICENSE)
+
+Mozilla is not affiliated with this project. Firefox, Gecko and Mozilla are
+Mozilla's trademarks; they appear here only to describe what this software is
+built on.
+
+
+4. Bundled and downloaded third-party components
+------------------------------------------------
+
+Shipped in this repository:
+
+  Eruda 3.4.3 — MIT — https://eruda.liriliri.io
+    packages/flutter_mozilla_components/android/src/main/assets/extensions/
+    web_inspector/eruda.js — the on-device element inspector.
+
+  Roboto Mono — Apache-2.0 — Google Fonts
+    apps/weblibre/assets/fonts/RobotoMono-Regular.ttf
+
+Built from source at build time (packages/flutter_mozilla_components/javascript):
+
+  @mozilla/readability — Apache-2.0 — Mozilla
+  turndown — MIT — Dom Christie
+  remove-markdown — MIT — Stian Grytøyr
+
+Downloaded at build time by scripts/update-assets.sh, each used under its own
+project's terms:
+
+  uBlock Origin filter-list index (assets.json) — GPL-3.0 — Raymond Hill
+    https://github.com/gorhill/uBlock
+  ClearURLs rule data — https://gitlab.com/ClearURLs/rules
+  MISP warninglists, URL shortener list — https://github.com/MISP/misp-warninglists
+  Tor Project built-in bridge lines — https://bridges.torproject.org
+
+Dart and Flutter package dependencies are resolved by pub and are not vendored
+here; their licences travel with them. Material Design Icons are used under the
+Apache-2.0 licence of the icon font.
+
+
+5. Names
+--------
+
+"Mellow" and the "m" icon in apps/weblibre/assets/icon are this fork's own work
+and are not part of WebLibre's branding. WebLibre, Zen Browser, Firefox, Gecko,
+Mozilla and uBlock Origin are the marks of their respective owners and are used
+here only descriptively. This project claims no endorsement by any of them.
