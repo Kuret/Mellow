@@ -1,181 +1,98 @@
 <p align="center">
-  <img width="250" src="apps/weblibre/assets/icon/icon.png" alt="WebLibre logo">
+  <img width="180" src="apps/weblibre/assets/icon/icon.png" alt="Mellow">
 </p>
 
-# WebLibre
+<h1 align="center">Mellow</h1>
 
-<p align="center"><strong>A privacy-focused Android browser with powerful browsing separation, local-first tools, and deep customization.</strong></p>
+<p align="center"><strong>A calm, space-first Android browser that syncs with Zen Browser.</strong></p>
 
 <p align="center">
-  <a href="https://github.com/FaFre/WebLibre/releases">
-    <img alt="Latest GitHub release" src="https://img.shields.io/github/v/release/FaFre/WebLibre">
-  </a>
-  <a href="https://f-droid.org/en/packages/eu.weblibre.gecko/">
-    <img alt="F-Droid version" src="https://img.shields.io/f-droid/v/eu.weblibre.gecko">
-  </a>
-  <a href="COPYING">
-    <img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue">
-  </a>
-  <a href="https://liberapay.com/FaFre/donate">
-    <img alt="Liberapay patrons" src="https://img.shields.io/liberapay/patrons/FaFre">
-  </a>
+  <a href="COPYING"><img alt="License: AGPL-3.0-or-later" src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue"></a>
+  <a href="https://github.com/FaFre/WebLibre"><img alt="Fork of WebLibre" src="https://img.shields.io/badge/fork%20of-WebLibre-lightgrey"></a>
 </p>
 
-WebLibre is an independent browser for Android devices, built on [Mozilla's Gecko engine](https://wiki.mozilla.org/Gecko) and [Mozilla Android Components](https://mozac.org/). It combines strong privacy defaults with containers, isolated tabs, built-in Tor and proxy routing, Firefox-compatible extensions, on-device search, and flexible tab management.
+Mellow is a fork of [**WebLibre**](https://github.com/FaFre/WebLibre) rebuilt around
+[**Zen Browser**](https://zen-browser.app)'s data model — spaces, nested folders, essentials, a
+vertical rail — and wired into Zen's own `spaces` Firefox Sync engine, so the spaces you keep on
+the desktop are the spaces you get on the phone, in both directions.
 
-WebLibre is not a Firefox fork. It is its own browser experience, designed for people who want familiar everyday browsing without giving up control over how sites, identities, and network connections are separated.
+Underneath it is still WebLibre's browser: Mozilla's [Gecko](https://wiki.mozilla.org/Gecko)
+engine driven through [Mozilla Android Components](https://mozac.org/), which is why pages render
+and Firefox extensions behave the way they do in Firefox for Android.
 
-**Coming from Firefox for Android, Fennec, or IronFox?** Websites and extensions behave the same because WebLibre uses the same Gecko engine. On top of that, WebLibre adds features that Firefox and its hardened forks do not offer: isolated tabs, containers with per-container cookie isolation and Tor/proxy routing, a built-in multi-protocol proxy client, tree-style tab management, and on-device local search across tabs, history, and feeds.
+> [!NOTE]
+> **This is a personal build.** It exists because one person wanted Zen's spaces on their phone
+> with extensions that work. There are no releases, no store listing, no roadmap and no support.
+> It is not affiliated with, endorsed by or supported by WebLibre, OnDevice UG, Zen Browser or
+> Mozilla. If you want a maintained privacy browser, go and use [WebLibre](https://weblibre.eu) —
+> it is the better-tested software and it is where this one came from.
 
-> [!IMPORTANT]
-> **Early Access** - WebLibre is under active development. Many people already use it every day, but features and settings can change. Some updates may cause problems or change how features work.
+## What it does
 
-## Install WebLibre
+- **Zen spaces, two ways.** A Sync 1.5 client for Zen's `spaces` collection (engine version 3):
+  spaces, their order, icons, theme and pinned-tab containers round-trip with the desktop. Local
+  state stays local, and the uploader is hardened against the tombstone bug that has eaten spaces
+  upstream.
+- **The Zen shape.** Spaces with nested folders and essentials, a wide vertical rail on tablets
+  and unfolded screens, a compact bar on phones, and an optional slide-out rail that a back-edge
+  swipe pulls in from either side.
+- **Extensions.** Firefox-compatible WebExtensions, kept first-class. Everything else in this fork
+  was judged against whether it got in the way of that or of sync.
+- **Firefox Sync for the rest.** History, bookmarks and tabs over the same account.
+- **Less of everything else.** Roughly 128k lines of upstream features were removed rather than
+  carried — see [what changed](docs/CHANGES-FROM-WEBLIBRE.md).
 
-WebLibre requires Android 8.0 or newer. Android 13 or newer is recommended. On Android 12 and older, you may see visual problems.
+## Status
 
-<p align="center">
-  <a href="https://github.com/FaFre/WebLibre/releases">
-    <img height="90" alt="Get WebLibre from GitHub" src="https://docs.weblibre.eu/weblibre/_images/badges/github.png">
-  </a>
-  <a href="https://f-droid.org/en/packages/eu.weblibre.gecko/">
-    <img height="90" alt="Get WebLibre on F-Droid" src="https://docs.weblibre.eu/weblibre/_images/badges/fdroid.png">
-  </a>
-  <a href="https://play.google.com/store/apps/details?id=eu.weblibre.gecko">
-    <img height="90" alt="Get WebLibre on Google Play" src="https://docs.weblibre.eu/weblibre/_images/badges/google_play.png">
-  </a>
-</p>
+Built and run daily on exactly one device (a Samsung foldable, Android 17). It is not tested
+anywhere else, on any other screen, or by anyone else. Treat everything here as "works for me".
 
-- **[GitHub Releases](https://github.com/FaFre/WebLibre/releases)** - Direct downloads; [Obtainium](https://obtainium.imranr.dev/) can manage updates. Most current devices use the `arm64-v8a` APK; `armeabi-v7a` is for older 32-bit devices, and `x86_64` is for emulators, ChromeOS and x86 tablets.
-- **[Google Play](https://play.google.com/store/apps/details?id=eu.weblibre.gecko)** - Automatic updates through Google Play.
-- **[F-Droid](https://f-droid.org/en/packages/eu.weblibre.gecko/)** - F-Droid creates and signs its own builds. New versions may arrive considerably later than on GitHub or Google Play because of the complex build process and manual review by the F-Droid team.
+Builds still carry upstream's application id (`eu.weblibre.gecko.alpha`) so an existing install
+keeps its profile. **Do not distribute APKs built from this tree** — they would collide with
+WebLibre's own update channel. Change `applicationId` in
+`apps/weblibre/android/app/build.gradle` first if you ever need to (it costs you the profile on
+that device).
 
-> [!WARNING]
-> You cannot switch directly between an F-Droid build and a GitHub or Google Play build because they use different signing keys - you must uninstall the current build first, which deletes your data.
->
-> Before you uninstall, create an encrypted [profile backup](https://docs.weblibre.eu/weblibre/profiles.html#_back_up_a_profile). Use **Change Backup Directory** to save the backup outside WebLibre's app storage, then verify the backup.
+## Building
 
-### Verify your download
+```bash
+# Flutter 3.47.3, JDK 17, Android SDK
+dart pub global activate melos
+melos bootstrap
+melos run update-assets      # downloads the external data files
+melos run build-components   # builds the readability JS bundle
+melos run build              # build_runner across the workspace
 
-You can verify that an APK is an official build with `apksigner verify --print-certs`. The SHA-256 certificate fingerprints are:
-
-- **GitHub Releases / Google Play:**
-
-  ```text
-  8F:52:6E:1E:53:D6:BD:4D:FB:F4:F4:B9:3C:2A:91:EC:B5:CB:8D:A5:E1:4A:D9:4C:25:70:E1:E3:C7:13:52:7F
-  ```
-
-- **F-Droid** (signed by F-Droid with their own key):
-
-  ```text
-  BB:2A:97:F5:61:53:35:C9:E5:7C:86:6F:1C:30:ED:4F:D7:D7:BD:DC:BC:BC:06:68:FE:93:A5:79:17:3D:3D:2D
-  ```
-
-## Start Here
-
-On first launch, choose the setup that fits you:
-
-- **Quick Start** applies the recommended defaults and installs uBlock Origin automatically.
-- **Custom Setup** lets you choose search, DNS over HTTPS, layout, hardening, on-device AI, and extension options.
-- **Restore from Backup** imports an existing encrypted WebLibre profile before setup.
-
-After installation, these guides provide the fastest introduction:
-
-- **[First Launch Guide](https://docs.weblibre.eu/weblibre/getting-started.html)** - Understand what each first-launch option (Quick Start, Custom Setup, Restore from Backup) does.
-- **[Privacy Check-Up](https://docs.weblibre.eu/weblibre/quick-start.html)** - Review the most important privacy settings after setup.
-- **[Switching from Another Browser](https://docs.weblibre.eu/weblibre/migration.html)** - Move bookmarks and browsing habits in stages.
-- **[Common Workflows](https://docs.weblibre.eu/weblibre/workflows.html)** - Learn everyday tasks and power-user flows.
-
-## What Makes WebLibre Different
-
-### Privacy controls that you can tune
-
-New installations start with strict tracking protection. WebLibre also includes DNS over HTTPS, HTTPS-only protection, removal of tracking information from URLs, Global Privacy Control, fingerprinting defenses, site isolation, an Intent Gatekeeper for links opened by other apps, and optional screenshot protection.
-
-You can change each privacy setting. Stronger protection can break some websites, so you can add an exception for a site or use a less strict mode.
-
-**Learn more:** [Privacy overview](https://docs.weblibre.eu/weblibre/privacy/overview.html) | [Threat model](https://docs.weblibre.eu/weblibre/threat-model.html)
-
-### Tabs, containers, and profiles
-
-- Open **Regular**, **Private**, or **Isolated** tabs. Each isolated tab has a separate session from every other tab. Unlike private tabs, isolated tabs remain open after you quit and reopen WebLibre.
-- Organize tabs in list, grid, or tree views, with parent-child relationships, stacking, filtering, pinning, bulk actions, and a quick switcher.
-- Use **Containers** for different activities and assign sites to them automatically.
-- Enable **Cookie Isolation** on a container to give it separate cookies, logins, and site data, then optionally add clear-on-exit rules or per-container Tor/proxy routing.
-- Create separate **Profiles** for independent tabs, bookmarks, history, logins, extensions, feeds, and settings. Profiles can be backed up and protected using compatible Android device authentication.
-
-**Learn more:** [Tab management](https://docs.weblibre.eu/weblibre/tabs/tab-management.html) | [Containers](https://docs.weblibre.eu/weblibre/tabs/containers.html) | [Profiles](https://docs.weblibre.eu/weblibre/profiles.html)
-
-### Built-in Tor and proxy routing
-
-WebLibre includes Tor without requiring a separate Tor app. Route regular browsing, private tabs, or selected cookie-isolated containers through Tor, with bridge options such as obfs4 and Snowflake when needed.
-
-The built-in proxy client supports SOCKS, HTTP, WireGuard, Shadowsocks, and [a dozen more protocols](https://docs.weblibre.eu/weblibre/proxy.html). Connections can be created manually or imported from subscriptions, QR codes, WireGuard files, and sing-box JSON.
-
-**Learn more:** [Tor integration](https://docs.weblibre.eu/weblibre/tor.html) | [Proxy connections](https://docs.weblibre.eu/weblibre/proxy.html)
-
-### Firefox-compatible extensions
-
-Install uBlock Origin during onboarding, discover add-ons in WebLibre's in-app store, use a custom collection, or install a local `.xpi` file. Installed extensions can be updated, configured, and pinned to the toolbar from inside the browser.
-
-Not every desktop Firefox extension works well on Android. Add-ons that depend on desktop-only interfaces may be limited, and unsigned extensions should only be installed from sources you trust.
-
-**Learn more:** [Extensions](https://docs.weblibre.eu/weblibre/extensions.html)
-
-### Search locally before searching the web
-
-The address bar can search open tabs, bookmarks, saved feed articles, history, and popular sites before sending a query to a web provider. The local search index can also index the text of pages you visit on your device, with controls for private tabs, individual containers, and index deletion.
-
-Bang providers and custom search engines let you send a query directly to a specific website. Local results stay on your device. If web autocomplete is enabled, partial text is sent to your selected suggestion provider; submitting a web search sends the full query to your selected search engine.
-
-**Learn more:** [Personal Local Search](https://docs.weblibre.eu/weblibre/search/local-search.html) | [Bang providers](https://docs.weblibre.eu/weblibre/search/bangs.html)
-
-### Reading and organization tools
-
-- **On-Device AI** can suggest draft containers and names from open tab titles. It is optional, requires confirmation before changing anything, and may download a model to your phone.
-- **Page Translation** translates supported languages on-device after any required language-model download.
-- **Reader Mode**, PDF/Markdown/full-page export, a QR scanner, and installable web apps are built in.
-- **RSS/Atom feeds** and Small Web discovery help you follow and find independent sites.
-- **Firefox Sync** can synchronize tabs, bookmarks, and history with your other devices.
-
-**Learn more:** [On-Device AI](https://docs.weblibre.eu/weblibre/on-device-ai.html) | [Content tools](https://docs.weblibre.eu/weblibre/reader-mode.html) | [Full documentation](https://docs.weblibre.eu/weblibre/index.html)
-
-## Documentation and Community
-
-Full user documentation is available at **[docs.weblibre.eu](https://docs.weblibre.eu/weblibre/index.html)**.
-
-- **[Troubleshooting](https://docs.weblibre.eu/weblibre/troubleshooting.html)** - Fix common problems and learn what to include in a bug report.
-- **[Feedback Platform](https://feedback.weblibre.eu/)** - Suggest and vote on features.
-- **[Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org)** - Ask questions and talk with the community.
-- **[GitHub Issues](https://github.com/FaFre/WebLibre/issues)** - Report reproducible bugs and follow development.
-
-## Support the Project
-
-- **[WebLibre Supporter](https://docs.weblibre.eu/weblibre/supporter-subscription.html)** - Fund development and get access to WebLibre Search and encrypted sync for WebLibre settings. The browser and its built-in privacy controls remain free.
-- **[GitHub Sponsors](https://github.com/sponsors/FaFre)** - Sponsor development through GitHub.
-- **[Liberapay](https://liberapay.com/FaFre/donate)** - Make a recurring donation.
-- **[Ko-fi](https://ko-fi.com/FaFre)** - Make a one-time donation.
-
-<p align="center">
-  <a href="https://liberapay.com/FaFre/donate"><img alt="Donate with Liberapay" src="https://docs.weblibre.eu/weblibre/_images/badges/liberapay.svg"></a>
-  <a href="https://ko-fi.com/FaFre"><img alt="Donate with Ko-fi" src="https://docs.weblibre.eu/weblibre/_images/badges/kofi.svg"></a>
-  <a href="https://github.com/sponsors/FaFre"><img alt="Donate with GitHub Sponsors" src="https://docs.weblibre.eu/weblibre/_images/badges/github_sponsors.svg"></a>
-  <a href="#monero"><img alt="Donate with Monero" src="https://docs.weblibre.eu/weblibre/_images/badges/monero.svg"></a>
-  <a href="#litecoin"><img alt="Donate with Litecoin" src="https://docs.weblibre.eu/weblibre/_images/badges/litecoin.svg"></a>
-</p>
-
-### Monero
-
-```text
-89rpdkq1XJYJYUshjF23YZhJdNEpghrQTXnz7vxnrLVHGrrqXTZ6BdKbqgyQnNZCkxTDA4RfhDsUcF6eHAAqco4WDQR2cZF
+cd apps/weblibre
+flutter build apk --release --flavor alpha --split-per-abi \
+  --target-platform android-arm64 --no-tree-shake-icons
 ```
 
-### Litecoin
+`build.gradle` falls back to debug signing when `KEY_PATH` is unset.
 
-```text
-ltc1q0dtutc9zgkvffevwsz7s87379puk37hwn4un94
-```
+## Credits
+
+Mellow is other people's work with a different shape on top. In order of how much is owed:
+
+- **[WebLibre](https://github.com/FaFre/WebLibre)** by **Fabian Freund** / OnDevice UG — the
+  browser. Engine integration, extensions, containers, the whole Flutter↔Android Components
+  bridge, and the four plugin packages this repo still ships. AGPL-3.0-or-later; Mellow is a
+  derivative work and stays under the same licence.
+- **[Zen Browser](https://github.com/zen-browser/desktop)** — the spaces model and the sync
+  record format Mellow speaks. No Zen code is copied here; the client was written against the
+  behaviour of Zen's own sync engine so the two agree on the wire.
+- **[Mozilla](https://mozilla.org)** — GeckoView, Android Components and Firefox Sync, under
+  MPL-2.0.
+
+Full attribution, including the bundled third-party assets, is in [NOTICE](NOTICE).
 
 ## License
 
-WebLibre is free software licensed under the [GNU Affero General Public License v3.0](COPYING).
+Mellow is free software under the
+[GNU Affero General Public License v3.0 or later](COPYING), inherited from WebLibre. Every
+source file keeps its original copyright header. Changes made in this fork are documented in
+[docs/CHANGES-FROM-WEBLIBRE.md](docs/CHANGES-FROM-WEBLIBRE.md), as AGPL §5 asks.
+
+The name **Mellow** and its icon are this fork's own. The names WebLibre, Zen Browser, Firefox
+and Mozilla belong to their owners and are used here only to say, factually, what this software
+is built on and talks to.
