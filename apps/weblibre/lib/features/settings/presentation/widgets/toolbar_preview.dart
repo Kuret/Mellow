@@ -209,8 +209,12 @@ class TabBarPreviewCard extends StatelessWidget {
     ];
 
     // The compact bar draws the configured buttons in a row of their own
-    // beneath the address row, the same as the live bar does.
-    final compactToolbarRow = ToolbarButtonsRow(buttons: mainToolbarActions);
+    // beneath the address row, the same as the live bar does — and leaves it
+    // out entirely when the setting that hides them is off, so the preview
+    // keeps showing the chrome the user actually has.
+    final compactToolbarRow = zenSettings.showToolbarButtons
+        ? ToolbarButtonsRow(buttons: mainToolbarActions)
+        : null;
 
     Widget title() => _CompactPreviewTitle(tabState: previewTabState);
 
@@ -329,6 +333,7 @@ class TabBarPreviewCard extends StatelessWidget {
             ),
           ],
         ),
+        showToolbar: zenSettings.showToolbarButtons,
         toolbar: WideRailToolbarRow(buttons: mainToolbarActions),
         spaces: const SpaceIconRailView(
           entries: [
