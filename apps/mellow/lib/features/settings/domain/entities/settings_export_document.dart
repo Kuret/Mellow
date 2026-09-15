@@ -29,7 +29,14 @@ import 'package:mellow/utils/uri_input_parser.dart';
 /// Checked before anything else on import: the alternative is decoding a
 /// stranger's JSON far enough to notice it has no settings in it, and then
 /// having to explain that in an error message.
-const settingsExportFormat = 'weblibre.settings.export';
+const settingsExportFormat = 'mellow.settings.export';
+
+/// What the format was called before the fork renamed itself.
+///
+/// A format identifier is a promise to the files already written, not a brand,
+/// so every one of these still imports. New files are only ever written under
+/// [settingsExportFormat].
+const legacySettingsExportFormats = {'weblibre.settings.export'};
 
 /// Version of the *envelope* — the wrapper below, not the documents inside it.
 ///
@@ -197,7 +204,9 @@ SettingsExportDocument decodeSettingsExport(String text) {
     );
   }
 
-  if (decoded['format'] != settingsExportFormat) {
+  final declaredFormat = decoded['format'];
+  if (declaredFormat != settingsExportFormat &&
+      !legacySettingsExportFormats.contains(declaredFormat)) {
     throw const SettingsExportFormatException(
       'This is not a Mellow settings export.',
     );
@@ -686,10 +695,6 @@ bool _scrubsTo(String local, String imported) {
   return scrubbed.paths.isNotEmpty && scrubbed.value == imported;
 }
 
-/// The first line of every snapshot Mellow writes, and the thing that makes
-/// one recognisable as such.
-const geckoPrefsSnapshotMarker = '// WebLibre Gecko prefs snapshot';
-
 /// Reads a Gecko preferences document, refusing anything that is not one.
 ///
 /// Strict on purpose, because `parseUserJs` is not: it skips whatever it does
@@ -714,7 +719,8 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
     final line = rawLine.trim();
 
     if (line.isEmpty) continue;
-    if (line == geckoPrefsSnapshotMarker) {
+    if (line == geckoPrefsSnapshotMarker ||
+        legacyGeckoPrefsSnapshotMarkers.contains(line)) {
       sawMarker = true;
       continue;
     }

@@ -30,7 +30,7 @@ void main() {
     test('round-trips JSON and text documents', () {
       final text = encodeSettingsExport(
         documents: {
-          'weblibre_settings': const SettingsExportEntry(
+          'mellow_settings': const SettingsExportEntry(
             schemaVersion: 1,
             content: {
               'payload': {
@@ -54,13 +54,13 @@ void main() {
       expect(document.appVersion, '1.2.3+45');
       expect(document.exportedAt, DateTime.utc(2026, 9, 4, 12, 30));
       expect(document.redacted, ['general.someToken']);
-      expect(document.documents.keys, ['weblibre_settings', 'gecko_user_js']);
+      expect(document.documents.keys, ['mellow_settings', 'gecko_user_js']);
       expect(
         document.documents['gecko_user_js']!.content,
         'user_pref("alpha.pref", true);\n',
       );
       expect(
-        (document.documents['weblibre_settings']!.content
+        (document.documents['mellow_settings']!.content
             as Map<String, dynamic>)['payload'],
         {
           'general': {'themeMode': 'dark'},
@@ -71,7 +71,7 @@ void main() {
     test('stays readable rather than nesting encoded JSON', () {
       final text = encodeSettingsExport(
         documents: {
-          'weblibre_settings': const SettingsExportEntry(
+          'mellow_settings': const SettingsExportEntry(
             schemaVersion: 1,
             content: {'schema_version': 1},
           ),
@@ -124,7 +124,7 @@ void main() {
         'format': settingsExportFormat,
         'format_version': settingsExportFormatVersion + 1,
         'documents': {
-          'weblibre_settings': {'schema_version': 1, 'content': {}},
+          'mellow_settings': {'schema_version': 1, 'content': {}},
         },
       });
 
@@ -164,7 +164,7 @@ void main() {
         'format': settingsExportFormat,
         'format_version': settingsExportFormatVersion,
         'documents': {
-          'weblibre_settings': {'content': <String, dynamic>{}},
+          'mellow_settings': {'content': <String, dynamic>{}},
         },
       });
 
@@ -174,10 +174,32 @@ void main() {
           isA<SettingsExportFormatException>().having(
             (error) => error.message,
             'message',
-            contains('"weblibre_settings"'),
+            contains('"mellow_settings"'),
           ),
         ),
       );
+    });
+
+    test('still reads a file written under the old format name', () {
+      // The fork renamed itself; the files people already exported did not.
+      final text = jsonEncode({
+        'format': 'weblibre.settings.export',
+        'format_version': settingsExportFormatVersion,
+        'documents': {
+          'weblibre_settings': {
+            'schema_version': 1,
+            'content': {
+              'payload': {
+                'general': {'themeMode': 'dark'},
+              },
+            },
+          },
+        },
+      });
+
+      final document = decodeSettingsExport(text);
+
+      expect(document.documents.keys, ['weblibre_settings']);
     });
 
     test('keeps document kinds it does not know', () {
@@ -441,6 +463,16 @@ void main() {
         () => requireGeckoPrefsDocument(''),
         throwsA(isA<SettingsExportFormatException>()),
       );
+    });
+
+    test('accepts a snapshot written under the old marker', () {
+      final parsed = requireGeckoPrefsDocument(
+        '// WebLibre Gecko prefs snapshot\n'
+        '// schema_version=1\n'
+        'user_pref("alpha.pref", true);\n',
+      );
+
+      expect(parsed.prefs.keys, contains('alpha.pref'));
     });
 
     test('accepts a snapshot that genuinely holds no preferences', () {
@@ -891,5 +923,5 @@ void main() {
 /// The two comment lines every Mellow prefs snapshot opens with, and the only
 /// thing separating one from a file that is not a snapshot at all.
 const _snapshotHeader =
-    '// WebLibre Gecko prefs snapshot\n'
+    '// Mellow Gecko prefs snapshot\n'
     '// schema_version=1\n';

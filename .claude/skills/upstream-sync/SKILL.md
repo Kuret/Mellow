@@ -97,7 +97,7 @@ git format-patch --stdout <sha>^..<sha> \
 Two things the filter cannot decide for you:
 
 - It rewrites *identifier tokens*, never the word "WebLibre" on its own — licence headers, the `weblibre.eu` and `FaFre/WebLibre` URLs and the settings-export format marker all contain that word and must survive. If a patch adds new user-facing copy saying "WebLibre", rename that by hand.
-- It deliberately restores `weblibre_settings`, the `SyncDocumentKind` wire value that names the document inside settings exports and synced settings records. Anything else that travels off this device — a sync key, a file-format marker — deserves the same treatment; add it to the map rather than letting the broad rules move it.
+- It renames the stored names — the export format id, the `SyncDocumentKind` value, the prefs-snapshot marker — because each of those has a read-side alias in the code that keeps old files importable. Anything that travels off this device and has *no* such alias must not be moved by the map: add an exception rather than letting the broad rules reach it, and pin it with a test.
 
 On conflict: resolve with our semantics winning in our files, upstream winning in theirs; if a conflict needs a judgement call you cannot defend in one sentence, drop that patch and list it under "not taken" instead.
 

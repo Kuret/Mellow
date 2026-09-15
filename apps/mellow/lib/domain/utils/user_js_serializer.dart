@@ -37,13 +37,20 @@ bool isSyncablePrefValue(Object value) {
 /// profile's `prefs.js` file.
 ///
 /// String-valued prefs starting with unsyncable URL prefixes are excluded.
+/// The first line of every snapshot Mellow writes, and the thing that makes
+/// one recognisable as such.
+const geckoPrefsSnapshotMarker = '// Mellow Gecko prefs snapshot';
+
+/// The marker earlier builds wrote, still recognised when reading.
+const legacyGeckoPrefsSnapshotMarkers = {'// WebLibre Gecko prefs snapshot'};
+
 String serializeUserJs({
   required Map<String, Object> userPrefs,
   required int schemaVersion,
   String? exportedAt,
 }) {
   final buffer = StringBuffer();
-  buffer.writeln('// WebLibre Gecko prefs snapshot');
+  buffer.writeln(geckoPrefsSnapshotMarker);
   buffer.writeln('// schema_version=$schemaVersion');
   buffer.writeln(
     '// exported_at=${exportedAt ?? DateTime.now().toUtc().toIso8601String()}',

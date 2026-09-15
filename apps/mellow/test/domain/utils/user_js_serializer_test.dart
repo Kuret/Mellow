@@ -37,7 +37,7 @@ void main() {
       );
 
       expect(text, '''
-// WebLibre Gecko prefs snapshot
+// Mellow Gecko prefs snapshot
 // schema_version=1
 // exported_at=2026-04-15T12:00:00Z
 user_pref("alpha.pref", "value");

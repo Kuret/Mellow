@@ -58,10 +58,22 @@ enum SettingsTransferSection {
 
   static SettingsTransferSection? forKindValue(String value) {
     for (final section in SettingsTransferSection.values) {
-      if (section.kind.value == value) return section;
+      if (section.kind.matches(value)) return section;
     }
     return null;
   }
+}
+
+/// The entry [kind] was written under, accepting the names earlier builds used.
+SettingsExportEntry? _entryFor(
+  SettingsExportDocument document,
+  SyncDocumentKind kind,
+) {
+  for (final key in [kind.value, ...kind.legacyValues]) {
+    final entry = document.documents[key];
+    if (entry != null) return entry;
+  }
+  return null;
 }
 
 /// An import stopped part way through.
@@ -249,7 +261,7 @@ class SettingsTransferService extends _$SettingsTransferService {
     for (final section in SettingsTransferSection.values) {
       if (!sections.contains(section)) continue;
 
-      final entry = document.documents[section.kind.value];
+      final entry = _entryFor(document, section.kind);
       if (entry == null) continue;
 
       prepared.add((section, await _prepare(section, entry)));

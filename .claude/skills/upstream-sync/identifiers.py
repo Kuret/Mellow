@@ -51,10 +51,6 @@ RENAMES: list[tuple[str, str]] = [
     ("WebLibreFxAEntryPoint", "MellowFxAEntryPoint"),
     ("WebLibreWidget", "MellowWidget"),
     ("weblibre_", "mellow_"),
-    # ...except this one. `weblibre_settings` is the SyncDocumentKind wire
-    # value: it names the document inside settings exports and synced settings
-    # records, so it has to survive the rename that moved everything around it.
-    ("'mellow_settings'", "'weblibre_settings'"),
     # --- Schemes, file extensions and other stored names ----------------
     ('android:scheme="weblibre"', 'android:scheme="mellow"'),
     ('scheme == "weblibre"', 'scheme == "mellow"'),
@@ -64,6 +60,10 @@ RENAMES: list[tuple[str, str]] = [
     (".weblibre'", ".mellow'"),
     ('.weblibre"', '.mellow"'),
     (".weblibre$", ".mellow$"),
+    ("weblibre.settings.export", "mellow.settings.export"),
+    # The one place a bare "WebLibre" is safe to move: the whole phrase is the
+    # first line of a Gecko prefs snapshot, not prose about the project.
+    ("// WebLibre Gecko prefs snapshot", "// Mellow Gecko prefs snapshot"),
     ('"fontName": "WebLibre"', '"fontName": "Mellow"'),
 ]
 
