@@ -80,6 +80,21 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         keywords: ['rail', 'width', 'side', 'vertical', 'sidebar'],
         child: _RailWidthTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Swipe to Move the Rail',
+        subtitle:
+            'A back swipe from the edge opposite the rail moves it there; '
+            "a swipe from the rail's own edge still goes back",
+        keywords: [
+          'rail',
+          'move',
+          'swipe',
+          'back gesture',
+          'side',
+          'vertical',
+        ],
+        child: _SwipeToMoveRailTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -118,8 +133,10 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
       SettingsEntryDefinition(
         title: 'Slide-out Tab Rail',
         subtitle:
-            'On narrow screens, swipe back from this edge to slide the tab '
-            'rail in; a back swipe from the other edge still goes back',
+            'On narrow screens, replace the bar with a tab rail that slides '
+            'in on a back swipe from this edge (or, on Either side, from '
+            'whichever edge the swipe comes from); a back swipe from the '
+            'other edge still goes back',
         keywords: [
           'rail',
           'drawer',
@@ -309,14 +326,15 @@ class _CompactRailSideSection extends HookConsumerWidget {
           const ListTile(
             title: Text('Slide-out Tab Rail'),
             subtitle: Text(
-              'On narrow screens, swipe back from this edge to slide the '
-              'tab rail in; a back swipe from the other edge still goes '
-              'back',
+              'On narrow screens, replace the bar with a tab rail that '
+              'slides in on a back swipe from this edge; a back swipe from '
+              'the other edge still goes back. On Either side, the panel '
+              'opens on whichever edge the swipe comes from',
             ),
             leading: Icon(MdiIcons.dockLeft),
             contentPadding: EdgeInsets.zero,
           ),
-          RadioGroup<RailSide?>(
+          RadioGroup<CompactRailSide?>(
             groupValue: compactRailSide,
             onChanged: (value) async {
               await ref
@@ -328,23 +346,56 @@ class _CompactRailSideSection extends HookConsumerWidget {
             },
             child: const Column(
               children: [
-                RadioListTile<RailSide?>.adaptive(
+                RadioListTile<CompactRailSide?>.adaptive(
                   value: null,
                   title: Text('Off'),
                 ),
-                RadioListTile<RailSide?>.adaptive(
-                  value: RailSide.left,
+                RadioListTile<CompactRailSide?>.adaptive(
+                  value: CompactRailSide.left,
                   title: Text('Left'),
                 ),
-                RadioListTile<RailSide?>.adaptive(
-                  value: RailSide.right,
+                RadioListTile<CompactRailSide?>.adaptive(
+                  value: CompactRailSide.right,
                   title: Text('Right'),
+                ),
+                RadioListTile<CompactRailSide?>.adaptive(
+                  value: CompactRailSide.either,
+                  title: Text('Either side'),
                 ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SwipeToMoveRailTile extends HookConsumerWidget {
+  const _SwipeToMoveRailTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final swipeToMoveRail = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.swipeToMoveRail),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Swipe to Move the Rail'),
+      subtitle: const Text(
+        'On wide screens, a back swipe from the edge opposite the rail '
+        "moves it there; a swipe from the rail's own edge still goes back",
+      ),
+      secondary: const Icon(MdiIcons.dockLeft),
+      value: swipeToMoveRail,
+      onChanged: (value) async {
+        await ref
+            .read(saveZenSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.swipeToMoveRail(value),
+            );
+      },
     );
   }
 }
