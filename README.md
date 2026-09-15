@@ -22,7 +22,7 @@ and Firefox extensions behave the way they do in Firefox for Android.
 
 > [!NOTE]
 > **This is a personal build.** It exists because one person wanted Zen's spaces on their phone
-> with extensions that work. There are no releases, no store listing, no roadmap and no support.
+> with extensions that work. There is no store listing, no roadmap and no support.
 > It is not affiliated with, endorsed by or supported by WebLibre, OnDevice UG, Zen Browser or
 > Mozilla. If you want a maintained privacy browser, go and use [WebLibre](https://weblibre.eu) —
 > it is the better-tested software and it is where this one came from.
@@ -50,6 +50,12 @@ anywhere else, on any other screen, or by anyone else. Treat everything here as 
 Mellow has its own application id (`app.mellow.browser`), so it installs beside WebLibre rather
 than over it and never touches WebLibre's update channel.
 
+APKs are on the [releases page](https://github.com/Kuret/Mellow/releases): arm64 only, Android 8.0+,
+signed with this project's own key. Every release note carries the APK's SHA-256. They are cut by
+hand from a local build (`scripts/release.sh`) rather than by CI, so that every build ever installed
+on a phone carries the same signature — Android refuses to update an app whose signing certificate
+changed.
+
 ## Building
 
 ```bash
@@ -65,7 +71,9 @@ flutter build apk --release --flavor alpha --split-per-abi \
   --target-platform android-arm64 --no-tree-shake-icons
 ```
 
-`build.gradle` falls back to debug signing when `KEY_PATH` is unset.
+`build.gradle` falls back to debug signing when `KEY_PATH` is unset, which is fine for a build you
+only install yourself and fatal for one you publish — so `scripts/release.sh` refuses to release an
+APK it finds debug-signed.
 
 ## Credits
 
