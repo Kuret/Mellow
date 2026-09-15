@@ -80,24 +80,6 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         keywords: ['rail', 'width', 'side', 'vertical', 'sidebar'],
         child: _RailWidthTile(),
       ),
-      SettingsEntryDefinition(
-        title: 'Show Toolbar Buttons',
-        subtitle:
-            'Off, the rail shows only tabs and spaces. Back, forward, '
-            'reload, tabs and settings stay available by long-pressing + '
-            'in the space row.',
-        keywords: [
-          'toolbar',
-          'buttons',
-          'hide',
-          'navigation',
-          'back',
-          'forward',
-          'refresh',
-          'settings',
-        ],
-        child: _RailToolbarTile(),
-      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -141,6 +123,27 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
     title: 'Customize',
     keywords: ['buttons', 'arrange', 'layout'],
     entries: [
+      SettingsEntryDefinition(
+        title: 'Show Toolbar Buttons',
+        subtitle:
+            "Off, the chrome shows only tabs and spaces. Back, forward, "
+            "reload, tabs and settings stay available by long-pressing + in "
+            "the rail's space row, or the space icon on the compact bar.",
+        keywords: [
+          'toolbar',
+          'buttons',
+          'hide',
+          'navigation',
+          'back',
+          'forward',
+          'refresh',
+          'settings',
+          'rail',
+          'compact bar',
+          'space indicator',
+        ],
+        child: _RailToolbarTile(),
+      ),
       SettingsEntryDefinition(
         title: 'Customize Toolbar Buttons',
         subtitle: 'Choose which actions appear in the toolbar',
@@ -477,25 +480,25 @@ class _RailToolbarTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showRailToolbar = ref.watch(
-      zenSettingsWithDefaultsProvider.select((s) => s.showRailToolbar),
+    final showToolbarButtons = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.showToolbarButtons),
     );
 
     return SwitchListTile.adaptive(
       title: const Text('Show Toolbar Buttons'),
       subtitle: const Text(
-        'Off, the rail shows only tabs and spaces. Back, forward, reload, '
-        'tabs and settings stay available by long-pressing + in the space '
-        'row.',
+        "Off, the chrome shows only tabs and spaces. Back, forward, reload, "
+        "tabs and settings stay available by long-pressing + in the rail's "
+        "space row, or the space icon on the compact bar.",
       ),
       secondary: const Icon(MdiIcons.dockTop),
-      value: showRailToolbar,
+      value: showToolbarButtons,
       onChanged: (value) async {
         await ref
             .read(saveZenSettingsControllerProvider.notifier)
             .save(
               (currentSettings) =>
-                  currentSettings.copyWith.showRailToolbar(value),
+                  currentSettings.copyWith.showToolbarButtons(value),
             );
       },
     );
