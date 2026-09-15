@@ -1,0 +1,7 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Mellow (monochrome)</title>
+  <g stroke="#FFFFFF" stroke-width="164" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M120 790 V430 A196 196 0 0 1 512 430 V790"/>
+    <path d="M512 430 A196 196 0 0 1 904 430 V790"/>
+  </g>
+</svg>

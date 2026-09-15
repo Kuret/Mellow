@@ -1,5 +1,14 @@
-<svg width="147" height="106" viewBox="0 0 147 106" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M146.187 4.16996C146.608 2.00885 144.953 0 142.751 0H116.196C114.521 0 113.081 1.18632 112.761 2.83005L93.5631 101.268C93.1417 103.429 94.7966 105.438 96.9984 105.438H123.554C125.229 105.438 126.669 104.251 126.989 102.608L146.187 4.16996Z" fill="#A7A7A7"/>
-<foreignObject x="20.7803" y="18.1592" width="106.094" height="90.7813"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(1.75px);height:100%;width:100%"></div></foreignObject><path data-figma-bg-blur-radius="3.50001" d="M106.53 105.441C106.53 71.9717 98.6042 38.5029 74.1832 38.5029C49.7622 38.5029 41.124 71.3155 41.124 105.441" stroke="#FBDC6B" stroke-opacity="0.8" stroke-width="33.6875"/>
-<path d="M0.813229 4.16996C0.391767 2.00885 2.04669 0 4.24852 0H30.8042C32.4789 0 33.9189 1.18632 34.2395 2.83005L53.4369 101.268C53.8583 103.429 52.2034 105.438 50.0016 105.438H23.4459C21.7712 105.438 20.3312 104.251 20.0106 102.608L0.813229 4.16996Z" fill="#9C83F8"/>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Mellow</title>
+  <defs>
+    <linearGradient id="mellow" x1="120" y1="180" x2="920" y2="850" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFC170"/>
+      <stop offset="0.52" stop-color="#F6836F"/>
+      <stop offset="1" stop-color="#9B7BE8"/>
+    </linearGradient>
+  </defs>
+  <g stroke="url(#mellow)" stroke-width="164" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M120 790 V430 A196 196 0 0 1 512 430 V790"/>
+    <path d="M512 430 A196 196 0 0 1 904 430 V790"/>
+  </g>
 </svg>
