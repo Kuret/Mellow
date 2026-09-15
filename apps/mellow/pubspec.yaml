@@ -2,7 +2,7 @@ name: mellow
 description: "A calm, space-first Android browser that syncs with Zen Browser."
 publish_to: 'none'
 resolution: workspace
-version: 0.30.0+41
+version: 0.1.0+65
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
