@@ -27,6 +27,7 @@ import 'package:riverpod/misc.dart' show Override;
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
@@ -34,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart'
@@ -116,7 +118,10 @@ Future<TabDatabase> _memoryDatabaseWithOneTab() async {
 
 /// The provider tree the panel's real content ([RailSpaceTabs],
 /// [SpaceIconRail]) needs on top of [db].
-List<Override> _panelOverrides(TabDatabase db, {RailSide? compactRailSide}) => [
+List<Override> _panelOverrides(
+  TabDatabase db, {
+  CompactRailSide? compactRailSide,
+}) => [
   tabDatabaseProvider.overrideWith((ref) => db),
   generalSettingsWithDefaultsProvider.overrideWith(
     (ref) => GeneralSettings.withDefaults(),
@@ -138,6 +143,10 @@ List<Override> _panelOverrides(TabDatabase db, {RailSide? compactRailSide}) => [
     _DefaultTabViewFilterController.new,
   ),
   tabListProvider.overrideWith(() => _TabListOf(const [])),
+  effectiveToolbarButtonConfigsProvider.overrideWithValue(
+    EquatableValue(const []),
+  ),
+  pinnedAddonIdsProvider.overrideWith(_NoPinnedAddonIds.new),
 ];
 
 class _DefaultTabViewFilterController extends TabViewFilterController {
@@ -145,20 +154,30 @@ class _DefaultTabViewFilterController extends TabViewFilterController {
   TabViewFilterOptions build() => TabViewFilterOptions.withDefaults();
 }
 
+class _NoPinnedAddonIds extends PinnedAddonIds {
+  @override
+  Set<String> build() => const {};
+}
+
 Widget _harness({
   required List<Override> overrides,
   required double viewportWidth,
+  EdgeInsets viewPadding = EdgeInsets.zero,
 }) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
       home: MediaQuery(
-        data: MediaQueryData(size: Size(viewportWidth, 800)),
+        data: MediaQueryData(
+          size: Size(viewportWidth, 800),
+          padding: viewPadding,
+        ),
         child: Scaffold(
           body: CompactRailSlideOut(
             isNarrowViewport: true,
             viewportWidth: viewportWidth,
             railWidth: 260,
+            showToolbarButtons: true,
             child: Container(key: const Key('content'), color: Colors.white),
           ),
         ),
@@ -213,7 +232,7 @@ void main() {
 
     await tester.pumpWidget(
       _harness(
-        overrides: _panelOverrides(db, compactRailSide: RailSide.right),
+        overrides: _panelOverrides(db, compactRailSide: CompactRailSide.right),
         viewportWidth: 360,
       ),
     );
@@ -245,13 +264,65 @@ void main() {
     await _disposeTree(tester);
   });
 
+  testWidgets(
+    'the panel carries the address row, like the wide rail composes it',
+    (tester) async {
+      final db = await _memoryDatabaseWithOneTab();
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        _harness(
+          overrides: _panelOverrides(db, compactRailSide: CompactRailSide.left),
+          viewportWidth: 360,
+        ),
+      );
+      await _settle(tester);
+
+      // No compact bar's own widgets exist — only the wide rail's blocks,
+      // reused inside the panel.
+      expect(find.byType(WideRailLayout), findsOneWidget);
+      expect(find.byKey(WideRailLayout.urlRowKey), findsOneWidget);
+      expect(find.byKey(WideRailLayout.tabsKey), findsOneWidget);
+      expect(find.byKey(WideRailLayout.spacesKey), findsOneWidget);
+
+      await _disposeTree(tester);
+    },
+  );
+
+  testWidgets('the panel clears the top system inset (status bar)', (
+    tester,
+  ) async {
+    final db = await _memoryDatabaseWithOneTab();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      _harness(
+        overrides: _panelOverrides(db, compactRailSide: CompactRailSide.left),
+        viewportWidth: 360,
+        viewPadding: const EdgeInsets.only(top: 40),
+      ),
+    );
+    await _settle(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(WideRailLayout)),
+    );
+    container.read(compactRailPanelOpenProvider.notifier).open();
+    await _settle(tester);
+
+    final panelRect = tester.getRect(find.byType(WideRailLayout));
+    expect(panelRect.top, greaterThanOrEqualTo(40));
+
+    await _disposeTree(tester);
+  });
+
   testWidgets('closes when a tab is selected', (tester) async {
     final db = await _memoryDatabaseWithOneTab();
     addTearDown(db.close);
 
     await tester.pumpWidget(
       _harness(
-        overrides: _panelOverrides(db, compactRailSide: RailSide.left),
+        overrides: _panelOverrides(db, compactRailSide: CompactRailSide.left),
         viewportWidth: 360,
       ),
     );
