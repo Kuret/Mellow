@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="180" src="apps/weblibre/assets/icon/icon.png" alt="Mellow">
+  <img width="180" src="apps/mellow/assets/icon/icon.png" alt="Mellow">
 </p>
 
 <h1 align="center">Mellow</h1>
@@ -47,11 +47,8 @@ and Firefox extensions behave the way they do in Firefox for Android.
 Built and run daily on exactly one device (a Samsung foldable, Android 17). It is not tested
 anywhere else, on any other screen, or by anyone else. Treat everything here as "works for me".
 
-Builds still carry upstream's application id (`eu.weblibre.gecko.alpha`) so an existing install
-keeps its profile. **Do not distribute APKs built from this tree** — they would collide with
-WebLibre's own update channel. Change `applicationId` in
-`apps/weblibre/android/app/build.gradle` first if you ever need to (it costs you the profile on
-that device).
+Mellow has its own application id (`app.mellow.browser`), so it installs beside WebLibre rather
+than over it and never touches WebLibre's update channel.
 
 ## Building
 
@@ -63,7 +60,7 @@ melos run update-assets      # downloads the external data files
 melos run build-components   # builds the readability JS bundle
 melos run build              # build_runner across the workspace
 
-cd apps/weblibre
+cd apps/mellow
 flutter build apk --release --flavor alpha --split-per-abi \
   --target-platform android-arm64 --no-tree-shake-icons
 ```

@@ -81,7 +81,7 @@ Shipped in this repository:
     web_inspector/eruda.js — the on-device element inspector.
 
   Roboto Mono — Apache-2.0 — Google Fonts
-    apps/weblibre/assets/fonts/RobotoMono-Regular.ttf
+    apps/mellow/assets/fonts/RobotoMono-Regular.ttf
 
 Built from source at build time (packages/flutter_mozilla_components/javascript):
 
@@ -106,7 +106,7 @@ Apache-2.0 licence of the icon font.
 5. Names
 --------
 
-"Mellow" and the "m" icon in apps/weblibre/assets/icon are this fork's own work
+"Mellow" and the "m" icon in apps/mellow/assets/icon are this fork's own work
 and are not part of WebLibre's branding. WebLibre, Zen Browser, Firefox, Gecko,
 Mozilla and uBlock Origin are the marks of their respective owners and are used
 here only descriptively. This project claims no endorsement by any of them.

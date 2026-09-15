@@ -111,7 +111,14 @@ upstream's work, and the part that would otherwise have to be maintained here. I
 tab, browser and UI feature work alone, because this fork replaced those semantics and a textually
 clean merge can still be wrong.
 
-The internal identifiers were deliberately **not** renamed for the same reason: the Dart package is
-still `weblibre`, the Kotlin packages are still `eu.weblibre.*`, and the application id is still
-`eu.weblibre.gecko`. Renaming them would buy nothing technical and would cost the ability to take
-upstream's engine-layer fixes. Only what a user sees says Mellow.
+The identifiers were renamed too, all of them: the Dart package (`weblibre` → `mellow`), the app
+directory (`apps/weblibre` → `apps/mellow`), the Kotlin packages and application id
+(`eu.weblibre.*` → `app.mellow.browser.*`), the Android resource prefix (`weblibre_` → `mellow_`).
+That is what puts Mellow in its own application-id namespace instead of squatting in upstream's,
+at the price of making every upstream patch conflict on contact with an import block.
+
+The price is paid mechanically rather than by hand: `.claude/skills/upstream-sync/identifiers.py`
+holds the mapping and doubles as a patch filter, so upstream commits are translated on the way in
+(`git format-patch | identifiers.py | git am -3`). It rewrites identifier *tokens* only — licence
+headers, upstream URLs, the settings-export format marker and the `weblibre_settings` sync key all
+keep the old name, because those either credit upstream or travel off the device.
