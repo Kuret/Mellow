@@ -29,9 +29,10 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/s
 
 /// The compact bar's fixed leading control: the selected space's icon (or the
 /// first letter of its name) with a strip of dots underneath marking where it
-/// sits among the spaces. Tapping opens [showSpacePickerSheet]; a horizontal
-/// swipe steps to the neighbouring space; a long-press opens the shared quick
-/// menu (see [showBrowserQuickMenu]) — the compact bar's counterpart to the
+/// sits among the spaces. A horizontal swipe steps to the neighbouring
+/// space; both a tap and a long-press open the shared quick menu (see
+/// [showBrowserQuickMenu]) with its spaces section included — the tap
+/// silently, the long-press with the acknowledging haptic tick, matching the
 /// wide rail's "+" long-press, since the compact bar's toolbar row can be
 /// switched off the same way the rail's can.
 class SpaceIndicator extends ConsumerWidget {
@@ -57,9 +58,14 @@ class SpaceIndicator extends ConsumerWidget {
         name: selected?.name ?? '',
         index: index,
         count: spaces.length,
-        onTap: () => showSpacePickerSheet(context),
+        onTap: (buttonContext) => showBrowserQuickMenu(
+          buttonContext,
+          ref,
+          includeSpaces: true,
+          haptic: false,
+        ),
         onLongPress: (buttonContext) =>
-            showBrowserQuickMenu(buttonContext, ref),
+            showBrowserQuickMenu(buttonContext, ref, includeSpaces: true),
       ),
     );
   }
@@ -74,7 +80,11 @@ class SpaceIndicatorView extends StatelessWidget {
   /// Position of the selected space among [count]; negative while unknown.
   final int index;
   final int count;
-  final VoidCallback? onTap;
+
+  /// Fired on a tap, with the indicator's own [BuildContext] (to anchor a
+  /// popup menu near it) — the same shape as [onLongPress], since both open
+  /// the same menu.
+  final void Function(BuildContext buttonContext)? onTap;
 
   /// Fired on a long-press, with the indicator's own [BuildContext] (to
   /// anchor a popup menu near it) — the same pattern as
@@ -154,7 +164,7 @@ class SpaceIndicatorView extends StatelessWidget {
         label: 'Space: $displayName',
         child: Builder(
           builder: (context) => InkWell(
-            onTap: onTap,
+            onTap: onTap == null ? null : () => onTap!(context),
             onLongPress: onLongPress == null
                 ? null
                 : () => onLongPress!(context),
