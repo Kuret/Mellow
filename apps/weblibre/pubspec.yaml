@@ -115,9 +115,7 @@ flutter:
     - assets/fonts/
     - assets/icon/
     - assets/images/
-    - assets/landing/
     - assets/preferences/
-    - assets/legal/
     - assets/ublock/
 
 flutter_launcher_icons:
