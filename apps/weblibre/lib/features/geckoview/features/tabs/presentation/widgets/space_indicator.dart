@@ -19,7 +19,6 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -188,90 +187,4 @@ class SpaceIndicatorView extends StatelessWidget {
   }
 
   static const width = SpaceIndicator.width;
-}
-
-/// What the picker sheet asks its caller to do once it has closed; switching
-/// spaces happens inside the sheet, navigation happens here where the
-/// caller's context is still mounted.
-sealed class _SpacePickerAction {
-  const _SpacePickerAction();
-}
-
-class _CreateSpace extends _SpacePickerAction {
-  const _CreateSpace();
-}
-
-class _EditSpace extends _SpacePickerAction {
-  final String uuid;
-
-  const _EditSpace(this.uuid);
-}
-
-/// Bottom sheet listing every space: tap to switch, long-press to edit, a
-/// trailing row to create one. The compact bar's replacement for the space
-/// chip row it has no room for.
-Future<void> showSpacePickerSheet(BuildContext context) async {
-  final action = await showModalBottomSheet<_SpacePickerAction>(
-    context: context,
-    showDragHandle: true,
-    useSafeArea: true,
-    builder: (context) => const _SpacePickerSheet(),
-  );
-  if (action == null || !context.mounted) {
-    return;
-  }
-  switch (action) {
-    case _CreateSpace():
-      await const SpaceCreateRoute().push<void>(context);
-    case _EditSpace(:final uuid):
-      await SpaceEditRoute(uuid: uuid).push<void>(context);
-  }
-}
-
-class _SpacePickerSheet extends ConsumerWidget {
-  const _SpacePickerSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final spaces =
-        ref.watch(watchSpacesProvider.select((value) => value.value)) ??
-        const <SpaceData>[];
-    final selectedUuid = ref.watch(selectedSpaceProvider);
-
-    return SafeArea(
-      top: false,
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(
-              'Spaces',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          for (final space in spaces)
-            ListTile(
-              leading: SpaceIconAvatar(icon: space.icon, radius: 18),
-              title: Text(space.name.isEmpty ? 'Space' : space.name),
-              selected: space.uuid == selectedUuid,
-              trailing: space.uuid == selectedUuid
-                  ? const Icon(Icons.check)
-                  : null,
-              onTap: () {
-                ref.read(selectedSpaceProvider.notifier).space = space.uuid;
-                Navigator.of(context).pop();
-              },
-              onLongPress: () =>
-                  Navigator.of(context).pop(_EditSpace(space.uuid)),
-            ),
-          ListTile(
-            leading: const CircleAvatar(radius: 18, child: Icon(Icons.add)),
-            title: const Text('New space'),
-            onTap: () => Navigator.of(context).pop(const _CreateSpace()),
-          ),
-        ],
-      ),
-    );
-  }
 }
