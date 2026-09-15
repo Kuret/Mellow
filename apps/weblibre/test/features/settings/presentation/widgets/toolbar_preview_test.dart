@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/zen_settings.dart';
@@ -90,6 +91,36 @@ void main() {
         expect(
           tester.getCenter(find.byType(WideRailLayout)).dx,
           greaterThan(tester.getCenter(_widePageContent()).dx),
+        );
+      });
+
+      testWidgets('puts the space switcher on the configured side', (
+        tester,
+      ) async {
+        await _pumpPreview(
+          tester,
+          GeneralSettings.withDefaults(),
+          zenSettings: ZenSettings.withDefaults(
+            spaceIndicatorSide: SpaceIndicatorSide.left,
+          ),
+          compact: compact,
+        );
+        expect(
+          tester.getTopLeft(find.byType(SpaceIndicatorView)).dx,
+          lessThan(tester.getTopLeft(find.text('News').first).dx),
+        );
+
+        await _pumpPreview(
+          tester,
+          GeneralSettings.withDefaults(),
+          zenSettings: ZenSettings.withDefaults(
+            spaceIndicatorSide: SpaceIndicatorSide.right,
+          ),
+          compact: compact,
+        );
+        expect(
+          tester.getTopLeft(find.byType(SpaceIndicatorView)).dx,
+          greaterThan(tester.getTopLeft(find.text('News').first).dx),
         );
       });
 

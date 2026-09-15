@@ -243,7 +243,10 @@ class TabBarPreviewCard extends StatelessWidget {
 
     // --- Narrow screens: the compact bar at the configured edge. ---------
 
-    final compactBar = _CompactBarPreview(settings: settings);
+    final compactBar = _CompactBarPreview(
+      settings: settings,
+      spaceIndicatorSide: zenSettings.spaceIndicatorSide,
+    );
     final position = settings.effectiveTabBarPosition;
     final pageHeight = compact
         ? _kCompactPageContentHeight
@@ -446,9 +449,13 @@ class TabBarPreviewCard extends StatelessWidget {
 /// squares, the divider, a folder chip and two tab chips. The live bar needs
 /// the tab and space tables, which the preview does not have.
 class _CompactBarPreview extends StatelessWidget {
-  const _CompactBarPreview({required this.settings});
+  const _CompactBarPreview({
+    required this.settings,
+    required this.spaceIndicatorSide,
+  });
 
   final GeneralSettings settings;
+  final SpaceIndicatorSide spaceIndicatorSide;
 
   @override
   Widget build(BuildContext context) {
@@ -495,61 +502,64 @@ class _CompactBarPreview extends StatelessWidget {
       ),
     );
 
+    const indicator = SpaceIndicatorView(
+      icon: null,
+      name: 'Work',
+      index: 0,
+      count: 2,
+    );
+    final chipStrip = Expanded(
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        children: [
+          essential(),
+          essential(),
+          const Padding(
+            padding: EdgeInsets.only(left: 2.0, right: 6.0),
+            child: VerticalDivider(width: 1, indent: 12, endIndent: 12),
+          ),
+          const Center(
+            child: CompactFolderChip(
+              name: 'Reading',
+              childCount: 3,
+              expanded: false,
+            ),
+          ),
+          for (final item in items)
+            Center(
+              child: QuickTabSwitcherChip(
+                item: item,
+                isSelected: item.isActive,
+                selectedBorderColor: scheme.primary,
+                decoration: decoration,
+                label: buildQuickTabSwitcherChipLabel(
+                  context,
+                  item,
+                  isSelected: item.isActive,
+                  titleMaxWidth: settings.quickTabSwitcherTitleWidth,
+                ),
+                padding: const EdgeInsets.only(right: 8.0),
+                onTap: () async {},
+                onDelete:
+                    TabChipCloseButtonMode.activeTabOnly.showsFor(
+                      isActive: item.isActive,
+                    )
+                    ? () async {}
+                    : null,
+              ),
+            ),
+        ],
+      ),
+    );
+
     return SizedBox(
       height: CompactTabBar.height,
       child: Row(
-        children: [
-          const SpaceIndicatorView(
-            icon: null,
-            name: 'Work',
-            index: 0,
-            count: 2,
-          ),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              children: [
-                essential(),
-                essential(),
-                const Padding(
-                  padding: EdgeInsets.only(left: 2.0, right: 6.0),
-                  child: VerticalDivider(width: 1, indent: 12, endIndent: 12),
-                ),
-                const Center(
-                  child: CompactFolderChip(
-                    name: 'Reading',
-                    childCount: 3,
-                    expanded: false,
-                  ),
-                ),
-                for (final item in items)
-                  Center(
-                    child: QuickTabSwitcherChip(
-                      item: item,
-                      isSelected: item.isActive,
-                      selectedBorderColor: scheme.primary,
-                      decoration: decoration,
-                      label: buildQuickTabSwitcherChipLabel(
-                        context,
-                        item,
-                        isSelected: item.isActive,
-                        titleMaxWidth: settings.quickTabSwitcherTitleWidth,
-                      ),
-                      padding: const EdgeInsets.only(right: 8.0),
-                      onTap: () async {},
-                      onDelete:
-                          TabChipCloseButtonMode.activeTabOnly.showsFor(
-                            isActive: item.isActive,
-                          )
-                          ? () async {}
-                          : null,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
+        children: switch (spaceIndicatorSide) {
+          SpaceIndicatorSide.left => [indicator, chipStrip],
+          SpaceIndicatorSide.right => [chipStrip, indicator],
+        },
       ),
     );
   }
