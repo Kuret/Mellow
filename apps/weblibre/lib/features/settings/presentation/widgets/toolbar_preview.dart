@@ -123,9 +123,12 @@ class TabBarPreviewCard extends StatelessWidget {
   static const _kWideCanvasWidth = 640.0;
   static const _kWideCanvasHeight = 300.0;
 
-  /// The compact bar's chrome: the address/toolbar row and one switcher row.
+  /// The compact bar's chrome: the address row, the toolbar button row under
+  /// it, and one switcher row.
   static double toolbarHeight(GeneralSettings settings) =>
-      kToolbarHeight + BrowserTabBar.quickTabSwitcherHeight;
+      kToolbarHeight +
+      BrowserTabBar.toolbarButtonsRowHeight +
+      BrowserTabBar.quickTabSwitcherHeight;
 
   /// Height of the narrow-screen preview box (content plus its border).
   static double narrowPreviewHeight(
@@ -205,12 +208,9 @@ class TabBarPreviewCard extends StatelessWidget {
       NavigationMenuButtonView(onTap: () {}),
     ];
 
-    // The compact bar shares its row with the address field, so its share of
-    // the buttons scrolls rather than overflows when they don't all fit
-    // beside the title — same as the live bar (see [ToolbarButtonsRow]).
-    final compactMainToolbarActions = <Widget>[
-      Flexible(child: ToolbarButtonsRow(buttons: mainToolbarActions)),
-    ];
+    // The compact bar draws the configured buttons in a row of their own
+    // beneath the address row, the same as the live bar does.
+    final compactToolbarRow = ToolbarButtonsRow(buttons: mainToolbarActions);
 
     Widget title() => _CompactPreviewTitle(tabState: previewTabState);
 
@@ -256,7 +256,8 @@ class TabBarPreviewCard extends StatelessWidget {
             displayQuickTabSwitcher: false,
             backgroundColor: chromeColor,
             title: title(),
-            actions: compactMainToolbarActions,
+            actions: const [],
+            toolbarRow: compactToolbarRow,
             quickTabSwitcher: const SizedBox.shrink(),
           ),
           pageContent(height: pageHeight),
@@ -283,7 +284,8 @@ class TabBarPreviewCard extends StatelessWidget {
             displayQuickTabSwitcher: true,
             backgroundColor: chromeColor,
             title: title(),
-            actions: compactMainToolbarActions,
+            actions: const [],
+            toolbarRow: compactToolbarRow,
             quickTabSwitcher: compactBar,
           ),
         ],

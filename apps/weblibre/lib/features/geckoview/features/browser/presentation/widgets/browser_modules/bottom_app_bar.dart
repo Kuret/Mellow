@@ -251,6 +251,12 @@ class BrowserTabBar extends HookConsumerWidget {
 
   static const quickTabSwitcherHeight = CompactTabBar.height;
 
+  /// Height of the compact bar's toolbar button row. Reserved whenever the
+  /// address row is drawn, the way the strip this replaced was: a user who
+  /// switches every button off keeps an empty row rather than a bar that
+  /// changes height under them.
+  static const toolbarButtonsRowHeight = 48.0;
+
   bool get displayAppBar =>
       showMainToolbar &&
       !suppressMainToolbar &&
@@ -263,7 +269,7 @@ class BrowserTabBar extends HookConsumerWidget {
     var height = 0.0;
 
     if (displayAppBar) {
-      height += kToolbarHeight;
+      height += kToolbarHeight + toolbarButtonsRowHeight;
     }
 
     if (displayQuickTabSwitcher) {
@@ -412,19 +418,20 @@ class BrowserTabBar extends HookConsumerWidget {
     }
 
     // The rail spreads every button evenly across its own width (see
-    // [WideRailToolbarRow]), so it gets the plain list; the horizontal bar
-    // shares its row with the address field, so its share of the configured
-    // buttons goes through [ToolbarButtonsRow] instead — scrolling rather
-    // than overflowing the `AppBar` when they don't all fit beside the title.
+    // [WideRailToolbarRow]), so it gets the plain list. The horizontal bar
+    // puts the same set in a row of its own beneath the address row, through
+    // [ToolbarButtonsRow] — it spreads them when they fit and scrolls when
+    // they don't, so a long configured set can neither overflow nor squeeze
+    // the address field. Only the pinned add-on bar stays in the address
+    // row's actions, where it has always been.
     final actions = <Widget>[
       const PinnedAddonBar(),
       ...configuredToolbarButtons,
     ];
-    final compactActions = <Widget>[
-      const PinnedAddonBar(),
-      if (configuredToolbarButtons.isNotEmpty)
-        Flexible(child: ToolbarButtonsRow(buttons: configuredToolbarButtons)),
-    ];
+    final compactActions = <Widget>[const PinnedAddonBar()];
+    final compactToolbarRow = configuredToolbarButtons.isEmpty
+        ? null
+        : ToolbarButtonsRow(buttons: configuredToolbarButtons);
 
     if (railSide != null) {
       // The rail is the Arc/Zen sidebar (PLAN §9 W1): address row on top,
@@ -478,6 +485,7 @@ class BrowserTabBar extends HookConsumerWidget {
           ? CompactAppBarTitle(containerColor: effectiveContainerColor)
           : null,
       actions: compactActions,
+      toolbarRow: compactToolbarRow,
       quickTabSwitcher: const CompactTabBar(),
       onVerticalDragStart: enableGestures ? dragStartHandler : null,
       onVerticalDragEnd: enableGestures ? barVerticalDragEndHandler : null,
@@ -538,6 +546,7 @@ class BrowserTabBarView extends StatelessWidget {
     required this.title,
     required this.actions,
     required this.quickTabSwitcher,
+    this.toolbarRow,
     this.onVerticalDragStart,
     this.onVerticalDragEnd,
   });
@@ -549,6 +558,15 @@ class BrowserTabBarView extends StatelessWidget {
   final Color? backgroundColor;
   final Widget? title;
   final List<Widget> actions;
+
+  /// The configured toolbar buttons, in a row of their own under the address
+  /// row.
+  ///
+  /// Their own row rather than the address row's actions: the set is the
+  /// user's, it runs to half a dozen buttons by default, and sharing one row
+  /// with the address field squeezes the field down to nothing on a phone.
+  final Widget? toolbarRow;
+
   final Widget quickTabSwitcher;
   final GestureDragStartCallback? onVerticalDragStart;
   final GestureDragEndCallback? onVerticalDragEnd;
@@ -599,6 +617,15 @@ class BrowserTabBarView extends StatelessWidget {
                     title: title,
                     actions: actions,
                   ),
+                ),
+              ),
+            if (showMainToolbar && toolbarRow != null)
+              Visibility(
+                visible: displayAppBar,
+                maintainState: true,
+                child: SizedBox(
+                  height: BrowserTabBar.toolbarButtonsRowHeight,
+                  child: toolbarRow,
                 ),
               ),
           ],
