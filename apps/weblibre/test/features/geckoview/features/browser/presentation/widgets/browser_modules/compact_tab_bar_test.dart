@@ -190,6 +190,7 @@ Future<_RecordingTabRepository> _pumpBar(
   required TabDatabase db,
   bool restored = false,
   double viewportWidth = 400,
+  ZenSettings? zenSettings,
 }) async {
   final repository = _RecordingTabRepository();
   await tester.pumpWidget(
@@ -198,7 +199,7 @@ Future<_RecordingTabRepository> _pumpBar(
         tabDatabaseProvider.overrideWith((ref) => db),
         tabRepositoryProvider.overrideWith(() => repository),
         zenSettingsWithDefaultsProvider.overrideWith(
-          (ref) => ZenSettings.withDefaults(),
+          (ref) => zenSettings ?? ZenSettings.withDefaults(),
         ),
         generalSettingsWithDefaultsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(),
@@ -645,6 +646,39 @@ void main() {
 
     await _disposeTree(tester);
   });
+
+  testWidgets(
+    'the space indicator sits before the chip strip by default, and after '
+    'it when the setting says right',
+    (tester) async {
+      final db = await _memoryDatabase(
+        tabs: const [(id: 'tab-1', title: 'Docs')],
+      );
+      addTearDown(db.close);
+
+      await _pumpBar(tester, db: db);
+      final leftIndicatorX = tester.getTopLeft(find.byType(SpaceIndicator)).dx;
+      final leftChipX = tester.getTopLeft(find.text('Docs')).dx;
+      expect(leftIndicatorX, lessThan(leftChipX));
+
+      await _disposeTree(tester);
+
+      await _pumpBar(
+        tester,
+        db: db,
+        zenSettings: ZenSettings.withDefaults(
+          spaceIndicatorSide: SpaceIndicatorSide.right,
+        ),
+      );
+      final rightIndicatorX = tester
+          .getTopLeft(find.byType(SpaceIndicator))
+          .dx;
+      final rightChipX = tester.getTopLeft(find.text('Docs')).dx;
+      expect(rightIndicatorX, greaterThan(rightChipX));
+
+      await _disposeTree(tester);
+    },
+  );
 
   testWidgets('a cold tab renders dimmed with the snowflake badge', (
     tester,

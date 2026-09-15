@@ -46,21 +46,26 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/e
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/zen_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
-/// The narrow-viewport tab bar: one [height] row for the current space. At
-/// the leading edge the fixed [SpaceIndicator]; after it, scrolling
-/// horizontally, the Essentials as icon chips, a thin divider, then the
-/// pinned tabs, folders and normal tabs as chips in `order_key` order — a
-/// folder as a chip that shows its contents inline while it is expanded
-/// ([compactBarExpandedFoldersProvider]): its tabs and a chip per subfolder,
-/// which opens the same way. The selected tab is highlighted
-/// and kept in view.
+/// The narrow-viewport tab bar: one [height] row for the current space. The
+/// fixed [SpaceIndicator] sits at one edge — the leading edge by default, the
+/// trailing one when [ZenSettings.spaceIndicatorSide] is
+/// [SpaceIndicatorSide.right], for a right-handed grip; the rest of the row,
+/// scrolling horizontally, is the Essentials as icon chips, a thin divider,
+/// then the pinned tabs, folders and normal tabs as chips in `order_key`
+/// order — a folder as a chip that shows its contents inline while it is
+/// expanded ([compactBarExpandedFoldersProvider]): its tabs and a chip per
+/// subfolder, which opens the same way. The selected tab is highlighted and
+/// kept in view.
 ///
 /// Spaces are switched by swiping the indicator, by overscrolling the chip
-/// strip past either end, or from the picker sheet the indicator opens.
+/// strip past either end, or from the picker sheet the indicator opens — all
+/// independent of which side of the row the indicator sits on.
 class CompactTabBar extends ConsumerWidget {
   const CompactTabBar({super.key});
 
@@ -70,19 +75,25 @@ class CompactTabBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spaceUuid = ref.watch(selectedSpaceProvider);
+    final spaceIndicatorSide = ref.watch(
+      zenSettingsWithDefaultsProvider.select((s) => s.spaceIndicatorSide),
+    );
+
+    const indicator = SpaceIndicator();
+    final chipStrip = Expanded(
+      child: SpaceSlide(
+        spaceUuid: spaceUuid,
+        child: _CompactChipStrip(spaceUuid: spaceUuid),
+      ),
+    );
 
     return SizedBox(
       height: height,
       child: Row(
-        children: [
-          const SpaceIndicator(),
-          Expanded(
-            child: SpaceSlide(
-              spaceUuid: spaceUuid,
-              child: _CompactChipStrip(spaceUuid: spaceUuid),
-            ),
-          ),
-        ],
+        children: switch (spaceIndicatorSide) {
+          SpaceIndicatorSide.left => [indicator, chipStrip],
+          SpaceIndicatorSide.right => [chipStrip, indicator],
+        },
       ),
     );
   }
