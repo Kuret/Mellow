@@ -62,7 +62,7 @@ final class SelectedSpaceProvider
   }
 }
 
-String _$selectedSpaceHash() => r'876e6c173db44d04cbd007a0f593e7abb8aebaaa';
+String _$selectedSpaceHash() => r'6fecea9c5a2f0a8cd89dbc434ece665322d83b3b';
 
 /// The space the tab list shows and new regular tabs are created in.
 ///

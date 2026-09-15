@@ -25,10 +25,12 @@ import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -128,6 +130,14 @@ class SelectedSpace extends _$SelectedSpace {
         if (current == null || !spaces.any((space) => space.uuid == current)) {
           state = spaces.first.uuid;
         }
+        // Drop the memory a deleted space would otherwise leave behind
+        // forever — the map is keyed on space uuid and nothing else prunes
+        // it.
+        unawaited(
+          ref
+              .read(spaceLastTabProvider.notifier)
+              .pruneToSpaces({for (final space in spaces) space.uuid}),
+        );
       },
       onError: (error, stackTrace) {
         logger.e(
@@ -151,8 +161,23 @@ class SelectedSpace extends _$SelectedSpace {
         final tab = await ref
             .read(tabDataRepositoryProvider.notifier)
             .getTabSummaryById(next);
+        if (!ref.mounted) {
+          return;
+        }
         final spaceUuid = tab?.spaceUuid;
-        if (ref.mounted && spaceUuid != null && spaceUuid != stateOrNull) {
+        if (spaceUuid == null) {
+          // Private tabs and essentials have no space: they neither move the
+          // selected space nor overwrite any space's remembered tab.
+          return;
+        }
+        // Remember this as the space's tab regardless of whether it also
+        // moves the selected space — every regular-tab selection updates
+        // what "coming back to this space" restores, the way it updates
+        // engine history.
+        unawaited(
+          ref.read(spaceLastTabProvider.notifier).recordTab(spaceUuid, next),
+        );
+        if (spaceUuid != stateOrNull) {
           state = spaceUuid;
         }
       },
@@ -164,6 +189,23 @@ class SelectedSpace extends _$SelectedSpace {
         );
       },
     );
+
+    // The reverse of the listener above: once the selected space itself
+    // changes — a swipe, a rail tap, a stale uuid falling back to the first
+    // space — restore what that space was last showing, so the tab list does
+    // not land on the tab a *different* space happens to have selected. Only
+    // reacts to an actual change (never the first build, where there is
+    // nothing to restore from yet): [TabRepository.restoreSpaceTab] itself
+    // checks whether the selected tab already belongs to the new space, which
+    // is what keeps this from fighting the listener above — selecting a tab
+    // syncs the space back to it, a no-op here since it is already the
+    // current space.
+    listenSelf((previous, next) {
+      if (previous == null || next == null || previous == next) {
+        return;
+      }
+      unawaited(ref.read(tabRepositoryProvider.notifier).restoreSpaceTab(next));
+    });
 
     return stateOrNull;
   }
