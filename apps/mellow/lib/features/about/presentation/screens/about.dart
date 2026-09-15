@@ -46,7 +46,9 @@ class AboutDialogScreen extends HookConsumerWidget {
       ),
       applicationName: packageInfo.appName,
       applicationVersion: packageInfo.version,
-      applicationLegalese: 'Copyright © Fabian Freund, 2024-2026',
+      applicationLegalese:
+          'A fork of WebLibre, © Fabian Freund 2024-2026 · Mellow, 2026 · '
+          'AGPL-3.0-or-later',
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -68,7 +70,7 @@ class AboutDialogScreen extends HookConsumerWidget {
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
-                  url: Uri.https('feedback.weblibre.eu'),
+                  url: Uri.https('github.com', '/Kuret/Mellow/issues'),
                   tabMode: TabMode.regular,
                   selectTab: true,
                 );
@@ -81,12 +83,12 @@ class AboutDialogScreen extends HookConsumerWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(MdiIcons.handHeart),
-          title: const Text('Donate'),
+          title: const Text('Support WebLibre'),
           onTap: () async {
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
-                  url: Uri.https('github.com').replace(path: 'FaFre/WebLibre'),
+                  url: Uri.https('liberapay.com', '/FaFre/donate'),
                   tabMode: TabMode.regular,
                   selectTab: true,
                 );
@@ -124,7 +126,7 @@ class AboutDialogScreen extends HookConsumerWidget {
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
-                  url: Uri.https('github.com').replace(path: 'FaFre/WebLibre'),
+                  url: Uri.https('github.com', '/Kuret/Mellow'),
                   tabMode: TabMode.regular,
                   selectTab: true,
                 );
