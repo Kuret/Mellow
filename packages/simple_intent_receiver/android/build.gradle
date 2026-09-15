@@ -1,4 +1,4 @@
-group = "eu.weblibre.simple_intent_receiver"
+group = "app.mellow.browser.simple_intent_receiver"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -22,7 +22,7 @@ allprojects {
 apply plugin: "com.android.library"
 
 android {
-    namespace = "eu.weblibre.simple_intent_receiver"
+    namespace = "app.mellow.browser.simple_intent_receiver"
 
     compileSdk = 37
 

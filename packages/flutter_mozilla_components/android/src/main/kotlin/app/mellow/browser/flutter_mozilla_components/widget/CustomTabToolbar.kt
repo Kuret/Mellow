@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.widget
+package app.mellow.browser.flutter_mozilla_components.widget
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -24,7 +24,7 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
-import eu.weblibre.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel

@@ -21,18 +21,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/sections.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
   SettingsSectionDefinition(

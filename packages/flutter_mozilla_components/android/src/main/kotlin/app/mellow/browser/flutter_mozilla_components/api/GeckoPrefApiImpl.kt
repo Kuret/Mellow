@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPref
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPref
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPrefApi
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.preferences.Branch
 import mozilla.components.concept.engine.preferences.BrowserPrefObserverDelegate

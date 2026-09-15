@@ -19,11 +19,11 @@
  */
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/error_observer.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/startup_bootstrap.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/core/error_observer.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/startup_bootstrap.dart';
-import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> backgroundFetch(HeadlessEvent task) async {

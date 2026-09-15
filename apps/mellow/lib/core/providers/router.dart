@@ -20,10 +20,10 @@
 import 'dart:async';
 
 import 'package:go_router/go_router.dart';
+import 'package:mellow/core/providers/app_state.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/providers/app_state.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 
 part 'router.g.dart';
 

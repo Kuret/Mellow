@@ -20,13 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
+import 'package:mellow/presentation/widgets/safe_raw_image.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 class TabIcon extends HookConsumerWidget {
   final TabState tabState;

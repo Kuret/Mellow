@@ -20,8 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
-import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 
 class QrScannerButton extends HookConsumerWidget {
   final void Function(Barcode? scanResult) onScanResult;

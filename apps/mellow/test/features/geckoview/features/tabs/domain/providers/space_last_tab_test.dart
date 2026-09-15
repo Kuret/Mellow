@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 ProviderContainer _openContainer() {
   final container = ProviderContainer(
@@ -95,21 +95,26 @@ void main() {
     expect(await notifier.entryFor('space-2'), isNull);
   });
 
-  test('the map survives across a rebuild backed by the same storage', () async {
-    final storage = Storage<String, String>.inMemory();
-    final first = ProviderContainer(
-      overrides: [riverpodDatabaseStorageProvider.overrideWithValue(storage)],
-    );
-    addTearDown(first.dispose);
-    await first.read(spaceLastTabProvider.notifier).recordTab('space-1', 'tab-1');
+  test(
+    'the map survives across a rebuild backed by the same storage',
+    () async {
+      final storage = Storage<String, String>.inMemory();
+      final first = ProviderContainer(
+        overrides: [riverpodDatabaseStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(first.dispose);
+      await first
+          .read(spaceLastTabProvider.notifier)
+          .recordTab('space-1', 'tab-1');
 
-    final second = ProviderContainer(
-      overrides: [riverpodDatabaseStorageProvider.overrideWithValue(storage)],
-    );
-    addTearDown(second.dispose);
-    final entry = await second
-        .read(spaceLastTabProvider.notifier)
-        .entryFor('space-1');
-    expect((entry! as SpaceLastTabTab).tabId, 'tab-1');
-  });
+      final second = ProviderContainer(
+        overrides: [riverpodDatabaseStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(second.dispose);
+      final entry = await second
+          .read(spaceLastTabProvider.notifier)
+          .entryFor('space-1');
+      expect((entry! as SpaceLastTabTab).tabId, 'tab-1');
+    },
+  );
 }

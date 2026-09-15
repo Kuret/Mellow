@@ -66,7 +66,7 @@ sweep_stale_temp_files() {
     rm -f "$stale"
     log "Removed stale temp asset: ${stale#"$REPO_ROOT/"}"
     swept=$((swept + 1))
-  done < <(find "$REPO_ROOT/apps/weblibre/assets" -type f -name '*.tmp.*' -print0)
+  done < <(find "$REPO_ROOT/apps/mellow/assets" -type f -name '*.tmp.*' -print0)
 
   [ "$swept" -gt 0 ] && log "Swept $swept stale temp asset(s)."
   return 0
@@ -75,7 +75,7 @@ sweep_stale_temp_files() {
 # ── asset groups ─────────────────────────────────────────────────────────────
 
 update_bridges() {
-  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
+  local dir="$REPO_ROOT/apps/mellow/assets/preferences"
   log "Updating Tor bridges..."
 
   fetch "https://bridges.torproject.org/moat/circumvention/builtin" \
@@ -83,7 +83,7 @@ update_bridges() {
 }
 
 update_url_cleaner() {
-  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
+  local dir="$REPO_ROOT/apps/mellow/assets/preferences"
   log "Updating URL cleaner catalog..."
 
   fetch "https://rules2.clearurls.xyz/data.minify.json" \
@@ -91,7 +91,7 @@ update_url_cleaner() {
 }
 
 update_url_shorteners() {
-  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
+  local dir="$REPO_ROOT/apps/mellow/assets/preferences"
   log "Updating URL shortener list..."
 
   fetch "https://raw.githubusercontent.com/MISP/misp-warninglists/refs/heads/main/lists/url-shortener/list.json" \
@@ -99,7 +99,7 @@ update_url_shorteners() {
 }
 
 update_ublock() {
-  local dir="$REPO_ROOT/apps/weblibre/assets/ublock"
+  local dir="$REPO_ROOT/apps/mellow/assets/ublock"
   log "Updating uBlock Origin assets..."
 
   fetch "https://raw.githubusercontent.com/gorhill/uBlock/master/assets/assets.json" \

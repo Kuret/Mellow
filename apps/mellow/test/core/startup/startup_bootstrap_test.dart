@@ -4,18 +4,18 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_bootstrap.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_bootstrap.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 const _profileA = '0199a0b1-1111-7111-8111-111111111111';
 const _profileB = '0199a0b1-2222-7222-8222-222222222222';
@@ -225,7 +225,7 @@ void main() {
 
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    root = await Directory.systemTemp.createTemp('weblibre_startup');
+    root = await Directory.systemTemp.createTemp('mellow_startup');
     PathProviderPlatform.instance = _FakePathProvider(root);
     filesystem.resetForTest();
 

@@ -22,17 +22,17 @@ import 'dart:async';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/presentation/widgets/selectable_chips.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/presentation/widgets/selectable_chips.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class QuickTabSwitcherItem with FastEquatable {
   final Color? color;
@@ -200,10 +200,7 @@ Widget buildQuickTabSwitcherChipLabel(
   final labelRow = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Padding(
-        padding: const EdgeInsets.only(right: 6.0),
-        child: avatar,
-      ),
+      Padding(padding: const EdgeInsets.only(right: 6.0), child: avatar),
       ConstrainedBox(
         constraints: BoxConstraints(maxWidth: titleMaxWidth),
         child: Text(item.title),

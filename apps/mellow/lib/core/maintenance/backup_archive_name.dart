@@ -16,7 +16,7 @@
  */
 import 'package:convert/convert.dart';
 
-const backupArchiveExtension = '.weblibre';
+const backupArchiveExtension = '.mellow';
 
 /// The archive name's timestamp format.
 ///
@@ -33,7 +33,7 @@ final backupArchiveDateFormatter = FixedDateTimeFormatter(
   isUtc: false,
 );
 
-/// `backup_<profile>_YYYY-MM-DD_hhmmss.weblibre`.
+/// `backup_<profile>_YYYY-MM-DD_hhmmss.mellow`.
 ///
 /// The name is the only metadata the backup *list* has — the archive is
 /// encrypted, so nothing inside it can be read without the password. Producer
@@ -44,7 +44,7 @@ final backupArchiveDateFormatter = FixedDateTimeFormatter(
 /// is strictly anchored, so a profile name containing `_` still parses.
 final backupArchiveNamePattern = RegExp(
   r'^backup_(?<profile>.+?)_(?<timestamp>\d{4}-\d{2}-\d{2}_\d{6})'
-  r'\.weblibre$',
+  r'\.mellow$',
 );
 
 String backupArchiveName({required String profileName, required DateTime at}) =>

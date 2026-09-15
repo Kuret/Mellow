@@ -20,10 +20,10 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/experimental/persist.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 final class RiverpodStorage extends Storage<String, String> {
   final UserDatabase _db;

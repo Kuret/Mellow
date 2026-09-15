@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
+import 'package:mellow/presentation/widgets/inline_count_badge.dart';
 
 // Default cap on inline chevrons before collapsing into a single icon + badge.
 const int _defaultMaxInlineGlyphs = 2;

@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.services
+package app.mellow.browser.flutter_mozilla_components.services
 
 import android.content.Intent
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.feature.media.service.AbstractMediaSessionService

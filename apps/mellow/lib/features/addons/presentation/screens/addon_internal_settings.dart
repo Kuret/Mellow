@@ -24,10 +24,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/addons/extensions/addon_info.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/addons/extensions/addon_info.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
 
 Future<void> openAddonSettingsFlow(
   BuildContext context,
@@ -131,13 +131,13 @@ class _AddonSettingsPlatformView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
-      viewType: 'eu.weblibre/addon_settings',
+      viewType: 'app.mellow.browser/addon_settings',
       surfaceFactory: (context, controller) =>
           PointerInputSurface(controller: controller),
       onCreatePlatformView: (params) {
         final controller = PlatformViewsService.initExpensiveAndroidView(
           id: params.id,
-          viewType: 'eu.weblibre/addon_settings',
+          viewType: 'app.mellow.browser/addon_settings',
           layoutDirection: TextDirection.ltr,
           creationParams: <String, Object?>{'optionsPageUrl': optionsPageUrl},
           creationParamsCodec: const StandardMessageCodec(),

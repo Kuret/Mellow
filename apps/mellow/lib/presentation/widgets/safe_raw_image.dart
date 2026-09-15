@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/widgets.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
 
 /// A safe wrapper around [RawImage] that guards against disposed images.
 ///

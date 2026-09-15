@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.gecko
+package app.mellow.browser
 
 import android.app.ActivityManager
 import android.app.Application
@@ -25,11 +25,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Process
-import eu.weblibre.flutter_mozilla_components.ActiveProfile
-import eu.weblibre.flutter_mozilla_components.MegazordSetup
-import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.ActiveProfile
+import app.mellow.browser.flutter_mozilla_components.MegazordSetup
+import app.mellow.browser.flutter_mozilla_components.services.StalePrivateNotification
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
 
 class MyApplication : Application() {
 

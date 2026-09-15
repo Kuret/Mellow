@@ -19,10 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/search/domain/providers/search_provider.dart';
-import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/search/domain/providers/search_provider.dart';
+import 'package:mellow/features/search/presentation/widgets/search_provider_icon.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
   const DefaultSearchSelector({super.key});
@@ -53,9 +53,7 @@ class DefaultSearchSelector extends HookConsumerWidget {
               .read(saveGeneralSettingsControllerProvider.notifier)
               .save(
                 (currentSettings) =>
-                    currentSettings.copyWith.defaultSearchProvider(
-                      provider.id,
-                    ),
+                    currentSettings.copyWith.defaultSearchProvider(provider.id),
               );
         }
       },

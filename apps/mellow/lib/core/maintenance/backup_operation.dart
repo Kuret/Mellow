@@ -18,10 +18,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
 
 /// Not enough room to stage the copy and the archive.
 ///
@@ -93,7 +93,7 @@ Future<BackupResult> backupProfile({
   await lease.assertHeld('backup.start');
 
   final staging = Directory(p.join(workDir.path, 'source'));
-  final archive = File(p.join(workDir.path, 'archive.weblibre'));
+  final archive = File(p.join(workDir.path, 'archive.mellow'));
 
   try {
     await _preflight(profileDir, options, availableBytes);

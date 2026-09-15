@@ -7,14 +7,14 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/domain/services/favicon_resolver.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/icon_cache_marker.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/features/user/domain/repositories/cache.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/domain/services/favicon_resolver.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/icon_cache_marker.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -24,17 +24,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
-import 'package:weblibre/features/geckoview/features/web_inspector/domain/providers/web_inspector.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:mellow/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
+import 'package:mellow/features/geckoview/features/web_inspector/domain/providers/web_inspector.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
 
 /// Actions on the page in front of the user.
 ///

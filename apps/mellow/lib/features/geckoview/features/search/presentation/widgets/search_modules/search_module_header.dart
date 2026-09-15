@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
 
 /// A reusable header widget for search modules that displays a collapse/expand
 /// chevron on the left, the section title, and a "Show all N" / "Show less"

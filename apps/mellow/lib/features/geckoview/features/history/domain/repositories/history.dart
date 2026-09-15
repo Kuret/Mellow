@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 
 part 'history.g.dart';
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import org.json.JSONObject
 import java.security.MessageDigest
@@ -105,7 +105,7 @@ fun restartAuthorizationTokenHash(token: String): String =
         .joinToString("") { "%02x".format(it) }
 
 /**
- * Single reader/writer for `weblibre_restart/authorization.json`.
+ * Single reader/writer for `mellow_restart/authorization.json`.
  *
  * At most one authorization exists at a time, and the newest wins: a user who
  * answered the mismatch dialog twice meant the second answer. The first request's

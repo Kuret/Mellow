@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 part 'save_settings.g.dart';
 

@@ -27,35 +27,35 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/providers/bookmark_list_ui_state.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/import_progress_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/select_bookmark_folder_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmark_list_ui_state.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_progress_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/select_bookmark_folder_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 /// How many hits an in-list search asks storage for.
 ///
@@ -894,11 +894,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     }
 
     final currentTab = ref.read(selectedTabStateProvider);
-    final tabMode =
-        currentTab?.tabMode ??
-        TabMode.fromTabType(
-          TabType.regular,
-        );
+    final tabMode = currentTab?.tabMode ?? TabMode.fromTabType(TabType.regular);
 
     for (final entry in entries) {
       await ref
@@ -1029,7 +1025,9 @@ class BookmarkListScreen extends HookConsumerWidget {
         container = await containerRepo.getContainerData(siteAssignedId);
       }
     }
-    container ??= await ref.read(selectedContainerProvider.notifier).fetchData();
+    container ??= await ref
+        .read(selectedContainerProvider.notifier)
+        .fetchData();
 
     await GeckoBrowserService().openInCustomTab(
       url: url,
@@ -1045,11 +1043,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     required bool selectTab,
   }) async {
     final currentTab = ref.read(selectedTabStateProvider);
-    final tabMode =
-        currentTab?.tabMode ??
-        TabMode.fromTabType(
-          TabType.regular,
-        );
+    final tabMode = currentTab?.tabMode ?? TabMode.fromTabType(TabType.regular);
 
     final tabId = await ref
         .read(tabRepositoryProvider.notifier)

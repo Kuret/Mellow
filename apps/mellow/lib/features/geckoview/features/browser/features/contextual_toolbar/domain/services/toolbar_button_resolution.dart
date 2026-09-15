@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
 
 class ContextualToolbarButtonResolution {
   const ContextualToolbarButtonResolution({

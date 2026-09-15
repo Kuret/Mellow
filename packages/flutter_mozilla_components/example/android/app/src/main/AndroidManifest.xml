@@ -41,7 +41,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
-        <activity android:name="eu.weblibre.flutter_mozilla_components.activities.NotificationActivity" android:theme="@style/Theme.AppCompat.Translucent" />
+        <activity android:name="app.mellow.browser.flutter_mozilla_components.activities.NotificationActivity" android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -67,15 +67,15 @@
         </activity>
 
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:theme="@style/Theme.AppCompat.Light"/>
 
         <service
-            android:name="eu.weblibre.flutter_mozilla_components.services.DownloadService"
+            android:name="app.mellow.browser.flutter_mozilla_components.services.DownloadService"
             android:foregroundServiceType="dataSync" />
 
-        <service android:name="eu.weblibre.flutter_mozilla_components.services.MediaSessionService"
+        <service android:name="app.mellow.browser.flutter_mozilla_components.services.MediaSessionService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
 

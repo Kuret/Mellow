@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import eu.weblibre.simple_intent_receiver.pigeons.IntentEvents
+import app.mellow.browser.simple_intent_receiver.pigeons.IntentEvents
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
@@ -38,7 +38,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
-import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import app.mellow.browser.simple_intent_receiver.pigeons.Intent as PigeonIntent
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])

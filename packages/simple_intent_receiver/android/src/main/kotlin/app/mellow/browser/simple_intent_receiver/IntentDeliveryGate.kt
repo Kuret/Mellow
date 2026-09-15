@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
-import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import app.mellow.browser.simple_intent_receiver.pigeons.Intent as PigeonIntent
 
 /** How many undelivered launches are worth keeping. */
 const val MAX_PENDING_INTENTS = 16
@@ -37,7 +37,7 @@ const val MAX_PENDING_INTENTS = 16
  * the ordering, readiness and bound can be tested without an Android runtime.
  * [pending] may outlive a gate to carry the backlog across engine replacement;
  * readiness always belongs to this gate's isolate. A shared queue requires a
- * single engine consumer and platform-thread access, as in WebLibre's coordinator.
+ * single engine consumer and platform-thread access, as in Mellow's coordinator.
  */
 class IntentDeliveryGate(
     private val maxPending: Int = MAX_PENDING_INTENTS,

@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/secure_storage/legacy_proxy_secrets.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
-import 'package:weblibre/core/secure_storage/legacy_proxy_secrets.dart';
 
 void main() {
   late Directory profileDir;
 
   setUp(() async {
-    profileDir = await Directory.systemTemp.createTemp('weblibre_proxy_own');
+    profileDir = await Directory.systemTemp.createTemp('mellow_proxy_own');
   });
 
   tearDown(() async {

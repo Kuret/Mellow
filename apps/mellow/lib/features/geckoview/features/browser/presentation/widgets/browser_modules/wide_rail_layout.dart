@@ -19,10 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
+import 'package:mellow/features/geckoview/features/search/domain/entities/search_text.dart';
 
 /// The wide vertical rail (PLAN §9 W1), laid out like Zen's sidebar: the
 /// toolbar buttons in a row at the top, the address field in one upright row

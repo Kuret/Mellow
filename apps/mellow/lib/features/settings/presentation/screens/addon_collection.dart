@@ -22,11 +22,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/form_validators.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/form_validators.dart';
 
 const _defaultServerUrl = 'https://services.addons.mozilla.org';
 

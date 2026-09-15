@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_split_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_split_data.dart';
 
 import 'tab_db_test_helpers.dart';
 

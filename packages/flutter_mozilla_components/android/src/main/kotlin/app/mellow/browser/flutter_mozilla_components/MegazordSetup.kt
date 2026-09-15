@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

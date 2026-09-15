@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.app.Activity
 import android.content.Intent
@@ -25,7 +25,7 @@ import mozilla.components.support.utils.ext.packageManagerCompatHelper
  * `addReferrerInformation`.
  *
  * The app-links authentication carve-out
- * ([eu.weblibre.flutter_mozilla_components.applinks.WebLibreAppLinksInterceptor]) is the consumer:
+ * ([app.mellow.browser.flutter_mozilla_components.applinks.MellowAppLinksInterceptor]) is the consumer:
  * it lets a sign-in callback return to the app that opened the tab.
  */
 fun Activity.addExternalCallerInformation(intent: Intent) {

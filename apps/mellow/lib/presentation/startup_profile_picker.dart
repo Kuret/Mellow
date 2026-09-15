@@ -15,10 +15,10 @@
  * GNU Affero General Public License for more details.
  */
 import 'package:flutter/material.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/startup/profile_discovery.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/startup/profile_discovery.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 
 /// Asks which profile to start, while the selection lease is held.
 ///

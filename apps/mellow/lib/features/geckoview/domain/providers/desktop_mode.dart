@@ -19,12 +19,12 @@
  */
 import 'dart:async';
 
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/utils/host_rules.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/host_rules.dart';
 
 part 'desktop_mode.g.dart';
 

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/core/sort_field.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/core/sort_field.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 
 enum BookmarkSortType {
   manual('Default', null),

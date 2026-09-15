@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:mellow/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 
 part 'bottom_sheet.g.dart';
 

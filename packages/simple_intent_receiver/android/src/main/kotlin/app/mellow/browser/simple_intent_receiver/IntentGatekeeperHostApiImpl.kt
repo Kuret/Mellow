@@ -4,24 +4,24 @@
  * This file is part of WebLibre
  * (see https://weblibre.eu).
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
+import app.mellow.browser.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
 /**
  * Persists the Flutter-side gatekeeper policy to a shared-prefs file that
- * [eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity]
+ * [app.mellow.browser.flutter_mozilla_components.activities.IntentReceiverActivity]
  * reads on each incoming intent.
  *
  * The prefs file name MUST match
- * [eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences.PREFS_NAME].
+ * [app.mellow.browser.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences.PREFS_NAME].
  */
 class IntentGatekeeperHostApiImpl(private val context: Context) : IntentGatekeeperHostApi {
     companion object {
-        private const val PREFS_NAME = "weblibre_intent_gatekeeper"
+        private const val PREFS_NAME = "mellow_intent_gatekeeper"
         private const val KEY_ENABLED = "enabled"
         private const val KEY_CUSTOM_TABS_ENABLED = "custom_tabs_enabled"
         private const val KEY_BLOCKED_PACKAGES = "blocked_packages"

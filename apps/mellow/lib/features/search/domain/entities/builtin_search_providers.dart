@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/features/search/domain/entities/custom_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
 
 /// Every engine the browser can search with, in the order pickers show them.
 const builtinSearchProviders = <SearchProvider>[

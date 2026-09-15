@@ -4,36 +4,36 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
-import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
-import eu.weblibre.flutter_mozilla_components.services.DownloadService
-import eu.weblibre.flutter_mozilla_components.EngineProvider
-import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.history.FallbackHistoryDelegate
-import eu.weblibre.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware
-import eu.weblibre.flutter_mozilla_components.PermissionStorage
-import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
-import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
-import eu.weblibre.flutter_mozilla_components.R
-import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
-import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddleware
-import eu.weblibre.flutter_mozilla_components.middleware.CrashRecoveryMiddleware
-import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
-import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
-import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
-import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.ColorSchemePreference
+import app.mellow.browser.flutter_mozilla_components.Components
+import app.mellow.browser.flutter_mozilla_components.interceptor.AppRequestInterceptor
+import app.mellow.browser.flutter_mozilla_components.services.DownloadService
+import app.mellow.browser.flutter_mozilla_components.EngineProvider
+import app.mellow.browser.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.history.FallbackHistoryDelegate
+import app.mellow.browser.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware
+import app.mellow.browser.flutter_mozilla_components.PermissionStorage
+import app.mellow.browser.flutter_mozilla_components.services.MediaSessionService
+import app.mellow.browser.flutter_mozilla_components.activities.NotificationActivity
+import app.mellow.browser.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStores
+import app.mellow.browser.flutter_mozilla_components.middleware.AppLinkNavigationMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.CrashRecoveryMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.FlutterEventMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataService
+import app.mellow.browser.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.engine.gecko.util.EngineDownloadDelegate
@@ -221,7 +221,7 @@ class Core(
     val store by lazy {
         BrowserStore(
             middleware = listOf(
-                // WebLibre-owned app-link pending-request invalidation + suppression clearing.
+                // Mellow-owned app-link pending-request invalidation + suppression clearing.
                 AppLinkNavigationMiddleware(
                     PendingAppLinkStores.forProfile(
                         components.profileApplicationContext.relativePath,

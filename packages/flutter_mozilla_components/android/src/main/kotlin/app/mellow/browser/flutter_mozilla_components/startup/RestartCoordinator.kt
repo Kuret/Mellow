@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import android.app.ActivityOptions
 import android.app.AlarmManager
@@ -26,7 +26,7 @@ import android.os.Build
 import android.os.Process
 import android.content.Context
 import android.content.Intent
-import eu.weblibre.flutter_mozilla_components.activities.RestartActivity
+import app.mellow.browser.flutter_mozilla_components.activities.RestartActivity
 import mozilla.components.support.base.log.logger.Logger
 import java.security.SecureRandom
 import kotlin.system.exitProcess
@@ -42,7 +42,7 @@ const val RESTART_REQUEST_TTL_MS = 5 * 60 * 1000L
  * belongs to the *new* browser. Without the pid a late backstop would wait on the
  * process it was supposed to bring into existence, then kill it.
  */
-const val EXTRA_RESTART_TARGET_PID = "eu.weblibre.extra.RESTART_TARGET_PID"
+const val EXTRA_RESTART_TARGET_PID = "app.mellow.browser.extra.RESTART_TARGET_PID"
 
 /**
  * The flags the relaunch alarm's `PendingIntent` is registered with.

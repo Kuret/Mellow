@@ -20,7 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart'
+import 'package:mellow/features/user/data/models/general_settings.dart'
     show TabBarPosition;
 
 part 'zen_settings.g.dart';
@@ -156,7 +156,7 @@ class CustomSearchEngine with FastEquatable {
 /// bookkeeping, and the Zen tab model's rail and tab-budget options.
 ///
 /// They live here rather than on `GeneralSettings` on purpose. That model is
-/// upstream WebLibre's, one of its hottest files, so every field we added to
+/// upstream Mellow's, one of its hottest files, so every field we added to
 /// it turned into a merge conflict on the next upstream settings change. This
 /// model is ours alone; it is stored in the same `setting` table under the
 /// `zen` partition key.

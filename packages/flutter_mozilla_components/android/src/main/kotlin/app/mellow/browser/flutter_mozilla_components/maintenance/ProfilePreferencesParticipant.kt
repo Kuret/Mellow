@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.maintenance
+package app.mellow.browser.flutter_mozilla_components.maintenance
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.ActiveProfile
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.startup.AtomicJsonFile
+import app.mellow.browser.flutter_mozilla_components.ActiveProfile
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.startup.AtomicJsonFile
 import mozilla.components.support.base.log.logger.Logger
 import java.io.File
 

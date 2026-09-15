@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:mellow/presentation/widgets/pointer_scrollable_sheet.dart';
 
 /// The 800x600 test surface, so sizes and pixel offsets can be read off each
 /// other: a sheet at extent 0.5 is 300px tall and starts halfway down.

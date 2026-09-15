@@ -19,9 +19,9 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
-import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
+import 'package:mellow/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/custom_search_providers.dart';
+import 'package:mellow/features/search/domain/services/search_provider_migration.dart';
 
 void main() {
   group('searchProviderIdFromStoredValue', () {

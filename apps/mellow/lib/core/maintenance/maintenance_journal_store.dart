@@ -14,9 +14,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  */
-import 'package:weblibre/core/startup/atomic_json_file.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
+import 'package:mellow/core/startup/atomic_json_file.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 
 /// Durable write-ahead record of a destructive maintenance operation.
 ///

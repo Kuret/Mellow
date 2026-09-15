@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
 part 'local_index_pruner.g.dart';
 

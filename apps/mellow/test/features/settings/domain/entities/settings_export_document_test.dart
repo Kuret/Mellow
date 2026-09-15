@@ -21,9 +21,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/domain/utils/user_js_serializer.dart';
-import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:mellow/domain/utils/user_js_serializer.dart';
+import 'package:mellow/features/settings/domain/entities/settings_export_document.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
 
 void main() {
   group('encodeSettingsExport', () {
@@ -211,18 +211,14 @@ void main() {
     });
 
     test('does not claim a redaction for a credential that was never set', () {
-      final result = scrubGeneralSettings({
-        'someToken': '',
-      }, ownedKeys: owned);
+      final result = scrubGeneralSettings({'someToken': ''}, ownedKeys: owned);
 
       expect(result.keys, isEmpty);
     });
 
     test('empties a credential that was never set anyway', () {
       // An honest empty string still clears whatever the importing device had.
-      final result = scrubGeneralSettings({
-        'someToken': '',
-      }, ownedKeys: owned);
+      final result = scrubGeneralSettings({'someToken': ''}, ownedKeys: owned);
 
       expect(result.values['someToken'], isNull);
     });
@@ -892,7 +888,7 @@ void main() {
   });
 }
 
-/// The two comment lines every WebLibre prefs snapshot opens with, and the only
+/// The two comment lines every Mellow prefs snapshot opens with, and the only
 /// thing separating one from a file that is not a snapshot at all.
 const _snapshotHeader =
     '// WebLibre Gecko prefs snapshot\n'

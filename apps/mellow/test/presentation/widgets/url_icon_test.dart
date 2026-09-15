@@ -8,12 +8,12 @@ import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/domain/services/favicon_resolver.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/domain/services/favicon_resolver.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

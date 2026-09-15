@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/core/routing/tab_type.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/core/routing/tab_type.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 void main() {
   group('TabMode value semantics', () {

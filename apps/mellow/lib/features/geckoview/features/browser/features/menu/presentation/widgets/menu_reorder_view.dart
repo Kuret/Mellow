@@ -19,8 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
 
 /// Replaces the menu's scrolling content while the user is arranging it.
 ///

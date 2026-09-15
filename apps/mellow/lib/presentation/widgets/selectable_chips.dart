@@ -20,8 +20,8 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mellow/presentation/widgets/reorderable_hold_drag.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
 class _BadgeWrapper extends StatelessWidget {
   final Widget child;

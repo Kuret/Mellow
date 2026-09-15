@@ -19,12 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget displaying Enhanced Tracking Protection toggle
 class TrackingProtectionSection extends HookConsumerWidget {

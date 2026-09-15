@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -7,7 +7,7 @@ import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
-import eu.weblibre.flutter_mozilla_components.startup.ProfileUuid
+import app.mellow.browser.flutter_mozilla_components.startup.ProfileUuid
 import java.io.File
 
 class ProfileContext(private val base: Context, val relativePath: String) :

@@ -32,11 +32,11 @@
 /// widget that actually shows it.
 library;
 
+import 'package:mellow/domain/entities/equatable_image.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/find_result.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/history.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 
 part 'tab_detail_state.g.dart';
 

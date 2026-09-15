@@ -20,7 +20,7 @@
 
 import 'dart:io';
 
-import 'package:weblibre/utils/uri_policy.dart';
+import 'package:mellow/utils/uri_policy.dart';
 
 const maxUriInputLength = 4096;
 

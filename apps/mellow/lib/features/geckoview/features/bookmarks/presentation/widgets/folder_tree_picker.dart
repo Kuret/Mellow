@@ -22,10 +22,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
 
 /// Indentation applied per level of folder nesting.
 const _indentPerDepth = 20.0;

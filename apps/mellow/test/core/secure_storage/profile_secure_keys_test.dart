@@ -15,7 +15,7 @@
  * GNU Affero General Public License for more details.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/core/secure_storage/profile_secure_keys.dart';
+import 'package:mellow/core/secure_storage/profile_secure_keys.dart';
 
 const _a = '0199a0b1-1111-7111-8111-111111111111';
 const _b = '0199a0b1-2222-7222-8222-222222222222';

@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components.sync
+package app.mellow.browser.flutter_mozilla_components.sync
 
 import android.content.Context
 import androidx.core.content.edit

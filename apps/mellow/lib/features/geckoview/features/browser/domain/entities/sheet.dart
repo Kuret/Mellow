@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
 
 sealed class Sheet with FastEquatable {}
 

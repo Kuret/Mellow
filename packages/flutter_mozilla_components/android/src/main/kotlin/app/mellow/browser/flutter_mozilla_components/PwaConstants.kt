@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 object PwaConstants {
-    const val PROFILES_DIR_NAME = "weblibre_profiles"
+    const val PROFILES_DIR_NAME = "mellow_profiles"
     const val PROFILE_DIR_PREFIX = "profile-"
 
     // Intent extras keys for PWA metadata
@@ -27,7 +27,7 @@ object PwaConstants {
     const val SHORTCUT_CONTAINER_MODE_UNASSIGNED = "unassigned"
 
     // Profile and file paths
-    const val CURRENT_PROFILE_FILE = "weblibre_profiles/current_profile"
+    const val CURRENT_PROFILE_FILE = "mellow_profiles/current_profile"
     const val PROFILE_MAPPING_PREFS = "pwa_profile_mapping"
     const val PROFILE_MAPPING_TOKEN_PREFIX = "token_"
 

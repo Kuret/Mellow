@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:home_widget/home_widget.dart';
+import 'package:mellow/data/models/received_intent_parameter.dart';
+import 'package:mellow/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
-import 'package:weblibre/data/models/received_intent_parameter.dart';
-import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 
 part 'home_widget.g.dart';
 

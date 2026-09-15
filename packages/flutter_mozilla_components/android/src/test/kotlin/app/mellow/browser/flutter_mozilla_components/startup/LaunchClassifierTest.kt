@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

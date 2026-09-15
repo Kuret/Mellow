@@ -24,10 +24,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
-import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
+import 'package:mellow/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:mellow/presentation/widgets/sheet_drag_handle.dart';
 
-const _viewType = 'eu.weblibre/addon_popup';
+const _viewType = 'app.mellow.browser/addon_popup';
 
 Future<void> showAddonPopupBottomSheet(
   BuildContext context, {

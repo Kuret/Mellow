@@ -421,7 +421,7 @@ class IntentGatekeeperHostApi {
   }
 
   /// Returns the list of packages for which the user tapped "Always allow"
-  /// via a blocked-intent notification while WebLibre was not running.
+  /// via a blocked-intent notification while Mellow was not running.
   /// Callers must acknowledge persisted packages via
   /// [ackPendingAlwaysAllows] after Flutter settings were updated
   /// successfully.

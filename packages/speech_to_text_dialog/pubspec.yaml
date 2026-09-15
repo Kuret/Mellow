@@ -22,5 +22,5 @@ flutter:
   plugin:
     platforms:
       android:
-        package: eu.weblibre.speech_to_text_dialog
+        package: app.mellow.browser.speech_to_text_dialog
         pluginClass: SpeechToTextDialogPlugin

@@ -18,11 +18,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 
 /// Hosts the screen under a GoRouter with a page beneath it, so the screen's
 /// `context.pop` has somewhere to go.

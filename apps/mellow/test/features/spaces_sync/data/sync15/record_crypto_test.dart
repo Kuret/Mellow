@@ -21,8 +21,8 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart' as pkg_crypto;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/spaces_sync/data/sync15/key_bundle.dart';
-import 'package:weblibre/features/spaces_sync/data/sync15/record_crypto.dart';
+import 'package:mellow/features/spaces_sync/data/sync15/key_bundle.dart';
+import 'package:mellow/features/spaces_sync/data/sync15/record_crypto.dart';
 
 void main() {
   final keys = KeyBundle(

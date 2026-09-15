@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/core/logger.dart';
+import 'package:mellow/core/logger.dart';
 
 class DatabaseRegistry {
   DatabaseRegistry._();

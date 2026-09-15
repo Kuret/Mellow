@@ -26,12 +26,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/settings/domain/providers/log_filter.dart';
+import 'package:mellow/features/settings/presentation/dialogs/log_details_dialog.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
-import 'package:weblibre/features/settings/presentation/dialogs/log_details_dialog.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
   return switch (level) {

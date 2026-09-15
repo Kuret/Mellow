@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 /// A compact space selector: the chip shows the selected space's icon and
 /// name, and tapping opens a menu of every space.

@@ -25,18 +25,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/utils/image_helper.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 Future<void> showShareBottomSheet(
   BuildContext context, {
@@ -58,7 +58,6 @@ class ShareBottomSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final tabUrl = ref.watch(
       tabStateProvider(selectedTabId).select((v) => v?.url),
     );

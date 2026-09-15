@@ -1,4 +1,4 @@
-group = "eu.weblibre.speech_to_text_dialog"
+group = "app.mellow.browser.speech_to_text_dialog"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -22,7 +22,7 @@ allprojects {
 apply plugin: "com.android.library"
 
 android {
-    namespace = "eu.weblibre.speech_to_text_dialog"
+    namespace = "app.mellow.browser.speech_to_text_dialog"
 
     compileSdk = 37
 

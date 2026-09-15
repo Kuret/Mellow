@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
 
 /**
  * Implementation of GeckoWebInspectorApi, forwarding to the web inspector
- * extension through [eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature].
+ * extension through [app.mellow.browser.flutter_mozilla_components.feature.WebInspectorFeature].
  */
 class GeckoWebInspectorApiImpl : GeckoWebInspectorApi {
     private val components by lazy {

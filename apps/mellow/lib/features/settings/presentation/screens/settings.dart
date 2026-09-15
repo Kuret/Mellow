@@ -22,19 +22,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
-import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/appearance_layout_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/links_sites_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/settings_layout.dart';
-import 'package:weblibre/features/settings/presentation/screens/tabs_spaces_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/sync/presentation/screens/sync_settings.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/settings/domain/providers/pending_settings_highlight.dart';
+import 'package:mellow/features/settings/presentation/screens/advanced_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/appearance_layout_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/extensions_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/links_sites_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/privacy_security_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/search_settings.dart';
+import 'package:mellow/features/settings/presentation/screens/settings_layout.dart';
+import 'package:mellow/features/settings/presentation/screens/tabs_spaces_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/appearance_layout_content.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/sync/presentation/screens/sync_settings.dart';
 
 /// Activates [category] — either by pushing its route (narrow layout) or by
 /// selecting it into the two-pane layout's right-hand pane (wide layout).

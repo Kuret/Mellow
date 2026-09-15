@@ -19,8 +19,8 @@
  */
 import 'dart:io';
 
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// Global, profile-independent locations that have to be readable before any
 /// profile database is opened.
@@ -40,7 +40,7 @@ class StartupPaths {
 
   /// Maintenance workspace. Deliberately outside the `profile-` namespace so
   /// profile enumeration can never mistake an artifact for a profile.
-  static const maintenanceDirName = 'weblibre_maintenance';
+  static const maintenanceDirName = 'mellow_maintenance';
   static const maintenanceIncomingDirName = 'incoming';
   static const maintenanceOutgoingDirName = 'outgoing';
   static const maintenanceRestoreDirName = 'restore';
@@ -53,17 +53,17 @@ class StartupPaths {
   /// exactly as deleting it would — without throwing the user's profile away.
   static const maintenanceOrphanedDirName = 'orphaned';
 
-  static const restartDirName = 'weblibre_restart';
+  static const restartDirName = 'mellow_restart';
   static const restartRequestFileName = 'request.json';
   static const restartAuthorizationFileName = 'authorization.json';
 
   /// Account handoff ledger. Global because a callback can arrive before any
   /// profile is committed, and the record is what says which profile started
   /// the sign-in.
-  static const accountDirName = 'weblibre_account';
+  static const accountDirName = 'mellow_account';
   static const accountHandoffFileName = 'handoff.json';
 
-  static const startupIntentsDirName = 'weblibre_startup_intents';
+  static const startupIntentsDirName = 'mellow_startup_intents';
   static const startupIntentQueueFileName = 'queue.json';
   static const startupIntentPayloadsDirName = 'payloads';
 

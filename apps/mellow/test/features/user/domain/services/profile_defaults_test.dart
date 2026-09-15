@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
-import 'package:weblibre/features/user/domain/services/profile_defaults.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:mellow/features/user/data/models/ublock_filter_list_settings.dart';
+import 'package:mellow/features/user/domain/services/profile_defaults.dart';
 
 PreferenceSetting _setting(Object value, {bool requireUserOptIn = false}) {
   return PreferenceSetting(
@@ -96,7 +96,9 @@ void main() {
         ),
         'Attack Surface Reduction': PreferenceSettingGroup(
           description: null,
-          settings: {'javascript.options.main_process_disable_jit': _setting(true)},
+          settings: {
+            'javascript.options.main_process_disable_jit': _setting(true),
+          },
         ),
         'Telemetry': PreferenceSettingGroup(
           description: null,

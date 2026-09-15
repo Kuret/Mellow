@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.view.View
 import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
-import eu.weblibre.flutter_mozilla_components.widget.BackGestureFilterFrameLayout
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.widget.BackGestureFilterFrameLayout
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory

@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -39,13 +39,13 @@ import mozilla.components.service.fxa.sync.SyncReason
 import mozilla.components.service.fxa.sync.SyncStatusObserver
 import mozilla.components.service.fxa.sync.getLastSynced
 import mozilla.components.support.base.log.logger.Logger
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncAccountInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineStatus
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineValue
-import eu.weblibre.flutter_mozilla_components.sync.CachedSyncDevice
-import eu.weblibre.flutter_mozilla_components.sync.SyncStateCache
-import eu.weblibre.flutter_mozilla_components.sync.SyncedTabsIntegration
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncAccountInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncEngineStatus
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncEngineValue
+import app.mellow.browser.flutter_mozilla_components.sync.CachedSyncDevice
+import app.mellow.browser.flutter_mozilla_components.sync.SyncStateCache
+import app.mellow.browser.flutter_mozilla_components.sync.SyncedTabsIntegration
 import mozilla.components.browser.state.store.BrowserStore
 import androidx.lifecycle.ProcessLifecycleOwner
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread

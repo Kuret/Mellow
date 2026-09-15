@@ -1,9 +1,9 @@
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import mozilla.components.concept.sync.AccountObserver
 import mozilla.components.concept.sync.AuthType
 import mozilla.components.concept.sync.OAuthAccount
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 
 class AuthCustomTabActivity : ExternalAppBrowserActivity() {
     private val accountStateObserver = object : AccountObserver {

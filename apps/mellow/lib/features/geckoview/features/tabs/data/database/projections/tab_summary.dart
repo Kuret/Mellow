@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
 /// The `tab` columns a [TabSummary] is built from.
 ///

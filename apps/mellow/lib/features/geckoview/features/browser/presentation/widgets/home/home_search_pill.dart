@@ -21,9 +21,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
-import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/presentation/widgets/qr_scanner_button.dart';
+import 'package:mellow/presentation/widgets/speech_to_text_button.dart';
 
 /// The home surface's entry into search.
 ///

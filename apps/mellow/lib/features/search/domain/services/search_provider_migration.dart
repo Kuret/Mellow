@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/custom_search_providers.dart';
 
 /// Bang triggers that named an engine we still ship, mapped to its provider id.
 ///

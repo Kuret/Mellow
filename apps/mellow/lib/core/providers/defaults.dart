@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:mellow/core/design/app_colors.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/design/app_colors.dart';
 
 part 'defaults.g.dart';
 
@@ -31,4 +31,6 @@ part 'defaults.g.dart';
 Color lightSeedColorFallback(Ref ref) => AppColors.light.seedColor;
 
 @Riverpod(keepAlive: true)
-Uri docsUri(Ref ref) => Uri.parse('https://docs.weblibre.eu/');
+Uri docsUri(Ref ref) => Uri.parse(
+  'https://github.com/Kuret/Mellow/blob/main/docs/CHANGES-FROM-WEBLIBRE.md',
+);

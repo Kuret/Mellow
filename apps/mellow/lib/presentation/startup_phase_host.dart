@@ -22,11 +22,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/startup_bootstrap.dart';
-import 'package:weblibre/presentation/startup_maintenance_screen.dart';
-import 'package:weblibre/presentation/startup_profile_picker.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/startup_bootstrap.dart';
+import 'package:mellow/presentation/startup_maintenance_screen.dart';
+import 'package:mellow/presentation/startup_profile_picker.dart';
 
 /// How often the picker proves it is still asking.
 ///
@@ -375,7 +375,7 @@ class StartupHaltScreen extends StatelessWidget {
 
               // The screen used to state the situation and stop there, including
               // where it said "try again in a moment" with nothing to press and
-              // "close and reopen WebLibre" to a user holding an app that offers
+              // "close and reopen Mellow" to a user holding an app that offers
               // no way to close itself.
               if (_retryable && onRetry != null)
                 FilledButton.icon(
@@ -392,7 +392,7 @@ class StartupHaltScreen extends StatelessWidget {
                 // user.
                 onPressed: busy ? null : () => unawaited(SystemNavigator.pop()),
                 icon: const Icon(Icons.close),
-                label: const Text('Close WebLibre'),
+                label: const Text('Close Mellow'),
               ),
               const SizedBox(height: 24),
               // Folded away rather than dropped. None of it means anything to a

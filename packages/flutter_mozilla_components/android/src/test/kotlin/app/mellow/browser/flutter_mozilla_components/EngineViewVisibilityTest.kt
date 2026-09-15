@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.app.Activity
 import android.view.SurfaceView
@@ -143,6 +143,6 @@ class EngineViewVisibilityTest {
 
     private companion object {
         const val CONTAINER_ID = 4242
-        const val CHANNEL = "eu.weblibre.flutter_mozilla_components/engine_view"
+        const val CHANNEL = "app.mellow.browser.flutter_mozilla_components/engine_view"
     }
 }

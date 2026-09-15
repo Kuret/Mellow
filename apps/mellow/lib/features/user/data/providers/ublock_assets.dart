@@ -20,8 +20,8 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:mellow/features/user/data/models/ublock_asset.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/data/models/ublock_asset.dart';
 
 part 'ublock_assets.g.dart';
 

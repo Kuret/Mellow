@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import java.io.File
 
@@ -40,7 +40,7 @@ object ProfileWorkTags {
     fun forProfile(profileId: String): String = "$PREFIX${profileId.lowercase()}"
 
     /**
-     * The tag for a [ProfileContext.relativePath], e.g. `weblibre_profiles/profile-<uuid>`.
+     * The tag for a [ProfileContext.relativePath], e.g. `mellow_profiles/profile-<uuid>`.
      *
      * Falls back to tagging the path itself when it does not carry a recognisable
      * profile directory name. An unparseable path is a bug, but a *mistagged* job

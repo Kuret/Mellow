@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.pointer
+package app.mellow.browser.flutter_mozilla_components.pointer
 
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerHitTest
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputFlutterApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerHitTest
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerInputFlutterApi
 import io.flutter.plugin.common.BinaryMessenger
 
 /**

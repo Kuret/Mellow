@@ -20,7 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
+import 'package:mellow/features/spaces_sync/data/models/zen_records.dart';
 
 /// One fixture per record kind, each realistic and each round-trip-testable:
 /// re-encoding a decoded record must produce byte-identical canonical JSON

@@ -19,8 +19,8 @@
  */
 import 'package:flutter/services.dart' show SwipeEdge;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 void main() {
   group('resolveWideRailMoveBackGesture', () {
@@ -48,28 +48,31 @@ void main() {
       }
     });
 
-    test('claims a gesture from the edge opposite the rail, moving it there', () {
-      expect(
-        resolveWideRailMoveBackGesture(
-          enabled: true,
-          currentSide: RailSide.left,
-          isWideViewport: true,
-          swipeEdge: SwipeEdge.right,
-          isCurrentRoute: true,
-        ),
-        RailSide.right,
-      );
-      expect(
-        resolveWideRailMoveBackGesture(
-          enabled: true,
-          currentSide: RailSide.right,
-          isWideViewport: true,
-          swipeEdge: SwipeEdge.left,
-          isCurrentRoute: true,
-        ),
-        RailSide.left,
-      );
-    });
+    test(
+      'claims a gesture from the edge opposite the rail, moving it there',
+      () {
+        expect(
+          resolveWideRailMoveBackGesture(
+            enabled: true,
+            currentSide: RailSide.left,
+            isWideViewport: true,
+            swipeEdge: SwipeEdge.right,
+            isCurrentRoute: true,
+          ),
+          RailSide.right,
+        );
+        expect(
+          resolveWideRailMoveBackGesture(
+            enabled: true,
+            currentSide: RailSide.right,
+            isWideViewport: true,
+            swipeEdge: SwipeEdge.left,
+            isCurrentRoute: true,
+          ),
+          RailSide.left,
+        );
+      },
+    );
 
     test("never claims a gesture from the rail's own edge, so that edge "
         'still goes back', () {
@@ -121,21 +124,18 @@ void main() {
       );
     });
 
-    test(
-      'never claims a plain committed back with no predictive events: there '
-      'is no edge to decide the direction from',
-      () {
-        expect(
-          resolveWideRailMoveBackGesture(
-            enabled: true,
-            currentSide: RailSide.left,
-            isWideViewport: true,
-            swipeEdge: null,
-            isCurrentRoute: true,
-          ),
-          isNull,
-        );
-      },
-    );
+    test('never claims a plain committed back with no predictive events: there '
+        'is no edge to decide the direction from', () {
+      expect(
+        resolveWideRailMoveBackGesture(
+          enabled: true,
+          currentSide: RailSide.left,
+          isWideViewport: true,
+          swipeEdge: null,
+          isCurrentRoute: true,
+        ),
+        isNull,
+      );
+    });
   });
 }

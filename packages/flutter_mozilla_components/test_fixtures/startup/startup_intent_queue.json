@@ -31,7 +31,7 @@
       "id": "0199a0b3-0000-7000-8000-000000000001",
       "sequence": 1,
       "classification": "trustedPwa",
-      "action": "eu.weblibre.gecko.PWA_LAUNCH",
+      "action": "app.mellow.browser.PWA_LAUNCH",
       "dataUri": "https://app.example/start",
       "mimeType": null,
       "categories": [],

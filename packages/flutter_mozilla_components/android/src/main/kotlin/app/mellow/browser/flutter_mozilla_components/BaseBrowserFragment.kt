@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.app.Activity
 import android.content.Context
@@ -25,21 +25,21 @@ import androidx.annotation.CallSuper
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
-import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadState
-import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
-import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
-import eu.weblibre.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
-import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
-import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature
-import eu.weblibre.flutter_mozilla_components.services.DownloadService
-import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
-import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
+import app.mellow.browser.flutter_mozilla_components.databinding.FragmentBrowserBinding
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
+import app.mellow.browser.flutter_mozilla_components.ext.toPigeonDownloadState
+import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
+import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
+import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
+import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
+import app.mellow.browser.flutter_mozilla_components.feature.ReadabilityExtractFeature
+import app.mellow.browser.flutter_mozilla_components.feature.WebExtensionToolbarFeature
+import app.mellow.browser.flutter_mozilla_components.feature.WebInspectorFeature
+import app.mellow.browser.flutter_mozilla_components.services.DownloadService
+import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkRuntime
+import app.mellow.browser.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStores
 import io.flutter.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChangedBy

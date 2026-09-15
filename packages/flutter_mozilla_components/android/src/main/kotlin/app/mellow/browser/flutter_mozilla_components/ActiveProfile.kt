@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
 import android.util.AtomicFile
-import eu.weblibre.flutter_mozilla_components.startup.CommittedProfileWriter
-import eu.weblibre.flutter_mozilla_components.startup.ExternalCommitResult
-import eu.weblibre.flutter_mozilla_components.startup.ProfileUuid
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
-import eu.weblibre.flutter_mozilla_components.sync.SyncStateCache
+import app.mellow.browser.flutter_mozilla_components.startup.CommittedProfileWriter
+import app.mellow.browser.flutter_mozilla_components.startup.ExternalCommitResult
+import app.mellow.browser.flutter_mozilla_components.startup.ProfileUuid
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.sync.SyncStateCache
 import java.io.File
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

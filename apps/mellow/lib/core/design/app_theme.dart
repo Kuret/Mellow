@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/core/design/app_colors.dart';
+import 'package:mellow/core/design/app_colors.dart';
 
 /// Curated accent choices offered by the "Accent Color" setting. Each reads
 /// as a legible highlight (selection, switches, focus rings) against both the
@@ -226,7 +226,11 @@ ThemeData buildAppTheme({
     return null;
   });
 
-  final accentWash = _accentWash(colorScheme.primary, colorScheme.surface, 0.16);
+  final accentWash = _accentWash(
+    colorScheme.primary,
+    colorScheme.surface,
+    0.16,
+  );
 
   return ThemeData(
     useMaterial3: true,

@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
 
 class TabViewReorderResult {
   final List<String> movingTabIds;

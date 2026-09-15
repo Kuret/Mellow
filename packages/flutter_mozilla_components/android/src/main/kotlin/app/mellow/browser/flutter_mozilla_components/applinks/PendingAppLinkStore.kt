@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptRequest
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkTarget
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptRequest
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkTarget
 import mozilla.components.support.base.log.logger.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -331,7 +331,7 @@ class PendingAppLinkStore(
      * [AppLinkNavigationMiddleware] covers the engine-delegated navigations that never reach the
      * interceptor (history, reload, `loadData`, desktop-mode toggle), gated on the tab really having
      * somewhere to go for the same reason. Navigations that reach neither (a PWA/TWA scoped load, a
-     * sandbox capture, `weblibre://`, FxA) do not bump at all; the committed-URL anchor stays the
+     * sandbox capture, `mellow://`, FxA) do not bump at all; the committed-URL anchor stays the
      * backstop for those, which is why [claimRelease] checks both.
      */
     fun beginNavigation(tabId: String, reason: String = "?"): Long {

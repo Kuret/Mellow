@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/domain/entities/profile.dart';
+import 'package:mellow/domain/entities/profile.dart';
 
 /// Naming profiles in lists the user picks from.
 ///

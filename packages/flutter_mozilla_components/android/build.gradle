@@ -1,4 +1,4 @@
-group = "eu.weblibre.flutter_mozilla_components"
+group = "app.mellow.browser.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -37,7 +37,7 @@ apply plugin: "com.android.library"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "eu.weblibre.flutter_mozilla_components"
+        namespace = "app.mellow.browser.flutter_mozilla_components"
     }
 
     compileSdk = 37

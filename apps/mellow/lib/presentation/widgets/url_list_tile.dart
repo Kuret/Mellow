@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_icons.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 class UrlListTile extends StatelessWidget {
   final String title;

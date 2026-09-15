@@ -25,17 +25,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/app_state.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
-import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/utils/exit_app.dart';
+import 'package:mellow/core/providers/app_state.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
+import 'package:mellow/features/settings/presentation/widgets/custom_list_tile.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/domain/providers.dart';
+import 'package:mellow/features/user/domain/repositories/cache.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/utils/exit_app.dart';
 
 const List<SettingsSectionDefinition> advancedSettingsSections = [
   SettingsSectionDefinition(

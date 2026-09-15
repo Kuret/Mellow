@@ -19,17 +19,17 @@
  */
 import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/profile_discovery.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/uuid.dart' as ids;
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/profile_discovery.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/uuid.dart' as ids;
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'profile.g.dart';
 

@@ -20,13 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/presentation/controllers/website_title.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
+import 'package:mellow/presentation/widgets/safe_raw_image.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/presentation/controllers/website_title.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class WebsiteTitleTile extends HookConsumerWidget {
   final TabState initialTabState;

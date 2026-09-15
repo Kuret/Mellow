@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionException
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionException
 import mozilla.components.concept.engine.content.blocking.TrackingProtectionException as MozillaTrackingProtectionException
 
 /**

@@ -23,11 +23,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinksMode;
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/features/search/domain/services/search_provider_migration.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:mellow/features/search/domain/services/search_provider_migration.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 part 'general_settings.g.dart';
 
@@ -154,6 +154,7 @@ enum DeleteBrowsingDataType {
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
+
   /// Id of the [SearchProvider] typed queries are sent to.
   ///
   /// Read through [SearchProviderIdConverter], which also translates the
@@ -214,7 +215,6 @@ class GeneralSettings with FastEquatable {
   /// matching host (or any of its subdomains) is switched to desktop mode,
   /// overriding [globalDesktopMode] for that visit. See `hostMatchesRule`.
   final List<String> desktopModeSites;
-
 
   GeneralSettings({
     required this.themeMode,
@@ -338,8 +338,8 @@ class GeneralSettings with FastEquatable {
   /// a poor search entry to hand someone as their only one.
   HomeSearchBarPlacement effectiveHomeSearchBarPlacement() =>
       effectiveTabBarPosition == TabBarPosition.bottom
-          ? HomeSearchBarPlacement.tabBar
-          : HomeSearchBarPlacement.top;
+      ? HomeSearchBarPlacement.tabBar
+      : HomeSearchBarPlacement.top;
 
   /// Where the compact bar sits on a narrow viewport: [tabBarPosition]
   /// reduced to top or bottom. The legacy side values predate the

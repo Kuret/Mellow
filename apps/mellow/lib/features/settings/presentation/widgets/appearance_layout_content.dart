@@ -20,15 +20,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_theme.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:mellow/core/design/app_theme.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
   SettingsSectionDefinition(
@@ -85,14 +85,7 @@ const List<SettingsSectionDefinition> appearanceLayoutSettingsSections = [
         subtitle:
             'A back swipe from the edge opposite the rail moves it there; '
             "a swipe from the rail's own edge still goes back",
-        keywords: [
-          'rail',
-          'move',
-          'swipe',
-          'back gesture',
-          'side',
-          'vertical',
-        ],
+        keywords: ['rail', 'move', 'swipe', 'back gesture', 'side', 'vertical'],
         child: _SwipeToMoveRailTile(),
       ),
     ],

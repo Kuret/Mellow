@@ -4,24 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonDisabledReason
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonIncognito
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonListing
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonListingPreview
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonStoreApp
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonStoreInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonStorePromoted
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdateAttemptInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdateStatus
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.addons.AddonPrefs
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonDisabledReason
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonIncognito
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonListing
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonListingPreview
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonStoreApp
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonStoreInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonStorePromoted
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonUpdateAttemptInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonUpdateStatus
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.WebExtensionActionType
 import org.json.JSONArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

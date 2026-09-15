@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 
 part 'tracking_protection_provider.g.dart';
 

@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/projections/tab_summary.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/container.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/projections/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
 /// Rows of `container` — a Firefox contextual identity mirrored from Zen's
 /// `container` record (PLAN §6.2) — and of `container_local`, the per-container

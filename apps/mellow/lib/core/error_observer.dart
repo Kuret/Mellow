@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/core/logger.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/core/logger.dart';
 
 final class ErrorObserver extends ProviderObserver {
   const ErrorObserver();

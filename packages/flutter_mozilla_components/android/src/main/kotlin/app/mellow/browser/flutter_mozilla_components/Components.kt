@@ -4,24 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
-import eu.weblibre.flutter_mozilla_components.components.Core
-import eu.weblibre.flutter_mozilla_components.components.BackgroundServices
-import eu.weblibre.flutter_mozilla_components.components.Events
-import eu.weblibre.flutter_mozilla_components.components.Features
-import eu.weblibre.flutter_mozilla_components.components.Search
-import eu.weblibre.flutter_mozilla_components.components.Services
-import eu.weblibre.flutter_mozilla_components.components.UseCases
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import app.mellow.browser.flutter_mozilla_components.components.Core
+import app.mellow.browser.flutter_mozilla_components.components.BackgroundServices
+import app.mellow.browser.flutter_mozilla_components.components.Events
+import app.mellow.browser.flutter_mozilla_components.components.Features
+import app.mellow.browser.flutter_mozilla_components.components.Search
+import app.mellow.browser.flutter_mozilla_components.components.Services
+import app.mellow.browser.flutter_mozilla_components.components.UseCases
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonCollection
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.ContentBlocking
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
 import mozilla.components.feature.downloads.DefaultFileSizeFormatter

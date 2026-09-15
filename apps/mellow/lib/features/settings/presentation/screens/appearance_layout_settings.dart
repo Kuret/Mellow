@@ -19,11 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/appearance_layout_content.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/settings/presentation/widgets/toolbar_preview.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 class AppearanceLayoutSettingsScreen extends HookConsumerWidget {
   const AppearanceLayoutSettingsScreen({super.key});

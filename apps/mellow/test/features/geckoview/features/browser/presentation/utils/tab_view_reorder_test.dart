@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/tab_scope_change.dart';
 
 // [TabScopeToSpecific] has no value equality, so a direct `==` comparison
 // against a runtime-constructed instance (as opposed to the same `const`

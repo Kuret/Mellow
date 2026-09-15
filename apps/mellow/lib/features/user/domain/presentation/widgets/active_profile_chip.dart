@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/providers.dart';
 
 /// A colour that is stable for one profile and (very likely) different from
 /// the next: the hue comes from the profile id, the tone from the theme.

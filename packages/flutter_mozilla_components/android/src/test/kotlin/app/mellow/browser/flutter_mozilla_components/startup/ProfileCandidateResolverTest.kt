@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -34,7 +34,7 @@ private const val OLDEST = "0199a0b1-1111-7111-8111-111111111111"
 private const val MIDDLE = "0199a0b1-2222-7222-8222-222222222222"
 private const val NEWEST = "0199a0b1-3333-7333-8333-333333333333"
 
-/** Mirrors `apps/weblibre/test/core/startup/profile_discovery_test.dart`. */
+/** Mirrors `apps/mellow/test/core/startup/profile_discovery_test.dart`. */
 class ProfileCandidateResolverTest {
 
     private lateinit var filesDir: File
@@ -42,7 +42,7 @@ class ProfileCandidateResolverTest {
 
     @BeforeTest
     fun setUp() {
-        filesDir = Files.createTempDirectory("weblibre_profiles").toFile()
+        filesDir = Files.createTempDirectory("mellow_profiles").toFile()
         paths = StartupPaths(filesDir)
         paths.profilesDir.mkdirs()
     }
@@ -221,7 +221,7 @@ class ProfileCandidateResolverTest {
 
     @Test
     fun unrelatedEntriesAreNeitherProfilesNorDamage() {
-        File(paths.profilesDir, "weblibre_maintenance").mkdirs()
+        File(paths.profilesDir, "mellow_maintenance").mkdirs()
         paths.currentProfileFile.writeText(OLDEST)
         writeProfile(OLDEST)
 

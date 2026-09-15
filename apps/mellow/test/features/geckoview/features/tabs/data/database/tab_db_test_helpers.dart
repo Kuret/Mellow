@@ -1,15 +1,15 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/data/database/functions/url_functions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/data/database/functions/url_functions.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
 /// An in-memory `tab.db` with the SQL functions the schema needs
 /// (LexoRank UDFs, url helpers and `generate_content_hash`).

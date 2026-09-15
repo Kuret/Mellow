@@ -21,7 +21,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/utils/ordered_layout.dart';
+import 'package:mellow/utils/ordered_layout.dart';
 
 part 'menu_layout.g.dart';
 
@@ -116,7 +116,6 @@ enum MenuItemType {
   exportAsPdf,
   exportAsPng,
   printPage,
-
 
   // Quick links
   history,
@@ -222,8 +221,7 @@ enum MenuItemType {
   String? get description => switch (this) {
     moreDisclosure => 'Folds everything below it behind a "More" row',
     sendToDevice => 'The devices themselves come from your account',
-    setDefaultBrowser =>
-      'Only shown until Mellow is your default browser',
+    setDefaultBrowser => 'Only shown until Mellow is your default browser',
     _ => null,
   };
 }

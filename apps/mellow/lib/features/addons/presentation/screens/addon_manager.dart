@@ -21,13 +21,13 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/addons/extensions/addon_info.dart';
-import 'package:weblibre/features/addons/presentation/screens/addon_browse.dart';
-import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/addons/extensions/addon_info.dart';
+import 'package:mellow/features/addons/presentation/screens/addon_browse.dart';
+import 'package:mellow/features/addons/presentation/widgets/addon_ui.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 class AddonManagerScreen extends ConsumerWidget {
   const AddonManagerScreen({super.key});

@@ -21,11 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/defaults.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/about/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/core/providers/defaults.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/about/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
   const AboutDialogScreen({super.key});

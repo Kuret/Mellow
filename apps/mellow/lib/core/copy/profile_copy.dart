@@ -28,7 +28,7 @@ const profilePickerContents = 'tabs, history and settings';
 const profileDataDescription =
     'tabs, history, bookmarks, settings and saved site logins';
 
-/// WebLibre account state restored only when replacing a profile.
+/// Mellow account state restored only when replacing a profile.
 ///
 /// Kept separate from [profileDataDescription] because creating a new profile
 /// from a backup leaves these behind, while replacing a profile restores them.
@@ -62,14 +62,14 @@ const restartsThenAsksPassword = '$restartsToWork $asksPasswordAfterRestart';
 /// The only move a user has when startup will not continue.
 const reopenToContinue = 'Close Mellow and open it again.';
 
-/// Replacing a profile installs the archive's WebLibre account state.
+/// Replacing a profile installs the archive's Mellow account state.
 const signedInFromBackup =
     'The restored profile uses the Mozilla account from the backup.';
 
 /// What a backup made before credentials were archived does to the target's own.
 ///
 /// Deliberately stated up front rather than discovered afterwards. Backups taken
-/// by earlier versions of WebLibre carry no credentials at all, and
+/// by earlier versions of Mellow carry no credentials at all, and
 /// `SecureStorageParticipant.apply` leaves the target profile's existing ones
 /// alone rather than deleting an account the archive never held. That is the
 /// right default — the alternative signs the user out of an account they may
@@ -99,7 +99,7 @@ const shortcutsNeedPinningAgain =
 /// Backing up an idle profile still ends the private session of the one in front
 /// of you, and that is the half nobody pictures.
 /// Worded to follow [restartsToWork] rather than to stand alone: every screen
-/// that says this has already said WebLibre restarts, and repeating the subject
+/// that says this has already said Mellow restarts, and repeating the subject
 /// made the pair read as two unrelated warnings.
 const restartClosesCurrentProfile =
     'It also closes the profile you are using now, which is not always the '

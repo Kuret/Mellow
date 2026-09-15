@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
+import 'package:mellow/utils/uri_parser.dart' as uri_parser;
 
 class UriConverter extends TypeConverter<Uri, String> {
   const UriConverter();

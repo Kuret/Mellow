@@ -19,14 +19,14 @@
  */
 import 'package:drift/drift.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/scope_slot.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/spaces_sync/domain/zen_ids.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/scope_slot.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 
 part 'folder.g.dart';
 

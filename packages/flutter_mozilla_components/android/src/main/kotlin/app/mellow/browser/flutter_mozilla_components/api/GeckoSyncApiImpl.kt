@@ -1,15 +1,15 @@
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.components.WebLibreFxAEntryPoint
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncApi
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncAccountInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncDevice
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncDeviceTabs
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncEngineValue
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncIncomingTab
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncRemoteTab
-import eu.weblibre.flutter_mozilla_components.pigeons.SyncCredentials
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.components.MellowFxAEntryPoint
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncAccountInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncDevice
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncDeviceTabs
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncEngineValue
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncIncomingTab
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncRemoteTab
+import app.mellow.browser.flutter_mozilla_components.pigeons.SyncCredentials
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import kotlinx.coroutines.CoroutineScope
@@ -108,7 +108,7 @@ class GeckoSyncApiImpl : GeckoSyncApi {
                 components.backgroundServices.awaitStarted()
                 components.services.accountsAuthFeature.beginAuthentication(
                     context = components.profileApplicationContext,
-                    entrypoint = WebLibreFxAEntryPoint.Settings,
+                    entrypoint = MellowFxAEntryPoint.Settings,
                     scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
                 )
             }.fold(
@@ -128,7 +128,7 @@ class GeckoSyncApiImpl : GeckoSyncApi {
                 components.services.accountsAuthFeature.beginPairingAuthentication(
                     context = components.profileApplicationContext,
                     pairingUrl = pairingUrl,
-                    entrypoint = WebLibreFxAEntryPoint.Settings,
+                    entrypoint = MellowFxAEntryPoint.Settings,
                     scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
                 )
             }.fold(

@@ -20,18 +20,18 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/providers/router.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/search/domain/providers/search_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 
 part 'providers.g.dart';
 
@@ -52,8 +52,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
             final selectedTabType = selectedTabState?.tabMode.toTabType();
 
             final route = SearchRoute(
-              tabType:
-                  selectedTabType ?? TabType.regular,
+              tabType: selectedTabType ?? TabType.regular,
               searchText: text,
             );
 
@@ -73,10 +72,7 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         )[ref.read(selectedTabProvider)];
 
         final tabMode =
-            currentTab?.tabMode ??
-            TabMode.fromTabType(
-              TabType.regular,
-            );
+            currentTab?.tabMode ?? TabMode.fromTabType(TabType.regular);
 
         await ref
             .read(tabRepositoryProvider.notifier)

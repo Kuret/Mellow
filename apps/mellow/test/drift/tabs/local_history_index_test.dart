@@ -1,10 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/data/database/functions/url_functions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/data/database/functions/url_functions.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
 
 void main() {
   late TabDatabase db;

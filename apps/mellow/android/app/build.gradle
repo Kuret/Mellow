@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "eu.weblibre.gecko"
+    namespace = "app.mellow.browser"
     compileSdk = 37
 
     compileOptions {
@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "eu.weblibre.gecko"
+        applicationId = "app.mellow.browser"
         // https://api.flutter.dev/flutter/widgets/AndroidView-class.html
         minSdkVersion = 26
         targetSdk = 37

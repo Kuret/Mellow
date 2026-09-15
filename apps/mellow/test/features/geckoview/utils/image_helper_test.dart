@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
+import 'package:mellow/features/geckoview/utils/image_helper.dart';
 
 void main() {
   testWidgets('tryDecodeImage rasterizes svg bytes at favicon size', (

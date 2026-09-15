@@ -19,12 +19,12 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/maintenance_scanner.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/maintenance_scanner.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// Reading a [MaintenanceScan] the way the maintenance screen has to.
 ///
@@ -90,7 +90,7 @@ extension MaintenanceEvidence on MaintenanceScan {
 ///
 /// The whole workspace goes, not just `staging`. An interrupted unpack leaves
 /// its scratch beside the staging tree rather than in it — the startup screen's
-/// unpacker copies the archive to `incoming.weblibre` there before opening it —
+/// unpacker copies the archive to `incoming.mellow` there before opening it —
 /// and that copy is the size of the backup. Nothing else reclaims it:
 /// `RestoreOperation` clears only `staging` and `old`, and a workspace holding
 /// nothing else does not count as evidence, so this used to skip past it.

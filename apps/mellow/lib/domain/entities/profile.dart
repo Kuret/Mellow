@@ -20,9 +20,9 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mellow/core/uuid.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/uuid.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'profile.g.dart';
 

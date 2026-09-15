@@ -20,8 +20,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/user/data/models/ublock_asset.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
+import 'package:mellow/features/user/data/models/ublock_asset.dart';
+import 'package:mellow/features/user/data/models/ublock_filter_list_settings.dart';
 
 UBlockAssetsRegistry _makeRegistry({
   List<MapEntry<String, UBlockAssetEntry>>? extra,

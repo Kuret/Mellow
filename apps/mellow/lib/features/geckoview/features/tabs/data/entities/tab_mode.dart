@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/core/routing/tab_type.dart';
+import 'package:mellow/core/routing/tab_type.dart';
 
 /// Persisted tab privacy mode.
 ///

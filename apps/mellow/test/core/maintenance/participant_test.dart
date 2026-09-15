@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 
 class _FakeProfileApi implements GeckoProfileApi {
   @override
@@ -101,7 +101,7 @@ void main() {
   setUp(() {
     recorder = _Recorder();
     published = [];
-    root = Directory.systemTemp.createTempSync('weblibre_participant');
+    root = Directory.systemTemp.createTempSync('mellow_participant');
     context = MaintenanceParticipantContext(
       taskId: 'task-1',
       profileId: '0199a0b1-1111-7111-8111-111111111111',

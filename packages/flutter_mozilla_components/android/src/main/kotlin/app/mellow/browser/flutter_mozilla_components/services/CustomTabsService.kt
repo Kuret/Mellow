@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.services
+package app.mellow.browser.flutter_mozilla_components.services
 
 import android.net.Uri
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsSessionToken
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.customtabs.AbstractCustomTabsService
 import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
@@ -18,7 +18,7 @@ import mozilla.components.support.base.log.logger.Logger
 /**
  * Custom Tabs entry point for other apps.
  *
- * Every request arrives on a binder thread from a process WebLibre does not
+ * Every request arrives on a binder thread from a process Mellow does not
  * control, and any of them can be the first thing that touches this process. That
  * makes it one of the paths that can ask for components while the profile is
  * still being selected, or while maintenance owns the process — and there,
@@ -26,7 +26,7 @@ import mozilla.components.support.base.log.logger.Logger
  *
  * Refusal is therefore a returned `false`, never a thrown exception. A throw here
  * crosses the binder as a dead-service error, which the client app reports as
- * WebLibre crashing; `false` is the documented way to say "not now", and clients
+ * Mellow crashing; `false` is the documented way to say "not now", and clients
  * already handle it by opening the URL normally.
  */
 class CustomTabsService : AbstractCustomTabsService() {

@@ -22,14 +22,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   const ContextualToolbarSettingsScreen({

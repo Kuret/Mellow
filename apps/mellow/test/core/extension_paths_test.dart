@@ -18,9 +18,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 const _source = '0199a0b1-1111-7111-8111-111111111111';
 const _clone = '0199a0b1-2222-7222-8222-222222222222';
@@ -30,7 +30,7 @@ void main() {
   late Directory filesDir;
 
   setUp(() async {
-    filesDir = await Directory.systemTemp.createTemp('weblibre_ext_paths');
+    filesDir = await Directory.systemTemp.createTemp('mellow_ext_paths');
   });
 
   tearDown(() async {

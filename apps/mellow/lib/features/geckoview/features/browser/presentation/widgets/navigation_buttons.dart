@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
 
 class NavigateForwardButtonView extends StatelessWidget {
   const NavigateForwardButtonView({

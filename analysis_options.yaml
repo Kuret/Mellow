@@ -1,4 +1,4 @@
-# Root analysis options for the WebLibre monorepo
+# Root analysis options for the Mellow monorepo
 # This file is included by all packages using relative paths
 
 include: package:lint/package.yaml

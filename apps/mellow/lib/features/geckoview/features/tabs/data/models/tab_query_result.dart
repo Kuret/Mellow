@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 class TabQueryResult with FastEquatable {
   final String id;

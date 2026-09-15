@@ -19,15 +19,15 @@
  */
 import 'dart:async';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/data/models/received_intent_parameter.dart';
+import 'package:mellow/features/app_widget/domain/services/home_widget.dart';
+import 'package:mellow/features/share_intent/domain/entities/shared_content.dart';
+import 'package:mellow/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/received_intent_parameter.dart';
-import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
-import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
-import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 
 part 'intent.g.dart';
 

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
 
 sealed class TabContainerSelection {
   const TabContainerSelection();

@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AlertDialog
-import eu.weblibre.flutter_mozilla_components.R
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.support.base.feature.LifecycleAwareFeature
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Process-level registry of the *started* [NativeAppLinkPromptFeature] instances, keyed by tabId.
- * The [WebLibreAppLinksInterceptor] runs on an engine thread and creates prompt requests
+ * The [MellowAppLinksInterceptor] runs on an engine thread and creates prompt requests
  * asynchronously; a Custom Tab feature only queries the store at lifecycle start, so without this a
  * request created after start would sit unshown (its navigation already denied) until a rotation or
  * restart. The interceptor pings [notifyPromptAvailable] so the feature re-queries immediately.
@@ -139,16 +139,16 @@ class NativeAppLinkPromptFeature(
             ?: return
 
         val title = request.appName?.let {
-            context.getString(R.string.weblibre_app_link_prompt_title_named, it)
-        } ?: context.getString(R.string.weblibre_app_link_prompt_title_generic)
+            context.getString(R.string.mellow_app_link_prompt_title_named, it)
+        } ?: context.getString(R.string.mellow_app_link_prompt_title_generic)
 
         dialog = AlertDialog.Builder(context)
             .setTitle(title)
-            .setMessage(context.getString(R.string.weblibre_app_link_prompt_message))
-            .setPositiveButton(R.string.weblibre_app_link_prompt_open) { _, _ ->
+            .setMessage(context.getString(R.string.mellow_app_link_prompt_message))
+            .setPositiveButton(R.string.mellow_app_link_prompt_open) { _, _ ->
                 resolveOpen(request)
             }
-            .setNegativeButton(R.string.weblibre_app_link_prompt_cancel) { _, _ ->
+            .setNegativeButton(R.string.mellow_app_link_prompt_cancel) { _, _ ->
                 resolveCancel(request)
             }
             .setOnCancelListener {

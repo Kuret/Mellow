@@ -21,12 +21,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/data/models/drag_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// A widget that wraps a tab and puts both tabs into a new container when
 /// another tab is dropped onto it.

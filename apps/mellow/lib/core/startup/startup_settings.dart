@@ -14,10 +14,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  */
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
 
 part 'startup_settings.g.dart';
 

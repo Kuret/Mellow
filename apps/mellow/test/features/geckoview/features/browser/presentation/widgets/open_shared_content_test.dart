@@ -23,18 +23,18 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/open_shared_content.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/open_shared_content.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 /// One recorded [TabRepository.addTab] call.
 typedef _AddedTab = ({
@@ -120,9 +120,7 @@ Future<void> _pumpSheet(
         // ignore: scoped_providers_should_specify_dependencies
         containerRepositoryProvider.overrideWith(_NoContainerRepository.new),
         // ignore: scoped_providers_should_specify_dependencies
-        selectedContainerDataProvider.overrideWith(
-          (ref) => Stream.value(null),
-        ),
+        selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
         // ignore: scoped_providers_should_specify_dependencies
         selectedSpaceProvider.overrideWith(_TestSelectedSpace.new),
         // ignore: scoped_providers_should_specify_dependencies

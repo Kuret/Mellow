@@ -18,18 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/search/util/tokenized_filter.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/search/util/tokenized_filter.dart';
 
 part 'providers.g.dart';
 

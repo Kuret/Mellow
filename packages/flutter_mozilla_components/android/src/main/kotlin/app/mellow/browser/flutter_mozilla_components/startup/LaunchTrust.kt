@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import android.content.Context
 import android.content.Intent
@@ -26,8 +26,8 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
 
 /**
  * Decides what a launch *is*, from nothing but the intent and global state.

@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
 import androidx.annotation.VisibleForTesting
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +46,7 @@ object BrowserExtensionFeature {
      * available that Gecko ran the delayed startup it gates on a chrome window
      * existing: a background script cannot run before `extensions-late-startup`
      * fires, and that notification releases *every* extension's background at
-     * once. [EngineWarmupSession][eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession]
+     * once. [EngineWarmupSession][app.mellow.browser.flutter_mozilla_components.startup.EngineWarmupSession]
      * watches it to know its job is done.
      *
      * Latched, unlike everything else here: it answers "did that ever happen",

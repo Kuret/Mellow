@@ -22,13 +22,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_labels.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_switch_handler.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
 
 /// Bottom sheet widget to select a user profile.
 class SelectProfileDialog extends HookConsumerWidget {

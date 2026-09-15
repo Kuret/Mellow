@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
-import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
+import app.mellow.browser.flutter_mozilla_components.feature.ResultConsumer
+import app.mellow.browser.flutter_mozilla_components.feature.BrowserExtensionFeature
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import org.json.JSONArray
 import org.json.JSONObject
 

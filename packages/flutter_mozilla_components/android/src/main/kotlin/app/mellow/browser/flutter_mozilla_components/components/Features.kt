@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
-import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebInspectorFeature
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import app.mellow.browser.flutter_mozilla_components.feature.ReadabilityExtractFeature
+import app.mellow.browser.flutter_mozilla_components.feature.WebExtensionToolbarFeature
+import app.mellow.browser.flutter_mozilla_components.feature.WebInspectorFeature
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 

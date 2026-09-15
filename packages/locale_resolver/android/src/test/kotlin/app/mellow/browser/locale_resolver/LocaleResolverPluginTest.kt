@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.locale_resolver
+package app.mellow.browser.locale_resolver
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

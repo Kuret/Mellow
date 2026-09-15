@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import android.app.Activity
 import android.content.Context

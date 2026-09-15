@@ -1257,9 +1257,9 @@ class AddonCollection {
     dartOut: 'lib/src/pigeons/gecko.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/weblibre/flutter_mozilla_components/pigeons/Gecko.g.kt',
+        'android/src/main/kotlin/app/mellow/browser/flutter_mozilla_components/pigeons/Gecko.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.weblibre.flutter_mozilla_components.pigeons',
+      package: 'app.mellow.browser.flutter_mozilla_components.pigeons',
     ),
     dartPackageName: 'flutter_mozilla_components',
   ),
@@ -1495,7 +1495,7 @@ abstract class GeckoEngineSettingsApi {
   /// made per tab rather than guessed from the visited URL.
   ///
   /// [excludedTabIds] are the tabs whose container has exclude-from-history on.
-  /// [knownTabIds] is every tab WebLibre has a row for: a tab outside this set is
+  /// [knownTabIds] is every tab Mellow has a row for: a tab outside this set is
   /// one Dart hasn't seen yet (e.g. a `window.open` child), for which native
   /// falls back to inheriting the opener's exclusion. [excludedContextIds] are
   /// the Gecko contextual identities of excluded containers, used as a
@@ -2040,16 +2040,16 @@ enum ClearDataType {
 }
 
 /// Native -> Dart history visit notifications. Fired from the tab-scoped history
-/// delegate on each recorded Mozilla Places visit so WebLibre can persist the one
+/// delegate on each recorded Mozilla Places visit so Mellow can persist the one
 /// thing Places can't store: which container the visit belonged to. The visit
 /// itself (title, visit type, exact time) stays owned by Places.
 @FlutterApi()
 abstract class GeckoHistoryEvents {
   /// [tabId] is the session that produced the visit — the engine session's own
   /// history delegate reports it, so it is exact rather than inferred. Dart maps
-  /// the tab to its WebLibre container and writes the visit→container relation,
+  /// the tab to its Mellow container and writes the visit→container relation,
   /// keyed on ([url], [visitTime]) to join back to the Places visit. A tab
-  /// WebLibre has no row for (custom tab, not yet synced) simply stays untagged.
+  /// Mellow has no row for (custom tab, not yet synced) simply stays untagged.
   void onVisitRecorded(String url, int visitTime, String tabId);
 }
 
@@ -2887,7 +2887,7 @@ class AppLinkResolutionResult {
 
 /// API for detecting and launching external applications that can handle URLs.
 ///
-/// WebLibre-owned resolution/launch surface (replaces the Mozilla AC use-case
+/// Mellow-owned resolution/launch surface (replaces the Mozilla AC use-case
 /// wrappers). Policy lives in Dart; this surface owns PackageManager resolution
 /// and Intent launch.
 @HostApi()

@@ -20,11 +20,11 @@
 import 'dart:convert';
 
 import 'package:convert/convert.dart';
-import 'package:weblibre/domain/utils/user_js_parser.dart';
-import 'package:weblibre/domain/utils/user_js_serializer.dart';
-import 'package:weblibre/utils/uri_input_parser.dart';
+import 'package:mellow/domain/utils/user_js_parser.dart';
+import 'package:mellow/domain/utils/user_js_serializer.dart';
+import 'package:mellow/utils/uri_input_parser.dart';
 
-/// Marks a file as a WebLibre settings export.
+/// Marks a file as a Mellow settings export.
 ///
 /// Checked before anything else on import: the alternative is decoding a
 /// stranger's JSON far enough to notice it has no settings in it, and then
@@ -686,7 +686,7 @@ bool _scrubsTo(String local, String imported) {
   return scrubbed.paths.isNotEmpty && scrubbed.value == imported;
 }
 
-/// The first line of every snapshot WebLibre writes, and the thing that makes
+/// The first line of every snapshot Mellow writes, and the thing that makes
 /// one recognisable as such.
 const geckoPrefsSnapshotMarker = '// WebLibre Gecko prefs snapshot';
 
@@ -700,7 +700,7 @@ const geckoPrefsSnapshotMarker = '// WebLibre Gecko prefs snapshot';
 /// preferences, it clears them, and a body of prose imports as "reset
 /// everything". Neither is a thing a person asked for.
 ///
-/// So every line has to be one WebLibre itself would have written: the marker,
+/// So every line has to be one Mellow itself would have written: the marker,
 /// a comment, or a well-formed statement. An empty snapshot still passes —
 /// exported from a profile with nothing set, replacing with it is a legitimate
 /// thing to ask for — but an empty *parse* of a non-empty file does not.

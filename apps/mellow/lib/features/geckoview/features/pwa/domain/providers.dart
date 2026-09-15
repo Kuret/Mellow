@@ -21,14 +21,14 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/filesystem.dart' show filesystem;
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/pwa/domain/pwa_installability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/filesystem.dart' show filesystem;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/pwa/domain/pwa_installability.dart';
 
 part 'providers.g.dart';
 

@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 
 import 'tab_db_test_helpers.dart';
 

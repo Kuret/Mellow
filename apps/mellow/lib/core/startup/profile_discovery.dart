@@ -19,12 +19,12 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// Canonical on-disk name for a profile directory: `profile-` followed by the
 /// lowercase, hyphenated UUID and nothing else.

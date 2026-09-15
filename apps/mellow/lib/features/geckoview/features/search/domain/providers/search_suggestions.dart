@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
+import 'package:mellow/features/search/domain/autosuggest/brave.dart';
+import 'package:mellow/features/search/domain/autosuggest/duckduckgo.dart';
+import 'package:mellow/features/search/domain/autosuggest/empty.dart';
+import 'package:mellow/features/search/domain/autosuggest/kagi.dart';
+import 'package:mellow/features/search/domain/autosuggest/qwant.dart';
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
-import 'package:weblibre/features/search/domain/autosuggest/brave.dart';
-import 'package:weblibre/features/search/domain/autosuggest/duckduckgo.dart';
-import 'package:weblibre/features/search/domain/autosuggest/empty.dart';
-import 'package:weblibre/features/search/domain/autosuggest/kagi.dart';
-import 'package:weblibre/features/search/domain/autosuggest/qwant.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'search_suggestions.g.dart';
 

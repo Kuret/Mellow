@@ -20,8 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/routing/routes.dart';
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/core/routing/routes.dart';
 
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;

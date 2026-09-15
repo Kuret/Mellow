@@ -19,8 +19,8 @@
  */
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 import '../../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 

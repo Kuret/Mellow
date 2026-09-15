@@ -1,29 +1,29 @@
 // dart format width=80
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart' as i0;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart'
     as i1;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart'
     as i2;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart'
     as i3;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart'
     as i4;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart'
     as i5;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_split_data.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_split_data.dart'
     as i6;
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_source.dart'
     as i7;
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart'
     as i8;
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart'
     as i9;
-import 'package:weblibre/data/database/converters/uri.dart' as i10;
+import 'package:mellow/data/database/converters/uri.dart' as i10;
 import 'package:drift/internal/modular.dart' as i11;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/history_query_result.dart'
     as i12;
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_query_result.dart'
     as i13;
 
 typedef $ContainerCreateCompanionBuilder =

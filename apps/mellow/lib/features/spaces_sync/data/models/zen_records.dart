@@ -317,7 +317,7 @@ final class ZenFolderRecord extends ZenRecordData {
 }
 
 /// `split` — record id is the group id (PLAN §4.2). Zen's split view;
-/// WebLibre cannot render it but must round-trip it faithfully.
+/// Mellow cannot render it but must round-trip it faithfully.
 final class ZenSplitRecord extends ZenRecordData {
   ZenSplitRecord({
     required this.splitId,

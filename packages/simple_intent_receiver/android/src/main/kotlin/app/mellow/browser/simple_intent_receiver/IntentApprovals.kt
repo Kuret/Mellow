@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import android.content.Context
 import android.content.Intent
@@ -47,15 +47,15 @@ data class NotificationApproval(
 object IntentApprovals {
     // Stable names that must match the notification replay path and shared-prefs
     // schema in `IntentGatekeeperPreferences`.
-    private const val PREFS_NAME = "weblibre_intent_gatekeeper"
+    private const val PREFS_NAME = "mellow_intent_gatekeeper"
     private const val KEY_NOTIFICATION_APPROVAL_TOKENS = "notification_approval_tokens"
     private const val KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX = "notification_approval_package_"
 
     const val EXTRA_NOTIFICATION_APPROVAL_TOKEN =
-        "eu.weblibre.gatekeeper.notification_approval_token"
+        "app.mellow.browser.gatekeeper.notification_approval_token"
 
     /** Names the package the user asked to allow from now on, for the consumer. */
-    const val EXTRA_ALWAYS_ALLOW_PACKAGE = "eu.weblibre.gatekeeper.always_allow_package"
+    const val EXTRA_ALWAYS_ALLOW_PACKAGE = "app.mellow.browser.gatekeeper.always_allow_package"
 
     /**
      * Redeems the token [intent] carries, if it carries a live one.

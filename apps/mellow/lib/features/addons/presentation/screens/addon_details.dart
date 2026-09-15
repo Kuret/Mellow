@@ -21,15 +21,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/addons/extensions/addon_info.dart';
+import 'package:mellow/features/addons/presentation/screens/addon_internal_settings.dart';
+import 'package:mellow/features/addons/presentation/widgets/addon_ui.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:mellow/utils/number_format.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/addons/extensions/addon_info.dart';
-import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
-import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/utils/number_format.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 class AddonDetailsScreen extends ConsumerWidget {
   final String addonId;

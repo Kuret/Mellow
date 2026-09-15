@@ -20,10 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
 
 class _NoSelectedTab extends SelectedTab {
   @override
@@ -93,9 +93,7 @@ void main() {
               selectedSpaceProvider.overrideWith(_NoSelectedSpace.new),
               selectedTabProvider.overrideWith(_NoSelectedTab.new),
             ],
-            child: const MaterialApp(
-              home: Scaffold(body: SpaceIconRail()),
-            ),
+            child: const MaterialApp(home: Scaffold(body: SpaceIconRail())),
           ),
         );
         await tester.pump();

@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import eu.weblibre.flutter_mozilla_components.widget.ZoomAwareSwipeRefreshLayout
+import app.mellow.browser.flutter_mozilla_components.widget.ZoomAwareSwipeRefreshLayout
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -22,11 +22,11 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'general_settings.g.dart';
 

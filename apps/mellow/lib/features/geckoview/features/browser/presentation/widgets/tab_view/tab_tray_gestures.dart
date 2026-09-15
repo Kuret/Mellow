@@ -26,14 +26,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/widgets/single_finger_horizontal_drag.dart';
 
 /// Which of the two multitouch gestures a pointer sequence turned out to be.
 ///

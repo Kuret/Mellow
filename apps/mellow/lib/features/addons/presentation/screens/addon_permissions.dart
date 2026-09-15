@@ -19,8 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
 
 const _permissionsLearnMoreUrl =
     'https://support.mozilla.org/kb/permission-request-messages-firefox-extensions';

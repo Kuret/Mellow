@@ -20,8 +20,8 @@
 import 'package:flutter/widgets.dart' hide Locale;
 import 'package:intl/locale.dart' as intl;
 import 'package:locale_resolver/locale_resolver.dart';
+import 'package:mellow/extensions/locale.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/extensions/locale.dart';
 
 part 'locale_resolver.g.dart';
 

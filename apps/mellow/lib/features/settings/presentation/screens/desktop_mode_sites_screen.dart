@@ -19,11 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/string_list_settings_screen.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/host_rules.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/string_list_settings_screen.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/utils/host_rules.dart';
 
 /// Manages the list of sites that always load in desktop mode.
 class DesktopModeSitesScreen extends HookConsumerWidget {

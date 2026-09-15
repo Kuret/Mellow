@@ -19,8 +19,8 @@
  */
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 
 void main() {
   group('GeneralSettings deserialization coverage', () {

@@ -20,11 +20,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 /// The type of home screen shortcut the user chose.
 enum ShortcutInstallType { shortcut, app }

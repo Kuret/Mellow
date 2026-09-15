@@ -23,15 +23,15 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:mellow/features/user/domain/providers.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
+import 'package:mellow/presentation/widgets/safe_raw_image.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 /// Origins served by a bundled asset instead of a network-fetched favicon.
-/// Lets first-party properties (e.g. WebLibre's own search) show their
+/// Lets first-party properties (e.g. Mellow's own search) show their
 /// brand mark rather than a generic globe or a remotely fetched icon.
 const _bundledIconByOrigin = {
   'https://weblibre.eu': 'assets/icon/bang_icon.png',

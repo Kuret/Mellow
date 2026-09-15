@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -62,7 +62,7 @@ class StartupArbiterTest {
 
     @BeforeTest
     fun setUp() {
-        filesDir = Files.createTempDirectory("weblibre_arbiter").toFile()
+        filesDir = Files.createTempDirectory("mellow_arbiter").toFile()
         paths = StartupPaths(filesDir)
         paths.profilesDir.mkdirs()
         paths.maintenanceJournalsDir.mkdirs()
@@ -217,7 +217,7 @@ class StartupArbiterTest {
 
         val state = assertIs<StartupState.Committed>(StartupArbiter.currentState())
         assertEquals(PROFILE_A, state.profileId)
-        assertEquals("weblibre_profiles/profile-$PROFILE_A", state.relativePath)
+        assertEquals("mellow_profiles/profile-$PROFILE_A", state.relativePath)
         assertEquals(listOf(PROFILE_A), writer.persisted)
     }
 
@@ -1139,7 +1139,7 @@ class StartupArbiterTest {
         StartupArbiter.currentState()
 
         assertEquals(
-            listOf("$PROFILE_A:$PROFILE_A:weblibre_profiles/profile-$PROFILE_A"),
+            listOf("$PROFILE_A:$PROFILE_A:mellow_profiles/profile-$PROFILE_A"),
             seen,
         )
     }

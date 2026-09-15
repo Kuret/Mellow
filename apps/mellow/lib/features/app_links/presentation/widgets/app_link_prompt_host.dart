@@ -23,10 +23,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
-import 'package:weblibre/features/app_links/presentation/widgets/app_link_open_banner.dart';
-import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/app_links/domain/services/app_links_coordinator.dart';
+import 'package:mellow/features/app_links/presentation/widgets/app_link_open_banner.dart';
+import 'package:mellow/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
 
 /// Presents Flutter-owned app-link prompts (§2.6): renders at most one banner for
 /// the active tab, and drives one modal at a time via [showDialog]. A request is

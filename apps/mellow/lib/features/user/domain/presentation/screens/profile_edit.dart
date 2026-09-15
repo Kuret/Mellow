@@ -24,21 +24,21 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
-import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
-import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/features/user/domain/services/local_authentication.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/settings/presentation/widgets/sections.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
+import 'package:mellow/features/user/domain/entities/restart_cost.dart';
+import 'package:mellow/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_switch_handler.dart';
+import 'package:mellow/features/user/domain/providers/profile_auth.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/features/user/domain/services/local_authentication.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/form_validators.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Scope for the confirmation taken *before* a locked profile exists.
 ///

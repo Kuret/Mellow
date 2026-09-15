@@ -18,14 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 
 part 'bookmarks.g.dart';
 

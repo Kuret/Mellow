@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
 import android.os.Handler
 import android.os.Looper
@@ -12,7 +12,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import java.lang.ref.WeakReference
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.action.AppLifecycleAction
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.store.BrowserStore

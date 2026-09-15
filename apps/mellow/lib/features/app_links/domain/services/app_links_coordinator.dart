@@ -19,11 +19,11 @@
  */
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'app_links_coordinator.g.dart';
 

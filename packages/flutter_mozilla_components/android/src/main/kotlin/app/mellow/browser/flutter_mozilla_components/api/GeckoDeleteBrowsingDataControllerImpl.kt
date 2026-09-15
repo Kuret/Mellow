@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import androidx.core.net.toUri
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.pigeons.ClearDataType
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

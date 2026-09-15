@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -43,7 +43,7 @@ class StartupIntentBrokerTest {
 
     @BeforeTest
     fun setUp() {
-        filesDir = Files.createTempDirectory("weblibre_broker").toFile()
+        filesDir = Files.createTempDirectory("mellow_broker").toFile()
         paths = StartupPaths(filesDir)
         paths.profilesDir.mkdirs()
         paths.maintenanceJournalsDir.mkdirs()

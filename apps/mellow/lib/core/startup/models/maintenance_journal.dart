@@ -20,7 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/core/startup/models/json_read.dart';
+import 'package:mellow/core/startup/models/json_read.dart';
 
 part 'maintenance_journal.g.dart';
 
@@ -137,7 +137,7 @@ class ParticipantRecord with FastEquatable {
 }
 
 /// Durable evidence of a destructive maintenance operation, stored outside the
-/// `profile-` namespace at `weblibre_maintenance/journals/<taskId>.json`.
+/// `profile-` namespace at `mellow_maintenance/journals/<taskId>.json`.
 @CopyWith()
 @JsonSerializable()
 class MaintenanceJournal with FastEquatable {

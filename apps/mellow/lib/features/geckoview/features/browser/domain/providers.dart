@@ -18,31 +18,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:mellow/core/sort_field.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_list.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/search/domain/entities/tab_preview.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/features/search/domain/providers/search_provider.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/sort_field.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/search/domain/providers/search_provider.dart';
 
 part 'providers.g.dart';
 

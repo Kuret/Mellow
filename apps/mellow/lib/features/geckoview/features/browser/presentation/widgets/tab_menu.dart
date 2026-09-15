@@ -25,35 +25,35 @@ import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/move_tab_sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:mellow/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:mellow/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/move_tab_sheet.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/background_tab_open.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 class TabMenu extends HookConsumerWidget {
   final MenuAnchorChildBuilder builder;
@@ -128,8 +128,7 @@ class TabMenu extends HookConsumerWidget {
                   .enabled(value);
             },
           ),
-        if (enableFindInPage || enableDesktopMode)
-          const Divider(),
+        if (enableFindInPage || enableDesktopMode) const Divider(),
         if (enableAddBookmark)
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.bookmarkPlus),

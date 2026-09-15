@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl.Companion
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.AutocompleteResult
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestion
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionType
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl.Companion
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.AutocompleteResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestion
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

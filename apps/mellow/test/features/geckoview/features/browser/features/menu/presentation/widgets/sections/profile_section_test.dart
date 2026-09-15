@@ -20,9 +20,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
-import 'package:weblibre/features/user/domain/providers/default_browser.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
+import 'package:mellow/features/user/domain/providers/default_browser.dart';
 
 /// Opens the menu sheet the way the browser does, so the quit row runs inside a
 /// modal route that is torn down the moment it is tapped.

@@ -20,12 +20,12 @@
 import 'dart:convert';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/addons/utils/addon_html.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/addons/utils/addon_html.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'providers.g.dart';
 

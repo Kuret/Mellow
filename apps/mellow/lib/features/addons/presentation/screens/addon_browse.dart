@@ -24,9 +24,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/addons/presentation/widgets/addon_listing_card.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/addons/presentation/widgets/addon_listing_card.dart';
 
 class AddonBrowseView extends HookConsumerWidget {
   const AddonBrowseView({super.key});

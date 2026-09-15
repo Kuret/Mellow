@@ -20,8 +20,8 @@
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
 
 void main() {
   group('GeneralSettings app-link fields', () {

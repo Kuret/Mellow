@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 
 /**
  * Trampoline that exists only to give the notifications delegate an Activity.

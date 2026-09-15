@@ -20,13 +20,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/features/user/domain/entities/restart_cost.dart';
 
 /// Confirms deleting [profileName], including the restart it needs.
 ///
 /// The restart is not a detail to leave out. Deletion is journaled and runs in a
-/// process that has never opened the profile, so confirming here closes WebLibre
+/// process that has never opened the profile, so confirming here closes Mellow
 /// on the spot — and a browser that vanishes the instant you tap "Delete" reads
 /// as a crash, not as the thing you asked for.
 ///

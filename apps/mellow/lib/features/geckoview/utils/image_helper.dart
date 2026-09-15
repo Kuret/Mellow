@@ -25,9 +25,9 @@ import 'dart:ui';
 
 import 'package:fast_equatable/hash.dart';
 import 'package:flutter_svg/flutter_svg.dart' as svg;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
-import 'package:weblibre/utils/lru_cache.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
+import 'package:mellow/utils/lru_cache.dart';
 
 final _cache = LRUCache<ImageIdentity, EquatableImage>(100);
 const _defaultSvgIconSize = 32;

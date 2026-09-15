@@ -21,14 +21,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/domain/services/app_initialization.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/multi_finger_tap_guard.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/providers/router.dart';
+import 'package:mellow/domain/services/app_initialization.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/sync/domain/entities/sync_repository_state.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
+import 'package:mellow/presentation/widgets/multi_finger_tap_guard.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 class MainApp extends HookConsumerWidget {
   final ThemeData? theme;

@@ -21,25 +21,25 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_list.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 import '../../features/tabs/data/database/tab_db_test_helpers.dart';
 
@@ -146,7 +146,8 @@ class _DefaultTabViewFilterController extends TabViewFilterController {
 /// [SpaceLastTab] without persistence, seeded directly and readable back for
 /// assertions.
 class _FakeSpaceLastTab extends SpaceLastTab {
-  _FakeSpaceLastTab([Map<String, String?> initial = const {}]) : _initial = initial;
+  _FakeSpaceLastTab([Map<String, String?> initial = const {}])
+    : _initial = initial;
 
   final Map<String, String?> _initial;
 
@@ -282,103 +283,91 @@ void main() {
       expect((await summaryOf(h.db, 'a-cold')).engineTabId, 'a-cold');
     });
 
-    test(
-      'a remembered tab that was closed falls back to the most recently '
-      'used tab in the space',
-      () async {
-        final h = _openHarness(
-          liveTabIds: ['a-1', 'a-2'],
-          selectedTabId: 'other',
-          currentSelectedSpace: _spaceA,
-          lastTabEntries: {_spaceA: 'a-gone'},
-        );
-        await _seedSpaces(h.db);
-        await h.db.transaction(() async {
-          await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
-          await h.db.tabDao.touchTab('a-1', timestamp: DateTime(2024));
-          await seedTab(h.db, 'a-2', spaceUuid: _spaceA);
-          await h.db.tabDao.touchTab('a-2', timestamp: DateTime(2025));
-        });
-
-        await h.container
-            .read(tabRepositoryProvider.notifier)
-            .restoreSpaceTab(_spaceA);
-
-        // 'a-gone' was never seeded, so its remembered id does not exist;
-        // the most recently touched tab in the space is selected instead.
-        expect(h.engine.selectedTabIds, ['a-2']);
-      },
-    );
-
-    test(
-      'a remembered tab moved to another space is not restored into the '
-      'wrong one, and falls back within the target space instead',
-      () async {
-        final h = _openHarness(
-          liveTabIds: ['a-1', 'b-1'],
-          selectedTabId: 'other',
-          currentSelectedSpace: _spaceA,
-          // Recorded while 'moved' was still in space A; it has since been
-          // moved to space B (e.g. by the desktop, through Zen sync).
-          lastTabEntries: {_spaceA: 'moved'},
-        );
-        await _seedSpaces(h.db);
+    test('a remembered tab that was closed falls back to the most recently '
+        'used tab in the space', () async {
+      final h = _openHarness(
+        liveTabIds: ['a-1', 'a-2'],
+        selectedTabId: 'other',
+        currentSelectedSpace: _spaceA,
+        lastTabEntries: {_spaceA: 'a-gone'},
+      );
+      await _seedSpaces(h.db);
+      await h.db.transaction(() async {
         await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
-        await seedTab(h.db, 'b-1', spaceUuid: _spaceB);
-        await seedTab(h.db, 'moved', spaceUuid: _spaceB);
-
-        await h.container
-            .read(tabRepositoryProvider.notifier)
-            .restoreSpaceTab(_spaceA);
-
-        expect(h.engine.selectedTabIds, ['a-1']);
-        expect(h.engine.selectedTabIds, isNot(contains('moved')));
-      },
-    );
-
-    test(
-      'a space whose last state was the home surface requests home instead '
-      'of selecting a tab',
-      () async {
-        final h = _openHarness(
-          liveTabIds: ['a-1'],
-          selectedTabId: 'other',
-          currentSelectedSpace: _spaceA,
-          lastTabEntries: {_spaceA: null},
-        );
-        await _seedSpaces(h.db);
-        await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
-
-        await h.container
-            .read(tabRepositoryProvider.notifier)
-            .restoreSpaceTab(_spaceA);
-
-        expect(h.engine.selectedTabIds, isEmpty);
-        expect(h.container.read(forceBrowserHomeProvider), isTrue);
-      },
-    );
-
-    test(
-      'does nothing when the currently selected tab already belongs to the '
-      'space (the forward sync loop is a no-op here)',
-      () async {
-        final h = _openHarness(
-          liveTabIds: ['a-1', 'a-2'],
-          selectedTabId: 'a-1',
-          currentSelectedSpace: _spaceA,
-          lastTabEntries: {_spaceA: 'a-2'},
-        );
-        await _seedSpaces(h.db);
-        await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
+        await h.db.tabDao.touchTab('a-1', timestamp: DateTime(2024));
         await seedTab(h.db, 'a-2', spaceUuid: _spaceA);
+        await h.db.tabDao.touchTab('a-2', timestamp: DateTime(2025));
+      });
 
-        await h.container
-            .read(tabRepositoryProvider.notifier)
-            .restoreSpaceTab(_spaceA);
+      await h.container
+          .read(tabRepositoryProvider.notifier)
+          .restoreSpaceTab(_spaceA);
 
-        expect(h.engine.selectedTabIds, isEmpty);
-      },
-    );
+      // 'a-gone' was never seeded, so its remembered id does not exist;
+      // the most recently touched tab in the space is selected instead.
+      expect(h.engine.selectedTabIds, ['a-2']);
+    });
+
+    test('a remembered tab moved to another space is not restored into the '
+        'wrong one, and falls back within the target space instead', () async {
+      final h = _openHarness(
+        liveTabIds: ['a-1', 'b-1'],
+        selectedTabId: 'other',
+        currentSelectedSpace: _spaceA,
+        // Recorded while 'moved' was still in space A; it has since been
+        // moved to space B (e.g. by the desktop, through Zen sync).
+        lastTabEntries: {_spaceA: 'moved'},
+      );
+      await _seedSpaces(h.db);
+      await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
+      await seedTab(h.db, 'b-1', spaceUuid: _spaceB);
+      await seedTab(h.db, 'moved', spaceUuid: _spaceB);
+
+      await h.container
+          .read(tabRepositoryProvider.notifier)
+          .restoreSpaceTab(_spaceA);
+
+      expect(h.engine.selectedTabIds, ['a-1']);
+      expect(h.engine.selectedTabIds, isNot(contains('moved')));
+    });
+
+    test('a space whose last state was the home surface requests home instead '
+        'of selecting a tab', () async {
+      final h = _openHarness(
+        liveTabIds: ['a-1'],
+        selectedTabId: 'other',
+        currentSelectedSpace: _spaceA,
+        lastTabEntries: {_spaceA: null},
+      );
+      await _seedSpaces(h.db);
+      await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
+
+      await h.container
+          .read(tabRepositoryProvider.notifier)
+          .restoreSpaceTab(_spaceA);
+
+      expect(h.engine.selectedTabIds, isEmpty);
+      expect(h.container.read(forceBrowserHomeProvider), isTrue);
+    });
+
+    test('does nothing when the currently selected tab already belongs to the '
+        'space (the forward sync loop is a no-op here)', () async {
+      final h = _openHarness(
+        liveTabIds: ['a-1', 'a-2'],
+        selectedTabId: 'a-1',
+        currentSelectedSpace: _spaceA,
+        lastTabEntries: {_spaceA: 'a-2'},
+      );
+      await _seedSpaces(h.db);
+      await seedTab(h.db, 'a-1', spaceUuid: _spaceA);
+      await seedTab(h.db, 'a-2', spaceUuid: _spaceA);
+
+      await h.container
+          .read(tabRepositoryProvider.notifier)
+          .restoreSpaceTab(_spaceA);
+
+      expect(h.engine.selectedTabIds, isEmpty);
+    });
 
     test('leaves nothing selected for a space with no tabs at all', () async {
       final h = _openHarness(

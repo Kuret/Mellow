@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/web_extension.dart';
+import 'package:mellow/presentation/widgets/safe_raw_image.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
 class ExtensionBadgeIcon extends StatelessWidget {
   final WebExtensionState state;

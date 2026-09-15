@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/utils/clipboard.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/utils/clipboard.dart';
 
 /// Creates a floating snackbar.
 /// The margin is controlled by the scaffold's snackBarTheme for proper

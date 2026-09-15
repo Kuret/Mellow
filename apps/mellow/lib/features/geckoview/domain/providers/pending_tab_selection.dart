@@ -19,11 +19,11 @@
  */
 import 'dart:async';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 
 part 'pending_tab_selection.g.dart';
 

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.history
+package app.mellow.browser.flutter_mozilla_components.history
 
 import mozilla.components.concept.engine.history.HistoryTrackingDelegate
 import mozilla.components.concept.storage.PageVisit
@@ -22,7 +22,7 @@ import mozilla.components.concept.storage.PageVisit
  *    anyway, so refusing costs nothing.
  *  - A session the engine opened itself (`window.open`), in the window between
  *    Gecko starting its navigation and
- *    [eu.weblibre.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware]
+ *    [app.mellow.browser.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware]
  *    binding it — the one gap the binding cannot close from inside the store,
  *    since the child is already navigating when `AddTabAction` is dispatched.
  *

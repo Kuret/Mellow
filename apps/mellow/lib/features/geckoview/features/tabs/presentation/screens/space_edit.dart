@@ -23,15 +23,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/space.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 enum _DialogMode { create, edit }
 

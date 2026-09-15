@@ -20,22 +20,22 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/maintenance/maintenance_journal_store.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_outcome.dart';
+import 'package:mellow/core/maintenance/maintenance_runner.dart';
+import 'package:mellow/core/maintenance/saf_archive_target.dart';
+import 'package:mellow/core/startup/maintenance_evidence.dart';
+import 'package:mellow/core/startup/maintenance_scanner.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_bootstrap.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:secure_archive/secure_archive.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
-import 'package:weblibre/core/maintenance/maintenance_runner.dart';
-import 'package:weblibre/core/maintenance/saf_archive_target.dart';
-import 'package:weblibre/core/startup/maintenance_evidence.dart';
-import 'package:weblibre/core/startup/maintenance_scanner.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_bootstrap.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
 /// How often the screen proves it is still here.
 ///
@@ -94,7 +94,7 @@ class StartupMaintenanceScreen extends HookWidget {
     ///
     /// A failure takes the task out of `activeTasks`, which is right — a
     /// mistyped archive password must not hold the browser shut — but it also
-    /// left the screen with nothing but "Open WebLibre". Retrying then meant
+    /// left the screen with nothing but "Open Mellow". Retrying then meant
     /// booting, walking to Users → Backups, and going through the whole restart
     /// again for one wrong character. `failed → queued` is a legal transition,
     /// so the queue can simply take it back.
@@ -231,7 +231,7 @@ class StartupMaintenanceScreen extends HookWidget {
         unpacker: (sourceFile, staging, secret) async {
           await withArchiveFromSaf(
             sourceUri: sourceFile,
-            local: File(p.join(staging.parent.path, 'incoming.weblibre')),
+            local: File(p.join(staging.parent.path, 'incoming.mellow')),
             use: (archive) => SecureArchiveUnpack(
               inputFile: archive,
               outputDirectory: staging,
@@ -412,7 +412,7 @@ class StartupMaintenanceScreen extends HookWidget {
         outcome.value = _Outcome(
           parked == 0
               ? 'The interrupted record was discarded.'
-              : 'The interrupted record was discarded. WebLibre could not tell '
+              : 'The interrupted record was discarded. Mellow could not tell '
                     'which profile the saved data belonged to, so it kept it on '
                     'the device instead of removing it.',
         );
@@ -624,13 +624,13 @@ class StartupMaintenanceScreen extends HookWidget {
                   OutlinedButton.icon(
                     onPressed: busy.value ? null : onFinished,
                     icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Open WebLibre'),
+                    label: const Text('Open Mellow'),
                   ),
                 ] else
                   FilledButton.icon(
                     onPressed: busy.value ? null : onFinished,
                     icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Open WebLibre'),
+                    label: const Text('Open Mellow'),
                   ),
               ] else ...[
                 // Nothing queued, but evidence remains — so `onFinished` would

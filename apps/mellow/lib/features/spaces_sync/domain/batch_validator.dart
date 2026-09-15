@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
+import 'package:mellow/features/spaces_sync/data/models/zen_records.dart';
 
 /// One reason a record in an outgoing batch was refused.
 class BatchViolation {

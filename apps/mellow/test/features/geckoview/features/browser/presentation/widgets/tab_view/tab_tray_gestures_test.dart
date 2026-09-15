@@ -21,15 +21,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/widgets/single_finger_horizontal_drag.dart';
 
 /// [SelectedSpace] without its persistence and tab-selection listeners, so
 /// the gesture layer can be exercised without a database.

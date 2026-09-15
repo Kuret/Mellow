@@ -21,12 +21,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 
 /// A compact container selector that displays only the currently selected
 /// container (or "unassigned" if none selected) without counts.

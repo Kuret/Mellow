@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/utils/debouncer.dart';
+import 'package:mellow/utils/debouncer.dart';
 
 /// A hook that creates a [Debouncer] with automatic disposal.
 ///

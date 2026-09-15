@@ -20,12 +20,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/host_rules.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/utils/host_rules.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Section widget toggling whether the current site should always load in
 /// desktop mode. Adds/removes the current host from the persisted rule list and

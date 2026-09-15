@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
-import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.WebExtensionActionType
+import app.mellow.browser.flutter_mozilla_components.pigeons.WebExtensionData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import mozilla.components.browser.state.selector.selectedTab

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.app.Activity
 import android.app.ActivityManager
@@ -13,13 +13,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
-import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
-import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
-import eu.weblibre.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver
+import app.mellow.browser.flutter_mozilla_components.Components
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.PwaSessionCreator
+import app.mellow.browser.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
+import app.mellow.browser.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
+import app.mellow.browser.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,19 +30,19 @@ import mozilla.components.feature.customtabs.CustomTabIntentProcessor
 import mozilla.components.feature.intent.ext.getSessionId
 import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
 import androidx.browser.customtabs.CustomTabsIntent
-import eu.weblibre.flutter_mozilla_components.startup.ExternalCommitResult
-import eu.weblibre.flutter_mozilla_components.startup.LaunchClassification
-import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
-import eu.weblibre.flutter_mozilla_components.startup.LaunchDescriptor
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
-import eu.weblibre.flutter_mozilla_components.startup.PENDING_LAUNCH_TTL_MS
-import eu.weblibre.flutter_mozilla_components.startup.PendingLaunch
-import eu.weblibre.flutter_mozilla_components.startup.PendingLaunchStore
-import eu.weblibre.flutter_mozilla_components.startup.ProfileDiscovery
-import eu.weblibre.flutter_mozilla_components.startup.RestartAuthorizationStore
-import eu.weblibre.flutter_mozilla_components.startup.ProfileInspection
-import eu.weblibre.flutter_mozilla_components.startup.StartupConfig
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.startup.ExternalCommitResult
+import app.mellow.browser.flutter_mozilla_components.startup.LaunchClassification
+import app.mellow.browser.flutter_mozilla_components.startup.LaunchTrust
+import app.mellow.browser.flutter_mozilla_components.startup.LaunchDescriptor
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.startup.PENDING_LAUNCH_TTL_MS
+import app.mellow.browser.flutter_mozilla_components.startup.PendingLaunch
+import app.mellow.browser.flutter_mozilla_components.startup.PendingLaunchStore
+import app.mellow.browser.flutter_mozilla_components.startup.ProfileDiscovery
+import app.mellow.browser.flutter_mozilla_components.startup.RestartAuthorizationStore
+import app.mellow.browser.flutter_mozilla_components.startup.ProfileInspection
+import app.mellow.browser.flutter_mozilla_components.startup.StartupConfig
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
 import mozilla.components.browser.state.state.ExternalAppType
 
 /**
@@ -61,7 +61,7 @@ class IntentReceiverActivity : Activity() {
         private const val TAG = "IntentReceiverActivity"
         private const val PRIVATE_BROWSING_MODE = "private_browsing_mode"
 
-        const val MAIN_ACTIVITY_CLASS = "eu.weblibre.gecko.MainActivity"
+        const val MAIN_ACTIVITY_CLASS = "app.mellow.browser.MainActivity"
 
         /**
          * Asks the running browser to restart onto another profile.
@@ -76,13 +76,13 @@ class IntentReceiverActivity : Activity() {
          * and so cannot be read or forged from outside.
          */
         const val ACTION_RESTART_INTO_PROFILE =
-            "eu.weblibre.action.RESTART_INTO_PROFILE"
+            "app.mellow.browser.action.RESTART_INTO_PROFILE"
 
-        const val EXTRA_RESTART_PROFILE_ID = "eu.weblibre.extra.RESTART_PROFILE_ID"
+        const val EXTRA_RESTART_PROFILE_ID = "app.mellow.browser.extra.RESTART_PROFILE_ID"
 
         /** One-shot proof that this app issued the request. */
         const val EXTRA_RESTART_AUTHORIZATION =
-            "eu.weblibre.extra.RESTART_AUTHORIZATION"
+            "app.mellow.browser.extra.RESTART_AUTHORIZATION"
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -475,7 +475,7 @@ class IntentReceiverActivity : Activity() {
     /**
      * Reads the current profile UUID from the filesystem.
      * The Flutter side persists this as a plain text file at:
-     *   <filesDir>/weblibre_profiles/current_profile
+     *   <filesDir>/mellow_profiles/current_profile
      */
     /**
      * The profile this process actually runs, or null if it has not committed one.

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/settings/presentation/screens/settings_layout.dart';
+import 'package:mellow/features/settings/presentation/screens/settings_layout.dart';
 
 void main() {
   group('useTwoPaneSettings', () {

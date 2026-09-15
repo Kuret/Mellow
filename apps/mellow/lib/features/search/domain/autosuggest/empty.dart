@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:exceptions/exceptions.dart';
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'empty.g.dart';
 

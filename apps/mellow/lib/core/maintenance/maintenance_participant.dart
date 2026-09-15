@@ -16,9 +16,9 @@
  */
 import 'dart:io';
 
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
 
 /// Which operation a participant is taking part in.
 ///

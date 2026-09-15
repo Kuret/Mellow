@@ -19,7 +19,7 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/core/startup/models/json_read.dart';
+import 'package:mellow/core/startup/models/json_read.dart';
 
 part 'startup_intent.g.dart';
 

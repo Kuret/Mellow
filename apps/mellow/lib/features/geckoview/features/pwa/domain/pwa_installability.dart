@@ -19,8 +19,8 @@
  */
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/extensions/uri.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/extensions/uri.dart';
 
 /// Display modes that are valid for installable PWAs per W3C spec.
 const _validDisplayModes = {

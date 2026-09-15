@@ -19,13 +19,13 @@
  */
 import 'dart:async';
 
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
 // `riverpod/riverpod.dart` is what carries the `.select` extension on
 // providers; `riverpod_annotation` re-exports `Ref` but not the
 // ProviderListenable extensions, so this import isn't redundant despite
 // the unused-import lint's opinion.
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
 part 'local_index_settings_sync.g.dart';
 

@@ -19,10 +19,10 @@
  */
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
+import 'package:mellow/features/geckoview/features/history/domain/repositories/container_history.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 
 /// Ask for confirmation and delete [container], honouring the dialog's
 /// wipe-history choice. Returns whether the container was deleted.

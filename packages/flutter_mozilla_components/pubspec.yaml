@@ -38,7 +38,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: eu.weblibre.flutter_mozilla_components
+        package: app.mellow.browser.flutter_mozilla_components
         pluginClass: FlutterMozillaComponentsPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

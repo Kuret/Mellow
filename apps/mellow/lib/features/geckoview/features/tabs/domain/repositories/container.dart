@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/core/uuid.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
+import 'package:mellow/features/spaces_sync/domain/zen_ids.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/uuid.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
-import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
 
 part 'container.g.dart';
 

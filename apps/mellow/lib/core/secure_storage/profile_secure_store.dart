@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:weblibre/core/secure_storage/profile_secure_keys.dart';
+import 'package:mellow/core/secure_storage/profile_secure_keys.dart';
 
 /// Profile-scoped access to the app-wide secure store.
 ///

@@ -20,13 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/custom_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/search/presentation/widgets/search_provider_icon.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/custom_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/features/search/presentation/widgets/search_provider_icon.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 /// The engine catalogue as something to edit: the built-ins to read, the user's
 /// own to add to, change and remove.

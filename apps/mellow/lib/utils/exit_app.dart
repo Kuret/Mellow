@@ -21,12 +21,12 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/database_registry.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/core/database_registry.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 /// Tears down the app and ends the process.
 ///

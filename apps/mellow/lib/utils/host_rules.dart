@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/utils/uri_input_parser.dart';
+import 'package:mellow/utils/uri_input_parser.dart';
 
 /// Helpers for per-site rule lists keyed by host (e.g. gesture exclusions,
 /// per-site desktop mode). Entries are stored as bare lowercase hosts and match

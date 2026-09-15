@@ -20,8 +20,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Follow-up for an action that just created a tab with `selectTab: false`.
 ///

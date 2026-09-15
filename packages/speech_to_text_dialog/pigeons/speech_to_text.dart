@@ -28,9 +28,9 @@ import 'package:pigeon/pigeon.dart';
     dartOut: 'lib/src/pigeons/speech_to_text.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/weblibre/speech_to_text_dialog/pigeons/SpeechToText.g.kt',
+        'android/src/main/kotlin/app/mellow/browser/speech_to_text_dialog/pigeons/SpeechToText.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.weblibre.speech_to_text_dialog.pigeons',
+      package: 'app.mellow.browser.speech_to_text_dialog.pigeons',
     ),
     dartPackageName: 'speech_to_text_dialog',
   ),

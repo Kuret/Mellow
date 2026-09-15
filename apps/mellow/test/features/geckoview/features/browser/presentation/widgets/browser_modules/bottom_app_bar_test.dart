@@ -22,31 +22,31 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/data/database/functions/url_functions.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_list.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 import 'package:riverpod/misc.dart' show Override;
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/data/database/functions/url_functions.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 class _NoSelectedTab extends SelectedTab {
   @override
@@ -260,26 +260,22 @@ void main() {
       },
     );
 
-    test(
-      'BrowserTopAppBar reserves no height for the button row when off',
-      () {
-        final withButtons = BrowserTopAppBar(
-          showMainToolbar: true,
-          quickTabSwitcherRowCount: 0,
-          showToolbarButtons: true,
-        );
-        final withoutButtons = BrowserTopAppBar(
-          showMainToolbar: true,
-          quickTabSwitcherRowCount: 0,
-          showToolbarButtons: false,
-        );
+    test('BrowserTopAppBar reserves no height for the button row when off', () {
+      final withButtons = BrowserTopAppBar(
+        showMainToolbar: true,
+        quickTabSwitcherRowCount: 0,
+        showToolbarButtons: true,
+      );
+      final withoutButtons = BrowserTopAppBar(
+        showMainToolbar: true,
+        quickTabSwitcherRowCount: 0,
+        showToolbarButtons: false,
+      );
 
-        expect(
-          withButtons.preferredSize.height -
-              withoutButtons.preferredSize.height,
-          BrowserTabBar.toolbarButtonsRowHeight,
-        );
-      },
-    );
+      expect(
+        withButtons.preferredSize.height - withoutButtons.preferredSize.height,
+        BrowserTabBar.toolbarButtonsRowHeight,
+      );
+    });
   });
 }

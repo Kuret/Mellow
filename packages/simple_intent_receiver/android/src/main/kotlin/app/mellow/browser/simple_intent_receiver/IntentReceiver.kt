@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import io.flutter.plugin.common.BinaryMessenger
-import eu.weblibre.simple_intent_receiver.pigeons.IntentEvents
-import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
-import eu.weblibre.simple_intent_receiver.ext.EventSequence
+import app.mellow.browser.simple_intent_receiver.pigeons.IntentEvents
+import app.mellow.browser.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import app.mellow.browser.simple_intent_receiver.ext.EventSequence
 
 class IntentReceiver(messenger: BinaryMessenger) {
     private val intentEvents: IntentEvents = IntentEvents(messenger)

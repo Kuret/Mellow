@@ -21,22 +21,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/maintenance/backup_archive_name.dart';
+import 'package:mellow/core/maintenance/maintenance_outcome.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/entities/restart_cost.dart';
+import 'package:mellow/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_labels.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_switch_handler.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/features/user/domain/services/user_backup.dart';
+import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/form_validators.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:saf_util/saf_util.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/maintenance/backup_archive_name.dart';
-import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/features/user/domain/services/user_backup.dart';
-import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 enum RestoreTarget { createOrOverride, createNew }
 
@@ -309,9 +309,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                   const ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(Icons.info_outline),
-                    title: Text(
-                      'A new profile starts without Mozilla sign-in',
-                    ),
+                    title: Text('A new profile starts without Mozilla sign-in'),
                     subtitle: Text(
                       'Tabs, history and bookmarks are restored. Sign-in and '
                       'sync data stay with the original profile.',
@@ -427,7 +425,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                     ),
                   ],
                   // Restoring over an existing user replays every participant,
-                  // so the WebLibre account, sync and proxy state in the
+                  // so the Mellow account, sync and proxy state in the
                   // archive is installed. A *new* user does not get it —
                   // see `applyCloneParticipantPolicy` — and saying so on only one of
                   // the two branches is what made the backup screen's

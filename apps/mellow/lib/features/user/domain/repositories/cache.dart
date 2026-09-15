@@ -20,13 +20,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/icon_cache_marker.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/icon_cache_marker.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'cache.g.dart';
 

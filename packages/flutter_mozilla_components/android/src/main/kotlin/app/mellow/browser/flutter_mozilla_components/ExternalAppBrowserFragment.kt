@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Intent
 import android.os.Bundle
@@ -26,10 +26,10 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
-import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
-import eu.weblibre.flutter_mozilla_components.feature.PwaWindowFeature
-import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbar
-import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbarFeature
+import app.mellow.browser.flutter_mozilla_components.activities.ExternalAppBrowserActivity
+import app.mellow.browser.flutter_mozilla_components.feature.PwaWindowFeature
+import app.mellow.browser.flutter_mozilla_components.widget.CustomTabToolbar
+import app.mellow.browser.flutter_mozilla_components.widget.CustomTabToolbarFeature
 import mozilla.components.feature.contextmenu.ContextMenuCandidate
 import mozilla.components.feature.contextmenu.ContextMenuFeature
 import mozilla.components.browser.state.selector.findCustomTab
@@ -346,7 +346,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
 
         // Send ACTION_VIEW intent with URL to MainActivity so Flutter shows the Open URL dialog
         val mainIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).apply {
-            setClassName(activity, "eu.weblibre.gecko.MainActivity")
+            setClassName(activity, "app.mellow.browser.MainActivity")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(PRIVATE_BROWSING_MODE, isPrivateCustomTab)
         }
@@ -366,7 +366,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                 putExtra(Intent.EXTRA_TEXT, tab.content.url)
                 putExtra(Intent.EXTRA_SUBJECT, tab.content.title)
                 // Use NEW_DOCUMENT + MULTIPLE_TASK so the receiving app opens
-                // in its own task rather than inside WebLibre's recents entry.
+                // in its own task rather than inside Mellow's recents entry.
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
             }
             startActivity(Intent.createChooser(shareIntent, null))

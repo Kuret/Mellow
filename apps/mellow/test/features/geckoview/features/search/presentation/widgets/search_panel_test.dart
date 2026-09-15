@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_panel.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_panel.dart';
 
 const _fieldKey = ValueKey('panel-field');
 

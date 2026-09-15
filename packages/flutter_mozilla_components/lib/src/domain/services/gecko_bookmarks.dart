@@ -12,7 +12,7 @@ enum BookmarkRoot {
   menu("menu________", "Menu"),
   toolbar("toolbar_____", "Toolbar"),
   unfiled("unfiled_____", "Unified"),
-  mobile("mobile______", "WebLibre");
+  mobile("mobile______", "Mellow");
 
   final String id;
   final String displayName;

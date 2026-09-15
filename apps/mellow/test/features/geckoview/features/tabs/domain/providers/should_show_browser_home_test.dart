@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 
 const _spaceA = 'space-a';
 const _spaceB = 'space-b';
@@ -64,27 +64,24 @@ void main() {
     expect(container.read(shouldShowBrowserHomeProvider), isFalse);
   });
 
-  test(
-    'holds its previous answer instead of flashing home while a restore is '
-    'in flight, then re-evaluates once it settles',
-    () async {
-      final container = _openContainer();
-      container.listen(shouldShowBrowserHomeProvider, (_, _) {});
-      await Future<void>.delayed(Duration.zero);
-      expect(container.read(shouldShowBrowserHomeProvider), isFalse);
+  test('holds its previous answer instead of flashing home while a restore is '
+      'in flight, then re-evaluates once it settles', () async {
+    final container = _openContainer();
+    container.listen(shouldShowBrowserHomeProvider, (_, _) {});
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(shouldShowBrowserHomeProvider), isFalse);
 
-      container.read(restoringSpaceTabProvider.notifier).start();
-      // The selected space moves out from under the tab, as it does the
-      // instant a swipe lands and before the restore's DB reads settle.
-      (container.read(selectedSpaceProvider.notifier) as _MutableSelectedSpace)
-          .moveTo(_spaceB);
+    container.read(restoringSpaceTabProvider.notifier).start();
+    // The selected space moves out from under the tab, as it does the
+    // instant a swipe lands and before the restore's DB reads settle.
+    (container.read(selectedSpaceProvider.notifier) as _MutableSelectedSpace)
+        .moveTo(_spaceB);
 
-      // Without the guard this would already read true (mismatch).
-      expect(container.read(shouldShowBrowserHomeProvider), isFalse);
+    // Without the guard this would already read true (mismatch).
+    expect(container.read(shouldShowBrowserHomeProvider), isFalse);
 
-      container.read(restoringSpaceTabProvider.notifier).finish();
+    container.read(restoringSpaceTabProvider.notifier).finish();
 
-      expect(container.read(shouldShowBrowserHomeProvider), isTrue);
-    },
-  );
+    expect(container.read(shouldShowBrowserHomeProvider), isTrue);
+  });
 }

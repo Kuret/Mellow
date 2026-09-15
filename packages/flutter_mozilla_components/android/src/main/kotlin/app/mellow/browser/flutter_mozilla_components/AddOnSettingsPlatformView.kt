@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.app.Activity
 import android.content.Context
@@ -12,9 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
-import eu.weblibre.flutter_mozilla_components.addons.FlutterAddonSettingsFragment
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
-import eu.weblibre.flutter_mozilla_components.widget.PointerInputFrameLayout
+import app.mellow.browser.flutter_mozilla_components.addons.FlutterAddonSettingsFragment
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.widget.PointerInputFrameLayout
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory

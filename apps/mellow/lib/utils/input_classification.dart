@@ -20,8 +20,8 @@
 
 import 'dart:io';
 
-import 'package:weblibre/utils/uri_input_parser.dart';
-import 'package:weblibre/utils/uri_policy.dart';
+import 'package:mellow/utils/uri_input_parser.dart';
+import 'package:mellow/utils/uri_policy.dart';
 
 enum NavigationReason {
   explicitScheme,

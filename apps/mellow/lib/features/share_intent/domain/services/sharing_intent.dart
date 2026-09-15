@@ -19,26 +19,27 @@
  */
 import 'dart:async';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/startup_bootstrap.dart';
+import 'package:mellow/data/models/received_intent_parameter.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
+import 'package:mellow/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:mellow/features/share_intent/domain/services/brokered_intents.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/services/profile_restart_request.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/startup_bootstrap.dart';
-import 'package:weblibre/data/models/received_intent_parameter.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
-import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
-import 'package:weblibre/features/share_intent/domain/services/brokered_intents.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 
 part 'sharing_intent.g.dart';
 
-const _alwaysAllowPackageExtra = 'eu.weblibre.gatekeeper.always_allow_package';
+const _alwaysAllowPackageExtra =
+    'app.mellow.browser.gatekeeper.always_allow_package';
 
 StreamTransformer<Intent, ReceivedIntentParameter>
 _buildSharingIntentTransformer(

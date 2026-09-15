@@ -18,21 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:exceptions/exceptions.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/features/user/domain/entities/fingerprint_overrides.dart';
+import 'package:mellow/features/user/domain/providers/backup_directory.dart';
+import 'package:mellow/features/user/domain/repositories/cache.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/features/user/domain/services/fingerprinting.dart';
+import 'package:mellow/features/user/domain/services/user_backup.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
-import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
-import 'package:weblibre/features/user/domain/services/user_backup.dart';
 
 part 'providers.g.dart';
 

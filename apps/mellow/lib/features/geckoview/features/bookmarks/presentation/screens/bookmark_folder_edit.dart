@@ -22,11 +22,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
-import 'package:weblibre/utils/form_validators.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:mellow/utils/form_validators.dart';
 
 class BookmarkFolderEditScreen extends HookConsumerWidget {
   final String? parentGuid;

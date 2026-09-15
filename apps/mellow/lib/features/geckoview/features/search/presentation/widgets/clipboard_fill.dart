@@ -21,8 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/utils/clipboard.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
+import 'package:mellow/utils/clipboard.dart';
 
 class ClipboardFillLink extends HookConsumerWidget {
   final TextEditingController controller;

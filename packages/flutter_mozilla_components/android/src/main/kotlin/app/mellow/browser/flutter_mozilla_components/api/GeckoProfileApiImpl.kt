@@ -17,35 +17,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
 import android.os.StatFs
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.maintenance.MaintenanceParticipantHandler
-import eu.weblibre.flutter_mozilla_components.maintenance.ProfileExternalStorageParticipant
-import eu.weblibre.flutter_mozilla_components.maintenance.ProfileJobsParticipant
-import eu.weblibre.flutter_mozilla_components.maintenance.ProfilePreferencesParticipant
-import eu.weblibre.flutter_mozilla_components.maintenance.PwaShortcutParticipant
-import eu.weblibre.flutter_mozilla_components.pigeons.ParticipantStep
+import app.mellow.browser.flutter_mozilla_components.maintenance.MaintenanceParticipantHandler
+import app.mellow.browser.flutter_mozilla_components.maintenance.ProfileExternalStorageParticipant
+import app.mellow.browser.flutter_mozilla_components.maintenance.ProfileJobsParticipant
+import app.mellow.browser.flutter_mozilla_components.maintenance.ProfilePreferencesParticipant
+import app.mellow.browser.flutter_mozilla_components.maintenance.PwaShortcutParticipant
+import app.mellow.browser.flutter_mozilla_components.pigeons.ParticipantStep
 import java.io.File
 import java.io.FileInputStream
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
-import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirective
-import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKind
-import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
-import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupPromptMode
-import eu.weblibre.flutter_mozilla_components.pigeons.StartupIntentRecord
-import eu.weblibre.flutter_mozilla_components.startup.DartAccessOwner
-import eu.weblibre.flutter_mozilla_components.startup.DartProfileAccess
-import eu.weblibre.flutter_mozilla_components.startup.ProfilePromptMode
-import eu.weblibre.flutter_mozilla_components.startup.RestartCoordinator
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
-import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
-import eu.weblibre.flutter_mozilla_components.startup.StartupDirectiveKind
-import eu.weblibre.flutter_mozilla_components.startup.StartupOwner
-import eu.weblibre.flutter_mozilla_components.startup.StartupOwnerType
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoProfileApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProfileStartupDirective
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKind
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProfileStartupPromptMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.StartupIntentRecord
+import app.mellow.browser.flutter_mozilla_components.startup.DartAccessOwner
+import app.mellow.browser.flutter_mozilla_components.startup.DartProfileAccess
+import app.mellow.browser.flutter_mozilla_components.startup.ProfilePromptMode
+import app.mellow.browser.flutter_mozilla_components.startup.RestartCoordinator
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.startup.StartupIntentBroker
+import app.mellow.browser.flutter_mozilla_components.startup.StartupDirectiveKind
+import app.mellow.browser.flutter_mozilla_components.startup.StartupOwner
+import app.mellow.browser.flutter_mozilla_components.startup.StartupOwnerType
 
 /**
  * Thin adapter from the arbitration Pigeon API to [StartupArbiter].

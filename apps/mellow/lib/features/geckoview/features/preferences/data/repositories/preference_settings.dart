@@ -24,13 +24,13 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_migrations.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_migrations.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'preference_settings.g.dart';
 

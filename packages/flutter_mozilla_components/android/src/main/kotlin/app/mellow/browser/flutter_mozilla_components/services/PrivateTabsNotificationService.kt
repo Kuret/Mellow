@@ -3,19 +3,19 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.services
+package app.mellow.browser.flutter_mozilla_components.services
 
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.R
-import eu.weblibre.flutter_mozilla_components.activities.AuthCustomTabActivity
-import eu.weblibre.flutter_mozilla_components.activities.AuthIntentReceiverActivity
-import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
-import eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.activities.AuthCustomTabActivity
+import app.mellow.browser.flutter_mozilla_components.activities.AuthIntentReceiverActivity
+import app.mellow.browser.flutter_mozilla_components.activities.ExternalAppBrowserActivity
+import app.mellow.browser.flutter_mozilla_components.activities.IntentReceiverActivity
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.privatemode.notification.AbstractPrivateNotificationService
 import mozilla.components.support.base.android.NotificationsDelegate

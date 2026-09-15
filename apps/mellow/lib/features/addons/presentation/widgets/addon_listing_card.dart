@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/utils/number_format.dart';
+import 'package:mellow/utils/number_format.dart';
 
 class AddonListingIcon extends StatelessWidget {
   final String? iconUrl;

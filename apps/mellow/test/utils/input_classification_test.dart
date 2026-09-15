@@ -19,17 +19,17 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/utils/input_classification.dart';
+import 'package:mellow/utils/input_classification.dart';
 
 void main() {
   group('classifyAddressBarInput', () {
     test('searches free text containing whitespace', () {
-      final result = classifyAddressBarInput('WebLibre README.md');
+      final result = classifyAddressBarInput('Mellow README.md');
 
       expect(result, isA<SearchInputClassification>());
       final search = result as SearchInputClassification;
       expect(search.reason, SearchReason.containsWhitespace);
-      expect(search.query, 'WebLibre README.md');
+      expect(search.query, 'Mellow README.md');
     });
 
     test('navigates schemeless domain', () {
@@ -277,7 +277,7 @@ void main() {
     });
 
     test('treats plain sentence as non-url', () {
-      final uri = parseSharedIntentUrl('This is WebLibre README.md');
+      final uri = parseSharedIntentUrl('This is Mellow README.md');
 
       expect(uri, isNull);
     });

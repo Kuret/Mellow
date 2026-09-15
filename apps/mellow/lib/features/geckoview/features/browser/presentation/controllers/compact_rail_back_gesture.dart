@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import 'package:flutter/services.dart' show SwipeEdge;
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 /// Whether a back gesture should open the narrow-viewport compact bar's
 /// slide-out tab rail instead of running the browser's ordinary back, and —
@@ -77,9 +77,8 @@ RailSide? resolveCompactRailBackGesture({
 
   return switch (side) {
     CompactRailSide.left => gestureSide == RailSide.left ? RailSide.left : null,
-    CompactRailSide.right => gestureSide == RailSide.right
-        ? RailSide.right
-        : null,
+    CompactRailSide.right =>
+      gestureSide == RailSide.right ? RailSide.right : null,
     // Either edge opens the panel — on the edge it came from.
     CompactRailSide.either => gestureSide,
   };

@@ -19,7 +19,7 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
+import 'package:mellow/features/share_intent/domain/entities/shared_content.dart';
 
 void main() {
   group('SharedContent.parse', () {
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('returns SharedText for plain sentence', () {
-      final parsed = SharedContent.parse('WebLibre README.md');
+      final parsed = SharedContent.parse('Mellow README.md');
 
       expect(parsed, isA<SharedText>());
     });

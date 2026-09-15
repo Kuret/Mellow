@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
+import 'package:mellow/presentation/widgets/reorderable_hold_drag.dart';
 
 /// Horizontal chip bar mirroring the quick tab switcher: fixed-width items in
 /// a viewport that only fits 2.5 of them, so the item at the trailing edge is

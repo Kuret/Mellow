@@ -26,7 +26,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
   return switch (level) {

@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/foundation.dart';
+import 'package:mellow/features/user/domain/providers.dart';
+import 'package:mellow/features/user/domain/services/local_authentication.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 
 part 'profile_auth.g.dart';
 

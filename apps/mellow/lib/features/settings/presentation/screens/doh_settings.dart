@@ -19,8 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/settings/presentation/widgets/doh_settings_content.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 
 const List<SettingsSectionDefinition> dohSettingsSections = [
   SettingsSectionDefinition(

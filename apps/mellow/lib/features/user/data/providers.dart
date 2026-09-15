@@ -21,14 +21,14 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:mellow/core/database_registry.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/database/riverpod_storage.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/database_registry.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
 
 part 'providers.g.dart';
 

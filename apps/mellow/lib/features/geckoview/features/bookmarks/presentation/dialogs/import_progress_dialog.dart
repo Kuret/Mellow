@@ -19,7 +19,7 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 
 /// Shows how far a running bookmark import has got.
 ///

@@ -21,13 +21,13 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:mellow/core/database_registry.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/data/database/functions/url_functions.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/database_registry.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/data/database/functions/url_functions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 
 part 'providers.g.dart';
 

@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.ProfileContext
-import eu.weblibre.flutter_mozilla_components.ext.toStringSet
+import app.mellow.browser.flutter_mozilla_components.ProfileContext
+import app.mellow.browser.flutter_mozilla_components.ext.toStringSet
 import mozilla.components.support.base.log.logger.Logger
 import org.json.JSONArray
 import org.json.JSONObject
@@ -210,7 +210,7 @@ class AppLinkPolicyStore internal constructor(
         if (has(key) && !isNull(key)) getString(key) else null
 
     companion object {
-        const val PREFS_NAME = "weblibre_app_link_policy"
+        const val PREFS_NAME = "mellow_app_link_policy"
         private const val KEY_SNAPSHOT = "snapshot"
 
         private const val FIELD_MIGRATED = "migrated"

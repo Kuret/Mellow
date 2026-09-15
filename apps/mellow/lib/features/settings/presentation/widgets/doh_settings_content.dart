@@ -22,11 +22,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/utils/form_validators.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/utils/form_validators.dart';
 
 class DohSettingsContent extends HookConsumerWidget {
   const DohSettingsContent({super.key});

@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.TabContent
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.TabContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel

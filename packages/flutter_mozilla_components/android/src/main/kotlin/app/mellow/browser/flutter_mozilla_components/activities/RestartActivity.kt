@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.app.Activity
 import android.app.ActivityManager
@@ -26,11 +26,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.content.Intent
-import eu.weblibre.flutter_mozilla_components.startup.EXTRA_RESTART_TARGET_PID
-import eu.weblibre.flutter_mozilla_components.startup.PendingLaunch
-import eu.weblibre.flutter_mozilla_components.startup.PendingLaunchStore
-import eu.weblibre.flutter_mozilla_components.startup.RestartCoordinator
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.startup.EXTRA_RESTART_TARGET_PID
+import app.mellow.browser.flutter_mozilla_components.startup.PendingLaunch
+import app.mellow.browser.flutter_mozilla_components.startup.PendingLaunchStore
+import app.mellow.browser.flutter_mozilla_components.startup.RestartCoordinator
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
 
 /**
  * Relaunches the browser after the default process has died.

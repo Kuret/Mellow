@@ -17,10 +17,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
-import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
+import 'package:mellow/features/user/domain/presentation/screens/profile_restore.dart';
+import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
 
 /// The screen the first-run "Restore from Backup" flow opens.
 ///
@@ -46,7 +46,7 @@ void main() {
       await pump(
         tester,
         ProfileRestoreScreen(
-          backupFileUri: Uri.parse('content://backups/archive.weblibre'),
+          backupFileUri: Uri.parse('content://backups/archive.mellow'),
           forcedOverwriteTarget: target,
           adoptArchiveName: true,
         ),
@@ -73,7 +73,7 @@ void main() {
     await pump(
       tester,
       ProfileRestoreScreen(
-        backupFileUri: Uri.parse('content://backups/archive.weblibre'),
+        backupFileUri: Uri.parse('content://backups/archive.mellow'),
       ),
     );
 

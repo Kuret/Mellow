@@ -4,18 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.pointer
+package app.mellow.browser.flutter_mozilla_components.pointer
 
 import android.os.Handler
 import android.os.Looper
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
-import eu.weblibre.flutter_mozilla_components.ext.transformPosition
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerHitTest
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerTarget
-import eu.weblibre.flutter_mozilla_components.widget.PointerInputFrameLayout
+import app.mellow.browser.flutter_mozilla_components.ext.transformPosition
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerHitTest
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerInputHostApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerTarget
+import app.mellow.browser.flutter_mozilla_components.widget.PointerInputFrameLayout
 import io.flutter.plugin.common.BinaryMessenger
 import java.util.ArrayDeque
 

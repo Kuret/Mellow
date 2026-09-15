@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/sync_state.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/sync_state.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 /// Zen sync bookkeeping (PLAN §8): `sync_record_state` mirrors the desktop's
 /// `zen-spaces-sync.json` "uploaded" digests so a sync only pushes records

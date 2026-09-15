@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 
 class ToolbarButtonSpec {
   final ToolbarButtonId id;

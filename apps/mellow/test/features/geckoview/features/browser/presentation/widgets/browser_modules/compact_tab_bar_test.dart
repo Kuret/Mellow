@@ -24,35 +24,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/data/database/functions/url_functions.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/data/database/functions/url_functions.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_list.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 class _EmptyTabStates extends TabStates {
   @override
@@ -670,9 +670,7 @@ void main() {
           spaceIndicatorSide: SpaceIndicatorSide.right,
         ),
       );
-      final rightIndicatorX = tester
-          .getTopLeft(find.byType(SpaceIndicator))
-          .dx;
+      final rightIndicatorX = tester.getTopLeft(find.byType(SpaceIndicator)).dx;
       final rightChipX = tester.getTopLeft(find.text('Docs')).dx;
       expect(rightIndicatorX, greaterThan(rightChipX));
 

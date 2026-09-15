@@ -10,7 +10,7 @@ final _api = GeckoAppLinksApi();
 
 /// Service for detecting and launching external applications that can handle URLs.
 ///
-/// WebLibre-owned resolution/launch surface. Policy lives in Dart; the native side
+/// Mellow-owned resolution/launch surface. Policy lives in Dart; the native side
 /// owns PackageManager resolution and Intent launch. Used by the manual
 /// "Open in app" entry points.
 class GeckoAppLinksService {

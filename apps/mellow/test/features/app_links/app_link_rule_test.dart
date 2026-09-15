@@ -19,7 +19,7 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
 
 void main() {
   group('PersistedAppLinkRule', () {

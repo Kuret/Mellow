@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/core/maintenance/backup_archive_name.dart';
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/backup_archive_name.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
 
 void main() {
   _manifestTolerance();
@@ -11,7 +11,7 @@ void main() {
     final at = DateTime(2026, 8, 19, 13, 1, 45);
     final name = backupArchiveName(profileName: 'Default', at: at);
 
-    expect(name, 'backup_Default_2026-08-19_130145.weblibre');
+    expect(name, 'backup_Default_2026-08-19_130145.mellow');
 
     final parsed = BackupArchiveName.tryParse(name)!;
     expect(parsed.profileName, 'Default');
@@ -35,11 +35,11 @@ void main() {
 
   test('names that are not backups do not parse', () {
     expect(BackupArchiveName.tryParse('notes.txt'), isNull);
-    expect(BackupArchiveName.tryParse('backup_Default.weblibre'), isNull);
+    expect(BackupArchiveName.tryParse('backup_Default.mellow'), isNull);
     // The shape the runner used to emit.
     expect(
       BackupArchiveName.tryParse(
-        'backup_Default_2026-08-19_13-01-45-123Z.weblibre',
+        'backup_Default_2026-08-19_13-01-45-123Z.mellow',
       ),
       isNull,
     );

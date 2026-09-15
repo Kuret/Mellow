@@ -20,13 +20,13 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 
 part 'home_target_controller.g.dart';
 
@@ -154,18 +154,17 @@ class HomeTargetController extends _$HomeTargetController {
 
   @override
   void build() {
-    ref.listen(
-      fireImmediately: true,
-      browserRestoreCompleteProvider,
-      (previous, next) {
-        if (!next || _startupHandled) return;
-        _startupHandled = true;
+    ref.listen(fireImmediately: true, browserRestoreCompleteProvider, (
+      previous,
+      next,
+    ) {
+      if (!next || _startupHandled) return;
+      _startupHandled = true;
 
-        // This controller is created lazily by the browser view. Restore can
-        // already be complete by then, and a plain listen would sit waiting for
-        // an edge that has been and gone, silently skipping the startup resume.
-        unawaited(_applyStartupTarget());
-      },
-    );
+      // This controller is created lazily by the browser view. Restore can
+      // already be complete by then, and a plain listen would sit waiting for
+      // an edge that has been and gone, silently skipping the startup resume.
+      unawaited(_applyStartupTarget());
+    });
   }
 }

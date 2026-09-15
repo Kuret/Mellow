@@ -17,15 +17,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/atomic_json_file.dart';
+import 'package:mellow/core/startup/restart_authorization_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/features/user/domain/services/profile_restart_request.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
-import 'package:weblibre/core/startup/atomic_json_file.dart';
-import 'package:weblibre/core/startup/restart_authorization_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 
 Intent intentWith({String? action, Map<String, Object?> extra = const {}}) =>
     Intent(
-      fromPackageName: 'eu.weblibre',
+      fromPackageName: 'app.mellow.browser',
       action: action,
       data: null,
       categories: const [],
@@ -35,8 +35,8 @@ Intent intentWith({String? action, Map<String, Object?> extra = const {}}) =>
 
 const _profileId = '0199a0b1-1111-7111-8111-111111111111';
 const _otherProfileId = '0199a0b1-2222-7222-8222-222222222222';
-const _extraKey = 'eu.weblibre.extra.RESTART_PROFILE_ID';
-const _authorizationKey = 'eu.weblibre.extra.RESTART_AUTHORIZATION';
+const _extraKey = 'app.mellow.browser.extra.RESTART_PROFILE_ID';
+const _authorizationKey = 'app.mellow.browser.extra.RESTART_AUTHORIZATION';
 
 Intent requestFor(
   String profileId, {

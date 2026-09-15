@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.Intent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.R
-import eu.weblibre.flutter_mozilla_components.activities.AuthIntentReceiverActivity
-import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import app.mellow.browser.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.activities.AuthIntentReceiverActivity
+import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.accounts.FirefoxAccountsAuthFeature

@@ -5,11 +5,11 @@ import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/icon_cache_marker.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/icon_cache_marker.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/features/user/domain/repositories/cache.dart';
 
 /// The favicon cache announces changes so readers can drop their decoded icons.
 /// A write that leaves a reader rendering the same thing must stay silent —

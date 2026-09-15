@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/clone_participant_policy.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
-import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
 
 void main() {
   late Directory clone;
 
   setUp(() async {
-    clone = await Directory.systemTemp.createTemp('weblibre_clone');
+    clone = await Directory.systemTemp.createTemp('mellow_clone');
   });
 
   tearDown(() async {

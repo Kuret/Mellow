@@ -4,27 +4,27 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.applinks.AppLinkLaunchMode
-import eu.weblibre.flutter_mozilla_components.applinks.AppLinkLaunchResult
-import eu.weblibre.flutter_mozilla_components.applinks.AppLinkPolicyStores
-import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkRequest
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStore
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
-import eu.weblibre.flutter_mozilla_components.applinks.releaseHeldNavigation
-import eu.weblibre.flutter_mozilla_components.applinks.toAppLinkPolicy
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkDecision
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPolicySnapshot
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptRequest
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkResolutionResult
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkTarget
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
+import app.mellow.browser.flutter_mozilla_components.Components
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkLaunchMode
+import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkLaunchResult
+import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkPolicyStores
+import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkRuntime
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkRequest
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStore
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStores
+import app.mellow.browser.flutter_mozilla_components.applinks.releaseHeldNavigation
+import app.mellow.browser.flutter_mozilla_components.applinks.toAppLinkPolicy
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkDecision
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPolicySnapshot
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptRequest
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkResolutionResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkTarget
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAppLinksApi
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.support.base.log.logger.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * WebLibre-owned implementation of [GeckoAppLinksApi] backed by [ExternalAppResolver] and
+ * Mellow-owned implementation of [GeckoAppLinksApi] backed by [ExternalAppResolver] and
  * [AppLinkLauncher] (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md Phase 1). Policy lives in Dart; this
  * surface owns PackageManager resolution and Intent launch for the manual entry points.
  */

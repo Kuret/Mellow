@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
-import eu.weblibre.flutter_mozilla_components.startup.DartProfileAccess
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
+import app.mellow.browser.flutter_mozilla_components.startup.DartProfileAccess
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

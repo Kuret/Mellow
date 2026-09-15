@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/services.dart';
-import 'package:weblibre/utils/uri_parser.dart';
+import 'package:mellow/utils/uri_parser.dart';
 
 Future<Uri?> tryGetUriFromClipboard({bool eagerParsing = true}) async {
   final data = await Clipboard.getData('text/plain');

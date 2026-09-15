@@ -20,11 +20,11 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'app_link_policy_replication.g.dart';
 

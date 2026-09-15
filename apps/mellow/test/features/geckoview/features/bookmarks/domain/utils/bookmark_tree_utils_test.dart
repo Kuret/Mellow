@@ -20,9 +20,9 @@
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 
 BookmarkEntry entry(String guid, String title) => BookmarkEntry(
   guid: guid,
@@ -77,7 +77,7 @@ void main() {
     test('should keep built-in roots pinned ahead of the rest at root', () {
       final children = <BookmarkItem>[
         entry('z', 'Zulu'),
-        folder(BookmarkRoot.mobile.id, 'WebLibre'),
+        folder(BookmarkRoot.mobile.id, 'Mellow'),
         entry('a', 'Alpha'),
         folder(BookmarkRoot.menu.id, 'Menu'),
       ];

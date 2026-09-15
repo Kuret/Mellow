@@ -4,39 +4,39 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
-import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
-import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
-import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
-import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
-import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
-import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
-import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
-import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
-import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
-import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.history.HistoryExclusions
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonCollection
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.ContentBlocking
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettings
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoHistoryEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoViewportEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.QueryParameterStripping
+import app.mellow.browser.flutter_mozilla_components.services.PrivateTabsNotificationService
+import app.mellow.browser.flutter_mozilla_components.addons.AddonPrefs
+import app.mellow.browser.flutter_mozilla_components.addons.WebExtensionPromptHost
+import app.mellow.browser.flutter_mozilla_components.api.GeckoViewportApiImpl
+import app.mellow.browser.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
+import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
+import app.mellow.browser.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import app.mellow.browser.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
+import app.mellow.browser.flutter_mozilla_components.startup.EngineWarmupSession
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -66,7 +66,7 @@ import java.util.concurrent.TimeUnit
 private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 14 days
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
-private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
+private const val UBLOCK_FILTER_LISTS_PREF = "browser.mellow.uBO.filterLists"
 
 object GlobalComponents {
     private var _components: Components? = null
@@ -153,7 +153,7 @@ object GlobalComponents {
     var engineSettingsApi: GeckoEngineSettingsApiImpl? = null
 
     // Native -> Dart history visit notifications, consumed by Core's history
-    // delegate to forward the visit's WebLibre container. Null on the headless
+    // delegate to forward the visit's Mellow container. Null on the headless
     // path (no Flutter engine); the delegate still hard-excludes persisted
     // container contextIds but skips Dart relation emits.
     var historyEvents: GeckoHistoryEvents? = null

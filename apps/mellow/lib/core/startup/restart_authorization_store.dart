@@ -20,10 +20,10 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/atomic_json_file.dart';
-import 'package:weblibre/core/startup/models/json_read.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/atomic_json_file.dart';
+import 'package:mellow/core/startup/models/json_read.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 
 const restartAuthorizationVersion = 1;
 
@@ -104,7 +104,7 @@ class RestartAuthorization {
 String restartAuthorizationTokenHash(String token) =>
     sha256.convert(utf8.encode(token)).toString();
 
-/// Reader for `weblibre_restart/authorization.json`.
+/// Reader for `mellow_restart/authorization.json`.
 ///
 /// Read-and-consume only: this side never issues an authorization. Issuing one
 /// is the privilege the record exists to prove, and it belongs to the native

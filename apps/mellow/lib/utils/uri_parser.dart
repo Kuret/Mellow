@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/utils/uri_input_parser.dart';
-import 'package:weblibre/utils/uri_policy.dart';
+import 'package:mellow/utils/uri_input_parser.dart';
+import 'package:mellow/utils/uri_policy.dart';
 
 Uri? tryParseUrl(String? input, {bool eagerParsing = false}) {
   return parseUserInputUrl(

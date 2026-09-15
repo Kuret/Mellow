@@ -21,19 +21,19 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 /// Zen's `zen.tabs.essentials.max`: how many essentials a strip is laid out
 /// for. A layout hint only — the grid wraps and grows past it, since the

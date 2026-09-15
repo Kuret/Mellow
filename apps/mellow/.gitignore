@@ -33,7 +33,7 @@ migrate_working_dir/
 /build/
 assets/bangs/*
 !assets/bangs/
-!assets/bangs/weblibre_bangs.json
+!assets/bangs/mellow_bangs.json
 assets/preferences/builtin-bridges.json
 assets/preferences/url-shortener-list.json
 assets/preferences/url_cleaner_data.minify.json

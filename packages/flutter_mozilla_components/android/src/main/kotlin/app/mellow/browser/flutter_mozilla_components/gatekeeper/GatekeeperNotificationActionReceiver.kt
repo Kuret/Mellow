@@ -4,7 +4,7 @@
  * This file is part of WebLibre
  * (see https://weblibre.eu).
  */
-package eu.weblibre.flutter_mozilla_components.gatekeeper
+package app.mellow.browser.flutter_mozilla_components.gatekeeper
 
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -30,13 +30,13 @@ class GatekeeperNotificationActionReceiver : BroadcastReceiver() {
     companion object {
         private const val TAG = "GatekeeperActionReceiver"
 
-        const val ACTION_ALLOW_ONCE = "eu.weblibre.gecko.gatekeeper.ALLOW_ONCE"
-        const val ACTION_ALWAYS_ALLOW = "eu.weblibre.gecko.gatekeeper.ALWAYS_ALLOW"
+        const val ACTION_ALLOW_ONCE = "app.mellow.browser.gatekeeper.ALLOW_ONCE"
+        const val ACTION_ALWAYS_ALLOW = "app.mellow.browser.gatekeeper.ALWAYS_ALLOW"
 
         const val EXTRA_PACKAGE_NAME = "gatekeeper_package"
         const val EXTRA_BLOCKED_INTENT = "gatekeeper_blocked_intent"
         const val EXTRA_NOTIFICATION_ID = "gatekeeper_notification_id"
-        const val EXTRA_NOTIFICATION_APPROVAL_TOKEN = "eu.weblibre.gatekeeper.notification_approval_token"
+        const val EXTRA_NOTIFICATION_APPROVAL_TOKEN = "app.mellow.browser.gatekeeper.notification_approval_token"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -99,7 +99,7 @@ class GatekeeperNotificationActionReceiver : BroadcastReceiver() {
             val relaunchIntent = Intent(blockedIntent).apply {
                 setClassName(
                     context.packageName,
-                    "eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity",
+                    "app.mellow.browser.flutter_mozilla_components.activities.IntentReceiverActivity",
                 )
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 putExtra(EXTRA_NOTIFICATION_APPROVAL_TOKEN, approvalToken)

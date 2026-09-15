@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/capture_tab.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 enum CaptureTabStatus { pending, ready, failed }
 

@@ -20,9 +20,9 @@
 import 'dart:async';
 
 import 'package:exceptions/exceptions.dart';
+import 'package:mellow/core/providers/format.dart';
+import 'package:mellow/features/about/domain/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/providers/format.dart';
-import 'package:weblibre/features/about/domain/providers.dart';
 
 part 'app_initialization.g.dart';
 

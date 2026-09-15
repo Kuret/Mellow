@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/models/restart_request.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/models/startup_intent.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/models/restart_request.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/models/startup_intent.dart';
 
 import 'fixtures.dart';
 

@@ -21,16 +21,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/settings/presentation/widgets/custom_search_engines_editor.dart';
+import 'package:mellow/features/settings/presentation/widgets/default_search_selector.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/custom_search_engines_editor.dart';
-import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const List<SettingsSectionDefinition> searchSettingsSections = [
   SettingsSectionDefinition(

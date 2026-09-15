@@ -24,20 +24,20 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/presentation/widgets/active_profile_chip.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_chips.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/domain/presentation/widgets/active_profile_chip.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
+import 'package:mellow/presentation/widgets/speech_to_text_button.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 /// Widget for tab filters (container chips with synced option)
 class _TabFilters extends ConsumerWidget {

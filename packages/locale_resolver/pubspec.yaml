@@ -36,7 +36,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: eu.weblibre.locale_resolver
+        package: app.mellow.browser.locale_resolver
         pluginClass: LocaleResolverPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.speech_to_text_dialog
+package app.mellow.browser.speech_to_text_dialog
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -29,8 +29,8 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.PluginRegistry
-import eu.weblibre.speech_to_text_dialog.pigeons.SpeechToTextApi as PigeonSpeechToTextApi
-import eu.weblibre.speech_to_text_dialog.pigeons.SpeechToTextEvents
+import app.mellow.browser.speech_to_text_dialog.pigeons.SpeechToTextApi as PigeonSpeechToTextApi
+import app.mellow.browser.speech_to_text_dialog.pigeons.SpeechToTextEvents
 import java.util.Locale
 
 /// Plugin implementation for speech recognition dialog.

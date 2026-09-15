@@ -25,21 +25,21 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/background_tab_open.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uuid/enums.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 sealed class _PickerResult {}
 
@@ -96,8 +96,7 @@ class OpenInContainer extends HookConsumerWidget {
 
         final currentTab = ref.read(selectedTabStateProvider);
         final tabMode =
-            currentTab?.tabMode ??
-            TabMode.fromTabType(TabType.regular);
+            currentTab?.tabMode ?? TabMode.fromTabType(TabType.regular);
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)

@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import java.net.IDN
 import java.net.InetAddress

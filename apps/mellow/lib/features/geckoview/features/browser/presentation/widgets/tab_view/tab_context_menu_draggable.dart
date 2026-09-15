@@ -21,10 +21,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
+import 'package:mellow/data/models/drag_data.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
+import 'package:mellow/presentation/widgets/reorderable_hold_drag.dart';
 
 /// Chrome-like tab context menu + drag coordination.
 ///

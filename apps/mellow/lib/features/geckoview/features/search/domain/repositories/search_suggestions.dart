@@ -19,10 +19,10 @@
  */
 import 'dart:async';
 
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:mellow/utils/lru_cache.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/utils/lru_cache.dart';
 
 part 'search_suggestions.g.dart';
 

@@ -2,7 +2,7 @@
 // ignore_for_file: unused_local_variable, unused_import
 import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/database/database.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'generated/schema.dart';
 

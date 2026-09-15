@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
-import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
-import eu.weblibre.flutter_mozilla_components.history.TabScopedHistoryDelegate
+import app.mellow.browser.flutter_mozilla_components.history.HistoryExclusions
+import app.mellow.browser.flutter_mozilla_components.history.TabScopedHistoryDelegate
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.TabListAction
@@ -78,7 +78,7 @@ class HistoryDelegateBindingMiddleware(
             is TabListAction.RemoveAllTabsAction -> HistoryExclusions.forgetAll()
             // Only the tabs actually being removed, read before [next] applies the
             // action. Forgetting the whole set would drop the provisional mark of a
-            // surviving tab WebLibre has no row for yet — an excluded container's
+            // surviving tab Mellow has no row for yet — an excluded container's
             // `window.open` child — and its next visit would reach Places.
             is TabListAction.RemoveAllNormalTabsAction ->
                 store.state.normalTabs.forEach { HistoryExclusions.forget(it.id) }
@@ -111,7 +111,7 @@ class HistoryDelegateBindingMiddleware(
     }
 
     /**
-     * Carry the opener's exclusion over to a session WebLibre hasn't recorded yet.
+     * Carry the opener's exclusion over to a session Mellow hasn't recorded yet.
      * The child inherits the parent's container in Dart moments later; until that
      * snapshot arrives this is the only thing standing between an excluded
      * container's popup and Places. Provisional — see [HistoryExclusions].

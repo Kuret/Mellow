@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'settings_export_directory.g.dart';
 

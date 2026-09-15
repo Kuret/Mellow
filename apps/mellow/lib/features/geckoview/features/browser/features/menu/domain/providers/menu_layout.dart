@@ -19,11 +19,11 @@
  */
 import 'dart:convert';
 
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'menu_layout.g.dart';
 

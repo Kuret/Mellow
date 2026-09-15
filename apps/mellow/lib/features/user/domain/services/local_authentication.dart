@@ -20,9 +20,9 @@
 import 'dart:async';
 
 import 'package:local_auth/local_auth.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/user/data/models/auth_settings.dart';
 
 part 'local_authentication.g.dart';
 

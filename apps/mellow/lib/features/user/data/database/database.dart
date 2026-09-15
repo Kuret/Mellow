@@ -21,13 +21,13 @@ import 'package:drift/drift.dart';
 import 'package:drift/internal/versioned_schema.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
-import 'package:weblibre/features/user/data/database/daos/cache.dart';
-import 'package:weblibre/features/user/data/database/daos/search_history.dart';
-import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
-import 'package:weblibre/features/user/data/database/daos/setting.dart';
-import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
-import 'package:weblibre/features/user/data/database/database.drift.dart';
-import 'package:weblibre/features/user/data/database/database.steps.dart';
+import 'package:mellow/features/user/data/database/daos/cache.dart';
+import 'package:mellow/features/user/data/database/daos/search_history.dart';
+import 'package:mellow/features/user/data/database/daos/search_tokens.dart';
+import 'package:mellow/features/user/data/database/daos/setting.dart';
+import 'package:mellow/features/user/data/database/daos/toolbar_button_config.dart';
+import 'package:mellow/features/user/data/database/database.drift.dart';
+import 'package:mellow/features/user/data/database/database.steps.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},

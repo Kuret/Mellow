@@ -20,8 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/settings/domain/providers/pending_settings_highlight.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 
 void main() {
   group('filterSettingsSections', () {

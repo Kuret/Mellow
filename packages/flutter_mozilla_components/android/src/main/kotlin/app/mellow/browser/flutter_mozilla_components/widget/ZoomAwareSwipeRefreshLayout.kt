@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.widget
+package app.mellow.browser.flutter_mozilla_components.widget
 
 import android.content.Context
 import android.util.AttributeSet

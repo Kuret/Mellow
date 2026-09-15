@@ -17,14 +17,14 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/plaintext_cleanup.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
 
 void main() {
   late Directory root;
 
   setUp(() {
-    root = Directory.systemTemp.createTempSync('weblibre_shred');
+    root = Directory.systemTemp.createTempSync('mellow_shred');
   });
 
   tearDown(() {

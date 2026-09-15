@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:intl/intl.dart';
-import 'package:weblibre/features/addons/extensions/addon_info.dart';
+import 'package:mellow/features/addons/extensions/addon_info.dart';
 
 class AddonIconView extends StatelessWidget {
   final AddonInfo addon;

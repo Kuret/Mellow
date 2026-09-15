@@ -4,21 +4,21 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
-import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
-import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
-import eu.weblibre.flutter_mozilla_components.pigeons.CustomCookiePolicy
-import eu.weblibre.flutter_mozilla_components.pigeons.DohSettingsMode
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
-import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
-import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
+import app.mellow.browser.flutter_mozilla_components.ColorSchemePreference
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.history.HistoryExclusions
+import app.mellow.browser.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.ColorScheme
+import app.mellow.browser.flutter_mozilla_components.pigeons.CustomCookiePolicy
+import app.mellow.browser.flutter_mozilla_components.pigeons.DohSettingsMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettings
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.HttpsOnlyMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.QueryParameterStripping
+import app.mellow.browser.flutter_mozilla_components.pigeons.TrackingScope
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.DefaultDesktopModeAction
 import mozilla.components.concept.engine.Engine
@@ -85,19 +85,19 @@ class GeckoEngineSettingsApiImpl(
      * For CUSTOM mode, uses the settings from GeckoEngineSettings to determine the behavior.
      */
     private fun updateFingerprintingProtection(
-        trackingProtectionPolicy: eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy,
+        trackingProtectionPolicy: app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy,
         settings: GeckoEngineSettings? = null
     ) {
         when(trackingProtectionPolicy) {
-            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> {
+            app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> {
                 components.core.engineSettings.fingerprintingProtection = true
                 components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
             }
-            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> {
+            app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> {
                 components.core.engineSettings.fingerprintingProtection = false
                 components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = true
             }
-            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> {
+            app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> {
                 // Handle suspected fingerprinters (separate from FINGERPRINTING category)
                 if (settings?.blockSuspectedFingerprinters == true) {
                     when (settings.suspectedFingerprintersScope) {
@@ -115,7 +115,7 @@ class GeckoEngineSettingsApiImpl(
                     components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = false
                 }
             }
-            eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> {
+            app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> {
                 components.core.engineSettings.fingerprintingProtection = false
                 components.core.engineSettings.fingerprintingProtectionPrivateBrowsing = false
             }
@@ -186,10 +186,10 @@ class GeckoEngineSettingsApiImpl(
         }
         if(settings.trackingProtectionPolicy != null) {
             components.core.engineSettings.trackingProtectionPolicy = when(settings.trackingProtectionPolicy) {
-                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> TrackingProtectionPolicy.none()
-                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> TrackingProtectionPolicy.recommended()
-                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> TrackingProtectionPolicy.strict()
-                eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> createCustomTrackingProtectionPolicy(settings)
+                app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.NONE -> TrackingProtectionPolicy.none()
+                app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.RECOMMENDED -> TrackingProtectionPolicy.recommended()
+                app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT -> TrackingProtectionPolicy.strict()
+                app.mellow.browser.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.CUSTOM -> createCustomTrackingProtectionPolicy(settings)
             }
 
             updateFingerprintingProtection(settings.trackingProtectionPolicy, settings)

@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 
 part 'find_in_page.g.dart';
 

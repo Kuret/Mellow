@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
 
 class ReservedToken {
   final int id;

@@ -2,15 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
-import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
-import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.feature.CookieManagerFeature
+import app.mellow.browser.flutter_mozilla_components.feature.BrowserExtensionFeature
+import app.mellow.browser.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.QueryParameterStripping
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings

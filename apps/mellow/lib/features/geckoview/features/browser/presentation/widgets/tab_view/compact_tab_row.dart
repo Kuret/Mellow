@@ -20,13 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_presence.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_presence.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/cold_tab_badge.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/split_badge.dart';
 
 /// A pinned-shelf row (PLAN §6.4): favicon and a single-line title, no URL
 /// and no thumbnail. Pinned tabs are the ones the user returns to, so the

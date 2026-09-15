@@ -17,9 +17,9 @@
 import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
+import 'package:mellow/core/maintenance/secure_storage_participant.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
-import 'package:weblibre/core/maintenance/secure_storage_participant.dart';
 
 /// A participant whose state lives on the Android side.
 ///

@@ -67,9 +67,9 @@ class ProfileStartupDirective {
     dartOut: 'lib/src/pigeons/startup.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/weblibre/flutter_mozilla_components/pigeons/Startup.g.kt',
+        'android/src/main/kotlin/app/mellow/browser/flutter_mozilla_components/pigeons/Startup.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.weblibre.flutter_mozilla_components.pigeons',
+      package: 'app.mellow.browser.flutter_mozilla_components.pigeons',
       // Pigeon emits a `FlutterError` class per generated file; the gecko pigeon
       // already owns that name in this package.
       errorClassName: 'StartupFlutterError',

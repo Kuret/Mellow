@@ -19,8 +19,8 @@
  */
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 /// Closes [tabId] with the shared UX contract: close, then offer undo via
 /// snackbar.

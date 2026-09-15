@@ -1,14 +1,14 @@
-import 'package:weblibre/data/database/converters/uri.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_split_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/data/database/converters/uri.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_split_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/history_query_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
 
 CREATE TABLE container (
   id TEXT PRIMARY KEY NOT NULL,            -- local id == the Gecko contextId handed to engine sessions
@@ -865,7 +865,7 @@ END;
 -- ===========================================================================
 -- Visit → container relation. Mozilla Places remains the source of truth for
 -- browsing history (url, title, visit type, visit time, sync); this table only
--- carries the one thing Places can't store: which WebLibre container a visit
+-- carries the one thing Places can't store: which Mellow container a visit
 -- belonged to. One row per contained visit, written by the Dart
 -- VisitContainerRecorder from native history-delegate events. Uncontained
 -- visits produce no row.
@@ -897,7 +897,7 @@ CREATE INDEX idx_vc_container ON visit_container(container_id, visit_time DESC);
 
 -- Zen sync bookkeeping (PLAN §8). `foreign_record` mirrors remote records
 -- this device did not author but must round-trip verbatim (unknown record
--- kinds, or fields WebLibre doesn't yet model). `sync_record_state` tracks
+-- kinds, or fields Mellow doesn't yet model). `sync_record_state` tracks
 -- what this device last uploaded, mirroring Zen's `zen-spaces-sync.json`
 -- "uploaded" map, so the next sync only pushes records that actually changed.
 CREATE TABLE foreign_record (
@@ -1228,7 +1228,7 @@ containersToClearOnExit:
   FROM container_local cl
   WHERE cl.clear_data_on_exit = 1;
 
--- Every tab WebLibre knows about, with its container and whether that
+-- Every tab Mellow knows about, with its container and whether that
 -- container opted out of history recording. Two consumers:
 --
 --   * the exclude-from-history snapshot replicated to native — the tab is the

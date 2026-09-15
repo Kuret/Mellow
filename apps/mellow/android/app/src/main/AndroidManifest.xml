@@ -56,24 +56,24 @@
         android:enableOnBackInvokedCallback="true">
         
         <activity 
-            android:name="eu.weblibre.flutter_mozilla_components.activities.NotificationActivity" 
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.NotificationActivity" 
             android:theme="@style/Theme.AppCompat.Translucent" 
             android:exported="false"
             android:launchMode="singleTop" />
 
         <receiver
-            android:name="eu.weblibre.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver"
+            android:name="app.mellow.browser.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="eu.weblibre.gecko.gatekeeper.ALLOW_ONCE" />
-                <action android:name="eu.weblibre.gecko.gatekeeper.ALWAYS_ALLOW" />
+                <action android:name="app.mellow.browser.gatekeeper.ALLOW_ONCE" />
+                <action android:name="app.mellow.browser.gatekeeper.ALWAYS_ALLOW" />
             </intent-filter>
         </receiver>
 
         <!-- Merged in by org.mozilla.components:feature-pwa and removed here.
              It is exported, so any app can start it, and it opens ManifestStorage
-             — a profile-scoped Room database — before WebLibre has decided which
-             profile this process belongs to. WebLibre never targets it: its own
+             — a profile-scoped Room database — before Mellow has decided which
+             profile this process belongs to. Mellow never targets it: its own
              PWA shortcuts point at IntentReceiverActivity, which validates the
              launch token and arbitrates the profile before touching storage. -->
         <activity
@@ -113,19 +113,19 @@
                 <action android:name="es.antonborri.home_widget.action.LAUNCH" />
             </intent-filter>
 
-            <!-- WebLibre Account auth callback deep link -->
+            <!-- Mellow Account auth callback deep link -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="weblibre" android:host="account" />
+                <data android:scheme="mellow" android:host="account" />
             </intent-filter>
         </activity>
 
         <!-- Intent router: receives external VIEW/SEND intents and routes
              Custom Tab / PWA to ExternalAppBrowserActivity, regular intents to MainActivity -->
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.IntentReceiverActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
             android:exported="true"
             android:excludeFromRecents="true"
@@ -197,7 +197,7 @@
              or reattach its cached Flutter engine, and it gives the relaunch a
              foreground context that background-activity-launch rules allow. -->
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.activities.RestartActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.RestartActivity"
             android:process=":restart"
             android:exported="false"
             android:excludeFromRecents="true"
@@ -205,7 +205,7 @@
             android:theme="@style/Theme.AppCompat.Translucent" />
 
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.ExternalAppBrowserActivity"
             android:exported="false"
             android:taskAffinity=""
             android:documentLaunchMode="always"
@@ -219,7 +219,7 @@
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.activities.AuthCustomTabActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.AuthCustomTabActivity"
             android:exported="false"
             android:taskAffinity=""
             android:autoRemoveFromRecents="false"
@@ -228,11 +228,11 @@
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.activities.AuthIntentReceiverActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.activities.AuthIntentReceiverActivity"
             android:exported="false" />
 
         <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
+            android:name="app.mellow.browser.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:theme="@style/AppTheme"/>
 
@@ -249,7 +249,7 @@
 
 
         <service
-            android:name="eu.weblibre.flutter_mozilla_components.services.CustomTabsService"
+            android:name="app.mellow.browser.flutter_mozilla_components.services.CustomTabsService"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
@@ -257,12 +257,12 @@
         </service>
 
         <service
-            android:name="eu.weblibre.flutter_mozilla_components.services.DownloadService"
+            android:name="app.mellow.browser.flutter_mozilla_components.services.DownloadService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
 
         <service
-            android:name="eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService"
+            android:name="app.mellow.browser.flutter_mozilla_components.services.PrivateTabsNotificationService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
@@ -270,7 +270,7 @@
                 android:value="This foreground service allows users to close private tabs from the notification" />
         </service>
 
-        <service android:name="eu.weblibre.flutter_mozilla_components.services.MediaSessionService"
+        <service android:name="app.mellow.browser.flutter_mozilla_components.services.MediaSessionService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
 

@@ -19,14 +19,14 @@
  */
 import 'dart:async';
 
+import 'package:mellow/features/about/domain/providers.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/about/domain/providers.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'intent_gatekeeper.g.dart';
 

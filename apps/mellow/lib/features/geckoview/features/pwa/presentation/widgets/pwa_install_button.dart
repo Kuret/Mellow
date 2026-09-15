@@ -20,13 +20,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/pwa/presentation/dialogs/pwa_install_dialog.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/pwa/presentation/dialogs/pwa_install_dialog.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Shows install bottom sheet for sites with a valid PWA manifest (existing flow).
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {

@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
-import eu.weblibre.flutter_mozilla_components.ext.toStringList
-import eu.weblibre.flutter_mozilla_components.ext.toStringSet
+import app.mellow.browser.flutter_mozilla_components.ext.toStringList
+import app.mellow.browser.flutter_mozilla_components.ext.toStringSet
 import org.json.JSONObject
 
 /** Gecko's cookie-store context for regular tabs, and for contextless traffic. */

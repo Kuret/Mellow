@@ -22,14 +22,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
+import 'package:mellow/presentation/hooks/menu_controller.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 /// The fixed row pinned below the menu's scrolling content: back,
 /// forward, close and reload for the tab in front.

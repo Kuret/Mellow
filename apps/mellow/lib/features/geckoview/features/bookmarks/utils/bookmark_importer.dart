@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 
 /// Writes a parsed [ImportBookmarkTree] into Places.
 ///

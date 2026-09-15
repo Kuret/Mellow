@@ -19,10 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/history.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 class HistoryMenuItem extends HookConsumerWidget {
   const HistoryMenuItem({

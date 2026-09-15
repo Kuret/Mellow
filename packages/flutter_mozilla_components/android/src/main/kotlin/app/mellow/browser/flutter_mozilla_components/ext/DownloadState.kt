@@ -4,10 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.ext
+package app.mellow.browser.flutter_mozilla_components.ext
 
-import eu.weblibre.flutter_mozilla_components.pigeons.DownloadState as PigeonDownloadState
-import eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus as PigeonDownloadStatus
+import app.mellow.browser.flutter_mozilla_components.pigeons.DownloadState as PigeonDownloadState
+import app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus as PigeonDownloadStatus
 import mozilla.components.browser.state.state.content.DownloadState as MozillaDownloadState
 
 fun MozillaDownloadState.toPigeonDownloadState(

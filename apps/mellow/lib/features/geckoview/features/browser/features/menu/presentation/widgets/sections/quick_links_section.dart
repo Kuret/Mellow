@@ -22,9 +22,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 
 /// Rows linking to the browser's other screens.
 class QuickLinksSection extends ConsumerWidget {

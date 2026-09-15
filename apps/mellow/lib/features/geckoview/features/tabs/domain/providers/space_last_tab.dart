@@ -20,10 +20,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'space_last_tab.g.dart';
 
@@ -92,7 +92,9 @@ class SpaceLastTab extends _$SpaceLastTab {
         (key, value) => MapEntry(key, value as String?),
       ),
     );
-    unawaited((persistResult.future ?? Future.value()).whenComplete(ready.complete));
+    unawaited(
+      (persistResult.future ?? Future.value()).whenComplete(ready.complete),
+    );
 
     return stateOrNull ?? const {};
   }

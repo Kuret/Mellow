@@ -20,14 +20,14 @@
 import 'dart:math' as math;
 
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/visit_container.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 /// Data access for the visit → container relation (`visit_container`).
 ///
 /// Mozilla Places owns the browsing history itself; this table only records
-/// which WebLibre container each contained visit belonged to. Reads are joined
+/// which Mellow container each contained visit belonged to. Reads are joined
 /// back to Places `VisitInfo`s in the domain layer on
 /// (url_canonical, nearest visit_time).
 @DriftAccessor()

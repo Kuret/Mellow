@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import org.json.JSONObject
 
@@ -110,7 +110,7 @@ data class RestartRequest(
 }
 
 /**
- * Single reader/writer for `weblibre_restart/request.json`.
+ * Single reader/writer for `mellow_restart/request.json`.
  *
  * The monitor is the file's rather than this instance's, because
  * [RestartCoordinator] constructs a store per call. See [FileMonitors].

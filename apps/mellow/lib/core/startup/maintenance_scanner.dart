@@ -19,12 +19,12 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/atomic_json_file.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/atomic_json_file.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
 
 /// A journal file that could not be understood. It reserves maintenance just
 /// like a live journal would; the alternative is booting a profile that may be

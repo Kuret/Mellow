@@ -22,11 +22,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinkTarget, AppLinksMode, GeckoAppLinksService;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 final _appLinkTargetProvider = FutureProvider.autoDispose
     .family<AppLinkTarget?, Uri>((ref, url) {

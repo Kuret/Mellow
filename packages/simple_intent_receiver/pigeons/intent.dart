@@ -42,9 +42,9 @@ class Intent {
     dartOut: 'lib/src/pigeons/intent.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/weblibre/simple_intent_receiver/pigeons/Intent.g.kt',
+        'android/src/main/kotlin/app/mellow/browser/simple_intent_receiver/pigeons/Intent.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.weblibre.simple_intent_receiver.pigeons',
+      package: 'app.mellow.browser.simple_intent_receiver.pigeons',
     ),
     dartPackageName: 'simple_intent_receiver',
   ),
@@ -102,7 +102,7 @@ abstract class IntentGatekeeperHostApi {
   String? resolvePackageLabel(String packageName);
 
   /// Returns the list of packages for which the user tapped "Always allow"
-  /// via a blocked-intent notification while WebLibre was not running.
+  /// via a blocked-intent notification while Mellow was not running.
   /// Callers must acknowledge persisted packages via
   /// [ackPendingAlwaysAllows] after Flutter settings were updated
   /// successfully.

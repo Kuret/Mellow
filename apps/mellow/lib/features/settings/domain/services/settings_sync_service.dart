@@ -19,11 +19,11 @@
  */
 import 'dart:convert';
 
+import 'package:mellow/features/settings/domain/entities/settings_sync_envelope.dart';
+import 'package:mellow/features/settings/domain/services/sync_document_service.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/settings/domain/entities/settings_sync_envelope.dart';
-import 'package:weblibre/features/settings/domain/services/sync_document_service.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'settings_sync_service.g.dart';
 
@@ -36,7 +36,7 @@ class SettingsSyncService extends _$SettingsSyncService
   void build() {}
 
   @override
-  SyncDocumentKind get kind => SyncDocumentKind.weblibreSettings;
+  SyncDocumentKind get kind => SyncDocumentKind.mellowSettings;
 
   @override
   int get schemaVersion => _schemaVersion;

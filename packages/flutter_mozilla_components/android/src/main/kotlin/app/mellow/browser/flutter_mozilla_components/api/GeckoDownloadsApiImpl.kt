@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.os.Environment
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.DownloadState
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareInternetResourceState
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.pigeons.DownloadState
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoDownloadsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareInternetResourceState
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CopyInternetResourceAction
 import mozilla.components.browser.state.action.ShareResourceAction
@@ -91,14 +91,14 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
         )
     }
 
-    private fun eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.toMozillaStatus(): mozilla.components.browser.state.state.content.DownloadState.Status {
+    private fun app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.toMozillaStatus(): mozilla.components.browser.state.state.content.DownloadState.Status {
         return when (this) {
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.INITIATED -> mozilla.components.browser.state.state.content.DownloadState.Status.INITIATED
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.DOWNLOADING -> mozilla.components.browser.state.state.content.DownloadState.Status.DOWNLOADING
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.PAUSED -> mozilla.components.browser.state.state.content.DownloadState.Status.PAUSED
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.CANCELLED -> mozilla.components.browser.state.state.content.DownloadState.Status.CANCELLED
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.FAILED -> mozilla.components.browser.state.state.content.DownloadState.Status.FAILED
-            eu.weblibre.flutter_mozilla_components.pigeons.DownloadStatus.COMPLETED -> mozilla.components.browser.state.state.content.DownloadState.Status.COMPLETED
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.INITIATED -> mozilla.components.browser.state.state.content.DownloadState.Status.INITIATED
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.DOWNLOADING -> mozilla.components.browser.state.state.content.DownloadState.Status.DOWNLOADING
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.PAUSED -> mozilla.components.browser.state.state.content.DownloadState.Status.PAUSED
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.CANCELLED -> mozilla.components.browser.state.state.content.DownloadState.Status.CANCELLED
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.FAILED -> mozilla.components.browser.state.state.content.DownloadState.Status.FAILED
+            app.mellow.browser.flutter_mozilla_components.pigeons.DownloadStatus.COMPLETED -> mozilla.components.browser.state.state.content.DownloadState.Status.COMPLETED
         }
     }
 

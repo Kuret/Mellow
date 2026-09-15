@@ -19,7 +19,7 @@
  */
 import 'package:flutter/services.dart';
 
-const _channel = MethodChannel('eu.weblibre.gecko/activity');
+const _channel = MethodChannel('app.mellow.browser/activity');
 
 /// Moves the app to the background without finishing the activity.
 /// Unlike [SystemNavigator.pop], this keeps the Flutter engine attached,

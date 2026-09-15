@@ -17,7 +17,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const visibility = MethodChannel(
-    'eu.weblibre.flutter_mozilla_components/engine_view',
+    'app.mellow.browser.flutter_mozilla_components/engine_view',
   );
 
   const showFragmentChannel =

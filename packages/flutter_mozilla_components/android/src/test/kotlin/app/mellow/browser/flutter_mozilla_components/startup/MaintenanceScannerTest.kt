@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -32,7 +32,7 @@ import org.json.JSONObject
 
 private const val PROFILE_ID = "0199a0b1-1111-7111-8111-111111111111"
 
-/** Mirrors `apps/weblibre/test/core/startup/maintenance_scanner_test.dart`. */
+/** Mirrors `apps/mellow/test/core/startup/maintenance_scanner_test.dart`. */
 class MaintenanceScannerTest {
 
     private lateinit var filesDir: File
@@ -40,7 +40,7 @@ class MaintenanceScannerTest {
 
     @BeforeTest
     fun setUp() {
-        filesDir = Files.createTempDirectory("weblibre_maintenance").toFile()
+        filesDir = Files.createTempDirectory("mellow_maintenance").toFile()
         paths = StartupPaths(filesDir)
         paths.profilesDir.mkdirs()
         paths.maintenanceJournalsDir.mkdirs()

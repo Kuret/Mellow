@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 /**
  * Global app-links behaviour, Kotlin-native mirror of the Pigeon `AppLinksMode` transport enum.
@@ -61,7 +61,7 @@ data class AppLinkPolicy(
     /**
      * When true, an engine-supported (http(s)) navigation that raises a prompt is **denied** while
      * the prompt is up, instead of being allowed to load behind it (§2.2). Declining then re-issues
-     * the load; see [WebLibreAppLinksInterceptor] and `AppLinkNavigationRelease`.
+     * the load; see [MellowAppLinksInterceptor] and `AppLinkNavigationRelease`.
      *
      * Opt-in, and the seed default is deliberately `false`: this flag decides whether a navigation
      * is *stalled*, and the surface that would un-stall it (a prompt UI) is not guaranteed to exist

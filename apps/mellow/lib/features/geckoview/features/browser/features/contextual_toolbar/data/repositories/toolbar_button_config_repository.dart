@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'toolbar_button_config_repository.g.dart';
 

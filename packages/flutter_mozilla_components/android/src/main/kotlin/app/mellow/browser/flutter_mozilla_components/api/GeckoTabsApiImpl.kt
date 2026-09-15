@@ -4,28 +4,28 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
-import eu.weblibre.flutter_mozilla_components.pigeons.AddTabParams
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
-import eu.weblibre.flutter_mozilla_components.pigeons.LoadUrlFlagsValue
-import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation as PigeonRestoreLocation
-import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableTab as PigeonRecoverableTab
-import eu.weblibre.flutter_mozilla_components.pigeons.SourceValue
-import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
-import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.HistoryItem
-import eu.weblibre.flutter_mozilla_components.pigeons.HistoryState
-import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation
-import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
-import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
+import app.mellow.browser.flutter_mozilla_components.history.HistoryExclusions
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddTabParams
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
+import app.mellow.browser.flutter_mozilla_components.pigeons.LoadUrlFlagsValue
+import app.mellow.browser.flutter_mozilla_components.pigeons.RestoreLocation as PigeonRestoreLocation
+import app.mellow.browser.flutter_mozilla_components.pigeons.RecoverableTab as PigeonRecoverableTab
+import app.mellow.browser.flutter_mozilla_components.pigeons.SourceValue
+import app.mellow.browser.flutter_mozilla_components.pigeons.WebExtensionActionType
+import app.mellow.browser.flutter_mozilla_components.pigeons.WebExtensionData
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.FindResultState
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.HistoryItem
+import app.mellow.browser.flutter_mozilla_components.pigeons.HistoryState
+import app.mellow.browser.flutter_mozilla_components.pigeons.RestoreLocation
+import app.mellow.browser.flutter_mozilla_components.pigeons.SecurityInfoState
+import app.mellow.browser.flutter_mozilla_components.pigeons.TabContentState
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

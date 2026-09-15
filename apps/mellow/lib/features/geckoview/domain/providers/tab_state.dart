@@ -21,24 +21,24 @@ import 'dart:async';
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/find_result.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/history.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/security.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/utils/image_helper.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 
 part 'tab_state.g.dart';
 

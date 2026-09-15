@@ -19,23 +19,24 @@
  */
 import 'dart:async';
 
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/restart_authorization_store.dart';
+import 'package:mellow/features/share_intent/domain/services/sharing_intent.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/utils/exit_app.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/restart_authorization_store.dart';
-import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/utils/exit_app.dart';
 
 part 'profile_restart_request.g.dart';
 
 /// Sent by `IntentReceiverActivity` when the user answers a profile-mismatch
 /// dialog with "restart into the other profile".
-const restartIntoProfileAction = 'eu.weblibre.action.RESTART_INTO_PROFILE';
-const _profileIdExtra = 'eu.weblibre.extra.RESTART_PROFILE_ID';
-const _authorizationExtra = 'eu.weblibre.extra.RESTART_AUTHORIZATION';
+const restartIntoProfileAction =
+    'app.mellow.browser.action.RESTART_INTO_PROFILE';
+const _profileIdExtra = 'app.mellow.browser.extra.RESTART_PROFILE_ID';
+const _authorizationExtra = 'app.mellow.browser.extra.RESTART_AUTHORIZATION';
 
 /// The profile id a restart request *claims*, or null for any other intent.
 ///

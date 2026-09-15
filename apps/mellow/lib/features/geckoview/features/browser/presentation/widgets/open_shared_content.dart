@@ -26,23 +26,23 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoAppLinksService;
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
-import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/hooks/debouncer.dart';
-import 'package:weblibre/utils/form_validators.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
+import 'package:mellow/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
+import 'package:mellow/presentation/hooks/debouncer.dart';
+import 'package:mellow/utils/form_validators.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Where a shared link should land.
 ///

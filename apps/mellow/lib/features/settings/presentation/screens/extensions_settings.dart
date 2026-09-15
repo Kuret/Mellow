@@ -23,9 +23,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 
 const List<SettingsSectionDefinition> extensionsSettingsSections = [
   SettingsSectionDefinition(

@@ -4,7 +4,7 @@
  * This file is part of WebLibre
  * (see https://weblibre.eu).
  */
-package eu.weblibre.flutter_mozilla_components.gatekeeper
+package app.mellow.browser.flutter_mozilla_components.gatekeeper
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,7 +15,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import eu.weblibre.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.R
 
 /**
  * Posts an actionable heads-up notification when an intent is blocked by the

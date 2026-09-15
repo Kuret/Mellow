@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/maintenance_journal_store.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_runner.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_runner.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 const _profileId = '0199a0b1-1111-7111-8111-111111111111';
 
@@ -52,7 +52,7 @@ void main() {
   late List<String> published;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('weblibre_runner');
+    root = await Directory.systemTemp.createTemp('mellow_runner');
     paths = StartupPaths(Directory(p.join(root.path, 'files')));
     await paths.ensureGlobalDirectories();
     store = StartupConfigStore(paths);
@@ -271,7 +271,7 @@ void main() {
         profileId: _profileId,
         profileName: 'Default',
         createdAt: DateTime.utc(2026, 8, 18),
-        sourceFileUri: 'content://tree/backups/archive.weblibre',
+        sourceFileUri: 'content://tree/backups/archive.mellow',
       );
       await store.enqueueTask(task);
       return task;

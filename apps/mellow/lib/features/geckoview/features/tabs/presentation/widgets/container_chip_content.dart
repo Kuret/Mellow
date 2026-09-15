@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
 
 /// The colour a container is themed from: its Firefox colour keyword, or the
 /// theme primary for `toolbar` (and unknown keywords), which has no colour of

@@ -20,12 +20,12 @@
 import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
 
 /// Converts a queued launch into the shape the ordinary intent pipeline reads.
 ///

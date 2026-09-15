@@ -20,16 +20,16 @@
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/features/settings/domain/entities/settings_export_document.dart';
+import 'package:mellow/features/settings/domain/services/settings_transfer_service.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
-import 'package:weblibre/features/settings/domain/services/settings_transfer_service.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 void main() {
   // The settings document reaches three repositories, and one of them talks to
@@ -121,10 +121,7 @@ void main() {
         sections: const {},
       );
 
-      expect(
-        (await generalSettings().fetchSettings()).pureBlack,
-        false,
-      );
+      expect((await generalSettings().fetchSettings()).pureBlack, false);
     });
 
     test('refuses a section from a newer build before applying anything', () {
@@ -320,10 +317,7 @@ void main() {
         throwsA(isA<SettingsExportFormatException>()),
       );
 
-      expect(
-        (await generalSettings().fetchSettings()).pureBlack,
-        false,
-      );
+      expect((await generalSettings().fetchSettings()).pureBlack, false);
     });
   });
 }

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:weblibre/utils/uri_policy.dart';
+import 'package:mellow/utils/uri_policy.dart';
 
 extension UriX on Uri {
   Uri get base => Uri.parse('$scheme://$authority');

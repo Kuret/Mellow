@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import 'package:flutter/services.dart' show SwipeEdge;
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 /// Whether a back gesture should move the wide-viewport docked side rail to
 /// the opposite edge, instead of running the browser's ordinary back.

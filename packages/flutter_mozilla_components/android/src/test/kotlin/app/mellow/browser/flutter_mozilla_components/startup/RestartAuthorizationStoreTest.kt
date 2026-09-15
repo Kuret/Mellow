@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -34,7 +34,7 @@ private const val TARGET_PROFILE = "0199a0b1-1111-7111-8111-111111111111"
 
 /**
  * The Dart half of this contract lives in
- * `apps/weblibre/test/features/user/domain/services/profile_restart_request_test.dart`,
+ * `apps/mellow/test/features/user/domain/services/profile_restart_request_test.dart`,
  * which checks the same record from the consuming side.
  */
 class RestartAuthorizationStoreTest {
@@ -46,7 +46,7 @@ class RestartAuthorizationStoreTest {
 
     @BeforeTest
     fun setUp() {
-        filesDir = Files.createTempDirectory("weblibre_restart_auth").toFile()
+        filesDir = Files.createTempDirectory("mellow_restart_auth").toFile()
         paths = StartupPaths(filesDir)
         store = RestartAuthorizationStore(paths)
     }

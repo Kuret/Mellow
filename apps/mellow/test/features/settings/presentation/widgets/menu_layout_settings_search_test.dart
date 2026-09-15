@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/settings/presentation/widgets/appearance_layout_content.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/settings/presentation/widgets/appearance_layout_content.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 
 /// What the Appearance & Layout screen renders and what the global settings
 /// search indexes.

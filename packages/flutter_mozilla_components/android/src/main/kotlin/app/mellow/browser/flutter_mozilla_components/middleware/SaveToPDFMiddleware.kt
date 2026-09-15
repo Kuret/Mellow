@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.EngineAction

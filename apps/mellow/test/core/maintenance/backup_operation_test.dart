@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/asset_database.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/backup_operation.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/asset_database.dart';
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
-import 'package:weblibre/core/maintenance/backup_operation.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
 
 const _profileId = '0199a0b1-1111-7111-8111-111111111111';
 
@@ -52,7 +52,7 @@ void main() {
   late Directory workDir;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('weblibre_backup');
+    root = await Directory.systemTemp.createTemp('mellow_backup');
     profileDir = Directory(p.join(root.path, 'profile'));
     workDir = Directory(p.join(root.path, 'work'));
     await workDir.create(recursive: true);
@@ -293,7 +293,7 @@ void main() {
       );
 
       expect(
-        File(p.join(workDir.path, 'archive.weblibre')).existsSync(),
+        File(p.join(workDir.path, 'archive.mellow')).existsSync(),
         isFalse,
       );
       expect(Directory(p.join(workDir.path, 'source')).existsSync(), isFalse);

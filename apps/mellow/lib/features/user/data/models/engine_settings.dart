@@ -24,9 +24,9 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mellow/features/user/data/models/ublock_filter_list_settings.dart';
+import 'package:mellow/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
-import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 
 part 'engine_settings.g.dart';
 
@@ -125,10 +125,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   /// languages the device is configured for and nothing else.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  List<String> get locales => WidgetsBinding
-      .instance
-      .platformDispatcher
-      .locales
+  List<String> get locales => WidgetsBinding.instance.platformDispatcher.locales
       .map((locale) => locale.toLanguageTag())
       .toList();
 
@@ -147,7 +144,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get blockCookies => true;
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  CustomCookiePolicy get customCookiePolicy => CustomCookiePolicy.totalProtection;
+  CustomCookiePolicy get customCookiePolicy =>
+      CustomCookiePolicy.totalProtection;
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   bool get blockTrackingContent => true;

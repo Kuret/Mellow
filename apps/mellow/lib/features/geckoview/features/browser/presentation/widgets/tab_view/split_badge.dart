@@ -20,7 +20,7 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
 
 /// A tab's place in its split (PLAN §6.5): [index] of [count] members, in
 /// `splitIndex` order. Members render adjacent; this tells a row whether it

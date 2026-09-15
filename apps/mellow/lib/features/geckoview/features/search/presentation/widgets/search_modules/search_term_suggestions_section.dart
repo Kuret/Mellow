@@ -20,11 +20,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
-import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_suggestions.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
+import 'package:mellow/presentation/hooks/on_listenable_change_selector.dart';
 
 class SearchTermSuggestionsSection extends HookConsumerWidget {
   final TextEditingController searchTextController;

@@ -4,9 +4,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -500,7 +500,7 @@ class PendingAppLinkStoreTest {
     @Test
     fun aCommittedUrlChangeStillRevokesWithoutAGenerationBump() {
         // Backstop for navigations that never reach the interceptor tail (PWA/TWA, sandbox capture,
-        // weblibre://, FxA): they bump nothing, so only the anchor can catch them.
+        // mellow://, FxA): they bump nothing, so only the anchor can catch them.
         val store = PendingAppLinkStore(FakeClock())
         val request = heldAt(store)
         assertNotNull(store.consume(request.requestId))

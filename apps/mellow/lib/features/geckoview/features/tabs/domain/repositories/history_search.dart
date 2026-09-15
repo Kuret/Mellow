@@ -22,11 +22,11 @@ import 'dart:math' as math;
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show HistoryMetadata;
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/history_query_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 
 part 'history_search.g.dart';
 

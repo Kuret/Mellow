@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.content.Context
 import android.content.Intent
@@ -15,16 +15,16 @@ import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.getSystemService
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity
-import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
-import eu.weblibre.flutter_mozilla_components.pigeons.PwaIcon
-import eu.weblibre.flutter_mozilla_components.pigeons.PwaManifest
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetParams
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.activities.IntentReceiverActivity
+import app.mellow.browser.flutter_mozilla_components.pigeons.ExternalApplicationResource
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPwaApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.PwaIcon
+import app.mellow.browser.flutter_mozilla_components.pigeons.PwaManifest
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTarget
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTargetFiles
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTargetParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

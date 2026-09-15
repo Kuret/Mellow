@@ -22,10 +22,10 @@
 
 import 'dart:convert';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
-import 'package:weblibre/utils/uri_input_parser.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
+import 'package:mellow/utils/uri_input_parser.dart';
 
 /// Parses a Firefox JSON bookmark backup into an [ImportBookmarkTree].
 ///
@@ -356,7 +356,7 @@ class _BookmarkJsonParser {
 
   /// Reads a backup timestamp, which may be in either unit.
   ///
-  /// Firefox writes PRTime (microseconds), while WebLibre's own JSON export
+  /// Firefox writes PRTime (microseconds), while Mellow's own JSON export
   /// writes Places' native milliseconds. Any microsecond value for a date after
   /// ~1973 exceeds [_microsecondThreshold], whereas a millisecond value would
   /// have to be a date past the year 5138 to reach it.

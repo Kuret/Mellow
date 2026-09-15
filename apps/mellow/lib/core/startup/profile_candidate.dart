@@ -19,9 +19,9 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/startup/profile_discovery.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/startup/profile_discovery.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// Where a candidate came from. Purely diagnostic; the decision itself is
 /// [resolveProfileCandidate].

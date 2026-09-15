@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPolicySnapshot
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode as PigeonAppLinksMode
-import eu.weblibre.flutter_mozilla_components.pigeons.NativeAppLinkRule
-import eu.weblibre.flutter_mozilla_components.pigeons.NativeAppLinkRuleDecision
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPolicySnapshot
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinksMode as PigeonAppLinksMode
+import app.mellow.browser.flutter_mozilla_components.pigeons.NativeAppLinkRule
+import app.mellow.browser.flutter_mozilla_components.pigeons.NativeAppLinkRuleDecision
 
 /** Map the replicated Pigeon snapshot to the Kotlin-native classifier policy (§2.8). */
 fun AppLinkPolicySnapshot.toAppLinkPolicy(): AppLinkPolicy {

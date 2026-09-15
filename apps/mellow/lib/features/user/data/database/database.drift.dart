@@ -1,16 +1,16 @@
 // dart format width=80
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart' as i0;
-import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+import 'package:mellow/features/user/data/database/definitions.drift.dart'
     as i1;
-import 'package:weblibre/features/user/data/database/daos/setting.dart' as i2;
-import 'package:weblibre/features/user/data/database/database.dart' as i3;
-import 'package:weblibre/features/user/data/database/daos/cache.dart' as i4;
-import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart'
+import 'package:mellow/features/user/data/database/daos/setting.dart' as i2;
+import 'package:mellow/features/user/data/database/database.dart' as i3;
+import 'package:mellow/features/user/data/database/daos/cache.dart' as i4;
+import 'package:mellow/features/user/data/database/daos/toolbar_button_config.dart'
     as i5;
-import 'package:weblibre/features/user/data/database/daos/search_tokens.dart'
+import 'package:mellow/features/user/data/database/daos/search_tokens.dart'
     as i6;
-import 'package:weblibre/features/user/data/database/daos/search_history.dart'
+import 'package:mellow/features/user/data/database/daos/search_history.dart'
     as i7;
 import 'package:drift/internal/modular.dart' as i8;
 import 'package:sqlite3/common.dart' as i9;

@@ -22,13 +22,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
-import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
+import 'package:mellow/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 /// Screen to view and manage tracking protection exceptions
 ///

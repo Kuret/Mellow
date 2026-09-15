@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.simple_intent_receiver.ext
+package app.mellow.browser.simple_intent_receiver.ext
 
 import java.util.concurrent.atomic.AtomicLong
 

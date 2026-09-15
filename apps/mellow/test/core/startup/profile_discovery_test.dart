@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/profile_candidate.dart';
+import 'package:mellow/core/startup/profile_discovery.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/startup/profile_candidate.dart';
-import 'package:weblibre/core/startup/profile_discovery.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 const _oldest = '0199a0b1-1111-7111-8111-111111111111';
 const _middle = '0199a0b1-2222-7222-8222-222222222222';
@@ -17,7 +17,7 @@ void main() {
   late Directory profilesDir;
 
   setUp(() async {
-    profilesDir = await Directory.systemTemp.createTemp('weblibre_profiles');
+    profilesDir = await Directory.systemTemp.createTemp('mellow_profiles');
   });
 
   tearDown(() async {
@@ -203,9 +203,7 @@ void main() {
     );
 
     test('unrelated directories are neither profiles nor damage', () async {
-      await Directory(
-        p.join(profilesDir.path, 'weblibre_maintenance'),
-      ).create();
+      await Directory(p.join(profilesDir.path, 'mellow_maintenance')).create();
       await File(
         p.join(profilesDir.path, 'current_profile'),
       ).writeAsString(_oldest);

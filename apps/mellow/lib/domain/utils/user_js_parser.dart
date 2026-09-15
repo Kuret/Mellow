@@ -19,7 +19,7 @@
  */
 /// Parses Firefox-compatible `user.js` text into a map of pref name to value.
 ///
-/// Accepts the Firefox `user.js` subset used by WebLibre:
+/// Accepts the Firefox `user.js` subset used by Mellow:
 /// - blank lines and whitespace
 /// - `//`, `#`, and `/* ... */` comments
 /// - `user_pref("name", value);`

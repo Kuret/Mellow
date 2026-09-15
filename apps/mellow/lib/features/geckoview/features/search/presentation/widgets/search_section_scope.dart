@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
 
 /// Marks which [SearchSectionHost] the sections below it belong to, and how
 /// their headers are painted.

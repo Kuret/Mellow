@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.pointer
+package app.mellow.browser.flutter_mozilla_components.pointer
 
 import android.content.Context
 import android.os.Looper
@@ -13,9 +13,9 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerHitTest
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerTarget
-import eu.weblibre.flutter_mozilla_components.widget.PointerInputFrameLayout
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerHitTest
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerTarget
+import app.mellow.browser.flutter_mozilla_components.widget.PointerInputFrameLayout
 import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

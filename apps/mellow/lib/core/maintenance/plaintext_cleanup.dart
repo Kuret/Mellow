@@ -19,7 +19,7 @@
  */
 import 'dart:io';
 
-import 'package:weblibre/core/logger.dart';
+import 'package:mellow/core/logger.dart';
 
 /// Removes [directory], and if it cannot, empties what is inside it.
 ///

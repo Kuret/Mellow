@@ -20,7 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 
 part 'container_data.g.dart';
 

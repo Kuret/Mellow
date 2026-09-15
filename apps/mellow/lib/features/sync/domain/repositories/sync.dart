@@ -22,12 +22,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/sync/domain/entities/sync_repository_state.dart';
+import 'package:mellow/features/sync/domain/entities/synced_tab_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
-import 'package:weblibre/features/sync/domain/entities/synced_tab_item.dart';
 
 part 'sync.g.dart';
 

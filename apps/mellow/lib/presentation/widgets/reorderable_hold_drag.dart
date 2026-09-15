@@ -58,7 +58,7 @@ const _kMinRevealDelta = 0.5;
 /// immediately reports "the drag target sticks out past the viewport edge".
 /// Because the proxy is pinned to the stationary finger, that condition never
 /// clears again and the list auto-scrolls all the way to its min/max extent,
-/// dragging the item along with it (WebLibre issue #579).
+/// dragging the item along with it (Mellow issue #579).
 class ReorderableHoldDragListener extends HookWidget {
   /// Index of the item in the enclosing reorderable list.
   final int index;

@@ -21,8 +21,8 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 void main() {
   group('ZenSettings deserialization coverage', () {

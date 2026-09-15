@@ -1,27 +1,27 @@
 // dart format width=80
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart' as i0;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart'
     as i1;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/container.dart'
     as i2;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart'
     as i3;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/tab.dart'
     as i4;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/space.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/space.dart'
     as i5;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_folder.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/tab_folder.dart'
     as i6;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab_split.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/tab_split.dart'
     as i7;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/sync_state.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/sync_state.dart'
     as i8;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/capture_tab.dart'
     as i9;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/history.dart'
     as i10;
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart'
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/visit_container.dart'
     as i11;
 import 'package:drift/internal/modular.dart' as i12;
 import 'package:sqlite3/common.dart' as i13;

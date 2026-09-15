@@ -20,9 +20,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
 
 /// The arrangement lists themselves, without any chrome around them.
 ///

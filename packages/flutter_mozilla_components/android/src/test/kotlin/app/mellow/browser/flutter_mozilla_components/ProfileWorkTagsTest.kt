@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,7 +33,7 @@ class ProfileWorkTagsTest {
         // the participant never asks for — which looks exactly like no tag at all.
         assertEquals(
             ProfileWorkTags.forProfile(uuid),
-            ProfileWorkTags.forRelativePath("weblibre_profiles/profile-$uuid"),
+            ProfileWorkTags.forRelativePath("mellow_profiles/profile-$uuid"),
         )
     }
 
@@ -45,7 +45,7 @@ class ProfileWorkTagsTest {
         )
         assertEquals(
             ProfileWorkTags.forProfile(uuid),
-            ProfileWorkTags.forRelativePath("weblibre_profiles/profile-${uuid.uppercase()}"),
+            ProfileWorkTags.forRelativePath("mellow_profiles/profile-${uuid.uppercase()}"),
         )
     }
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.maintenance
+package app.mellow.browser.flutter_mozilla_components.maintenance
 
 import org.json.JSONArray
 import org.json.JSONObject

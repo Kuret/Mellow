@@ -22,11 +22,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/providers/http_client.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/providers/http_client.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 
 part 'browser_addon.g.dart';
 

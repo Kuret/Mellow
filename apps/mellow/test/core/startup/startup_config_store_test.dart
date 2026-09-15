@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
 
 void main() {
   late Directory filesDir;
@@ -13,7 +13,7 @@ void main() {
   late StartupConfigStore store;
 
   setUp(() async {
-    filesDir = await Directory.systemTemp.createTemp('weblibre_startup_cfg');
+    filesDir = await Directory.systemTemp.createTemp('mellow_startup_cfg');
     paths = StartupPaths(filesDir);
     await paths.ensureGlobalDirectories();
     store = StartupConfigStore(paths);

@@ -19,13 +19,13 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/geckoview/features/history/domain/entities/history_entry.dart';
+import 'package:mellow/features/geckoview/features/history/domain/entities/history_filter_options.dart';
+import 'package:mellow/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/utils/url_canonical.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/utils/url_canonical.dart';
 
 part 'container_history.g.dart';
 

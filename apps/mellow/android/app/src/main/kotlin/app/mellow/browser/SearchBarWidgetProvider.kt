@@ -1,4 +1,4 @@
-package eu.weblibre.gecko
+package app.mellow.browser
 
 import android.content.Context
 import android.content.Intent

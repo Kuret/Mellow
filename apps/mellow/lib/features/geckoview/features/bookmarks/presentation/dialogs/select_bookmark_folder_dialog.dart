@@ -23,7 +23,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 
 /// Shows a bottom sheet for selecting a bookmark folder destination (for move operations).
 ///

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:weblibre/features/search/domain/entities/bareword.dart';
+import 'package:mellow/features/search/domain/entities/bareword.dart';
 
 typedef _Phrase = List<Bareword>;
 

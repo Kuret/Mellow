@@ -19,25 +19,25 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/security.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_row.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_tab_bar.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/wide_rail_tab_list.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 /// Pinned header showing both layouts the browser picks from by viewport
 /// width: the compact bar of narrow screens and the side rail of wide ones.

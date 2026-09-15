@@ -20,7 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/features/user/data/models/ublock_asset.dart';
+import 'package:mellow/features/user/data/models/ublock_asset.dart';
 
 part 'ublock_filter_list_settings.g.dart';
 

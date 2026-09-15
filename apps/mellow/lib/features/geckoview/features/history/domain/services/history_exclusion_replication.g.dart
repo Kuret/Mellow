@@ -153,7 +153,7 @@ final class WatchHistoryExclusionSnapshotProvider
 String _$watchHistoryExclusionSnapshotHash() =>
     r'073ec4248f1e0e6f9df8f3a1e8d27196652a308a';
 
-/// Keeps native's exclude-from-history snapshot in sync with WebLibre's
+/// Keeps native's exclude-from-history snapshot in sync with Mellow's
 /// containers and tabs. Activated eagerly at startup (and pushed once more
 /// before engine init) so an excluded container never leaks a restored tab's
 /// visit to Places.
@@ -162,7 +162,7 @@ String _$watchHistoryExclusionSnapshotHash() =>
 final historyExclusionReplicationProvider =
     HistoryExclusionReplicationProvider._();
 
-/// Keeps native's exclude-from-history snapshot in sync with WebLibre's
+/// Keeps native's exclude-from-history snapshot in sync with Mellow's
 /// containers and tabs. Activated eagerly at startup (and pushed once more
 /// before engine init) so an excluded container never leaks a restored tab's
 /// visit to Places.
@@ -170,7 +170,7 @@ final historyExclusionReplicationProvider =
 final class HistoryExclusionReplicationProvider
     extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
     with $FutureModifier<void>, $FutureProvider<void> {
-  /// Keeps native's exclude-from-history snapshot in sync with WebLibre's
+  /// Keeps native's exclude-from-history snapshot in sync with Mellow's
   /// containers and tabs. Activated eagerly at startup (and pushed once more
   /// before engine init) so an excluded container never leaks a restored tab's
   /// visit to Places.

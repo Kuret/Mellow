@@ -19,7 +19,7 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/utils/url_canonical.dart';
+import 'package:mellow/utils/url_canonical.dart';
 
 void main() {
   group('canonicalizeUrl', () {

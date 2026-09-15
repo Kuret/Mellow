@@ -1,7 +1,7 @@
 // dart format width=80
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart' as i0;
-import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+import 'package:mellow/features/user/data/database/definitions.drift.dart'
     as i1;
 import 'dart:typed_data' as i2;
 import 'package:drift/internal/modular.dart' as i3;

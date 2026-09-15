@@ -19,10 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
 
 class DialogOutcome {
   final IntentSourcePolicy decision;

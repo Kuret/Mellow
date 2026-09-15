@@ -19,10 +19,10 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/features/share_intent/domain/services/brokered_intents.dart';
 import 'package:path/path.dart' as p;
 import 'package:simple_intent_receiver/simple_intent_receiver.dart' as sir;
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/features/share_intent/domain/services/brokered_intents.dart';
 
 /// Records what the broker was asked to do.
 class _FakeProfileApi implements GeckoProfileApi {

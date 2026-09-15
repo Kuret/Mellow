@@ -26,33 +26,33 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/providers/global_drop.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/data/models/drag_data.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
+import 'package:mellow/features/geckoview/features/browser/utils/grid_calculations.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_summary.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/folder.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 
 /// Grid tile for a [TabListFolderItem]. Grid cells are all the same fixed
 /// aspect-ratio size (see [_TabGridView]'s `SliverGridDelegateWithFixedCrossAxisCount`),
@@ -719,11 +719,9 @@ class ViewTabGridWidget extends HookConsumerWidget {
                 ),
                 child: FloatingActionButton.small(
                   onPressed: () async {
-
                     await SearchRoute(
                       tabType:
-                          ref.read(selectedTabTypeProvider) ??
-                          TabType.regular,
+                          ref.read(selectedTabTypeProvider) ?? TabType.regular,
                     ).push(context);
 
                     onClose();

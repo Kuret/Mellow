@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/maintenance_evidence.dart';
+import 'package:mellow/core/startup/maintenance_scanner.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/domain/entities/profile.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/startup/maintenance_evidence.dart';
-import 'package:weblibre/core/startup/maintenance_scanner.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/domain/entities/profile.dart';
 
 const _profile = '0199a0b1-1111-7111-8111-111111111111';
 
@@ -16,7 +16,7 @@ void main() {
   late StartupPaths paths;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('weblibre_evidence');
+    root = await Directory.systemTemp.createTemp('mellow_evidence');
     paths = StartupPaths(Directory(p.join(root.path, 'files')));
     await paths.ensureGlobalDirectories();
   });
@@ -82,7 +82,7 @@ void main() {
       // it — a sibling of staging, not part of it.
       final dir = paths.restoreWorkspaceDir(taskId)
         ..createSync(recursive: true);
-      File(p.join(dir.path, 'incoming.weblibre')).writeAsStringSync('archive');
+      File(p.join(dir.path, 'incoming.mellow')).writeAsStringSync('archive');
     }
   }
 

@@ -24,16 +24,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
-import 'package:weblibre/features/user/domain/providers/default_browser.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:mellow/features/sync/domain/entities/sync_repository_state.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
+import 'package:mellow/features/user/domain/providers.dart';
+import 'package:mellow/features/user/domain/providers/default_browser.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 /// Tears the app down. Injectable so a test can confirm a quit without the real
 /// implementation ending the process.

@@ -4,9 +4,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
-import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
+import app.mellow.browser.flutter_mozilla_components.history.HistoryExclusions
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.HistoryMetadataAction

@@ -22,12 +22,12 @@
         <item name="mozac_primary_text_color">?attr/colorOnSurface</item>
     </style>
 
-    <style name="Widget.WebLibreWidget.AppWidget.Container" parent="android:Widget">
+    <style name="Widget.MellowWidget.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
         <item name="android:background">?android:attr/colorBackground</item>
     </style>
 
-    <style name="Widget.WebLibreWidget.AppWidget.InnerView" parent="android:Widget">
+    <style name="Widget.MellowWidget.AppWidget.InnerView" parent="android:Widget">
         <item name="android:background">?android:attr/colorBackground</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>

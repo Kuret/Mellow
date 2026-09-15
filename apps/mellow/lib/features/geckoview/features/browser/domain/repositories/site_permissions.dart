@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/site_permissions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
 
 part 'site_permissions.g.dart';
 

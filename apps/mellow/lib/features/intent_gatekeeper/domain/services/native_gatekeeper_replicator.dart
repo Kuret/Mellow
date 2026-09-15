@@ -22,12 +22,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'native_gatekeeper_replicator.g.dart';
 

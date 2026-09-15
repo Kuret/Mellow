@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
 import android.content.Context
 import mozilla.appservices.fxaclient.FxaServer as AppServicesFxaServer

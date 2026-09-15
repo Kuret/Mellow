@@ -22,8 +22,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 import 'package:speech_to_text_dialog/speech_to_text_dialog.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class SpeechToTextButton extends HookWidget {
   final Function(String text) onTextReceived;

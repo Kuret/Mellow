@@ -23,12 +23,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/addons/presentation/widgets/addon_listing_card.dart';
+import 'package:mellow/features/addons/utils/permissions.dart';
+import 'package:mellow/utils/number_format.dart';
+import 'package:mellow/utils/ui_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/addons/presentation/widgets/addon_listing_card.dart';
-import 'package:weblibre/features/addons/utils/permissions.dart';
-import 'package:weblibre/utils/number_format.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 class AddonListingDetailsScreen extends ConsumerWidget {
   final AddonListing listing;

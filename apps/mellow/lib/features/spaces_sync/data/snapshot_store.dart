@@ -20,8 +20,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:mellow/features/spaces_sync/data/models/zen_records.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
 
 /// One saved copy of the decrypted `spaces` collection.
 class SpacesSnapshot {

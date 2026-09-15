@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/spaces_sync/data/models/zen_records.dart';
-import 'package:weblibre/features/spaces_sync/domain/spaces_applier.dart';
-import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/spaces_sync/data/models/zen_records.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_applier.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_projection.dart';
 
 import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 import 'spaces_sync_test_support.dart';

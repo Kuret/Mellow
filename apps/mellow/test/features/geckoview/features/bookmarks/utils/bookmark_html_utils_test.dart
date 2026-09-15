@@ -22,10 +22,10 @@ import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
 
 @GenerateMocks([GeckoBookmarksService])
 import 'bookmark_html_utils_test.mocks.dart';

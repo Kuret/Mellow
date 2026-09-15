@@ -21,8 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/app_links/domain/services/app_links_coordinator.dart';
 
 /// Build the `alwaysOpen` rule for a target, or null when it cannot be remembered
 /// (ambiguous resolution / no bound package).

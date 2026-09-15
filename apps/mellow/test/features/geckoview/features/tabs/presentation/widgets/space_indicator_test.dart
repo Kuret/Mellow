@@ -20,11 +20,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 
 class _NoSelectedTab extends SelectedTab {
   @override
@@ -136,12 +136,7 @@ void main() {
 
         expect(find.byType(PopupMenuDivider), findsNWidgets(2));
 
-        const order = [
-          'Settings',
-          'Work',
-          'Home',
-          'New Space',
-        ];
+        const order = ['Settings', 'Work', 'Home', 'New Space'];
         final positions = [
           for (final label in order) tester.getTopLeft(find.text(label)).dy,
         ];
@@ -173,31 +168,27 @@ void main() {
         // "Home" (space-2) is the selected one: it must carry a check, "Work"
         // must not.
         final homeRow = tester.widget<Row>(
-          find.ancestor(
-            of: find.text('Home'),
-            matching: find.byType(Row),
-          ),
+          find.ancestor(of: find.text('Home'), matching: find.byType(Row)),
         );
         expect(
-          homeRow.children.any((child) => child is Icon && child.icon == Icons.check),
+          homeRow.children.any(
+            (child) => child is Icon && child.icon == Icons.check,
+          ),
           isTrue,
         );
         final workRow = tester.widget<Row>(
-          find.ancestor(
-            of: find.text('Work'),
-            matching: find.byType(Row),
-          ),
+          find.ancestor(of: find.text('Work'), matching: find.byType(Row)),
         );
         expect(
-          workRow.children.any((child) => child is Icon && child.icon == Icons.check),
+          workRow.children.any(
+            (child) => child is Icon && child.icon == Icons.check,
+          ),
           isFalse,
         );
       },
     );
 
-    testWidgets('choosing a space switches the selected space', (
-      tester,
-    ) async {
+    testWidgets('choosing a space switches the selected space', (tester) async {
       late ProviderContainer container;
 
       await tester.pumpWidget(

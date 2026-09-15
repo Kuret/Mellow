@@ -20,7 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
 
 void main() {
   Widget buildSubject({required Uri uri, bool showHttpScheme = true}) {

@@ -21,10 +21,10 @@ import 'dart:convert';
 
 import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart' as http;
+import 'package:mellow/core/http_error_handler.dart';
+import 'package:mellow/core/providers/http_client.dart';
+import 'package:mellow/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/http_error_handler.dart';
-import 'package:weblibre/core/providers/http_client.dart';
-import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'duckduckgo.g.dart';
 

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/core/routing/routes.dart';
+import 'package:mellow/core/routing/routes.dart';
 
 /// An animated tab type switcher that only shows the label for the currently
 /// active option. Inactive options collapse to show only their icon.

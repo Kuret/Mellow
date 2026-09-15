@@ -2,7 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
-package eu.weblibre.speech_to_text_dialog.pigeons
+package app.mellow.browser.speech_to_text_dialog.pigeons
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel

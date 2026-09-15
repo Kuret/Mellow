@@ -4,14 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.widget
+package app.mellow.browser.flutter_mozilla_components.widget
 
 import android.app.Activity
 import android.content.Context
 // import android.util.Log
 import android.view.MotionEvent
 import androidx.core.view.WindowInsetsCompat
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
 import kotlin.math.abs
 
 /**

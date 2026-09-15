@@ -21,18 +21,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/app_link_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/desktop_mode_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/entities/search_text.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/presentation/widgets/website_title_tile.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/certificate_tile.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/app_link_section.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/desktop_mode_section.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
+import 'package:mellow/features/geckoview/features/search/domain/entities/search_text.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/presentation/widgets/website_title_tile.dart';
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
   const ClampingScrollPhysicsWithoutImplicit({super.parent});

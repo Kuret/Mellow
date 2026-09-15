@@ -20,13 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/move_tab_sheet.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/move_tab_sheet.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 /// One recorded [TabDataRepository.moveTabToFolder] call.
 typedef _FolderMove = ({String tabId, String? folderId});

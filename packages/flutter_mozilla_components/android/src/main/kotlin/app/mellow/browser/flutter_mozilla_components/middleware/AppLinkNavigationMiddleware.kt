@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptNotifier
-import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStore
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.applinks.NativeAppLinkPromptNotifier
+import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStore
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.action.EngineAction

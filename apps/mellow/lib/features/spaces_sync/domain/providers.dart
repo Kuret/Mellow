@@ -21,10 +21,10 @@ import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:http/http.dart' as http;
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/features/spaces_sync/data/snapshot_store.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/features/spaces_sync/data/snapshot_store.dart';
 
 part 'providers.g.dart';
 

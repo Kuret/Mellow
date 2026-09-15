@@ -22,14 +22,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PredictiveBackEvent;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart'
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart'
     show BrowserTabBar;
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 /// Wraps the browser's content in two independent back-gesture behaviours,
 /// both off by default and both gated the same way (see [_side] and

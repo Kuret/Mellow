@@ -20,9 +20,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 
 void main() {
   Future<void> pumpHarness(WidgetTester tester, {required bool card}) {

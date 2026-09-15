@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.feature
+package app.mellow.browser.flutter_mozilla_components.feature
 
 import android.util.Patterns
-import eu.weblibre.flutter_mozilla_components.pigeons.CustomSelectionAction
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.SelectionPattern
+import app.mellow.browser.flutter_mozilla_components.pigeons.CustomSelectionAction
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.SelectionPattern
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
 
 class DefaultSelectionActionDelegate(

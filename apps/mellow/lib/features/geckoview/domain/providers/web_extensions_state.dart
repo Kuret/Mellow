@@ -21,13 +21,13 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/web_extension.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/utils/image_helper.dart';
+import 'package:mellow/utils/lru_cache.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
-import 'package:weblibre/utils/lru_cache.dart';
 
 part 'web_extensions_state.g.dart';
 

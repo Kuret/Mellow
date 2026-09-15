@@ -24,53 +24,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/extensions/media_query.dart';
-import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_host.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_rail_slide_out.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
-import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
-import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
-import 'package:weblibre/utils/move_to_background.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/providers/global_drop.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/data/models/drag_data.dart';
+import 'package:mellow/extensions/media_query.dart';
+import 'package:mellow/features/app_links/presentation/widgets/app_link_prompt_host.dart';
+import 'package:mellow/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:mellow/features/geckoview/domain/controllers/overlay.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/compact_rail_slide_out.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_autofocus.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/presentation/hooks/keyed_state.dart';
+import 'package:mellow/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:mellow/utils/move_to_background.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 class _AnimatedToolbar extends HookWidget {
   final bool visible;
@@ -935,10 +935,10 @@ class BrowserScreen extends HookConsumerWidget {
     // gated on this explicitly, the same way it already is on [isRail].
     final compactRailActive =
         ref.watch(
-          zenSettingsWithDefaultsProvider.select(
-            (value) => value.compactRailSide,
-          ),
-        ) !=
+              zenSettingsWithDefaultsProvider.select(
+                (value) => value.compactRailSide,
+              ),
+            ) !=
             null &&
         !isWideViewport(viewportWidth);
 

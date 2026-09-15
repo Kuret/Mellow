@@ -20,7 +20,7 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:weblibre/core/logger.dart';
+import 'package:mellow/core/logger.dart';
 import 'package:xxh3/xxh3.dart';
 
 /// Suffix of the file recording which asset version is installed.

@@ -19,19 +19,19 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_reorder_view.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/navigation_row.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/about_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/extensions_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/page_actions_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_links_section.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
-import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
-import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_reorder_view.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/navigation_row.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/about_section.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/extensions_section.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/page_actions_section.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_links_section.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
+import 'package:mellow/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:mellow/presentation/widgets/sheet_drag_handle.dart';
 
 /// Shows the combined browser menu as a modal bottom sheet.
 Future<void> showBrowserMenuSheet(BuildContext context) {

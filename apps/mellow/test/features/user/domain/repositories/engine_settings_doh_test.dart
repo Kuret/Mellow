@@ -1,12 +1,12 @@
 import 'package:drift/native.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/providers.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 
 void main() {
   // EngineSettings.withDefaults seeds `locales` from the platform dispatcher.

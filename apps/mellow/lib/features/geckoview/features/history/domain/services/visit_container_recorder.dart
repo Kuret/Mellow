@@ -20,10 +20,10 @@
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/utils/url_canonical.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/utils/url_canonical.dart';
 
 part 'visit_container_recorder.g.dart';
 
@@ -40,20 +40,20 @@ class _HistoryEventsReceiver extends GeckoHistoryEvents {
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
 /// on each Places visit the tab's native history delegate forwards the id of the
-/// session that produced it, which this service maps to that tab's WebLibre
+/// session that produced it, which this service maps to that tab's Mellow
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// Graceful absence: a visit from a tab with no container — or from one Mellow
 /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
 /// custom tab — writes no row and simply appears untagged. Activated eagerly at
 /// startup.
 @Riverpod(keepAlive: true)
 class VisitContainerRecorder extends _$VisitContainerRecorder {
-  /// A tab created by the engine (`window.open`) is persisted by WebLibre only
+  /// A tab created by the engine (`window.open`) is persisted by Mellow only
   /// after the fact, so its first visit can arrive before the row exists. Retry
   /// briefly rather than dropping the tag; a tab still absent after the whole
-  /// budget is one WebLibre does not track at all (a custom tab), and is not
+  /// budget is one Mellow does not track at all (a custom tab), and is not
   /// asked about again — see [_unresolvedTabIds].
   static const _resolveAttempts = 4;
   static const _resolveRetryDelay = Duration(milliseconds: 150);
@@ -120,7 +120,7 @@ class VisitContainerRecorder extends _$VisitContainerRecorder {
           ? tabContainerIds[tabId]
           : await awaitTabRow(tabId);
 
-      // Uncontained tab, or one WebLibre has no row for → nothing to tag.
+      // Uncontained tab, or one Mellow has no row for → nothing to tag.
       if (containerId == null) return;
       if (!ref.mounted) return;
 

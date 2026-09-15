@@ -21,16 +21,16 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/folder_tree.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/folder.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/folder_tree.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/folder.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
 
 /// Shows the "move tab" picker: pin the tab at the root of a space, or file
 /// it into one of that space's folders (however deeply nested), for the
@@ -64,8 +64,7 @@ class _MoveTabSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final spaces =
-        ref.watch(watchSpacesProvider).value ?? const <SpaceData>[];
+    final spaces = ref.watch(watchSpacesProvider).value ?? const <SpaceData>[];
     final otherSpaces = spaces
         .where((space) => space.uuid != currentSpaceUuid)
         .toList();
@@ -155,9 +154,9 @@ class _SpaceSection extends ConsumerWidget {
     }
     // A different space: name it explicitly rather than relying on the
     // tab's current space, which setShelf would otherwise keep.
-    return ref
-        .read(tabDataRepositoryProvider.notifier)
-        .moveToScope([tabId], TabOrderScope.pinned(spaceUuid!));
+    return ref.read(tabDataRepositoryProvider.notifier).moveToScope([
+      tabId,
+    ], TabOrderScope.pinned(spaceUuid!));
   }
 
   Future<void> _moveToFolder(WidgetRef ref, String folderId) {

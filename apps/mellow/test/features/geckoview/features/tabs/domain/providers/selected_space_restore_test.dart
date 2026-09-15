@@ -18,17 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 import '../../data/database/tab_db_test_helpers.dart';
 
@@ -111,41 +111,35 @@ void main() {
     expect((entry! as SpaceLastTabTab).tabId, 'a-1');
   });
 
-  test(
-    'switching back to a space asks TabRepository to restore what it '
-    'remembers, once the selected tab no longer belongs to it',
-    () async {
-      selectedTab.select('a-1');
-      await _pump();
-      selectedTab.select('b-1');
-      await _pump();
-      // Selecting 'b-1' followed the selected space to space B; both spaces
-      // now have a remembered tab.
-      expect(container.read(selectedSpaceProvider), _spaceB);
+  test('switching back to a space asks TabRepository to restore what it '
+      'remembers, once the selected tab no longer belongs to it', () async {
+    selectedTab.select('a-1');
+    await _pump();
+    selectedTab.select('b-1');
+    await _pump();
+    // Selecting 'b-1' followed the selected space to space B; both spaces
+    // now have a remembered tab.
+    expect(container.read(selectedSpaceProvider), _spaceB);
 
-      tabs.restoredSpaces.clear();
-      container.read(selectedSpaceProvider.notifier).space = _spaceA;
-      await _pump();
+    tabs.restoredSpaces.clear();
+    container.read(selectedSpaceProvider.notifier).space = _spaceA;
+    await _pump();
 
-      expect(tabs.restoredSpaces, [_spaceA]);
-    },
-  );
+    expect(tabs.restoredSpaces, [_spaceA]);
+  });
 
-  test(
-    'switching space does not ask for a restore when the selected tab '
-    'already belongs to it (the forward sync is not a switch)',
-    () async {
-      selectedTab.select('a-1');
-      await _pump();
-      tabs.restoredSpaces.clear();
+  test('switching space does not ask for a restore when the selected tab '
+      'already belongs to it (the forward sync is not a switch)', () async {
+    selectedTab.select('a-1');
+    await _pump();
+    tabs.restoredSpaces.clear();
 
-      // Re-affirming the same space explicitly — nothing changed.
-      container.read(selectedSpaceProvider.notifier).space = _spaceA;
-      await _pump();
+    // Re-affirming the same space explicitly — nothing changed.
+    container.read(selectedSpaceProvider.notifier).space = _spaceA;
+    await _pump();
 
-      expect(tabs.restoredSpaces, isEmpty);
-    },
-  );
+    expect(tabs.restoredSpaces, isEmpty);
+  });
 
   test(
     'forcing the home surface records the selected space as last on home',

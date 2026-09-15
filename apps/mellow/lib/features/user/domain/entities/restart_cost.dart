@@ -19,9 +19,9 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 /// What ending this process discards, whichever profile the operation names.
 ///

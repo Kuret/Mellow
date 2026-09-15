@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 void main() {
   group('isWideViewport', () {

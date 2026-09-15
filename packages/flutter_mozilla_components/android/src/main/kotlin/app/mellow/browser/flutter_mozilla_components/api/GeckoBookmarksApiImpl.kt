@@ -1,13 +1,13 @@
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
-import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkImportNode
-import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkInfo
-import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkInsertTreeResult
-import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkNode
-import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkNodeType
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksApi
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
+import app.mellow.browser.flutter_mozilla_components.pigeons.BookmarkImportNode
+import app.mellow.browser.flutter_mozilla_components.pigeons.BookmarkInfo
+import app.mellow.browser.flutter_mozilla_components.pigeons.BookmarkInsertTreeResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.BookmarkNode
+import app.mellow.browser.flutter_mozilla_components.pigeons.BookmarkNodeType
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBookmarksApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

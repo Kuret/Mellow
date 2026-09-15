@@ -20,7 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/spaces_sync/data/sync15/hawk.dart';
+import 'package:mellow/features/spaces_sync/data/sync15/hawk.dart';
 
 /// Header-only Hawk reference vector, straight from the Hawk 1.x spec /
 /// draft-hammer-oauth-v2-mac.

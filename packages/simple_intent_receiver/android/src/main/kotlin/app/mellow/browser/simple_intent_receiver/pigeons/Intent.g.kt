@@ -2,7 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
-package eu.weblibre.simple_intent_receiver.pigeons
+package app.mellow.browser.simple_intent_receiver.pigeons
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel
@@ -396,7 +396,7 @@ interface IntentGatekeeperHostApi {
   fun resolvePackageLabel(packageName: String): String?
   /**
    * Returns the list of packages for which the user tapped "Always allow"
-   * via a blocked-intent notification while WebLibre was not running.
+   * via a blocked-intent notification while Mellow was not running.
    * Callers must acknowledge persisted packages via
    * [ackPendingAlwaysAllows] after Flutter settings were updated
    * successfully.

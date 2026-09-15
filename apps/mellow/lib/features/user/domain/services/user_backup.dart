@@ -20,6 +20,19 @@
 import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/maintenance/clone_participant_policy.dart';
+import 'package:mellow/core/maintenance/plaintext_cleanup.dart';
+import 'package:mellow/core/maintenance/saf_archive_target.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/uuid.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/providers/backup_directory.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -27,19 +40,6 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:secure_archive/secure_archive.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
-import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
-import 'package:weblibre/core/maintenance/saf_archive_target.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/uuid.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 part 'user_backup.g.dart';
 
@@ -58,9 +58,7 @@ class UserBackupService extends _$UserBackupService {
 
   Future<List<SafDocumentFile>> getBackupList(Uri dirUri) async {
     final files = await _safUtil.list(dirUri.toString());
-    return files
-        .where((f) => !f.isDir && f.name.endsWith('.weblibre'))
-        .toList();
+    return files.where((f) => !f.isDir && f.name.endsWith('.mellow')).toList();
   }
 
   /// Queues a backup of [profile] and arms the restart that will run it.
@@ -111,7 +109,7 @@ class UserBackupService extends _$UserBackupService {
     required String password,
   }) async {
     final tempDir = await getTemporaryDirectory();
-    final tempFile = File(p.join(tempDir.path, 'restore_temp.weblibre'));
+    final tempFile = File(p.join(tempDir.path, 'restore_temp.mellow'));
 
     final outputDirectory = Directory(
       p.join(filesystem.profilesDir.path, 'restore_temp'),
@@ -141,7 +139,7 @@ class UserBackupService extends _$UserBackupService {
           final newPath = filesystem.getProfileDir(newProfile.uuidValue);
 
           // Before the tree becomes a profile. The archive carries a
-          // `weblibre_participants/` payload describing the profile it was taken
+          // `mellow_participants/` payload describing the profile it was taken
           // *from* — including its account session and proxy credentials as
           // plain JSON — and a clone is a different profile that must not
           // inherit it. See [applyCloneParticipantPolicy] for what a future
@@ -233,7 +231,7 @@ class UserBackupService extends _$UserBackupService {
 
       var count = 0;
       await for (final entity in oldDir.list()) {
-        if (entity is File && entity.path.endsWith('.weblibre')) {
+        if (entity is File && entity.path.endsWith('.mellow')) {
           try {
             await _safStream.pasteLocalFile(
               entity.path,

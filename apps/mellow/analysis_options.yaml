@@ -1,4 +1,4 @@
-# Analysis options for the WebLibre app
+# Analysis options for the Mellow app
 # Includes root configuration with app-specific overrides
 
 analyzer:

@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import android.content.Context
-import eu.weblibre.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
 import java.io.File
 
 /**
@@ -126,18 +126,18 @@ class StartupPaths(val filesDir: File) {
         const val STARTUP_CONFIG_FILE_NAME = "startup_config.json"
         const val CURRENT_PROFILE_FILE_NAME = "current_profile"
 
-        const val MAINTENANCE_DIR_NAME = "weblibre_maintenance"
+        const val MAINTENANCE_DIR_NAME = "mellow_maintenance"
         const val MAINTENANCE_INCOMING_DIR_NAME = "incoming"
         const val MAINTENANCE_OUTGOING_DIR_NAME = "outgoing"
         const val MAINTENANCE_RESTORE_DIR_NAME = "restore"
         const val MAINTENANCE_JOURNALS_DIR_NAME = "journals"
 
-        const val RESTART_DIR_NAME = "weblibre_restart"
+        const val RESTART_DIR_NAME = "mellow_restart"
         const val RESTART_REQUEST_FILE_NAME = "request.json"
         const val RESTART_AUTHORIZATION_FILE_NAME = "authorization.json"
         const val PENDING_LAUNCH_FILE_NAME = "pending_launch.json"
 
-        const val STARTUP_INTENTS_DIR_NAME = "weblibre_startup_intents"
+        const val STARTUP_INTENTS_DIR_NAME = "mellow_startup_intents"
         const val STARTUP_INTENT_QUEUE_FILE_NAME = "queue.json"
         const val STARTUP_INTENT_PAYLOADS_DIR_NAME = "payloads"
 

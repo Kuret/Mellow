@@ -21,7 +21,7 @@ import 'dart:ui';
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
 
 part 'web_extension.g.dart';
 

@@ -4,17 +4,17 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/delete_operation.dart';
+import 'package:mellow/core/maintenance/maintenance_journal_store.dart';
+import 'package:mellow/core/maintenance/maintenance_lease.dart';
+import 'package:mellow/core/maintenance/maintenance_outcome.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
+import 'package:mellow/core/maintenance/restore_operation.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
-import 'package:weblibre/core/maintenance/delete_operation.dart';
-import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
-import 'package:weblibre/core/maintenance/maintenance_lease.dart';
-import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
-import 'package:weblibre/core/maintenance/restore_operation.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 const _target = '0199a0b1-1111-7111-8111-111111111111';
 const _other = '0199a0b1-2222-7222-8222-222222222222';
@@ -111,7 +111,7 @@ void main() {
   late MaintenanceJournalStore journals;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('weblibre_journal');
+    root = await Directory.systemTemp.createTemp('mellow_journal');
     paths = StartupPaths(Directory(p.join(root.path, 'files')));
     await paths.ensureGlobalDirectories();
     journals = MaintenanceJournalStore(paths);
@@ -763,7 +763,7 @@ void main() {
       await restoreWithParticipant(_FakeProfileApi()).run(
         taskId: 'task-1',
         targetProfileId: _target,
-        archive: File(p.join(root.path, 'archive.weblibre')),
+        archive: File(p.join(root.path, 'archive.mellow')),
       );
 
       // Against a context built before the rename this is null: the participant
@@ -778,7 +778,7 @@ void main() {
       await restoreWithParticipant(_FakeProfileApi()).run(
         taskId: 'task-1',
         targetProfileId: _target,
-        archive: File(p.join(root.path, 'archive.weblibre')),
+        archive: File(p.join(root.path, 'archive.mellow')),
       );
 
       // Undo data survives the install and is released at completion.
@@ -851,7 +851,7 @@ void main() {
         ).run(
           taskId: 'task-1',
           targetProfileId: _target,
-          archive: File(p.join(root.path, 'archive.weblibre')),
+          archive: File(p.join(root.path, 'archive.mellow')),
         ),
         throwsA(isA<MaintenanceLeaseLost>()),
       );

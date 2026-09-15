@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.addons
+package app.mellow.browser.flutter_mozilla_components.addons
 
 import android.app.Activity
 import android.app.Application
@@ -11,8 +11,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.fragment.app.FragmentActivity
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ProfileContext
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ProfileContext
 import java.lang.ref.WeakReference
 import mozilla.components.support.base.log.logger.Logger
 

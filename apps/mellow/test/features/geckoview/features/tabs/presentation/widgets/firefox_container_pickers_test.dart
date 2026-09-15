@@ -16,10 +16,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
-import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
+import 'package:mellow/presentation/widgets/sheet_drag_handle.dart';
 
 void main() {
   group('FirefoxContainerColorPicker', () {

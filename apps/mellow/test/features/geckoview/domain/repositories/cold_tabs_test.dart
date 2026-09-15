@@ -21,30 +21,30 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/domain/services/live_tab_budget.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/restore_complete.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_list.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/domain/services/live_tab_budget.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_order_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_shelf.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 
 import '../../features/tabs/data/database/tab_db_test_helpers.dart';
 
@@ -419,56 +419,53 @@ void main() {
       expect(row.spaceUuid, _space);
     });
 
-    test(
-      'addTab with an explicit spaceUuid opens in that space, not the '
-      'selected one, and appends to its normal shelf',
-      () async {
-        const targetSpace = 'space-2';
-        final h = _openHarness(liveTabIds: _liveIds(10));
-        await _seed(h.db, cold: 0, live: 10);
-        // _seed only ever populates _space; add a second space and give it
-        // an existing tab so 'appends to the end' has something to sort
-        // after.
-        await seedSpaces(h.db, [targetSpace]);
-        await seedTab(h.db, 'target-existing', spaceUuid: targetSpace);
-        // The globally selected space (_FakeSelectedSpace) stays _space
-        // throughout: an explicit spaceUuid must win over it regardless.
-        expect(h.container.read(selectedSpaceProvider), _space);
+    test('addTab with an explicit spaceUuid opens in that space, not the '
+        'selected one, and appends to its normal shelf', () async {
+      const targetSpace = 'space-2';
+      final h = _openHarness(liveTabIds: _liveIds(10));
+      await _seed(h.db, cold: 0, live: 10);
+      // _seed only ever populates _space; add a second space and give it
+      // an existing tab so 'appends to the end' has something to sort
+      // after.
+      await seedSpaces(h.db, [targetSpace]);
+      await seedTab(h.db, 'target-existing', spaceUuid: targetSpace);
+      // The globally selected space (_FakeSelectedSpace) stays _space
+      // throughout: an explicit spaceUuid must win over it regardless.
+      expect(h.container.read(selectedSpaceProvider), _space);
 
-        final repo = h.container.read(tabRepositoryProvider.notifier);
-        final id = await repo.addTab(
-          tabMode: TabMode.regular,
-          url: Uri.parse('https://shared.example/'),
-          selectTab: false,
-          spaceUuid: targetSpace,
-          launchedFromIntent: true,
-          containerSelection: const TabContainerSelection.unassigned(),
-        );
+      final repo = h.container.read(tabRepositoryProvider.notifier);
+      final id = await repo.addTab(
+        tabMode: TabMode.regular,
+        url: Uri.parse('https://shared.example/'),
+        selectTab: false,
+        spaceUuid: targetSpace,
+        launchedFromIntent: true,
+        containerSelection: const TabContainerSelection.unassigned(),
+      );
 
-        final row = await summaryOf(h.db, id);
-        // 1: lands in the space named by spaceUuid, not the selected one.
-        expect(row.spaceUuid, targetSpace);
-        // 3: an ordinary shelf tab, not essential or pinned, so the sync
-        // projection carries it (spaces_projection.dart reads space_uuid
-        // verbatim off exactly this kind of row).
-        expect(row.tabShelf, TabShelf.normal);
-        expect(row.folderId, isNull);
+      final row = await summaryOf(h.db, id);
+      // 1: lands in the space named by spaceUuid, not the selected one.
+      expect(row.spaceUuid, targetSpace);
+      // 3: an ordinary shelf tab, not essential or pinned, so the sync
+      // projection carries it (spaces_projection.dart reads space_uuid
+      // verbatim off exactly this kind of row).
+      expect(row.tabShelf, TabShelf.normal);
+      expect(row.folderId, isNull);
 
-        // 2: appended after the space's existing tab in order_key order.
-        final orderedIds = await idsInScope(
-          h.db,
-          TabOrderScope.normal(spaceUuid: targetSpace),
-        );
-        expect(orderedIds, ['target-existing', id]);
+      // 2: appended after the space's existing tab in order_key order.
+      final orderedIds = await idsInScope(
+        h.db,
+        TabOrderScope.normal(spaceUuid: targetSpace),
+      );
+      expect(orderedIds, ['target-existing', id]);
 
-        // 4: the other space (_space) is untouched by this add.
-        final otherSpaceIds = await idsInScope(
-          h.db,
-          TabOrderScope.normal(spaceUuid: _space),
-        );
-        expect(otherSpaceIds, isNot(contains(id)));
-      },
-    );
+      // 4: the other space (_space) is untouched by this add.
+      final otherSpaceIds = await idsInScope(
+        h.db,
+        TabOrderScope.normal(spaceUuid: _space),
+      );
+      expect(otherSpaceIds, isNot(contains(id)));
+    });
 
     test('the live tab budget unloads the least recently used tabs past the '
         'budget and spares the selected, pinned and essential ones', () async {

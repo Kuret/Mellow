@@ -20,10 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 
 /// Arranges the browser menu from Settings, editing the same saved layout as
 /// the "Customize menu" button inside the menu itself.

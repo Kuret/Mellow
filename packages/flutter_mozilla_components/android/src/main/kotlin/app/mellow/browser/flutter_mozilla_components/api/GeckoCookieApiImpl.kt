@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
-import eu.weblibre.flutter_mozilla_components.pigeons.*
+import app.mellow.browser.flutter_mozilla_components.feature.CookieManagerFeature
+import app.mellow.browser.flutter_mozilla_components.feature.ResultConsumer
+import app.mellow.browser.flutter_mozilla_components.pigeons.*
 import org.json.JSONObject
 
 class GeckoCookieApiImpl : GeckoCookieApi {

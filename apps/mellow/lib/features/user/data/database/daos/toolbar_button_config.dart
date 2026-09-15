@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.drift.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:mellow/features/user/data/database/daos/toolbar_button_config.drift.dart';
+import 'package:mellow/features/user/data/database/database.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart';
 
 @DriftAccessor()
 class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>

@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
-import 'package:weblibre/utils/input_classification.dart';
+import 'package:mellow/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:mellow/utils/input_classification.dart';
 
 sealed class SharedContent with FastEquatable {
   final String? contextId;

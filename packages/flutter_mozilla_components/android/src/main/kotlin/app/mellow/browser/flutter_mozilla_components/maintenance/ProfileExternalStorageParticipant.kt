@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.maintenance
+package app.mellow.browser.flutter_mozilla_components.maintenance
 
 import android.content.Context
 import mozilla.components.support.base.log.logger.Logger
 import java.io.File
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
 
 /**
  * The profile's trees on external storage.
  *
  * `ProfileContext` redirects `getExternalFilesDir` and `externalCacheDir` under
- * `<external>/weblibre_profiles/profile-<uuid>/`, so downloads and media a
+ * `<external>/mellow_profiles/profile-<uuid>/`, so downloads and media a
  * profile owns live entirely outside its internal directory and no
  * directory-scoped backup or delete can see them.
  *

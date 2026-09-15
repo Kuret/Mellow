@@ -20,11 +20,11 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 
-/// The bookmark file formats WebLibre can read.
+/// The bookmark file formats Mellow can read.
 enum BookmarkImportFormat { html, json }
 
 /// Reads and parses the bookmark file at [path] in a background isolate.

@@ -2,7 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
-package eu.weblibre.flutter_mozilla_components.pigeons
+package app.mellow.browser.flutter_mozilla_components.pigeons
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel

@@ -19,7 +19,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 /// Dialog to select between extracted or full content for sharing.
 /// Shows options for extracted (reader-optimized) vs full (complete) content.

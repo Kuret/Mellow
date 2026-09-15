@@ -36,7 +36,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: eu.weblibre.simple_intent_receiver
+        package: app.mellow.browser.simple_intent_receiver
         pluginClass: SimpleIntentReceiverPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

@@ -20,8 +20,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:mellow/utils/url_canonical.dart';
 import 'package:sqlite3/common.dart';
-import 'package:weblibre/utils/url_canonical.dart';
 import 'package:xxh3/xxh3.dart';
 
 /// Bytes 0x1F (Unit Separator) between hashed parts. Prevents collisions

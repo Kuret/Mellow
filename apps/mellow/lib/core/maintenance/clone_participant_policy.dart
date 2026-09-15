@@ -19,10 +19,10 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/maintenance/backup_manifest.dart';
+import 'package:mellow/core/maintenance/participant_category.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/maintenance/backup_manifest.dart';
-import 'package:weblibre/core/maintenance/participant_category.dart';
 
 /// What a restore into a *new* profile does with the participant payload the
 /// archive carries.
@@ -35,7 +35,7 @@ import 'package:weblibre/core/maintenance/participant_category.dart';
 /// Today the answer for every category is **discard**, and the discard is the
 /// part that matters most: `SecureStorageParticipant` stages the account refresh
 /// token, the end-to-end sync key and the proxy credentials as plain JSON inside
-/// `weblibre_participants/`. That is safe inside a password-encrypted archive
+/// `mellow_participants/`. That is safe inside a password-encrypted archive
 /// and *not* safe unpacked into a profile directory, where it would sit
 /// unencrypted for the life of the clone — and be picked up by a later backup of
 /// the clone as a stale second copy.

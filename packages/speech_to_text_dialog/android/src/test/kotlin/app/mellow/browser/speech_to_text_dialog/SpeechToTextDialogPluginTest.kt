@@ -1,4 +1,4 @@
-package eu.weblibre.speech_to_text_dialog
+package app.mellow.browser.speech_to_text_dialog
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

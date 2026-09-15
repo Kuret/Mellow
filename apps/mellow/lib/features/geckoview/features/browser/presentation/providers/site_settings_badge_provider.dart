@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'site_settings_badge_provider.g.dart';
 

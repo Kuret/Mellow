@@ -20,7 +20,7 @@
 
 // ignore_for_file: avoid_dynamic_calls wo know what we do
 
-import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/models/preference_setting.dart';
 
 enum PreferencePartition {
   user('user'),

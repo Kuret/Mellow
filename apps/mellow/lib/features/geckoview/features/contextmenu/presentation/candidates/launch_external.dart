@@ -21,9 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class LaunchExternal extends HookConsumerWidget {
   final HitResult hitResult;

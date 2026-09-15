@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import android.app.Activity
 import android.content.Context
@@ -29,9 +29,9 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
-import eu.weblibre.simple_intent_receiver.pigeons.IntentHost
-import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
-import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
+import app.mellow.browser.simple_intent_receiver.pigeons.IntentHost
+import app.mellow.browser.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import app.mellow.browser.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
 /** Supplied by the activity from saved state, never from caller-controlled intent extras. */
 interface IntentReceiverHost {

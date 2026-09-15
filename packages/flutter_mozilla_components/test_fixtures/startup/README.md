@@ -1,6 +1,6 @@
 # Shared startup fixtures
 
-These files are parsed by **both** `apps/weblibre/test/core/startup/startup_parity_test.dart`
+These files are parsed by **both** `apps/mellow/test/core/startup/startup_parity_test.dart`
 and `packages/flutter_mozilla_components/android/src/test/kotlin/.../startup/StartupParityTest.kt`.
 
 They exist because the startup arbitration contract has two independent

@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 /// The engine's favicon, fetched from its own home page.
 ///

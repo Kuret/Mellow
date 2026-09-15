@@ -19,11 +19,11 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/search/domain/repositories/search_history.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/search/domain/repositories/search_history.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 part 'browser_data.g.dart';
 

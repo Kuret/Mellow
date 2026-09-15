@@ -19,13 +19,13 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
+import 'package:mellow/features/settings/presentation/widgets/hardening_group_icon.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/presentation/widgets/failure_widget.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
-import 'package:weblibre/features/settings/presentation/widgets/hardening_group_icon.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class WebEngineHardeningGroupScreen extends HookConsumerWidget {
   final String groupName;

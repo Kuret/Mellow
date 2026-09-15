@@ -20,10 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/core/providers/global_drop.dart';
+import 'package:mellow/data/models/drag_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
 class TabDragContainerTarget extends HookConsumerWidget {
   final ContainerData? container;

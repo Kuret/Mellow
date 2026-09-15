@@ -23,22 +23,22 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'engine_settings_replication.g.dart';
 
 const _safeBrowsingMalwarePref = 'browser.safebrowsing.malware.enabled';
 const _safeBrowsingPhishingPref = 'browser.safebrowsing.phishing.enabled';
-const ublockFilterListsPref = 'browser.weblibre.uBO.filterLists';
+const ublockFilterListsPref = 'browser.mellow.uBO.filterLists';
 
 /// Checks if any Custom ETP setting changed between two EngineSettings instances.
 bool _customEtpSettingsChanged(
@@ -130,10 +130,6 @@ class EngineSettingsReplicationService
         );
       },
     );
-
-
-
-
 
     ref.listen(
       fireImmediately: true,

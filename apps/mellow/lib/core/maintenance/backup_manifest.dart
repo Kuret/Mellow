@@ -17,15 +17,15 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mellow/core/asset_database.dart';
+import 'package:mellow/core/maintenance/participant_category.dart';
+import 'package:mellow/core/startup/models/json_read.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/asset_database.dart';
-import 'package:weblibre/core/maintenance/participant_category.dart';
-import 'package:weblibre/core/startup/models/json_read.dart';
 
 part 'backup_manifest.g.dart';
 
 /// Name of the manifest inside the archive root.
-const backupManifestFileName = 'weblibre_backup.json';
+const backupManifestFileName = 'mellow_backup.json';
 
 const backupManifestVersion = 1;
 
@@ -34,7 +34,7 @@ const backupManifestVersion = 1;
 /// Inside the archive on purpose: it is the only way state that lives outside
 /// the profile directory can travel with a backup and be found again by the
 /// restore of that same archive.
-const participantStagingDirName = 'weblibre_participants';
+const participantStagingDirName = 'mellow_participants';
 
 /// What a backup deliberately leaves out.
 ///

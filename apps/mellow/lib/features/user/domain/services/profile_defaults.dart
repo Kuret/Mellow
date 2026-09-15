@@ -21,16 +21,16 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/models/ublock_filter_list_settings.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/user/data/providers/ublock_assets.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
-import 'package:weblibre/features/user/data/providers/ublock_assets.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/zen_settings.dart';
 
 part 'profile_defaults.g.dart';
 
@@ -126,12 +126,12 @@ class ProfileDefaultsService extends _$ProfileDefaultsService {
   final _prefManager = GeckoPrefService();
 
   Future<void> _seedUBlockDefaults() async {
-    final engineRepository = ref.read(engineSettingsRepositoryProvider.notifier);
+    final engineRepository = ref.read(
+      engineSettingsRepositoryProvider.notifier,
+    );
     final current = await ref.read(engineSettingsRepositoryProvider.future);
 
-    if (!isPristineUBlockFilterListSettings(
-      current.ublockFilterListSettings,
-    )) {
+    if (!isPristineUBlockFilterListSettings(current.ublockFilterListSettings)) {
       return;
     }
 
@@ -144,10 +144,11 @@ class ProfileDefaultsService extends _$ProfileDefaultsService {
   }
 
   Future<void> _seedHardeningPreferenceDefaults() async {
-    final content = await rootBundle
-            .loadString('assets/preferences/settings.json')
-            .then(jsonDecode)
-        as Map<String, dynamic>;
+    final content =
+        await rootBundle
+                .loadString('assets/preferences/settings.json')
+                .then(jsonDecode)
+            as Map<String, dynamic>;
     final groups = deserializePreferenceSettingGroups(
       PreferencePartition.user,
       content,

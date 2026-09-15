@@ -21,10 +21,10 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:weblibre/core/sort_field.dart';
-import 'package:weblibre/data/database/converters/date_time_range.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/core/sort_field.dart';
+import 'package:mellow/data/database/converters/date_time_range.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'tab_view_filter_options.g.dart';
 

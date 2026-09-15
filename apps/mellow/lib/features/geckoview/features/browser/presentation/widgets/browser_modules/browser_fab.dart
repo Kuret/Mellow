@@ -20,8 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 
 class BrowserFab extends HookConsumerWidget {
   const BrowserFab({super.key});

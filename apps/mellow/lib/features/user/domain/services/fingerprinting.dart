@@ -20,8 +20,8 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:mellow/features/user/data/models/rfp_target.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/user/data/models/rfp_target.dart';
 
 part 'fingerprinting.g.dart';
 

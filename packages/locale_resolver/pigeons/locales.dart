@@ -31,9 +31,9 @@ class LocalizedResult {
     dartOut: 'lib/src/pigeons/locales.g.dart',
     dartOptions: DartOptions(),
     kotlinOut:
-        'android/src/main/kotlin/eu/weblibre/locale_resolver/pigeons/Locales.g.kt',
+        'android/src/main/kotlin/app/mellow/browser/locale_resolver/pigeons/Locales.g.kt',
     kotlinOptions: KotlinOptions(
-      package: 'eu.weblibre.locale_resolver.pigeons',
+      package: 'app.mellow.browser.locale_resolver.pigeons',
     ),
     dartPackageName: 'locale_resolver',
   ),

@@ -23,13 +23,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
-import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
-import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
-import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/presentation/hooks/on_listenable_change_selector.dart';
+import 'package:mellow/presentation/widgets/auto_suggest_text_field.dart';
+import 'package:mellow/presentation/widgets/qr_scanner_button.dart';
+import 'package:mellow/presentation/widgets/speech_to_text_button.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
 
 class SearchField extends HookConsumerWidget {
   final TextEditingController textEditingController;

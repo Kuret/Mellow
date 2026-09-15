@@ -1,6 +1,6 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/services/browser_data.dart';
 
 class _FakeGeckoDeleteBrowserDataService extends GeckoDeleteBrowserDataService {
   final clearedContexts = <String>[];

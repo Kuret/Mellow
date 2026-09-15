@@ -1,4 +1,4 @@
-name: weblibre
+name: mellow
 description: "A calm, space-first Android browser that syncs with Zen Browser."
 publish_to: 'none'
 resolution: workspace

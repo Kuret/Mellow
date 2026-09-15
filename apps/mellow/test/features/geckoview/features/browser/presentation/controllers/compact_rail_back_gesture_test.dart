@@ -19,8 +19,8 @@
  */
 import 'package:flutter/services.dart' show SwipeEdge;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
-import 'package:weblibre/features/user/data/models/zen_settings.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
+import 'package:mellow/features/user/data/models/zen_settings.dart';
 
 void main() {
   group('resolveCompactRailBackGesture', () {
@@ -48,28 +48,31 @@ void main() {
       }
     });
 
-    test('claims a predictive gesture from the matching edge, opening on it', () {
-      expect(
-        resolveCompactRailBackGesture(
-          side: CompactRailSide.left,
-          isNarrowViewport: true,
-          isOpen: false,
-          swipeEdge: SwipeEdge.left,
-          isCurrentRoute: true,
-        ),
-        RailSide.left,
-      );
-      expect(
-        resolveCompactRailBackGesture(
-          side: CompactRailSide.right,
-          isNarrowViewport: true,
-          isOpen: false,
-          swipeEdge: SwipeEdge.right,
-          isCurrentRoute: true,
-        ),
-        RailSide.right,
-      );
-    });
+    test(
+      'claims a predictive gesture from the matching edge, opening on it',
+      () {
+        expect(
+          resolveCompactRailBackGesture(
+            side: CompactRailSide.left,
+            isNarrowViewport: true,
+            isOpen: false,
+            swipeEdge: SwipeEdge.left,
+            isCurrentRoute: true,
+          ),
+          RailSide.left,
+        );
+        expect(
+          resolveCompactRailBackGesture(
+            side: CompactRailSide.right,
+            isNarrowViewport: true,
+            isOpen: false,
+            swipeEdge: SwipeEdge.right,
+            isCurrentRoute: true,
+          ),
+          RailSide.right,
+        );
+      },
+    );
 
     test('never claims a predictive gesture from the other edge, so it keeps '
         'doing what it does today', () {
@@ -95,32 +98,29 @@ void main() {
       );
     });
 
-    test(
-      'on either side, claims a predictive gesture from both edges, opening '
-      'on the edge it came from',
-      () {
-        expect(
-          resolveCompactRailBackGesture(
-            side: CompactRailSide.either,
-            isNarrowViewport: true,
-            isOpen: false,
-            swipeEdge: SwipeEdge.left,
-            isCurrentRoute: true,
-          ),
-          RailSide.left,
-        );
-        expect(
-          resolveCompactRailBackGesture(
-            side: CompactRailSide.either,
-            isNarrowViewport: true,
-            isOpen: false,
-            swipeEdge: SwipeEdge.right,
-            isCurrentRoute: true,
-          ),
-          RailSide.right,
-        );
-      },
-    );
+    test('on either side, claims a predictive gesture from both edges, opening '
+        'on the edge it came from', () {
+      expect(
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.either,
+          isNarrowViewport: true,
+          isOpen: false,
+          swipeEdge: SwipeEdge.left,
+          isCurrentRoute: true,
+        ),
+        RailSide.left,
+      );
+      expect(
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.either,
+          isNarrowViewport: true,
+          isOpen: false,
+          swipeEdge: SwipeEdge.right,
+          isCurrentRoute: true,
+        ),
+        RailSide.right,
+      );
+    });
 
     test('never claims on a wide viewport', () {
       for (final side in CompactRailSide.values) {
@@ -195,22 +195,19 @@ void main() {
       );
     });
 
-    test(
-      'a plain committed back on either side falls back to the left edge, '
-      'since there is no gesture edge to prefer one over the other with',
-      () {
-        expect(
-          resolveCompactRailBackGesture(
-            side: CompactRailSide.either,
-            isNarrowViewport: true,
-            isOpen: false,
-            swipeEdge: null,
-            isCurrentRoute: true,
-          ),
-          RailSide.left,
-        );
-      },
-    );
+    test('a plain committed back on either side falls back to the left edge, '
+        'since there is no gesture edge to prefer one over the other with', () {
+      expect(
+        resolveCompactRailBackGesture(
+          side: CompactRailSide.either,
+          isNarrowViewport: true,
+          isOpen: false,
+          swipeEdge: null,
+          isCurrentRoute: true,
+        ),
+        RailSide.left,
+      );
+    });
 
     test('a plain committed back still respects narrow/open/current', () {
       expect(

@@ -20,10 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 
 /// Tints the status-bar (top) and navigation-bar (bottom) inset regions with
 /// the active container's surface color, mirroring how the tab bar

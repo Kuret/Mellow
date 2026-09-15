@@ -21,17 +21,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/combined_history.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/history_search.dart';
+import 'package:mellow/presentation/hooks/on_listenable_change_selector.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/presentation/widgets/url_icon.dart';
+import 'package:mellow/utils/text_highlight.dart';
 import 'package:nullability/nullability.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/combined_history.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
-import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
-import 'package:weblibre/utils/text_highlight.dart';
 
 /// Combined history view: engine frecency-ranked suggestions augmented with
 /// local content snippets, plus local-only content matches appended at the

@@ -59,11 +59,11 @@ class GeckoView extends StatefulWidget {
 
 class _GeckoViewState extends State<GeckoView> {
   static const platform = MethodChannel(
-    'eu.weblibre.flutter_mozilla_components/trim_memory',
+    'app.mellow.browser.flutter_mozilla_components/trim_memory',
   );
 
   static const _visibility = MethodChannel(
-    'eu.weblibre.flutter_mozilla_components/engine_view',
+    'app.mellow.browser.flutter_mozilla_components/engine_view',
   );
 
   final browserService = GeckoBrowserService();
@@ -224,13 +224,13 @@ class _GeckoViewState extends State<GeckoView> {
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
-      viewType: 'eu.weblibre/gecko',
+      viewType: 'app.mellow.browser/gecko',
       surfaceFactory: (context, controller) =>
           PointerInputSurface(controller: controller),
       onCreatePlatformView: (PlatformViewCreationParams params) {
         return PlatformViewsService.initExpensiveAndroidView(
             id: params.id,
-            viewType: 'eu.weblibre/gecko',
+            viewType: 'app.mellow.browser/gecko',
             layoutDirection: TextDirection.ltr,
             creationParams: {},
             creationParamsCodec: const StandardMessageCodec(),

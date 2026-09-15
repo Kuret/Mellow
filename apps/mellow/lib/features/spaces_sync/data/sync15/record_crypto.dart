@@ -22,7 +22,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart' as pkg_crypto;
 import 'package:cryptography/cryptography.dart';
-import 'package:weblibre/features/spaces_sync/data/sync15/key_bundle.dart';
+import 'package:mellow/features/spaces_sync/data/sync15/key_bundle.dart';
 
 /// A Sync 1.5 encrypted BSO payload: `{"ciphertext","IV","hmac"}`. `ciphertext`
 /// and `iv` are standard base64; `hmac` is lowercase hex.

@@ -1,4 +1,4 @@
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.app.Activity
 import android.content.Intent
@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import mozilla.components.feature.customtabs.CustomTabIntentProcessor
 import mozilla.components.feature.intent.ext.getSessionId
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 
 class AuthIntentReceiverActivity : Activity() {
     companion object {

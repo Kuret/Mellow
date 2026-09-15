@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.Context
 
@@ -15,7 +15,7 @@ import android.content.Context
  *
  * A single shared launcher is important: its 2 s same-package auto-launch cooldown
  * (§2.4 loop breaker) must be observed across *every* launch path — the synchronous
- * interceptor tail ([WebLibreAppLinksInterceptor]), the manual "Open in <App>" entry points
+ * interceptor tail ([MellowAppLinksInterceptor]), the manual "Open in <App>" entry points
  * (`GeckoAppLinksApiImpl.launchAppLink`), and prompt resolution. If each site built its own
  * launcher the cooldown would be per-instance and the ping-pong defence would break.
  */

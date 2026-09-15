@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 
 /// Shows [child] only when [tabId] currently has a container assigned.
 /// Shared between TabMenu and the browser menu bottom sheet.

@@ -19,10 +19,10 @@
  */
 import 'dart:io';
 
+import 'package:mellow/utils/uri_input_parser.dart';
+import 'package:mellow/utils/uri_policy.dart';
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/utils/uri_input_parser.dart';
-import 'package:weblibre/utils/uri_policy.dart';
 
 Uri? parseValidatedUrl(
   String? value, {

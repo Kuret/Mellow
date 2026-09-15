@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import androidx.annotation.MainThread
 import mozilla.components.browser.state.selector.findTabOrCustomTab
@@ -20,7 +20,7 @@ private val logger = Logger("AppLinkNavigationRelease")
  *
  * [EngineSession.LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE] is load-bearing, not decoration:
  * GeckoView skips the navigation delegate entirely for a load carrying it
- * (`GeckoSession.shouldLoadUri`), so the release never re-enters [WebLibreAppLinksInterceptor] and
+ * (`GeckoSession.shouldLoadUri`), so the release never re-enters [MellowAppLinksInterceptor] and
  * cannot raise a second prompt for the answer the user just gave. Suppression alone would not do it
  * — [AppLinkNavigationMiddleware] clears a tab's suppression on every `LoadUrlAction`, so a plain
  * re-issue would wipe the very decision it is acting on and prompt again, forever. The middleware

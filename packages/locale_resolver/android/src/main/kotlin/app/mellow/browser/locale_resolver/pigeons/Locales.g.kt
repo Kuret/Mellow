@@ -2,7 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
-package eu.weblibre.locale_resolver.pigeons
+package app.mellow.browser.locale_resolver.pigeons
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel

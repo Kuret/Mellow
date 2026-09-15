@@ -4,18 +4,18 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components
+package app.mellow.browser.flutter_mozilla_components
 
-import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
-import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
-import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
-import eu.weblibre.flutter_mozilla_components.api.GeckoWebInspectorApiImpl
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
-import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.api.GeckoBrowserApiImpl
+import app.mellow.browser.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
+import app.mellow.browser.flutter_mozilla_components.api.GeckoProfileApiImpl
+import app.mellow.browser.flutter_mozilla_components.api.GeckoWebInspectorApiImpl
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBrowserApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoProfileApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoWebInspectorApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.PointerInputHostApi
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin

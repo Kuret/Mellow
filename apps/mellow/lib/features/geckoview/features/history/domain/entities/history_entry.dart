@@ -20,7 +20,7 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 
-/// Maximum gap (epoch millis) between a WebLibre `visit_container` relation row
+/// Maximum gap (epoch millis) between a Mellow `visit_container` relation row
 /// and a Mozilla Places `VisitInfo` for them to be considered the same visit.
 /// The relation's `visit_time` is captured near — not exactly at — the Places
 /// record time (the native delegate stamps `System.currentTimeMillis()`), so
@@ -28,7 +28,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 const int historyVisitContainerMatchWindowMs = 5000;
 
 /// A single history-screen row: a Mozilla Places visit (the source of truth for
-/// url, title, visit type and time) annotated with the WebLibre container(s)
+/// url, title, visit type and time) annotated with the Mellow container(s)
 /// it belonged to.
 ///
 /// [containerIds] is the visit's resolved container tag — at most one entry for

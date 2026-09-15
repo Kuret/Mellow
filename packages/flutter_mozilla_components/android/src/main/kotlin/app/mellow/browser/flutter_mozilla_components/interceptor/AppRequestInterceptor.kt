@@ -4,17 +4,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.interceptor
+package app.mellow.browser.flutter_mozilla_components.interceptor
 
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.applinks.WebLibreAppLinksInterceptor
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.ProxyLoadError
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.applinks.MellowAppLinksInterceptor
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.ProxyLoadError
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.browser.state.selector.findTabOrCustomTab
@@ -28,8 +28,8 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    // The WebLibre-owned §2.4 app-links tail.
-    private val webLibreAppLinks by lazy { WebLibreAppLinksInterceptor(context) }
+    // The Mellow-owned §2.4 app-links tail.
+    private val webLibreAppLinks by lazy { MellowAppLinksInterceptor(context) }
 
     override fun onLoadRequest(
         engineSession: EngineSession,
@@ -56,9 +56,9 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         // empty fields — so callers must check the scheme explicitly.
         val parsed = Uri.parse(uri)
 
-        // Intercept weblibre:// deep links and dispatch them as Android intents
+        // Intercept mellow:// deep links and dispatch them as Android intents
         // so the Flutter side can handle them (e.g. account callback handoff).
-        if (parsed.scheme == "weblibre") {
+        if (parsed.scheme == "mellow") {
             val intent = Intent(Intent.ACTION_VIEW, parsed).apply {
                 setPackage(context.packageName)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -77,7 +77,7 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
                     appName = null,
                 )
             } catch (e: ActivityNotFoundException) {
-                // No activity is registered for this weblibre:// URI (cold-start
+                // No activity is registered for this mellow:// URI (cold-start
                 // race, manifest mismatch, etc.). Let the load fall through so
                 // Gecko shows a normal "can't load" page instead of crashing the
                 // load flow on an unhandled exception.
@@ -98,8 +98,8 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
             return it
         }
 
-        // App-links tail: the WebLibre-owned §2.4 implementation. Structural guards above
-        // (PWA/TWA, sandbox, weblibre://, FxA) already answered.
+        // App-links tail: the Mellow-owned §2.4 implementation. Structural guards above
+        // (PWA/TWA, sandbox, mellow://, FxA) already answered.
         return webLibreAppLinks.onLoadRequest(
             engineSession,
             uri,

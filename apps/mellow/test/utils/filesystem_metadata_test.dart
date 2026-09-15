@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 void main() {
   late Directory root;
 
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('weblibre_metadata');
+    root = await Directory.systemTemp.createTemp('mellow_metadata');
   });
 
   tearDown(() async {

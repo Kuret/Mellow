@@ -26,17 +26,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/io_client.dart';
+import 'package:mellow/core/http_error_handler.dart';
+import 'package:mellow/core/providers/http_client.dart';
+import 'package:mellow/data/models/web_page_info.dart';
+import 'package:mellow/domain/services/favicon_resolver.dart';
+import 'package:mellow/extensions/http_encoding.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/entities/browser_icon.dart';
+import 'package:mellow/features/user/domain/repositories/cache.dart';
+import 'package:mellow/utils/lru_cache.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'package:weblibre/core/http_error_handler.dart';
-import 'package:weblibre/core/providers/http_client.dart';
-import 'package:weblibre/data/models/web_page_info.dart';
-import 'package:weblibre/domain/services/favicon_resolver.dart';
-import 'package:weblibre/extensions/http_encoding.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
-import 'package:weblibre/utils/lru_cache.dart';
 
 part 'generic_website.g.dart';
 

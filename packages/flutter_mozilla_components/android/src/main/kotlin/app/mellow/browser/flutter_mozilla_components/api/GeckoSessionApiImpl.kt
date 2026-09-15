@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.*
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.*
 import kotlinx.coroutines.*
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.selectedTab

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/site_permissions.dart';
 
 /// Permission types with their display configuration
 enum PermissionType {

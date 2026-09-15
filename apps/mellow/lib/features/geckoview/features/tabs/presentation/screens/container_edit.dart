@@ -24,15 +24,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_local_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/container_local_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
 
 enum _DialogMode { create, edit }
 

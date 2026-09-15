@@ -19,12 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/switch_profile_dialog.dart';
-import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/presentation/dialogs/switch_profile_dialog.dart';
+import 'package:mellow/features/user/domain/repositories/profile.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/ui_helper.dart' as ui_helper;
 
 /// Handles the profile switching flow with confirmation dialog.
 ///

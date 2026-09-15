@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
-import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/firefox_container_vocab.dart';
+import 'package:mellow/presentation/widgets/sheet_drag_handle.dart';
 
 /// Picks one of Firefox's thirteen contextual-identity icon keywords.
 ///

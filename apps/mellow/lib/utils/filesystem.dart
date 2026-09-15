@@ -21,12 +21,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/domain/entities/profile.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/domain/entities/profile.dart';
 
-const profilesDirName = 'weblibre_profiles';
+const profilesDirName = 'mellow_profiles';
 const profileDirPrefix = 'profile-';
 
 const startupProfileFileName = 'current_profile';

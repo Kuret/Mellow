@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.addons
+package app.mellow.browser.flutter_mozilla_components.addons
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,7 +26,7 @@ import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.android.content.appVersionName
 import mozilla.components.ui.widgets.withCenterAlignedButtons
-import eu.weblibre.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.R
 import kotlinx.coroutines.Dispatchers
 import mozilla.components.feature.addons.R as MozComp
 

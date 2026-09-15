@@ -4,68 +4,68 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
-import eu.weblibre.flutter_mozilla_components.AddonPopupViewFactory
-import eu.weblibre.flutter_mozilla_components.AddonSettingsViewFactory
-import eu.weblibre.flutter_mozilla_components.BrowserFragment
-import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
-import eu.weblibre.flutter_mozilla_components.EngineProvider
-import eu.weblibre.flutter_mozilla_components.EngineViewVisibility
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ProfileContext
-import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
-import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
-import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
-import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
-import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoCookieApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFindApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
-import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.LogLevel
+import app.mellow.browser.flutter_mozilla_components.AddonPopupViewFactory
+import app.mellow.browser.flutter_mozilla_components.AddonSettingsViewFactory
+import app.mellow.browser.flutter_mozilla_components.BrowserFragment
+import app.mellow.browser.flutter_mozilla_components.GeckoViewFactory
+import app.mellow.browser.flutter_mozilla_components.EngineProvider
+import app.mellow.browser.flutter_mozilla_components.EngineViewVisibility
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ProfileContext
+import app.mellow.browser.flutter_mozilla_components.activities.ExternalAppBrowserActivity
+import app.mellow.browser.flutter_mozilla_components.activities.NotificationActivity
+import app.mellow.browser.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.pigeons.AddonCollection
+import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.ContentBlocking
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettings
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAddonsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAppLinksApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBookmarksApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBrowserApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoCookieApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoDownloadsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFindApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoHistoryApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoIconsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.startup.EngineWarmupSession
+import app.mellow.browser.flutter_mozilla_components.startup.StartupArbiter
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoLogging
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPrefApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoPwaApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSelectionActionController
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoHistoryEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSessionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabsApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoViewportApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoViewportEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.LogLevel
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import mozilla.components.browser.state.action.CustomTabListAction
@@ -148,7 +148,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // The factory resolves the current activity lazily via activityProvider,
         // so it always uses the latest activity after recreation/config changes.
         _flutterPluginBinding.platformViewRegistry.registerViewFactory(
-            "eu.weblibre/gecko", GeckoViewFactory(
+            "app.mellow.browser/gecko", GeckoViewFactory(
                 activityProvider = { this.activity },
                 FRAGMENT_CONTAINER_ID,
                 _flutterEvents,
@@ -156,11 +156,11 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             )
         )
         _flutterPluginBinding.platformViewRegistry.registerViewFactory(
-            "eu.weblibre/addon_settings",
+            "app.mellow.browser/addon_settings",
             AddonSettingsViewFactory(activityProvider = { this.activity }, pointerRouter),
         )
         _flutterPluginBinding.platformViewRegistry.registerViewFactory(
-            "eu.weblibre/addon_popup",
+            "app.mellow.browser/addon_popup",
             AddonPopupViewFactory(activityProvider = { this.activity }, pointerRouter),
         )
         isPlatformViewRegistered = true
@@ -321,7 +321,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
         // Set before GlobalComponents.setUp (which lazily builds the engine and
         // its history delegate) so Core can wrap the delegate to forward the
-        // visit's WebLibre container to Dart.
+        // visit's Mellow container to Dart.
         GlobalComponents.historyEvents =
             GeckoHistoryEvents(_flutterPluginBinding.binaryMessenger)
 

@@ -1,8 +1,8 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
-import 'package:weblibre/features/user/data/database/database.dart';
+import 'package:mellow/data/database/functions/lexo_rank_functions.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:mellow/features/user/data/database/database.dart';
 
 void main() {
   late UserDatabase db;

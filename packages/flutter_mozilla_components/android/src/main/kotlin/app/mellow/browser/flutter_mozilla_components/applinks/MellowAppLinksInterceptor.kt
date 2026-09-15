@@ -4,16 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
-import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import app.mellow.browser.flutter_mozilla_components.Components
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
@@ -24,21 +24,21 @@ import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import java.util.Locale
 
 /**
- * The WebLibre-owned §2.4 interception tail (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md Phase 5). Replaces
+ * The Mellow-owned §2.4 interception tail (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md Phase 5). Replaces
  * Mozilla AC's `AppLinksInterceptor` + `AppLinksFeature` + `AppLinksCancelRetryMiddleware` on the
  * synchronous `RequestInterceptor.onLoadRequest` path.
  *
- * Structural guards (PWA/TWA, sandbox capture, `weblibre://`, FxA) already ran in
- * [eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor] before this is called;
+ * Structural guards (PWA/TWA, sandbox capture, `mellow://`, FxA) already ran in
+ * [app.mellow.browser.flutter_mozilla_components.interceptor.AppRequestInterceptor] before this is called;
  * this tail owns steps 2–8: navigation eligibility, resolution/sanitisation ([ExternalAppResolver]),
  * the pure [AppLinkClassifier] decision, and its execution (auto-launch, validated fallback, or a
  * pending prompt). Policy comes from the profile-scoped [AppLinkPolicyStore]; prompts land in the
  * profile-scoped [PendingAppLinkStore]. It never denies a load and re-issues the same load.
  */
-class WebLibreAppLinksInterceptor(
+class MellowAppLinksInterceptor(
     private val context: Context,
 ) {
-    private val logger = Logger("WebLibreAppLinks")
+    private val logger = Logger("MellowAppLinks")
     private val runtime get() = AppLinkRuntime.get(context)
 
     /**
@@ -450,7 +450,7 @@ class WebLibreAppLinksInterceptor(
 
     /**
      * The package that launched this session, as recorded by
-     * [eu.weblibre.flutter_mozilla_components.activities.addExternalCallerInformation]. Note the
+     * [app.mellow.browser.flutter_mozilla_components.activities.addExternalCallerInformation]. Note the
      * underlying referrer is caller-supplied and can be spoofed, so this may only gate actions the
      * caller could already perform itself (here: launching its own intent).
      */

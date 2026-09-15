@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'bookmark_list_ui_state.g.dart';
 

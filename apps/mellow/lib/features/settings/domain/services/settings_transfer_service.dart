@@ -19,14 +19,14 @@
  */
 import 'dart:convert';
 
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/features/settings/domain/entities/settings_export_document.dart';
+import 'package:mellow/features/settings/domain/services/prefs_js_reader.dart';
+import 'package:mellow/features/settings/domain/services/prefs_sync_service.dart';
+import 'package:mellow/features/settings/domain/services/settings_sync_service.dart';
+import 'package:mellow/features/settings/domain/services/sync_document_service.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
-import 'package:weblibre/features/settings/domain/services/prefs_js_reader.dart';
-import 'package:weblibre/features/settings/domain/services/prefs_sync_service.dart';
-import 'package:weblibre/features/settings/domain/services/settings_sync_service.dart';
-import 'package:weblibre/features/settings/domain/services/sync_document_service.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'settings_transfer_service.g.dart';
 
@@ -40,7 +40,7 @@ part 'settings_transfer_service.g.dart';
 /// left out of it would just quietly stop being exported.
 enum SettingsTransferSection {
   settings(
-    SyncDocumentKind.weblibreSettings,
+    SyncDocumentKind.mellowSettings,
     'App settings',
     'Appearance, browsing, tabs, privacy, Tor and web engine settings',
   ),

@@ -20,7 +20,7 @@
 import 'package:collection/collection.dart';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:weblibre/extensions/uri.dart';
+import 'package:mellow/extensions/uri.dart';
 
 class UriBreadcrumb extends StatelessWidget {
   final Uri uri;

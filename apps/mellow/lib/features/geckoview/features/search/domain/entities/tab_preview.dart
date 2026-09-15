@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/domain/entities/equatable_image.dart';
+import 'package:mellow/domain/entities/equatable_image.dart';
 
 class TabPreview with FastEquatable {
   final String id;

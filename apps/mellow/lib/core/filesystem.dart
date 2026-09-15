@@ -22,18 +22,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/startup/maintenance_scanner.dart';
+import 'package:mellow/core/startup/profile_discovery.dart' as discovery;
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/utils/filesystem.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:sqlite3/sqlite3.dart';
-
 import 'package:uuid/uuid.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/startup/maintenance_scanner.dart';
-import 'package:weblibre/core/startup/profile_discovery.dart' as discovery;
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// Any `files/mozilla/` prefix belonging to a *different* profile, or to the
 /// pre-multi-profile layout.

@@ -20,12 +20,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/history_query_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/history_search.dart';
+import 'package:mellow/utils/url_canonical.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
-import 'package:weblibre/utils/url_canonical.dart';
 
 part 'combined_history.g.dart';
 

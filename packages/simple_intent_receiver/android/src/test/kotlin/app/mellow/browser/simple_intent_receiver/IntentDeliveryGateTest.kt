@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.simple_intent_receiver
+package app.mellow.browser.simple_intent_receiver
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import app.mellow.browser.simple_intent_receiver.pigeons.Intent as PigeonIntent
 
 /**
  * The lifecycle paths behind #589, stated as the only thing about them that is

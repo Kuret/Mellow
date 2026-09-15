@@ -19,9 +19,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
+import 'package:mellow/core/maintenance/native_participant.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
-import 'package:weblibre/core/maintenance/native_participant.dart';
 
 /// Records which directory each step was handed.
 class _RoutingApi implements GeckoProfileApi {
@@ -59,7 +59,7 @@ void main() {
   late Directory rollback;
 
   setUp(() {
-    root = Directory.systemTemp.createTempSync('weblibre_routing');
+    root = Directory.systemTemp.createTempSync('mellow_routing');
     staged = Directory(p.join(root.path, 'staged'))..createSync();
     rollback = Directory(p.join(root.path, 'rollback'))..createSync();
   });

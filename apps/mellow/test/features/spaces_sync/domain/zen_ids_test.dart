@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
+import 'package:mellow/features/spaces_sync/domain/zen_ids.dart';
 
 void main() {
   group('ZenIds.newTabId', () {

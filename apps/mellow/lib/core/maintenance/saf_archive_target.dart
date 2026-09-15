@@ -19,13 +19,13 @@
  */
 import 'dart:io';
 
+import 'package:mellow/core/logger.dart';
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
-import 'package:weblibre/core/logger.dart';
 
 /// Suffix a backup wears while it is still being written.
 ///
-/// A `.weblibre` file in the backup folder is a promise that it can be restored.
+/// A `.mellow` file in the backup folder is a promise that it can be restored.
 /// A publication that is interrupted — the process dies, the volume fills, the
 /// grant is pulled mid-write — must not be able to make that promise, so the
 /// name is only claimed once the bytes are all there.

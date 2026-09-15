@@ -19,12 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/design/app_colors.dart';
+import 'package:mellow/core/design/aura_surface.dart';
+import 'package:mellow/features/geckoview/features/search/domain/providers/search_section_display.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_modules/search_module_header.dart';
+import 'package:mellow/features/geckoview/features/search/presentation/widgets/search_section_scope.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/design/aura_surface.dart';
-import 'package:weblibre/features/geckoview/features/search/domain/providers/search_section_display.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_header.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_section_scope.dart';
 
 const previewItemsPerModule = 3;
 

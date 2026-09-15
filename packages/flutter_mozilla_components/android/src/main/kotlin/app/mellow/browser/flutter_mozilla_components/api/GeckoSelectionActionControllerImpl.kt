@@ -4,11 +4,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
-import eu.weblibre.flutter_mozilla_components.pigeons.CustomSelectionAction
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
+import app.mellow.browser.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import app.mellow.browser.flutter_mozilla_components.pigeons.CustomSelectionAction
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import mozilla.components.feature.addons.logger
 
 /**

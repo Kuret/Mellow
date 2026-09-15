@@ -4,7 +4,7 @@
  * This file is part of WebLibre
  * (see https://weblibre.eu).
  */
-package eu.weblibre.flutter_mozilla_components.gatekeeper
+package app.mellow.browser.flutter_mozilla_components.gatekeeper
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -19,7 +19,7 @@ import java.util.UUID
  * write to the same file using [Context.getSharedPreferences] with this name.
  */
 object IntentGatekeeperPreferences {
-    const val PREFS_NAME = "weblibre_intent_gatekeeper"
+    const val PREFS_NAME = "mellow_intent_gatekeeper"
     const val KEY_ENABLED = "enabled"
     const val KEY_CUSTOM_TABS_ENABLED = "custom_tabs_enabled"
     const val KEY_BLOCKED_PACKAGES = "blocked_packages"

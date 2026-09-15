@@ -17,12 +17,12 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/saf_archive_target.dart';
 import 'package:path/path.dart' as p;
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_stream/saf_stream_platform_interface.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
-import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 
 /// An in-memory document tree: uri -> (name, bytes).
 class _FakeTree {
@@ -120,11 +120,11 @@ void main() {
   late _FakeTree tree;
 
   final target = Uri.parse('content://tree');
-  const fileName = 'backup_Work_2026-08-19_101500.weblibre';
+  const fileName = 'backup_Work_2026-08-19_101500.mellow';
 
   setUp(() {
-    root = Directory.systemTemp.createTempSync('weblibre_saf');
-    archive = File(p.join(root.path, 'archive.weblibre'))
+    root = Directory.systemTemp.createTempSync('mellow_saf');
+    archive = File(p.join(root.path, 'archive.mellow'))
       ..writeAsStringSync('a complete archive');
     tree = _FakeTree();
   });
@@ -155,7 +155,7 @@ void main() {
 
     test('a truncated write never takes the final name', () {
       // The realistic failure — the volume fills mid-copy. A short archive under
-      // a `.weblibre` name is a backup that claims to be restorable and is not.
+      // a `.mellow` name is a backup that claims to be restorable and is not.
       expect(publish(shortBy: 3), throwsA(isA<BackupPublicationFailure>()));
     });
 
@@ -187,9 +187,9 @@ void main() {
     });
 
     test('a partial file is not a backup the list would offer', () {
-      // The list filters on `.weblibre`, and `.weblibre.partial` does not match —
+      // The list filters on `.mellow`, and `.mellow.partial` does not match —
       // so an interrupted publication cannot be picked for a restore.
-      expect('$fileName$partialArchiveSuffix'.endsWith('.weblibre'), isFalse);
+      expect('$fileName$partialArchiveSuffix'.endsWith('.mellow'), isFalse);
     });
   });
 

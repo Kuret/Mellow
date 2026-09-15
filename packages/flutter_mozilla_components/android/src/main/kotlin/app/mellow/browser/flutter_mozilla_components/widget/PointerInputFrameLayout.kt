@@ -4,13 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.widget
+package app.mellow.browser.flutter_mozilla_components.widget
 
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
-import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
+import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
 
 /**
  * The root of a platform view whose mouse input is arbitrated against the

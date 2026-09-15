@@ -10,11 +10,11 @@ part of 'visit_container_recorder.dart';
 // ignore_for_file: type=lint, type=warning
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
 /// on each Places visit the tab's native history delegate forwards the id of the
-/// session that produced it, which this service maps to that tab's WebLibre
+/// session that produced it, which this service maps to that tab's Mellow
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// Graceful absence: a visit from a tab with no container — or from one Mellow
 /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
 /// custom tab — writes no row and simply appears untagged. Activated eagerly at
 /// startup.
@@ -24,11 +24,11 @@ final visitContainerRecorderProvider = VisitContainerRecorderProvider._();
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
 /// on each Places visit the tab's native history delegate forwards the id of the
-/// session that produced it, which this service maps to that tab's WebLibre
+/// session that produced it, which this service maps to that tab's Mellow
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// Graceful absence: a visit from a tab with no container — or from one Mellow
 /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
 /// custom tab — writes no row and simply appears untagged. Activated eagerly at
 /// startup.
@@ -36,11 +36,11 @@ final class VisitContainerRecorderProvider
     extends $NotifierProvider<VisitContainerRecorder, void> {
   /// Records the visit→container relation. Mozilla Places owns the visit itself;
   /// on each Places visit the tab's native history delegate forwards the id of the
-  /// session that produced it, which this service maps to that tab's WebLibre
+  /// session that produced it, which this service maps to that tab's Mellow
   /// container and persists as a `visit_container` row (keyed on the visit's
   /// canonical URL + time so the history UI can join it back to Places).
   ///
-  /// Graceful absence: a visit from a tab with no container — or from one WebLibre
+  /// Graceful absence: a visit from a tab with no container — or from one Mellow
   /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
   /// custom tab — writes no row and simply appears untagged. Activated eagerly at
   /// startup.
@@ -76,11 +76,11 @@ String _$visitContainerRecorderHash() =>
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
 /// on each Places visit the tab's native history delegate forwards the id of the
-/// session that produced it, which this service maps to that tab's WebLibre
+/// session that produced it, which this service maps to that tab's Mellow
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// Graceful absence: a visit from a tab with no container — or from one Mellow
 /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
 /// custom tab — writes no row and simply appears untagged. Activated eagerly at
 /// startup.

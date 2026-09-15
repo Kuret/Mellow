@@ -19,7 +19,7 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/extensions/uri.dart';
+import 'package:mellow/extensions/uri.dart';
 
 void main() {
   group('Uri display formatting', () {

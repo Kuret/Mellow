@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.drift.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/daos/history.drift.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/history_query_result.dart';
 
 @DriftAccessor()
 class HistoryDao extends DatabaseAccessor<TabDatabase> with $HistoryDaoMixin {

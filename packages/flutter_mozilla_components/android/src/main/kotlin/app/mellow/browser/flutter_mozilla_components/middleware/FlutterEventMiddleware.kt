@@ -1,23 +1,23 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
 import android.graphics.Bitmap
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.ext.resize
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.AudioHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.EmailHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeoHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.ImageHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.ImageSrcHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.PhoneHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.UnknownHitResult
-import eu.weblibre.flutter_mozilla_components.pigeons.VideoHitResult
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.ext.resize
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.AudioHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.EmailHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.FindResultState
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeoHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.ImageHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.ImageSrcHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.PhoneHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.UnknownHitResult
+import app.mellow.browser.flutter_mozilla_components.pigeons.VideoHitResult
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.LastAccessAction

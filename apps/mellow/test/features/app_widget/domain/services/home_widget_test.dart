@@ -16,9 +16,9 @@
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/features/app_widget/domain/services/home_widget.dart';
+import 'package:mellow/features/share_intent/domain/services/brokered_intents.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
-import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
-import 'package:weblibre/features/share_intent/domain/services/brokered_intents.dart';
 
 Intent intentWith({String? action, String? data}) => Intent(
   fromPackageName: null,

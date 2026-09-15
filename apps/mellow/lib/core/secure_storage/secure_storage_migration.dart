@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/core/secure_storage/profile_secure_keys.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/core/secure_storage/profile_secure_keys.dart';
 
 /// Base key of the account session, sync key and in-flight PKCE verifier.
 const accountSecureBaseKey = 'account_auth_data';

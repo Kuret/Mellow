@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/startup/maintenance_scanner.dart';
+import 'package:mellow/core/startup/models/maintenance_journal.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/core/startup/startup_paths.dart';
 import 'package:path/path.dart' as p;
-import 'package:weblibre/core/startup/maintenance_scanner.dart';
-import 'package:weblibre/core/startup/models/maintenance_journal.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/core/startup/startup_paths.dart';
 
 const _profileId = '0199a0b1-1111-7111-8111-111111111111';
 
@@ -19,7 +19,7 @@ void main() {
   late MaintenanceScanner scanner;
 
   setUp(() async {
-    filesDir = await Directory.systemTemp.createTemp('weblibre_maintenance');
+    filesDir = await Directory.systemTemp.createTemp('mellow_maintenance');
     paths = StartupPaths(filesDir);
     await paths.ensureGlobalDirectories();
     scanner = MaintenanceScanner(paths);
@@ -255,7 +255,7 @@ void _tolerantParsingTests() {
     late StartupPaths paths;
 
     setUp(() async {
-      filesDir = await Directory.systemTemp.createTemp('weblibre_malformed');
+      filesDir = await Directory.systemTemp.createTemp('mellow_malformed');
       paths = StartupPaths(filesDir);
       await paths.ensureGlobalDirectories();
     });

@@ -22,7 +22,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
+import 'package:mellow/core/design/app_colors.dart';
 
 class BrowserPage extends ConsumerWidget {
   final Widget child;

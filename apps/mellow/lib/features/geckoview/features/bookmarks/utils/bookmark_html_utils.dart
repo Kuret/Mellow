@@ -20,8 +20,8 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:mellow/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
 
 const _containerNormal = 0;
 const _containerToolbar = 1;

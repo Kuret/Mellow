@@ -20,20 +20,20 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/space.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/space_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/user/data/providers.dart';
 
 part 'selected_space.g.dart';
 
@@ -134,9 +134,9 @@ class SelectedSpace extends _$SelectedSpace {
         // forever — the map is keyed on space uuid and nothing else prunes
         // it.
         unawaited(
-          ref
-              .read(spaceLastTabProvider.notifier)
-              .pruneToSpaces({for (final space in spaces) space.uuid}),
+          ref.read(spaceLastTabProvider.notifier).pruneToSpaces({
+            for (final space in spaces) space.uuid,
+          }),
         );
       },
       onError: (error, stackTrace) {

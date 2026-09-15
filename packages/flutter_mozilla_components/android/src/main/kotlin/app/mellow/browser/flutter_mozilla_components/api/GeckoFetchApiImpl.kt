@@ -1,15 +1,15 @@
-package eu.weblibre.flutter_mozilla_components.api
+package app.mellow.browser.flutter_mozilla_components.api
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchApi
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchCookiePolicy
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchMethod
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchRedircet
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchRequest
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchResponse
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHeader
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchApi
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchCookiePolicy
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchMethod
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchRedircet
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchRequest
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoFetchResponse
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoHeader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

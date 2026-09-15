@@ -4,12 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import java.util.Locale
 
 /**
- * Frozen scheme classification tables for the WebLibre-owned app-links implementation
+ * Frozen scheme classification tables for the Mellow-owned app-links implementation
  * (see APP_LINKS_OWN_IMPLEMENTATION_PLAN.md §2.2).
  *
  * These tables initially match Mozilla Android Components

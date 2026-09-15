@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
+import 'package:mellow/domain/entities/profile.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_labels.dart';
 
 const _a = '0199a0b1-1111-7111-8111-111111111111';
 const _b = '0199a0b1-2222-7222-8222-222222222222';

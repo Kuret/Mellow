@@ -20,8 +20,8 @@
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
-import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
+import 'package:mellow/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:mellow/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
 
 AppLinkTarget _target({
   String url = 'https://youtu.be/abc',

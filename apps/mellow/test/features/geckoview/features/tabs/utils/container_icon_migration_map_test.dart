@@ -1,6 +1,6 @@
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/utils/container_icon_migration_map.dart';
+import 'package:mellow/features/geckoview/features/tabs/utils/container_icon_migration_map.dart';
 
 void main() {
   group('containerIconKeyForLegacyCodePoint', () {

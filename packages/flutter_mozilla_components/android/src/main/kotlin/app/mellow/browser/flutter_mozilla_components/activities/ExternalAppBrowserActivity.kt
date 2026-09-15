@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.activities
+package app.mellow.browser.flutter_mozilla_components.activities
 
 import android.content.Context
 import android.content.Intent
@@ -14,14 +14,14 @@ import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
-import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
-import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
-import eu.weblibre.flutter_mozilla_components.PwaConstants
-import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
-import eu.weblibre.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.ColorSchemePreference
+import app.mellow.browser.flutter_mozilla_components.ExternalAppBrowserFragment
+import app.mellow.browser.flutter_mozilla_components.FlutterEngineCoordinator
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.HomePressDispatcher
+import app.mellow.browser.flutter_mozilla_components.PwaConstants
+import app.mellow.browser.flutter_mozilla_components.PwaSessionCreator
+import app.mellow.browser.flutter_mozilla_components.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -98,8 +98,8 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Match the window chrome (status/nav bar + pre-paint background) to the
-        // user's WebLibre color scheme rather than just the system mode, so a
-        // cold-started Custom Tab / PWA doesn't flash dark when WebLibre is light.
+        // user's Mellow color scheme rather than just the system mode, so a
+        // cold-started Custom Tab / PWA doesn't flash dark when Mellow is light.
         // Set before super.onCreate so the correct mode is applied without a recreate.
         delegate.localNightMode = ColorSchemePreference.nightMode(this)
 
@@ -325,7 +325,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         val contextId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
 
         val mainIntent = Intent().apply {
-            setClassName(this@ExternalAppBrowserActivity, "eu.weblibre.gecko.MainActivity")
+            setClassName(this@ExternalAppBrowserActivity, "app.mellow.browser.MainActivity")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             if (url != null) {
                 action = Intent.ACTION_VIEW

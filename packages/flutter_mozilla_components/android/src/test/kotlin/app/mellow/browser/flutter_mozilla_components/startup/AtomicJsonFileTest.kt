@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import java.io.File
 import java.nio.file.Files
@@ -36,7 +36,7 @@ class AtomicJsonFileTest {
 
     @BeforeTest
     fun setUp() {
-        dir = Files.createTempDirectory("weblibre_atomic").toFile()
+        dir = Files.createTempDirectory("mellow_atomic").toFile()
     }
 
     @AfterTest

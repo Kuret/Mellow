@@ -20,11 +20,11 @@
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lexo_rank/lexo_rank.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
-import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
+import 'package:mellow/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'toolbar_button_configs.g.dart';
 

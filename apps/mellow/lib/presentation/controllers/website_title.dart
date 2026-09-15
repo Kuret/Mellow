@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:mellow/data/models/web_page_info.dart';
+import 'package:mellow/domain/services/generic_website.dart';
+import 'package:mellow/extensions/ref_cache.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/entities/states/tab.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/data/models/web_page_info.dart';
-import 'package:weblibre/domain/services/generic_website.dart';
-import 'package:weblibre/extensions/ref_cache.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 
 part 'website_title.g.dart';
 

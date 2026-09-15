@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.addons
+package app.mellow.browser.flutter_mozilla_components.addons
 
 import android.content.Context
 import android.os.Bundle
@@ -12,8 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.R
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView

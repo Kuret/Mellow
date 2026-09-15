@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/entities/folder_tree.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/models/tab_folder_data.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/entities/folder_tree.dart';
 
 TabFolderData _folder(
   String id, {
@@ -41,7 +41,9 @@ void main() {
     });
 
     test('root folders come out at depth 0 with an empty path', () {
-      final rows = buildFolderTree([_folder('1', name: 'Work', orderKey: 'a0')]);
+      final rows = buildFolderTree([
+        _folder('1', name: 'Work', orderKey: 'a0'),
+      ]);
 
       expect(rows, hasLength(1));
       expect(rows.single.folder.id, '1');
@@ -73,52 +75,75 @@ void main() {
       expect(byId['grandchild']!.path, 'Linux › DE');
     });
 
-    test('two same-named folders under different parents stay distinguishable', () {
-      final rows = buildFolderTree([
-        _folder('linux', name: 'Linux', orderKey: 'a0'),
-        _folder('macos', name: 'MacOS', orderKey: 'a1'),
-        _folder(
-          'linux-de',
-          name: 'DE',
-          parentFolderId: 'linux',
-          orderKey: 'a0',
-        ),
-        _folder(
-          'macos-de',
-          name: 'DE',
-          parentFolderId: 'macos',
-          orderKey: 'a0',
-        ),
-      ]);
+    test(
+      'two same-named folders under different parents stay distinguishable',
+      () {
+        final rows = buildFolderTree([
+          _folder('linux', name: 'Linux', orderKey: 'a0'),
+          _folder('macos', name: 'MacOS', orderKey: 'a1'),
+          _folder(
+            'linux-de',
+            name: 'DE',
+            parentFolderId: 'linux',
+            orderKey: 'a0',
+          ),
+          _folder(
+            'macos-de',
+            name: 'DE',
+            parentFolderId: 'macos',
+            orderKey: 'a0',
+          ),
+        ]);
 
-      final byId = {for (final row in rows) row.folder.id: row};
+        final byId = {for (final row in rows) row.folder.id: row};
 
-      expect(byId['linux-de']!.folder.name, 'DE');
-      expect(byId['macos-de']!.folder.name, 'DE');
-      expect(byId['linux-de']!.path, isNot(byId['macos-de']!.path));
-      expect(byId['linux-de']!.path, 'Linux');
-      expect(byId['macos-de']!.path, 'MacOS');
-    });
+        expect(byId['linux-de']!.folder.name, 'DE');
+        expect(byId['macos-de']!.folder.name, 'DE');
+        expect(byId['linux-de']!.path, isNot(byId['macos-de']!.path));
+        expect(byId['linux-de']!.path, 'Linux');
+        expect(byId['macos-de']!.path, 'MacOS');
+      },
+    );
 
-    test('siblings are ordered by orderKey, depth-first before the next root', () {
-      final rows = buildFolderTree([
-        _folder('b', name: 'B', orderKey: 'b0'),
-        _folder('a', name: 'A', orderKey: 'a0'),
-        _folder('a-child', name: 'A-child', parentFolderId: 'a', orderKey: 'a0'),
-        _folder('b-child', name: 'B-child', parentFolderId: 'b', orderKey: 'a0'),
-      ]);
+    test(
+      'siblings are ordered by orderKey, depth-first before the next root',
+      () {
+        final rows = buildFolderTree([
+          _folder('b', name: 'B', orderKey: 'b0'),
+          _folder('a', name: 'A', orderKey: 'a0'),
+          _folder(
+            'a-child',
+            name: 'A-child',
+            parentFolderId: 'a',
+            orderKey: 'a0',
+          ),
+          _folder(
+            'b-child',
+            name: 'B-child',
+            parentFolderId: 'b',
+            orderKey: 'a0',
+          ),
+        ]);
 
-      expect(
-        rows.map((row) => row.folder.id).toList(),
-        ['a', 'a-child', 'b', 'b-child'],
-      );
-    });
+        expect(rows.map((row) => row.folder.id).toList(), [
+          'a',
+          'a-child',
+          'b',
+          'b-child',
+        ]);
+      },
+    );
 
     test(
       'a folder whose parent id does not resolve is treated as a root, not dropped',
       () {
         final rows = buildFolderTree([
-          _folder('orphan', name: 'Orphan', parentFolderId: 'missing', orderKey: 'a0'),
+          _folder(
+            'orphan',
+            name: 'Orphan',
+            parentFolderId: 'missing',
+            orderKey: 'a0',
+          ),
         ]);
 
         expect(rows, hasLength(1));

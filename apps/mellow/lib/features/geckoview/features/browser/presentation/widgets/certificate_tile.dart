@@ -21,9 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/extensions/uri.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/extensions/uri.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 
 class CertificateTile extends HookConsumerWidget {
   const CertificateTile({super.key});

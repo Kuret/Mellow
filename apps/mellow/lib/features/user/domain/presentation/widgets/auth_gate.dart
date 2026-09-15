@@ -24,14 +24,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/startup/models/startup_config.dart';
-import 'package:weblibre/core/startup/startup_config_store.dart';
-import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
-import 'package:weblibre/presentation/hooks/on_initialization.dart';
-import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/ui_helper.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
+import 'package:mellow/core/filesystem.dart';
+import 'package:mellow/core/startup/models/startup_config.dart';
+import 'package:mellow/core/startup/startup_config_store.dart';
+import 'package:mellow/features/user/domain/providers/profile_auth.dart';
+import 'package:mellow/presentation/hooks/on_initialization.dart';
+import 'package:mellow/utils/exit_app.dart';
+import 'package:mellow/utils/ui_helper.dart';
 
 class LockScreen extends HookConsumerWidget {
   const LockScreen({super.key});

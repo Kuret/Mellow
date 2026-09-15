@@ -19,9 +19,9 @@
  */
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/search/domain/entities/builtin_search_providers.dart';
-import 'package:weblibre/features/search/domain/entities/search_provider.dart';
-import 'package:weblibre/features/search/domain/services/search_provider_match.dart';
+import 'package:mellow/features/search/domain/entities/builtin_search_providers.dart';
+import 'package:mellow/features/search/domain/entities/search_provider.dart';
+import 'package:mellow/features/search/domain/services/search_provider_match.dart';
 
 const _testProvider = SearchProvider(
   id: 'test',

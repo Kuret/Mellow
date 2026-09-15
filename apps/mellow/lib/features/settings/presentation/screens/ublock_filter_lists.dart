@@ -22,15 +22,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/models/ublock_asset.dart';
+import 'package:mellow/features/user/data/models/ublock_filter_list_settings.dart';
+import 'package:mellow/features/user/data/providers/ublock_assets.dart';
+import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/presentation/widgets/uri_breadcrumb.dart';
+import 'package:mellow/utils/form_validators.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/ublock_asset.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
-import 'package:weblibre/features/user/data/providers/ublock_assets.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
-import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
-import 'package:weblibre/utils/form_validators.dart';
 
 typedef _SettingsMutator =
     Future<void> Function(
@@ -127,7 +127,7 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
       );
     }
 
-    Future<void> applyWebLibreHardenings() async {
+    Future<void> applyMellowHardenings() async {
       await updateSettings((current) {
         final tokens = [...current.enabledStockListTokens];
         for (final token in kUBlockHardeningStockTokens) {
@@ -226,7 +226,7 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
                           'filter lists and add a legitimate URL shortener '
                           'list as an external list.',
                       confirmLabel: 'Apply',
-                      action: applyWebLibreHardenings,
+                      action: applyMellowHardenings,
                     ),
                   ),
                 ],

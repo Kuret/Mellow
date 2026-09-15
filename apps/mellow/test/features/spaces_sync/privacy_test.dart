@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
-import 'package:weblibre/features/spaces_sync/domain/spaces_projection.dart';
-import 'package:weblibre/features/spaces_sync/domain/spaces_sync_service.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:mellow/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_projection.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 
 import '../geckoview/features/tabs/data/database/tab_db_test_helpers.dart';
 import 'spaces_sync_test_support.dart';

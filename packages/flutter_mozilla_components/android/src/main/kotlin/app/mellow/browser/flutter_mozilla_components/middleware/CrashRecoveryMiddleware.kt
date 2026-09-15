@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.middleware
+package app.mellow.browser.flutter_mozilla_components.middleware
 
 import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +30,7 @@ import mozilla.components.support.base.log.logger.Logger
  * restore the tab is not merely stale — it is a blank rectangle for the rest of
  * the process' life, and nothing in the UI says why.
  *
- * Fenix answers this with a crash page the user has to dismiss. WebLibre
+ * Fenix answers this with a crash page the user has to dismiss. Mellow
  * restores silently: a reloaded tab is a better answer than an empty one, and
  * the reload is what the user would ask for anyway.
  *

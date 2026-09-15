@@ -21,11 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:mellow/presentation/widgets/share_tile.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
-import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
-import 'package:weblibre/presentation/widgets/share_tile.dart';
 
 class ShareLink extends HookConsumerWidget {
   final HitResult hitResult;

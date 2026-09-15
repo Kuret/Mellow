@@ -22,7 +22,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:weblibre/features/spaces_sync/data/sync15/tokenserver_client.dart';
+import 'package:mellow/features/spaces_sync/data/sync15/tokenserver_client.dart';
 
 Map<String, Object?> _successBody() => {
   'id': 'hawk-id',

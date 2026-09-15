@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.gecko
+package app.mellow.browser
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
-import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
-import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
-import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
-import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
-import eu.weblibre.simple_intent_receiver.IntentApprovals
-import eu.weblibre.simple_intent_receiver.IntentCallerResolver
-import eu.weblibre.simple_intent_receiver.IntentReceiverHost
+import app.mellow.browser.flutter_mozilla_components.FlutterEngineCoordinator
+import app.mellow.browser.flutter_mozilla_components.HomePressDispatcher
+import app.mellow.browser.flutter_mozilla_components.startup.LaunchTrust
+import app.mellow.browser.flutter_mozilla_components.startup.StartupIntentBroker
+import app.mellow.browser.flutter_mozilla_components.startup.StartupPaths
+import app.mellow.browser.simple_intent_receiver.IntentApprovals
+import app.mellow.browser.simple_intent_receiver.IntentCallerResolver
+import app.mellow.browser.simple_intent_receiver.IntentReceiverHost
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -42,14 +42,14 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         private const val TAG = "MainActivity"
 
         /** Marks the intent [checkAndExitPiP] sends to itself. */
-        private const val EXTRA_EXIT_PIP = "eu.weblibre.gecko.EXIT_PIP"
+        private const val EXTRA_EXIT_PIP = "app.mellow.browser.EXIT_PIP"
 
-        private const val STATE_INTENT_PROCESS = "eu.weblibre.gecko.INTENT_PROCESS"
+        private const val STATE_INTENT_PROCESS = "app.mellow.browser.INTENT_PROCESS"
         private val intentProcessId = UUID.randomUUID().toString()
     }
 
-    private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
-    private val ACTIVITY_CHANNEL = "eu.weblibre.gecko/activity"
+    private val TRIM_MEMORY_CHANNEL = "app.mellow.browser.flutter_mozilla_components/trim_memory"
+    private val ACTIVITY_CHANNEL = "app.mellow.browser/activity"
     private val ENGINE_ID = FlutterEngineCoordinator.ENGINE_ID
     private var trimMemoryChannel: MethodChannel? = null
 

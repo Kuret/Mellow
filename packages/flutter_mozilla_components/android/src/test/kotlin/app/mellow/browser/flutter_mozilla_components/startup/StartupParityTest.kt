@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,7 +30,7 @@ import kotlin.test.assertTrue
  * The Kotlin half of the startup contract parity suite.
  *
  * Every assertion here is mirrored in
- * `apps/weblibre/test/core/startup/startup_parity_test.dart` and reads the same
+ * `apps/mellow/test/core/startup/startup_parity_test.dart` and reads the same
  * fixture files. A divergence between the two parsers is not cosmetic: Kotlin
  * decides whether to reserve maintenance before any profile consumer runs, and
  * Dart decides what the picker and the task queue do. If they disagree, Gecko can

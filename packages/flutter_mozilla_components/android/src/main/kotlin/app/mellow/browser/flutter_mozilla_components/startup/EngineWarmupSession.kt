@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.startup
+package app.mellow.browser.flutter_mozilla_components.startup
 
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
-import eu.weblibre.flutter_mozilla_components.Components
-import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
+import app.mellow.browser.flutter_mozilla_components.Components
+import app.mellow.browser.flutter_mozilla_components.feature.BrowserExtensionFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

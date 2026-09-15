@@ -19,7 +19,7 @@
  */
 import 'dart:math';
 
-import 'package:weblibre/core/uuid.dart';
+import 'package:mellow/core/uuid.dart';
 
 /// Identity formats for Zen's synced records (DESIGN.md "Identity formats").
 ///

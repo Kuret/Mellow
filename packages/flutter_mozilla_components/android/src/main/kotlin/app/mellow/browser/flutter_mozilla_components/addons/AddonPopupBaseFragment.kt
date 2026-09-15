@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package eu.weblibre.flutter_mozilla_components.addons
+package app.mellow.browser.flutter_mozilla_components.addons
 
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
 import androidx.fragment.app.Fragment
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.services.DownloadService
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.services.DownloadService
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.state.CustomTabSessionState

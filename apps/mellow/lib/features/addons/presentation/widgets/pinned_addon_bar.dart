@@ -20,11 +20,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/addons/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/addons/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/web_extensions_state.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 
 class PinnedAddonBar extends ConsumerWidget {
   const PinnedAddonBar({super.key, this.axis = Axis.horizontal});

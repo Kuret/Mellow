@@ -20,12 +20,12 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mellow/core/maintenance/maintenance_participant.dart';
+import 'package:mellow/core/maintenance/secure_storage_participant.dart';
+import 'package:mellow/core/secure_storage/profile_secure_store.dart';
+import 'package:mellow/core/secure_storage/secure_storage_migration.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
-import 'package:weblibre/core/maintenance/maintenance_participant.dart';
-import 'package:weblibre/core/maintenance/secure_storage_participant.dart';
-import 'package:weblibre/core/secure_storage/profile_secure_store.dart';
-import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 
 const _a = '0199a0b1-1111-7111-8111-111111111111';
 const _b = '0199a0b1-2222-7222-8222-222222222222';
@@ -84,7 +84,7 @@ void main() {
     platform = _FakeSecureStorage();
     FlutterSecureStoragePlatform.instance = platform;
     storage = const FlutterSecureStorage();
-    root = Directory.systemTemp.createTempSync('weblibre_secure_participant');
+    root = Directory.systemTemp.createTempSync('mellow_secure_participant');
     staged = Directory(p.join(root.path, 'staged'))
       ..createSync(recursive: true);
     rollback = Directory(p.join(root.path, 'rollback'))

@@ -19,10 +19,10 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:weblibre/core/routing/routes.dart';
+import 'package:mellow/core/routing/routes.dart';
 
-import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 
 /// The about screen, on its own so it can be moved or switched off like any
 /// other section.

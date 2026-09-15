@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.applinks
+package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.ComponentName
 import android.content.Intent
@@ -163,7 +163,7 @@ class ExternalAppResolver(
                 resolvedActivityName = defaultInfo?.activityInfo?.name
                 resolvedInfo = defaultInfo
             }
-            // A page must not relaunch WebLibre through the app-link path: if WebLibre itself is the
+            // A page must not relaunch Mellow through the app-link path: if Mellow itself is the
             // default handler, keep the load in-browser rather than hunting for other apps.
             defaultPackage == packages.selfPackageName -> {
                 resolvedPackage = null
@@ -244,7 +244,7 @@ class ExternalAppResolver(
     private fun safeParseUri(url: String): Intent? {
         val intent = safeParseRawUri(url, Intent.URI_INTENT_SCHEME) ?: return null
         return if (intent.`package` == packages.selfPackageName) {
-            // Ignore intents that would relaunch WebLibre.
+            // Ignore intents that would relaunch Mellow.
             null
         } else {
             intent
@@ -276,7 +276,7 @@ class ExternalAppResolver(
 
         // Preserve an explicit `intent:...;package=` target: it is a package-id constraint (not a
         // component, which could point at a non-exported activity), so resolution/launch targets the
-        // app the link actually names instead of some other handler or WebLibre itself. `safeParseUri`
+        // app the link actually names instead of some other handler or Mellow itself. `safeParseUri`
         // already rejected a self-package target. This mirrors AC's createBrowsableIntents.
         source.`package`?.let { pkg ->
             if (pkg != packages.selfPackageName) sanitized.`package` = pkg

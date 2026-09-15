@@ -21,10 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/permission_type.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
+import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/permission_type.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/entities/site_permissions.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 
 /// Section widget displaying site permissions with toggles
 class PermissionsSection extends HookConsumerWidget {

@@ -4,23 +4,23 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package eu.weblibre.flutter_mozilla_components.components
+package app.mellow.browser.flutter_mozilla_components.components
 
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
-import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
-import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
-import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
-import eu.weblibre.flutter_mozilla_components.pigeons.PwaIcon
-import eu.weblibre.flutter_mozilla_components.pigeons.PwaManifest
-import eu.weblibre.flutter_mozilla_components.pigeons.HistoryItem
-import eu.weblibre.flutter_mozilla_components.pigeons.HistoryState
-import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
-import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetParams
-import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
+import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
+import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.pigeons.ExternalApplicationResource
+import app.mellow.browser.flutter_mozilla_components.pigeons.FindResultState
+import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
+import app.mellow.browser.flutter_mozilla_components.pigeons.PwaIcon
+import app.mellow.browser.flutter_mozilla_components.pigeons.PwaManifest
+import app.mellow.browser.flutter_mozilla_components.pigeons.HistoryItem
+import app.mellow.browser.flutter_mozilla_components.pigeons.HistoryState
+import app.mellow.browser.flutter_mozilla_components.pigeons.SecurityInfoState
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTarget
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTargetFiles
+import app.mellow.browser.flutter_mozilla_components.pigeons.ShareTargetParams
+import app.mellow.browser.flutter_mozilla_components.pigeons.TabContentState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job

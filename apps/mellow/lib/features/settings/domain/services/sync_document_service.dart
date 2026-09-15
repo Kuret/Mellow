@@ -22,7 +22,10 @@
 /// The [value] is the stable identifier written into exported settings files
 /// (and, historically, into hosted sync storage), so it must not change.
 enum SyncDocumentKind {
-  weblibreSettings('weblibre_settings', 'Settings'),
+  /// The wire value is deliberately still `weblibre_settings`: it names the
+  /// document inside every settings export and every synced settings record,
+  /// so renaming it with the rest of the fork would orphan both.
+  mellowSettings('weblibre_settings', 'Settings'),
   geckoUserJs('gecko_user_js', 'Gecko Prefs'),
 
   /// Small encrypted canary written on first-device sync setup so a second

@@ -1,9 +1,9 @@
-name: weblibre_project
+name: mellow_project
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
 workspace:
-  - apps/weblibre/
+  - apps/mellow/
   - packages/flutter_mozilla_components
   - packages/flutter_mozilla_components/example
   - packages/simple_intent_receiver
@@ -16,7 +16,7 @@ dev_dependencies:
   melos: ^7.8.1
 
 melos:
-  name: weblibre_project
+  name: mellow_project
 
   command:
     bootstrap:
@@ -88,7 +88,7 @@ melos:
         # the one sanctioned gradle invocation. It needs a configured Android
         # project, which `flutter build`/`flutter run` produces — run one first
         # on a clean checkout.
-        cd apps/weblibre/android
+        cd apps/mellow/android
         # --continue: one applinks test fails permanently (see CLAUDE.md), and
         # without it that failure would stop the modules after it from running
         # at all. Read the XML reports, not the exit status.
@@ -100,23 +100,23 @@ melos:
       description: Build stable release APKs split per ABI with the Skia renderer
       run: |
         set -e
-        cd apps/weblibre
+        cd apps/mellow
         flutter build apk --release --flavor stable --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-impeller:
       description: Build stable comparison APKs split per ABI with Impeller enabled
       run: |
         set -e
-        cd apps/weblibre
+        cd apps/mellow
         flutter build apk --release --flavor stableImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-alpha:
       description: Build alpha release APKs split per ABI with the Skia renderer
       run: |
         set -e
-        cd apps/weblibre
+        cd apps/mellow
         flutter build apk --release --flavor alpha --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-alpha-impeller:
       description: Build alpha comparison APKs split per ABI with Impeller enabled
       run: |
         set -e
-        cd apps/weblibre
+        cd apps/mellow
         flutter build apk --release --flavor alphaImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons

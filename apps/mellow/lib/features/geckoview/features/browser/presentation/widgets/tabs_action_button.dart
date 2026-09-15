@@ -19,10 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 
 class TabsActionButtonView extends StatelessWidget {
   const TabsActionButtonView({

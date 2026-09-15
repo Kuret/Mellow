@@ -23,12 +23,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:mellow/core/providers/persisted_bool.dart';
+import 'package:mellow/core/routing/routes.dart';
+import 'package:mellow/features/geckoview/domain/providers.dart';
+import 'package:mellow/features/geckoview/domain/providers/web_extensions_state.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 
 /// The installed extensions, as one expandable row.
 ///
