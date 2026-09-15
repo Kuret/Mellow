@@ -171,6 +171,19 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
       isCurrentRoute: isCurrentRoute,
     );
     if (panelSide != null) {
+      // Applied here, at the start of the gesture, rather than when it
+      // commits: the drag animates from `handleUpdateBackGestureProgress`
+      // onwards, and the panel has to already be sitting on the edge the
+      // finger came from for that to look like anything. Committing the side
+      // at the end instead meant the first swipe from a new edge played the
+      // whole animation on the old one and only snapped across at the end —
+      // so on `either` the panel looked stuck on whichever edge it had last
+      // opened from.
+      //
+      // Safe to keep even if the gesture is cancelled: the panel is closed
+      // then, and a closed panel's side only decides which edge it waits
+      // off-screen on.
+      ref.read(compactRailPanelSideProvider.notifier).set(panelSide);
       _pending = _PendingPanelOpen(panelSide);
       return true;
     }
@@ -201,8 +214,11 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
   @override
   void handleCommitBackGesture() {
     switch (_pending) {
-      case _PendingPanelOpen(:final side):
-        ref.read(compactRailPanelSideProvider.notifier).set(side);
+      // The side is not set here: `handleStartBackGesture` already did it, so
+      // the panel was on the right edge for the whole drag. (The plain-back
+      // path, which has no start event, sets it in the browser screen's own
+      // `BackButtonListener` before opening.)
+      case _PendingPanelOpen():
         ref.read(compactRailPanelOpenProvider.notifier).open();
         unawaited(_controller.forward());
       case _PendingRailMove(:final to):

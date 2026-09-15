@@ -21,6 +21,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:drift/native.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PredictiveBackEvent, SwipeEdge;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod/misc.dart' show Override;
@@ -344,4 +345,60 @@ void main() {
 
     await _disposeTree(tester);
   });
+
+  testWidgets(
+    'on Either side the panel moves to the swiped edge as the gesture starts',
+    (tester) async {
+      final db = await _memoryDatabaseWithOneTab();
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        _harness(
+          overrides: _panelOverrides(
+            db,
+            compactRailSide: CompactRailSide.either,
+          ),
+          viewportWidth: 360,
+        ),
+      );
+      await _settle(tester);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WideRailLayout)),
+      );
+      final observer =
+          tester.state(find.byType(CompactRailSlideOut))
+              as WidgetsBindingObserver;
+
+      // The side has to land on the *start* of the gesture, not when it
+      // commits: the drag animates from the progress events in between, and
+      // a side applied at the end played the whole animation on the edge the
+      // panel last opened from.
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.right)),
+        isTrue,
+      );
+      expect(container.read(compactRailPanelSideProvider), RailSide.right);
+
+      observer.handleCancelBackGesture();
+      await _settle(tester);
+
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
+        isTrue,
+      );
+      expect(container.read(compactRailPanelSideProvider), RailSide.left);
+
+      await _disposeTree(tester);
+    },
+  );
 }
+
+/// A predictive back gesture just starting at [edge]. `fromMap` is the only
+/// public way to build one.
+PredictiveBackEvent _backGesture(SwipeEdge edge) =>
+    PredictiveBackEvent.fromMap(<String?, Object?>{
+      'touchOffset': const <Object?>[0.0, 400.0],
+      'progress': 0.0,
+      'swipeEdge': edge.index,
+    });
