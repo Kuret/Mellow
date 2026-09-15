@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_space.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/space_last_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/space.dart';
 import 'package:weblibre/features/spaces_sync/domain/zen_ids.dart';
@@ -477,6 +478,80 @@ class TabRepository extends _$TabRepository {
     }
 
     return selectTab(latestTab.id);
+  }
+
+  /// Restores what [spaceUuid] was last showing, once it becomes the
+  /// selected space, so returning to a space lands where it was left instead
+  /// of on the home surface.
+  ///
+  /// Called only from [SelectedSpace]'s own `listenSelf`, and only when the
+  /// currently selected tab does not already belong to [spaceUuid] — that
+  /// check lives there, not here, because it is also what stops this from
+  /// fighting the forward direction (selecting a tab syncs the space to
+  /// match it, which would otherwise call back in here for no reason).
+  ///
+  /// The remembered tab is re-validated here rather than trusted: Zen sync
+  /// can close it, or move it to another space, out from under the memory at
+  /// any time. An invalid or absent memory falls back to the space's most
+  /// recently used tab; a space with no tabs at all is left alone, which is
+  /// what leaves the home surface showing for it.
+  ///
+  /// [RestoringSpaceTab] is held for the duration so
+  /// `shouldShowBrowserHomeProvider` does not flash home for the frame or two
+  /// these DB reads take before settling on the restored tab.
+  Future<void> restoreSpaceTab(String spaceUuid) async {
+    ref.read(restoringSpaceTabProvider.notifier).start();
+    try {
+      final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
+      final selectedTab = ref.read(selectedTabProvider);
+      if (selectedTab != null) {
+        final current = await tabDao
+            .getTabSummaryById(selectedTab)
+            .getSingleOrNull();
+        if (!ref.mounted) {
+          return;
+        }
+        if (current?.spaceUuid == spaceUuid) {
+          // Already showing a tab from this space — nothing to restore.
+          return;
+        }
+      }
+
+      final entry = await ref
+          .read(spaceLastTabProvider.notifier)
+          .entryFor(spaceUuid);
+      if (!ref.mounted) {
+        return;
+      }
+
+      switch (entry) {
+        case SpaceLastTabHome():
+          ref.read(forceBrowserHomeProvider.notifier).request();
+          return;
+        case SpaceLastTabTab(:final tabId):
+          final summary = await tabDao.getTabSummaryById(tabId).getSingleOrNull();
+          if (!ref.mounted) {
+            return;
+          }
+          if (summary != null && summary.spaceUuid == spaceUuid) {
+            await selectTab(tabId);
+            return;
+          }
+        case null:
+          break;
+      }
+
+      // No usable memory: fall back to the space's most recently used tab.
+      if (!ref.mounted) {
+        return;
+      }
+      await resumeLatestSpaceTab(spaceUuid);
+    } finally {
+      if (ref.mounted) {
+        ref.read(restoringSpaceTabProvider.notifier).finish();
+      }
+    }
   }
 
   Future<bool> selectPreviousTab(String tabId, {bool skipScopeCheck = true}) =>
