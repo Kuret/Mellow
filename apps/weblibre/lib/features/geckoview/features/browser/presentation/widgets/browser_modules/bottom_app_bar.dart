@@ -460,7 +460,8 @@ class BrowserTabBar extends HookConsumerWidget {
       ...configuredToolbarButtons,
     ];
     final compactActions = <Widget>[const PinnedAddonBar()];
-    final compactToolbarRow = !showToolbarButtons || configuredToolbarButtons.isEmpty
+    final compactToolbarRow =
+        !showToolbarButtons || configuredToolbarButtons.isEmpty
         ? null
         : ToolbarButtonsRow(buttons: configuredToolbarButtons);
 
@@ -479,7 +480,7 @@ class BrowserTabBar extends HookConsumerWidget {
           title: uprightTitle,
           collapsed: const WideRailCollapsedUrlButton(),
         ),
-        tabs: const _RailSpaceTabs(),
+        tabs: const RailSpaceTabs(),
         toolbar: WideRailToolbarRow(
           buttons: [
             // The add-on bar is a rigid row of however many add-ons the tab
@@ -544,8 +545,12 @@ Widget _buildConfiguredToolbarButton(
 
 /// The rail's shelves: a horizontal swipe anywhere on the list steps to the
 /// neighbouring space, and the list slides over with it.
-class _RailSpaceTabs extends ConsumerWidget {
-  const _RailSpaceTabs();
+///
+/// Public (rather than the wide rail's private module scope) so the
+/// narrow-viewport compact bar's slide-out panel can show the identical
+/// shelves and space-swipe behaviour.
+class RailSpaceTabs extends ConsumerWidget {
+  const RailSpaceTabs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
