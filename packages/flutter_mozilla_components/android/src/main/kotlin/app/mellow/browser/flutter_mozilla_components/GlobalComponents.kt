@@ -94,6 +94,11 @@ object GlobalComponents {
         // before the runtime goes away rather than after. Here for the case
         // where it is not.
         EngineWarmupSession.stop()
+        // Drops in-flight thumbnail/icon encodes on the floor: they belong to
+        // the profile being torn down, and their sequence numbers are drawn
+        // from the same process-global counter as the next profile's, so Dart's
+        // recency gate would not reject them.
+        _components?.existingCore?.flutterEventMiddleware?.close()
         _components = null
         currentMode = null
 

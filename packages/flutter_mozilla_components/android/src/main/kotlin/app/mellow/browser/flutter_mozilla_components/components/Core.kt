@@ -217,6 +217,11 @@ class Core(
         HistoryMetadataService(storage = historyStorage)
     }
 
+    // Held rather than constructed inline in the middleware list below so
+    // `GlobalComponents.tearDown` can cancel its in-flight thumbnail/icon
+    // encodes; see [FlutterEventMiddleware.close].
+    val flutterEventMiddleware = FlutterEventMiddleware(flutterEvents)
+
     @OptIn(FlowPreview::class)
     val store by lazy {
         BrowserStore(
@@ -235,7 +240,7 @@ class Core(
                 // Android Components deliberately parks a crashed tab until the
                 // app asks for it back; nothing else here ever would.
                 CrashRecoveryMiddleware(),
-                FlutterEventMiddleware(flutterEvents),
+                flutterEventMiddleware,
                 DownloadMiddleware(
                     applicationContext = context,
                     downloadServiceClass = DownloadService::class.java,
