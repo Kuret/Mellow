@@ -7,7 +7,7 @@
 package app.mellow.browser.flutter_mozilla_components.services
 
 import android.content.Intent
-import android.os.Environment
+import app.mellow.browser.flutter_mozilla_components.DownloadLocationPreference
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.downloads.AbstractFetchDownloadService
@@ -61,7 +61,7 @@ class DownloadService : AbstractFetchDownloadService() {
         DefaultDownloadFileUtils(
             context = applicationContext,
             downloadLocation = {
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                DownloadLocationPreference.read(applicationContext)
             },
         )
     }

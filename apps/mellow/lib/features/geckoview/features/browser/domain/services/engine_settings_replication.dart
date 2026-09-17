@@ -83,6 +83,7 @@ Future<void> syncUBlockFilterLists(
 class EngineSettingsReplicationService
     extends _$EngineSettingsReplicationService {
   final _service = GeckoEngineSettingsService();
+  final _downloadsService = GeckoDownloadsService();
 
   /// Values the user can no longer change: pull-to-refresh is always on and
   /// downloads are always handled in-app. Pushed once at startup instead of
@@ -125,6 +126,27 @@ class EngineSettingsReplicationService
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to generalSettingsRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    // Native resolves the download folder on its own — the download service and
+    // the Custom Tab / PWA activity have no engine to ask — so the choice is
+    // pushed rather than fetched, and pushed on every start: the native copy is
+    // profile-scoped and a profile that has not committed yet drops the write.
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.downloadDirectoryUri,
+      ),
+      (previous, next) async {
+        await _downloadsService.setDownloadDirectory(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to downloadDirectoryUri',
           error: error,
           stackTrace: stackTrace,
         );

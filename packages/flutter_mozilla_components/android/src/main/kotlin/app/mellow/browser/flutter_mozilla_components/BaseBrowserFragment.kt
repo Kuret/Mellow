@@ -13,7 +13,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
@@ -437,7 +436,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = components.profileApplicationContext,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(components.profileApplicationContext)
                         },
                     ),
                     downloadManager = FetchDownloadManager(

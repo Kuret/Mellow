@@ -25,6 +25,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/logger.dart';
 import 'package:mellow/core/providers/app_state.dart';
 import 'package:mellow/core/routing/routes.dart';
 import 'package:mellow/features/settings/presentation/controllers/save_settings.dart';
@@ -32,10 +33,14 @@ import 'package:mellow/features/settings/presentation/dialogs/user_agent_restart
 import 'package:mellow/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:mellow/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:mellow/features/user/data/models/engine_settings.dart';
+import 'package:mellow/features/user/data/models/general_settings.dart';
 import 'package:mellow/features/user/domain/providers.dart';
 import 'package:mellow/features/user/domain/repositories/cache.dart';
 import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
+import 'package:mellow/features/user/domain/repositories/general_settings.dart';
+import 'package:mellow/presentation/hooks/cached_future.dart';
 import 'package:mellow/utils/exit_app.dart';
+import 'package:saf_util/saf_util.dart';
 
 const List<SettingsSectionDefinition> advancedSettingsSections = [
   SettingsSectionDefinition(
@@ -53,6 +58,18 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
         subtitle: 'Override the browser user agent string',
         keywords: ['ua'],
         child: _UserAgentTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Downloads',
+    keywords: ['downloads'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Download folder',
+        subtitle: 'Choose where downloaded files are saved',
+        keywords: ['downloads', 'folder', 'directory', 'storage', 'save'],
+        child: _DownloadDirectoryTile(),
       ),
     ],
   ),
@@ -392,6 +409,135 @@ class _SettingsTransferTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const SettingsTransferRoute().push(context),
+    );
+  }
+}
+
+/// The tree URI a picked folder is addressed by.
+///
+/// `saf_util` takes the persisted grant on the tree URI the system returned, but
+/// hands back `DocumentFile.fromTreeUri(...).uri` — the same folder in its
+/// *document* form, `…/tree/<id>/document/<id>`. Nothing downstream accepts that
+/// form: the grant list is keyed on the tree URI, and Mozilla's writer compares
+/// `directoryPath` against it by exact equality before writing. Saving the
+/// picker's URI verbatim therefore stored a folder that matched no grant, so
+/// every download quietly went to the public Downloads folder instead.
+String normalizeDownloadTreeUri(String uri) {
+  final tree = uri.indexOf('/tree/');
+  if (tree < 0) {
+    return uri;
+  }
+
+  final document = uri.indexOf('/document/', tree);
+
+  return document < 0 ? uri : uri.substring(0, document);
+}
+
+/// Reads a folder name out of a tree URI, for the moment before the document
+/// provider has answered — and for when it never does.
+///
+/// A tree URI ends in the provider's own document id, conventionally
+/// `volume:relative/path`; anything else is shown whole rather than guessed at.
+String describeDownloadTreeUri(String uri) {
+  final documentId = Uri.decodeComponent(uri.split('/').last);
+  final separator = documentId.indexOf(':');
+
+  if (separator < 0 || separator == documentId.length - 1) {
+    return documentId;
+  }
+
+  return documentId.substring(separator + 1);
+}
+
+class _DownloadDirectoryTile extends HookConsumerWidget {
+  const _DownloadDirectoryTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final directoryUri = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.downloadDirectoryUri),
+    );
+
+    // Resolving the folder is also how the grant is checked: access can be
+    // revoked in the system settings, or the card it lives on unmounted, and
+    // the native side then quietly writes to the default folder instead. Saying
+    // so beats showing the name of a folder nothing is being saved to.
+    final folder = useCachedFuture(() async {
+      if (directoryUri == null) {
+        return null;
+      }
+
+      try {
+        return await SafUtil().documentFileFromUri(directoryUri, true);
+      } catch (error, stackTrace) {
+        logger.w(
+          'Could not resolve the configured download folder',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return null;
+      }
+    }, [directoryUri]);
+
+    final unavailable =
+        directoryUri != null &&
+        folder.connectionState == ConnectionState.done &&
+        folder.data == null;
+
+    final subtitle = switch (directoryUri) {
+      null => 'Saving to the system Downloads folder',
+      final uri when unavailable =>
+        'No longer available — saving to the system Downloads folder '
+            '(${describeDownloadTreeUri(uri)})',
+      final uri => folder.data?.name ?? describeDownloadTreeUri(uri),
+    };
+
+    Future<void> pick() async {
+      try {
+        final picked = await SafUtil().pickDirectory(
+          writePermission: true,
+          persistablePermission: true,
+        );
+        if (picked == null) return;
+
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) => currentSettings.copyWith
+                  .downloadDirectoryUri(normalizeDownloadTreeUri(picked.uri)),
+            );
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to pick a download folder',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+
+    Future<void> reset() {
+      return ref
+          .read(saveGeneralSettingsControllerProvider.notifier)
+          .save(
+            (currentSettings) =>
+                currentSettings.copyWith.downloadDirectoryUri(null),
+          );
+    }
+
+    return ListTile(
+      title: const Text('Download folder'),
+      subtitle: Text(subtitle),
+      leading: Icon(
+        unavailable ? MdiIcons.folderAlert : MdiIcons.folderDownload,
+      ),
+      trailing: directoryUri != null
+          ? IconButton(
+              icon: const Icon(Icons.settings_backup_restore),
+              tooltip: 'Use the system Downloads folder',
+              onPressed: reset,
+            )
+          : null,
+      onTap: pick,
     );
   }
 }

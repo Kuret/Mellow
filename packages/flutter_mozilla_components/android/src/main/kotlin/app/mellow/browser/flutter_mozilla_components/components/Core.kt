@@ -8,9 +8,9 @@ package app.mellow.browser.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
+import app.mellow.browser.flutter_mozilla_components.DownloadLocationPreference
 import app.mellow.browser.flutter_mozilla_components.ColorSchemePreference
 import app.mellow.browser.flutter_mozilla_components.Components
 import app.mellow.browser.flutter_mozilla_components.interceptor.AppRequestInterceptor
@@ -148,9 +148,7 @@ class Core(
             downloadDelegate = EngineDownloadDelegate(
                 context = context,
                 downloadLocation = {
-                    Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOWNLOADS,
-                    ).path
+                    DownloadLocationPreference.read(context)
                 },
             ),
             useContentBlockingDatabase = true
@@ -260,7 +258,7 @@ class Core(
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = context,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(context)
                         },
                     ),
                 ),
