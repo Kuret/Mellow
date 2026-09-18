@@ -11,8 +11,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.ViewGroup
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import app.mellow.browser.flutter_mozilla_components.pointer.isSecondaryMouseButton
 import kotlin.math.abs
+import org.mozilla.geckoview.GeckoView
 
 /**
  * [SwipeRefreshLayout] that only pulls to refresh for a plain vertical drag.
@@ -40,6 +43,16 @@ import kotlin.math.abs
  * verdict for the whole stroke is what makes the guard hold.
  *
  * See https://github.com/FaFre/WebLibre/issues/356.
+ *
+ * [dispatchTouchEvent] also claims one other, narrower case before any of the
+ * above: a secondary mouse button press. GeckoView's `PanZoomController`
+ * treats every mouse button delivered through `onTouchEvent` as a plain
+ * touch (so a mouse can pan and zoom), and only `onMouseEvent` gives desktop
+ * semantics — a `contextmenu` event in the page for a right click, which is
+ * what Samsung DeX needs. Only the secondary button is diverted; the primary
+ * button keeps flowing through touch dispatch, which is what the pull and
+ * pinch handling above, `BrowserHandlingScrollFeature`, and nested scrolling
+ * all still need.
  *
  * Derived from android-components `VerticalSwipeRefreshLayout` (MPL-2.0).
  */
@@ -82,7 +95,41 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
     private var previousY = 0f
     private var disallowInterceptTouchEvent = false
 
+    /**
+     * Whether the stroke in flight was claimed at its ACTION_DOWN as a
+     * secondary mouse button press and is being routed to
+     * `PanZoomController.onMouseEvent` instead of the touch pipeline.
+     *
+     * Latched for the whole stroke so the touch pipeline never sees half a
+     * gesture: MOVE/UP/CANCEL for a claimed DOWN keep going the same way,
+     * regardless of what the button state reports on those later events.
+     */
+    private var routingSecondaryButtonGestureToGecko = false
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (routingSecondaryButtonGestureToGecko) {
+            val routed = routeToGeckoMouseEvent(ev)
+            if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) {
+                routingSecondaryButtonGestureToGecko = false
+            }
+            if (routed) {
+                return true
+            }
+            // The GeckoView child disappeared mid-gesture (session torn down,
+            // fragment detaching). Nothing claimed it after all; let it fall
+            // through to the ordinary path below rather than swallow it.
+            routingSecondaryButtonGestureToGecko = false
+        } else if (ev.actionMasked == MotionEvent.ACTION_DOWN && ev.isSecondaryMouseButton()) {
+            // Only the secondary button is diverted to desktop semantics; the
+            // primary button must keep flowing through touch dispatch below,
+            // which BrowserHandlingScrollFeature and this layout's own nested
+            // scrolling depend on.
+            if (routeToGeckoMouseEvent(ev)) {
+                routingSecondaryButtonGestureToGecko = true
+                return true
+            }
+        }
+
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // Against the previous stroke, before this one overwrites it.
@@ -158,6 +205,28 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
         // Record it for [onInterceptTouchEvent] but do not pass it up: the
         // parent may use the gesture for something else.
         disallowInterceptTouchEvent = disallowIntercept
+    }
+
+    /**
+     * Hands [event] to the GeckoView child's `PanZoomController.onMouseEvent`,
+     * which is what gives a secondary-button press desktop semantics — a
+     * `contextmenu` event in the page — instead of the plain-touch handling
+     * `onTouchEvent` gives every mouse button.
+     *
+     * Returns whether the event was actually handed off. `GeckoEngineView`
+     * (this layout's first child, added in `BaseBrowserFragment`) wraps the
+     * real `NestedGeckoView` as *its* first child — see
+     * `BrowserHandlingScrollFeature.resolveTouchTargetView` for the same
+     * precedent. If that child cannot be found, is not a [GeckoView], or has
+     * no session attached yet, this returns `false` so the caller falls back
+     * to the ordinary touch path instead of swallowing the event.
+     */
+    private fun routeToGeckoMouseEvent(event: MotionEvent): Boolean {
+        val engineView = (getChildAt(0) as? ViewGroup)?.getChildAt(0) as? GeckoView ?: return false
+        if (engineView.session == null) return false
+
+        engineView.panZoomController.onMouseEvent(event)
+        return true
     }
 
     /**
