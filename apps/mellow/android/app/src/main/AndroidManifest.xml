@@ -80,6 +80,12 @@
             android:name="mozilla.components.feature.pwa.WebAppLauncherActivity"
             tools:node="remove" />
 
+        <!-- density is deliberately absent from configChanges below: declaring
+             it suppresses the activity recreation that refreshes Flutter's
+             devicePixelRatio, and without that recreation docking into or out
+             of DeX keeps the old scaling until the app is killed
+             (flutter#30518). The Flutter engine is cached, so the recreation
+             keeps Dart state. -->
         <activity
             android:name=".MainActivity"
             android:label="${appName}"
@@ -89,7 +95,7 @@
             android:theme="@style/LaunchTheme"
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             <!-- We do want to ahndle "open with" by ourselfs. Prevents automatically pushing routes. -->
@@ -214,7 +220,7 @@
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
             android:persistableMode="persistNever"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
