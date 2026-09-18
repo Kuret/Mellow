@@ -28,6 +28,7 @@ import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:mellow/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
 import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
+import 'package:mellow/features/geckoview/features/browser/features/menu/presentation/widgets/browser_menu_sheet.dart';
 import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
@@ -56,6 +57,7 @@ enum _BrowserQuickMenuAction {
   back,
   forward,
   tabs,
+  menu,
   settings,
   newSpace,
   newTab,
@@ -177,6 +179,16 @@ Future<void> showBrowserQuickMenu(
           children: [Icon(MdiIcons.tab), iconTextSpacing, Text('Tabs')],
         ),
       ),
+      // The rest of the browser: bookmarks, history, find in page, the
+      // inspector, share. With the toolbar hidden this menu is the only way
+      // to them, and Settings alone was not the whole escape hatch.
+      const PopupMenuItem(
+        value: _QuickMenuAction(_BrowserQuickMenuAction.menu),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(Icons.more_vert), iconTextSpacing, Text('Menu')],
+        ),
+      ),
       const PopupMenuItem(
         value: _QuickMenuAction(_BrowserQuickMenuAction.settings),
         child: Row(
@@ -247,6 +259,10 @@ Future<void> showBrowserQuickMenu(
     case _QuickMenuAction(action: _BrowserQuickMenuAction.tabs):
       if (anchorContext.mounted) {
         await const TabViewRoute().push(anchorContext);
+      }
+    case _QuickMenuAction(action: _BrowserQuickMenuAction.menu):
+      if (anchorContext.mounted) {
+        await showBrowserMenuSheet(anchorContext);
       }
     case _QuickMenuAction(action: _BrowserQuickMenuAction.settings):
       if (anchorContext.mounted) {
