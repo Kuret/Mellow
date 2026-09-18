@@ -28,6 +28,7 @@ import 'package:mellow/features/geckoview/features/contextmenu/presentation/cand
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/copy_image_location.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/copy_link.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/copy_link_text.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/inspect_element.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/launch_external.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/open_image_new_tab.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/candidates/open_in_container.dart';
@@ -81,6 +82,7 @@ class ContextMenuDialog extends HookConsumerWidget {
           CopyImageLocation(hitResult: effective),
         if (ShareEmail.isSupported(effective)) ShareEmail(hitResult: effective),
         if (CopyEmail.isSupported(effective)) CopyEmail(hitResult: effective),
+        const InspectElement(),
         HookBuilder(
           builder: (context) {
             final isSupported = useCachedFuture(
