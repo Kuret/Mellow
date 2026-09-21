@@ -56,9 +56,11 @@ abstract class PointerInputFlutterApi {
   /// [tracksHover] marks a hover event, and additionally arms the stationary
   /// watch that reports later changes through
   /// [PointerInputHostApi.hoverTargetChanged].
+  @asyncCallback
   PointerHitTest hitTest(double x, double y, bool tracksHover);
 
   /// The cursor left every registered surface, so the stationary watch stops.
+  @asyncCallback
   void pointerExit();
 
   /// A secondary mouse button went down at [x]/[y], in physical pixels local
@@ -69,6 +71,7 @@ abstract class PointerInputFlutterApi {
   /// says where and when one happened, so a click Gecko answers with nothing —
   /// empty page, no link under the cursor — can raise a menu of its own
   /// instead of doing nothing at all.
+  @asyncCallback
   void secondaryButtonDown(double x, double y);
 
   /// A finger long-press landed at [x]/[y], in physical pixels local to the
@@ -81,6 +84,7 @@ abstract class PointerInputFlutterApi {
   /// answers nothing for a text selection either, so a long-press that starts
   /// one raises this menu too, over Gecko's own selection handles. That
   /// overlap is accepted rather than suppressed: chosen, not overlooked.
+  @asyncCallback
   void longPress(double x, double y);
 
   /// A finger touched down at [x]/[y], in physical pixels local to the
@@ -92,6 +96,7 @@ abstract class PointerInputFlutterApi {
   /// and [longPress]'s own, once it does fire — somewhere to appear, and
   /// says nothing about whether a press turns into a long-press, a scroll or
   /// anything else.
+  @asyncCallback
   void touchDown(double x, double y);
 }
 

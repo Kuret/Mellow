@@ -120,12 +120,12 @@ class GeckoViewportService extends GeckoViewportEvents {
   // GeckoViewportEvents implementation
 
   @override
-  void onKeyboardVisibilityChanged(
+  Future<void> onKeyboardVisibilityChanged(
     int sequence,
     int heightPx,
     bool isVisible,
     bool isAnimating,
-  ) {
+  ) async {
     _keyboardSubject.addWhenMoreRecent(sequence, null, (
       heightPx: heightPx,
       isVisible: isVisible,
@@ -134,12 +134,15 @@ class GeckoViewportService extends GeckoViewportEvents {
   }
 
   @override
-  void onCaptionBarInsetChanged(int sequence, int topPx) {
+  Future<void> onCaptionBarInsetChanged(int sequence, int topPx) async {
     _captionBarInsetSubject.addWhenMoreRecent(sequence, null, topPx);
   }
 
   @override
-  void onBrowserHandlingScrollChanged(int sequence, bool isHandling) {
+  Future<void> onBrowserHandlingScrollChanged(
+    int sequence,
+    bool isHandling,
+  ) async {
     _browserHandlingScrollSubject.addWhenMoreRecent(sequence, null, isHandling);
   }
 

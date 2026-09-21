@@ -93,38 +93,48 @@ class GeckoEventService extends GeckoStateEvents {
       _manifestUpdateSubject.stream;
 
   @override
-  void onViewReadyStateChange(int sequence, bool state) {
+  Future<void> onViewReadyStateChange(int sequence, bool state) async {
     _viewStateSubject.addWhenMoreRecent(sequence, null, state);
   }
 
   @override
-  void onEngineReadyStateChange(int sequence, bool state) {
+  Future<void> onEngineReadyStateChange(int sequence, bool state) async {
     _engineStateSubject.addWhenMoreRecent(sequence, null, state);
   }
 
   // Overridden methods
   @override
-  void onTabListChange(int sequence, List<String?> tabIds) {
+  Future<void> onTabListChange(int sequence, List<String?> tabIds) async {
     _tabListSubject.addWhenMoreRecent(sequence, null, tabIds.nonNulls.toList());
   }
 
   @override
-  void onSelectedTabChange(int sequence, String? id) {
+  Future<void> onSelectedTabChange(int sequence, String? id) async {
     _selectedTabSubject.addWhenMoreRecent(sequence, id, id);
   }
 
   @override
-  void onRestoreCompleteChange(int sequence, bool restoreComplete) {
+  Future<void> onRestoreCompleteChange(
+    int sequence,
+    bool restoreComplete,
+  ) async {
     _restoreCompleteSubject.addWhenMoreRecent(sequence, null, restoreComplete);
   }
 
   @override
-  void onTabContentStateChange(int sequence, TabContentState state) {
+  Future<void> onTabContentStateChange(
+    int sequence,
+    TabContentState state,
+  ) async {
     _tabContentSubject.addWhenMoreRecent(sequence, state.id, state);
   }
 
   @override
-  void onHistoryStateChange(int sequence, String id, HistoryState state) {
+  Future<void> onHistoryStateChange(
+    int sequence,
+    String id,
+    HistoryState state,
+  ) async {
     _historySubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       history: state,
@@ -132,11 +142,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onSecurityInfoStateChange(
+  Future<void> onSecurityInfoStateChange(
     int sequence,
     String id,
     SecurityInfoState state,
-  ) {
+  ) async {
     _securityInfoSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       securityInfo: state,
@@ -144,7 +154,7 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onIconChange(int sequence, String id, Uint8List? bytes) {
+  Future<void> onIconChange(int sequence, String id, Uint8List? bytes) async {
     _iconChangeSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       bytes: bytes,
@@ -152,7 +162,7 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onIconUpdate(int sequence, String url, Uint8List bytes) {
+  Future<void> onIconUpdate(int sequence, String url, Uint8List bytes) async {
     _iconUpdateSubject.addWhenMoreRecent(sequence, url, (
       url: url,
       bytes: bytes,
@@ -160,7 +170,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onThumbnailChange(int sequence, String id, Uint8List? bytes) {
+  Future<void> onThumbnailChange(
+    int sequence,
+    String id,
+    Uint8List? bytes,
+  ) async {
     _thumbnailSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       bytes: bytes,
@@ -168,7 +182,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onFindResults(int sequence, String id, List<FindResultState?> results) {
+  Future<void> onFindResults(
+    int sequence,
+    String id,
+    List<FindResultState?> results,
+  ) async {
     _findResultsSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       results: results.nonNulls.toList(),
@@ -176,7 +194,7 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onLongPress(int sequence, String id, HitResult hitResult) {
+  Future<void> onLongPress(int sequence, String id, HitResult hitResult) async {
     _longPressSubject.addWhenMoreRecent(sequence, id, (
       tabId: id,
       hitResult: hitResult,
@@ -184,7 +202,7 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onTabAdded(int sequence, String tabId) {
+  Future<void> onTabAdded(int sequence, String tabId) async {
     _tabAddedSubject.addWhenMoreRecent(sequence, null, tabId);
   }
 
@@ -197,15 +215,15 @@ class GeckoEventService extends GeckoStateEvents {
   // }
 
   @override
-  void onPreferenceChange(int sequence, GeckoPref value) {
+  Future<void> onPreferenceChange(int sequence, GeckoPref value) async {
     _prefUpdateSubject.addWhenMoreRecent(sequence, value.name, value);
   }
 
   @override
-  void onContainerSiteAssignment(
+  Future<void> onContainerSiteAssignment(
     int sequence,
     ContainerSiteAssignment details,
-  ) {
+  ) async {
     _siteAssignementSubject.addWhenMoreRecent(
       sequence,
       details.requestId,
@@ -214,7 +232,7 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onProxyLoadError(int sequence, ProxyLoadError details) {
+  Future<void> onProxyLoadError(int sequence, ProxyLoadError details) async {
     if (!_proxyLoadErrorsObserved) {
       // Same ordering rule the subject itself applies: these arrive over a
       // platform channel that does not promise delivery order, which is what
@@ -256,12 +274,16 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  void onDownloadStopped(int sequence, DownloadState state) {
+  Future<void> onDownloadStopped(int sequence, DownloadState state) async {
     _downloadStoppedSubject.addWhenMoreRecent(sequence, state.id, state);
   }
 
   @override
-  void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest) {
+  Future<void> onManifestUpdate(
+    int sequence,
+    String tabId,
+    PwaManifest? manifest,
+  ) async {
     _manifestUpdateSubject.addWhenMoreRecent(sequence, tabId, (
       tabId: tabId,
       manifest: manifest,
