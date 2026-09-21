@@ -18,6 +18,7 @@ typedef IconUpdateEvent = ({String url, Uint8List bytes});
 typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
+typedef TabAddedEvent = ({String tabId, String? parentId});
 typedef ScrollEvent = ({String tabId, int scrollY});
 typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
 typedef DownloadStoppedEvent = DownloadState;
@@ -59,7 +60,7 @@ class GeckoEventService extends GeckoStateEvents {
     onListen: _flushProxyLoadErrors,
   );
 
-  final _tabAddedSubject = PublishSubject<String>();
+  final _tabAddedSubject = PublishSubject<TabAddedEvent>();
   final _downloadStoppedSubject = PublishSubject<DownloadStoppedEvent>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
 
@@ -86,7 +87,7 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<ProxyLoadError> get proxyLoadErrorEvents =>
       _proxyLoadErrorSubject.stream;
 
-  Stream<String> get tabAddedStream => _tabAddedSubject.stream;
+  Stream<TabAddedEvent> get tabAddedStream => _tabAddedSubject.stream;
   Stream<DownloadStoppedEvent> get downloadStoppedEvents =>
       _downloadStoppedSubject.stream;
   Stream<ManifestUpdateEvent> get manifestUpdateEvents =>
@@ -202,8 +203,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  Future<void> onTabAdded(int sequence, String tabId) async {
-    _tabAddedSubject.addWhenMoreRecent(sequence, null, tabId);
+  Future<void> onTabAdded(int sequence, String tabId, String? parentId) async {
+    _tabAddedSubject.addWhenMoreRecent(sequence, null, (
+      tabId: tabId,
+      parentId: parentId,
+    ));
   }
 
   // @override
