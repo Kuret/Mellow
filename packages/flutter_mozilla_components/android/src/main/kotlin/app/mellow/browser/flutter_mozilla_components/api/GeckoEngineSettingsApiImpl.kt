@@ -299,6 +299,7 @@ class GeckoEngineSettingsApiImpl(
         setDefaultSettings(settings);
 
         var reloadSession = false
+        var reloadAllTabs = false
 
         //Then copy default settings into runtime
         if(settings.javascriptEnabled != null) {
@@ -326,7 +327,11 @@ class GeckoEngineSettingsApiImpl(
             components.core.engineSettings.preferredColorScheme?.let { scheme ->
                 ColorSchemePreference.write(components.core.prefs, scheme)
             }
-            reloadSession = true
+            // Reload every loaded tab, not just the selected one: preferredColorScheme
+            // is applied to the shared GeckoRuntime, but a background tab's content
+            // process won't repaint with the new prefers-color-scheme until it's
+            // reloaded or renavigated. See issue #454.
+            reloadAllTabs = true
         }
         if(settings.userAgent != null) {
             components.core.engine.settings.userAgentString = components.core.engineSettings.userAgentString
@@ -389,7 +394,13 @@ class GeckoEngineSettingsApiImpl(
             reloadSession = true
         }
 
-        if(reloadSession) {
+        if (reloadAllTabs) {
+            components.core.store.state.tabs.forEach { tab ->
+                if (tab.engineState.engineSession != null) {
+                    components.useCases.sessionUseCases.reload(tab.id)
+                }
+            }
+        } else if (reloadSession) {
             components.useCases.sessionUseCases.reload()
         }
     }
