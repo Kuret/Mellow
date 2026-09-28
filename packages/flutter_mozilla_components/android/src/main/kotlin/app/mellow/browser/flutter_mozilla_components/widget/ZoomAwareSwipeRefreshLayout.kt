@@ -222,11 +222,29 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
      * to the ordinary touch path instead of swallowing the event.
      */
     private fun routeToGeckoMouseEvent(event: MotionEvent): Boolean {
-        val engineView = (getChildAt(0) as? ViewGroup)?.getChildAt(0) as? GeckoView ?: return false
+        val engineView = findGeckoView(this) ?: return false
         if (engineView.session == null) return false
 
         engineView.panZoomController.onMouseEvent(event)
         return true
+    }
+
+    /**
+     * The engine view, found by type rather than by position.
+     *
+     * [SwipeRefreshLayout] adds its own refresh spinner as a child in its
+     * constructor, so the engine view is not child 0 and indexing for it finds
+     * an ImageView instead — which is exactly how the first attempt at this
+     * silently routed nothing.
+     */
+    private fun findGeckoView(root: ViewGroup): GeckoView? {
+        for (index in 0 until root.childCount) {
+            when (val child = root.getChildAt(index)) {
+                is GeckoView -> return child
+                is ViewGroup -> findGeckoView(child)?.let { return it }
+            }
+        }
+        return null
     }
 
     /**
