@@ -40,6 +40,19 @@ class PointerInputBridge implements PointerInputFlutterApi {
   @visibleForTesting
   static PointerInputHostApi Function() hostApi = PointerInputHostApi.new;
 
+  /// Where the mouse last hovered, in logical pixels — null with no live
+  /// bridge, and null off a hover entirely, which a finger never starts:
+  /// callers that want to anchor something under a cursor still need a
+  /// fallback that does not depend on one.
+  ///
+  /// Read once, at the moment something needs to appear under the pointer —
+  /// a context menu, say — rather than watched, so a plain getter is enough.
+  static Offset? get pointerPosition {
+    final bridge = _instance;
+    final position = bridge?._hoverPosition;
+    return position == null ? null : position / bridge!._view.devicePixelRatio;
+  }
+
   final FlutterView _view;
   final PointerInputHostApi _host;
 

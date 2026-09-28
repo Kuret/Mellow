@@ -135,6 +135,8 @@ export 'src/pigeons/gecko.g.dart'
         VisitType,
         WebExtensionActionType,
         WebExtensionData;
+export 'src/pigeons/pointer_input.g.dart'
+    show PointerHitTest, PointerInputHostApi, PointerTarget;
 export 'src/pigeons/startup.g.dart'
     show
         GeckoProfileApi,
@@ -144,4 +146,5 @@ export 'src/pigeons/startup.g.dart'
         ProfileStartupOwnerType,
         ProfileStartupPromptMode,
         StartupIntentRecord;
+export 'src/pointer_input_bridge.dart' show PointerInputBridge;
 export 'src/pointer_input_surface.dart';
