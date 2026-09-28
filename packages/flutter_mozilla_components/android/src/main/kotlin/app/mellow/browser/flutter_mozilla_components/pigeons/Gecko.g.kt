@@ -4289,6 +4289,58 @@ data class SyncCredentials (
   }
 }
 
+/**
+ * The download manager remembered from the chooser's "Always use this app".
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PreferredDownloadManager (
+  /** The app's Android package id. */
+  val packageName: String,
+  /** The app's current name, or null when it is no longer installed. */
+  val label: String? = null,
+  /** Whether the remembered app is this browser itself. */
+  val isThisApp: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PreferredDownloadManager {
+      val packageName = pigeonVar_list[0] as String
+      val label = pigeonVar_list[1] as String?
+      val isThisApp = pigeonVar_list[2] as Boolean
+      return PreferredDownloadManager(packageName, label, isThisApp)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      packageName,
+      label,
+      isThisApp,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as PreferredDownloadManager
+    return GeckoPigeonUtils.deepEquals(this.packageName, other.packageName) && GeckoPigeonUtils.deepEquals(this.label, other.label) && GeckoPigeonUtils.deepEquals(this.isThisApp, other.isThisApp)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.packageName)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.label)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.isThisApp)
+    return result
+  }
+  override fun toString(): String {
+    return "PreferredDownloadManager(packageName=$packageName, label=$label, isThisApp=$isThisApp)"
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class GeckoPref (
   val name: String,
@@ -6353,125 +6405,130 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       226.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          PreferredDownloadManager.fromList(it)
         }
       }
       227.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          GeckoPref.fromList(it)
         }
       }
       228.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       229.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       230.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       231.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       232.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       233.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkImportNode.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       234.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInsertTreeResult.fromList(it)
+          BookmarkImportNode.fromList(it)
         }
       }
       235.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          BookmarkInsertTreeResult.fromList(it)
         }
       }
       236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          SitePermissions.fromList(it)
         }
       }
       238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkTarget.fromList(it)
+          TrackingProtectionException.fromList(it)
         }
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProtectedTargetPattern.fromList(it)
+          AppLinkTarget.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeAppLinkRule.fromList(it)
+          ProtectedTargetPattern.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeContextAppLinkPolicy.fromList(it)
+          NativeAppLinkRule.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPolicySnapshot.fromList(it)
+          NativeContextAppLinkPolicy.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPromptRequest.fromList(it)
+          AppLinkPolicySnapshot.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkResolutionResult.fromList(it)
+          AppLinkPromptRequest.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PwaIcon.fromList(it)
+          AppLinkResolutionResult.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetFiles.fromList(it)
+          PwaIcon.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetParams.fromList(it)
+          ShareTargetFiles.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTarget.fromList(it)
+          ShareTargetParams.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalApplicationResource.fromList(it)
+          ShareTarget.fromList(it)
         }
       }
       250.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ExternalApplicationResource.fromList(it)
+        }
+      }
+      251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           PwaManifest.fromList(it)
         }
@@ -6869,104 +6926,108 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(225)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is PreferredDownloadManager -> {
         stream.write(226)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is GeckoPref -> {
         stream.write(227)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is ContainerSiteAssignment -> {
         stream.write(228)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ProxyLoadError -> {
         stream.write(229)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is GeckoHeader -> {
         stream.write(230)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoFetchRequest -> {
         stream.write(231)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchResponse -> {
         stream.write(232)
         writeValue(stream, value.toList())
       }
-      is BookmarkImportNode -> {
+      is BookmarkNode -> {
         stream.write(233)
         writeValue(stream, value.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is BookmarkImportNode -> {
         stream.write(234)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkInsertTreeResult -> {
         stream.write(235)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInfo -> {
         stream.write(236)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is SitePermissions -> {
         stream.write(237)
         writeValue(stream, value.toList())
       }
-      is AppLinkTarget -> {
+      is TrackingProtectionException -> {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is ProtectedTargetPattern -> {
+      is AppLinkTarget -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is NativeAppLinkRule -> {
+      is ProtectedTargetPattern -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is NativeAppLinkRule -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeContextAppLinkPolicy -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is AppLinkPromptRequest -> {
+      is AppLinkPolicySnapshot -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPromptRequest -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is PwaIcon -> {
+      is AppLinkResolutionResult -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is ShareTargetFiles -> {
+      is PwaIcon -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is ShareTargetParams -> {
+      is ShareTargetFiles -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetParams -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTarget -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is PwaManifest -> {
+      is ExternalApplicationResource -> {
         stream.write(250)
+        writeValue(stream, value.toList())
+      }
+      is PwaManifest -> {
+        stream.write(251)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -7466,6 +7527,13 @@ interface GeckoEngineSettingsApi {
   fun setUseExternalDownloadManager(enabled: Boolean)
   fun getUseExternalDownloadManager(): Boolean
   /**
+   * The download manager the user chose to always use from the chooser, or
+   * null while every download asks. Profile-scoped.
+   */
+  fun getPreferredDownloadManager(): PreferredDownloadManager?
+  /** Forgets the remembered download manager, so the chooser asks again. */
+  fun clearPreferredDownloadManager()
+  /**
    * Sets the browser-wide default desktop mode (BrowserState.desktopMode).
    * Newly opened tabs inherit this default; a per-tab requestDesktopSite
    * still overrides it for that tab.
@@ -7614,6 +7682,37 @@ interface GeckoEngineSettingsApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getUseExternalDownloadManager())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.getPreferredDownloadManager$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getPreferredDownloadManager())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.clearPreferredDownloadManager$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.clearPreferredDownloadManager()
+              listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

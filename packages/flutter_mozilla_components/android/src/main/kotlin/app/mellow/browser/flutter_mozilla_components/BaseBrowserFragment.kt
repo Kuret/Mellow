@@ -32,6 +32,7 @@ import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
 import app.mellow.browser.flutter_mozilla_components.ext.toPigeonDownloadState
 import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
 import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
+import app.mellow.browser.flutter_mozilla_components.feature.DownloadAppChooser
 import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import app.mellow.browser.flutter_mozilla_components.feature.PromptSheet
@@ -415,6 +416,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
+            val downloadAppChooser = DownloadAppChooser(
+                components.profileApplicationContext,
+                childFragmentManager,
+            )
             downloadsFeature.set(
                 feature = DownloadsFeature(
                     components.profileApplicationContext,
@@ -449,9 +454,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onNeedToRequestPermissions = { permissions ->
                         requestDownloadPermissionsLauncher.launch(permissions)
                     },
-                    shouldForwardToThirdParties = {
-                        GlobalComponents.useExternalDownloadManager
-                    },
+                    shouldForwardToThirdParties = downloadAppChooser::shouldForwardToThirdParties,
+                    customThirdPartyDownloadDialog = downloadAppChooser::show,
+                    // Despite the name, the hook `DownloadsFeature` calls to close
+                    // every download prompt when the page navigates away — the
+                    // only one that reaches a custom third-party chooser.
+                    dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
                 ),
                 owner = this,
                 view = view,
