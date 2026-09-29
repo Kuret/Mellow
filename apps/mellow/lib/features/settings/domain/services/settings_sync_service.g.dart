@@ -42,7 +42,7 @@ final class SettingsSyncServiceProvider
 }
 
 String _$settingsSyncServiceHash() =>
-    r'26d922e59636d690c9c597d813d3efa399d8b953';
+    r'a4a9298d5cfb4643c15afc3fcc5a83b5acac1791';
 
 abstract class _$SettingsSyncService extends $Notifier<void> {
   void build();

@@ -58,6 +58,7 @@ import 'package:mellow/features/geckoview/features/browser/presentation/widgets/
 import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:mellow/features/geckoview/features/contextmenu/presentation/page_context_menu_trigger.dart';
 import 'package:mellow/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:mellow/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:mellow/features/geckoview/features/search/domain/providers/search_autofocus.dart';
@@ -1509,6 +1510,11 @@ class BrowserScreen extends HookConsumerWidget {
                   bottomSafeArea: bottomSafeArea,
                   bottomAppBarTotalHeight: bottomAppBarTotalHeight,
                 ),
+
+                // Layer 8: the page context menu's own trigger — a right
+                // click over empty page area, rather than a link or image.
+                // Renders nothing; see [PageContextMenuTrigger].
+                const PageContextMenuTrigger(),
               ],
             ),
           ),

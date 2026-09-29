@@ -60,6 +60,16 @@ abstract class PointerInputFlutterApi {
 
   /// The cursor left every registered surface, so the stationary watch stops.
   void pointerExit();
+
+  /// A secondary mouse button went down at [x]/[y], in physical pixels local
+  /// to the Flutter view.
+  ///
+  /// Reported, not arbitrated: the engine still receives the event, because a
+  /// right click on a link is Gecko's to answer with a context menu. This only
+  /// says where and when one happened, so a click Gecko answers with nothing —
+  /// empty page, no link under the cursor — can raise a menu of its own
+  /// instead of doing nothing at all.
+  void secondaryButtonDown(double x, double y);
 }
 
 /// Told to the native router by the Dart half.

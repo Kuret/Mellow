@@ -437,4 +437,18 @@ void main() {
     expect(controller.events.whereType<PointerUpEvent>(), hasLength(1));
     expect(host.hoverTargets, isEmpty);
   });
+
+  testWidgets('a secondary button press reaches the callback in logical '
+      'pixels', (tester) async {
+    await pump(tester, _surface(1));
+    addTearDown(() => PointerInputBridge.onSecondaryButtonDown = null);
+
+    Offset? reported;
+    PointerInputBridge.onSecondaryButtonDown = (position) =>
+        reported = position;
+
+    PointerInputBridge.instance!.secondaryButtonDown(200, 240);
+
+    expect(reported, const Offset(100, 120));
+  });
 }

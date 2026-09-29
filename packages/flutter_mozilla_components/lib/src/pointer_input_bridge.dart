@@ -53,6 +53,16 @@ class PointerInputBridge implements PointerInputFlutterApi {
     return position == null ? null : position / bridge!._view.devicePixelRatio;
   }
 
+  /// Called with every secondary (right) button press the native router sees
+  /// on the surface, in logical pixels — whether or not Gecko has a link,
+  /// image or media source under it. The event is not consumed on the native
+  /// side, so a hit-result context menu can still open from the same click;
+  /// callers that raise their own menu from this need to give that menu a
+  /// chance to appear first, rather than racing it.
+  ///
+  /// Null until app code sets it.
+  static void Function(Offset position)? onSecondaryButtonDown;
+
   final FlutterView _view;
   final PointerInputHostApi _host;
 
@@ -130,6 +140,11 @@ class PointerInputBridge implements PointerInputFlutterApi {
   void pointerExit() {
     _hoverPosition = null;
     _hoverTarget = null;
+  }
+
+  @override
+  void secondaryButtonDown(double x, double y) {
+    onSecondaryButtonDown?.call(Offset(x, y) / _view.devicePixelRatio);
   }
 
   /// The registered platform view under [physicalPosition], or null when

@@ -27,6 +27,13 @@ internal interface PointerInputHost {
 
     /** Tells Dart the cursor left every registered surface. */
     fun pointerExit()
+
+    /**
+     * Tells Dart a secondary mouse button went down at [x]/[y], in physical
+     * pixels local to the Flutter view. Reported only; the engine still gets
+     * the event.
+     */
+    fun secondaryButtonDown(x: Double, y: Double)
 }
 
 /** The production host: the generated pigeon channel. */
@@ -53,6 +60,14 @@ internal class PigeonPointerInputHost(messenger: BinaryMessenger) : PointerInput
             api.pointerExit {}
         } catch (_: RuntimeException) {
             // Nothing to recover: Dart's hover watch stops with its isolate.
+        }
+    }
+
+    override fun secondaryButtonDown(x: Double, y: Double) {
+        try {
+            api.secondaryButtonDown(x, y) {}
+        } catch (_: RuntimeException) {
+            // A click nobody is left to answer needs no menu.
         }
     }
 }

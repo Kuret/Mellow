@@ -47,6 +47,7 @@ class PointerInputRouterTest {
 
         val hitTests = mutableListOf<Query>()
         var exits = 0
+        val secondaryClicks = mutableListOf<Pair<Double, Double>>()
 
         override fun hitTest(
             x: Double,
@@ -59,6 +60,10 @@ class PointerInputRouterTest {
 
         override fun pointerExit() {
             exits++
+        }
+
+        override fun secondaryButtonDown(x: Double, y: Double) {
+            secondaryClicks += x to y
         }
 
         /** Answers hit test [index], defaulting to a revision that keeps them ordered. */

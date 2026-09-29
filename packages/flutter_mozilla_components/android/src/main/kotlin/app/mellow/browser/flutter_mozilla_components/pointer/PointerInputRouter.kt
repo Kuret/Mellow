@@ -221,6 +221,7 @@ class PointerInputRouter internal constructor(private val host: PointerInputHost
      * must not dispatch it any further itself.
      */
     internal fun intercept(root: PointerInputFrameLayout, event: MotionEvent): Boolean {
+        reportSecondaryButtonDown(root, event)
         if (redispatching || !event.isArbitratedMouseInput()) return false
         // Once the engine is gone there is no Flutter tree left to protect, and
         // plain native dispatch is better than swallowing the input entirely.
@@ -260,6 +261,30 @@ class PointerInputRouter internal constructor(private val host: PointerInputHost
         if (isHover) retainHover(retained, flutterView)
         arbitrate(retained, flutterView, sourceToken = registration.token)
         return true
+    }
+
+    /**
+     * Tells Dart about a secondary button press, and nothing more.
+     *
+     * Deliberately outside the arbitration below: a right click belongs to the
+     * engine, which answers one over a link with a context menu of its own.
+     * The report exists for the clicks it answers with nothing — empty page,
+     * no link under the cursor — which Dart can then give a menu instead of
+     * leaving the button dead.
+     */
+    private fun reportSecondaryButtonDown(root: PointerInputFrameLayout, event: MotionEvent) {
+        if (disposed || redispatching) return
+        if (event.actionMasked != MotionEvent.ACTION_BUTTON_PRESS) return
+        if (event.actionButton != MotionEvent.BUTTON_SECONDARY) return
+        val flutterView = root.pointerFlutterView ?: return
+
+        val located = MotionEvent.obtain(event)
+        try {
+            located.transformPosition(root, flutterView)
+            host.secondaryButtonDown(located.x.toDouble(), located.y.toDouble())
+        } finally {
+            located.recycle()
+        }
     }
 
     /**

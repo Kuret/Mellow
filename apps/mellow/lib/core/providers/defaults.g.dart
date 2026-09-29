@@ -102,4 +102,4 @@ final class DocsUriProvider extends $FunctionalProvider<Uri, Uri, Uri>
   }
 }
 
-String _$docsUriHash() => r'6456efcf97ddc7ee87a67e2d3380f7241e3d76ea';
+String _$docsUriHash() => r'27136c1cc54205906f24fbd876eb4d9b5eb2217b';

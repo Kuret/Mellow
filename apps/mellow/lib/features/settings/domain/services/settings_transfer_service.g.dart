@@ -102,7 +102,7 @@ final class SettingsTransferServiceProvider
 }
 
 String _$settingsTransferServiceHash() =>
-    r'ebb8e84f06a95fabd7a2b31557201962fbe57cad';
+    r'b54d77b8be27d069e68fab57a872481631332328';
 
 /// Reads and writes settings as a plain file, next to — and independent of —
 /// account sync.

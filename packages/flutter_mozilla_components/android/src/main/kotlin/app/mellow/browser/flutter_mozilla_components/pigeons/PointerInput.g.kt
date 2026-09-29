@@ -386,6 +386,33 @@ class PointerInputFlutterApi(private val binaryMessenger: BinaryMessenger, priva
       } 
     }
   }
+  /**
+   * A secondary mouse button went down at [x]/[y], in physical pixels local
+   * to the Flutter view.
+   *
+   * Reported, not arbitrated: the engine still receives the event, because a
+   * right click on a link is Gecko's to answer with a context menu. This only
+   * says where and when one happened, so a click Gecko answers with nothing —
+   * empty page, no link under the cursor — can raise a menu of its own
+   * instead of doing nothing at all.
+   */
+  fun secondaryButtonDown(xArg: Double, yArg: Double, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.PointerInputFlutterApi.secondaryButtonDown$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(xArg, yArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(PointerInputFlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(PointerInputPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
 }
 /**
  * Told to the native router by the Dart half.
