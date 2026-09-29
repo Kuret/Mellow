@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_auto_size_text/flutter_auto_size_text.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -61,7 +63,7 @@ class ContextMenuDialog extends HookConsumerWidget {
       // phase, and writing a provider there is what Riverpod refuses. The
       // grace period is measured in hundreds of milliseconds, so a microtask
       // costs it nothing.
-      Future.microtask(shownAt.markShown);
+      unawaited(Future.microtask(shownAt.markShown));
       return null;
     }, const []);
 
