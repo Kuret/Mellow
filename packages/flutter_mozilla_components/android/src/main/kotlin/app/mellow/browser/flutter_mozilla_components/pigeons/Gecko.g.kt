@@ -10803,6 +10803,37 @@ class GeckoViewportEvents(private val binaryMessenger: BinaryMessenger, private 
     }
   }
   /**
+   * Called when the window's caption bar inset changes.
+   *
+   * Desktop windowing — Samsung DeX, and Android's own desktop mode — draws a
+   * caption above the window and forces the app to inset below it. Flutter
+   * reports that inset inside `systemBars()`, indistinguishable from a status
+   * bar, so chrome that reserves room for a status bar reserves the caption's
+   * height a second time and leaves a dead band under the window's titlebar.
+   * Reported separately so it can be taken back out again.
+   *
+   * [sequence] Event sequence number for ordering.
+   * [topPx] Height of the caption bar inset in physical pixels, 0 when there
+   * is none — which is every phone, folded or not.
+   */
+  fun onCaptionBarInsetChanged(sequenceArg: Long, topPxArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onCaptionBarInsetChanged$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, topPxArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
    * Called when GeckoView scroll-handling eligibility changes.
    *
    * [sequence] Event sequence number for ordering.

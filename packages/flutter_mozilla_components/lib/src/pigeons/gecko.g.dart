@@ -10826,6 +10826,20 @@ abstract class GeckoViewportEvents {
   /// [isAnimating] Whether the keyboard is currently animating.
   void onKeyboardVisibilityChanged(int sequence, int heightPx, bool isVisible, bool isAnimating);
 
+  /// Called when the window's caption bar inset changes.
+  ///
+  /// Desktop windowing — Samsung DeX, and Android's own desktop mode — draws a
+  /// caption above the window and forces the app to inset below it. Flutter
+  /// reports that inset inside `systemBars()`, indistinguishable from a status
+  /// bar, so chrome that reserves room for a status bar reserves the caption's
+  /// height a second time and leaves a dead band under the window's titlebar.
+  /// Reported separately so it can be taken back out again.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [topPx] Height of the caption bar inset in physical pixels, 0 when there
+  /// is none — which is every phone, folded or not.
+  void onCaptionBarInsetChanged(int sequence, int topPx);
+
   /// Called when GeckoView scroll-handling eligibility changes.
   ///
   /// [sequence] Event sequence number for ordering.
@@ -10851,6 +10865,28 @@ abstract class GeckoViewportEvents {
           final bool arg_isAnimating = args[3]! as bool;
           try {
             api.onKeyboardVisibilityChanged(arg_sequence, arg_heightPx, arg_isVisible, arg_isAnimating);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoViewportEvents.onCaptionBarInsetChanged$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final int arg_topPx = args[1]! as int;
+          try {
+            api.onCaptionBarInsetChanged(arg_sequence, arg_topPx);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

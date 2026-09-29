@@ -32,6 +32,10 @@ class GeckoViewportService extends GeckoViewportEvents {
   ));
   final _browserHandlingScrollSubject = BehaviorSubject<bool>.seeded(false);
 
+  /// Seeded at zero, which is the answer on every phone: no desktop window,
+  /// no caption above it.
+  final _captionBarInsetSubject = BehaviorSubject<int>.seeded(0);
+
   /// Stream of keyboard visibility changes.
   ///
   /// Emits events whenever the soft keyboard shows/hides.
@@ -51,6 +55,10 @@ class GeckoViewportService extends GeckoViewportEvents {
   ///
   /// Emits true when GeckoView reports that browser content can handle
   /// scrolling for dynamic toolbar behavior.
+  /// The window caption's height in physical pixels — desktop windowing only,
+  /// and zero everywhere else.
+  ValueStream<int> get captionBarInsetEvents => _captionBarInsetSubject.stream;
+
   ValueStream<bool> get browserHandlingScrollEvents =>
       _browserHandlingScrollSubject.stream;
 
@@ -126,6 +134,11 @@ class GeckoViewportService extends GeckoViewportEvents {
   }
 
   @override
+  void onCaptionBarInsetChanged(int sequence, int topPx) {
+    _captionBarInsetSubject.addWhenMoreRecent(sequence, null, topPx);
+  }
+
+  @override
   void onBrowserHandlingScrollChanged(int sequence, bool isHandling) {
     _browserHandlingScrollSubject.addWhenMoreRecent(sequence, null, isHandling);
   }
@@ -134,5 +147,6 @@ class GeckoViewportService extends GeckoViewportEvents {
   Future<void> dispose() async {
     await _keyboardSubject.close();
     await _browserHandlingScrollSubject.close();
+    await _captionBarInsetSubject.close();
   }
 }

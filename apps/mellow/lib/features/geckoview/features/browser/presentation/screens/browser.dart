@@ -1124,8 +1124,33 @@ class BrowserScreen extends HookConsumerWidget {
         ? sideRailTotalWidth
         : 0.0;
 
-    // Calculate top toolbar size for browser offset and progress indicator
-    final topSafeArea = MediaQuery.of(context).padding.top;
+    final captionBarInsetPx = useState(
+      viewportService.captionBarInsetEvents.valueOrNull ?? 0,
+    );
+    useOnStreamChange(
+      viewportService.captionBarInsetEvents,
+      onData: (topPx) {
+        if (captionBarInsetPx.value != topPx) {
+          captionBarInsetPx.value = topPx;
+        }
+      },
+    );
+
+    // Calculate top toolbar size for browser offset and progress indicator.
+    //
+    // The caption bar comes back out of the inset. Desktop windowing — DeX,
+    // and Android's own desktop mode — already holds the window below its
+    // caption, but Flutter reports that caption inside `systemBars()` where it
+    // is indistinguishable from a status bar, so reserving room for one
+    // reserves the caption's height a second time. That is the dead band under
+    // the titlebar, and the reason it vanishes in fullscreen, where there is
+    // no caption to count twice. Zero on a phone, so this changes nothing
+    // there.
+    final topSafeArea = math.max(
+      0.0,
+      MediaQuery.of(context).padding.top -
+          captionBarInsetPx.value / MediaQuery.devicePixelRatioOf(context),
+    );
     final topAppBarContentSize = compactRailActive
         ? Size.zero
         : BrowserTopAppBar(

@@ -13,6 +13,7 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.captionBar
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.navigationBars
 import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
@@ -48,6 +49,9 @@ class KeyboardVisibilityFeature(
     // State tracking for animation-bounds-based keyboard height
     private var areKeyboardInsetsDeferred = false
     private var isKeyboardShowingUp = false
+
+    /** Last reported caption bar height, so an unchanged inset stays quiet. */
+    private var lastCaptionBarInsetPx = -1
     private var keyboardAnimationInProgress = false
     private var keyboardHeight = 0 // full target height from animation bounds
 
@@ -175,6 +179,7 @@ class KeyboardVisibilityFeature(
         insets: WindowInsetsCompat,
     ): WindowInsetsCompat {
         isKeyboardShowingUp = insets.isVisible(ime())
+        notifyCaptionBarInset(insets.getInsets(captionBar()).top)
 
         if (!areKeyboardInsetsDeferred) {
             val height = calculateKeyboardHeight(
@@ -185,6 +190,24 @@ class KeyboardVisibilityFeature(
         }
 
         return insets
+    }
+
+    /**
+     * Reports the caption bar's height when it changes, and only then.
+     *
+     * Desktop windowing draws a caption above the window and forces the app
+     * to inset below it. Flutter folds that inset into `systemBars()`, where
+     * it is indistinguishable from a status bar, so chrome reserving room for
+     * a status bar reserves the caption a second time — a dead band under the
+     * titlebar that disappears in fullscreen, where there is no caption to
+     * double-count. Reported separately so Dart can subtract it again.
+     *
+     * Zero on every phone, which is what makes subtracting it safe there.
+     */
+    private fun notifyCaptionBarInset(topPx: Int) {
+        if (topPx == lastCaptionBarInsetPx) return
+        lastCaptionBarInsetPx = topPx
+        flutterEvents.onCaptionBarInsetChanged(EventSequence.next(), topPx.toLong()) { }
     }
 
     // --- Legacy keyboard detection (pre-API 30) ---
