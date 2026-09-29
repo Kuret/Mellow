@@ -1538,8 +1538,13 @@ class BrowserScreen extends HookConsumerWidget {
 
                 // Layer 8: the page context menu's own trigger — a right
                 // click over empty page area, rather than a link or image.
-                // Renders nothing; see [PageContextMenuTrigger].
-                const PageContextMenuTrigger(),
+                // Renders nothing; see [PageContextMenuTrigger]. Positioned
+                // despite having nothing to position: every other child of
+                // this stack is, and a Stack sizes itself to its largest
+                // *non*-positioned child — so adding a zero-sized plain one
+                // collapses the stack to nothing and takes the whole browser
+                // with it, silently, with no error to show for it.
+                const Positioned.fill(child: PageContextMenuTrigger()),
               ],
             ),
           ),
