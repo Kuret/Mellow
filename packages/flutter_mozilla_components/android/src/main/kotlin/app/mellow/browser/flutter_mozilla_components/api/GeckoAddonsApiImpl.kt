@@ -10,6 +10,7 @@ import android.content.Context
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import app.mellow.browser.flutter_mozilla_components.addons.AddonPrefs
 import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.feature.WebExtensionActionsHost
 import app.mellow.browser.flutter_mozilla_components.pigeons.AddonDisabledReason
 import app.mellow.browser.flutter_mozilla_components.pigeons.AddonIncognito
 import app.mellow.browser.flutter_mozilla_components.pigeons.AddonInfo
@@ -160,6 +161,7 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
     override fun invokeAddonAction(extensionId: String, actionType: WebExtensionActionType) {
         scope.launch {
             withContext(Dispatchers.Main.immediate) {
+                WebExtensionActionsHost.prepareForAction()
                 when(actionType) {
                     WebExtensionActionType.BROWSER -> components.features.webExtensionToolbarFeature.invokeAddonBrowserAction(extensionId)
                     WebExtensionActionType.PAGE -> components.features.webExtensionToolbarFeature.invokeAddonPageAction(extensionId)

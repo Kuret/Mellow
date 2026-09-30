@@ -32,6 +32,7 @@ import app.mellow.browser.flutter_mozilla_components.middleware.FlutterEventMidd
 import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataService
 import app.mellow.browser.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
@@ -261,6 +262,8 @@ class Core(
                 SaveToPDFMiddleware(),
                 FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
                 LastMediaAccessMiddleware(),
+                // Before the engine middleware; see its KDoc (issue #542).
+                WebExtensionActiveTabMiddleware,
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.
