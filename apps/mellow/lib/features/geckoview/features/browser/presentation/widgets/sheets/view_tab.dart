@@ -126,7 +126,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                     child: WebsiteTitleTile(initialTabState),
                   ),
                 ),
-                const CertificateTile(),
+                CertificateTile(onClose: onClose),
                 const Divider(),
               ],
             ),
