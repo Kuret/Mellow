@@ -115,11 +115,7 @@ class AppLinkPromptDetails extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                warning.icon,
-                size: 16,
-                color: theme.colorScheme.tertiary,
-              ),
+              Icon(warning.icon, size: 16, color: theme.colorScheme.tertiary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

@@ -57,6 +57,8 @@ PersistedAppLinkRule? rememberedRuleFor(
 
 /// Modal prompt for an unsupported-scheme app link (§2.2). The navigation is
 /// genuinely stalled and there is no page to show behind it.
+///
+/// The content of a modal bottom sheet; `AppLinkPromptHost` presents it.
 class AppLinkPromptDialog extends HookConsumerWidget {
   final AppLinkPromptRequest request;
 
@@ -93,40 +95,63 @@ class AppLinkPromptDialog extends HookConsumerWidget {
       navigator.pop();
     }
 
-    return AlertDialog(
-      icon: const Icon(Icons.open_in_new),
-      title: Text(
-        appName != null ? 'Open in $appName?' : 'Open in another app?',
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('This link is handled by an app outside Mellow.'),
-          const SizedBox(height: 8),
-          AppLinkPromptDetails(request: request),
-          if (request.canRemember)
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: remember.value,
-              onChanged: (value) => remember.value = value ?? false,
-              title: Text(
-                'Remember my choice for ${displayAppLinkScope(target.scopeKey)}',
-              ),
+    final textTheme = Theme.of(context).textTheme;
+
+    // Shown as a modal bottom sheet (#651): it sits on the bottom edge, over the
+    // toolbar, next to where the banner form of this prompt appears.
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.open_in_new),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    appName != null
+                        ? 'Open in $appName?'
+                        : 'Open in another app?',
+                    style: textTheme.titleLarge,
+                  ),
+                ),
+              ],
             ),
-        ],
+            const SizedBox(height: 16),
+            const Text('This link is handled by an app outside Mellow.'),
+            const SizedBox(height: 8),
+            AppLinkPromptDetails(request: request),
+            if (request.canRemember)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: remember.value,
+                onChanged: (value) => remember.value = value ?? false,
+                title: Text(
+                  'Remember my choice for ${displayAppLinkScope(target.scopeKey)}',
+                ),
+              ),
+            const SizedBox(height: 16),
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: () => resolve(AppLinkDecision.cancel),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => resolve(AppLinkDecision.open),
+                  child: const Text('Open'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => resolve(AppLinkDecision.cancel),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => resolve(AppLinkDecision.open),
-          child: const Text('Open'),
-        ),
-      ],
     );
   }
 }
