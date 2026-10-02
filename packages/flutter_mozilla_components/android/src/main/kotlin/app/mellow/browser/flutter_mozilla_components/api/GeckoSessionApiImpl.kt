@@ -6,8 +6,9 @@
 
 package app.mellow.browser.flutter_mozilla_components.api
 
+import android.graphics.Bitmap
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
-import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.ext.toPngBytes
 import app.mellow.browser.flutter_mozilla_components.pigeons.*
 import kotlinx.coroutines.*
 import mozilla.components.browser.state.action.ContentAction
@@ -241,7 +242,33 @@ class GeckoSessionApiImpl : GeckoSessionApi {
         }
     }
 
-    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? =
+    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? {
+        val bitmap = captureSelectedTab() ?: return null
+        if (!sendBack) {
+            return null
+        }
+
+        // PNG, the format every caller shares or saves it in: encoded here,
+        // off the main thread, Flutter has nothing left to transcode — which
+        // it could only do on its UI isolate, as dart:ui's image decoder is
+        // not available on background isolates. captureThumbnail calls back on
+        // the main thread, where a full-resolution encode would stall the UI.
+        return try {
+            withContext(Dispatchers.Default) { bitmap.toPngBytes() }
+                .also { logger.debug("$TAG: Screenshot captured successfully") }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to process screenshot", e)
+            throw e
+        }
+    }
+
+    /**
+     * Captures the selected tab and stores the bitmap as its thumbnail.
+     * Returns `null` when the engine view produced no bitmap.
+     */
+    private suspend fun captureSelectedTab(): Bitmap? =
         suspendCancellableCoroutine { continuation ->
             try {
                 val tab = components.core.store.state.selectedTab
@@ -255,13 +282,7 @@ class GeckoSessionApiImpl : GeckoSessionApi {
                     try {
                         if (bitmap != null) {
                             components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
-                            if (sendBack) {
-                                val compressed = bitmap.toWebPBytes()
-                                logger.debug("$TAG: Screenshot captured successfully")
-                                continuation.resume(compressed)
-                            } else {
-                                continuation.resume(null)
-                            }
+                            continuation.resume(bitmap)
                         } else {
                             logger.warn("$TAG: Failed to capture screenshot - null bitmap")
                             continuation.resume(null)
