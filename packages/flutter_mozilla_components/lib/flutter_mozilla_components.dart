@@ -146,5 +146,6 @@ export 'src/pigeons/startup.g.dart'
         ProfileStartupOwnerType,
         ProfileStartupPromptMode,
         StartupIntentRecord;
+export 'src/platform_view_keyboard.dart';
 export 'src/pointer_input_bridge.dart' show PointerInputBridge;
 export 'src/pointer_input_surface.dart';

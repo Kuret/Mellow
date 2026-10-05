@@ -130,24 +130,29 @@ class _AddonSettingsPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: 'app.mellow.browser/addon_settings',
-      surfaceFactory: (context, controller) =>
-          PointerInputSurface(controller: controller),
-      onCreatePlatformView: (params) {
-        final controller = PlatformViewsService.initExpensiveAndroidView(
-          id: params.id,
-          viewType: 'app.mellow.browser/addon_settings',
-          layoutDirection: TextDirection.ltr,
-          creationParams: <String, Object?>{'optionsPageUrl': optionsPageUrl},
-          creationParamsCodec: const StandardMessageCodec(),
-        );
-        controller.addOnPlatformViewCreatedListener(
-          params.onPlatformViewCreated,
-        );
-        unawaited(controller.create());
-        return controller;
-      },
+    return PlatformViewKeyboard(
+      child: PlatformViewLink(
+        viewType: 'app.mellow.browser/addon_settings',
+        surfaceFactory: (context, controller) =>
+            PointerInputSurface(controller: controller),
+        onCreatePlatformView: (params) {
+          final controller = PlatformViewsService.initExpensiveAndroidView(
+            id: params.id,
+            viewType: 'app.mellow.browser/addon_settings',
+            layoutDirection: TextDirection.ltr,
+            creationParams: <String, Object?>{'optionsPageUrl': optionsPageUrl},
+            creationParamsCodec: const StandardMessageCodec(),
+            // So the keyboard follows focus into the extension's page; see
+            // [PlatformViewKeyboard].
+            onFocus: () => params.onFocusChanged(true),
+          );
+          controller.addOnPlatformViewCreatedListener(
+            params.onPlatformViewCreated,
+          );
+          unawaited(controller.create());
+          return controller;
+        },
+      ),
     );
   }
 }

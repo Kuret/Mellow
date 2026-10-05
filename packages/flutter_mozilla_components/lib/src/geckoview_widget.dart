@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/src/domain/services/gecko_browser.dart';
+import 'package:flutter_mozilla_components/src/platform_view_keyboard.dart';
 import 'package:flutter_mozilla_components/src/pointer_input_surface.dart';
 
 class GeckoView extends StatefulWidget {
@@ -223,33 +224,38 @@ class _GeckoViewState extends State<GeckoView> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: 'app.mellow.browser/gecko',
-      surfaceFactory: (context, controller) =>
-          PointerInputSurface(controller: controller),
-      onCreatePlatformView: (PlatformViewCreationParams params) {
-        return PlatformViewsService.initExpensiveAndroidView(
-            id: params.id,
-            viewType: 'app.mellow.browser/gecko',
-            layoutDirection: TextDirection.ltr,
-            creationParams: {},
-            creationParamsCodec: const StandardMessageCodec(),
-          )
-          ..addOnPlatformViewCreatedListener((value) {
-            params.onPlatformViewCreated(value);
+    return PlatformViewKeyboard(
+      child: PlatformViewLink(
+        viewType: 'app.mellow.browser/gecko',
+        surfaceFactory: (context, controller) =>
+            PointerInputSurface(controller: controller),
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          return PlatformViewsService.initExpensiveAndroidView(
+              id: params.id,
+              viewType: 'app.mellow.browser/gecko',
+              layoutDirection: TextDirection.ltr,
+              creationParams: {},
+              creationParamsCodec: const StandardMessageCodec(),
+              // Tells Flutter the page took focus, so the keyboard follows it
+              // there; see [PlatformViewKeyboard].
+              onFocus: () => params.onFocusChanged(true),
+            )
+            ..addOnPlatformViewCreatedListener((value) {
+              params.onPlatformViewCreated(value);
 
-            SchedulerBinding.instance.addPostFrameCallback((_) async {
-              // A first attempt for the common case where the view is painted
-              // from the frame it is created in, so the container is already
-              // attached by now. When it is not, this attempt is cheap and the
-              // ready subscription takes over as soon as it becomes attached.
-              await _enqueueShowNativeFragment();
-              await widget.postInitializationStep?.call();
-            });
-          })
-          // ignore: discarded_futures that hos it is done in docs
-          ..create();
-      },
+              SchedulerBinding.instance.addPostFrameCallback((_) async {
+                // A first attempt for the common case where the view is painted
+                // from the frame it is created in, so the container is already
+                // attached by now. When it is not, this attempt is cheap and the
+                // ready subscription takes over as soon as it becomes attached.
+                await _enqueueShowNativeFragment();
+                await widget.postInitializationStep?.call();
+              });
+            })
+            // ignore: discarded_futures that hos it is done in docs
+            ..create();
+        },
+      ),
     );
   }
 }

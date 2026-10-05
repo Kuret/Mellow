@@ -83,28 +83,33 @@ class _AddonPopupPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: _viewType,
-      surfaceFactory: (context, controller) => PointerInputSurface(
-        controller: controller,
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
-          Factory<EagerGestureRecognizer>(EagerGestureRecognizer.new),
+    return PlatformViewKeyboard(
+      child: PlatformViewLink(
+        viewType: _viewType,
+        surfaceFactory: (context, controller) => PointerInputSurface(
+          controller: controller,
+          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+            Factory<EagerGestureRecognizer>(EagerGestureRecognizer.new),
+          },
+        ),
+        onCreatePlatformView: (params) {
+          final controller = PlatformViewsService.initExpensiveAndroidView(
+            id: params.id,
+            viewType: _viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParams: <String, Object?>{'extensionId': extensionId},
+            creationParamsCodec: const StandardMessageCodec(),
+            // So the keyboard follows focus into the extension's page; see
+            // [PlatformViewKeyboard].
+            onFocus: () => params.onFocusChanged(true),
+          );
+          controller.addOnPlatformViewCreatedListener(
+            params.onPlatformViewCreated,
+          );
+          unawaited(controller.create());
+          return controller;
         },
       ),
-      onCreatePlatformView: (params) {
-        final controller = PlatformViewsService.initExpensiveAndroidView(
-          id: params.id,
-          viewType: _viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParams: <String, Object?>{'extensionId': extensionId},
-          creationParamsCodec: const StandardMessageCodec(),
-        );
-        controller.addOnPlatformViewCreatedListener(
-          params.onPlatformViewCreated,
-        );
-        unawaited(controller.create());
-        return controller;
-      },
     );
   }
 }
