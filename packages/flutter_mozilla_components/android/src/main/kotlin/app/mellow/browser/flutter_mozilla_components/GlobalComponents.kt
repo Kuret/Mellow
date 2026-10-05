@@ -281,14 +281,10 @@ object GlobalComponents {
 
                 if (restoredState != null) {
                     newComponents.useCases.tabsUseCases.restore(
-                        state = RecoverableBrowserState(
-                            tabs = restoredState.tabs,
-                            // Intentionally do not resume the previously selected tab during the
-                            // first full setup. We restore the tab list, but let startup open in
-                            // its neutral/default state instead of jumping back into prior content.
-                            selectedTabId = null,
-                            tabPartitions = restoredState.tabPartitions
-                        ),
+                        // Intentionally do not resume the previously selected tab during the
+                        // first full setup. We restore the tab list, but let startup open in
+                        // its neutral/default state instead of jumping back into prior content.
+                        state = restoredState.copy(selectedTabId = null),
                         restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
                     )
                 }
