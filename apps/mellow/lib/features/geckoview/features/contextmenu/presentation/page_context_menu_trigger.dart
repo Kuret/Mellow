@@ -26,15 +26,22 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/domain/providers/context_menu_shown_at.dart';
 import 'package:mellow/features/geckoview/features/contextmenu/presentation/page_context_menu_dialog.dart';
 
-/// Bridges [PointerInputBridge.onSecondaryButtonDown] to [PageContextMenuDialog].
+/// Bridges [PointerInputBridge.onSecondaryButtonDown] and
+/// [PointerInputBridge.onLongPress] to [PageContextMenuDialog].
 ///
 /// A right click over empty page area reaches [PointerInputBridge] the same
 /// way one over a link does — Gecko has nothing to hit-test either way, and
-/// the native side reports the button press regardless. The two cases are
-/// indistinguishable at the moment the button goes down, so this waits out a
-/// grace period for the hit-result context menu to have opened before
-/// assuming it hasn't: without it, a right click on a link would raise both
-/// menus at once.
+/// the native side reports the button press regardless. A finger long-press
+/// is the touch equivalent: touch has no secondary button, so the native
+/// side times the long-press itself and reports it the same way. Both cases
+/// are indistinguishable at the moment they start from the one Gecko *does*
+/// answer with a hit-result menu, so this waits out a grace period for that
+/// menu to have opened before assuming it hasn't: without it, a right click
+/// or long-press on a link would raise both menus at once.
+///
+/// Gecko's hit test also answers nothing for a text selection, so a
+/// long-press that starts one raises this menu too, over Gecko's own
+/// selection handles. That overlap is accepted rather than suppressed.
 ///
 /// Renders nothing; placed once, anywhere under the [Navigator] that should
 /// host the menu.
@@ -51,7 +58,7 @@ class PageContextMenuTrigger extends HookConsumerWidget {
     useEffect(() {
       Timer? graceTimer;
 
-      PointerInputBridge.onSecondaryButtonDown = (position) {
+      void openAfterGracePeriod(Offset position) {
         final pressedAt = DateTime.now();
         graceTimer?.cancel();
         graceTimer = Timer(gracePeriod, () {
@@ -66,15 +73,21 @@ class PageContextMenuTrigger extends HookConsumerWidget {
           unawaited(
             showDialog<void>(
               context: context,
+              // Desktop browsers do not dim the page for a context menu.
+              barrierColor: Colors.transparent,
               builder: (_) => PageContextMenuDialog(anchor: position),
             ),
           );
         });
-      };
+      }
+
+      PointerInputBridge.onSecondaryButtonDown = openAfterGracePeriod;
+      PointerInputBridge.onLongPress = openAfterGracePeriod;
 
       return () {
         graceTimer?.cancel();
         PointerInputBridge.onSecondaryButtonDown = null;
+        PointerInputBridge.onLongPress = null;
       };
     }, const []);
 

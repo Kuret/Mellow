@@ -40,16 +40,21 @@ class PointerInputBridge implements PointerInputFlutterApi {
   @visibleForTesting
   static PointerInputHostApi Function() hostApi = PointerInputHostApi.new;
 
-  /// Where the mouse last hovered, in logical pixels — null with no live
-  /// bridge, and null off a hover entirely, which a finger never starts:
-  /// callers that want to anchor something under a cursor still need a
-  /// fallback that does not depend on one.
+  /// Where a context menu should anchor, in logical pixels — the most
+  /// recent of the mouse's last hover position and a finger's last
+  /// touch-down, whichever happened later. Null with no live bridge, and
+  /// null when neither has happened yet.
+  ///
+  /// A mouse leaves a hover position behind that a finger never starts, and a
+  /// finger's touch-down arrives before Gecko's own hit-result answer, which
+  /// a long-press would not: last write wins, so switching between mouse and
+  /// finger does the obvious thing.
   ///
   /// Read once, at the moment something needs to appear under the pointer —
   /// a context menu, say — rather than watched, so a plain getter is enough.
-  static Offset? get pointerPosition {
+  static Offset? get anchorPosition {
     final bridge = _instance;
-    final position = bridge?._hoverPosition;
+    final position = bridge?._anchorPosition;
     return position == null ? null : position / bridge!._view.devicePixelRatio;
   }
 
@@ -62,6 +67,16 @@ class PointerInputBridge implements PointerInputFlutterApi {
   ///
   /// Null until app code sets it.
   static void Function(Offset position)? onSecondaryButtonDown;
+
+  /// Called with every finger long-press the native router detects on the
+  /// surface, in logical pixels — whether or not Gecko has a link, image or
+  /// media source under it, and whether or not it started a text selection.
+  /// See [PointerInputFlutterApi.longPress] for why that overlap is accepted.
+  /// The event is not consumed on the native side, exactly as
+  /// [onSecondaryButtonDown]'s isn't.
+  ///
+  /// Null until app code sets it.
+  static void Function(Offset position)? onLongPress;
 
   final FlutterView _view;
   final PointerInputHostApi _host;
@@ -87,6 +102,11 @@ class PointerInputBridge implements PointerInputFlutterApi {
   var _live = true;
   Offset? _hoverPosition;
   PointerTarget? _hoverTarget;
+
+  /// The most recent of the mouse's last hover position and a finger's last
+  /// touch-down, in physical pixels — whichever was written to more
+  /// recently. Backs [anchorPosition].
+  Offset? _anchorPosition;
 
   /// Registers [owner]'s platform view, creating the bridge if it is the first.
   factory PointerInputBridge.attach(
@@ -116,6 +136,7 @@ class PointerInputBridge implements PointerInputFlutterApi {
     _live = false;
     _hoverPosition = null;
     _hoverTarget = null;
+    _anchorPosition = null;
     PointerInputFlutterApi.setUp(null);
     _instance = null;
     // Nothing is left to arbitrate for, so nothing may stay retained natively.
@@ -130,6 +151,7 @@ class PointerInputBridge implements PointerInputFlutterApi {
     if (tracksHover) {
       _hoverPosition = position;
       _hoverTarget = target;
+      _anchorPosition = position;
       _watchFrames();
     }
 
@@ -145,6 +167,16 @@ class PointerInputBridge implements PointerInputFlutterApi {
   @override
   void secondaryButtonDown(double x, double y) {
     onSecondaryButtonDown?.call(Offset(x, y) / _view.devicePixelRatio);
+  }
+
+  @override
+  void longPress(double x, double y) {
+    onLongPress?.call(Offset(x, y) / _view.devicePixelRatio);
+  }
+
+  @override
+  void touchDown(double x, double y) {
+    _anchorPosition = Offset(x, y);
   }
 
   /// The registered platform view under [physicalPosition], or null when

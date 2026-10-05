@@ -245,6 +245,8 @@ class ContextMenuRoute extends GoRouteData with $ContextMenuRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
+      // Desktop browsers do not dim the page for a context menu.
+      barrierColor: Colors.transparent,
       builder: (_) =>
           ContextMenuDialog(hitResult: HitResultJson.fromJson(hitResult)),
     );

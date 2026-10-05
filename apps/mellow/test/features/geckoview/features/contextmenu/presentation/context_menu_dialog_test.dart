@@ -58,6 +58,7 @@ void main() {
   Future<void> pumpMenu(
     WidgetTester tester, {
     Offset? hover,
+    Offset? touchDown,
     HitResult? hitResult,
   }) async {
     await tester.pumpWidget(
@@ -102,6 +103,14 @@ void main() {
       );
     }
 
+    if (touchDown != null) {
+      final ratio = tester.view.devicePixelRatio;
+      PointerInputBridge.instance!.touchDown(
+        touchDown.dx * ratio,
+        touchDown.dy * ratio,
+      );
+    }
+
     await tester.tap(find.text('open'));
     // Not pumpAndSettle: LaunchExternal asks the (absent, in this suite)
     // native engine to resolve an app link, and that future is never going
@@ -112,13 +121,21 @@ void main() {
   }
 
   testWidgets(
-    'falls back to the centred dialog when nothing has hovered — the case '
-    'a finger long-press always leaves the bridge in',
+    'still anchors through AnchoredMenu, at the screen centre, when nothing '
+    'has hovered or touched down — never centred through a second, separate '
+    'presentation',
     (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
       await pumpMenu(tester);
 
-      expect(find.byType(SimpleDialog), findsOneWidget);
-      expect(find.byKey(const Key('anchoredContextMenu')), findsNothing);
+      expect(find.byType(SimpleDialog), findsNothing);
+      final topLeft = tester.getTopLeft(
+        find.byKey(const Key('anchoredContextMenu')),
+      );
+      expect(topLeft, const Offset(400, 600));
     },
   );
 
@@ -135,6 +152,41 @@ void main() {
     );
     expect(topLeft, const Offset(100, 150));
   });
+
+  testWidgets('anchors the menu at the touch-down position', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpMenu(tester, touchDown: const Offset(120, 170));
+
+    expect(find.byType(SimpleDialog), findsNothing);
+    final topLeft = tester.getTopLeft(
+      find.byKey(const Key('anchoredContextMenu')),
+    );
+    expect(topLeft, const Offset(120, 170));
+  });
+
+  testWidgets(
+    'anchors at the touch-down position when it is more recent than the '
+    'last hover — switching between mouse and finger does the obvious thing',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await pumpMenu(
+        tester,
+        hover: const Offset(100, 150),
+        touchDown: const Offset(120, 170),
+      );
+
+      final topLeft = tester.getTopLeft(
+        find.byKey(const Key('anchoredContextMenu')),
+      );
+      expect(topLeft, const Offset(120, 170));
+    },
+  );
 
   testWidgets(
     'shifts the menu back onto screen instead of letting it spill past the '

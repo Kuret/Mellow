@@ -9,8 +9,10 @@ package app.mellow.browser.flutter_mozilla_components.widget
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
+import kotlin.math.hypot
 
 /**
  * The root of a platform view whose mouse input is arbitrated against the
@@ -48,4 +50,74 @@ open class PointerInputFrameLayout(
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
         router.intercept(this, event) || super.dispatchGenericMotionEvent(event)
+
+    /**
+     * Only observes: unlike [dispatchGenericMotionEvent] this never reports
+     * `true` for anything, because the engine needs every touch and hybrid
+     * composition already routes it through Flutter's own pipeline.
+     */
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        trackLongPress(event)
+        return super.dispatchTouchEvent(event)
+    }
+
+    private var longPressDown: MotionEvent? = null
+    private var longPressStartX = 0f
+    private var longPressStartY = 0f
+
+    private val longPressRunnable = Runnable {
+        longPressDown?.let {
+            router.reportLongPress(this, it)
+            resetLongPressTracking()
+        }
+    }
+
+    /**
+     * Times a finger long-press the same way the platform's own long-press
+     * gesture does, since Gecko gives this no hit result to key off of for
+     * empty page area or a text selection: only a mouse reports a tool other
+     * than [MotionEvent.TOOL_TYPE_FINGER] here, and a right button already
+     * covers that case, while a held left button must keep behaving as it
+     * does today rather than being reinterpreted as a long-press.
+     */
+    private fun trackLongPress(event: MotionEvent) {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                resetLongPressTracking()
+                if (event.getToolType(0) != MotionEvent.TOOL_TYPE_FINGER) return
+                router.reportTouchDown(this, event)
+                longPressDown = MotionEvent.obtain(event)
+                longPressStartX = event.x
+                longPressStartY = event.y
+                router.handler.postDelayed(
+                    longPressRunnable,
+                    ViewConfiguration.getLongPressTimeout().toLong(),
+                )
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (longPressDown == null) return
+                val slop = ViewConfiguration.get(context).scaledTouchSlop
+                val moved = hypot(
+                    (event.x - longPressStartX).toDouble(),
+                    (event.y - longPressStartY).toDouble(),
+                )
+                if (moved > slop) resetLongPressTracking()
+            }
+            MotionEvent.ACTION_POINTER_DOWN,
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL,
+            -> resetLongPressTracking()
+        }
+    }
+
+    /**
+     * Named apart from [View.cancelLongPress], which this deliberately leaves
+     * alone: that one cancels the platform's own long-press gesture detector,
+     * an unrelated mechanism this class does not use.
+     */
+    private fun resetLongPressTracking() {
+        router.handler.removeCallbacks(longPressRunnable)
+        longPressDown?.recycle()
+        longPressDown = null
+    }
 }

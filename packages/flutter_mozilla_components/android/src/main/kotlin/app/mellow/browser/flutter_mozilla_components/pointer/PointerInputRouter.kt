@@ -52,7 +52,12 @@ class PointerInputRouter internal constructor(private val host: PointerInputHost
 
     constructor(messenger: BinaryMessenger) : this(PigeonPointerInputHost(messenger))
 
-    private val handler = Handler(Looper.getMainLooper())
+    /**
+     * Shared with [PointerInputFrameLayout], whose long-press detection posts
+     * and cancels its own delayed callback here rather than keeping a second
+     * one alive per surface.
+     */
+    internal val handler = Handler(Looper.getMainLooper())
 
     /** Every registered surface, by platform view id. */
     private val views = mutableMapOf<Long, RegisteredView>()
@@ -282,6 +287,51 @@ class PointerInputRouter internal constructor(private val host: PointerInputHost
         try {
             located.transformPosition(root, flutterView)
             host.secondaryButtonDown(located.x.toDouble(), located.y.toDouble())
+        } finally {
+            located.recycle()
+        }
+    }
+
+    /**
+     * Tells Dart about a finger long-press [PointerInputFrameLayout] detected
+     * on [root], at [event]'s position.
+     *
+     * Deliberately outside arbitration, same as [reportSecondaryButtonDown]:
+     * the touch is still the engine's, so a long-press over a link or image
+     * is still Gecko's to answer with its own context menu. This only covers
+     * the presses Gecko answers with nothing.
+     */
+    internal fun reportLongPress(root: PointerInputFrameLayout, event: MotionEvent) {
+        if (disposed || redispatching) return
+        val flutterView = root.pointerFlutterView ?: return
+
+        val located = MotionEvent.obtain(event)
+        try {
+            located.transformPosition(root, flutterView)
+            host.longPress(located.x.toDouble(), located.y.toDouble())
+        } finally {
+            located.recycle()
+        }
+    }
+
+    /**
+     * Tells Dart about a finger touching down on [root], at [event]'s
+     * position.
+     *
+     * Deliberately outside arbitration, same as [reportLongPress]: the touch
+     * is still the engine's. Reported immediately, unlike [reportLongPress],
+     * so a menu waiting on this has somewhere to anchor before Gecko's own
+     * hit-result answer — which can arrive at about the same time a
+     * long-press would — comes back.
+     */
+    internal fun reportTouchDown(root: PointerInputFrameLayout, event: MotionEvent) {
+        if (disposed || redispatching) return
+        val flutterView = root.pointerFlutterView ?: return
+
+        val located = MotionEvent.obtain(event)
+        try {
+            located.transformPosition(root, flutterView)
+            host.touchDown(located.x.toDouble(), located.y.toDouble())
         } finally {
             located.recycle()
         }

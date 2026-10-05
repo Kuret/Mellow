@@ -34,6 +34,19 @@ internal interface PointerInputHost {
      * the event.
      */
     fun secondaryButtonDown(x: Double, y: Double)
+
+    /**
+     * Tells Dart a finger long-press landed at [x]/[y], in physical pixels
+     * local to the Flutter view. Reported only; the engine still gets the
+     * touch.
+     */
+    fun longPress(x: Double, y: Double)
+
+    /**
+     * Tells Dart a finger touched down at [x]/[y], in physical pixels local
+     * to the Flutter view. Reported only; the engine still gets the touch.
+     */
+    fun touchDown(x: Double, y: Double)
 }
 
 /** The production host: the generated pigeon channel. */
@@ -68,6 +81,22 @@ internal class PigeonPointerInputHost(messenger: BinaryMessenger) : PointerInput
             api.secondaryButtonDown(x, y) {}
         } catch (_: RuntimeException) {
             // A click nobody is left to answer needs no menu.
+        }
+    }
+
+    override fun longPress(x: Double, y: Double) {
+        try {
+            api.longPress(x, y) {}
+        } catch (_: RuntimeException) {
+            // A press nobody is left to answer needs no menu.
+        }
+    }
+
+    override fun touchDown(x: Double, y: Double) {
+        try {
+            api.touchDown(x, y) {}
+        } catch (_: RuntimeException) {
+            // Nobody left to anchor a menu for.
         }
     }
 }

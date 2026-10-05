@@ -413,6 +413,63 @@ class PointerInputFlutterApi(private val binaryMessenger: BinaryMessenger, priva
       } 
     }
   }
+  /**
+   * A finger long-press landed at [x]/[y], in physical pixels local to the
+   * Flutter view.
+   *
+   * Reported the same way [secondaryButtonDown] is: observed, not consumed,
+   * so Gecko still answers a press over a link or image with its own
+   * hit-result menu. Touch has no secondary button and Gecko's hit test
+   * answers nothing for empty page area, which is why this exists — but it
+   * answers nothing for a text selection either, so a long-press that starts
+   * one raises this menu too, over Gecko's own selection handles. That
+   * overlap is accepted rather than suppressed: chosen, not overlooked.
+   */
+  fun longPress(xArg: Double, yArg: Double, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.PointerInputFlutterApi.longPress$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(xArg, yArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(PointerInputFlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(PointerInputPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * A finger touched down at [x]/[y], in physical pixels local to the
+   * Flutter view.
+   *
+   * Reported immediately, unlike [longPress]: a link's hit-result menu can
+   * come back from Gecko at about the same moment a long-press would fire,
+   * which is too late to anchor it. This exists purely to give that menu —
+   * and [longPress]'s own, once it does fire — somewhere to appear, and
+   * says nothing about whether a press turns into a long-press, a scroll or
+   * anything else.
+   */
+  fun touchDown(xArg: Double, yArg: Double, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.PointerInputFlutterApi.touchDown$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(xArg, yArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(PointerInputFlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(PointerInputPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
 }
 /**
  * Told to the native router by the Dart half.

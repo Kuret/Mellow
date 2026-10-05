@@ -37,10 +37,11 @@ class _NoSelectedTab extends SelectedTab {
 
 void main() {
   tearDown(() {
-    // The trigger's useEffect leaves this pointing at its own closure over a
-    // now-disposed widget tree; nothing calls it again until the next test's
-    // own trigger remounts, but nothing should rely on that.
+    // The trigger's useEffect leaves these pointing at its own closure over a
+    // now-disposed widget tree; nothing calls them again until the next
+    // test's own trigger remounts, but nothing should rely on that.
     PointerInputBridge.onSecondaryButtonDown = null;
+    PointerInputBridge.onLongPress = null;
   });
 
   /// Mounts the trigger alone, the way it is placed once under the
@@ -98,6 +99,55 @@ void main() {
 
       // Still inside the grace period: this is what ContextMenuDialog does
       // on build when Gecko did hand back a hit result for the same click.
+      await tester.pump(const Duration(milliseconds: 50));
+      container.read(contextMenuShownAtProvider.notifier).markShown();
+
+      await tester.pump(PageContextMenuTrigger.gracePeriod);
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(PageContextMenuDialog), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'raises its own menu once the grace period passes with no hit-result '
+    'menu having opened for a long press — the touch equivalent of the '
+    'right-click case, since Gecko has nothing to hit-test for empty page '
+    'area either way',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [selectedTabProvider.overrideWith(_NoSelectedTab.new)],
+      );
+      addTearDown(container.dispose);
+
+      await pumpTrigger(tester, container: container);
+
+      PointerInputBridge.onLongPress!(const Offset(50, 60));
+      expect(find.byType(PageContextMenuDialog), findsNothing);
+
+      await tester.pump(PageContextMenuTrigger.gracePeriod);
+      // The dialog's own 150ms open transition.
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(PageContextMenuDialog), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'stays away when the hit-result menu opened for the same long press — '
+    'a long press on a link must still yield that menu, not this one',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [selectedTabProvider.overrideWith(_NoSelectedTab.new)],
+      );
+      addTearDown(container.dispose);
+
+      await pumpTrigger(tester, container: container);
+
+      PointerInputBridge.onLongPress!(const Offset(50, 60));
+
+      // Still inside the grace period: this is what ContextMenuDialog does
+      // on build when Gecko did hand back a hit result for the same press.
       await tester.pump(const Duration(milliseconds: 50));
       container.read(contextMenuShownAtProvider.notifier).markShown();
 

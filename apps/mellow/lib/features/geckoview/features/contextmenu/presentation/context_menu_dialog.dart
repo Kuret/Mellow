@@ -121,13 +121,17 @@ class ContextMenuDialog extends HookConsumerWidget {
       ),
     ];
 
-    // A mouse leaves its last hover position on the bridge; a long-press from
-    // a finger never does, so the phone — the primary device — keeps the
-    // familiar full-width dialog centred on screen.
-    final anchor = PointerInputBridge.pointerPosition;
-    if (anchor == null) {
-      return SimpleDialog(title: title, children: items);
-    }
+    // A mouse leaves its last hover position on the bridge, and a finger its
+    // last touch-down; whichever of the two happened more recently anchors
+    // this menu the way a desktop browser's own context menu would. Neither
+    // having happened yet — nothing plausible should reach this, but there is
+    // no native position to fall back to — still goes through the same
+    // widget, anchored at the screen centre, rather than a second
+    // presentation.
+    final size = MediaQuery.sizeOf(context);
+    final anchor =
+        PointerInputBridge.anchorPosition ??
+        Offset(size.width / 2, size.height / 2);
 
     return AnchoredMenu(
       anchor: anchor,

@@ -70,6 +70,29 @@ abstract class PointerInputFlutterApi {
   /// empty page, no link under the cursor — can raise a menu of its own
   /// instead of doing nothing at all.
   void secondaryButtonDown(double x, double y);
+
+  /// A finger long-press landed at [x]/[y], in physical pixels local to the
+  /// Flutter view.
+  ///
+  /// Reported the same way [secondaryButtonDown] is: observed, not consumed,
+  /// so Gecko still answers a press over a link or image with its own
+  /// hit-result menu. Touch has no secondary button and Gecko's hit test
+  /// answers nothing for empty page area, which is why this exists — but it
+  /// answers nothing for a text selection either, so a long-press that starts
+  /// one raises this menu too, over Gecko's own selection handles. That
+  /// overlap is accepted rather than suppressed: chosen, not overlooked.
+  void longPress(double x, double y);
+
+  /// A finger touched down at [x]/[y], in physical pixels local to the
+  /// Flutter view.
+  ///
+  /// Reported immediately, unlike [longPress]: a link's hit-result menu can
+  /// come back from Gecko at about the same moment a long-press would fire,
+  /// which is too late to anchor it. This exists purely to give that menu —
+  /// and [longPress]'s own, once it does fire — somewhere to appear, and
+  /// says nothing about whether a press turns into a long-press, a scroll or
+  /// anything else.
+  void touchDown(double x, double y);
 }
 
 /// Told to the native router by the Dart half.

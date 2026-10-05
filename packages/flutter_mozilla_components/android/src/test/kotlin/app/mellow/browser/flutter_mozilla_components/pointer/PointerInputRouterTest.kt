@@ -12,6 +12,7 @@ import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import app.mellow.browser.flutter_mozilla_components.pigeons.PointerHitTest
 import app.mellow.browser.flutter_mozilla_components.pigeons.PointerTarget
@@ -48,6 +49,8 @@ class PointerInputRouterTest {
         val hitTests = mutableListOf<Query>()
         var exits = 0
         val secondaryClicks = mutableListOf<Pair<Double, Double>>()
+        val longPresses = mutableListOf<Pair<Double, Double>>()
+        val touchDowns = mutableListOf<Pair<Double, Double>>()
 
         override fun hitTest(
             x: Double,
@@ -64,6 +67,14 @@ class PointerInputRouterTest {
 
         override fun secondaryButtonDown(x: Double, y: Double) {
             secondaryClicks += x to y
+        }
+
+        override fun longPress(x: Double, y: Double) {
+            longPresses += x to y
+        }
+
+        override fun touchDown(x: Double, y: Double) {
+            touchDowns += x to y
         }
 
         /** Answers hit test [index], defaulting to a revision that keeps them ordered. */
@@ -666,6 +677,80 @@ class PointerInputRouterTest {
         assertTrue(flutterEvents.isEmpty())
         assertFalse(root.isAccessibilityFocused)
         assertNotNull(root.createAccessibilityNodeInfo())
+    }
+
+    @Test
+    fun fingerLongPressReportsTransformedPositionAfterTimeout() {
+        val (root, _) = root(1, 50, 60)
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_DOWN, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER),
+        )
+        assertTrue(host.longPresses.isEmpty())
+        shadowOf(Looper.getMainLooper())
+            .idleFor(Duration.ofMillis(ViewConfiguration.getLongPressTimeout().toLong()))
+        assertEquals(listOf(80.0 to 100.0), host.longPresses)
+    }
+
+    @Test
+    fun fingerTouchDownReportsTransformedPositionImmediately() {
+        // Unlike the long-press it may or may not turn into, this must not
+        // wait out the platform's long-press timeout: a menu anchoring on it
+        // needs the position before Gecko's own hit-result answer, which can
+        // arrive at about the same moment a long-press would fire.
+        val (root, _) = root(1, 50, 60)
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_DOWN, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER),
+        )
+        assertEquals(listOf(80.0 to 100.0), host.touchDowns)
+    }
+
+    @Test
+    fun fingerLongPressCancelsWhenMovedBeyondTouchSlop() {
+        val (root, _) = root(1)
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_DOWN, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER),
+        )
+        val slop = ViewConfiguration.get(context).scaledTouchSlop
+        root.dispatchTouchEvent(
+            event(
+                MotionEvent.ACTION_MOVE,
+                InputDevice.SOURCE_TOUCHSCREEN,
+                MotionEvent.TOOL_TYPE_FINGER,
+                x = 30f + slop + 5f,
+            ),
+        )
+        shadowOf(Looper.getMainLooper())
+            .idleFor(Duration.ofMillis(ViewConfiguration.getLongPressTimeout().toLong()))
+        assertTrue(host.longPresses.isEmpty())
+    }
+
+    @Test
+    fun fingerLongPressCancelsOnActionUp() {
+        val (root, _) = root(1)
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_DOWN, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER),
+        )
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_UP, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER),
+        )
+        shadowOf(Looper.getMainLooper())
+            .idleFor(Duration.ofMillis(ViewConfiguration.getLongPressTimeout().toLong()))
+        assertTrue(host.longPresses.isEmpty())
+    }
+
+    @Test
+    fun mouseToolNeverStartsALongPressTimer() {
+        // A mouse has a right button for this menu already; reinterpreting a
+        // held left button as a long-press would break drag-select and
+        // drag-scroll, which must keep behaving as they do today.
+        val (root, _) = root(1)
+        root.dispatchTouchEvent(
+            event(MotionEvent.ACTION_DOWN, InputDevice.SOURCE_MOUSE, MotionEvent.TOOL_TYPE_MOUSE),
+        )
+        shadowOf(Looper.getMainLooper())
+            .idleFor(Duration.ofMillis(ViewConfiguration.getLongPressTimeout().toLong()))
+        assertTrue(host.longPresses.isEmpty())
+        assertTrue(host.touchDowns.isEmpty())
     }
 
     @Test

@@ -278,6 +278,29 @@ abstract class PointerInputFlutterApi {
   /// instead of doing nothing at all.
   void secondaryButtonDown(double x, double y);
 
+  /// A finger long-press landed at [x]/[y], in physical pixels local to the
+  /// Flutter view.
+  ///
+  /// Reported the same way [secondaryButtonDown] is: observed, not consumed,
+  /// so Gecko still answers a press over a link or image with its own
+  /// hit-result menu. Touch has no secondary button and Gecko's hit test
+  /// answers nothing for empty page area, which is why this exists — but it
+  /// answers nothing for a text selection either, so a long-press that starts
+  /// one raises this menu too, over Gecko's own selection handles. That
+  /// overlap is accepted rather than suppressed: chosen, not overlooked.
+  void longPress(double x, double y);
+
+  /// A finger touched down at [x]/[y], in physical pixels local to the
+  /// Flutter view.
+  ///
+  /// Reported immediately, unlike [longPress]: a link's hit-result menu can
+  /// come back from Gecko at about the same moment a long-press would fire,
+  /// which is too late to anchor it. This exists purely to give that menu —
+  /// and [longPress]'s own, once it does fire — somewhere to appear, and
+  /// says nothing about whether a press turns into a long-press, a scroll or
+  /// anything else.
+  void touchDown(double x, double y);
+
   static void setUp(PointerInputFlutterApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
     messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
     {
@@ -335,6 +358,50 @@ abstract class PointerInputFlutterApi {
           final double arg_y = args[1]! as double;
           try {
             api.secondaryButtonDown(arg_x, arg_y);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.PointerInputFlutterApi.longPress$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final double arg_x = args[0]! as double;
+          final double arg_y = args[1]! as double;
+          try {
+            api.longPress(arg_x, arg_y);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.PointerInputFlutterApi.touchDown$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final double arg_x = args[0]! as double;
+          final double arg_y = args[1]! as double;
+          try {
+            api.touchDown(arg_x, arg_y);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
