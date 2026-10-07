@@ -438,6 +438,7 @@ class IntentReceiverActivity : Activity() {
         }
 
         val installStartUrl = intent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
+        val desktopMode = PwaSessionCreator.desktopModeOf(intent)
 
         val currentProfileUuid = getCurrentProfileUuid()
 
@@ -452,6 +453,7 @@ class IntentReceiverActivity : Activity() {
                         profileUuid = profileUuid,
                         token = token,
                         installStartUrl = installStartUrl,
+                        desktopMode = desktopMode,
                         allowTaskReuse = false,
                     )
                 },
@@ -467,6 +469,7 @@ class IntentReceiverActivity : Activity() {
                 profileUuid = profileUuid,
                 token = token,
                 installStartUrl = installStartUrl,
+                desktopMode = desktopMode,
                 allowTaskReuse = true,
             )
         }
@@ -665,10 +668,11 @@ class IntentReceiverActivity : Activity() {
         profileUuid: String,
         token: String?,
         installStartUrl: String?,
+        desktopMode: Boolean?,
         allowTaskReuse: Boolean,
     ) {
         if (allowTaskReuse &&
-            bringPwaTaskToFront(url, profileUuid, contextId, token, installStartUrl)
+            bringPwaTaskToFront(url, profileUuid, contextId, token, installStartUrl, desktopMode)
         ) {
             finish()
             return
@@ -685,6 +689,7 @@ class IntentReceiverActivity : Activity() {
                 val sessionId = PwaSessionCreator.create(
                     url = url,
                     contextId = contextId,
+                    desktopMode = desktopMode,
                 )
 
                 Log.d(TAG, "Created PWA session: contextId=$contextId, sessionId=$sessionId")
@@ -697,6 +702,7 @@ class IntentReceiverActivity : Activity() {
                     pwaContextId = contextId,
                     pwaToken = token,
                     pwaInstallStartUrl = installStartUrl ?: url,
+                    pwaDesktopMode = desktopMode,
                 )
                 startActivity(externalIntent)
                 finish()
@@ -713,6 +719,7 @@ class IntentReceiverActivity : Activity() {
         contextId: String?,
         token: String?,
         installStartUrl: String?,
+        desktopMode: Boolean?,
     ): Boolean {
         if (token.isNullOrEmpty()) {
             return false
@@ -734,6 +741,17 @@ class IntentReceiverActivity : Activity() {
 
             if (!matchesPwaTaskIntent(baseIntent, url, profileUuid, contextId, token, installStartUrl, components)) {
                 continue
+            }
+
+            // Reinstalling keeps the launch token, so a task opened before the
+            // reinstall still matches — but in the desktop mode it was opened
+            // with, and its base intent is what recovers it after process death.
+            // Replace it rather than reuse it or open a second window beside it.
+            if (PwaSessionCreator.desktopModeOf(baseIntent) != desktopMode) {
+                Log.d(TAG, "Existing PWA task for $url has a stale desktop mode; replacing it")
+                runCatching { appTask.finishAndRemoveTask() }
+                    .onFailure { error -> Log.w(TAG, "Failed to remove stale PWA task", error) }
+                return false
             }
 
             return try {
