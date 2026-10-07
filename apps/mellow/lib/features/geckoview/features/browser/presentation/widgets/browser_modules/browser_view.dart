@@ -52,7 +52,6 @@ import 'package:mellow/features/intent_gatekeeper/domain/services/intent_gatekee
 import 'package:mellow/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
 import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
-import 'package:mellow/features/user/domain/services/local_authentication.dart';
 import 'package:mellow/presentation/hooks/on_initialization.dart';
 import 'package:mellow/utils/ui_helper.dart';
 import 'package:quick_actions/quick_actions.dart';
@@ -607,10 +606,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _periodicScreenshotUpdate?.cancel();
           _timerPaused = true;
         }
-
-        ref
-            .read(localAuthenticationServiceProvider.notifier)
-            .evictCacheOnBackground();
 
         if (state == AppLifecycleState.paused) {
           _suggestionCountTime = DateTime.now();
