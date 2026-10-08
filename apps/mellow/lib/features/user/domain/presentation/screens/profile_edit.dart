@@ -128,6 +128,7 @@ class ProfileEditScreen extends HookConsumerWidget {
             authKey: existing != null
                 ? profileAccessAuthKey(existing.id)
                 : _newProfileAuthKey,
+            localizedTitle: l10n.user_deviceAuthPromptTitle,
             localizedReason: existing != null
                 ? 'Require authentication for profile'
                 : 'Confirm you can unlock this profile',
@@ -135,7 +136,7 @@ class ProfileEditScreen extends HookConsumerWidget {
             alsoRemember: alsoRemember,
           );
 
-      if (!authResult) {
+      if (!authResult.passed) {
         if (context.mounted) reportFailure();
         return;
       }

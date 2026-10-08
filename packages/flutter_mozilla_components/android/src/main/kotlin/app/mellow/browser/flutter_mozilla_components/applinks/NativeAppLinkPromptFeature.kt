@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AlertDialog
 import app.mellow.browser.flutter_mozilla_components.R
+import app.mellow.browser.flutter_mozilla_components.lock.coverWhileWindowLocked
 import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.session.SessionUseCases
@@ -158,6 +159,9 @@ class NativeAppLinkPromptFeature(
             .setOnDismissListener { dialog = null }
             .show()
         shownRequest = request
+        // Over a Custom Tab or PWA window whose profile lock is up, or comes
+        // up while this waits: hidden, not answered, until it lifts.
+        dialog?.coverWhileWindowLocked()
         scheduleExpiryTick(request)
     }
 

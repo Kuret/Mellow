@@ -34,6 +34,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
         GeckoEngineSettingsService,
         GeckoLoggingService,
         LogLevel,
+        ProfileLockFlutterApi,
         WebExtensionActionType;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -70,6 +71,7 @@ import 'package:mellow/features/user/domain/repositories/cache.dart';
 import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/user/domain/services/external_window_password_check.dart';
 import 'package:mellow/features/user/domain/services/profile_defaults.dart';
 import 'package:mellow/features/user/domain/services/profile_restart_request.dart';
 import 'package:mellow/presentation/hooks/on_initialization.dart';
@@ -481,6 +483,11 @@ void main() async {
       LogLevel.error => Level.error,
     }, message);
   });
+
+  // Before the profile is resolved: a Custom Tab or PWA window that started
+  // this engine to check a password asks as soon as Dart runs, and is told to
+  // ask again until a profile is active.
+  ProfileLockFlutterApi.setUp(ExternalWindowPasswordCheck());
 
   await HomeWidget.setAppGroupId('weblibre');
 
