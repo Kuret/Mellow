@@ -35,6 +35,7 @@ import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
 import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
 import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
+import app.mellow.browser.flutter_mozilla_components.feature.PromptSheet
 import app.mellow.browser.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import app.mellow.browser.flutter_mozilla_components.feature.WebInspectorFeature
 import app.mellow.browser.flutter_mozilla_components.services.DownloadService
@@ -192,6 +193,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The download prompts and the app chooser below show in this manager.
+        PromptSheet.install(childFragmentManager)
 
         requestDownloadPermissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
