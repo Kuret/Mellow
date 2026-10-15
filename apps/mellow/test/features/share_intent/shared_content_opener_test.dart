@@ -40,6 +40,17 @@ class _ControlledIntentStream extends EngineBoundIntentStream {
   Stream<SharedContent> build() => controller.stream;
 }
 
+/// The cover without its engine wiring: the opener only ever lowers it.
+class _IdleStartupLaunchCover extends StartupLaunchCover {
+  int lowered = 0;
+
+  @override
+  bool build() => false;
+
+  @override
+  void lower() => lowered++;
+}
+
 Widget _page(String label) => Scaffold(body: Text(label));
 
 /// The routes the opener navigates between, with the app's names and paths but
@@ -112,6 +123,7 @@ Future<_Harness> _pump(WidgetTester tester) async {
         () => _ControlledIntentStream(intents),
       ),
       routerProvider.overrideWith((ref) => router),
+      startupLaunchCoverProvider.overrideWith(_IdleStartupLaunchCover.new),
       selectedTabTypeProvider.overrideWith((ref) => TabType.regular),
     ],
   );
@@ -235,5 +247,18 @@ void main() {
 
     expect(claims, [true, false]);
     expect(harness.container.read(intentLaunchClaimProvider), isFalse);
+  });
+
+  testWidgets('lowers the startup cover once the sheet is on its way', (
+    tester,
+  ) async {
+    final harness = await _pump(tester);
+    final cover =
+        harness.container.read(startupLaunchCoverProvider.notifier)
+            as _IdleStartupLaunchCover;
+
+    await harness.share(tester, _url('https://example.org/cover'));
+
+    expect(cover.lowered, 1);
   });
 }

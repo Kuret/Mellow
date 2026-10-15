@@ -79,6 +79,9 @@ void sharedContentOpener(Ref ref) {
 }
 
 Future<void> _open(Ref ref, SharedContent content) async {
+  // Held in a local: the cover is lowered after awaits, on every way out.
+  final launchCover = ref.read(startupLaunchCoverProvider.notifier);
+
   try {
     final router = await ref.read(routerProvider.future);
 
@@ -106,7 +109,7 @@ Future<void> _open(Ref ref, SharedContent content) async {
       // The previous share is still open; this one takes its place rather than
       // stacking on top and bringing it back when popped.
       unawaited(router.pushReplacement(route.location));
-      return;
+      return; // lowers the startup cover in `finally`
     }
 
     if (top != BrowserRoute.name) {
@@ -123,6 +126,11 @@ Future<void> _open(Ref ref, SharedContent content) async {
       error: error,
       stackTrace: stackTrace,
     );
+  } finally {
+    // A launch ends in a sheet or the search screen, never in a tab selected
+    // behind it, so nothing else would lower the startup cover that was raised
+    // for it. Lowering is a no-op when no cover is up.
+    launchCover.lower();
   }
 }
 
