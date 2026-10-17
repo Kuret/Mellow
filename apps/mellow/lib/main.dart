@@ -222,25 +222,6 @@ class _MainWidget extends HookConsumerWidget {
         logger.w('Failed preloading persisted state', error: e, stackTrace: s);
       }
 
-      // Takes the launch backlog from the host, and claims what the broker held
-      // while the profile picker was up, now rather than when the intent
-      // consumers are built after `initialize()`: whether the app was started
-      // for a link has to be known before the router mounts, or the home surface
-      // paints first (#612). Nothing is delivered early — the bus holds every
-      // intent until `brokeredIntentDelivery` starts delivery and delivers the
-      // broker's claim, as it always has.
-      _activateService(ref, intentBusProvider);
-      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
-        ..ignore();
-      final brokeredLaunches =
-          ref
-              .read(brokeredLaunchClaimProvider.notifier)
-              .claim()
-              .then(
-                (launches) => [for (final launch in launches) launch.intent],
-              )
-            ..ignore();
-
       final startupUBlockFilterListsPref =
           engineSettings.ublockFilterListSettings.enabled
           ? jsonEncode(
@@ -346,6 +327,32 @@ class _MainWidget extends HookConsumerWidget {
         rethrow;
       }
 
+      // Takes the launch backlog from the host, and claims what the broker held
+      // while the profile picker was up, now rather than when the intent
+      // consumers are built after `initialize()`: whether the app was started
+      // for a link has to be known before the router mounts, or the home surface
+      // paints first (#612). Nothing is delivered early — the bus holds every
+      // intent until `brokeredIntentDelivery` starts delivery and delivers the
+      // broker's claim, as it always has.
+      //
+      // Not before the engine, though both would be answered sooner: from here
+      // on these launches are this isolate's alone — the host stops holding
+      // them, and the broker's claim keeps them from any other engine — so a
+      // start that fails or is torn down in between strands them. Past the
+      // engine bring-up, the stretch that can is short, and the claim goes back
+      // in the `finally` below.
+      _activateService(ref, intentBusProvider);
+      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
+        ..ignore();
+      final brokeredLaunches =
+          ref
+              .read(brokeredLaunchClaimProvider.notifier)
+              .claim()
+              .then(
+                (launches) => [for (final launch in launches) launch.intent],
+              )
+            ..ignore();
+
       // Mirror the startup uBO pref into the fixator so later pref changes are
       // still observed and enforced after native startup initialization.
       try {
@@ -426,8 +433,8 @@ class _MainWidget extends HookConsumerWidget {
       // launch's tab is selected instead of handing over to the home surface.
       _activateService(ref, startupLaunchCoverProvider);
       // Both answered long ago in practice: they were asked for before the
-      // engine started. Bounded anyway, since a source that does not answer
-      // only goes uncovered — which is how every start looked before.
+      // first-frame preload above. Bounded anyway, since a source that does not
+      // answer only goes uncovered — which is how every start looked before.
       final startupLaunches = await Future.wait([
         for (final launches in [startupBacklog, brokeredLaunches])
           launches.timeout(const Duration(seconds: 1)).catchError((
@@ -452,40 +459,47 @@ class _MainWidget extends HookConsumerWidget {
         logger.w('Failed raising the startup cover', error: e, stackTrace: s);
       }
 
-      // Before `initialize()`, because that is what flips `initialized: true`
-      // and lets the router mount.
-      await secureStorageClaim;
+      try {
+        // Before `initialize()`, because that is what flips `initialized: true`
+        // and lets the router mount.
+        await secureStorageClaim;
 
-      await ref.read(appInitializationServiceProvider.notifier).initialize();
+        await ref.read(appInitializationServiceProvider.notifier).initialize();
 
-      // Wire settings → local_index_setting (tab.db) so the trigger gate
-      // is in sync from the moment tabs start writing.
-      _activateService(ref, localIndexSettingsSyncProvider);
+        // Wire settings → local_index_setting (tab.db) so the trigger gate
+        // is in sync from the moment tabs start writing.
+        _activateService(ref, localIndexSettingsSyncProvider);
 
-      // Cold-start prune of the local search index — drops rows the engine
-      // has forgotten (Places retention, user-initiated clears). Cheap and
-      // background; failures are logged and ignored.
-      unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+        // Cold-start prune of the local search index — drops rows the engine
+        // has forgotten (Places retention, user-initiated clears). Cheap and
+        // background; failures are logged and ignored.
+        unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
 
-      // One-shot: seeds this fork's own defaults (formerly applied by the
-      // now-removed onboarding wizard) into the profile, exactly once.
-      unawaited(
-        ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed(),
-      );
+        // One-shot: seeds this fork's own defaults (formerly applied by the
+        // now-removed onboarding wizard) into the profile, exactly once.
+        unawaited(
+          ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed(),
+        );
 
-      // Listen for "restart into the shortcut's profile" from the native
-      // mismatch dialog. Only this isolate can shut the profile down cleanly.
-      _activateService(ref, profileRestartRequestHandlerProvider);
+        // Listen for "restart into the shortcut's profile" from the native
+        // mismatch dialog. Only this isolate can shut the profile down cleanly.
+        _activateService(ref, profileRestartRequestHandlerProvider);
 
-      // Every consumer of `allIntents` has to exist before the intent bus starts
-      // delivery and the broker is drained. The restart-request consumer is
-      // alive from the read above; these two are otherwise built by the browser
-      // widget, far too late.
-      _activateService(ref, sharingIntentStreamProvider);
-      _activateService(ref, appWidgetLaunchStreamProvider);
-      // Opens shared links and text; must exist before brokered delivery starts.
-      _activateService(ref, sharedContentOpenerProvider);
-      await ref.read(brokeredIntentDeliveryProvider.future);
+        // Every consumer of `allIntents` has to exist before the intent bus starts
+        // delivery and the broker is drained. The restart-request consumer is
+        // alive from the read above; these two are otherwise built by the browser
+        // widget, far too late.
+        _activateService(ref, sharingIntentStreamProvider);
+        _activateService(ref, appWidgetLaunchStreamProvider);
+        // Opens shared links and text; must exist before brokered delivery starts.
+        _activateService(ref, sharedContentOpenerProvider);
+        await ref.read(brokeredIntentDeliveryProvider.future);
+      } finally {
+        // What startup claimed from the broker and never got to deliver goes
+        // back: left claimed, it would be kept from every other engine for the
+        // claim's full minute. Nothing to do once delivery has taken it.
+        unawaited(ref.read(brokeredLaunchClaimProvider.notifier).abandon());
+      }
 
       if (!kDebugMode) {
         await BackgroundFetch.configure(

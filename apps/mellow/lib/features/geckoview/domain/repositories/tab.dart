@@ -207,6 +207,11 @@ class TabRepository extends _$TabRepository {
     return created;
   }
 
+  /// Opens a tab and returns its id.
+  ///
+  /// [onCreated] is called with that id as soon as the engine has created the
+  /// tab, before its row is written and, for a selected tab, before the
+  /// selected container follows it.
   Future<String> addTab({
     required TabMode tabMode,
     Uri? url,
@@ -221,6 +226,7 @@ class TabRepository extends _$TabRepository {
     String? spaceUuid,
     bool launchedFromIntent = false,
     TabBackPromptBehavior? promptOnBackBehavior,
+    void Function(String tabId)? onCreated,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
@@ -267,7 +273,9 @@ class TabRepository extends _$TabRepository {
           // loads; the replicated snapshot only follows once its row is written.
           excludeFromHistory: excludeFromHistory,
         );
-        return _confirmMintedId(mintedId, createdId);
+        final confirmedId = _confirmMintedId(mintedId, createdId);
+        onCreated?.call(confirmedId);
+        return confirmedId;
       },
       containerId: Value(assignedContainer?.id),
       spaceUuid: Value(effectiveSpaceUuid),
