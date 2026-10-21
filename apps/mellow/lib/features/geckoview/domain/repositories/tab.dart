@@ -293,14 +293,9 @@ class TabRepository extends _$TabRepository {
     if (selectTab && ref.mounted) {
       _clearForceBrowserHome();
 
-      final selectedContainerNotifier = ref.read(
-        selectedContainerProvider.notifier,
-      );
-      if (assignedContainer != null) {
-        await selectedContainerNotifier.setContainerId(assignedContainer.id);
-      } else {
-        selectedContainerNotifier.clearContainer();
-      }
+      await ref
+          .read(selectedContainerProvider.notifier)
+          .followTab(assignedContainer?.id);
     }
 
     return newTabId;

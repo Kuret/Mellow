@@ -293,6 +293,18 @@ class _MainWidget extends HookConsumerWidget {
       // it does build.
       _activateService(ref, geckoSyncStateServiceProvider);
 
+      // What the browser's first frame draws from, loaded before it mounts:
+      // otherwise each one paints its default and then the saved state (#665) —
+      // the stock toolbar buttons.
+      // Activated, not just read: a read takes no listener. Started here, just
+      // before the engine bring-up, because none of it needs the engine and
+      // that is the longest wait left to hide it behind; not with the settings
+      // reads above, so the engine does not wait on it for the database.
+      _activateService(ref, toolbarButtonConfigsProvider);
+      final engineFreeFirstFrameState = ref.read(
+        toolbarButtonConfigsProvider.future,
+      )..ignore();
+
       // Logged because it is the last long step of a cold start, and the one a
       // headless bootstrap waits on: a launch that never reaches full components
       // needs this line to say whether the app half got here and stalled, or
@@ -335,12 +347,12 @@ class _MainWidget extends HookConsumerWidget {
       // intent until `brokeredIntentDelivery` starts delivery and delivers the
       // broker's claim, as it always has.
       //
-      // Not before the engine, though both would be answered sooner: from here
-      // on these launches are this isolate's alone — the host stops holding
-      // them, and the broker's claim keeps them from any other engine — so a
-      // start that fails or is torn down in between strands them. Past the
-      // engine bring-up, the stretch that can is short, and the claim goes back
-      // in the `finally` below.
+      // Not before the engine, though both would be answered sooner. The host
+      // keeps a copy of what it hands over until delivery confirms it, and puts
+      // it back if this isolate goes first; but the broker's claim keeps its
+      // launches from any other engine until the `finally` below gives them
+      // back, or for the claim's full minute if nothing gets to run that. Past
+      // the engine bring-up, the stretch in which that can happen is short.
       _activateService(ref, intentBusProvider);
       final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
         ..ignore();
@@ -404,18 +416,37 @@ class _MainWidget extends HookConsumerWidget {
       // app resume, a periodic timer and local tab-model changes.
       _activateService(ref, spacesSyncServiceProvider);
 
-      // What the browser's first frame draws from, loaded before it mounts:
-      // otherwise each one paints its default and then the saved state (#665) —
-      // the stock toolbar buttons, the brand header and profile wallpaper over a
-      // container's own, the gestures toggle in the wrong state. Activated, not
-      // just read: a read takes no listener, and the auto-disposed container
-      // data would be gone again before the first frame.
-      _activateService(ref, toolbarButtonConfigsProvider);
+      // Both answered long ago in practice: they were asked for right after the
+      // engine came up. Bounded anyway, since a source that does not answer
+      // only goes uncovered — which is how every start looked before. Waited
+      // on alongside the first-frame preload below rather than after it, so a
+      // slow start pays one bound, not both.
+      final startupLaunchesRead = Future.wait([
+        for (final launches in [startupBacklog, brokeredLaunches])
+          launches.timeout(const Duration(seconds: 1)).catchError((
+            Object e,
+            StackTrace s,
+          ) {
+            logger.w(
+              'Failed reading startup launches',
+              error: e,
+              stackTrace: s,
+            );
+            return const <sir.Intent>[];
+          }),
+      ]);
+
+      // The rest of the first frame's state: the brand header and profile
+      // wallpaper over a container's own (#665). After the engine, unlike the
+      // part started before it, because the selected container follows the
+      // selected tab, and that comes from the engine. Activated for the same
+      // reason, and also because the auto-disposed container data would be
+      // gone again before the first frame.
       _activateService(ref, selectedContainerDataProvider);
 
       try {
         await Future.wait([
-          ref.read(toolbarButtonConfigsProvider.future),
+          engineFreeFirstFrameState,
           ref.read(selectedContainerDataProvider.future),
         ])
         // Cosmetic, so it never holds the UI back for long: past this the
@@ -432,23 +463,7 @@ class _MainWidget extends HookConsumerWidget {
       // Raised before the router mounts, so the spinner stays up until the
       // launch's tab is selected instead of handing over to the home surface.
       _activateService(ref, startupLaunchCoverProvider);
-      // Both answered long ago in practice: they were asked for before the
-      // first-frame preload above. Bounded anyway, since a source that does not
-      // answer only goes uncovered — which is how every start looked before.
-      final startupLaunches = await Future.wait([
-        for (final launches in [startupBacklog, brokeredLaunches])
-          launches.timeout(const Duration(seconds: 1)).catchError((
-            Object e,
-            StackTrace s,
-          ) {
-            logger.w(
-              'Failed reading startup launches',
-              error: e,
-              stackTrace: s,
-            );
-            return const <sir.Intent>[];
-          }),
-      ]);
+      final startupLaunches = await startupLaunchesRead;
       // The launches are another app's data, read synchronously from here:
       // nothing in deciding the cover may stop the app from starting.
       try {

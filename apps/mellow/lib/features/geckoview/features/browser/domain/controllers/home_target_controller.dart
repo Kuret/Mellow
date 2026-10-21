@@ -86,18 +86,28 @@ class HomeTargetController extends _$HomeTargetController {
   /// window below is a few hundred milliseconds. The target then latched the
   /// home surface over the page the launch opened, or resumed a different tab
   /// entirely (#623), so a claimed launch is waited for instead — twice, since
-  /// one that arrives while the window below is open has the same claim on the
+  /// one that arrives while the check below is out has the same claim on the
   /// startup surface as one that was already in flight.
+  ///
+  /// A tab the user picks while the check is out — a placeholder chip tapped
+  /// during restore, flushed once its tab arrives — races it the same way: the
+  /// store can answer before that selection is dispatched, and the answer then
+  /// lands after it. Any deliberate selection in that stretch shows up as a
+  /// [ForceBrowserHome.clearCount] change, and the store is asked again.
   Future<void> _applyStartupTarget() async {
     final launchClaim = ref.read(intentLaunchClaimProvider.notifier);
+    final forceBrowserHome = ref.read(forceBrowserHomeProvider.notifier);
 
+    int clearCount;
     do {
       await launchClaim.waitUntilSettled();
       if (!ref.mounted) return;
 
+      clearCount = forceBrowserHome.clearCount;
       if (await _hasRestoredSelection()) return;
       if (!ref.mounted) return;
-    } while (ref.read(intentLaunchClaimProvider));
+    } while (ref.read(intentLaunchClaimProvider) ||
+        forceBrowserHome.clearCount != clearCount);
 
     await applyTarget();
   }
