@@ -239,6 +239,32 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         }
     }
 
+    /**
+     * Undoes the system UI reset Flutter performs on every resume. With no
+     * `SystemUiMode` set from Dart, its PlatformPlugin replaces the decor's
+     * legacy visibility flags with `LAYOUT_STABLE | LAYOUT_FULLSCREEN`. Before
+     * Android 11, edge-to-edge ([enableTransparentSystemBars]) is those flags
+     * plus `LAYOUT_HIDE_NAVIGATION`, and the light bar icons and immersive mode
+     * are legacy flags too: the reset laid the UI out above three-button
+     * navigation, leaving the bar to show the window instead of the app (#657).
+     * Android 11 and later keep all of them outside these flags.
+     *
+     * The flags are taken just before the reset, so they are whatever was last
+     * asked for, by this activity or by Dart's overlay style.
+     */
+    @Suppress("DEPRECATION")
+    override fun onPostResume() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            super.onPostResume()
+            return
+        }
+
+        val decor = window.decorView
+        val visibility = decor.systemUiVisibility
+        super.onPostResume()
+        decor.systemUiVisibility = visibility
+    }
+
     override fun onPause() {
         Log.d(TAG, "onPause")
         super.onPause()
