@@ -71,6 +71,19 @@ const _healFetchChunk = 100;
 /// race", defence 5).
 const _resurrectionWindow = Duration(minutes: 10);
 
+/// How far back the incoming echo guard looks (DESIGN defence 6): a create
+/// for an id this device uploaded a tombstone for inside this window, with no
+/// local row behind it, is Zen re-uploading the tab it just closed on our
+/// behalf from a stale projection (gh-15380; fixed on the desktop by
+/// gh-15485, but only from 1.22.3b). Same window as the canary's: both are
+/// the two halves of the one race.
+const _echoWindow = _resurrectionWindow;
+
+/// How many echoes of one id the guard refuses before it takes the peer at
+/// its word. A desktop undo-close reuses the id, so a second create is the
+/// user, not the race.
+const _maxEchoesRefused = 1;
+
 /// Tombstones always allowed in one batch regardless of the fraction, so
 /// closing a handful of tabs on a device that only holds a handful never
 /// needs an "Upload anyway".
@@ -140,6 +153,17 @@ class _Outgoing {
   /// Ids we hold a digest for that the projection no longer emits and the
   /// ledger never recorded: a mapping bug here, never a deletion to ship.
   final List<String> vanished;
+}
+
+/// What the echo guard let through, and the ids it held back.
+class _Screened {
+  _Screened({required this.records, required this.withheld});
+
+  final List<ZenIncoming> records;
+
+  /// Withheld ids never count as applied this run: their tombstone has to
+  /// go out again, and that path skips ids in the applied set.
+  final Set<String> withheld;
 }
 
 /// Everything one sync run needs after the handshake.
@@ -551,7 +575,8 @@ class SpacesSyncService extends _$SpacesSyncService {
     }
 
     final decoded = await _decode(session, bsos.values);
-    final records = decoded.records;
+    final screened = await _screenIncoming(decoded.records);
+    final records = screened.records;
     var newest = fetched.lastModified;
     if (decoded.newestModified case final modified?
         when newest == null || modified > newest) {
@@ -583,6 +608,112 @@ class SpacesSyncService extends _$SpacesSyncService {
         if (!failed.contains(_idOf(record))) _idOf(record),
     };
   }
+
+  /// The incoming echo guard (DESIGN defence 6). Runs before the apply, never
+  /// inside it, so the apply mutex sees one batch; only live records are
+  /// screened, tombstones and unknown kinds pass untouched.
+  ///
+  /// Two shapes are held back:
+  ///
+  /// - **An echo of our own tombstone.** The id is in `uploaded_tombstone`
+  ///   inside [_echoWindow], has had fewer than [_maxEchoesRefused] echoes
+  ///   refused, and no local row projects it. The record is not applied; its
+  ///   digest is stored (the server holds that content now, and a tombstone
+  ///   is only projected for a stored id), the deletion is recorded again so
+  ///   this run's upload tombstones it once more, and the echo is counted.
+  ///   Past the count, the peer insists: the record applies and the ledger
+  ///   row goes.
+  /// - **A local deletion still pending.** The id is in `deleted_record` with
+  ///   a stored digest and no local row: closed here, tombstone not out yet.
+  ///   The incoming modification would re-create the row and
+  ///   `_noteApplied` would settle the ledger, losing the close. Held back
+  ///   the same way, minus the echo count; the tombstone goes out this run.
+  ///
+  /// Only this fetch screens: [_healFromRemote] deliberately re-applies
+  /// deleted ids when uploads are off.
+  Future<_Screened> _screenIncoming(List<ZenIncoming> records) async {
+    if (records.isEmpty) {
+      return _Screened(records: records, withheld: const {});
+    }
+    final db = ref.read(tabDatabaseProvider);
+    final dao = db.syncStateDao;
+    final uploaded = await dao.uploadedTombstonesSince(
+      DateTime.now().subtract(_echoWindow),
+    );
+    final pending = await dao.pendingDeletions();
+    if (uploaded.isEmpty && pending.isEmpty) {
+      return _Screened(records: records, withheld: const {});
+    }
+    final stored = await dao.allDigests();
+
+    final kept = <ZenIncoming>[];
+    final withheld = <String>{};
+    await db.transaction(() async {
+      for (final record in records) {
+        if (record is! ZenIncomingRecord) {
+          kept.add(record);
+          continue;
+        }
+        final cleartext = record.cleartext;
+        final id = cleartext.id;
+        final kind = cleartext.kind;
+
+        if (uploaded[id] case final echo?) {
+          if (echo.echoes >= _maxEchoesRefused) {
+            logger.i(
+              'spaces sync: accepting re-created $kind $id after '
+              '${echo.echoes} refused echo(es)',
+            );
+            await dao.forgetUploadedTombstone([id]);
+            kept.add(record);
+            continue;
+          }
+          if (!await _projectsLocally(db, id)) {
+            withheld.add(id);
+            await dao.putDigest(
+              id,
+              kind,
+              recordDigest(kind, cleartext.data.toJson()),
+            );
+            await dao.recordDeletion(id, kind);
+            await dao.noteTombstoneEcho(id);
+            logger.w(
+              'spaces sync: ignoring resurrected $kind $id '
+              '(echo of our tombstone)',
+            );
+            continue;
+          }
+        }
+
+        if (pending.containsKey(id) &&
+            stored.containsKey(id) &&
+            !await _projectsLocally(db, id)) {
+          withheld.add(id);
+          await dao.putDigest(
+            id,
+            kind,
+            recordDigest(kind, cleartext.data.toJson()),
+          );
+          logger.i(
+            'spaces sync: holding incoming $kind $id: deleted here, '
+            'tombstone pending',
+          );
+          continue;
+        }
+
+        kept.add(record);
+      }
+    });
+    return _Screened(records: kept, withheld: withheld);
+  }
+
+  /// Whether some local row currently projects [id] — the lookups the
+  /// applier routes tombstones by.
+  Future<bool> _projectsLocally(TabDatabase db, String id) async =>
+      await db.tabDao.getTabSummaryById(id).getSingleOrNull() != null ||
+      await db.tabFolderDao.getById(id).getSingleOrNull() != null ||
+      await db.tabSplitDao.getById(id).getSingleOrNull() != null ||
+      await db.spaceDao.getByUuid(id).getSingleOrNull() != null;
 
   /// Decrypts and decodes [bsos]; a record that fails to decrypt is logged
   /// and skipped.
