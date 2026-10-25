@@ -9,7 +9,6 @@ package app.mellow.browser.flutter_mozilla_components.feature
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
-import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import app.mellow.browser.flutter_mozilla_components.widget.ZoomAwareSwipeRefreshLayout
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -35,7 +34,7 @@ import org.robolectric.annotation.Config
 
 /**
  * Covers what this feature adds to android-components' `SwipeRefreshFeature`:
- * which tab a completed pull resolves to, and the two cases where it must not
+ * which tab a completed pull resolves to, and the case where it must not
  * reload after all.
  *
  * `sdk = 28` deliberately: the haptic tick in `onRefresh` is API 30+, and
@@ -43,7 +42,7 @@ import org.robolectric.annotation.Config
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [28])
-class GestureAwareSwipeRefreshFeatureTest {
+class ZoomAwareSwipeRefreshFeatureTest {
     private val dispatched = CopyOnWriteArrayList<BrowserAction>()
     private val dispatchSeen = CountDownLatch(1)
 
@@ -80,13 +79,10 @@ class GestureAwareSwipeRefreshFeatureTest {
             ),
             middleware = listOf(recorder),
         )
-
-        GlobalComponents.touchConsumedByGesture = false
     }
 
     @After
     fun tearDown() {
-        GlobalComponents.touchConsumedByGesture = false
         events.forEach { it.recycle() }
         events.clear()
     }
@@ -108,21 +104,6 @@ class GestureAwareSwipeRefreshFeatureTest {
     }
 
     @Test
-    fun `a stroke already claimed by a touch gesture does not also reload`() {
-        val feature = feature(tabId = CUSTOM_TAB)
-        layout.isRefreshing = true
-        // What the gesture container sets on the terminating ACTION_UP, before
-        // this layout runs its own up-handling.
-        GlobalComponents.touchConsumedByGesture = true
-
-        feature.onRefresh()
-
-        assertNoReload()
-        // The throbber the pull put up is retracted rather than left spinning.
-        assertFalse(layout.isRefreshing)
-    }
-
-    @Test
     fun `a pull that turned out to be a zoom does not reload`() {
         val feature = feature(tabId = CUSTOM_TAB)
         layout.isRefreshing = true
@@ -138,7 +119,7 @@ class GestureAwareSwipeRefreshFeatureTest {
     }
 
     private fun feature(tabId: String?) =
-        GestureAwareSwipeRefreshFeature(
+        ZoomAwareSwipeRefreshFeature(
             store = store,
             reloadUrlUseCase = SessionUseCases(store).reload,
             swipeRefreshLayout = layout,
