@@ -145,7 +145,7 @@ class DownloadManagerPreferenceTest {
 
         assertNull(DownloadManagerPreference.read(context))
         assertTrue(
-            ProfilePrefs.of(context).all.keys.none { it.startsWith("browser.weblibre.preferredDownloadManager") },
+            ProfilePrefs.of(context).all.keys.none { it.startsWith("browser.mellow.preferredDownloadManager") },
         )
     }
 
@@ -157,7 +157,7 @@ class DownloadManagerPreferenceTest {
         val snapshot = ProfilePreferencesParticipant(context)
             .capture(ProfilePreferencesParticipant.prefixFor(PROFILE_A))
 
-        assertTrue(snapshot.defaultKeys.containsKey("browser.weblibre.preferredDownloadManager"))
+        assertTrue(snapshot.defaultKeys.containsKey("browser.mellow.preferredDownloadManager"))
     }
 
     // --- resolution against the offered apps --------------------------------------
@@ -216,9 +216,9 @@ class DownloadManagerPreferenceTest {
     }
 
     @Test
-    fun `remembering WebLibre takes the first-party path`() {
-        // Not forwarding is what reaches WebLibre's own confirmation; selecting
-        // WebLibre in the chooser would start the download without one.
+    fun `remembering Mellow takes the first-party path`() {
+        // Not forwarding is what reaches Mellow's own confirmation; selecting
+        // Mellow in the chooser would start the download without one.
         assertFalse(
             DownloadManagerPreference.shouldForwardToThirdParties(
                 context,

@@ -26,7 +26,7 @@ import mozilla.components.feature.downloads.ui.DownloaderApp
  * not used — the chooser shows instead, and the choice stays for the downloads
  * the app can take.
  *
- * WebLibre itself is a valid choice and is handled differently: remembering it
+ * Mellow itself is a valid choice and is handled differently: remembering it
  * skips the chooser by not forwarding to third parties at all
  * ([shouldForwardToThirdParties]), so the download takes the normal first-party
  * path and its confirmation still shows.
@@ -36,7 +36,7 @@ import mozilla.components.feature.downloads.ui.DownloaderApp
  * the choice travels with the profile through backup, restore and delete.
  */
 object DownloadManagerPreference {
-    private const val PREF_KEY = "browser.weblibre.preferredDownloadManager"
+    private const val PREF_KEY = "browser.mellow.preferredDownloadManager"
 
     /** A remembered download manager, by component. */
     data class Choice(val packageName: String, val activityName: String) {
@@ -96,16 +96,16 @@ object DownloadManagerPreference {
         }
     }
 
-    /** Whether [choice] is WebLibre itself, whichever of its activities was offered. */
+    /** Whether [choice] is Mellow itself, whichever of its activities was offered. */
     fun isThisApp(context: Context, choice: Choice?): Boolean =
         choice != null && choice.packageName == context.packageName
 
     /**
      * What `DownloadsFeature.shouldForwardToThirdParties` should answer.
      *
-     * The external-manager switch stays the gate. With WebLibre remembered the
+     * The external-manager switch stays the gate. With Mellow remembered the
      * answer is no, which is exactly the first-party path the switch being off
-     * takes — including its confirmation dialog — rather than selecting WebLibre
+     * takes — including its confirmation dialog — rather than selecting Mellow
      * in the chooser, which would start the download without one.
      */
     fun shouldForwardToThirdParties(context: Context): Boolean =
