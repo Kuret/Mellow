@@ -159,12 +159,6 @@ class _AppLinkRulesSubsection extends ConsumerWidget {
 
   const _AppLinkRulesSubsection({required this.rules});
 
-  String _displayScope(String scope) {
-    if (scope.startsWith('host:')) return scope.substring('host:'.length);
-    if (scope.startsWith('pkg:')) return scope.substring('pkg:'.length);
-    return scope;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (rules.isEmpty) {
@@ -191,7 +185,7 @@ class _AppLinkRulesSubsection extends ConsumerWidget {
                   ? MdiIcons.openInApp
                   : Icons.public,
             ),
-            title: Text(_displayScope(key)),
+            title: Text(displayAppLinkScope(key)),
             subtitle: Text(
               value.decision == AppLinkRuleDecision.alwaysOpen
                   ? 'Always open in the app'

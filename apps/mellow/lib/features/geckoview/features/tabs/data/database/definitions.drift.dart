@@ -2953,6 +2953,7 @@ typedef $TabCreateCompanionBuilder =
       required String id,
       i0.Value<String?> engineTabId,
       required i7.TabSource source,
+      i0.Value<String?> engineOpenerId,
       i0.Value<String?> containerId,
       i0.Value<String?> spaceUuid,
       i0.Value<String?> folderId,
@@ -2980,6 +2981,7 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String> id,
       i0.Value<String?> engineTabId,
       i0.Value<i7.TabSource> source,
+      i0.Value<String?> engineOpenerId,
       i0.Value<String?> containerId,
       i0.Value<String?> spaceUuid,
       i0.Value<String?> folderId,
@@ -3137,6 +3139,11 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
   get source => $composableBuilder(
     column: $table.source,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
+  i0.ColumnFilters<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => i0.ColumnFilters(column),
   );
 
   i0.ColumnFilters<int> get splitIndex => $composableBuilder(
@@ -3386,6 +3393,11 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<int> get splitIndex => $composableBuilder(
     column: $table.splitIndex,
     builder: (column) => i0.ColumnOrderings(column),
@@ -3596,6 +3608,11 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i2.Tab> {
 
   i0.GeneratedColumnWithTypeConverter<i7.TabSource, int> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => column,
+  );
 
   i0.GeneratedColumn<int> get splitIndex => $composableBuilder(
     column: $table.splitIndex,
@@ -3841,6 +3858,7 @@ class $TabTableManager
                 i0.Value<String> id = const i0.Value.absent(),
                 i0.Value<String?> engineTabId = const i0.Value.absent(),
                 i0.Value<i7.TabSource> source = const i0.Value.absent(),
+                i0.Value<String?> engineOpenerId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String?> spaceUuid = const i0.Value.absent(),
                 i0.Value<String?> folderId = const i0.Value.absent(),
@@ -3868,6 +3886,7 @@ class $TabTableManager
                 id: id,
                 engineTabId: engineTabId,
                 source: source,
+                engineOpenerId: engineOpenerId,
                 containerId: containerId,
                 spaceUuid: spaceUuid,
                 folderId: folderId,
@@ -3895,6 +3914,7 @@ class $TabTableManager
                 required String id,
                 i0.Value<String?> engineTabId = const i0.Value.absent(),
                 required i7.TabSource source,
+                i0.Value<String?> engineOpenerId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String?> spaceUuid = const i0.Value.absent(),
                 i0.Value<String?> folderId = const i0.Value.absent(),
@@ -3922,6 +3942,7 @@ class $TabTableManager
                 id: id,
                 engineTabId: engineTabId,
                 source: source,
+                engineOpenerId: engineOpenerId,
                 containerId: containerId,
                 spaceUuid: spaceUuid,
                 folderId: folderId,
@@ -8002,6 +8023,15 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<i7.TabSource>(i2.Tab.$convertersource);
+  late final i0.GeneratedColumn<String> engineOpenerId =
+      i0.GeneratedColumn<String>(
+        'engine_opener_id',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final i0.GeneratedColumn<String> containerId =
       i0.GeneratedColumn<String>(
         'container_id',
@@ -8198,6 +8228,7 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
     id,
     engineTabId,
     source,
+    engineOpenerId,
     containerId,
     spaceUuid,
     folderId,
@@ -8244,6 +8275,10 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i2.TabData> {
           i0.DriftSqlType.int,
           data['${effectivePrefix}source'],
         )!,
+      ),
+      engineOpenerId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}engine_opener_id'],
       ),
       containerId: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
@@ -8364,6 +8399,13 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
   final String? engineTabId;
   final i7.TabSource source;
 
+  /// The tab the engine opened this one from (`window.open`, `target="_blank"`),
+  /// which it therefore runs in the context of. Engine provenance only: it says
+  /// nothing about space, folder or order (`order_key` is the only order, folders
+  /// the only nesting) and is never rewritten by them. No foreign key: it is
+  /// written when the opener's row may not exist yet, and outlives it.
+  final String? engineOpenerId;
+
   /// ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
   /// the engine's back. Repositories close tabs before deleting a container.
   final String? containerId;
@@ -8403,6 +8445,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     required this.id,
     this.engineTabId,
     required this.source,
+    this.engineOpenerId,
     this.containerId,
     this.spaceUuid,
     this.folderId,
@@ -8434,6 +8477,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     }
     {
       map['source'] = i0.Variable<int>(i2.Tab.$convertersource.toSql(source));
+    }
+    if (!nullToAbsent || engineOpenerId != null) {
+      map['engine_opener_id'] = i0.Variable<String>(engineOpenerId);
     }
     if (!nullToAbsent || containerId != null) {
       map['container_id'] = i0.Variable<String>(containerId);
@@ -8509,6 +8555,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
       source: i2.Tab.$convertersource.fromJson(
         serializer.fromJson<int>(json['source']),
       ),
+      engineOpenerId: serializer.fromJson<String?>(json['engine_opener_id']),
       containerId: serializer.fromJson<String?>(json['container_id']),
       spaceUuid: serializer.fromJson<String?>(json['space_uuid']),
       folderId: serializer.fromJson<String?>(json['folder_id']),
@@ -8553,6 +8600,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
       'id': serializer.toJson<String>(id),
       'engine_tab_id': serializer.toJson<String?>(engineTabId),
       'source': serializer.toJson<int>(i2.Tab.$convertersource.toJson(source)),
+      'engine_opener_id': serializer.toJson<String?>(engineOpenerId),
       'container_id': serializer.toJson<String?>(containerId),
       'space_uuid': serializer.toJson<String?>(spaceUuid),
       'folder_id': serializer.toJson<String?>(folderId),
@@ -8589,6 +8637,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     String? id,
     i0.Value<String?> engineTabId = const i0.Value.absent(),
     i7.TabSource? source,
+    i0.Value<String?> engineOpenerId = const i0.Value.absent(),
     i0.Value<String?> containerId = const i0.Value.absent(),
     i0.Value<String?> spaceUuid = const i0.Value.absent(),
     i0.Value<String?> folderId = const i0.Value.absent(),
@@ -8614,6 +8663,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     id: id ?? this.id,
     engineTabId: engineTabId.present ? engineTabId.value : this.engineTabId,
     source: source ?? this.source,
+    engineOpenerId: engineOpenerId.present
+        ? engineOpenerId.value
+        : this.engineOpenerId,
     containerId: containerId.present ? containerId.value : this.containerId,
     spaceUuid: spaceUuid.present ? spaceUuid.value : this.spaceUuid,
     folderId: folderId.present ? folderId.value : this.folderId,
@@ -8652,6 +8704,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
           ..write('id: $id, ')
           ..write('engineTabId: $engineTabId, ')
           ..write('source: $source, ')
+          ..write('engineOpenerId: $engineOpenerId, ')
           ..write('containerId: $containerId, ')
           ..write('spaceUuid: $spaceUuid, ')
           ..write('folderId: $folderId, ')
@@ -8682,6 +8735,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
     id,
     engineTabId,
     source,
+    engineOpenerId,
     containerId,
     spaceUuid,
     folderId,
@@ -8711,6 +8765,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i2.TabData> {
           other.id == this.id &&
           other.engineTabId == this.engineTabId &&
           other.source == this.source &&
+          other.engineOpenerId == this.engineOpenerId &&
           other.containerId == this.containerId &&
           other.spaceUuid == this.spaceUuid &&
           other.folderId == this.folderId &&
@@ -8738,6 +8793,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
   final i0.Value<String> id;
   final i0.Value<String?> engineTabId;
   final i0.Value<i7.TabSource> source;
+  final i0.Value<String?> engineOpenerId;
   final i0.Value<String?> containerId;
   final i0.Value<String?> spaceUuid;
   final i0.Value<String?> folderId;
@@ -8763,6 +8819,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     this.id = const i0.Value.absent(),
     this.engineTabId = const i0.Value.absent(),
     this.source = const i0.Value.absent(),
+    this.engineOpenerId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.spaceUuid = const i0.Value.absent(),
     this.folderId = const i0.Value.absent(),
@@ -8789,6 +8846,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     required String id,
     this.engineTabId = const i0.Value.absent(),
     required i7.TabSource source,
+    this.engineOpenerId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.spaceUuid = const i0.Value.absent(),
     this.folderId = const i0.Value.absent(),
@@ -8818,6 +8876,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     i0.Expression<String>? id,
     i0.Expression<String>? engineTabId,
     i0.Expression<int>? source,
+    i0.Expression<String>? engineOpenerId,
     i0.Expression<String>? containerId,
     i0.Expression<String>? spaceUuid,
     i0.Expression<String>? folderId,
@@ -8844,6 +8903,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       if (id != null) 'id': id,
       if (engineTabId != null) 'engine_tab_id': engineTabId,
       if (source != null) 'source': source,
+      if (engineOpenerId != null) 'engine_opener_id': engineOpenerId,
       if (containerId != null) 'container_id': containerId,
       if (spaceUuid != null) 'space_uuid': spaceUuid,
       if (folderId != null) 'folder_id': folderId,
@@ -8876,6 +8936,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
     i0.Value<String>? id,
     i0.Value<String?>? engineTabId,
     i0.Value<i7.TabSource>? source,
+    i0.Value<String?>? engineOpenerId,
     i0.Value<String?>? containerId,
     i0.Value<String?>? spaceUuid,
     i0.Value<String?>? folderId,
@@ -8902,6 +8963,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       id: id ?? this.id,
       engineTabId: engineTabId ?? this.engineTabId,
       source: source ?? this.source,
+      engineOpenerId: engineOpenerId ?? this.engineOpenerId,
       containerId: containerId ?? this.containerId,
       spaceUuid: spaceUuid ?? this.spaceUuid,
       folderId: folderId ?? this.folderId,
@@ -8941,6 +9003,9 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
       map['source'] = i0.Variable<int>(
         i2.Tab.$convertersource.toSql(source.value),
       );
+    }
+    if (engineOpenerId.present) {
+      map['engine_opener_id'] = i0.Variable<String>(engineOpenerId.value);
     }
     if (containerId.present) {
       map['container_id'] = i0.Variable<String>(containerId.value);
@@ -9026,6 +9091,7 @@ class TabCompanion extends i0.UpdateCompanion<i2.TabData> {
           ..write('id: $id, ')
           ..write('engineTabId: $engineTabId, ')
           ..write('source: $source, ')
+          ..write('engineOpenerId: $engineOpenerId, ')
           ..write('containerId: $containerId, ')
           ..write('spaceUuid: $spaceUuid, ')
           ..write('folderId: $folderId, ')
@@ -13353,6 +13419,16 @@ class DefinitionsDrift extends i11.ModularAccessor {
       variables: [i0.Variable<String>(containerId)],
       readsFrom: {tab},
     ).asyncMap(tab.mapFromRow);
+  }
+
+  i0.Selectable<String> engineOpenedContainerDescendants({
+    required String tabId,
+  }) {
+    return customSelect(
+      'WITH RECURSIVE descendants AS (SELECT id, container_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.container_id FROM tab AS t JOIN descendants AS d ON t.engine_opener_id = d.id WHERE t.container_id IS d.container_id) SELECT id FROM descendants',
+      variables: [i0.Variable<String>(tabId)],
+      readsFrom: {tab},
+    ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
   i2.TabFts get tabFts => i11.ReadDatabaseContainer(

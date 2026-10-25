@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.SystemClock
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -453,6 +454,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     shouldForwardToThirdParties = {
                         GlobalComponents.useExternalDownloadManager
                     },
+                    // A full-width card on the bottom edge, the same shape AC gives the
+                    // extension permission prompt, instead of a centred dialog (#651).
+                    // Button colours and radius stay default: AC's radius override reads the
+                    // background colour unconditionally.
+                    promptsStyling = DownloadsFeature.PromptsStyling(
+                        gravity = Gravity.BOTTOM,
+                        shouldWidthMatchParent = true,
+                    ),
                 ),
                 owner = this,
                 view = view,
@@ -472,6 +481,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         browserStore = components.core.store,
                         launcher = AppLinkRuntime.get(profileContext).launcher,
                         sessionUseCases = components.useCases.sessionUseCases,
+                        // The fragment root is the CoordinatorLayout the non-modal banner
+                        // (a Snackbar) anchors itself to.
+                        rootView = view,
                     ),
                     owner = this,
                     view = view,

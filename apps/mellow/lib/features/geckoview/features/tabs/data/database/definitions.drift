@@ -73,6 +73,12 @@ CREATE TABLE tab(
   -- across tabs while live, hence UNIQUE.
   engine_tab_id TEXT UNIQUE,
   source ENUM(TabSource) NOT NULL,
+  -- The tab the engine opened this one from (`window.open`, `target="_blank"`),
+  -- which it therefore runs in the context of. Engine provenance only: it says
+  -- nothing about space, folder or order (`order_key` is the only order, folders
+  -- the only nesting) and is never rewritten by them. No foreign key: it is
+  -- written when the opener's row may not exist yet, and outlives it.
+  engine_opener_id TEXT,
   -- ON DELETE SET NULL, not CASCADE: a cascade here would delete tabs behind
   -- the engine's back. Repositories close tabs before deleting a container.
   container_id TEXT REFERENCES container (id) ON DELETE SET NULL,
@@ -1387,3 +1393,24 @@ tabsInSpace(REQUIRED :space_uuid AS TEXT OR NULL):
 
 tabsInContainer:
   SELECT * FROM tab WHERE container_id IS :container_id ORDER BY order_key;
+
+-- The seed tab and everything the engine opened from it, transitively, that
+-- is still filed in the seed's container: the rows that run in the seed's
+-- context. Walks engine provenance (`engine_opener_id`), and stops at any row
+-- filed in another container, so a branch moved elsewhere is never crossed,
+-- and neither is anything opened from it.
+engineOpenedContainerDescendants:
+  WITH RECURSIVE descendants AS (
+      SELECT id, container_id
+      FROM tab
+      WHERE id = :tab_id
+
+      UNION ALL
+
+      SELECT t.id, t.container_id
+      FROM tab t
+      JOIN descendants d ON t.engine_opener_id = d.id
+      WHERE t.container_id IS d.container_id
+  )
+  SELECT id
+  FROM descendants;

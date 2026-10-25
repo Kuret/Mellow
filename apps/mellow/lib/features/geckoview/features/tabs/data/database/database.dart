@@ -61,7 +61,7 @@ import 'package:mellow/features/spaces_sync/domain/zen_ids.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 22;
+  final int schemaVersion = 23;
 
   @override
   final int ftsTokenLimit = 10;
@@ -557,6 +557,11 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // The ledger of tombstones this device uploaded, read by the incoming
       // echo guard (DESIGN defence 6, Zen gh-15380 / gh-15485).
       await m.createTable(schema.uploadedTombstone);
+    },
+    from22To23: (m, schema) async {
+      // Nothing to backfill: engine provenance was never recorded, so an
+      // existing row has no known engine opener.
+      await m.addColumn(schema.tab, schema.tab.engineOpenerId);
     },
   );
 }

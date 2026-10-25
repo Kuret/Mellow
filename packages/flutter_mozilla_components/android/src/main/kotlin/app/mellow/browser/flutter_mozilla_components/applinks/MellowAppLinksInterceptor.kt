@@ -8,7 +8,8 @@ package app.mellow.browser.flutter_mozilla_components.applinks
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.core.net.toUri
 import app.mellow.browser.flutter_mozilla_components.Components
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
@@ -17,11 +18,10 @@ import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 import mozilla.components.support.base.log.logger.Logger
-import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
-import java.util.Locale
 
 /**
  * The Mellow-owned §2.4 interception tail (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md Phase 5). Replaces
@@ -40,11 +40,13 @@ class MellowAppLinksInterceptor(
 ) {
     private val logger = Logger("MellowAppLinks")
     private val runtime get() = AppLinkRuntime.get(context)
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     /**
      * @return the interception response, or `null` to let the engine proceed. Creating a pending
      * prompt is a side effect performed here; the return value only controls the current load.
      */
+    @Suppress("LongParameterList")
     fun onLoadRequest(
         engineSession: EngineSession,
         uri: String,
@@ -53,11 +55,17 @@ class MellowAppLinksInterceptor(
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        isNewWindowRequest: Boolean = false,
     ): RequestInterceptor.InterceptionResponse? {
         val components = GlobalComponents.components ?: return null
+        val opensNewWindow = opensNewTab(
+            isNewWindowRequest,
+            isSubframeRequest,
+            components.core.store.state.findTabOrCustomTab(engineSession),
+        )
         val response = decide(
             components, engineSession, uri, lastUri,
-            hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest,
+            hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest, opensNewWindow,
         )
 
         // Advance the tab's navigation generation only for a navigation that is actually going to
@@ -69,7 +77,8 @@ class MellowAppLinksInterceptor(
         //
         // `null` (the engine proceeds) and `Url` (we hand over a fallback to load) both move the tab,
         // and both must invalidate any older hold. Subframes are excluded throughout: an iframe
-        // loading does not mean the tab left the page.
+        // loading does not mean the tab left the page. So is a load for a new tab: it is asked
+        // about on its opener, which stays where it is.
         val tabId = components.core.store.state.findTabOrCustomTab(engineSession)?.id
         val outcome = when (response) {
             null -> "proceed"
@@ -81,7 +90,7 @@ class MellowAppLinksInterceptor(
             "onLoadRequest tab=$tabId subframe=$isSubframeRequest gesture=$hasUserGesture " +
                 "redirect=$isRedirect direct=$isDirectNavigation uri=$uri last=$lastUri -> $outcome",
         )
-        if (!isSubframeRequest && response !is RequestInterceptor.InterceptionResponse.Deny) {
+        if (movesTab(isSubframeRequest, opensNewWindow, response)) {
             tabId?.let { pendingStoreFor(components).beginNavigation(it, reason = "intercept:$outcome") }
         }
         return response
@@ -97,6 +106,7 @@ class MellowAppLinksInterceptor(
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        opensNewWindow: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
 
         val uriScheme = runCatching { uri.toUri().scheme }.getOrNull()
@@ -108,7 +118,7 @@ class MellowAppLinksInterceptor(
         // round trip. Gated on the policy so turning the carve-out off restores the plain §2.4
         // eligibility rules rather than only skipping the launch below.
         val authExceptionsAllowed = policy.authExceptionsEnabled && isPossibleAuthentication(session)
-        val isSameDomainNavigation = isSameDomain(lastUri, uri)
+        val isSameDomainNavigation = AppLinkEligibility.isSameDomain(lastUri, uri)
 
         // The generation a hold raised here answers for. Read, not advanced: the bump belongs to
         // [onLoadRequest], after the outcome is known, so that only navigations which actually
@@ -117,7 +127,7 @@ class MellowAppLinksInterceptor(
             ?.let { pendingStoreFor(components).currentNavGeneration(it) } ?: 0L
 
         // Step 2 — navigation eligibility. Any hit lets the engine proceed normally.
-        if (!isEligible(
+        if (!AppLinkEligibility.isEligible(
                 uriScheme,
                 engineSupportsScheme,
                 hasUserGesture,
@@ -132,10 +142,19 @@ class MellowAppLinksInterceptor(
         }
 
         val pendingStore = pendingStoreFor(components)
+        // Where an in-browser answer to a load for a new tab goes: a new tab of the opener, never
+        // the opener itself. Null for every other load.
+        val newTabHost = if (opensNewWindow) ComponentsNewTabHost(components) else null
 
         // Fallback re-entry guard (§2.7): a fallback we issued has come back around. Keep it in the
         // browser — never let it bounce out to an app. Consulted before resolution/classification.
-        if (pendingStore.isFallbackReentry(canonicalReentryKey(uri))) {
+        //
+        // A fallback is deliberately loaded as an *ordinary* navigation rather than one that skips
+        // the navigation delegate, because it is a page-supplied URL that no structural guard has
+        // vetted yet: skipping the delegate would take `AppRequestInterceptor`'s sandbox-capture,
+        // PWA/TWA and `mellow://` checks out of its path along with this one. So it does come back
+        // through here, and this is what keeps it from being classified as a fresh app link.
+        if (pendingStore.isFallbackReentry(session?.id, canonicalReentryKey(uri))) {
             return null
         }
 
@@ -148,7 +167,12 @@ class MellowAppLinksInterceptor(
         val effectiveMode = override?.globalMode ?: policy.globalMode
         val effectiveRules = override?.rules ?: policy.rules
 
-        val isProtectedNavigation = isProtected(policy, session, uri)
+        val isProtectedNavigation = AppLinkProtectionMatcher.isProtected(
+            policy,
+            session?.contextId,
+            uri,
+            resolved.intentDataUrl,
+        )
         val isPrivateNavigation = session?.content?.private ?: false
         val isWalletNavigation = AppLinkSchemes.isWallet(resolved.originalScheme) ||
             AppLinkSchemes.isWallet(resolved.intentDataScheme)
@@ -159,6 +183,23 @@ class MellowAppLinksInterceptor(
         // only set for an unambiguous handler.
         val authTargetPackage = if (resolved.isAmbiguous) null else resolved.packageName
         val isAuthCallback = isAuthenticationCallback(session, authTargetPackage)
+
+        // Nothing has loaded in this tab yet (`lastUri` is null only for a session's first load)
+        // and the target resolves back to the very app that opened it. Handing it back would bounce
+        // in place, and the `Deny` that goes with a launch would leave the tab blank — so the tab an
+        // app just opened for us would show nothing at all. Keep it here instead. AC declines for
+        // the same reason, and deliberately without regard to the user's mode: an auto-launch under
+        // `always` produces the identical empty tab.
+        //
+        // Only an engine-supported target is waved through. An unsupported scheme has no page to
+        // show either way, so it keeps its prompt rather than becoming an error page.
+        if (lastUri == null && isAuthCallback && resolved.engineSupportsScheme) {
+            logger.info(
+                "initial load resolves back to caller ${callerPackage(session)}; " +
+                    "keeping it in the browser rather than bouncing to a blank tab",
+            )
+            return null
+        }
 
         // Re-apply the same-domain guard now that the target is known (AC parity: `AppLinksInterceptor`
         // re-checks after resolution for exactly this reason). Eligibility waived it on the mere
@@ -172,13 +213,18 @@ class MellowAppLinksInterceptor(
 
         val matchingRule = effectiveRules[resolved.scopeKey]
         val fingerprint = targetFingerprint(uri, resolved)
-        val suppressionHit = session != null && pendingStore.isSuppressed(session.id, fingerprint)
+        // Suppression is answered per site, dedupe per exact target — see [appLinkSuppressionKey].
+        val suppressionHit = session != null &&
+            pendingStore.isSuppressed(
+                session.id,
+                appLinkSuppressionKey(resolved.scopeKey, fingerprint),
+            )
 
         // §2.4 authentication carve-out (AC parity): a tab opened *by* the app the navigation
         // targets is a sign-in round trip rather than a general app link, so it returns to its
         // caller even under `never`. The forced-prompt contexts still win — a protected container,
         // a private tab or a wallet scheme must not leak out silently, so those fall through to the
-        // classifier, which prompts for them regardless of mode (§2.4 step 4). An explicit
+        // classifier, which asks instead of launching, under `never` too (§2.4 step 4). An explicit
         // `neverOpen` rule for this scope and a live suppression are the user having answered this
         // exact question already (classifier steps 5–6); the carve-out is about a mode the user set
         // for links in general, not a licence to override a specific "no".
@@ -200,7 +246,7 @@ class MellowAppLinksInterceptor(
             return if (result == AppLinkLaunchResult.LAUNCHED) {
                 RequestInterceptor.InterceptionResponse.Deny
             } else {
-                safeNonLaunchResponse(pendingStore, session?.id, resolved)
+                safeNonLaunchResponse(pendingStore, session?.id, resolved, newTabHost)
             }
         }
 
@@ -214,6 +260,7 @@ class MellowAppLinksInterceptor(
             matchingRule = matchingRule,
             globalMode = effectiveMode,
             marketplaceFallbackEnabled = policy.marketplaceFallbackEnabled,
+            isAuthenticationCallback = authExceptionsAllowed && isAuthCallback,
         )
 
         val decision = AppLinkClassifier.classify(input)
@@ -222,7 +269,8 @@ class MellowAppLinksInterceptor(
                 "isolated=${override != null} hasApp=${resolved.hasExternalApp} " +
                 "engineScheme=${resolved.engineSupportsScheme} mode=${input.globalMode} " +
                 "protected=${input.isProtected} private=${input.isPrivate} wallet=${input.isWallet} " +
-                "suppressed=${input.suppressionHit} rule=${input.matchingRule?.decision} -> $decision",
+                "suppressed=${input.suppressionHit} rule=${input.matchingRule?.decision} " +
+                "auth=${input.isAuthenticationCallback} -> $decision",
         )
         return execute(
             decision, components, pendingStore, session, uri, lastUri, input, hasUserGesture,
@@ -231,6 +279,7 @@ class MellowAppLinksInterceptor(
             // loads into the tab, and replaying an iframe's target as a top-level load would replace
             // the whole page the user was reading. Let those load in their frame as before.
             blockWhilePrompting = policy.blockWhilePrompting && !isSubframeRequest,
+            newTabHost = newTabHost,
         )
     }
 
@@ -245,6 +294,7 @@ class MellowAppLinksInterceptor(
         hasUserGesture: Boolean,
         navGeneration: Long,
         blockWhilePrompting: Boolean,
+        newTabHost: NewTabHost?,
     ): RequestInterceptor.InterceptionResponse? {
         val resolved = input.resolved
         return when (decision) {
@@ -253,7 +303,7 @@ class MellowAppLinksInterceptor(
             is AppLinkDecision.DenyKeepPage -> RequestInterceptor.InterceptionResponse.Deny
 
             is AppLinkDecision.LoadFallback ->
-                fallbackResponse(pendingStore, session?.id, decision.url)
+                fallbackResponse(pendingStore, session?.id, decision.url, newTabHost)
 
             is AppLinkDecision.AutoLaunch -> {
                 val result = runtime.launcher.launch(
@@ -264,15 +314,19 @@ class MellowAppLinksInterceptor(
                 when (result) {
                     AppLinkLaunchResult.LAUNCHED -> RequestInterceptor.InterceptionResponse.Deny
 
-                    // A remembered `alwaysOpen` rule whose package no longer resolves must not
-                    // silently launch a different app: fall through to a prompt (§2.5). Reclassify
-                    // once with the rule removed so the global mode decides.
+                    // A remembered `alwaysOpen` rule whose package no longer resolves — or which
+                    // now shares the link with another handler — must not silently launch a
+                    // different app. Reclassify once with the rule dropped *and* the substitution
+                    // flagged, so the retry asks the user rather than letting the global mode
+                    // answer: under `always`, simply dropping the rule would auto-launch whatever
+                    // resolves now, which is exactly what the rule's package binding prevents.
                     AppLinkLaunchResult.PACKAGE_MISMATCH -> {
-                        val withoutRule = input.copy(matchingRule = null)
+                        val withoutRule =
+                            input.copy(matchingRule = null, rememberedTargetChanged = true)
                         execute(
                             AppLinkClassifier.classify(withoutRule),
                             components, pendingStore, session, uri, lastUri, withoutRule, hasUserGesture,
-                            navGeneration, blockWhilePrompting,
+                            navGeneration, blockWhilePrompting, newTabHost,
                         )
                     }
 
@@ -281,7 +335,7 @@ class MellowAppLinksInterceptor(
                     else -> when {
                         resolved.engineSupportsScheme -> null
                         resolved.fallbackUrl != null ->
-                            fallbackResponse(pendingStore, session?.id, resolved.fallbackUrl)
+                            fallbackResponse(pendingStore, session?.id, resolved.fallbackUrl, newTabHost)
                         else -> RequestInterceptor.InterceptionResponse.Deny
                     }
                 }
@@ -301,6 +355,7 @@ class MellowAppLinksInterceptor(
                     pendingStore, tab, uri, lastUri, input, decision, hasUserGesture,
                     heldNavigation = holdNavigation,
                     navGeneration = navGeneration,
+                    opensNewWindow = newTabHost != null,
                 )
                 if (decision.kind == AppLinkPromptKind.BANNER && !holdNavigation) {
                     // Engine-supported: allow the page to load while the non-modal banner is up.
@@ -325,6 +380,7 @@ class MellowAppLinksInterceptor(
         hasUserGesture: Boolean,
         heldNavigation: Boolean,
         navGeneration: Long,
+        opensNewWindow: Boolean,
     ) {
         val resolved = input.resolved
         val owner = if (tab is CustomTabSessionState) {
@@ -365,11 +421,12 @@ class MellowAppLinksInterceptor(
                 heldNavigation = heldNavigation,
                 // Where the tab is left standing while the prompt is up. Read from the store rather
                 // than `lastUri`, which is the previous load *request* and need not be what actually
-                // committed. Empty for a tab opened for this very link, which is exactly right: it
-                // stays empty until something loads, so the release still recognises it.
-                heldAnchorUrl = if (heldNavigation) tab.content.url else null,
+                // committed. None for a load meant for a new tab: that page is owed to a new tab,
+                // so where the opener stands does not decide whether it may still be opened.
+                heldAnchorUrl = if (heldNavigation && !opensNewWindow) tab.content.url else null,
                 navGeneration = navGeneration,
                 isUserGesture = hasUserGesture,
+                opensNewWindow = opensNewWindow,
             ),
         )
 
@@ -397,36 +454,51 @@ class MellowAppLinksInterceptor(
         pendingStore: PendingAppLinkStore,
         tabId: String?,
         resolved: ResolvedAppLink,
+        newTabHost: NewTabHost? = null,
     ): RequestInterceptor.InterceptionResponse? {
         return if (resolved.engineSupportsScheme) {
             null
         } else {
-            resolved.fallbackUrl?.let { fallbackResponse(pendingStore, tabId, it) }
+            resolved.fallbackUrl?.let { fallbackResponse(pendingStore, tabId, it, newTabHost) }
                 ?: RequestInterceptor.InterceptionResponse.Deny
         }
     }
 
     /**
-     * Issue [fallbackUrl] as the replacement load, or keep the current page when this tab already
-     * had the same fallback issued inside the window (§2.7,
+     * Issue [fallbackUrl] as the replacement load, or keep the current page when this tab has
+     * already been sent to the same fallback inside the window (§2.7,
      * [PendingAppLinkStore.claimFallbackIssue]).
      *
      * Without the claim this is an unbounded reload loop on any page that re-fires its `intent:`
      * URL every time its own `browser_fallback_url` page loads — Google Maps place links do, so
      * under `never` (or with the target app absent) the tab reloaded roughly once a second for as
-     * long as it stayed open. The re-entry map cannot catch that: it is keyed on the fallback URL
-     * and consulted for the *fallback's* load, while the load that regenerates it arrives under the
-     * `intent:` URL.
+     * long as it stayed open. Nothing on the *fallback's* own load can catch that: the load that
+     * regenerates the loop arrives under the `intent:` URL, not the fallback URL.
      *
      * The claim is keyed on the URL native hands out rather than the one that comes back, so a
      * fallback rewritten in flight (a redirect dropping a campaign parameter) is still recognised —
      * and on origin + path rather than the whole URL, because the same page grows a query parameter
      * on every bounce. See [PendingAppLinkStore.claimFallbackIssue] for both bounds.
+     *
+     * The flags are explicit, and both differences from the AC default are deliberate:
+     * - no `EXTERNAL`, which would push Gecko through a content-process switch and surface a
+     *   transient `about:blank` for a page that is not arriving from another app;
+     * - no `LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE`, which the AC default *does* set. A fallback is a
+     *   page-supplied URL that has passed no structural check yet, and skipping the delegate would
+     *   take `AppRequestInterceptor`'s sandbox-capture, PWA/TWA and `mellow://` guards out of its
+     *   path — a sandbox tab could reach the live web through an `intent:` link's fallback. The
+     *   re-entry map is what keeps the returning load from being re-classified as an app link.
+     *
+     * With [newTabHost] the load targeted a new tab and [tabId] is its opener, so the fallback is
+     * opened in a new tab of it instead ([openInNewTab]) and the opener's own load is denied. That
+     * happens from a posted task, never inside the engine's delegate callback this runs in, and only
+     * takes focus when the opener is the tab in view: nobody chose this, the page asked for it.
      */
     private fun fallbackResponse(
         pendingStore: PendingAppLinkStore,
         tabId: String?,
         fallbackUrl: String,
+        newTabHost: NewTabHost? = null,
     ): RequestInterceptor.InterceptionResponse {
         if (!pendingStore.claimFallbackIssue(tabId, fallbackUrl)) {
             logger.info("fallback re-issue refused tab=$tabId url=$fallbackUrl")
@@ -435,8 +507,24 @@ class MellowAppLinksInterceptor(
             // instead: deny and leave the fallback page already on screen standing.
             return RequestInterceptor.InterceptionResponse.Deny
         }
-        pendingStore.recordFallbackReentry(canonicalReentryKey(fallbackUrl))
-        return RequestInterceptor.InterceptionResponse.Url(fallbackUrl)
+        if (newTabHost != null && tabId != null) {
+            mainHandler.post {
+                openInNewTab(
+                    newTabHost,
+                    openerId = tabId,
+                    url = fallbackUrl,
+                    load = NewTabLoad.FALLBACK,
+                    focus = NewTabFocus.IF_OPENER_SELECTED,
+                    reason = "fallback",
+                )
+            }
+            return RequestInterceptor.InterceptionResponse.Deny
+        }
+        pendingStore.recordFallbackReentry(tabId, canonicalReentryKey(fallbackUrl))
+        return RequestInterceptor.InterceptionResponse.Url(
+            fallbackUrl,
+            flags = FALLBACK_LOAD_FLAGS,
+        )
     }
 
     /**
@@ -471,93 +559,6 @@ class MellowAppLinksInterceptor(
         }
     }
 
-    // ---- Eligibility (§2.4 step 2) ----
-
-    private fun isEligible(
-        uriScheme: String?,
-        engineSupportsScheme: Boolean,
-        hasUserGesture: Boolean,
-        isRedirect: Boolean,
-        isDirectNavigation: Boolean,
-        isSubframeRequest: Boolean,
-        isSameDomainNavigation: Boolean,
-        authExceptionsAllowed: Boolean,
-    ): Boolean {
-        if (uriScheme == null) return false
-        // A subframe request not triggered by the user and outside the allowlist stays in-page.
-        if (!hasUserGesture && isSubframeRequest && !AppLinkSchemes.isSubframeAllowed(uriScheme)) return false
-
-        val isAllowedRedirect = isRedirect && !isSubframeRequest
-        val isIntentionalNavigation = hasUserGesture || isAllowedRedirect || isDirectNavigation
-        // Unintentional engine-supported navigation continues in the browser.
-        if (engineSupportsScheme && !isIntentionalNavigation) return false
-        // Same-domain engine-supported navigation continues in the browser (AC subdomain stripping),
-        // unless this tab could be hosting an authentication round trip whose callback is an http
-        // app link on the same site. That "could be" is provisional — it only knows the tab was
-        // opened by *some* app, not that this navigation targets it — so the guard is re-applied in
-        // [onLoadRequest] once resolution reveals the actual target package.
-        if (engineSupportsScheme && isSameDomainNavigation && !authExceptionsAllowed) return false
-        // Always-denied schemes never resolve or launch externally.
-        if (AppLinkSchemes.isAlwaysDenied(uriScheme)) return false
-        return true
-    }
-
-    private fun isSameDomain(url1: String?, url2: String?): Boolean {
-        return stripCommonSubDomains(url1?.tryGetHostFromUrl()) ==
-            stripCommonSubDomains(url2?.tryGetHostFromUrl())
-    }
-
-    private fun stripCommonSubDomains(host: String?): String? {
-        return when {
-            host == null -> null
-            host.startsWith(WWW) -> host.replaceFirst(WWW, "")
-            host.startsWith(M) -> host.replaceFirst(M, "")
-            host.startsWith(MOBILE) -> host.replaceFirst(MOBILE, "")
-            host.startsWith(MAPS) -> host.replaceFirst(MAPS, "")
-            else -> host
-        }
-    }
-
-    // ---- Protection model (§2.3) ----
-
-    private fun isProtected(policy: AppLinkPolicy, session: SessionState?, uri: String): Boolean {
-        val contextId = session?.contextId
-        val protectedByContext = if (contextId == null) {
-            policy.protectGeneralContext
-        } else {
-            contextId in policy.protectedContextIds || contextId in policy.strictContextIds
-        }
-        if (protectedByContext) return true
-        return matchesProtectedTarget(policy.protectedTargetPatterns, uri)
-    }
-
-    private fun matchesProtectedTarget(patterns: List<ProtectedTargetPattern>, uri: String): Boolean {
-        if (patterns.isEmpty()) return false
-        val parsed = runCatching { Uri.parse(uri) }.getOrNull() ?: return false
-        val scheme = parsed.scheme?.lowercase(Locale.ROOT) ?: return false
-        val host = AppLinkHostNormalizer.normalizeHost(parsed.host) ?: return false
-        val effectivePort = if (parsed.port != -1) parsed.port else defaultPortForScheme(scheme)
-
-        return patterns.any { pattern ->
-            if (pattern.scheme.lowercase(Locale.ROOT) != scheme) return@any false
-            val patternHost = AppLinkHostNormalizer.normalizeHost(pattern.hostOrSuffix) ?: return@any false
-            if (pattern.includeSubdomains) {
-                // Wildcard entries match apex + subdomains and ignore port (§2.3).
-                host == patternHost || host.endsWith(".$patternHost")
-            } else {
-                // Exact entries compare scheme + origin including effective port.
-                host == patternHost && effectivePort == (pattern.port ?: defaultPortForScheme(scheme))
-            }
-        }
-    }
-
-    private fun defaultPortForScheme(scheme: String): Int = when (scheme) {
-        "http", "ws" -> 80
-        "https", "wss" -> 443
-        "ftp" -> 21
-        else -> -1
-    }
-
     // ---- Helpers ----
 
     /**
@@ -585,11 +586,28 @@ class MellowAppLinksInterceptor(
     private fun pendingStoreFor(components: Components): PendingAppLinkStore {
         return PendingAppLinkStores.forProfile(components.profileApplicationContext.relativePath)
     }
-
-    companion object {
-        private const val WWW = "www."
-        private const val M = "m."
-        private const val MOBILE = "mobile."
-        private const val MAPS = "maps."
-    }
 }
+
+/**
+ * Whether a load is meant for a new tab, which the engine asks about on [session], its opener.
+ *
+ * Only the browser's own tabs open one: a Custom Tab has no tab strip, so its loads — and anything
+ * the user keeps in the browser from a prompt there — stay in place. A subframe never opens a tab.
+ */
+internal fun opensNewTab(
+    isNewWindowRequest: Boolean,
+    isSubframeRequest: Boolean,
+    session: SessionState?,
+): Boolean = isNewWindowRequest && !isSubframeRequest && session is TabSessionState
+
+/**
+ * Whether the tab the interceptor was asked about is actually going somewhere, which advances its
+ * navigation generation and so invalidates the holds taken on it. A denied load leaves it where it
+ * was; so does a subframe load, and a load for a new tab, which never touches its opener.
+ */
+internal fun movesTab(
+    isSubframeRequest: Boolean,
+    opensNewWindow: Boolean,
+    response: RequestInterceptor.InterceptionResponse?,
+): Boolean = !isSubframeRequest && !opensNewWindow &&
+    response !is RequestInterceptor.InterceptionResponse.Deny

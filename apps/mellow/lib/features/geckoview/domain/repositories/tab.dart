@@ -1116,7 +1116,7 @@ class TabRepository extends _$TabRepository {
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
       (event) async {
-        // The engine's opener (`event.parentId`) is deliberately ignored:
+        // The engine's opener (`event.parentId`) is kept as provenance only:
         // folders are the only nesting here, so a tab opened from a page is
         // filed like any other.
         final tabId = event.tabId;
@@ -1130,6 +1130,7 @@ class TabRepository extends _$TabRepository {
         await db.tabDao.insertTab(
           tabId,
           source: TabSource.addedEvent,
+          engineOpenerId: Value(event.parentId),
           containerId: Value(containerId),
           spaceUuid: Value(spaceUuid),
         );
