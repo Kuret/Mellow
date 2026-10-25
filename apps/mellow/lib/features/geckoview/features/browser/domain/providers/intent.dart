@@ -50,7 +50,14 @@ final _contentParserTransformer =
       },
     );
 
-@Riverpod()
+/// Every shared URL or text the app should act on, parsed from the sharing and
+/// home-widget intent streams.
+///
+/// Consumed by `sharedContentOpener`, a keepAlive service that main.dart
+/// activates for the life of the app, which is why this is kept alive too.
+/// Keeping the handler out of the browser widget matters: a widget's
+/// subscriptions are paused while an opaque route covers it.
+@Riverpod(keepAlive: true)
 class EngineBoundIntentStream extends _$EngineBoundIntentStream {
   @override
   Stream<SharedContent> build() {
