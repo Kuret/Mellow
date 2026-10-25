@@ -220,4 +220,20 @@ void main() {
       containsPair('launched-from-intent', 'true'),
     );
   });
+
+  testWidgets('holds the launch claim while opening and releases it after', (
+    tester,
+  ) async {
+    final harness = await _pump(tester);
+    final claims = <bool>[];
+    harness.container.listen(
+      intentLaunchClaimProvider,
+      (previous, next) => claims.add(next),
+    );
+
+    await harness.share(tester, _url('https://example.org/claim'));
+
+    expect(claims, [true, false]);
+    expect(harness.container.read(intentLaunchClaimProvider), isFalse);
+  });
 }

@@ -62,7 +62,11 @@ void sharedContentOpener(Ref ref) {
         return;
       }
 
-      unawaited(_open(ref, content));
+      // Claimed synchronously, before the router is awaited, so that a cold
+      // start's home target waits for the sheet instead of resuming a tab under
+      // it. Released once the route is on its way, not when it is popped.
+      final launchClaim = ref.read(intentLaunchClaimProvider.notifier)..claim();
+      unawaited(_open(ref, content).whenComplete(launchClaim.release));
     },
     onError: (error, stackTrace) {
       logger.e(
@@ -101,7 +105,7 @@ Future<void> _open(Ref ref, SharedContent content) async {
     if (top == name) {
       // The previous share is still open; this one takes its place rather than
       // stacking on top and bringing it back when popped.
-      await router.pushReplacement(route.location);
+      unawaited(router.pushReplacement(route.location));
       return;
     }
 
@@ -112,7 +116,7 @@ Future<void> _open(Ref ref, SharedContent content) async {
       router.go(const BrowserRoute().location);
     }
 
-    await router.push(route.location);
+    unawaited(router.push(route.location));
   } catch (error, stackTrace) {
     logger.e(
       'Failed to open shared content',
