@@ -147,6 +147,8 @@ abstract class _$IntentLaunchClaim extends $Notifier<bool> {
 /// - the launch is on screen: a tab the consumer opened for it
 ///   ([launchTabOpened]), or whatever was selected after the engine created
 ///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
@@ -188,6 +190,8 @@ final startupLaunchCoverProvider = StartupLaunchCoverProvider._();
 /// - the launch is on screen: a tab the consumer opened for it
 ///   ([launchTabOpened]), or whatever was selected after the engine created
 ///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
@@ -227,6 +231,8 @@ final class StartupLaunchCoverProvider
   /// - the launch is on screen: a tab the consumer opened for it
   ///   ([launchTabOpened]), or whatever was selected after the engine created
   ///   it ([launchTabCreated]);
+  /// - the launch tab is selected but stays under home, because `addTab` could
+  ///   not move the selected container over to it;
   /// - the sharing pipeline let go of every awaited launch without opening it;
   /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
   /// - [_maxCover], so a launch lost on the way never strands the spinner.
@@ -275,7 +281,7 @@ final class StartupLaunchCoverProvider
 }
 
 String _$startupLaunchCoverHash() =>
-    r'25d312614d9909b5edf77eed8386399dd0379996';
+    r'b9308aad167bf163fa929989d4e25386b0d1a35c';
 
 /// Keeps the browser behind the startup spinner while a cold start is still
 /// opening the launch the app was started for.
@@ -294,6 +300,8 @@ String _$startupLaunchCoverHash() =>
 /// - the launch is on screen: a tab the consumer opened for it
 ///   ([launchTabOpened]), or whatever was selected after the engine created
 ///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.

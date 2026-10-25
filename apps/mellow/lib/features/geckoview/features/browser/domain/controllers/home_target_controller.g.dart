@@ -66,7 +66,7 @@ final class HomeTargetControllerProvider
 }
 
 String _$homeTargetControllerHash() =>
-    r'795c336e84828247bbfc58e7471b2cb480e586ef';
+    r'9a7b46aad82c8dc19cd1190bbb47ede035886197';
 
 /// Resumes the last opened tab when the browser has nothing to show.
 ///

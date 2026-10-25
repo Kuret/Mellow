@@ -259,7 +259,7 @@ final class BrokeredIntentDeliveryProvider
 }
 
 String _$brokeredIntentDeliveryHash() =>
-    r'7bca3685da098c7396340e5621a0801ccb7fd31c';
+    r'8e833db4c7070d06050a60019e23e0ccd092d7e1';
 
 /// The broker's queue, claimed ahead of its delivery.
 ///
