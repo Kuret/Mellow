@@ -13,7 +13,7 @@
     "contract_paths": [
       "src/zen/sync"
     ],
-    "last_reviewed": "787f9c5e025ff41eaad6455a7e5b9eeb540bfaa6",
+    "last_reviewed": "bc8e7ed4728c0e96a3299be647980d403aff115e",
     "engine_version": 3,
     "clone": "blobless (git clone --filter=blob:none); never shallow - see SKILL.md"
   }
