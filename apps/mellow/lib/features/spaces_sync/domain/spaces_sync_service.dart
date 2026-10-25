@@ -84,10 +84,15 @@ const _echoWindow = _resurrectionWindow;
 /// user, not the race.
 const _maxEchoesRefused = 1;
 
-/// Tombstones always allowed in one batch regardless of the fraction, so
-/// closing a handful of tabs on a device that only holds a handful never
-/// needs an "Upload anyway".
-const _minTombstoneAllowance = 5;
+/// Tombstones always allowed in one batch regardless of the fraction.
+///
+/// Closing up to twenty tabs at once is ordinary tidying on a phone; the old
+/// floor of five paused uploads silently after one such cleanup, and nothing
+/// moved again until the user found "Upload anyway" in the settings. The
+/// resurrection half of the canary (never bypassed) is the real guard against
+/// the Zen race; the volume half only has to catch a batch that empties a
+/// sidebar.
+const _minTombstoneAllowance = 20;
 
 /// `applied_tombstone` and `uploaded_tombstone` rows older than this are
 /// pruned once per run.

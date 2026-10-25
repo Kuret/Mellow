@@ -230,11 +230,11 @@ void main() {
       final service = serviceOf(harness);
       final postsBefore = harness.server.postCount;
 
-      final deleted = [for (var i = 0; i < 18; i++) 't$i'];
+      final deleted = [for (var i = 0; i < 30; i++) 't$i'];
       await deleteTabs(harness.db, deleted);
-      // 42 tabs left: max(5, min(floor(0.2 * 42), 25)) = 8 allowed,
-      // 18 requested — a batch that would clear out a third of the sidebar.
-      expect(await harness.db.tabDao.countSyncableTabs(), 42);
+      // 30 tabs left: max(20, min(floor(0.2 * 30), 25)) = 20 allowed,
+      // 30 requested — a batch that would clear out half the sidebar.
+      expect(await harness.db.tabDao.countSyncableTabs(), 30);
 
       await service.sync(reason: 'destructive');
 
@@ -243,8 +243,8 @@ void main() {
           .blockedBatch;
       expect(blocked, isNotNull);
       expect(blocked!.reason, SpacesSyncBlockReason.tombstoneVolume);
-      expect(blocked.tombstoneCount, 18);
-      expect(blocked.limit, 8);
+      expect(blocked.tombstoneCount, 30);
+      expect(blocked.limit, 20);
       expect(blocked.sampleIds, hasLength(5));
       expect(deleted, containsAll(blocked.sampleIds));
 
@@ -270,6 +270,30 @@ void main() {
       expect(
         harness.container.read(spacesSyncServiceProvider).blockedBatch,
         isNull,
+      );
+    });
+
+    test('closing fifteen of forty tabs uploads under the floor', () async {
+      final harness = await settledHarness(tabs: 40);
+      final service = serviceOf(harness);
+      final postsBefore = harness.server.postCount;
+
+      final deleted = [for (var i = 0; i < 15; i++) 't$i'];
+      await deleteTabs(harness.db, deleted);
+      // 25 tabs left: max(20, min(floor(0.2 * 25), 25)) = 20 allowed, so a
+      // phone-sized cleanup of fifteen tabs ships without an "Upload anyway".
+      expect(await harness.db.tabDao.countSyncableTabs(), 25);
+
+      await service.sync(reason: 'tidying');
+
+      expect(
+        harness.container.read(spacesSyncServiceProvider).blockedBatch,
+        isNull,
+      );
+      expect(harness.server.postCount, postsBefore + 1);
+      expect(
+        uploadedTombstones(harness.server).map((r) => r['id']),
+        containsAll(deleted),
       );
     });
 
