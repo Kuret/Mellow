@@ -20,9 +20,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as p;
 import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/services/profile_password.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   group('profile password verifier', () {

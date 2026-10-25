@@ -22,10 +22,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:path/path.dart' as p;
-import 'package:secure_archive/secure_archive.dart';
 import 'package:mellow/core/logger.dart';
 import 'package:mellow/features/user/data/models/auth_settings.dart';
+import 'package:path/path.dart' as p;
+import 'package:secure_archive/secure_archive.dart';
 
 /// Per-profile record of wrong password attempts, kept beside `metadata.json`.
 ///

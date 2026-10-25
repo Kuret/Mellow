@@ -21,11 +21,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as p;
 import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/presentation/dialogs/profile_password_dialogs.dart';
 import 'package:mellow/features/user/domain/services/profile_password.dart';
-import 'package:mellow/l10n/generated/app_localizations.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   testWidgets('a check that cannot record its result denies and stays usable', (
@@ -34,7 +33,7 @@ void main() {
     // A profile directory that does not exist: the wrong attempt cannot be
     // written, so the gate throws instead of answering.
     final profileDir = Directory(
-      p.join(Directory.systemTemp.path, 'weblibre-missing-${tester.hashCode}'),
+      p.join(Directory.systemTemp.path, 'mellow-missing-${tester.hashCode}'),
     );
     // Any verifier fails to match without running Argon2; what matters is
     // that recording the failure throws.
@@ -46,8 +45,6 @@ void main() {
     bool? result;
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
@@ -95,7 +92,7 @@ void main() {
     required int Function() departureCount,
   }) async {
     final profileDir = Directory(
-      p.join(Directory.systemTemp.path, 'weblibre-missing-${tester.hashCode}'),
+      p.join(Directory.systemTemp.path, 'mellow-missing-${tester.hashCode}'),
     );
     final verifier = await tester.runAsync(
       () => createProfilePasswordVerifier('secret'),
@@ -108,8 +105,6 @@ void main() {
     bool? result;
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
@@ -162,7 +157,7 @@ void main() {
     expect(result, isNull);
     expect(
       find.text(
-        'WebLibre was closed or switched away from during the check. '
+        'Mellow was closed or switched away from during the check. '
         'Enter the password again.',
       ),
       findsOneWidget,

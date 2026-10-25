@@ -178,10 +178,9 @@ class ProfileRestoreScreen extends HookConsumerWidget {
           showErrorMessage(
             context,
             error is CloneDeviceLockUnconfirmed
-                ? l10n.user_restoreDeviceLockUnconfirmed(
-                    l10n.profileCopy_nothingChanged,
-                  )
-                : describeMaintenanceFailure(l10n, error),
+                ? 'This backup is protected by the device lock, and this device '
+                      'could not unlock it. $nothingChanged'
+                : describeMaintenanceFailure(error),
           );
         });
       } else if (restoreState.hasData && !successHandled.value) {
@@ -548,9 +547,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                   context,
                                   ref,
                                   target,
-                                  reason: l10n.user_authReasonReplaceProfile(
-                                    labelFor(target),
-                                  ),
+                                  reason: 'Replace "${labelFor(target)}"',
                                 );
                                 if (!authorized) return;
 
@@ -568,8 +565,8 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                 final localAuth = ref.read(
                                   localAuthenticationServiceProvider.notifier,
                                 );
-                                final reason =
-                                    l10n.user_authReasonConfirmUnlock;
+                                const reason =
+                                    'Confirm you can unlock this profile';
                                 final alsoRemember =
                                     await activeProfileDeviceUnlock();
                                 if (!context.mounted) return;

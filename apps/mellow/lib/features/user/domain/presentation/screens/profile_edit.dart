@@ -71,8 +71,6 @@ class ProfileEditScreen extends HookConsumerWidget {
       return;
     }
 
-    final l10n = AppLocalizations.of(context);
-
     // Read from disk rather than trusted from the route: what guards a profile
     // has to be what the profile says now.
     final existing = profile != null
@@ -84,8 +82,9 @@ class ProfileEditScreen extends HookConsumerWidget {
       showErrorMessage(
         context,
         existing != null
-            ? l10n.user_authFailedExisting(l10n.profileCopy_nothingChanged)
-            : l10n.user_authFailedNew,
+            ? 'Could not confirm your identity. $nothingChanged'
+            : 'Could not confirm your identity. A locked profile is only '
+                  'created once this device can unlock it.',
       );
     }
 
@@ -97,7 +96,7 @@ class ProfileEditScreen extends HookConsumerWidget {
         context,
         ref,
         existing,
-        reason: l10n.user_authReasonEditProfile(existing.name),
+        reason: 'Change "${existing.name}"',
       );
       if (!context.mounted) return;
       if (!authorized) {
@@ -130,8 +129,8 @@ class ProfileEditScreen extends HookConsumerWidget {
                 ? profileAccessAuthKey(existing.id)
                 : _newProfileAuthKey,
             localizedReason: existing != null
-                ? l10n.user_authReasonRequireAuth
-                : l10n.user_authReasonConfirmUnlock,
+                ? 'Require authentication for profile'
+                : 'Confirm you can unlock this profile',
             settings: authSettings,
             alsoRemember: alsoRemember,
           );
@@ -267,7 +266,7 @@ class _AuthSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SettingSection(name: l10n.user_authenticationSectionTitle),
+        const SettingSection(name: 'Authentication'),
         RadioGroup<ProfileLockMethod>(
           groupValue: authSettings.lockMethod,
           onChanged: (value) async {
@@ -291,27 +290,35 @@ class _AuthSection extends StatelessWidget {
 
             onAuthSettingsChanged(authSettings.copyWith.lockMethod(value));
           },
-          child: Column(
+          child: const Column(
             children: [
               RadioListTile.adaptive(
                 value: ProfileLockMethod.none,
-                title: Text(l10n.user_lockMethodNoneTitle),
-                subtitle: Text(l10n.user_lockMethodNoneSubtitle),
-                secondary: const Icon(MdiIcons.lockOpenVariantOutline),
+                title: Text('No lock'),
+                subtitle: Text(
+                  'Anyone using Mellow on this device can open this profile',
+                ),
+                secondary: Icon(MdiIcons.lockOpenVariantOutline),
                 contentPadding: EdgeInsets.zero,
               ),
               RadioListTile.adaptive(
                 value: ProfileLockMethod.device,
-                title: Text(l10n.user_lockMethodDeviceTitle),
-                subtitle: Text(l10n.user_lockMethodDeviceSubtitle),
-                secondary: const Icon(MdiIcons.fingerprint),
+                title: Text('Device lock'),
+                subtitle: Text(
+                  'Fingerprint, face or the device PIN. Anyone who can unlock '
+                  'this device can open this profile.',
+                ),
+                secondary: Icon(MdiIcons.fingerprint),
                 contentPadding: EdgeInsets.zero,
               ),
               RadioListTile.adaptive(
                 value: ProfileLockMethod.password,
-                title: Text(l10n.user_lockMethodPasswordTitle),
-                subtitle: Text(l10n.user_lockMethodPasswordSubtitle),
-                secondary: const Icon(MdiIcons.formTextboxPassword),
+                title: Text('Profile password'),
+                subtitle: Text(
+                  "A password only for this profile. Fingerprints and the "
+                  "device PIN can't open it.",
+                ),
+                secondary: Icon(MdiIcons.formTextboxPassword),
                 contentPadding: EdgeInsets.zero,
               ),
             ],
@@ -319,7 +326,7 @@ class _AuthSection extends StatelessWidget {
         ),
         if (authSettings.lockMethod == ProfileLockMethod.password) ...[
           ListTile(
-            title: Text(l10n.user_changeProfilePasswordTitle),
+            title: const Text('Change password'),
             leading: const Icon(MdiIcons.keyChange),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             onTap: () async {
@@ -331,11 +338,15 @@ class _AuthSection extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            title: Text(l10n.user_profilePasswordUnrecoverableTitle),
-            subtitle: Text(l10n.user_profilePasswordUnrecoverableSubtitle),
-            leading: const Icon(Icons.info_outline),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+          const ListTile(
+            title: Text("A forgotten password can't be recovered"),
+            subtitle: Text(
+              "Without it, this profile can't be opened, backed up or "
+              "deleted. The password locks Mellow; it does not encrypt the "
+              "profile's data.",
+            ),
+            leading: Icon(Icons.info_outline),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
           ),
         ],
         if (authSettings.authenticationRequired) ...[
@@ -496,7 +507,7 @@ class _ProfileActionsSection extends ConsumerWidget {
                   context,
                   ref,
                   profile,
-                  reason: l10n.user_authReasonDeleteProfile(profile.name),
+                  reason: 'Delete "${profile.name}"',
                 );
 
                 if (authorized) {

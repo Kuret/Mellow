@@ -21,41 +21,39 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:mellow/core/design/display_features.dart';
 import 'package:mellow/core/logger.dart';
 import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/services/profile_password.dart';
-import 'package:mellow/l10n/generated/app_localizations.dart';
 import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
 
 /// The sentence that says how long the next attempt has to wait.
-String describePasswordRetryAfter(AppLocalizations l10n, Duration wait) {
+String describePasswordRetryAfter(Duration wait) {
   // Rounded up: "try again in 0 seconds" for a wait that is still running
   // reads as a bug.
   final seconds = (wait.inMilliseconds / 1000).ceil();
   if (seconds < 120) {
-    return l10n.user_passwordRetryInSeconds(seconds);
+    return seconds == 1
+        ? 'Try again in 1 second.'
+        : 'Try again in $seconds seconds.';
   }
-  return l10n.user_passwordRetryInMinutes((seconds / 60).ceil());
+  final minutes = (seconds / 60).ceil();
+  return minutes == 1
+      ? 'Try again in 1 minute.'
+      : 'Try again in $minutes minutes.';
 }
 
 /// The error under a password field for an attempt that did not unlock.
-String? describeProfilePasswordCheck(
-  AppLocalizations l10n,
-  ProfilePasswordCheck check,
-) {
+String? describeProfilePasswordCheck(ProfilePasswordCheck check) {
   return switch (check) {
     ProfilePasswordAccepted() => null,
-    ProfilePasswordRejected(retryAfter: null) => l10n.user_wrongProfilePassword,
+    ProfilePasswordRejected(retryAfter: null) => 'Wrong password',
     ProfilePasswordRejected(:final retryAfter?) =>
-      l10n.user_wrongProfilePasswordWithRetry(
-        describePasswordRetryAfter(l10n, retryAfter),
-      ),
-    ProfilePasswordInterrupted() => l10n.user_profilePasswordInterrupted,
+      'Wrong password. ${describePasswordRetryAfter(retryAfter)}',
+    ProfilePasswordInterrupted() =>
+      'Mellow was closed or switched away from during the check. Enter the '
+          'password again.',
     ProfilePasswordThrottled(:final retryAfter) =>
-      l10n.user_tooManyPasswordAttempts(
-        describePasswordRetryAfter(l10n, retryAfter),
-      ),
+      'Too many wrong attempts. ${describePasswordRetryAfter(retryAfter)}',
   };
 }
 
@@ -77,7 +75,6 @@ Future<bool> showProfilePasswordDialog(
 }) async {
   final result = await showDialog<bool>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => _ProfilePasswordDialog(
       profileDir: profileDir,
       settings: settings,
@@ -104,7 +101,6 @@ class _ProfilePasswordDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final controller = useTextEditingController();
     final passwordText = useValueListenable(controller).text;
     final checking = useState(false);
@@ -136,14 +132,14 @@ class _ProfilePasswordDialog extends HookWidget {
         }
 
         controller.clear();
-        error.value = describeProfilePasswordCheck(l10n, result);
+        error.value = describeProfilePasswordCheck(result);
       } catch (e, s) {
         // Most likely the attempt record could not be written. Denied, not
         // waved through: a check that cannot count its failures must not
         // count as passed.
         logger.e('Profile password check failed', error: e, stackTrace: s);
         if (context.mounted) {
-          error.value = l10n.user_profilePasswordCheckFailed;
+          error.value = 'Could not check the password. Try again.';
         }
       } finally {
         if (context.mounted) {
@@ -167,7 +163,7 @@ class _ProfilePasswordDialog extends HookWidget {
           onChanged: (_) => error.value = null,
           onSubmitted: (_) => submit(),
           decoration: InputDecoration(
-            labelText: l10n.user_profilePasswordFieldLabel,
+            labelText: 'Profile password',
             floatingLabelBehavior: FloatingLabelBehavior.always,
             errorText: error.value,
             errorMaxLines: 3,
@@ -178,7 +174,7 @@ class _ProfilePasswordDialog extends HookWidget {
             onPressed: checking.value
                 ? null
                 : () => Navigator.of(context).pop(false),
-            child: Text(l10n.common_cancel),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: checking.value || passwordText.isEmpty ? null : submit,
@@ -187,7 +183,7 @@ class _ProfilePasswordDialog extends HookWidget {
                     dimension: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(l10n.user_actionConfirm),
+                : const Text('Confirm'),
           ),
         ],
       ),
@@ -202,7 +198,6 @@ class _ProfilePasswordDialog extends HookWidget {
 Future<String?> showSetProfilePasswordDialog(BuildContext context) {
   return showDialog<String>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => const _SetProfilePasswordDialog(),
   );
 }
@@ -212,7 +207,6 @@ class _SetProfilePasswordDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final password = useTextEditingController();
     final repeat = useTextEditingController();
     final passwordText = useValueListenable(password).text;
@@ -251,13 +245,16 @@ class _SetProfilePasswordDialog extends HookWidget {
     }
 
     return AlertDialog(
-      title: Text(l10n.user_setProfilePasswordTitle),
+      title: const Text('Set profile password'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.user_setProfilePasswordExplanation),
+            const Text(
+              'This password is asked for when the profile opens, and before '
+              'it is backed up, replaced with a backup, changed or deleted.',
+            ),
             const SizedBox(height: 16),
             ObscurableTextField(
               controller: password,
@@ -265,8 +262,8 @@ class _SetProfilePasswordDialog extends HookWidget {
               autofocus: true,
               keyboardType: TextInputType.visiblePassword,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.user_newProfilePasswordFieldLabel,
+              decoration: const InputDecoration(
+                labelText: 'New password',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
               ),
             ),
@@ -278,12 +275,12 @@ class _SetProfilePasswordDialog extends HookWidget {
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => save(),
               decoration: InputDecoration(
-                labelText: l10n.user_repeatProfilePasswordFieldLabel,
+                labelText: 'Repeat password',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 errorText: mismatch
-                    ? l10n.user_profilePasswordsDoNotMatch
+                    ? "The passwords don't match"
                     : saveFailed.value
-                    ? l10n.user_profilePasswordSaveFailed
+                    ? 'Could not set the password. Try again.'
                     : null,
                 errorMaxLines: 3,
               ),
@@ -294,7 +291,7 @@ class _SetProfilePasswordDialog extends HookWidget {
       actions: [
         TextButton(
           onPressed: saving.value ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.common_cancel),
+          child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: canSave ? save : null,
@@ -303,7 +300,7 @@ class _SetProfilePasswordDialog extends HookWidget {
                   dimension: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text(l10n.common_save),
+              : const Text('Save'),
         ),
       ],
     );

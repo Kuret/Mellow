@@ -24,6 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mellow/core/copy/profile_copy.dart';
 import 'package:mellow/core/logger.dart';
 import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/presentation/dialogs/profile_password_dialogs.dart';
@@ -31,9 +32,7 @@ import 'package:mellow/features/user/domain/providers.dart';
 import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:mellow/features/user/domain/repositories/profile.dart';
 import 'package:mellow/features/user/domain/services/profile_password.dart';
-import 'package:mellow/l10n/generated/app_localizations.dart';
 import 'package:mellow/presentation/hooks/on_initialization.dart';
-import 'package:mellow/presentation/utils/profile_copy_l10n.dart';
 import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
 import 'package:mellow/utils/exit_app.dart';
 import 'package:mellow/utils/ui_helper.dart';
@@ -43,7 +42,6 @@ class LockScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final isAuthenticating = useState(false);
     final isSwitching = useState(false);
     final didAutoAuthenticate = useRef(false);
@@ -76,13 +74,7 @@ class LockScreen extends HookConsumerWidget {
       isAuthenticating.value = true;
 
       try {
-        await ref
-            .read(profileAuthStateProvider.notifier)
-            .authenticate(
-              localizedReason: AppLocalizations.of(
-                context,
-              ).user_authReasonUnlockProfile,
-            );
+        await ref.read(profileAuthStateProvider.notifier).authenticate();
       } finally {
         if (context.mounted) {
           isAuthenticating.value = false;
@@ -102,14 +94,14 @@ class LockScreen extends HookConsumerWidget {
 
         if (context.mounted && result is! ProfilePasswordAccepted) {
           password.clear();
-          passwordError.value = describeProfilePasswordCheck(l10n, result);
+          passwordError.value = describeProfilePasswordCheck(result);
         }
       } catch (e, s) {
         // Stays locked: a check that could not record its outcome is not a
         // pass.
         logger.e('Profile password unlock failed', error: e, stackTrace: s);
         if (context.mounted) {
-          passwordError.value = l10n.user_profilePasswordCheckFailed;
+          passwordError.value = 'Could not check the password. Try again.';
         }
       } finally {
         if (context.mounted) {
@@ -157,17 +149,14 @@ class LockScreen extends HookConsumerWidget {
         if (!armed) {
           isSwitching.value = false;
           if (context.mounted) {
-            showErrorMessage(context, restartCouldNotBeScheduled(l10n));
+            showErrorMessage(context, restartCouldNotBeScheduled);
           }
           return;
         }
       } catch (error) {
         isSwitching.value = false;
         if (context.mounted) {
-          showErrorMessage(
-            context,
-            l10n.user_restartFailedWithError(error.toString()),
-          );
+          showErrorMessage(context, 'Could not restart: $error');
         }
         return;
       }
@@ -186,7 +175,7 @@ class LockScreen extends HookConsumerWidget {
               children: [
                 const Icon(MdiIcons.lock, size: 64),
                 const SizedBox(height: 16),
-                Text(l10n.user_profileLockedTitle),
+                const Text('Profile is locked'),
                 const SizedBox(height: 16),
                 if (usesPassword) ...[
                   Padding(
@@ -202,7 +191,7 @@ class LockScreen extends HookConsumerWidget {
                         onChanged: (_) => passwordError.value = null,
                         onSubmitted: (_) => unlockWithPassword(),
                         decoration: InputDecoration(
-                          labelText: l10n.user_profilePasswordFieldLabel,
+                          labelText: 'Profile password',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           errorText: passwordError.value,
                           errorMaxLines: 3,
@@ -217,9 +206,7 @@ class LockScreen extends HookConsumerWidget {
                     ),
                     icon: const Icon(MdiIcons.lockOpenVariant),
                     label: Text(
-                      isAuthenticating.value
-                          ? l10n.user_unlockingLabel
-                          : l10n.user_unlockButtonLabel,
+                      isAuthenticating.value ? 'Unlocking...' : 'Unlock',
                     ),
                     onPressed:
                         isAuthenticating.value ||
@@ -235,9 +222,7 @@ class LockScreen extends HookConsumerWidget {
                     ),
                     icon: const Icon(MdiIcons.fingerprint),
                     label: Text(
-                      isAuthenticating.value
-                          ? l10n.user_unlockingLabel
-                          : l10n.user_unlockButtonLabel,
+                      isAuthenticating.value ? 'Unlocking...' : 'Unlock',
                     ),
                     // Disabled until the lock method is known, so a tap during
                     // the first frame cannot raise the device prompt for a
@@ -259,8 +244,8 @@ class LockScreen extends HookConsumerWidget {
                     icon: const Icon(MdiIcons.accountSwitch),
                     label: Text(
                       isSwitching.value
-                          ? l10n.user_restartingLabel
-                          : l10n.user_chooseAnotherProfileLabel,
+                          ? 'Restarting…'
+                          : 'Choose another profile',
                     ),
                     onPressed: isAuthenticating.value || isSwitching.value
                         ? null

@@ -215,7 +215,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                       context,
                       ref,
                       profile,
-                      reason: l10n.user_authReasonBackupProfile(profile.name),
+                      reason: 'Back up "${profile.name}"',
                     );
                     if (!authorized) return;
 
