@@ -13,7 +13,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.SystemClock
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -34,6 +33,7 @@ import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
 import app.mellow.browser.flutter_mozilla_components.ext.toPigeonDownloadState
 import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
 import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
+import app.mellow.browser.flutter_mozilla_components.feature.DownloadAppChooser
 import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import app.mellow.browser.flutter_mozilla_components.feature.PromptSheet
@@ -417,6 +417,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
+            val downloadAppChooser = DownloadAppChooser(
+                components.profileApplicationContext,
+                childFragmentManager,
+            )
             downloadsFeature.set(
                 feature = DownloadsFeature(
                     components.profileApplicationContext,
@@ -438,7 +442,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = components.profileApplicationContext,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(components.profileApplicationContext)
                         },
                     ),
                     downloadManager = FetchDownloadManager(
@@ -451,11 +455,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onNeedToRequestPermissions = { permissions ->
                         requestDownloadPermissionsLauncher.launch(permissions)
                     },
-                    shouldForwardToThirdParties = {
-                        GlobalComponents.useExternalDownloadManager
-                    },
-                    // A full-width card on the bottom edge, the same shape AC gives the
-                    // extension permission prompt, instead of a centred dialog (#651).
+                    shouldForwardToThirdParties = downloadAppChooser::shouldForwardToThirdParties,
+                    customThirdPartyDownloadDialog = downloadAppChooser::show,
+                    // Despite the name, the hook `DownloadsFeature` calls to close
+                    // every download prompt when the page navigates away — the
+                    // only one that reaches a custom third-party chooser.
+                    dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
+                    // On the bottom edge at full width, as AC lays out the extension
+                    // permission prompt; [PromptSheet] makes both M3 bottom sheets (#651).
                     // Button colours and radius stay default: AC's radius override reads the
                     // background colour unconditionally.
                     promptsStyling = DownloadsFeature.PromptsStyling(

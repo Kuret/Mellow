@@ -1461,6 +1461,20 @@ abstract class GeckoSyncApi {
   bool setDeviceName(String newName);
 }
 
+/// The download manager remembered from the chooser's "Always use this app".
+class PreferredDownloadManager {
+  /// The app's Android package id.
+  final String packageName;
+
+  /// The app's current name, or null when it is no longer installed.
+  final String? label;
+
+  /// Whether the remembered app is this browser itself.
+  final bool isThisApp;
+
+  const PreferredDownloadManager(this.packageName, this.label, this.isThisApp);
+}
+
 @HostApi()
 abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
@@ -1478,6 +1492,13 @@ abstract class GeckoEngineSettingsApi {
   void setUseExternalDownloadManager(bool enabled);
 
   bool getUseExternalDownloadManager();
+
+  /// The download manager the user chose to always use from the chooser, or
+  /// null while every download asks. Profile-scoped.
+  PreferredDownloadManager? getPreferredDownloadManager();
+
+  /// Forgets the remembered download manager, so the chooser asks again.
+  void clearPreferredDownloadManager();
 
   /// Sets the browser-wide default desktop mode (BrowserState.desktopMode).
   /// Newly opened tabs inherit this default; a per-tab requestDesktopSite
@@ -1701,6 +1722,13 @@ abstract class GeckoTabsApi {
     required String tabId,
     required String? alternativeUrl,
   });
+
+  /// DER encoding of the server certificate the engine reports for [tabId].
+  ///
+  /// Null when the engine has none: plain http, an unknown identity, a
+  /// certificate error page, or a page with loaded mixed active content.
+  /// A site loaded through a security exception still has one.
+  Uint8List? getSecurityCertificate({required String tabId});
 }
 
 @HostApi()
@@ -2208,6 +2236,15 @@ abstract class GeckoDownloadsApi {
     String directoryPath,
     String? contentType,
   );
+
+  /// Sets the folder new downloads are written to.
+  ///
+  /// [directoryUri] is a Storage Access Framework tree URI (`content://…`) the
+  /// app holds a persisted write grant for, or null for the public Downloads
+  /// folder. Replicated rather than asked for: the download service and the
+  /// Custom Tab / PWA activity resolve the folder with no Flutter engine
+  /// attached, so native keeps its own copy of the choice.
+  void setDownloadDirectory(String? directoryUri);
 }
 
 @FlutterApi()
