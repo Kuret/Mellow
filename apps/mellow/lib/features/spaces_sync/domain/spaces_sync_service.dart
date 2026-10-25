@@ -76,7 +76,8 @@ const _resurrectionWindow = Duration(minutes: 10);
 /// needs an "Upload anyway".
 const _minTombstoneAllowance = 5;
 
-/// `applied_tombstone` rows older than this are pruned once per run.
+/// `applied_tombstone` and `uploaded_tombstone` rows older than this are
+/// pruned once per run.
 const _appliedTombstoneRetention = Duration(hours: 1);
 
 /// Thrown when the outgoing batch fails [validateOutgoingBatch]: nothing
@@ -356,13 +357,14 @@ class SpacesSyncService extends _$SpacesSyncService {
       final applied = await _fetchAndApply(session, settings);
       settings = await settingsRepo.fetchSettings();
 
-      // The canary only looks at a recent window; keep the ledger small.
-      await ref
-          .read(tabDatabaseProvider)
-          .syncStateDao
-          .pruneAppliedTombstones(
-            DateTime.now().subtract(_appliedTombstoneRetention),
-          );
+      // The canary and the echo guard only look at a recent window; keep
+      // both ledgers small.
+      final syncState = ref.read(tabDatabaseProvider).syncStateDao;
+      final retentionCutoff = DateTime.now().subtract(
+        _appliedTombstoneRetention,
+      );
+      await syncState.pruneAppliedTombstones(retentionCutoff);
+      await syncState.pruneUploadedTombstones(retentionCutoff);
 
       var healed = 0;
       final blocked = state.blockedBatch;
@@ -448,6 +450,7 @@ class SpacesSyncService extends _$SpacesSyncService {
     await db.syncStateDao.clearAll();
     await db.syncStateDao.clearAllForeign();
     await db.syncStateDao.clearAllDeletions();
+    await db.syncStateDao.clearAllUploadedTombstones();
     await ref.read(spacesSyncSnapshotStoreProvider).writeFailedIds({});
     await ref
         .read(zenSettingsRepositoryProvider.notifier)
@@ -1031,6 +1034,9 @@ class SpacesSyncService extends _$SpacesSyncService {
       if (tombstoneIds.contains(id)) {
         await db.syncStateDao.deleteDigest(id);
         await db.syncStateDao.clearDeletions([id]);
+        // What the incoming echo guard reads: a create for this id arriving
+        // shortly is Zen's stale projection, not the user (gh-15380).
+        await db.syncStateDao.recordUploadedTombstone(id);
       } else if (digests[id] case final digest?) {
         await db.syncStateDao.putDigest(id, projected[id]!.kind, digest);
       }
