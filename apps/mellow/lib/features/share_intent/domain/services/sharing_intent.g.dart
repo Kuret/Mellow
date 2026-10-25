@@ -316,7 +316,7 @@ final class BrokeredLaunchClaimProvider
 }
 
 String _$brokeredLaunchClaimHash() =>
-    r'be524d1db5d89556395a3a0ef9ec5ed9f390df1c';
+    r'6b1c35e94256e80079a5029df1ec7cea7b9765c8';
 
 /// The broker's queue, claimed ahead of its delivery.
 ///
