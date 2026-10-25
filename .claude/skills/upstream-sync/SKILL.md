@@ -84,15 +84,13 @@ Branch from `zen-model`: `git checkout -b upstream-sync/<YYYY-MM-DD>`.
 
 **Every upstream patch has to be translated before it will apply.** Mellow renamed the identifiers it inherited — the Dart package (`weblibre` → `mellow`), the app directory (`apps/weblibre` → `apps/mellow`), the Kotlin packages and application id (`eu.weblibre.*` → `app.mellow.browser.*`), the Android resource prefix (`weblibre_` → `mellow_`). Upstream still speaks the old names, so a raw `cherry-pick` conflicts on contact with an import block or a resource reference.
 
-`identifiers.py` in this skill directory is the mapping, and it doubles as a patch filter. Take commits through it:
+`identifiers.py` in this skill directory is the mapping. `take.sh` applies it per commit:
 
 ```
-git format-patch --stdout <sha>^..<sha> \
-  | python3 .claude/skills/upstream-sync/identifiers.py \
-  | git am -3 --keep-non-patch          # -3 falls back to a real merge on drift
+.claude/skills/upstream-sync/take.sh <sha> [extra pathspec...]
 ```
 
-`git am` preserves upstream authorship the way `cherry-pick -x` did; add the upstream sha to the message yourself when it matters. For a large plugin-layer range, `<A>^..<B>` in one `format-patch` is fine when every commit in it is in the take bucket.
+It builds identifier-translated copies of `<sha>^` and `<sha>` (paths translated too, slice only) as two throwaway commits and cherry-picks the second, so git has a correct merge base and a real three-way merge on drift. Do **not** go back to `format-patch | identifiers.py | git am -3`: the filter changes blob content, so the patch's `index` lines name blobs this repo does not have and `-3` silently has nothing to fall back to. The script keeps upstream authorship and message and appends `(upstream FaFre/WebLibre <sha>)` as a trailer; on a conflict, resolve, `git cherry-pick --continue`, then `take.sh --finish <sha>` for the trailer. One commit per run, in upstream order; the slice defaults to the plugin packages plus `apps/weblibre/android`, and files the commit touches that do not exist here (deleted features) are skipped and printed, so read that list — a `SKIP-MISSING` on a file you still have under another name is a rename to resolve by hand. Generated files are always excluded; regenerate them after each commit that touches a pigeon schema or a drift table.
 
 Two things the filter cannot decide for you:
 
