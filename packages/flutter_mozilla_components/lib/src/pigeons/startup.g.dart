@@ -34,6 +34,16 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
+
+List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+  if (empty) {
+    return <Object?>[];
+  }
+  if (error == null) {
+    return <Object?>[result];
+  }
+  return <Object?>[error.code, error.message, error.details];
+}
 bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
@@ -132,6 +142,26 @@ enum ProfileStartupPromptMode {
   browserOnly;
 }
 
+/// The auto-lock modes whose unlock holds across windows.
+///
+/// Background mode is absent on purpose: switching between the browser and a
+/// Custom Tab or PWA window counts as leaving, so its unlock is never shared.
+enum SharedUnlockMode {
+  timeout,
+  startup;
+}
+
+enum ProfilePasswordOutcome {
+  accepted,
+  rejected,
+  /// Not checked: an earlier run of wrong attempts is still being waited out.
+  throttled,
+  /// The app half has not activated a profile yet. Asking again later is right.
+  unavailable,
+  /// The check could not run or record its result. Not a pass.
+  failed;
+}
+
 class ProfileStartupDirective {
   ProfileStartupDirective({
     required this.kind,
@@ -216,8 +246,116 @@ class ProfileStartupDirective {
   }
 }
 
-/// Profile arbitration, registered at plugin attach time so it is callable
-/// before anything opens a database or initializes Gecko.
+/// An unlock of the committed profile that the browser and its Custom Tab and
+/// PWA windows share.
+class SharedProfileUnlock {
+  SharedProfileUnlock({
+    required this.mode,
+    required this.timeoutMs,
+    required this.ageMs,
+  });
+
+  SharedUnlockMode mode;
+
+  int timeoutMs;
+
+  /// How long ago the profile was unlocked. An age rather than a timestamp:
+  /// Dart and native do not share a clock worth trusting.
+  int ageMs;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      mode,
+      timeoutMs,
+      ageMs,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SharedProfileUnlock decode(Object result) {
+    result as List<Object?>;
+    return SharedProfileUnlock(
+      mode: result[0]! as SharedUnlockMode,
+      timeoutMs: result[1]! as int,
+      ageMs: result[2]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SharedProfileUnlock || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(mode, other.mode) && _deepEquals(timeoutMs, other.timeoutMs) && _deepEquals(ageMs, other.ageMs);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'SharedProfileUnlock(mode: $mode, timeoutMs: $timeoutMs, ageMs: $ageMs)';
+  }
+}
+
+class ProfilePasswordReply {
+  ProfilePasswordReply({
+    required this.outcome,
+    this.retryAfterMs,
+  });
+
+  ProfilePasswordOutcome outcome;
+
+  /// How long the next attempt has to wait, for a rejected or throttled one.
+  int? retryAfterMs;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      outcome,
+      retryAfterMs,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ProfilePasswordReply decode(Object result) {
+    result as List<Object?>;
+    return ProfilePasswordReply(
+      outcome: result[0]! as ProfilePasswordOutcome,
+      retryAfterMs: result[1] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ProfilePasswordReply || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(outcome, other.outcome) && _deepEquals(retryAfterMs, other.retryAfterMs);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ProfilePasswordReply(outcome: $outcome, retryAfterMs: $retryAfterMs)';
+  }
+}
+
 /// One launch the broker is holding because nothing could receive it.
 ///
 /// Only what survives a process restart unchanged: arbitrary `Parcelable` extras
@@ -334,11 +472,23 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ProfileStartupPromptMode) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    }    else if (value is ProfileStartupDirective) {
+    }    else if (value is SharedUnlockMode) {
       buffer.putUint8(133);
+      writeValue(buffer, value.index);
+    }    else if (value is ProfilePasswordOutcome) {
+      buffer.putUint8(134);
+      writeValue(buffer, value.index);
+    }    else if (value is ProfileStartupDirective) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    }    else if (value is SharedProfileUnlock) {
+      buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    }    else if (value is ProfilePasswordReply) {
+      buffer.putUint8(137);
       writeValue(buffer, value.encode());
     }    else if (value is StartupIntentRecord) {
-      buffer.putUint8(134);
+      buffer.putUint8(138);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -361,8 +511,18 @@ class _PigeonCodec extends StandardMessageCodec {
         final value = readValue(buffer) as int?;
         return value == null ? null : ProfileStartupPromptMode.values[value];
       case 133:
-        return ProfileStartupDirective.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SharedUnlockMode.values[value];
       case 134:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : ProfilePasswordOutcome.values[value];
+      case 135:
+        return ProfileStartupDirective.decode(readValue(buffer)!);
+      case 136:
+        return SharedProfileUnlock.decode(readValue(buffer)!);
+      case 137:
+        return ProfilePasswordReply.decode(readValue(buffer)!);
+      case 138:
         return StartupIntentRecord.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -370,6 +530,8 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
+/// Profile arbitration, registered at plugin attach time so it is callable
+/// before anything opens a database or initializes Gecko.
 class GeckoProfileApi {
   /// Constructor for [GeckoProfileApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
@@ -573,14 +735,17 @@ class GeckoProfileApi {
   /// Returns false having changed nothing observable, so a caller that gets false
   /// can report the failure and keep running. On true the process is terminal and
   /// must call [completeProfileRestart] once teardown is done.
-  Future<bool> armProfileRestart(String? targetProfileId, String reason) async {
+  ///
+  /// [showPicker] makes the next launch show the profile picker once, whatever
+  /// the prompt setting says (it still needs a UI launch and two profiles).
+  Future<bool> armProfileRestart(String? targetProfileId, String reason, bool showPicker) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.armProfileRestart$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[targetProfileId, reason]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[targetProfileId, reason, showPicker]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
@@ -705,6 +870,28 @@ class GeckoProfileApi {
     )
     ;
     return pigeonVar_replyValue! as bool;
+  }
+
+  /// Copies the SAF document [sourceUri] into the local file [destPath].
+  ///
+  /// Throws with the platform's own exception class and message, so a restore
+  /// that cannot read its archive says why instead of failing anonymously.
+  Future<void> copyDocumentToFile(String sourceUri, String destPath) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.copyDocumentToFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sourceUri, destPath]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   /// Claims the right for this Dart isolate to hold profile state open.
@@ -849,5 +1036,109 @@ class GeckoProfileApi {
     )
     ;
     return pigeonVar_replyValue as String?;
+  }
+
+  /// Records that the browser unlocked [profileId] [ageMs] ago, so Custom Tab
+  /// and PWA windows open without asking again while [mode] says it holds.
+  ///
+  /// The age keeps an unlock the browser adopted from a window from starting
+  /// its timeout over on the way back.
+  Future<void> recordSharedProfileUnlock(String profileId, SharedUnlockMode mode, int timeoutMs, int ageMs) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.recordSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId, mode, timeoutMs, ageMs]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Drops a shared unlock: the profile was locked again, or its lock
+  /// settings no longer allow sharing one.
+  Future<void> clearSharedProfileUnlock(String profileId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.clearSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// The shared unlock of [profileId] that still holds, or null.
+  Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+    return pigeonVar_replyValue as SharedProfileUnlock?;
+  }
+}
+
+/// Lets a Custom Tab or PWA window check a profile password.
+///
+/// The check runs in Dart because that is where the password's Argon2
+/// verifier and the wrong-attempt throttling live; a second implementation in
+/// Kotlin would be a second copy that can disagree.
+abstract class ProfileLockFlutterApi {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  Future<ProfilePasswordReply> checkProfilePassword(String profileId, String password);
+
+  static void setUp(ProfileLockFlutterApi? api, {
+    BinaryMessenger? binaryMessenger, 
+    String messageChannelSuffix = '',
+  }) 
+{
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.ProfileLockFlutterApi.checkProfilePassword$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final String arg_profileId = args[0]! as String;
+          final String arg_password = args[1]! as String;
+          try {
+            final ProfilePasswordReply output = await api.checkProfilePassword(arg_profileId, arg_password);
+            return wrapResponse(result: output);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
   }
 }

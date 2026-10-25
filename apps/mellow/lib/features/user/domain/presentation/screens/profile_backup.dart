@@ -28,6 +28,7 @@ import 'package:mellow/core/routing/routes.dart';
 import 'package:mellow/domain/entities/profile.dart';
 import 'package:mellow/features/user/domain/entities/restart_cost.dart';
 import 'package:mellow/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_authorization.dart';
 import 'package:mellow/features/user/domain/providers/backup_directory.dart';
 import 'package:mellow/features/user/domain/services/user_backup.dart';
 import 'package:mellow/utils/exit_app.dart';
@@ -204,7 +205,19 @@ class ProfileBackupScreen extends HookConsumerWidget {
                       profileName: profile.name,
                       restartCost: restartCost,
                     );
-                    if (confirmed != true) return;
+                    if (confirmed != true || !context.mounted) return;
+
+                    // A backup is the profile's whole session — cookies and
+                    // logins — under a password whoever starts it picks. So
+                    // it takes whatever unlocks this profile, asked fresh, and
+                    // that holds when it is started from another profile too.
+                    final authorized = await authorizeProfileAction(
+                      context,
+                      ref,
+                      profile,
+                      reason: 'Back up "${profile.name}"',
+                    );
+                    if (!authorized) return;
 
                     // Queues the work and restarts. The archive is written
                     // by the next process, where nothing has the profile

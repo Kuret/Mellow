@@ -32,6 +32,8 @@ import 'package:mellow/features/settings/presentation/widgets/sections.dart';
 import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/entities/restart_cost.dart';
 import 'package:mellow/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:mellow/features/user/domain/presentation/dialogs/profile_password_dialogs.dart';
+import 'package:mellow/features/user/domain/presentation/utils/profile_authorization.dart';
 import 'package:mellow/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:mellow/features/user/domain/repositories/profile.dart';
@@ -69,54 +71,112 @@ class ProfileEditScreen extends HookConsumerWidget {
       return;
     }
 
-    // Require confirmation whenever a lock is involved — including on the
-    // *create* path, which used to skip it because there was no existing profile
-    // to compare against. Skipping it meant a user could switch the lock on with
-    // nothing enrolled on the device: `authenticate` catches `LocalAuthException`
-    // and reports failure, there is no way to clear the lock from outside the
-    // profile, and the result was a user that could never be opened. Proving the
-    // gate works before it is armed is the only thing standing between the toggle
-    // and that.
-    final locking = profile != null
-        ? profile!.authSettings.authenticationRequired ||
-              authSettings.authenticationRequired
-        : authSettings.authenticationRequired;
+    // Read from disk rather than trusted from the route: what guards a profile
+    // has to be what the profile says now.
+    final existing = profile != null
+        ? await readCurrentProfileMetadata(profile!)
+        : null;
+    if (!context.mounted) return;
 
-    if (locking) {
+    void reportFailure() {
+      showErrorMessage(
+        context,
+        existing != null
+            ? 'Could not confirm your identity. $nothingChanged'
+            : 'Could not confirm your identity. A locked profile is only '
+                  'created once this device can unlock it.',
+      );
+    }
+
+    // Any change to a locked profile — its name included — needs whatever
+    // unlocks it now. Otherwise anyone with another profile open could reach
+    // this screen from the profile list and simply switch the lock off.
+    if (existing != null && existing.authSettings.authenticationRequired) {
+      final authorized = await authorizeProfileAction(
+        context,
+        ref,
+        existing,
+        reason: 'Change "${existing.name}"',
+      );
+      if (!context.mounted) return;
+      if (!authorized) {
+        reportFailure();
+        return;
+      }
+    }
+
+    // Prove the device prompt works before it becomes the lock — including on
+    // the *create* path, which used to skip it because there was no existing
+    // profile to compare against. Skipping it meant a user could switch the
+    // lock on with nothing enrolled on the device: `authenticate` catches
+    // `LocalAuthException` and reports failure, and the result was a profile
+    // that could never be opened. Already proved above when the profile was
+    // device-locked before.
+    final provesDevice =
+        authSettings.lockMethod == ProfileLockMethod.device &&
+        existing?.authSettings.lockMethod != ProfileLockMethod.device;
+
+    if (provesDevice) {
+      final alsoRemember = await activeProfileDeviceUnlock(existing);
+      if (!context.mounted) return;
+
       final authResult = await ref
           .read(localAuthenticationServiceProvider.notifier)
           .authenticate(
             // A profile being created has no id yet, and the key only scopes the
             // result cache — nothing has been created for it to belong to.
-            authKey: profile != null
-                ? profileAccessAuthKey(profile!.id)
+            authKey: existing != null
+                ? profileAccessAuthKey(existing.id)
                 : _newProfileAuthKey,
-            localizedReason: profile != null
+            localizedTitle: deviceAuthPromptTitle,
+            localizedReason: existing != null
                 ? 'Require authentication for profile'
                 : 'Confirm you can unlock this profile',
             settings: authSettings,
+            alsoRemember: alsoRemember,
           );
 
-      if (!authResult) {
-        if (context.mounted) {
-          showErrorMessage(
-            context,
-            profile != null
-                ? 'Could not confirm your identity. $nothingChanged'
-                : 'Could not confirm your identity. A locked profile is only '
-                      'created once this device can unlock it.',
-          );
-        }
+      if (!authResult.passed) {
+        if (context.mounted) reportFailure();
         return;
       }
     }
+
+    // The editor only offers the password method together with a password,
+    // so this is a guard against a lock nobody could open, not a UI path.
+    if (authSettings.lockMethod == ProfileLockMethod.password &&
+        authSettings.passwordVerifier == null) {
+      return;
+    }
+
+    // A verifier left behind by a method that no longer uses it would come
+    // back to life, with the old password, the next time the method is chosen.
+    final toSave = authSettings.lockMethod == ProfileLockMethod.password
+        ? authSettings
+        : authSettings.copyWith(passwordVerifier: null);
 
     if (profile != null) {
       await ref
           .read(profileRepositoryProvider.notifier)
           .updateProfileMetadata(
-            profile!.copyWith(name: name, authSettings: authSettings),
+            existing!.copyWith(name: name, authSettings: toSave),
           );
+
+      // The remembered unlock carries the auto-lock policy it was made under,
+      // and `isCached`/`evictCacheOnBackground` read that copy rather than the
+      // profile. Left alone, a switch from "on startup" to "in background"
+      // would never lock this session. Every path above proved the new lock —
+      // the old one was answered, the device prompt passed, or the password
+      // was just typed twice — so the open profile stays unlocked, under the
+      // new policy from now on.
+      final authCache = ref.read(localAuthenticationServiceProvider.notifier);
+      final authKey = profileAccessAuthKey(existing.id);
+      if (existing.uuidValue == filesystem.selectedProfile &&
+          toSave.authenticationRequired) {
+        authCache.remember(authKey, toSave);
+      } else {
+        authCache.forget(authKey);
+      }
 
       if (context.mounted) {
         context.pop();
@@ -124,7 +184,7 @@ class ProfileEditScreen extends HookConsumerWidget {
     } else {
       await ref
           .read(profileRepositoryProvider.notifier)
-          .createProfile(name: name, authSettings: authSettings);
+          .createProfile(name: name, authSettings: toSave);
 
       if (context.mounted) {
         context.pop();
@@ -208,18 +268,88 @@ class _AuthSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SettingSection(name: 'Authentication'),
-        SwitchListTile.adaptive(
-          value: authSettings.authenticationRequired,
-          title: const Text('Require authentication'),
-          subtitle: const Text('Ask before this profile can be opened'),
-          secondary: const Icon(MdiIcons.fingerprint),
-          contentPadding: EdgeInsets.zero,
-          onChanged: (value) {
-            onAuthSettingsChanged(
-              authSettings.copyWith.authenticationRequired(value),
-            );
+        RadioGroup<ProfileLockMethod>(
+          groupValue: authSettings.lockMethod,
+          onChanged: (value) async {
+            if (value == null) return;
+
+            // Chosen only together with a password. A password method with no
+            // password behind it is a profile nobody can open.
+            if (value == ProfileLockMethod.password &&
+                authSettings.passwordVerifier == null) {
+              final verifier = await showSetProfilePasswordDialog(context);
+              if (verifier == null || !context.mounted) return;
+
+              onAuthSettingsChanged(
+                authSettings.copyWith(
+                  lockMethod: value,
+                  passwordVerifier: verifier,
+                ),
+              );
+              return;
+            }
+
+            onAuthSettingsChanged(authSettings.copyWith.lockMethod(value));
           },
+          child: const Column(
+            children: [
+              RadioListTile.adaptive(
+                value: ProfileLockMethod.none,
+                title: Text('No lock'),
+                subtitle: Text(
+                  'Anyone using Mellow on this device can open this profile',
+                ),
+                secondary: Icon(MdiIcons.lockOpenVariantOutline),
+                contentPadding: EdgeInsets.zero,
+              ),
+              RadioListTile.adaptive(
+                value: ProfileLockMethod.device,
+                title: Text('Device lock'),
+                subtitle: Text(
+                  'Fingerprint, face or the device PIN. Anyone who can unlock '
+                  'this device can open this profile.',
+                ),
+                secondary: Icon(MdiIcons.fingerprint),
+                contentPadding: EdgeInsets.zero,
+              ),
+              RadioListTile.adaptive(
+                value: ProfileLockMethod.password,
+                title: Text('Profile password'),
+                subtitle: Text(
+                  "A password only for this profile. Fingerprints and the "
+                  "device PIN can't open it.",
+                ),
+                secondary: Icon(MdiIcons.formTextboxPassword),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ],
+          ),
         ),
+        if (authSettings.lockMethod == ProfileLockMethod.password) ...[
+          ListTile(
+            title: const Text('Change password'),
+            leading: const Icon(MdiIcons.keyChange),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+            onTap: () async {
+              final verifier = await showSetProfilePasswordDialog(context);
+              if (verifier == null || !context.mounted) return;
+
+              onAuthSettingsChanged(
+                authSettings.copyWith.passwordVerifier(verifier),
+              );
+            },
+          ),
+          const ListTile(
+            title: Text("A forgotten password can't be recovered"),
+            subtitle: Text(
+              "Without it, this profile can't be opened, backed up or "
+              "deleted. The password locks Mellow; it does not encrypt the "
+              "profile's data.",
+            ),
+            leading: Icon(Icons.info_outline),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+          ),
+        ],
         if (authSettings.authenticationRequired) ...[
           const SizedBox(height: 8),
           Padding(
@@ -369,7 +499,19 @@ class _ProfileActionsSection extends ConsumerWidget {
                   restartCost: restartCost,
                 );
 
-                if (result == true) {
+                if (result != true || !context.mounted) return;
+
+                // Deleting destroys nothing that leaves the device, but it
+                // is still someone else's profile when this runs from another
+                // one, and a lock that anyone could delete away is no lock.
+                final authorized = await authorizeProfileAction(
+                  context,
+                  ref,
+                  profile,
+                  reason: 'Delete "${profile.name}"',
+                );
+
+                if (authorized) {
                   // Queues the delete and restarts: a profile's state reaches
                   // beyond its directory, so removal needs an ownership snapshot
                   // and a journal, and both need a maintenance lease this process

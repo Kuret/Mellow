@@ -70,11 +70,15 @@ class GeckoProfileService {
   ///
   /// False means nothing changed and the app may keep running. True means the
   /// process is terminal: finish teardown, then call [completeProfileRestart].
+  ///
+  /// [showPicker] asks the next launch to show the profile picker once, even
+  /// when the prompt setting is off.
   Future<bool> armProfileRestart({
     String? targetProfileId,
     required String reason,
+    bool showPicker = false,
   }) {
-    return _api.armProfileRestart(targetProfileId, reason);
+    return _api.armProfileRestart(targetProfileId, reason, showPicker);
   }
 
   /// Exits the process so the armed restart can relaunch it. Never returns.
@@ -109,6 +113,13 @@ class GeckoProfileService {
   /// is still open" rather than as a failure — Dart cannot do this at all, so
   /// the alternative to a best-effort answer is no answer.
   Future<bool> syncDirectory(String path) => _api.syncDirectory(path);
+
+  /// Copies the SAF document [sourceUri] into the local file at [destPath].
+  ///
+  /// Throws a `PlatformException` whose code is the native exception class and
+  /// whose message is its text.
+  Future<void> copyDocumentToFile(Uri sourceUri, String destPath) =>
+      _api.copyDocumentToFile(sourceUri.toString(), destPath);
 
   /// Claims every queued launch this engine may deliver, oldest first.
   ///
@@ -146,4 +157,26 @@ class GeckoProfileService {
   Future<String?> getCommittedProfileId() => _api.getCommittedProfileId();
 
   Future<String?> getBoundProfileFolder() => _api.getBoundProfileFolder();
+
+  /// Shares the browser's unlock of [profileId], made [age] ago, with Custom
+  /// Tab and PWA windows for as long as [mode] lets it hold.
+  Future<void> recordSharedProfileUnlock(
+    String profileId, {
+    required SharedUnlockMode mode,
+    required Duration timeout,
+    required Duration age,
+  }) => _api.recordSharedProfileUnlock(
+    profileId,
+    mode,
+    timeout.inMilliseconds,
+    age.inMilliseconds,
+  );
+
+  Future<void> clearSharedProfileUnlock(String profileId) =>
+      _api.clearSharedProfileUnlock(profileId);
+
+  /// An unlock of [profileId] a Custom Tab or PWA window made that still
+  /// holds, or null.
+  Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) =>
+      _api.getSharedProfileUnlock(profileId);
 }

@@ -1,0 +1,324 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mellow/core/logger.dart';
+import 'package:mellow/features/user/data/models/auth_settings.dart';
+import 'package:mellow/features/user/domain/services/profile_password.dart';
+import 'package:mellow/presentation/widgets/obscurable_text_field.dart';
+
+/// The sentence that says how long the next attempt has to wait.
+String describePasswordRetryAfter(Duration wait) {
+  // Rounded up: "try again in 0 seconds" for a wait that is still running
+  // reads as a bug.
+  final seconds = (wait.inMilliseconds / 1000).ceil();
+  if (seconds < 120) {
+    return seconds == 1
+        ? 'Try again in 1 second.'
+        : 'Try again in $seconds seconds.';
+  }
+  final minutes = (seconds / 60).ceil();
+  return minutes == 1
+      ? 'Try again in 1 minute.'
+      : 'Try again in $minutes minutes.';
+}
+
+/// Puts the cursor back into a password field after an attempt that did not
+/// unlock, so the next one can be typed straight away.
+///
+/// The field is disabled while the password is checked, which takes its focus
+/// and closes the keyboard. It is only enabled again by the rebuild that
+/// follows, so the focus is asked for after that frame.
+void refocusPasswordField(BuildContext context, FocusNode focusNode) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (context.mounted) focusNode.requestFocus();
+  });
+}
+
+/// The error under a password field for an attempt that did not unlock.
+String? describeProfilePasswordCheck(ProfilePasswordCheck check) {
+  return switch (check) {
+    ProfilePasswordAccepted() => null,
+    ProfilePasswordRejected(retryAfter: null) => 'Wrong password',
+    ProfilePasswordRejected(:final retryAfter?) =>
+      'Wrong password. ${describePasswordRetryAfter(retryAfter)}',
+    ProfilePasswordInterrupted() =>
+      'Mellow was closed or switched away from during the check. Enter the '
+          'password again.',
+    ProfilePasswordThrottled(:final retryAfter) =>
+      'Too many wrong attempts. ${describePasswordRetryAfter(retryAfter)}',
+  };
+}
+
+/// Asks for the password of the profile in [profileDir].
+///
+/// Returns true once the password is accepted, false when the dialog is
+/// dismissed. Wrong attempts are answered inside the dialog, so the person can
+/// try again without reopening it.
+///
+/// [departureCount] is read before and after each check; see
+/// `LocalAuthenticationService.departureCount`. A check during which the app
+/// left the foreground does not authorize.
+Future<bool> showProfilePasswordDialog(
+  BuildContext context, {
+  required Directory profileDir,
+  required AuthSettings settings,
+  required String title,
+  required int Function() departureCount,
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => _ProfilePasswordDialog(
+      profileDir: profileDir,
+      settings: settings,
+      title: title,
+      departureCount: departureCount,
+    ),
+  );
+
+  return result ?? false;
+}
+
+class _ProfilePasswordDialog extends HookWidget {
+  final Directory profileDir;
+  final AuthSettings settings;
+  final String title;
+  final int Function() departureCount;
+
+  const _ProfilePasswordDialog({
+    required this.profileDir,
+    required this.settings,
+    required this.title,
+    required this.departureCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useTextEditingController();
+    final focusNode = useFocusNode();
+    final passwordText = useValueListenable(controller).text;
+    final checking = useState(false);
+    final error = useState<String?>(null);
+
+    Future<void> submit() async {
+      if (checking.value || passwordText.isEmpty) return;
+      checking.value = true;
+
+      try {
+        final departuresBefore = departureCount();
+        var result = await ProfilePasswordGate(
+          profileDir,
+        ).check(settings, controller.text);
+
+        if (!context.mounted) return;
+
+        // An authorization that lands while the app is away would let the
+        // action run — and a backup restart into a screen that asks whoever
+        // opens the app next for the archive password.
+        if (result is ProfilePasswordAccepted &&
+            departureCount() != departuresBefore) {
+          result = const ProfilePasswordInterrupted();
+        }
+
+        if (result is ProfilePasswordAccepted) {
+          Navigator.of(context).pop(true);
+          return;
+        }
+
+        controller.clear();
+        error.value = describeProfilePasswordCheck(result);
+        refocusPasswordField(context, focusNode);
+      } catch (e, s) {
+        // Most likely the attempt record could not be written. Denied, not
+        // waved through: a check that cannot count its failures must not
+        // count as passed.
+        logger.e('Profile password check failed', error: e, stackTrace: s);
+        if (context.mounted) {
+          error.value = 'Could not check the password. Try again.';
+          refocusPasswordField(context, focusNode);
+        }
+      } finally {
+        if (context.mounted) {
+          checking.value = false;
+        }
+      }
+    }
+
+    // Not dismissible mid-check: the answer would arrive with nobody to give it
+    // to, and a reopened dialog would start a second check.
+    return PopScope(
+      canPop: !checking.value,
+      child: AlertDialog(
+        title: Text(title),
+        content: ObscurableTextField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: !checking.value,
+          autofocus: true,
+          keyboardType: TextInputType.visiblePassword,
+          textInputAction: TextInputAction.done,
+          onChanged: (_) => error.value = null,
+          onSubmitted: (_) => submit(),
+          decoration: InputDecoration(
+            labelText: 'Profile password',
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            errorText: error.value,
+            errorMaxLines: 3,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: checking.value
+                ? null
+                : () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: checking.value || passwordText.isEmpty ? null : submit,
+            child: checking.value
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Asks for a new profile password, twice, and returns its verifier.
+///
+/// Returns null when the dialog is dismissed. The only rule is the one backup
+/// passwords already have: it must not be empty.
+Future<String?> showSetProfilePasswordDialog(BuildContext context) {
+  return showDialog<String>(
+    context: context,
+    builder: (context) => const _SetProfilePasswordDialog(),
+  );
+}
+
+class _SetProfilePasswordDialog extends HookWidget {
+  const _SetProfilePasswordDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final password = useTextEditingController();
+    final repeat = useTextEditingController();
+    final passwordText = useValueListenable(password).text;
+    final repeatText = useValueListenable(repeat).text;
+    final saving = useState(false);
+    final saveFailed = useState(false);
+
+    final mismatch = repeatText.isNotEmpty && repeatText != passwordText;
+    final canSave =
+        !saving.value && passwordText.isNotEmpty && repeatText == passwordText;
+
+    Future<void> save() async {
+      if (!canSave) return;
+      saving.value = true;
+      saveFailed.value = false;
+
+      try {
+        final verifier = await createProfilePasswordVerifier(passwordText);
+        if (context.mounted) {
+          Navigator.of(context).pop(verifier);
+        }
+      } catch (e, s) {
+        logger.e(
+          'Could not create a profile password',
+          error: e,
+          stackTrace: s,
+        );
+        if (context.mounted) {
+          saveFailed.value = true;
+        }
+      } finally {
+        if (context.mounted) {
+          saving.value = false;
+        }
+      }
+    }
+
+    return AlertDialog(
+      title: const Text('Set profile password'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This password is asked for when the profile opens, and before '
+              'it is backed up, replaced with a backup, changed or deleted.',
+            ),
+            const SizedBox(height: 16),
+            ObscurableTextField(
+              controller: password,
+              enabled: !saving.value,
+              autofocus: true,
+              keyboardType: TextInputType.visiblePassword,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'New password',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ObscurableTextField(
+              controller: repeat,
+              enabled: !saving.value,
+              keyboardType: TextInputType.visiblePassword,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => save(),
+              decoration: InputDecoration(
+                labelText: 'Repeat password',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                errorText: mismatch
+                    ? "The passwords don't match"
+                    : saveFailed.value
+                    ? 'Could not set the password. Try again.'
+                    : null,
+                errorMaxLines: 3,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: saving.value ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: canSave ? save : null,
+          child: saving.value
+              ? const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Save'),
+        ),
+      ],
+    );
+  }
+}

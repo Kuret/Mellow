@@ -35,7 +35,7 @@ final class LocalAuthenticationServiceProvider
 }
 
 String _$localAuthenticationServiceHash() =>
-    r'0f4b2b47e94b2426a2219eca4eb2258bf683ab7c';
+    r'f982c9aaebd084d1ce8412cd479ea83ed2bc1e29';
 
 abstract class _$LocalAuthenticationService extends $AsyncNotifier<bool> {
   FutureOr<bool> build();
