@@ -40,6 +40,7 @@ import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
 import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
 import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
 import 'package:mellow/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -887,6 +888,28 @@ class _AppLinkPromptLayer extends ConsumerWidget {
   }
 }
 
+/// Keeps the startup spinner up while [StartupLaunchCover] is raised.
+///
+/// Drawn exactly like the loading screen `MainApp` shows before initialization
+/// completes, so the two read as one wait rather than a spinner, the home
+/// surface, and then the page.
+class _StartupLaunchCoverLayer extends ConsumerWidget {
+  const _StartupLaunchCoverLayer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(startupLaunchCoverProvider)) {
+      return const SizedBox.shrink();
+    }
+
+    // Absorbs input: the home surface it hides would otherwise still take
+    // taps.
+    return const AbsorbPointer(
+      child: Scaffold(body: Center(child: CircularProgressIndicator())),
+    );
+  }
+}
+
 class BrowserScreen extends HookConsumerWidget {
   const BrowserScreen({super.key});
 
@@ -1545,6 +1568,12 @@ class BrowserScreen extends HookConsumerWidget {
                 // collapses the stack to nothing and takes the whole browser
                 // with it, silently, with no error to show for it.
                 const Positioned.fill(child: PageContextMenuTrigger()),
+
+                // Layer 9: the startup spinner, while a cold start is still
+                // opening the link it was launched for. Above everything, so
+                // the home surface underneath never shows (#612); dialogs are
+                // routes of their own and still appear over it.
+                const Positioned.fill(child: _StartupLaunchCoverLayer()),
               ],
             ),
           ),

@@ -62,7 +62,11 @@ void sharedContentOpener(Ref ref) {
         return;
       }
 
-      unawaited(_open(ref, content));
+      // Claimed synchronously, before the router is awaited, so that a cold
+      // start's home target waits for the sheet instead of resuming a tab under
+      // it. Released once the route is on its way, not when it is popped.
+      final launchClaim = ref.read(intentLaunchClaimProvider.notifier)..claim();
+      unawaited(_open(ref, content).whenComplete(launchClaim.release));
     },
     onError: (error, stackTrace) {
       logger.e(
@@ -75,6 +79,9 @@ void sharedContentOpener(Ref ref) {
 }
 
 Future<void> _open(Ref ref, SharedContent content) async {
+  // Held in a local: the cover is lowered after awaits, on every way out.
+  final launchCover = ref.read(startupLaunchCoverProvider.notifier);
+
   try {
     final router = await ref.read(routerProvider.future);
 
@@ -101,8 +108,8 @@ Future<void> _open(Ref ref, SharedContent content) async {
     if (top == name) {
       // The previous share is still open; this one takes its place rather than
       // stacking on top and bringing it back when popped.
-      await router.pushReplacement(route.location);
-      return;
+      unawaited(router.pushReplacement(route.location));
+      return; // lowers the startup cover in `finally`
     }
 
     if (top != BrowserRoute.name) {
@@ -112,13 +119,18 @@ Future<void> _open(Ref ref, SharedContent content) async {
       router.go(const BrowserRoute().location);
     }
 
-    await router.push(route.location);
+    unawaited(router.push(route.location));
   } catch (error, stackTrace) {
     logger.e(
       'Failed to open shared content',
       error: error,
       stackTrace: stackTrace,
     );
+  } finally {
+    // A launch ends in a sheet or the search screen, never in a tab selected
+    // behind it, so nothing else would lower the startup cover that was raised
+    // for it. Lowering is a no-op when no cover is up.
+    launchCover.lower();
   }
 }
 
