@@ -25,6 +25,9 @@ import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.d
 import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
+
+import '../../../../../spaces_sync/fake_spaces_sync_service.dart';
 
 class _NoSelectedTab extends SelectedTab {
   @override
@@ -98,11 +101,20 @@ void main() {
       SpaceData(uuid: 'space-2', name: 'Home', icon: '🏠', orderIndex: 1),
     ];
 
-    Future<void> pumpIndicator(WidgetTester tester, {String? selected}) async {
+    Future<void> pumpIndicator(
+      WidgetTester tester, {
+      String? selected,
+      bool syncPaused = false,
+    }) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             watchSpacesProvider.overrideWith((ref) => Stream.value(spaces)),
+            spacesSyncServiceProvider.overrideWith(
+              syncPaused
+                  ? FakeSpacesSyncService.paused
+                  : FakeSpacesSyncService.new,
+            ),
             selectedSpaceProvider.overrideWith(
               () => _SelectedSpaceOverride(selected),
             ),
@@ -123,6 +135,27 @@ void main() {
       expect(find.text('Refresh'), findsOneWidget);
       expect(find.text('New Space'), findsOneWidget);
       expect(find.text('New Tab'), findsOneWidget);
+      // No paused upload, no review row.
+      expect(find.text('Sync upload paused \u00b7 Review'), findsNothing);
+      expect(find.byIcon(Icons.cloud_off), findsNothing);
+    });
+
+    testWidgets('a paused upload leads the menu with a review row', (
+      tester,
+    ) async {
+      await pumpIndicator(tester, selected: 'space-1', syncPaused: true);
+
+      await tester.tap(find.byType(SpaceIndicator));
+      await tester.pumpAndSettle();
+
+      final review = find.text('Sync upload paused \u00b7 Review');
+      expect(review, findsOneWidget);
+      expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+      // It sits above everything else, where the badge's dot points.
+      expect(
+        tester.getTopLeft(review).dy,
+        lessThan(tester.getTopLeft(find.text('Refresh')).dy),
+      );
     });
 
     testWidgets(
@@ -195,6 +228,7 @@ void main() {
         ProviderScope(
           overrides: [
             watchSpacesProvider.overrideWith((ref) => Stream.value(spaces)),
+            spacesSyncServiceProvider.overrideWith(FakeSpacesSyncService.new),
             selectedSpaceProvider.overrideWith(
               () => _SelectedSpaceOverride('space-1'),
             ),

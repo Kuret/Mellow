@@ -33,6 +33,7 @@ import 'package:mellow/features/geckoview/features/tabs/data/models/space_data.d
 import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 
 /// Opens a new tab in the current space: the same thing the main toolbar's
 /// "New Tab" button ([ToolbarButtonId.addTab]) does on a plain tap.
@@ -59,6 +60,7 @@ enum _BrowserQuickMenuAction {
   tabs,
   menu,
   settings,
+  reviewPausedSync,
   newSpace,
   newTab,
 }
@@ -139,12 +141,39 @@ Future<void> showBrowserQuickMenu(
       ? ref.read(selectedSpaceProvider)
       : null;
 
+  // While the destructive-batch canary holds an upload back the compact
+  // bar's indicator carries a dot (see `SpacesSyncPausedBadge`); this row is
+  // where that dot leads.
+  final syncPaused =
+      ref.read(spacesSyncServiceProvider.select((s) => s.blockedBatch)) != null;
+
   const iconTextSpacing = SizedBox(width: 12);
 
   final result = await showMenu<_BrowserQuickMenuResult>(
     context: anchorContext,
     position: position,
     items: [
+      if (syncPaused) ...[
+        const PopupMenuItem(
+          value: _QuickMenuAction(_BrowserQuickMenuAction.reviewPausedSync),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.cloud_off),
+              iconTextSpacing,
+              // The one long label in the menu; the menu caps its width, so
+              // this gives rather than overflowing.
+              Flexible(
+                child: Text(
+                  'Sync upload paused \u00b7 Review',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+      ],
       const PopupMenuItem(
         value: _QuickMenuAction(_BrowserQuickMenuAction.reload),
         child: Row(
@@ -267,6 +296,10 @@ Future<void> showBrowserQuickMenu(
     case _QuickMenuAction(action: _BrowserQuickMenuAction.settings):
       if (anchorContext.mounted) {
         await SettingsRoute().push(anchorContext);
+      }
+    case _QuickMenuAction(action: _BrowserQuickMenuAction.reviewPausedSync):
+      if (anchorContext.mounted) {
+        await SyncSettingsRoute().push(anchorContext);
       }
     case _QuickMenuAction(action: _BrowserQuickMenuAction.newSpace):
       if (anchorContext.mounted) {

@@ -45,6 +45,7 @@ import 'package:mellow/features/geckoview/features/tabs/domain/providers/selecte
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
+import 'package:mellow/features/spaces_sync/presentation/widgets/spaces_sync_paused_notice.dart';
 import 'package:mellow/features/user/data/models/general_settings.dart';
 import 'package:mellow/features/user/data/models/zen_settings.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
@@ -79,7 +80,7 @@ class CompactTabBar extends ConsumerWidget {
       zenSettingsWithDefaultsProvider.select((s) => s.spaceIndicatorSide),
     );
 
-    const indicator = SpaceIndicator();
+    const indicator = SpacesSyncPausedBadge(child: SpaceIndicator());
     final chipStrip = Expanded(
       child: SpaceSlide(
         spaceUuid: spaceUuid,

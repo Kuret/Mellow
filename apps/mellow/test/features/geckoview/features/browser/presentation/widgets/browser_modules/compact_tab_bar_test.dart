@@ -49,10 +49,13 @@ import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/essentials_grid.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_indicator.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:mellow/features/user/data/models/general_settings.dart';
 import 'package:mellow/features/user/data/models/zen_settings.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
+
+import '../../../../../../spaces_sync/fake_spaces_sync_service.dart';
 
 class _EmptyTabStates extends TabStates {
   @override
@@ -197,6 +200,7 @@ Future<_RecordingTabRepository> _pumpBar(
     ProviderScope(
       overrides: [
         tabDatabaseProvider.overrideWith((ref) => db),
+        spacesSyncServiceProvider.overrideWith(FakeSpacesSyncService.new),
         tabRepositoryProvider.overrideWith(() => repository),
         zenSettingsWithDefaultsProvider.overrideWith(
           (ref) => zenSettings ?? ZenSettings.withDefaults(),

@@ -47,6 +47,7 @@ import 'package:mellow/features/geckoview/features/tabs/domain/providers/selecte
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_swipe.dart';
 import 'package:mellow/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:mellow/features/spaces_sync/presentation/widgets/spaces_sync_paused_notice.dart';
 import 'package:mellow/features/user/data/models/general_settings.dart';
 import 'package:mellow/features/user/data/models/zen_settings.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
@@ -480,7 +481,14 @@ class BrowserTabBar extends HookConsumerWidget {
           title: uprightTitle,
           collapsed: const WideRailCollapsedUrlButton(),
         ),
-        tabs: const RailSpaceTabs(),
+        // The paused-upload notice sits at the foot of the shelves, just
+        // above the toolbar and space row, where the eye lands anyway.
+        tabs: const Column(
+          children: [
+            Expanded(child: RailSpaceTabs()),
+            SpacesSyncPausedNotice(),
+          ],
+        ),
         toolbar: WideRailToolbarRow(
           buttons: [
             // The add-on bar is a rigid row of however many add-ons the tab

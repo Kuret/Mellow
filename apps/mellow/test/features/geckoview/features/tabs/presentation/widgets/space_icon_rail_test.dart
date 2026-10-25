@@ -24,6 +24,9 @@ import 'package:mellow/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_space.dart';
 import 'package:mellow/features/geckoview/features/tabs/presentation/widgets/space_icon_rail.dart';
+import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
+
+import '../../../../../spaces_sync/fake_spaces_sync_service.dart';
 
 class _NoSelectedTab extends SelectedTab {
   @override
@@ -90,6 +93,7 @@ void main() {
           ProviderScope(
             overrides: [
               watchSpacesProvider.overrideWith((ref) => Stream.value(const [])),
+              spacesSyncServiceProvider.overrideWith(FakeSpacesSyncService.new),
               selectedSpaceProvider.overrideWith(_NoSelectedSpace.new),
               selectedTabProvider.overrideWith(_NoSelectedTab.new),
             ],
