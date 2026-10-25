@@ -175,6 +175,16 @@ class GeneralSettings with FastEquatable {
   @Deprecated('Retired; the bar has one layout')
   // ignore: deprecated_member_use_from_same_package
   final TabBarStackingMode tabBarStackingMode;
+
+  /// Where downloads are saved: a Storage Access Framework tree URI
+  /// (`content://…`) the app holds a persisted write grant for, or null for the
+  /// system's public Downloads folder.
+  ///
+  /// Stored as the URI the picker returned rather than a path, because that is
+  /// what a SAF grant is addressed by and what Mozilla's download writer
+  /// expects. Replicated to native, which resolves it without Flutter — see
+  /// `DownloadLocationPreference`.
+  final String? downloadDirectoryUri;
   final Duration unassignedTabsAutoCleanInterval;
   final bool quickTabSwitcherShowHistorySuggestions;
 
@@ -231,6 +241,7 @@ class GeneralSettings with FastEquatable {
     @Deprecated('Retired; the bar has one layout')
     // ignore: deprecated_member_use_from_same_package
     required this.tabBarStackingMode,
+    required this.downloadDirectoryUri,
     required this.unassignedTabsAutoCleanInterval,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
@@ -259,6 +270,7 @@ class GeneralSettings with FastEquatable {
     TabBarPosition? tabBarPosition,
     // ignore: deprecated_member_use_from_same_package
     TabBarStackingMode? tabBarStackingMode,
+    this.downloadDirectoryUri,
     Duration? unassignedTabsAutoCleanInterval,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
@@ -370,6 +382,7 @@ class GeneralSettings with FastEquatable {
     tabBarPosition,
     // ignore: deprecated_member_use_from_same_package
     tabBarStackingMode,
+    downloadDirectoryUri,
     unassignedTabsAutoCleanInterval,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,

@@ -7,7 +7,6 @@
 package app.mellow.browser.flutter_mozilla_components.api
 
 import android.app.Activity
-import android.content.Intent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import app.mellow.browser.flutter_mozilla_components.AddonPopupViewFactory
@@ -19,7 +18,6 @@ import app.mellow.browser.flutter_mozilla_components.EngineViewVisibility
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import app.mellow.browser.flutter_mozilla_components.ProfileContext
 import app.mellow.browser.flutter_mozilla_components.activities.ExternalAppBrowserActivity
-import app.mellow.browser.flutter_mozilla_components.activities.NotificationActivity
 import app.mellow.browser.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import app.mellow.browser.flutter_mozilla_components.pointer.PointerInputRouter
 import app.mellow.browser.flutter_mozilla_components.pigeons.AddonCollection
@@ -381,7 +379,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             _flutterPluginBinding.binaryMessenger,
             GeckoDeleteBrowsingDataControllerImpl()
         )
-        GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
+        GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl(profileApplicationContext))
         GeckoBrowserExtensionApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoBrowserExtensionApiImpl()
@@ -409,10 +407,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GlobalComponents.viewportEvents = viewportEvents
         GlobalComponents.viewportApi = viewportApi
 
-        val intent =
-            Intent(profileApplicationContext, NotificationActivity::class.java)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        profileApplicationContext.startActivity(intent)
+        // No `NotificationActivity` here. It used to be started at this point to
+        // bind the notifications delegate, but it finishes in `onCreate` and
+        // unbinds with it, so nothing stayed bound. What it did do is pause
+        // whatever window was in front, and the browser counts that
+        // `inactive` as leaving, which ends a background-mode unlock and
+        // interrupts a password check (issue #658). It remains the activity a
+        // web notification opens, see `Core`.
 
         reportEngineReady()
     }

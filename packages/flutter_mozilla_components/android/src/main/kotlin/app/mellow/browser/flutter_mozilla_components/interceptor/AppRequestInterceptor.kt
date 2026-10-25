@@ -135,8 +135,8 @@ class AppRequestInterceptor internal constructor(
 
         // App-links tail: the Mellow-owned §2.4 implementation. Structural guards above
         // (PWA/TWA, sandbox, mellow://, FxA) already answered. `isNewWindowRequest` is
-        // not forwarded: this tail predates upstream's app-links rework (28edf3f3) and
-        // has no use for it yet.
+        // forwarded: whether a link's in-browser answer opens a new tab or replaces the
+        // opener's page hangs on it.
         return webLibreAppLinks.onLoadRequest(
             engineSession,
             uri,
@@ -145,6 +145,7 @@ class AppRequestInterceptor internal constructor(
             isRedirect,
             isDirectNavigation,
             isSubframeRequest,
+            isNewWindowRequest,
         )
     }
 

@@ -37,6 +37,8 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarStackingMode tabBarStackingMode,
   );
 
+  GeneralSettings downloadDirectoryUri(String? downloadDirectoryUri);
+
   GeneralSettings unassignedTabsAutoCleanInterval(
     Duration unassignedTabsAutoCleanInterval,
   );
@@ -89,6 +91,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarPosition tabBarPosition,
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
+    String? downloadDirectoryUri,
     Duration unassignedTabsAutoCleanInterval,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
@@ -156,6 +159,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     @Deprecated('Retired; the bar has one layout')
     TabBarStackingMode tabBarStackingMode,
   ) => call(tabBarStackingMode: tabBarStackingMode);
+
+  @override
+  GeneralSettings downloadDirectoryUri(String? downloadDirectoryUri) =>
+      call(downloadDirectoryUri: downloadDirectoryUri);
 
   @override
   GeneralSettings unassignedTabsAutoCleanInterval(
@@ -237,6 +244,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     @Deprecated('Retired; the bar has one layout')
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
+    Object? downloadDirectoryUri = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
@@ -309,6 +317,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarStackingMode
           // ignore: cast_nullable_to_non_nullable
           : tabBarStackingMode as TabBarStackingMode,
+      downloadDirectoryUri: downloadDirectoryUri == const $CopyWithPlaceholder()
+          ? _value.downloadDirectoryUri
+          // ignore: cast_nullable_to_non_nullable
+          : downloadDirectoryUri as String?,
       unassignedTabsAutoCleanInterval:
           unassignedTabsAutoCleanInterval == const $CopyWithPlaceholder() ||
               unassignedTabsAutoCleanInterval == null
@@ -432,6 +444,7 @@ GeneralSettings _$GeneralSettingsFromJson(Map<String, dynamic> json) =>
         _$TabBarStackingModeEnumMap,
         json['tabBarStackingMode'],
       ),
+      downloadDirectoryUri: json['downloadDirectoryUri'] as String?,
       unassignedTabsAutoCleanInterval:
           json['unassignedTabsAutoCleanInterval'] == null
           ? null
@@ -485,6 +498,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
+  'downloadDirectoryUri': instance.downloadDirectoryUri,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,
   'quickTabSwitcherShowHistorySuggestions':

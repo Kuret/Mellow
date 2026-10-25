@@ -13,8 +13,8 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.SystemClock
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +33,7 @@ import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
 import app.mellow.browser.flutter_mozilla_components.ext.toPigeonDownloadState
 import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
 import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
+import app.mellow.browser.flutter_mozilla_components.feature.DownloadAppChooser
 import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import app.mellow.browser.flutter_mozilla_components.feature.PromptSheet
@@ -151,9 +152,18 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private var componentsWait: Runnable? = null
     val binding get() = _binding!!
 
-    protected val components by lazy {
+    private val componentsLazy = lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
+    protected val components by componentsLazy
+
+    /**
+     * The component set this fragment's features were built against, or null
+     * before it took one. It keeps that set for its whole life, so after the
+     * set is replaced it is watching a store nothing reports to any more.
+     */
+    internal val boundComponents: Components?
+        get() = if (componentsLazy.isInitialized()) componentsLazy.value else null
 
     private val backButtonHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
         fullScreenFeature,
@@ -416,6 +426,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
+            val downloadAppChooser = DownloadAppChooser(
+                components.profileApplicationContext,
+                childFragmentManager,
+            )
             downloadsFeature.set(
                 feature = DownloadsFeature(
                     components.profileApplicationContext,
@@ -437,7 +451,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = components.profileApplicationContext,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(components.profileApplicationContext)
                         },
                     ),
                     downloadManager = FetchDownloadManager(
@@ -450,9 +464,20 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onNeedToRequestPermissions = { permissions ->
                         requestDownloadPermissionsLauncher.launch(permissions)
                     },
-                    shouldForwardToThirdParties = {
-                        GlobalComponents.useExternalDownloadManager
-                    },
+                    shouldForwardToThirdParties = downloadAppChooser::shouldForwardToThirdParties,
+                    customThirdPartyDownloadDialog = downloadAppChooser::show,
+                    // Despite the name, the hook `DownloadsFeature` calls to close
+                    // every download prompt when the page navigates away — the
+                    // only one that reaches a custom third-party chooser.
+                    dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
+                    // On the bottom edge at full width, as AC lays out the extension
+                    // permission prompt; [PromptSheet] makes both M3 bottom sheets (#651).
+                    // Button colours and radius stay default: AC's radius override reads the
+                    // background colour unconditionally.
+                    promptsStyling = DownloadsFeature.PromptsStyling(
+                        gravity = Gravity.BOTTOM,
+                        shouldWidthMatchParent = true,
+                    ),
                 ),
                 owner = this,
                 view = view,
@@ -472,6 +497,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         browserStore = components.core.store,
                         launcher = AppLinkRuntime.get(profileContext).launcher,
                         sessionUseCases = components.useCases.sessionUseCases,
+                        // The fragment root is the CoordinatorLayout the non-modal banner
+                        // (a Snackbar) anchors itself to.
+                        rootView = view,
                     ),
                     owner = this,
                     view = view,
@@ -831,6 +859,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         // session the process should keep prioritised when it goes to background.
         AppLifecycleFeature.setVisibleSession(this, sessionId)
         keyboardVisibilityFeature?.checkKeyboardState()
+    }
+
+    /** Ends a text selection: its floating toolbar is a window above the page. */
+    protected fun clearEngineSelection() {
+        fragmentEngineView?.clearSelection()
     }
 
     @CallSuper

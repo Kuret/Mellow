@@ -600,9 +600,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   /// or upgrades an existing row's [source]. The row is live
   /// (`engine_tab_id = tabId`). The shelf is only written on insert — a
   /// re-added engine tab must not un-pin its row.
+  ///
+  /// [engineOpenerId] is the tab the engine opened this one from, kept as the
+  /// row's engine provenance (`engine_opener_id`). It does not place the row:
+  /// space, folder and order come from the arguments above, as for any tab.
   Future<String> insertTab(
     String tabId, {
     required TabSource source,
+    Value<String?> engineOpenerId = const Value.absent(),
     Value<String?> containerId = const Value.absent(),
     Value<String?> spaceUuid = const Value.absent(),
     Value<String?> folderId = const Value.absent(),
@@ -632,6 +637,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         TabCompanion.insert(
           id: tabId,
           engineTabId: Value(tabId),
+          engineOpenerId: engineOpenerId,
           source: source,
           timestamp: DateTime.now(),
           containerId: containerId,
@@ -646,6 +652,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         onConflict: DoUpdate(
           (old) => TabCompanion(
             engineTabId: Value(tabId),
+            engineOpenerId: engineOpenerId,
             source: Value(source),
             containerId: containerId,
             spaceUuid: spaceUuid.present

@@ -40,6 +40,7 @@ import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.selector.findTab
+import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.LastMediaAccessState
@@ -697,6 +698,11 @@ class GeckoTabsApiImpl : GeckoTabsApi {
             logger.error("$TAG: Failed to migrate private tab", e)
             throw e
         }
+    }
+
+    override fun getSecurityCertificate(tabId: String): ByteArray? {
+        return components.core.store.state.findTabOrCustomTab(tabId)
+            ?.content?.securityInfo?.certificate?.encoded
     }
 
     override fun addMultipleTabs(

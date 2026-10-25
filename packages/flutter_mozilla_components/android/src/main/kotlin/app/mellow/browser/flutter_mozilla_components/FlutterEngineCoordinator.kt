@@ -100,6 +100,31 @@ object FlutterEngineCoordinator {
         return create(context)
     }
 
+    /**
+     * Starts the app half without an activity, and reports whether one is now
+     * running.
+     *
+     * Idempotent: a healthy engine is left exactly as it is, so a launch that
+     * arrives while the browser is already running costs nothing.
+     */
+    @MainThread
+    fun ensureStarted(context: Context): Boolean {
+        healthyCachedEngine()?.let {
+            Log.d(TAG, "ensureStarted: engine ${engineTag(it)} already running")
+            return true
+        }
+
+        return try {
+            create(context)
+            true
+        } catch (e: Exception) {
+            // The caller has somewhere to fall back to, so this must not take
+            // the launch down with it.
+            Log.e(TAG, "Failed to start the Flutter engine headlessly", e)
+            false
+        }
+    }
+
     @MainThread
     private fun create(context: Context): FlutterEngine {
         val engine = FlutterEngine(context.applicationContext)

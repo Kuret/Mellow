@@ -66,6 +66,7 @@ class _RecordingTabRepository extends TabRepository {
     String? spaceUuid,
     bool launchedFromIntent = false,
     TabBackPromptBehavior? promptOnBackBehavior,
+    void Function(String tabId)? onCreated,
   }) async {
     added.add((
       url: url,

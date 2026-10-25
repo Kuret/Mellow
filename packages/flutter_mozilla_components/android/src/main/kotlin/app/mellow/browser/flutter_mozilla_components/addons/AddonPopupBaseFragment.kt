@@ -5,10 +5,11 @@
 package app.mellow.browser.flutter_mozilla_components.addons
 
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import androidx.fragment.app.Fragment
+import app.mellow.browser.flutter_mozilla_components.DownloadLocationPreference
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
+import app.mellow.browser.flutter_mozilla_components.feature.DownloadAppChooser
 import app.mellow.browser.flutter_mozilla_components.services.DownloadService
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CustomTabListAction
@@ -65,6 +66,12 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                 view = view,
             )
 
+            // Same chooser and external-manager gate as a browser tab, so a
+            // download an add-on popup starts is routed like any other.
+            val downloadAppChooser = DownloadAppChooser(
+                components.profileApplicationContext,
+                childFragmentManager,
+            )
             downloadsFeature.set(
                 feature = DownloadsFeature(
                     requireContext().applicationContext,
@@ -75,7 +82,7 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = components.profileApplicationContext,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(components.profileApplicationContext)
                         },
                     ),
                     downloadManager = FetchDownloadManager(
@@ -88,6 +95,10 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                         @Suppress("DEPRECATION")
                         requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_PERMISSIONS)
                     },
+                    shouldForwardToThirdParties = downloadAppChooser::shouldForwardToThirdParties,
+                    customThirdPartyDownloadDialog = downloadAppChooser::show,
+                    // The navigation cleanup hook; see BaseBrowserFragment.
+                    dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
                 ),
                 owner = this,
                 view = view,
@@ -143,7 +154,10 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                 0,
                 DownloadState.Status.INITIATED,
                 userAgent,
-                Environment.DIRECTORY_DOWNLOADS,
+                // The eighth argument is `directoryPath`, so the bare
+                // `Environment.DIRECTORY_DOWNLOADS` that stood here was a
+                // relative "Download" rather than a location.
+                DownloadLocationPreference.read(components.profileApplicationContext),
                 private = isPrivate,
                 skipConfirmation = skipConfirmation,
                 openInApp = openInApp,

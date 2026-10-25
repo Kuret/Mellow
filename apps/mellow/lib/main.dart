@@ -34,6 +34,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
         GeckoEngineSettingsService,
         GeckoLoggingService,
         LogLevel,
+        ProfileLockFlutterApi,
         WebExtensionActionType;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -54,11 +55,14 @@ import 'package:mellow/domain/services/app_initialization.dart';
 import 'package:mellow/features/app_widget/domain/services/home_widget.dart';
 import 'package:mellow/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:mellow/features/geckoview/domain/services/live_tab_budget.dart';
+import 'package:mellow/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:mellow/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
+import 'package:mellow/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:mellow/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:mellow/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
 import 'package:mellow/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
+import 'package:mellow/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:mellow/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
@@ -66,16 +70,20 @@ import 'package:mellow/features/share_intent/domain/services/shared_content_open
 import 'package:mellow/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:mellow/features/sync/domain/repositories/sync.dart';
+import 'package:mellow/features/user/data/database/riverpod_storage.dart';
+import 'package:mellow/features/user/data/providers.dart';
 import 'package:mellow/features/user/domain/repositories/cache.dart';
 import 'package:mellow/features/user/domain/repositories/engine_settings.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
+import 'package:mellow/features/user/domain/services/external_window_password_check.dart';
 import 'package:mellow/features/user/domain/services/profile_defaults.dart';
 import 'package:mellow/features/user/domain/services/profile_restart_request.dart';
 import 'package:mellow/presentation/hooks/on_initialization.dart';
 import 'package:mellow/presentation/main_app.dart';
 import 'package:mellow/presentation/startup_phase_host.dart';
 import 'package:nullability/nullability.dart';
+import 'package:simple_intent_receiver/simple_intent_receiver.dart' as sir;
 
 /// Starts a long-lived service provider **and keeps it reacting**.
 ///
@@ -193,9 +201,28 @@ class _MainWidget extends HookConsumerWidget {
           ref.read(generalSettingsRepositoryProvider.notifier).fetchSettings()
             ..ignore();
 
+      // Every `persist()` provider built after this reads its saved state
+      // synchronously, inside its first build, so its first frame is already
+      // the saved one rather than the default it would snap away from (#665).
+      // Joined here because it is one more small query beside two the engine
+      // waits for anyway, and so that the providers built during the engine
+      // bring-up below are already on the synchronous path.
+      final riverpodStorage = ref.read(riverpodDatabaseStorageProvider);
+      final persistedStatePreload = riverpodStorage is RiverpodStorage
+          ? (riverpodStorage.preload()..ignore())
+          : null;
+
       await countryCodes;
       final engineSettings = await engineSettingsFuture;
       final generalSettings = await generalSettingsFuture;
+
+      try {
+        await persistedStatePreload;
+      } catch (e, s) {
+        // Not fatal: reads keep going to the database, and the only cost is the
+        // flash this is here to prevent.
+        logger.w('Failed preloading persisted state', error: e, stackTrace: s);
+      }
 
       final startupUBlockFilterListsPref =
           engineSettings.ublockFilterListSettings.enabled
@@ -268,6 +295,18 @@ class _MainWidget extends HookConsumerWidget {
       // it does build.
       _activateService(ref, geckoSyncStateServiceProvider);
 
+      // What the browser's first frame draws from, loaded before it mounts:
+      // otherwise each one paints its default and then the saved state (#665) —
+      // the stock toolbar buttons.
+      // Activated, not just read: a read takes no listener. Started here, just
+      // before the engine bring-up, because none of it needs the engine and
+      // that is the longest wait left to hide it behind; not with the settings
+      // reads above, so the engine does not wait on it for the database.
+      _activateService(ref, toolbarButtonConfigsProvider);
+      final engineFreeFirstFrameState = ref.read(
+        toolbarButtonConfigsProvider.future,
+      )..ignore();
+
       // Logged because it is the last long step of a cold start, and the one a
       // headless bootstrap waits on: a launch that never reaches full components
       // needs this line to say whether the app half got here and stalled, or
@@ -301,6 +340,32 @@ class _MainWidget extends HookConsumerWidget {
         );
         rethrow;
       }
+
+      // Takes the launch backlog from the host, and claims what the broker held
+      // while the profile picker was up, now rather than when the intent
+      // consumers are built after `initialize()`: whether the app was started
+      // for a link has to be known before the router mounts, or the home surface
+      // paints first (#612). Nothing is delivered early — the bus holds every
+      // intent until `brokeredIntentDelivery` starts delivery and delivers the
+      // broker's claim, as it always has.
+      //
+      // Not before the engine, though both would be answered sooner. The host
+      // keeps a copy of what it hands over until delivery confirms it, and puts
+      // it back if this isolate goes first; but the broker's claim keeps its
+      // launches from any other engine until the `finally` below gives them
+      // back, or for the claim's full minute if nothing gets to run that. Past
+      // the engine bring-up, the stretch in which that can happen is short.
+      _activateService(ref, intentBusProvider);
+      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
+        ..ignore();
+      final brokeredLaunches =
+          ref
+              .read(brokeredLaunchClaimProvider.notifier)
+              .claim()
+              .then(
+                (launches) => [for (final launch in launches) launch.intent],
+              )
+            ..ignore();
 
       // Mirror the startup uBO pref into the fixator so later pref changes are
       // still observed and enforced after native startup initialization.
@@ -353,40 +418,105 @@ class _MainWidget extends HookConsumerWidget {
       // app resume, a periodic timer and local tab-model changes.
       _activateService(ref, spacesSyncServiceProvider);
 
-      // Before `initialize()`, because that is what flips `initialized: true`
-      // and lets the router mount.
-      await secureStorageClaim;
+      // Both answered long ago in practice: they were asked for right after the
+      // engine came up. Bounded anyway, since a source that does not answer
+      // only goes uncovered — which is how every start looked before. Waited
+      // on alongside the first-frame preload below rather than after it, so a
+      // slow start pays one bound, not both.
+      final startupLaunchesRead = Future.wait([
+        for (final launches in [startupBacklog, brokeredLaunches])
+          launches.timeout(const Duration(seconds: 1)).catchError((
+            Object e,
+            StackTrace s,
+          ) {
+            logger.w(
+              'Failed reading startup launches',
+              error: e,
+              stackTrace: s,
+            );
+            return const <sir.Intent>[];
+          }),
+      ]);
 
-      await ref.read(appInitializationServiceProvider.notifier).initialize();
+      // The rest of the first frame's state: the brand header and profile
+      // wallpaper over a container's own (#665). After the engine, unlike the
+      // part started before it, because the selected container follows the
+      // selected tab, and that comes from the engine. Activated for the same
+      // reason, and also because the auto-disposed container data would be
+      // gone again before the first frame.
+      _activateService(ref, selectedContainerDataProvider);
 
-      // Wire settings → local_index_setting (tab.db) so the trigger gate
-      // is in sync from the moment tabs start writing.
-      _activateService(ref, localIndexSettingsSyncProvider);
+      try {
+        await Future.wait([
+          engineFreeFirstFrameState,
+          ref.read(selectedContainerDataProvider.future),
+        ])
+        // Cosmetic, so it never holds the UI back for long: past this the
+        // first frame shows defaults, as it always did.
+        .timeout(const Duration(seconds: 2));
+      } catch (e, s) {
+        logger.w(
+          'Failed preloading first-frame state',
+          error: e,
+          stackTrace: s,
+        );
+      }
 
-      // Cold-start prune of the local search index — drops rows the engine
-      // has forgotten (Places retention, user-initiated clears). Cheap and
-      // background; failures are logged and ignored.
-      unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+      // Raised before the router mounts, so the spinner stays up until the
+      // launch's tab is selected instead of handing over to the home surface.
+      _activateService(ref, startupLaunchCoverProvider);
+      final startupLaunches = await startupLaunchesRead;
+      // The launches are another app's data, read synchronously from here:
+      // nothing in deciding the cover may stop the app from starting.
+      try {
+        ref
+            .read(startupLaunchCoverProvider.notifier)
+            .raiseFor(startupLaunches.expand((l) => l).where(isOpenableLaunch));
+      } catch (e, s) {
+        logger.w('Failed raising the startup cover', error: e, stackTrace: s);
+      }
 
-      // One-shot: seeds this fork's own defaults (formerly applied by the
-      // now-removed onboarding wizard) into the profile, exactly once.
-      unawaited(
-        ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed(),
-      );
+      try {
+        // Before `initialize()`, because that is what flips `initialized: true`
+        // and lets the router mount.
+        await secureStorageClaim;
 
-      // Listen for "restart into the shortcut's profile" from the native
-      // mismatch dialog. Only this isolate can shut the profile down cleanly.
-      _activateService(ref, profileRestartRequestHandlerProvider);
+        await ref.read(appInitializationServiceProvider.notifier).initialize();
 
-      // Every consumer of `allIntents` has to exist before the intent bus starts
-      // delivery and the broker is drained. The restart-request consumer is
-      // alive from the read above; these two are otherwise built by the browser
-      // widget, far too late.
-      _activateService(ref, sharingIntentStreamProvider);
-      _activateService(ref, appWidgetLaunchStreamProvider);
-      // Opens shared links and text; must exist before brokered delivery starts.
-      _activateService(ref, sharedContentOpenerProvider);
-      await ref.read(brokeredIntentDeliveryProvider.future);
+        // Wire settings → local_index_setting (tab.db) so the trigger gate
+        // is in sync from the moment tabs start writing.
+        _activateService(ref, localIndexSettingsSyncProvider);
+
+        // Cold-start prune of the local search index — drops rows the engine
+        // has forgotten (Places retention, user-initiated clears). Cheap and
+        // background; failures are logged and ignored.
+        unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+
+        // One-shot: seeds this fork's own defaults (formerly applied by the
+        // now-removed onboarding wizard) into the profile, exactly once.
+        unawaited(
+          ref.read(profileDefaultsServiceProvider.notifier).applyIfOwed(),
+        );
+
+        // Listen for "restart into the shortcut's profile" from the native
+        // mismatch dialog. Only this isolate can shut the profile down cleanly.
+        _activateService(ref, profileRestartRequestHandlerProvider);
+
+        // Every consumer of `allIntents` has to exist before the intent bus starts
+        // delivery and the broker is drained. The restart-request consumer is
+        // alive from the read above; these two are otherwise built by the browser
+        // widget, far too late.
+        _activateService(ref, sharingIntentStreamProvider);
+        _activateService(ref, appWidgetLaunchStreamProvider);
+        // Opens shared links and text; must exist before brokered delivery starts.
+        _activateService(ref, sharedContentOpenerProvider);
+        await ref.read(brokeredIntentDeliveryProvider.future);
+      } finally {
+        // What startup claimed from the broker and never got to deliver goes
+        // back: left claimed, it would be kept from every other engine for the
+        // claim's full minute. Nothing to do once delivery has taken it.
+        unawaited(ref.read(brokeredLaunchClaimProvider.notifier).abandon());
+      }
 
       if (!kDebugMode) {
         await BackgroundFetch.configure(
@@ -481,6 +611,11 @@ void main() async {
       LogLevel.error => Level.error,
     }, message);
   });
+
+  // Before the profile is resolved: a Custom Tab or PWA window that started
+  // this engine to check a password asks as soon as Dart runs, and is told to
+  // ask again until a profile is active.
+  ProfileLockFlutterApi.setUp(ExternalWindowPasswordCheck());
 
   await HomeWidget.setAppGroupId('weblibre');
 

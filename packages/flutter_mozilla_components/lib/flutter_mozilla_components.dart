@@ -106,6 +106,7 @@ export 'src/pigeons/gecko.g.dart'
         NativeAppLinkRuleDecision,
         NativeContextAppLinkPolicy,
         PhoneHitResult,
+        PreferredDownloadManager,
         ProtectedTargetPattern,
         ProxyLoadError,
         PwaIcon,
@@ -141,10 +142,15 @@ export 'src/pigeons/startup.g.dart'
     show
         GeckoProfileApi,
         ParticipantStep,
+        ProfileLockFlutterApi,
+        ProfilePasswordOutcome,
+        ProfilePasswordReply,
         ProfileStartupDirective,
         ProfileStartupDirectiveKind,
         ProfileStartupOwnerType,
         ProfileStartupPromptMode,
+        SharedProfileUnlock,
+        SharedUnlockMode,
         StartupIntentRecord;
 export 'src/platform_view_keyboard.dart';
 export 'src/pointer_input_bridge.dart' show PointerInputBridge;

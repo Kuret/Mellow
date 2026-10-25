@@ -13,9 +13,14 @@ import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkLaunchMode
 import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkLaunchResult
 import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkPolicyStores
 import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkRuntime
+import app.mellow.browser.flutter_mozilla_components.applinks.ComponentsNewTabHost
+import app.mellow.browser.flutter_mozilla_components.applinks.FALLBACK_LOAD_FLAGS
+import app.mellow.browser.flutter_mozilla_components.applinks.NewTabFocus
+import app.mellow.browser.flutter_mozilla_components.applinks.NewTabLoad
 import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkRequest
 import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStore
 import app.mellow.browser.flutter_mozilla_components.applinks.PendingAppLinkStores
+import app.mellow.browser.flutter_mozilla_components.applinks.openInNewTab
 import app.mellow.browser.flutter_mozilla_components.applinks.releaseHeldNavigation
 import app.mellow.browser.flutter_mozilla_components.applinks.toAppLinkPolicy
 import app.mellow.browser.flutter_mozilla_components.pigeons.AppLinkDecision
@@ -143,23 +148,27 @@ class GeckoAppLinksApiImpl(
                 return@resolve stale()
             }
 
-            // Never launch into a session that no longer exists.
-            val tabAlive = components.core.store.state
-                .findTabOrCustomTab(request.tabId) != null
-            if (!tabAlive) {
-                logger.info("resolvePendingAppLink($requestId) -> dead_session (${request.tabId})")
-                return@resolve AppLinkResolutionResult(false, false, "dead_session")
-            }
-
             // This runs on `Dispatchers.Default`, and everything below reaches the engine:
             // launching, loading a fallback, and claiming a held navigation. Navigation itself
             // runs on the UI thread, so claiming from here would race it — and would hand the
             // engine session a load from the wrong thread besides.
             val result = withContext(Dispatchers.Main) {
+                // Never launch into a session that no longer exists — checked here rather than
+                // before the thread handoff, because the tab can close during the handoff and a
+                // check that stale would let an external app open for a tab that is gone.
+                val tabAlive = components.core.store.state
+                    .findTabOrCustomTab(request.tabId) != null
+                if (!tabAlive) {
+                    logger.info(
+                        "resolvePendingAppLink($requestId) -> dead_session (${request.tabId})",
+                    )
+                    return@withContext AppLinkResolutionResult(false, false, "dead_session")
+                }
+
                 when (decision) {
                     AppLinkDecision.OPEN -> handleOpen(components, request)
                     AppLinkDecision.CANCEL -> {
-                        store.recordSuppression(request.tabId, request.targetFingerprint)
+                        store.recordSuppression(request.tabId, request.suppressionKey)
                         // Under `blockWhilePrompting` the page never loaded; declining is the
                         // user asking for it in the browser, so it is owed to them now. A no-op
                         // on the non-blocking path, where the page is already on screen.
@@ -169,6 +178,8 @@ class GeckoAppLinksApiImpl(
                             components.useCases.sessionUseCases,
                             request,
                             reason = "cancel",
+                            newTabHost = ComponentsNewTabHost(components),
+                            suppressionKey = request.suppressionKey,
                         )
                         AppLinkResolutionResult(false, false, null)
                     }
@@ -208,15 +219,31 @@ class GeckoAppLinksApiImpl(
 
         // Launch failed: load a validated fallback if present, else leave the page.
         val fallback = request.fallbackUrl
+        if (fallback != null && request.opensNewWindow) {
+            // The link asked for a new tab, so its fallback opens in one rather than replacing the
+            // opener's page. The user just tapped "Open", so it takes focus.
+            openInNewTab(
+                ComponentsNewTabHost(components),
+                openerId = request.tabId,
+                url = fallback,
+                load = NewTabLoad.FALLBACK,
+                focus = NewTabFocus.ALWAYS,
+                reason = "launch_failed",
+            )
+            return AppLinkResolutionResult(false, true, "launch_failed")
+        }
         if (fallback != null) {
-            // Guard the fallback load against immediately bouncing back out to an app
-            // (§2.7): a validated http(s) fallback can itself resolve to an external
-            // handler, which would re-prompt/auto-launch. The interceptor records the
-            // same for fallbacks it issues.
-            pendingStoreFor(components).recordFallbackReentry(fallback)
+            // Guard the fallback load against immediately bouncing back out to an app (§2.7): a
+            // validated http(s) fallback can itself resolve to an external handler, which would
+            // re-prompt or auto-launch. The re-entry map is the right instrument for that, rather
+            // than a load that skips the navigation delegate: the fallback is a page-supplied URL
+            // and still has to pass `AppRequestInterceptor`'s structural guards, sandbox capture
+            // above all. See [FALLBACK_LOAD_FLAGS].
+            pendingStoreFor(components).recordFallbackReentry(request.tabId, fallback)
             components.useCases.sessionUseCases.loadUrl(
                 url = fallback,
                 sessionId = request.tabId,
+                flags = FALLBACK_LOAD_FLAGS,
             )
             return AppLinkResolutionResult(false, true, "launch_failed")
         }
@@ -228,6 +255,7 @@ class GeckoAppLinksApiImpl(
             components.useCases.sessionUseCases,
             request,
             reason = "launch_failed",
+            newTabHost = ComponentsNewTabHost(components),
         )
         return AppLinkResolutionResult(false, false, "launch_failed")
     }

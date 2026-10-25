@@ -142,6 +142,19 @@ data class ClassifierInput(
     val matchingRule: AppLinkRule?,
     val globalMode: AppLinkMode,
     val marketplaceFallbackEnabled: Boolean,
+    /**
+     * A remembered `alwaysOpen` rule named an app the fresh resolution no longer agrees on — it is
+     * gone, or it is now one of several handlers. The rule cannot be honoured, and the user has to
+     * be asked again rather than have the decision made for them (§2.5).
+     */
+    val rememberedTargetChanged: Boolean = false,
+    /**
+     * The navigation returns a sign-in round trip to the app that opened this tab (the §2.4 auth
+     * carve-out). The interceptor launches those itself, even under `never`; it hands one to the
+     * classifier only when a forced-prompt context, a `neverOpen` rule or a suppression stands in
+     * the way. Only the first of those still lets it through, as a question.
+     */
+    val isAuthenticationCallback: Boolean = false,
 )
 
 /**
@@ -178,14 +191,40 @@ object AppLinkClassifier {
             return safeNonLaunch(resolved)
         }
 
-        // Step 4 — forced-prompt contexts (protected/private/wallet), ignoring matching rules.
-        if (input.isProtected || input.isPrivate || input.isWallet) {
-            return promptFor(resolved, canRemember = false)
-        }
-
-        // Step 5 — suppression hit: never launch, never prompt.
+        // Step 5 — suppression hit: never launch, never prompt. Checked ahead of the forced-prompt
+        // contexts: the user has just declined this target in this tab, and asking again would
+        // guard nothing.
         if (input.suppressionHit) {
             return safeNonLaunch(resolved)
+        }
+
+        // Step 4 — forced-prompt contexts (protected/private/wallet). They exist so that nothing
+        // leaves them without the user being asked, which is why they turn an automatic answer —
+        // `always`, or a remembered `alwaysOpen` rule — into a prompt. They must not turn a "no"
+        // into one: under `never`, or a `neverOpen` rule for this scope, nothing leaves the browser
+        // and there is nothing to ask about (#656). A rule answers before the mode here exactly as
+        // it does below, so an `alwaysOpen` exception under `never` is still asked about rather
+        // than refused. A sign-in returning to the app that opened the tab is exempt from the mode,
+        // so under `never` it is asked about too.
+        if (input.isProtected || input.isPrivate || input.isWallet) {
+            val declined = when (input.matchingRule?.decision) {
+                AppLinkRuleDecision.NEVER_OPEN -> true
+                AppLinkRuleDecision.ALWAYS_OPEN -> false
+                null -> input.globalMode == AppLinkMode.NEVER && !input.isAuthenticationCallback
+            }
+            return if (declined) {
+                neverBehaviour(resolved)
+            } else {
+                promptFor(resolved, canRemember = false)
+            }
+        }
+
+        // Step 5b — the remembered app is not the app this would open any more. The user agreed to
+        // one specific target, so this is not a question the global mode may answer on their
+        // behalf: under `always` it would launch whatever now resolves, which is the substitution
+        // the rule's package binding exists to prevent. Ask again instead.
+        if (input.rememberedTargetChanged) {
+            return promptFor(resolved, canRemember = canRemember(resolved))
         }
 
         // Step 6 — a matching remembered rule for this scope.

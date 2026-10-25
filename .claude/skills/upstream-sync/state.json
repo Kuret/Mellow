@@ -4,7 +4,7 @@
   "weblibre": {
     "remote": "origin",
     "branch": "main",
-    "last_reviewed": "45df19cbf3c69c3304c22dc15559930b7233dc0f"
+    "last_reviewed": "origin/main"
   },
   "zen": {
     "path": "../zen-desktop",

@@ -87,14 +87,29 @@ StartupIntentRecord record(
 
 const _extraStream = 'android.intent.extra.STREAM';
 
+/// What `brokeredIntentDelivery` does: claims the queue, then delivers what it
+/// claimed.
+Future<int> _drain({
+  required GeckoProfileService service,
+  required Future<void> Function(sir.Intent intent) deliver,
+  StartupPaths? startupPaths,
+  Future<Directory> Function()? payloadHome,
+}) async => await deliverClaimedLaunches(
+  await claimBrokeredIntents(engineId: 'engine-1', service: service),
+  engineId: 'engine-1',
+  service: service,
+  deliver: deliver,
+  startupPaths: startupPaths,
+  payloadHome: payloadHome,
+);
+
 void main() {
   group('draining queued launches', () {
     test('delivers each launch and acknowledges it', () async {
       final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
       final seen = <String?>[];
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async => seen.add(intent.data),
       );
@@ -104,13 +119,72 @@ void main() {
       expect(api.acknowledged, ['a', 'b']);
     });
 
+    test('claiming early delivers the very intents it claimed', () async {
+      // Startup claims before the router mounts and decides the startup cover
+      // from these intents; delivery runs later. The cover matches what it is
+      // waiting for by identity, so delivery must publish the same objects —
+      // and must not ask the broker a second time.
+      final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
+      final service = GeckoProfileService(api: api);
+
+      final claimed = await claimBrokeredIntents(
+        engineId: 'engine-1',
+        service: service,
+      );
+      final seen = <sir.Intent>[];
+      final delivered = await deliverClaimedLaunches(
+        claimed,
+        engineId: 'engine-1',
+        service: service,
+        deliver: (intent) async => seen.add(intent),
+      );
+
+      expect(delivered, 2);
+      expect(api.claimCalls, 1);
+      expect(seen, hasLength(2));
+      expect(identical(seen[0], claimed[0].intent), isTrue);
+      expect(identical(seen[1], claimed[1].intent), isTrue);
+      expect(api.acknowledged, ['a', 'b']);
+    });
+
+    test('a claim startup never delivers is handed back', () async {
+      // Startup claims before it delivers; a start that stops in between must
+      // not keep the launches from the next engine for the claim's minute.
+      final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
+      final service = GeckoProfileService(api: api);
+
+      final claimed = await claimBrokeredIntents(
+        engineId: 'engine-1',
+        service: service,
+      );
+      await releaseClaimedLaunches(
+        claimed,
+        engineId: 'engine-1',
+        service: service,
+      );
+
+      expect(api.released, ['a', 'b']);
+      expect(api.acknowledged, isEmpty);
+    });
+
+    test('a failed claim claims nothing', () async {
+      final api = _FakeProfileApi([record('a')])..claimThrows = true;
+
+      expect(
+        await claimBrokeredIntents(
+          engineId: 'engine-1',
+          service: GeckoProfileService(api: api),
+        ),
+        isEmpty,
+      );
+    });
+
     test('a launch that fails to deliver is handed back, not retired', () async {
       // Acknowledging it would retire a launch that never reached the user, with
       // no record that it existed.
       final api = _FakeProfileApi([record('a')]);
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async => throw StateError('no route'),
       );
@@ -127,8 +201,7 @@ void main() {
         record('c', sequence: 3),
       ]);
 
-      await drainBrokeredIntents(
-        engineId: 'engine-1',
+      await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async {
           if (intent.extra['fail'] == true) throw StateError('no route');
@@ -143,8 +216,7 @@ void main() {
       // means no queued launches, not a failed startup.
       final api = _FakeProfileApi([])..claimThrows = true;
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async {},
       );
@@ -156,8 +228,7 @@ void main() {
       final api = _FakeProfileApi([]);
 
       expect(
-        await drainBrokeredIntents(
-          engineId: 'engine-1',
+        await _drain(
           service: GeckoProfileService(api: api),
           deliver: (intent) async {},
         ),
@@ -186,8 +257,7 @@ void main() {
     Future<int> drain(
       _FakeProfileApi api,
       Future<void> Function(sir.Intent intent) deliver,
-    ) => drainBrokeredIntents(
-      engineId: 'engine-1',
+    ) => _drain(
       service: GeckoProfileService(api: api),
       startupPaths: paths,
       payloadHome: () async => home,

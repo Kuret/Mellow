@@ -849,10 +849,10 @@ packages:
     dependency: transitive
     description:
       name: local_auth_android
-      sha256: fdb936d59ab945c7af297defd67bd1ed87b11b6db1bc16d01e94677a8f1c38ec
+      sha256: e2ceb84cdecefe1bc0ddd4ac308b0f6525bbfa0a60d0e552082b2970e1fb38c2
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.9"
+    version: "2.3.0"
   local_auth_darwin:
     dependency: transitive
     description:
