@@ -8,7 +8,6 @@ package app.mellow.browser.flutter_mozilla_components.api
 
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
-import app.mellow.browser.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl.Companion
 import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
 import app.mellow.browser.flutter_mozilla_components.pigeons.AutocompleteResult
 import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoSuggestion
@@ -19,7 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.concept.engine.Engine
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
@@ -34,29 +32,26 @@ class GeckoSuggestionApiImpl(
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun getAutocompleteSuggestion(
-        query: String,
-        callback: (Result<AutocompleteResult?>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val suggestion = components.core.historyStorage.getAutocompleteSuggestion(query)
+    override suspend fun getAutocompleteSuggestion(query: String): AutocompleteResult? {
+        val suggestion = components.core.historyStorage.getAutocompleteSuggestion(query)
 
-                callback(Result.success( suggestion?.let { AutocompleteResult(
-                    input = it.input,
-                    url = it.url,
-                    text = it.text,
-                    totalItems = it.totalItems.toLong(),
-                    source = it.source
-                )}
-
-                ))
-            }
-        }
+        return suggestion?.let { AutocompleteResult(
+            input = it.input,
+            url = it.url,
+            text = it.text,
+            totalItems = it.totalItems.toLong(),
+            source = it.source
+        )}
     }
 
     override fun querySuggestions(text: String, providers: List<GeckoSuggestionType>) {
         for(provider in providers) {
+            // Captured synchronously, before the coroutine starts: each
+            // provider's onInputChanged is async (history/session storage
+            // lookups), so a slower older query for the same provider can
+            // finish after a faster newer one — grabbing the sequence after
+            // that work would let its stale results win on the Dart side.
+            val sequence = EventSequence.next()
             coroutineScope.launch {
                 val results = when(provider) {
                     GeckoSuggestionType.SESSION -> components.search.sessionSuggestions.onInputChanged(text)
@@ -78,7 +73,7 @@ class GeckoSuggestionApiImpl(
 
                 runOnUiThread {
                     suggestionEvents.onSuggestionResult(
-                        EventSequence.next(),
+                        sequence,
                         provider,
                         mappedResults
                     ) { }

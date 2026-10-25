@@ -16,6 +16,18 @@ class GeckoTabService {
 
   GeckoTabService({GeckoTabsApi? api}) : _api = api ?? _apiInstance;
 
+  /// The ids of every tab in the native store right now. The tab list events
+  /// are debounced and can lag behind it.
+  Future<List<String>> getTabIds() {
+    return _api.getTabIds();
+  }
+
+  /// The selected tab in the native store right now. The selected-tab events
+  /// are debounced and can lag behind it.
+  Future<String?> getSelectedTabId() {
+    return _api.getSelectedTabId();
+  }
+
   Future<void> syncEvents({
     bool onSelectedTabChange = false,
     bool onTabListChange = false,

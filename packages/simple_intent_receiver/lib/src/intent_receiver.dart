@@ -145,7 +145,7 @@ class IntentReceiver extends IntentEvents {
   Future<List<Intent>> pendingIntents = Future.value(const []);
 
   @override
-  void onIntentReceived(int sequence, Intent intent) {
+  Future<void> onIntentReceived(int sequence, Intent intent) async {
     if (_lastAdded != null && sequence <= _lastAdded!) {
       return;
     }
@@ -232,9 +232,6 @@ class IntentReceiver extends IntentEvents {
 
     _queue.clear();
     _pendingError = null;
-    await Future.wait<void>([
-      _controller.close(),
-      if (released != null) released,
-    ]);
+    await Future.wait<void>([_controller.close(), ?released]);
   }
 }

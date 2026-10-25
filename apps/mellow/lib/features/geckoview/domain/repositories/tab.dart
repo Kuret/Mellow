@@ -1115,7 +1115,11 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
-      (tabId) async {
+      (event) async {
+        // The engine's opener (`event.parentId`) is deliberately ignored:
+        // folders are the only nesting here, so a tab opened from a page is
+        // filed like any other.
+        final tabId = event.tabId;
         // A materialised tab has its row already, with its own space and
         // container; filing it under the selected ones would move it.
         if (_materializing.contains(tabId)) {

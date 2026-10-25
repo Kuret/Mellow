@@ -28,8 +28,10 @@ import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoTabContentEven
 import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import app.mellow.browser.flutter_mozilla_components.pigeons.QueryParameterStripping
 import app.mellow.browser.flutter_mozilla_components.services.PrivateTabsNotificationService
+import app.mellow.browser.flutter_mozilla_components.settings.BrowserSettingsPreferences
 import app.mellow.browser.flutter_mozilla_components.addons.AddonPrefs
 import app.mellow.browser.flutter_mozilla_components.addons.WebExtensionPromptHost
+import app.mellow.browser.flutter_mozilla_components.feature.WebExtensionActionsHost
 import app.mellow.browser.flutter_mozilla_components.api.GeckoViewportApiImpl
 import app.mellow.browser.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
@@ -94,12 +96,21 @@ object GlobalComponents {
         // before the runtime goes away rather than after. Here for the case
         // where it is not.
         EngineWarmupSession.stop()
+        // Drops in-flight thumbnail/icon encodes on the floor: they belong to
+        // the profile being torn down, and their sequence numbers are drawn
+        // from the same process-global counter as the next profile's, so Dart's
+        // recency gate would not reject them.
+        _components?.existingCore?.flutterEventMiddleware?.close()
         _components = null
         currentMode = null
+        // Replicated per profile, so it must not outlive the profile it was
+        // replicated for; the next one reads its own mirror until Dart speaks.
+        pullToRefreshEnabledValue = null
 
         // After the components, so it releases against the absence rather than
         // rebinding to the set being torn down.
         WebExtensionPromptHost.onComponentsChanged()
+        WebExtensionActionsHost.onComponentsChanged()
     }
 
     enum class ComponentsMode {
@@ -107,21 +118,70 @@ object GlobalComponents {
         EXTERNAL,
     }
 
-    // Pull-to-refresh setting
-    var pullToRefreshEnabled: Boolean = true
-        set(value) {
-            field = value
-            onPullToRefreshEnabledChanged?.invoke(value)
-        }
+    // Pull-to-refresh setting, as last replicated from Flutter for the profile
+    // currently set up. Null until that happens — which is always later than the
+    // first browser window, since the replication service is activated well
+    // after `GeckoBrowserService.initialize` — and again after [tearDown], so
+    // the next profile falls back to its own mirror rather than inheriting this
+    // one's answer.
+    private var pullToRefreshEnabledValue: Boolean? = null
 
-    var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
+    private val pullToRefreshListeners = mutableSetOf<(Boolean) -> Unit>()
+
+    /**
+     * Whether a pull-down on web content should reload.
+     *
+     * Falls back to the current profile's native-readable mirror while Dart has
+     * not spoken yet, so a user who turned pull-to-refresh off does not get it
+     * anyway for the first seconds of a cold start. With no profile committed
+     * there is nothing to consult and no window to apply it to, so the shipped
+     * default stands.
+     */
+    fun isPullToRefreshEnabled(): Boolean =
+        pullToRefreshEnabledValue
+            ?: _components?.profileApplicationContext
+                ?.let { BrowserSettingsPreferences.isPullToRefreshEnabled(it) }
+            ?: true
+
+    /**
+     * Records the replicated value and notifies every registered window.
+     *
+     * Resolves the profile context itself rather than taking one: the mirror is
+     * per profile, and a call site that reached for the process-global context
+     * would quietly seed the next profile's first window with this one's value.
+     */
+    fun setPullToRefreshEnabled(enabled: Boolean) {
+        _components?.profileApplicationContext
+            ?.let { BrowserSettingsPreferences.setPullToRefreshEnabled(it, enabled) }
+        if (pullToRefreshEnabledValue == enabled) return
+        pullToRefreshEnabledValue = enabled
+        // Over a copy: a listener may remove itself while being notified.
+        pullToRefreshListeners.toList().forEach { it(enabled) }
+    }
+
+    /**
+     * Registers [listener] for pull-to-refresh setting changes, until
+     * [removePullToRefreshListener] is called with the same instance.
+     *
+     * A set rather than a single slot: a Custom Tab window and the main browser
+     * window are separate activities in the same process and can be alive at
+     * once, so neither may displace the other's registration — nor, on its own
+     * teardown, clear it.
+     */
+    fun addPullToRefreshListener(listener: (Boolean) -> Unit) {
+        pullToRefreshListeners.add(listener)
+    }
+
+    fun removePullToRefreshListener(listener: (Boolean) -> Unit) {
+        pullToRefreshListeners.remove(listener)
+    }
 
     // Blocks system capture (screenshots, screen recording, the recents
     // preview) in every tab, private or not.
     var screenshotProtectionEnabled: Boolean = false
         set(value) {
             field = value
-            onSecureWindowSettingsChanged?.invoke()
+            notifySecureWindowSettingsChanged()
         }
 
     // Lifts the secure-window restriction that private tabs apply by default.
@@ -130,12 +190,25 @@ object GlobalComponents {
     var allowPrivateTabScreenshots: Boolean = false
         set(value) {
             field = value
-            onSecureWindowSettingsChanged?.invoke()
+            notifySecureWindowSettingsChanged()
         }
 
-    // Invoked when any input of shouldSecureWindow changes, so the hosting
-    // fragment can re-apply the flag without waiting for a store update.
-    var onSecureWindowSettingsChanged: (() -> Unit)? = null
+    // Notified when any input of shouldSecureWindow changes, so every hosting
+    // fragment can re-apply the flag without waiting for a store update. A set
+    // for the same reason as the pull-to-refresh one above.
+    private val secureWindowListeners = mutableSetOf<() -> Unit>()
+
+    fun addSecureWindowSettingsListener(listener: () -> Unit) {
+        secureWindowListeners.add(listener)
+    }
+
+    fun removeSecureWindowSettingsListener(listener: () -> Unit) {
+        secureWindowListeners.remove(listener)
+    }
+
+    private fun notifySecureWindowSettingsChanged() {
+        secureWindowListeners.toList().forEach { it() }
+    }
 
     // Whether the activity window must carry FLAG_SECURE for a tab with the
     // given privacy. Single source of truth for both enforcement points in
@@ -208,14 +281,10 @@ object GlobalComponents {
 
                 if (restoredState != null) {
                     newComponents.useCases.tabsUseCases.restore(
-                        state = RecoverableBrowserState(
-                            tabs = restoredState.tabs,
-                            // Intentionally do not resume the previously selected tab during the
-                            // first full setup. We restore the tab list, but let startup open in
-                            // its neutral/default state instead of jumping back into prior content.
-                            selectedTabId = null,
-                            tabPartitions = restoredState.tabPartitions
-                        ),
+                        // Intentionally do not resume the previously selected tab during the
+                        // first full setup. We restore the tab list, but let startup open in
+                        // its neutral/default state instead of jumping back into prior content.
+                        state = restoredState.copy(selectedTabId = null),
                         restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
                     )
                 }
@@ -351,6 +420,10 @@ object GlobalComponents {
         // own, and a rebuild would leave the running feature answering prompts on
         // the store this call just replaced.
         WebExtensionPromptHost.onComponentsChanged()
+
+        // Mirror extension actions to Dart and hand it popups whether or not a
+        // tab has been painted yet (issue #542).
+        WebExtensionActionsHost.onComponentsChanged()
 
         // Hold a window open across startup. Gecko gates its delayed startup —
         // and with it every already-installed extension's background script —

@@ -144,7 +144,7 @@ class PointerInputBridge implements PointerInputFlutterApi {
   }
 
   @override
-  PointerHitTest hitTest(double x, double y, bool tracksHover) {
+  Future<PointerHitTest> hitTest(double x, double y, bool tracksHover) async {
     final position = Offset(x, y);
     final target = _targetAt(position);
 
@@ -159,23 +159,23 @@ class PointerInputBridge implements PointerInputFlutterApi {
   }
 
   @override
-  void pointerExit() {
+  Future<void> pointerExit() async {
     _hoverPosition = null;
     _hoverTarget = null;
   }
 
   @override
-  void secondaryButtonDown(double x, double y) {
+  Future<void> secondaryButtonDown(double x, double y) async {
     onSecondaryButtonDown?.call(Offset(x, y) / _view.devicePixelRatio);
   }
 
   @override
-  void longPress(double x, double y) {
+  Future<void> longPress(double x, double y) async {
     onLongPress?.call(Offset(x, y) / _view.devicePixelRatio);
   }
 
   @override
-  void touchDown(double x, double y) {
+  Future<void> touchDown(double x, double y) async {
     _anchorPosition = Offset(x, y);
   }
 

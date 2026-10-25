@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_mozilla_components/src/extensions/latest_per_key_subject.dart';
 import 'package:flutter_mozilla_components/src/extensions/subject.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:rxdart/rxdart.dart';
@@ -20,11 +21,23 @@ final _apiInstance = GeckoAddonsApi();
 class GeckoAddonService extends GeckoAddonEvents {
   final GeckoAddonsApi _api;
 
-  final _browserExtensionSubject = ReplaySubject<ExtensionDataEvent>();
-  final _pageExtensionSubject = ReplaySubject<ExtensionDataEvent>();
+  // Replayed to a late listener as each extension's latest event. The toolbar
+  // feature re-sends an action whenever the selected tab's extension state
+  // changes, so holding every event would grow for the whole session.
+  final _browserExtensionSubject =
+      LatestPerKeySubject<String, ExtensionDataEvent>(
+        (event) => event.extensionId,
+      );
+  final _pageExtensionSubject = LatestPerKeySubject<String, ExtensionDataEvent>(
+    (event) => event.extensionId,
+  );
 
-  final _browserIconSubject = ReplaySubject<ExtensionIconEvent>();
-  final _pageIconSubject = ReplaySubject<ExtensionIconEvent>();
+  final _browserIconSubject = LatestPerKeySubject<String, ExtensionIconEvent>(
+    (event) => event.extensionId,
+  );
+  final _pageIconSubject = LatestPerKeySubject<String, ExtensionIconEvent>(
+    (event) => event.extensionId,
+  );
   final _popupSubject = PublishSubject<ExtensionPopupEvent>();
   final _openAddonSettingsSubject = PublishSubject<String>();
 
@@ -126,11 +139,11 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onRemoveWebExtensionAction(
+  Future<void> onRemoveWebExtensionAction(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -146,12 +159,12 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onUpdateWebExtensionIcon(
+  Future<void> onUpdateWebExtensionIcon(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     Uint8List icon,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserIconSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -167,12 +180,12 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onUpsertWebExtensionAction(
+  Future<void> onUpsertWebExtensionAction(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     WebExtensionData extensionData,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -188,12 +201,15 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onWebExtensionPopupRequested(String extensionId, String extensionName) {
+  Future<void> onWebExtensionPopupRequested(
+    String extensionId,
+    String extensionName,
+  ) async {
     _popupSubject.add((extensionId: extensionId, extensionName: extensionName));
   }
 
   @override
-  void onOpenAddonSettingsRequested(String addonId) {
+  Future<void> onOpenAddonSettingsRequested(String addonId) async {
     _openAddonSettingsSubject.add(addonId);
   }
 

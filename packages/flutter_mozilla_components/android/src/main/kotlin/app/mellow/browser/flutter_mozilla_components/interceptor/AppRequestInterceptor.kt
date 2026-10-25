@@ -11,25 +11,59 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import app.mellow.browser.flutter_mozilla_components.Components
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
 import app.mellow.browser.flutter_mozilla_components.applinks.MellowAppLinksInterceptor
 import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
 import app.mellow.browser.flutter_mozilla_components.pigeons.ProxyLoadError
 import mozilla.components.browser.errorpages.ErrorPages
-import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.request.ErrorType
 import mozilla.components.concept.engine.request.RequestInterceptor
 
-class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
-    private val components by lazy {
-        requireNotNull(GlobalComponents.components) { "Components not initialized" }
-    }
+class AppRequestInterceptor internal constructor(
+    private val context: Context,
+    componentsProvider: () -> Components,
+    appLinksProvider: () -> MellowAppLinksInterceptor,
+) : RequestInterceptor {
+    constructor(context: Context) : this(
+        context,
+        componentsProvider = {
+            requireNotNull(GlobalComponents.components) { "Components not initialized" }
+        },
+        appLinksProvider = { MellowAppLinksInterceptor(context) },
+    )
+
+    private val components by lazy(componentsProvider)
 
     // The Mellow-owned §2.4 app-links tail.
-    private val webLibreAppLinks by lazy { MellowAppLinksInterceptor(context) }
+    private val webLibreAppLinks by lazy(appLinksProvider)
+
+    // GeckoEngineSession calls the 9-arg overload (WebLibre AC patch); this one only
+    // serves callers that don't know the target.
+    override fun onLoadRequest(
+        engineSession: EngineSession,
+        uri: String,
+        lastUri: String?,
+        hasUserGesture: Boolean,
+        isSameDomain: Boolean,
+        isRedirect: Boolean,
+        isDirectNavigation: Boolean,
+        isSubframeRequest: Boolean,
+    ): RequestInterceptor.InterceptionResponse? = onLoadRequest(
+        engineSession,
+        uri,
+        lastUri,
+        hasUserGesture,
+        isSameDomain,
+        isRedirect,
+        isDirectNavigation,
+        isSubframeRequest,
+        isNewWindowRequest = false,
+    )
 
     override fun onLoadRequest(
         engineSession: EngineSession,
@@ -40,6 +74,7 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        isNewWindowRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
         // PWAs/TWAs should never trigger external app link interception —
         // they should behave as self-contained apps and load all URLs internally.
@@ -99,7 +134,9 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         }
 
         // App-links tail: the Mellow-owned §2.4 implementation. Structural guards above
-        // (PWA/TWA, sandbox, mellow://, FxA) already answered.
+        // (PWA/TWA, sandbox, mellow://, FxA) already answered. `isNewWindowRequest` is
+        // not forwarded: this tail predates upstream's app-links rework (28edf3f3) and
+        // has no use for it yet.
         return webLibreAppLinks.onLoadRequest(
             engineSession,
             uri,

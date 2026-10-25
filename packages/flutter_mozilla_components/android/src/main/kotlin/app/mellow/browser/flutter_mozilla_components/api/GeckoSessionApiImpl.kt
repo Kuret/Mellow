@@ -6,8 +6,9 @@
 
 package app.mellow.browser.flutter_mozilla_components.api
 
+import android.graphics.Bitmap
 import app.mellow.browser.flutter_mozilla_components.GlobalComponents
-import app.mellow.browser.flutter_mozilla_components.ext.toWebPBytes
+import app.mellow.browser.flutter_mozilla_components.ext.toPngBytes
 import app.mellow.browser.flutter_mozilla_components.pigeons.*
 import kotlinx.coroutines.*
 import mozilla.components.browser.state.action.ContentAction
@@ -19,6 +20,8 @@ import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.addons.logger
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Implementation of GeckoSessionApi that manages browser session operations
@@ -239,41 +242,62 @@ class GeckoSessionApiImpl : GeckoSessionApi {
         }
     }
 
-    override fun requestScreenshot(sendBack: Boolean, callback: (Result<ByteArray?>) -> Unit) {
-        try {
-            val tab = components.core.store.state.selectedTab
-            if (tab == null) {
-                logger.warn("$TAG: No selected tab for screenshot")
-                callback(Result.failure(IllegalStateException("No selected tab for screenshot")))
-                return
-            }
+    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? {
+        val bitmap = captureSelectedTab() ?: return null
+        if (!sendBack) {
+            return null
+        }
 
-            components.mainBrowserEngineView?.captureThumbnail { bitmap ->
-                try {
-                    if (bitmap != null) {
-                        components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
-                        if (sendBack) {
-                            val compressed = bitmap.toWebPBytes()
-                            logger.debug("$TAG: Screenshot captured successfully")
-                            callback(Result.success(compressed))
-                        } else {
-                            callback(Result.success(null))
-                        }
-                    } else {
-                        logger.warn("$TAG: Failed to capture screenshot - null bitmap")
-                        callback(Result.success(null))
-                    }
-                } catch (e: Exception) {
-                    logger.error("$TAG: Failed to process screenshot", e)
-                    callback(Result.failure(e))
-                }
-            } ?: run {
-                logger.warn("$TAG: No engine view available for screenshot")
-                callback(Result.failure(IllegalStateException("No engine view available")))
-            }
+        // PNG, the format every caller shares or saves it in: encoded here,
+        // off the main thread, Flutter has nothing left to transcode — which
+        // it could only do on its UI isolate, as dart:ui's image decoder is
+        // not available on background isolates. captureThumbnail calls back on
+        // the main thread, where a full-resolution encode would stall the UI.
+        return try {
+            withContext(Dispatchers.Default) { bitmap.toPngBytes() }
+                .also { logger.debug("$TAG: Screenshot captured successfully") }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            logger.error("$TAG: Failed to request screenshot", e)
-            callback(Result.failure(e))
+            logger.error("$TAG: Failed to process screenshot", e)
+            throw e
         }
     }
+
+    /**
+     * Captures the selected tab and stores the bitmap as its thumbnail.
+     * Returns `null` when the engine view produced no bitmap.
+     */
+    private suspend fun captureSelectedTab(): Bitmap? =
+        suspendCancellableCoroutine { continuation ->
+            try {
+                val tab = components.core.store.state.selectedTab
+                if (tab == null) {
+                    logger.warn("$TAG: No selected tab for screenshot")
+                    continuation.resumeWithException(IllegalStateException("No selected tab for screenshot"))
+                    return@suspendCancellableCoroutine
+                }
+
+                components.mainBrowserEngineView?.captureThumbnail { bitmap ->
+                    try {
+                        if (bitmap != null) {
+                            components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
+                            continuation.resume(bitmap)
+                        } else {
+                            logger.warn("$TAG: Failed to capture screenshot - null bitmap")
+                            continuation.resume(null)
+                        }
+                    } catch (e: Exception) {
+                        logger.error("$TAG: Failed to process screenshot", e)
+                        continuation.resumeWithException(e)
+                    }
+                } ?: run {
+                    logger.warn("$TAG: No engine view available for screenshot")
+                    continuation.resumeWithException(IllegalStateException("No engine view available"))
+                }
+            } catch (e: Exception) {
+                logger.error("$TAG: Failed to request screenshot", e)
+                continuation.resumeWithException(e)
+            }
+        }
 }

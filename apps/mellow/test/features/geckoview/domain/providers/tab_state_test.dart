@@ -95,13 +95,13 @@ void main() {
 
         switch (seed) {
           case 'security':
-            events.onSecurityInfoStateChange(
+            await events.onSecurityInfoStateChange(
               1,
               'tab',
               SecurityInfoState(secure: true, host: 'example.com', issuer: ''),
             );
           case 'icon':
-            events.onIconChange(1, 'tab', null);
+            await events.onIconChange(1, 'tab', null);
         }
         await pumpEventQueue();
 
@@ -113,7 +113,7 @@ void main() {
         expect(awaited, isFalse);
         expect(repository.requestedIds, isEmpty);
 
-        events.onTabContentStateChange(
+        await events.onTabContentStateChange(
           2,
           _contentState(contextId: contextId, isPrivate: isPrivate),
         );
@@ -146,7 +146,7 @@ void main() {
     // Read first: the provider only subscribes to the event service once it is
     // built, and building it is what this read does.
     container.read(tabStatesProvider);
-    events.onTabContentStateChange(1, _contentState());
+    await events.onTabContentStateChange(1, _contentState());
     repository.result.complete(null);
     await pumpEventQueue();
 

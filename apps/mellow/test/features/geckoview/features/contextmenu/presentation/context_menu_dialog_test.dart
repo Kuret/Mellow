@@ -96,7 +96,7 @@ void main() {
 
     if (hover != null) {
       final ratio = tester.view.devicePixelRatio;
-      PointerInputBridge.instance!.hitTest(
+      await PointerInputBridge.instance!.hitTest(
         hover.dx * ratio,
         hover.dy * ratio,
         true,
@@ -105,7 +105,7 @@ void main() {
 
     if (touchDown != null) {
       final ratio = tester.view.devicePixelRatio;
-      PointerInputBridge.instance!.touchDown(
+      await PointerInputBridge.instance!.touchDown(
         touchDown.dx * ratio,
         touchDown.dy * ratio,
       );

@@ -10,6 +10,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -25,6 +26,7 @@ import androidx.annotation.CallSuper
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.android.material.color.MaterialColors
 import app.mellow.browser.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import app.mellow.browser.flutter_mozilla_components.ext.EventSequence
 import app.mellow.browser.flutter_mozilla_components.ext.getPreferenceKey
@@ -33,8 +35,8 @@ import app.mellow.browser.flutter_mozilla_components.feature.AppLifecycleFeature
 import app.mellow.browser.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
 import app.mellow.browser.flutter_mozilla_components.feature.ZoomAwareSwipeRefreshFeature
 import app.mellow.browser.flutter_mozilla_components.feature.KeyboardVisibilityFeature
+import app.mellow.browser.flutter_mozilla_components.feature.PromptSheet
 import app.mellow.browser.flutter_mozilla_components.feature.ReadabilityExtractFeature
-import app.mellow.browser.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import app.mellow.browser.flutter_mozilla_components.feature.WebInspectorFeature
 import app.mellow.browser.flutter_mozilla_components.services.DownloadService
 import app.mellow.browser.flutter_mozilla_components.applinks.AppLinkRuntime
@@ -47,7 +49,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.SessionState
-import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.accounts.FxaCapability
@@ -78,7 +79,6 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.locale.ActivityContextWrapper
 import mozilla.components.support.utils.DefaultDownloadFileUtils
-import mozilla.components.support.webextensions.WebExtensionPopupObserver
 
 /**
  * Base fragment extended by [BrowserFragment] and [ExternalAppBrowserFragment].
@@ -114,8 +114,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
     private val webInspectorFeature = ViewBoundFeatureWrapper<WebInspectorFeature>()
-    private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
-    private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
+    // The web extension toolbar feature and popup observer are deliberately
+    // *not* bound here: this fragment only exists once a tab has been painted,
+    // so a start that stayed on the home surface never listed any extension
+    // action nor opened a popup (issue #542). `WebExtensionActionsHost` runs
+    // them for the lifetime of the components instead.
 
     // Keyboard visibility detection feature
     private var keyboardVisibilityFeature: KeyboardVisibilityFeature? = null
@@ -162,6 +165,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         webAuthnFeature
     )
 
+    // Held as fields so this fragment can unregister exactly its own
+    // registration: a Custom Tab window and the main browser window are alive
+    // at the same time, and neither may take the other's off GlobalComponents.
+    private val pullToRefreshSettingListener: (Boolean) -> Unit = { updatePullToRefreshEnabled() }
+    private val secureWindowSettingsListener: () -> Unit = { updateSecureWindowState() }
+
     protected abstract fun createEngine(components: Components): EngineView
 
     // Track this fragment's EngineView instance to reassign singleton when fragment becomes active
@@ -184,6 +193,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The download prompts and the app chooser below show in this manager.
+        PromptSheet.install(childFragmentManager)
 
         requestDownloadPermissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
@@ -364,19 +376,21 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     components.core.store,
                     components.useCases.sessionUseCases.reload,
                     binding.swipeToRefresh,
+                    // Without this a pull in a Custom Tab or PWA window resolves
+                    // to the *selected* tab — it would reload a background
+                    // browser tab and sync the throbber to that tab's loading
+                    // state. Same argument the SessionFeature above gets.
+                    tabId = sessionId,
                 ),
                 owner = this,
                 view = view,
             )
 
             // Apply pull-to-refresh setting
+            applyPullToRefreshTheme()
             updatePullToRefreshEnabled()
-            GlobalComponents.onPullToRefreshEnabledChanged = {
-                updatePullToRefreshEnabled()
-            }
-            GlobalComponents.onSecureWindowSettingsChanged = {
-                updateSecureWindowState()
-            }
+            GlobalComponents.addPullToRefreshListener(pullToRefreshSettingListener)
+            GlobalComponents.addSecureWindowSettingsListener(secureWindowSettingsListener)
             updateSecureWindowState()
 
             shareResourceFeature.set(
@@ -618,18 +632,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
-            webExtensionPopupObserver.set(
-                feature = WebExtensionPopupObserver(components.core.store, ::openPopup),
-                owner = this,
-                view = view,
-            )
-
-            webExtToolbarFeature.set(
-                feature = components.features.webExtensionToolbarFeature,
-                owner = this,
-                view = view,
-            )
-
             components.core.historyStorage.registerStorageMaintenanceWorker()
 
             // Start keyboard visibility detection if viewport events are available
@@ -673,13 +675,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      */
     protected open fun onEngineSetupComplete() {}
 
-    private fun openPopup(webExtensionState: WebExtensionState) {
-        components.addonEvents.onWebExtensionPopupRequested(
-            webExtensionState.id,
-            webExtensionState.name ?: "",
-        ) {}
-    }
-
     @CallSuper
     @Suppress("LongMethod")
     override fun onCreateView(
@@ -711,7 +706,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * arms the throbber and reloads the page on release.
      */
     private fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean): Boolean =
-        GlobalComponents.pullToRefreshEnabled && !inFullScreen
+        GlobalComponents.isPullToRefreshEnabled() && !inFullScreen
 
     /**
      * Re-applies [shouldPullToRefreshBeEnabled] to the layout. Called from both
@@ -720,13 +715,40 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * [inFullScreen] defaults to the tab's own state, so a view recreated while
      * a tab is already fullscreen does not come back with pull-to-refresh on.
      * Read from the store rather than from [fullScreenFeature], because the
-     * initial call runs before that feature is bound.
+     * initial call runs before that feature is bound — and through
+     * `GlobalComponents` rather than the `components` lazy, since the default
+     * argument is evaluated even when there is no longer a view to apply it to.
      */
     private fun updatePullToRefreshEnabled(
-        inFullScreen: Boolean = components.core.store.state
-            .findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
+        inFullScreen: Boolean = GlobalComponents.components
+            ?.core?.store?.state
+            ?.findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
     ) {
-        _binding?.swipeToRefresh?.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+        val layout = _binding?.swipeToRefresh ?: return
+        layout.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+    }
+
+    /**
+     * Themes the pull-to-refresh throbber, as Fenix does. Without it the
+     * spinner keeps the framework default — a near-white circle with a fixed
+     * arrow colour — over every page, including dark and AMOLED content.
+     */
+    private fun applyPullToRefreshTheme() {
+        val layout = _binding?.swipeToRefresh ?: return
+        layout.setColorSchemeColors(
+            MaterialColors.getColor(
+                layout,
+                com.google.android.material.R.attr.colorOnSurface,
+                Color.BLACK,
+            ),
+        )
+        layout.setProgressBackgroundColorSchemeColor(
+            MaterialColors.getColor(
+                layout,
+                com.google.android.material.R.attr.colorSurfaceContainerLowest,
+                Color.WHITE,
+            ),
+        )
     }
 
     private fun viewportFitChanged(viewportFit: Int) {
@@ -850,8 +872,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
         AppLifecycleFeature.clearVisibleSession(this)
 
-        GlobalComponents.onPullToRefreshEnabledChanged = null
-        GlobalComponents.onSecureWindowSettingsChanged = null
+        GlobalComponents.removePullToRefreshListener(pullToRefreshSettingListener)
+        GlobalComponents.removeSecureWindowSettingsListener(secureWindowSettingsListener)
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)
         // Read through `GlobalComponents` rather than the `components` lazy:

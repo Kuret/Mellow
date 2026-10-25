@@ -32,6 +32,7 @@ import app.mellow.browser.flutter_mozilla_components.middleware.FlutterEventMidd
 import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import app.mellow.browser.flutter_mozilla_components.middleware.HistoryMetadataService
 import app.mellow.browser.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import app.mellow.browser.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import app.mellow.browser.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import app.mellow.browser.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
@@ -76,7 +77,10 @@ import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.support.base.worker.Frequency
 import org.mozilla.geckoview.GeckoRuntime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.concurrent.TimeUnit
 
@@ -88,6 +92,14 @@ class Core(
     private val flutterEvents: GeckoStateEvents,
     private val extensionEvents: BrowserExtensionEvents
 ) {
+    /**
+     * The scope AC's session saving and upload cleanup run in. Never cancelled:
+     * these components live until the process exits, and a save in flight when
+     * `GlobalComponents.tearDown` runs must still reach disk. AC used
+     * `GlobalScope` for the same work before 157.
+     */
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     private val noOpCrashReporter = object : CrashReporting {
         override fun submitCaughtException(throwable: Throwable): Job = Job()
 
@@ -210,12 +222,17 @@ class Core(
     }
 
     val fileUploadsDirCleaner: FileUploadsDirCleaner by lazy {
-        FileUploadsDirCleaner { context.cacheDir }
+        FileUploadsDirCleaner(scope = applicationScope) { context.cacheDir }
     }
 
     val historyMetadataService by lazy {
         HistoryMetadataService(storage = historyStorage)
     }
+
+    // Held rather than constructed inline in the middleware list below so
+    // `GlobalComponents.tearDown` can cancel its in-flight thumbnail/icon
+    // encodes; see [FlutterEventMiddleware.close].
+    val flutterEventMiddleware = FlutterEventMiddleware(flutterEvents)
 
     @OptIn(FlowPreview::class)
     val store by lazy {
@@ -235,7 +252,7 @@ class Core(
                 // Android Components deliberately parks a crashed tab until the
                 // app asks for it back; nothing else here ever would.
                 CrashRecoveryMiddleware(),
-                FlutterEventMiddleware(flutterEvents),
+                flutterEventMiddleware,
                 DownloadMiddleware(
                     applicationContext = context,
                     downloadServiceClass = DownloadService::class.java,
@@ -256,6 +273,8 @@ class Core(
                 SaveToPDFMiddleware(),
                 FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
                 LastMediaAccessMiddleware(),
+                // Before the engine middleware; see its KDoc (issue #542).
+                WebExtensionActiveTabMiddleware,
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.
@@ -303,7 +322,7 @@ class Core(
      * The storage component for persisting browser tab sessions.
      */
     val sessionStorage: SessionStorage by lazy {
-        SessionStorage(context, engine)
+        SessionStorage(context, engine, applicationScope = applicationScope)
     }
 
     /**
