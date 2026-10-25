@@ -62,6 +62,7 @@ import 'package:mellow/features/geckoview/features/tabs/data/providers.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:mellow/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:mellow/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:mellow/features/share_intent/domain/services/shared_content_opener.dart';
 import 'package:mellow/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:mellow/features/spaces_sync/domain/spaces_sync_service.dart';
 import 'package:mellow/features/sync/domain/repositories/sync.dart';
@@ -383,6 +384,8 @@ class _MainWidget extends HookConsumerWidget {
       // widget, far too late.
       _activateService(ref, sharingIntentStreamProvider);
       _activateService(ref, appWidgetLaunchStreamProvider);
+      // Opens shared links and text; must exist before brokered delivery starts.
+      _activateService(ref, sharedContentOpenerProvider);
       await ref.read(brokeredIntentDeliveryProvider.future);
 
       if (!kDebugMode) {

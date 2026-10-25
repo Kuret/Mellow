@@ -37,7 +37,6 @@ import 'package:mellow/features/geckoview/domain/providers/tab_session.dart';
 import 'package:mellow/features/geckoview/domain/providers/tab_state.dart';
 import 'package:mellow/features/geckoview/domain/repositories/tab.dart';
 import 'package:mellow/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
-import 'package:mellow/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:mellow/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:mellow/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
@@ -51,7 +50,6 @@ import 'package:mellow/features/intent_gatekeeper/domain/entities/intent_source_
 import 'package:mellow/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:mellow/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:mellow/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
-import 'package:mellow/features/share_intent/domain/entities/shared_content.dart';
 import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:mellow/features/user/domain/repositories/general_settings.dart';
 import 'package:mellow/features/user/domain/services/local_authentication.dart';
@@ -509,42 +507,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           decision: outcome?.decision ?? IntentSourcePolicy.block,
           persist: outcome?.persist ?? false,
           packageName: request.packageName,
-        );
-      },
-    );
-
-    ref.listenManual(
-      engineBoundIntentStreamProvider,
-      (previous, next) {
-        next.whenData((sharedContent) async {
-          // A link that arrives from outside never lands in a tab on its own:
-          // it opens the custom tab, and the sheet pushed here is the only way
-          // to promote it into one — which is also where its space is chosen.
-          final router = await ref.read(routerProvider.future);
-
-          switch (sharedContent) {
-            case SharedUrl():
-              final route = OpenSharedContentRoute(
-                sharedUrl: sharedContent.url.toString(),
-                contextId: sharedContent.contextId,
-                containerMode: sharedContent.containerMode.queryValueOrNull,
-              );
-              await router.push(route.location);
-            case SharedText():
-              final route = SearchRoute(
-                tabType: ref.read(selectedTabTypeProvider) ?? TabType.regular,
-                searchText: sharedContent.text,
-                launchedFromIntent: true, //launched from intent
-              );
-              await router.push(route.location);
-          }
-        });
-      },
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to engineBoundIntentStreamProvider',
-          error: error,
-          stackTrace: stackTrace,
         );
       },
     );
