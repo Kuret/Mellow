@@ -37,7 +37,7 @@ const profileLockAttemptsFileName = 'lock_attempts.json';
 ///
 /// The MAC already proves the password; comparing the plaintext as well keeps a
 /// verifier from some other `SecureData` blob from passing.
-const _verifierPlaintext = 'weblibre-profile-lock-v1';
+const _verifierPlaintext = 'mellow-profile-lock-v1';
 
 /// Wrong attempts allowed before each further one has to wait.
 const _freeAttempts = 5;
