@@ -26,7 +26,6 @@ import 'package:mellow/features/user/data/models/auth_settings.dart';
 import 'package:mellow/features/user/domain/presentation/dialogs/profile_password_dialogs.dart';
 import 'package:mellow/features/user/domain/providers/profile_auth.dart';
 import 'package:mellow/features/user/domain/services/local_authentication.dart';
-import 'package:mellow/l10n/generated/app_localizations.dart';
 import 'package:mellow/utils/filesystem.dart' as fs;
 
 /// [profile] as its `metadata.json` describes it now.
@@ -126,9 +125,7 @@ Future<bool> authorizeProfileAction(
           .read(localAuthenticationServiceProvider.notifier)
           .authenticate(
             authKey: profileAccessAuthKey(current.id),
-            localizedTitle: AppLocalizations.of(
-              context,
-            ).user_deviceAuthPromptTitle,
+            localizedTitle: deviceAuthPromptTitle,
             localizedReason: reason,
             alsoRemember: alsoRemember,
           );

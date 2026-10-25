@@ -83,7 +83,7 @@ class LockScreen extends HookConsumerWidget {
         final result = await ref
             .read(profileAuthStateProvider.notifier)
             .authenticate(
-              localizedTitle: "Confirm it's you",
+              localizedTitle: deviceAuthPromptTitle,
               localizedReason: 'Unlock profile',
             );
         // A closed prompt needs no explanation; one the system refused does,
@@ -279,7 +279,7 @@ class LockScreen extends HookConsumerWidget {
                       child: Semantics(
                         liveRegion: true,
                         child: Text(
-                          deviceAuthFailure.value!.describe(context),
+                          deviceAuthFailure.value!.message,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,

@@ -581,7 +581,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                           (await localAuth.authenticate(
                                             authKey: _restoreAuthKey,
                                             localizedTitle:
-                                                l10n.user_deviceAuthPromptTitle,
+                                                deviceAuthPromptTitle,
                                             localizedReason: reason,
                                             alsoRemember: alsoRemember,
                                           )).passed,

@@ -128,7 +128,7 @@ class ProfileEditScreen extends HookConsumerWidget {
             authKey: existing != null
                 ? profileAccessAuthKey(existing.id)
                 : _newProfileAuthKey,
-            localizedTitle: l10n.user_deviceAuthPromptTitle,
+            localizedTitle: deviceAuthPromptTitle,
             localizedReason: existing != null
                 ? 'Require authentication for profile'
                 : 'Confirm you can unlock this profile',

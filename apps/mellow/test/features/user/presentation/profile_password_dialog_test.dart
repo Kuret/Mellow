@@ -92,7 +92,7 @@ void main() {
   ) async {
     // Checking disables the field, which takes its focus and the keyboard;
     // the next attempt must not need a tap first.
-    final profileDir = Directory.systemTemp.createTempSync('weblibre-refocus');
+    final profileDir = Directory.systemTemp.createTempSync('mellow-refocus');
     addTearDown(() => profileDir.deleteSync(recursive: true));
     // Fails to match without running Argon2, so the attempt is recorded as
     // a plain wrong password.
@@ -103,8 +103,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => TextButton(
             onPressed: () => showProfilePasswordDialog(

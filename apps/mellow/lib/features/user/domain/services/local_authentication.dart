@@ -45,6 +45,21 @@ enum DeviceAuthFailure {
   unavailable,
 }
 
+/// Title of the system unlock prompt; the line under it says what it is for.
+const deviceAuthPromptTitle = "Confirm it's you";
+
+/// What to tell the person about a device prompt that did not pass.
+extension DeviceAuthFailureMessage on DeviceAuthFailure {
+  String get message => switch (this) {
+    DeviceAuthFailure.noScreenLock =>
+      'No screen lock is set up on this device. Set a PIN, pattern or '
+          'password in Android settings to unlock this profile.',
+    DeviceAuthFailure.lockedOut => 'Too many attempts. Try again later.',
+    DeviceAuthFailure.unavailable =>
+      'Could not confirm your identity. Try again.',
+  };
+}
+
 /// How a device prompt ended.
 sealed class DeviceAuthResult {
   const DeviceAuthResult();
