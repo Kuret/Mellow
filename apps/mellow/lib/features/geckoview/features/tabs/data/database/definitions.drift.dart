@@ -6478,6 +6478,180 @@ typedef $AppliedTombstoneProcessedTableManager =
       i2.AppliedTombstoneData,
       i0.PrefetchHooks Function()
     >;
+typedef $UploadedTombstoneCreateCompanionBuilder =
+    i2.UploadedTombstoneCompanion Function({
+      required String id,
+      required DateTime uploadedAt,
+      i0.Value<int> echoes,
+      i0.Value<int> rowid,
+    });
+typedef $UploadedTombstoneUpdateCompanionBuilder =
+    i2.UploadedTombstoneCompanion Function({
+      i0.Value<String> id,
+      i0.Value<DateTime> uploadedAt,
+      i0.Value<int> echoes,
+      i0.Value<int> rowid,
+    });
+
+class $UploadedTombstoneFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.UploadedTombstone> {
+  $UploadedTombstoneFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<int> get echoes => $composableBuilder(
+    column: $table.echoes,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $UploadedTombstoneOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.UploadedTombstone> {
+  $UploadedTombstoneOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get echoes => $composableBuilder(
+    column: $table.echoes,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $UploadedTombstoneAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i2.UploadedTombstone> {
+  $UploadedTombstoneAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<int> get echoes =>
+      $composableBuilder(column: $table.echoes, builder: (column) => column);
+}
+
+class $UploadedTombstoneTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i2.UploadedTombstone,
+          i2.UploadedTombstoneData,
+          i2.$UploadedTombstoneFilterComposer,
+          i2.$UploadedTombstoneOrderingComposer,
+          i2.$UploadedTombstoneAnnotationComposer,
+          $UploadedTombstoneCreateCompanionBuilder,
+          $UploadedTombstoneUpdateCompanionBuilder,
+          (
+            i2.UploadedTombstoneData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i2.UploadedTombstone,
+              i2.UploadedTombstoneData
+            >,
+          ),
+          i2.UploadedTombstoneData,
+          i0.PrefetchHooks Function()
+        > {
+  $UploadedTombstoneTableManager(
+    i0.GeneratedDatabase db,
+    i2.UploadedTombstone table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i2.$UploadedTombstoneFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i2.$UploadedTombstoneOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i2.$UploadedTombstoneAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> id = const i0.Value.absent(),
+                i0.Value<DateTime> uploadedAt = const i0.Value.absent(),
+                i0.Value<int> echoes = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.UploadedTombstoneCompanion(
+                id: id,
+                uploadedAt: uploadedAt,
+                echoes: echoes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime uploadedAt,
+                i0.Value<int> echoes = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i2.UploadedTombstoneCompanion.insert(
+                id: id,
+                uploadedAt: uploadedAt,
+                echoes: echoes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $UploadedTombstoneProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i2.UploadedTombstone,
+      i2.UploadedTombstoneData,
+      i2.$UploadedTombstoneFilterComposer,
+      i2.$UploadedTombstoneOrderingComposer,
+      i2.$UploadedTombstoneAnnotationComposer,
+      $UploadedTombstoneCreateCompanionBuilder,
+      $UploadedTombstoneUpdateCompanionBuilder,
+      (
+        i2.UploadedTombstoneData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i2.UploadedTombstone,
+          i2.UploadedTombstoneData
+        >,
+      ),
+      i2.UploadedTombstoneData,
+      i0.PrefetchHooks Function()
+    >;
 typedef $PendingEngineCloseCreateCompanionBuilder =
     i2.PendingEngineCloseCompanion Function({
       required String engineTabId,
@@ -12059,6 +12233,235 @@ class AppliedTombstoneCompanion
     return (StringBuffer('AppliedTombstoneCompanion(')
           ..write('id: $id, ')
           ..write('appliedAt: $appliedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class UploadedTombstone extends i0.Table
+    with i0.TableInfo<UploadedTombstone, i2.UploadedTombstoneData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  UploadedTombstone(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> id = i0.GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final i0.GeneratedColumn<DateTime> uploadedAt =
+      i0.GeneratedColumn<DateTime>(
+        'uploaded_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  late final i0.GeneratedColumn<int> echoes = i0.GeneratedColumn<int>(
+    'echoes',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const i0.CustomExpression('0'),
+  );
+  @override
+  List<i0.GeneratedColumn> get $columns => [id, uploadedAt, echoes];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'uploaded_tombstone';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i2.UploadedTombstoneData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i2.UploadedTombstoneData(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      uploadedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}uploaded_at'],
+      )!,
+      echoes: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.int,
+        data['${effectivePrefix}echoes'],
+      )!,
+    );
+  }
+
+  @override
+  UploadedTombstone createAlias(String alias) {
+    return UploadedTombstone(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class UploadedTombstoneData extends i0.DataClass
+    implements i0.Insertable<i2.UploadedTombstoneData> {
+  final String id;
+  final DateTime uploadedAt;
+  final int echoes;
+  const UploadedTombstoneData({
+    required this.id,
+    required this.uploadedAt,
+    required this.echoes,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<String>(id);
+    map['uploaded_at'] = i0.Variable<DateTime>(uploadedAt);
+    map['echoes'] = i0.Variable<int>(echoes);
+    return map;
+  }
+
+  factory UploadedTombstoneData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return UploadedTombstoneData(
+      id: serializer.fromJson<String>(json['id']),
+      uploadedAt: serializer.fromJson<DateTime>(json['uploaded_at']),
+      echoes: serializer.fromJson<int>(json['echoes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'uploaded_at': serializer.toJson<DateTime>(uploadedAt),
+      'echoes': serializer.toJson<int>(echoes),
+    };
+  }
+
+  i2.UploadedTombstoneData copyWith({
+    String? id,
+    DateTime? uploadedAt,
+    int? echoes,
+  }) => i2.UploadedTombstoneData(
+    id: id ?? this.id,
+    uploadedAt: uploadedAt ?? this.uploadedAt,
+    echoes: echoes ?? this.echoes,
+  );
+  UploadedTombstoneData copyWithCompanion(i2.UploadedTombstoneCompanion data) {
+    return UploadedTombstoneData(
+      id: data.id.present ? data.id.value : this.id,
+      uploadedAt: data.uploadedAt.present
+          ? data.uploadedAt.value
+          : this.uploadedAt,
+      echoes: data.echoes.present ? data.echoes.value : this.echoes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UploadedTombstoneData(')
+          ..write('id: $id, ')
+          ..write('uploadedAt: $uploadedAt, ')
+          ..write('echoes: $echoes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, uploadedAt, echoes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i2.UploadedTombstoneData &&
+          other.id == this.id &&
+          other.uploadedAt == this.uploadedAt &&
+          other.echoes == this.echoes);
+}
+
+class UploadedTombstoneCompanion
+    extends i0.UpdateCompanion<i2.UploadedTombstoneData> {
+  final i0.Value<String> id;
+  final i0.Value<DateTime> uploadedAt;
+  final i0.Value<int> echoes;
+  final i0.Value<int> rowid;
+  const UploadedTombstoneCompanion({
+    this.id = const i0.Value.absent(),
+    this.uploadedAt = const i0.Value.absent(),
+    this.echoes = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  UploadedTombstoneCompanion.insert({
+    required String id,
+    required DateTime uploadedAt,
+    this.echoes = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  }) : id = i0.Value(id),
+       uploadedAt = i0.Value(uploadedAt);
+  static i0.Insertable<i2.UploadedTombstoneData> custom({
+    i0.Expression<String>? id,
+    i0.Expression<DateTime>? uploadedAt,
+    i0.Expression<int>? echoes,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uploadedAt != null) 'uploaded_at': uploadedAt,
+      if (echoes != null) 'echoes': echoes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i2.UploadedTombstoneCompanion copyWith({
+    i0.Value<String>? id,
+    i0.Value<DateTime>? uploadedAt,
+    i0.Value<int>? echoes,
+    i0.Value<int>? rowid,
+  }) {
+    return i2.UploadedTombstoneCompanion(
+      id: id ?? this.id,
+      uploadedAt: uploadedAt ?? this.uploadedAt,
+      echoes: echoes ?? this.echoes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<String>(id.value);
+    }
+    if (uploadedAt.present) {
+      map['uploaded_at'] = i0.Variable<DateTime>(uploadedAt.value);
+    }
+    if (echoes.present) {
+      map['echoes'] = i0.Variable<int>(echoes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UploadedTombstoneCompanion(')
+          ..write('id: $id, ')
+          ..write('uploadedAt: $uploadedAt, ')
+          ..write('echoes: $echoes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

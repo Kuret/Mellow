@@ -931,6 +931,16 @@ CREATE TABLE applied_tombstone (
   applied_at DATETIME NOT NULL
 );
 
+-- Tombstones this device uploaded, with the time and how many echoes of the
+-- id it has already refused. The fetch screen ignores a create for an id
+-- listed here inside the resurrection window: Zen before gh-15485 re-uploads
+-- a tab it just closed on our behalf from a stale projection.
+CREATE TABLE uploaded_tombstone (
+  id TEXT NOT NULL PRIMARY KEY,
+  uploaded_at DATETIME NOT NULL,
+  echoes INTEGER NOT NULL DEFAULT 0
+);
+
 -- Engine sessions whose rows an applied batch already deleted. Written inside
 -- the apply transaction and drained after it commits, so a crash in between
 -- cannot leave a live session whose row is gone (syncTabs would re-insert it

@@ -50,6 +50,9 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   late final i1.SyncRecordState syncRecordState = i1.SyncRecordState(this);
   late final i1.DeletedRecord deletedRecord = i1.DeletedRecord(this);
   late final i1.AppliedTombstone appliedTombstone = i1.AppliedTombstone(this);
+  late final i1.UploadedTombstone uploadedTombstone = i1.UploadedTombstone(
+    this,
+  );
   late final i1.PendingEngineClose pendingEngineClose = i1.PendingEngineClose(
     this,
   );
@@ -120,6 +123,7 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     syncRecordState,
     deletedRecord,
     appliedTombstone,
+    uploadedTombstone,
     pendingEngineClose,
   ];
   @override
@@ -336,6 +340,8 @@ class $TabDatabaseManager {
       i1.$DeletedRecordTableManager(_db, _db.deletedRecord);
   i1.$AppliedTombstoneTableManager get appliedTombstone =>
       i1.$AppliedTombstoneTableManager(_db, _db.appliedTombstone);
+  i1.$UploadedTombstoneTableManager get uploadedTombstone =>
+      i1.$UploadedTombstoneTableManager(_db, _db.uploadedTombstone);
   i1.$PendingEngineCloseTableManager get pendingEngineClose =>
       i1.$PendingEngineCloseTableManager(_db, _db.pendingEngineClose);
 }

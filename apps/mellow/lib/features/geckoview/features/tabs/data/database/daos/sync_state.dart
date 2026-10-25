@@ -169,4 +169,58 @@ class SyncStateDao extends DatabaseAccessor<TabDatabase>
       (db.appliedTombstone.delete()
             ..where((t) => t.appliedAt.isSmallerThanValue(before)))
           .go();
+
+  // --- uploaded_tombstone --------------------------------------------------
+
+  /// Notes that this device uploaded a tombstone for [id], now. A second
+  /// upload of the same id refreshes the time and keeps the echo count: the
+  /// count is what decides when the peer's insistence is taken as deliberate.
+  Future<void> recordUploadedTombstone(String id) =>
+      db.uploadedTombstone.insertOne(
+        UploadedTombstoneCompanion.insert(id: id, uploadedAt: DateTime.now()),
+        onConflict: DoUpdate(
+          (_) => UploadedTombstoneCompanion(uploadedAt: Value(DateTime.now())),
+        ),
+      );
+
+  /// The tombstones uploaded at or after [since], `id → (time, echoes)`.
+  Future<Map<String, ({DateTime uploadedAt, int echoes})>>
+  uploadedTombstonesSince(DateTime since) async {
+    final rows =
+        await (db.uploadedTombstone.select()
+              ..where((t) => t.uploadedAt.isBiggerOrEqualValue(since)))
+            .get();
+    return {
+      for (final row in rows)
+        row.id: (uploadedAt: row.uploadedAt, echoes: row.echoes),
+    };
+  }
+
+  /// Counts one refused echo of [id].
+  Future<void> noteTombstoneEcho(String id) =>
+      (db.uploadedTombstone.update()..where((t) => t.id.equals(id))).write(
+        UploadedTombstoneCompanion.custom(
+          echoes: db.uploadedTombstone.echoes + const Constant(1),
+        ),
+      );
+
+  Future<void> forgetUploadedTombstone(Iterable<String> ids) {
+    final unique = ids.toSet();
+    if (unique.isEmpty) {
+      return Future.value();
+    }
+    return (db.uploadedTombstone.delete()..where((t) => t.id.isIn(unique)))
+        .go();
+  }
+
+  /// Forgets tombstones uploaded before [before]; the echo guard only looks
+  /// at a recent window, so older entries are dead weight.
+  Future<void> pruneUploadedTombstones(DateTime before) =>
+      (db.uploadedTombstone.delete()
+            ..where((t) => t.uploadedAt.isSmallerThanValue(before)))
+          .go();
+
+  /// Forgets every uploaded tombstone, e.g. after a collection `syncID` reset.
+  Future<void> clearAllUploadedTombstones() =>
+      db.uploadedTombstone.delete().go();
 }
