@@ -104,7 +104,7 @@ On conflict: resolve with our semantics winning in our files, upstream winning i
 Rules that save the build:
 
 - Generated files are never hand-merged. Take ours, then regenerate: `bash -c 'source ../.env.sh && dart run build_runner build --delete-conflicting-outputs'`.
-- Pigeons regenerate with **27.3.1**, never the pinned ^28: `dart pub global activate pigeon 27.3.1 && dart pub global run pigeon --input pigeons/gecko.dart` from `packages/flutter_mozilla_components`. Check `git diff --stat` afterwards — anything beyond the schema plus its two generated files means the wrong pigeon ran.
+- Pigeons regenerate with the **^29 the package pubspecs pin** (upstream migrated in `1f295e09`; 27.3.1 is history): `dart pub global activate pigeon '^29.0.11' && for f in pigeons/*.dart; do dart pub global run pigeon --input $f; done` from each of `packages/flutter_mozilla_components`, `locale_resolver`, `simple_intent_receiver`, `speech_to_text_dialog`. Pigeon >= 28 emits Kotlin `suspend fun` for `@async` host methods and for every FlutterApi method that is not `@asyncCallback`; upstream marks all Kotlin->Dart event methods `@asyncCallback`, so do the same for any Mellow-only FlutterApi method you add, and implement it in Dart as `Future<void> ... async`. Check `git diff --stat` afterwards — anything beyond the schemas plus their generated files means the wrong pigeon ran.
 - Drift schema changes need a migration and a schema test, not just an edited `definitions.drift`. If upstream changed their schema under ours, stop and ask.
 
 Commit style: small and focused, one concern per commit, following the trailer convention already in `git log`.
