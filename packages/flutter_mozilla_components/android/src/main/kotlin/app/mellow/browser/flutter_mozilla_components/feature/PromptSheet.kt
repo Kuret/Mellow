@@ -97,7 +97,8 @@ internal object PromptSheet {
 
     private fun DialogFragment.isPrompt() =
         this is DownloadDialogFragment ||
-            this is AddonDialogFragment
+            this is AddonDialogFragment ||
+            this is DownloadAppChooserDialog
 
     /** Restyles [dialog], which is showing, as a modal bottom sheet. */
     fun apply(dialog: Dialog) {
