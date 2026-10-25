@@ -29,6 +29,9 @@ import subprocess
 import sys
 
 SKILL_DIR = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(SKILL_DIR))
+import identifiers  # noqa: E402
+
 STATE_PATH = SKILL_DIR / "state.json"
 
 # Files that upstream owns and this fork only follows. Changes here are the
@@ -66,13 +69,29 @@ def load_state():
 
 
 def fork_surface(fork_base):
-    """The files this fork has modified and deleted since it branched."""
+    """The files this fork has modified and deleted since it branched.
+
+    Every path is reported in Mellow's names. The fork renamed its app
+    directory and its Kotlin packages wholesale, so git sees upstream's
+    ``apps/weblibre/...`` as deleted and ours as added; compared raw, every
+    upstream app-level commit looked like it touched only files we deleted
+    (or nothing we modified) and landed in "take". Translating both sides
+    through the same identifier map the patch filter uses puts an upstream
+    edit next to the file it will actually land on.
+
+    A pure rename (``R100``) is not a modification: the translated patch
+    applies to it cleanly.
+    """
     modified, deleted = set(), set()
-    for line in git("diff", "--name-status", f"{fork_base}..HEAD").splitlines():
+    for line in git(
+        "diff", "--name-status", "-M", f"{fork_base}..HEAD"
+    ).splitlines():
         if not line.strip():
             continue
         parts = line.split("\t")
-        status, path = parts[0], parts[-1]
+        status, path = parts[0], identifiers.rewrite(parts[-1])
+        if status == "R100":
+            continue
         if status.startswith("M") or status.startswith("R"):
             modified.add(path)
         elif status.startswith("D"):
@@ -131,7 +150,11 @@ def main():
             continue
         header, _, body = chunk.partition("\n")
         sha, short, date, subject = header.split("\x1f")
-        files = [line.strip() for line in body.splitlines() if line.strip()]
+        files = [
+            identifiers.rewrite(line.strip())
+            for line in body.splitlines()
+            if line.strip()
+        ]
         commits.append(
             {
                 "sha": sha,
