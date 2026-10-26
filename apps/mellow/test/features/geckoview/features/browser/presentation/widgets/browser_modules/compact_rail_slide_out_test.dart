@@ -171,6 +171,7 @@ Widget _harness({
   required List<Override> overrides,
   required double viewportWidth,
   EdgeInsets viewPadding = EdgeInsets.zero,
+  bool isNarrowViewport = true,
 }) {
   return ProviderScope(
     overrides: overrides,
@@ -182,7 +183,7 @@ Widget _harness({
         ),
         child: Scaffold(
           body: CompactRailSlideOut(
-            isNarrowViewport: true,
+            isNarrowViewport: isNarrowViewport,
             viewportWidth: viewportWidth,
             railWidth: 260,
             showToolbarButtons: true,
@@ -440,6 +441,37 @@ void main() {
 
     expect(container.read(compactRailPanelOpenProvider), isTrue);
     expect(tester.getRect(find.byType(WideRailLayout)).left, closeTo(0, 0.5));
+
+    await _disposeTree(tester);
+  });
+
+  testWidgets('leaving the narrow layout closes the panel', (tester) async {
+    final db = await _memoryDatabaseWithOneTab();
+    addTearDown(db.close);
+    final overrides = _panelOverrides(
+      db,
+      compactRailSide: CompactRailSide.left,
+    );
+
+    await tester.pumpWidget(_harness(overrides: overrides, viewportWidth: 360));
+    await _settle(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(CompactRailSlideOut)),
+    );
+    container.read(compactRailPanelOpenProvider.notifier).open();
+    await _settle(tester);
+
+    await tester.pumpWidget(
+      _harness(
+        overrides: overrides,
+        viewportWidth: 360,
+        isNarrowViewport: false,
+      ),
+    );
+    await _settle(tester);
+
+    expect(container.read(compactRailPanelOpenProvider), isFalse);
 
     await _disposeTree(tester);
   });

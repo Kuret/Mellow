@@ -140,6 +140,20 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
   }
 
   @override
+  void didUpdateWidget(CompactRailSlideOut oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Leaving the narrow layout (unfolding) takes the panel off screen
+    // without closing it; close it for real, or it would be "open" — and
+    // every back gesture passed on — with nothing showing, or pop back up
+    // on its own when the narrow layout returns.
+    if (oldWidget.isNarrowViewport && !widget.isNarrowViewport) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _close();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
