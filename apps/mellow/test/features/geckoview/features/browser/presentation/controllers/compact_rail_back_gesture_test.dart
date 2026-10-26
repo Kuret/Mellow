@@ -242,4 +242,47 @@ void main() {
       );
     });
   });
+
+  group('claimsCompactRailBackGestures', () {
+    test('claims every gesture while the slide-out is in play', () {
+      for (final side in CompactRailSide.values) {
+        expect(
+          claimsCompactRailBackGestures(
+            side: side,
+            isNarrowViewport: true,
+            isCurrentRoute: true,
+          ),
+          isTrue,
+          reason: 'side=$side',
+        );
+      }
+    });
+
+    test('claims nothing with the setting off, wide, or under a route', () {
+      expect(
+        claimsCompactRailBackGestures(
+          side: null,
+          isNarrowViewport: true,
+          isCurrentRoute: true,
+        ),
+        isFalse,
+      );
+      expect(
+        claimsCompactRailBackGestures(
+          side: CompactRailSide.left,
+          isNarrowViewport: false,
+          isCurrentRoute: true,
+        ),
+        isFalse,
+      );
+      expect(
+        claimsCompactRailBackGestures(
+          side: CompactRailSide.left,
+          isNarrowViewport: true,
+          isCurrentRoute: false,
+        ),
+        isFalse,
+      );
+    });
+  });
 }

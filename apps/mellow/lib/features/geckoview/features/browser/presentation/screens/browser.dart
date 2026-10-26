@@ -1769,6 +1769,12 @@ class _Browser extends HookConsumerWidget {
                 : null,
             child: BackButtonListener(
               onBackButtonPressed: () async {
+                // Taken before anything can return early, so a pass-on mark
+                // never outlives the back it belongs to.
+                final passedOn = ref
+                    .read(compactRailPassedOnBackProvider.notifier)
+                    .take();
+
                 final tabState = ref.read(selectedTabStateProvider);
                 final promptOnBackBehavior = ref
                     .read(tabRepositoryProvider.notifier)
@@ -1792,8 +1798,10 @@ class _Browser extends HookConsumerWidget {
                 // deliberately not claimed, and the framework's ordinary pop
                 // then lands right here. Without the gate that swipe would
                 // open the panel too, and the setting's promise that the other
-                // edge still goes back would be false.
-                if (!ref.read(predictiveBackSeenProvider)) {
+                // edge still goes back would be false. A back the slide-out
+                // claimed and passed on (`passedOn`) already had its edge
+                // looked at, and goes straight through.
+                if (!passedOn && !ref.read(predictiveBackSeenProvider)) {
                   final fallbackPanelSide = resolveCompactRailBackGesture(
                     side: ref.read(
                       zenSettingsWithDefaultsProvider.select(

@@ -86,3 +86,26 @@ class PredictiveBackSeen extends _$PredictiveBackSeen {
     if (!state) state = true;
   }
 }
+
+/// Marks the back about to reach the browser screen's `BackButtonListener` as
+/// one the slide-out panel already looked at and passed on — a predictive
+/// gesture it claimed (so that it sees the whole gesture) but that was not
+/// meant to open the panel. The listener performs it as an ordinary back.
+///
+/// Without the mark the listener could not tell that back from one that came
+/// with no predictive events at all, which it has to treat as a possible
+/// swipe toward the panel.
+@Riverpod(keepAlive: true)
+class CompactRailPassedOnBack extends _$CompactRailPassedOnBack {
+  @override
+  bool build() => false;
+
+  void mark() => state = true;
+
+  /// Whether the current back was passed on; clears the mark either way.
+  bool take() {
+    final passedOn = state;
+    if (passedOn) state = false;
+    return passedOn;
+  }
+}

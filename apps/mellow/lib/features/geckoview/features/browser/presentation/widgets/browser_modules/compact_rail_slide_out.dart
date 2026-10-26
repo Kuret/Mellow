@@ -118,6 +118,10 @@ class _PendingPanelOpen extends _PendingBackGesture {
   final RailSide side;
 }
 
+/// Claimed only to see the gesture through; performs the browser's ordinary
+/// back when it commits.
+class _PendingPassOn extends _PendingBackGesture {}
+
 class _PendingRailMove extends _PendingBackGesture {
   _PendingRailMove(this.to);
 
@@ -218,6 +222,15 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
       return true;
     }
 
+    if (claimsCompactRailBackGestures(
+      side: _side,
+      isNarrowViewport: widget.isNarrowViewport,
+      isCurrentRoute: isCurrentRoute,
+    )) {
+      _pending = _PendingPassOn();
+      return true;
+    }
+
     final moveTo = resolveWideRailMoveBackGesture(
       enabled: _swipeToMoveRail,
       currentSide: _currentRailSide,
@@ -243,7 +256,10 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
 
   @override
   void handleCommitBackGesture() {
-    switch (_pending) {
+    final pending = _pending;
+    _pending = null;
+
+    switch (pending) {
       // The side is not set here: `handleStartBackGesture` already did it, so
       // the panel was on the right edge for the whole drag. (The plain-back
       // path, which has no start event, sets it in the browser screen's own
@@ -257,10 +273,17 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
               .read(saveZenSettingsControllerProvider.notifier)
               .save((currentSettings) => currentSettings.copyWith.railSide(to)),
         );
+      case _PendingPassOn():
+        ref.read(compactRailPassedOnBackProvider.notifier).mark();
+        _performOrdinaryBack();
+      // A commit with no start before it: the framework keeps the observers
+      // that claimed the *previous* gesture and hands them the commit of a
+      // back that came without a start event. Unhandled here it would vanish;
+      // route it like the unclaimed back it is, unmarked, so the browser
+      // screen treats it as edgeless.
       case null:
-        break;
+        _performOrdinaryBack();
     }
-    _pending = null;
   }
 
   @override
@@ -269,6 +292,12 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
       unawaited(_controller.reverse());
     }
     _pending = null;
+  }
+
+  /// What the framework does itself with a committed gesture nobody claimed.
+  void _performOrdinaryBack() {
+    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+    unawaited(WidgetsBinding.instance.handlePopRoute());
   }
 
   void _close() => ref.read(compactRailPanelOpenProvider.notifier).close();

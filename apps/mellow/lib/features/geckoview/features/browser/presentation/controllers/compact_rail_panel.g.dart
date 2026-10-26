@@ -316,3 +316,90 @@ abstract class _$PredictiveBackSeen extends $Notifier<bool> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// Marks the back about to reach the browser screen's `BackButtonListener` as
+/// one the slide-out panel already looked at and passed on — a predictive
+/// gesture it claimed (so that it sees the whole gesture) but that was not
+/// meant to open the panel. The listener performs it as an ordinary back.
+///
+/// Without the mark the listener could not tell that back from one that came
+/// with no predictive events at all, which it has to treat as a possible
+/// swipe toward the panel.
+
+@ProviderFor(CompactRailPassedOnBack)
+final compactRailPassedOnBackProvider = CompactRailPassedOnBackProvider._();
+
+/// Marks the back about to reach the browser screen's `BackButtonListener` as
+/// one the slide-out panel already looked at and passed on — a predictive
+/// gesture it claimed (so that it sees the whole gesture) but that was not
+/// meant to open the panel. The listener performs it as an ordinary back.
+///
+/// Without the mark the listener could not tell that back from one that came
+/// with no predictive events at all, which it has to treat as a possible
+/// swipe toward the panel.
+final class CompactRailPassedOnBackProvider
+    extends $NotifierProvider<CompactRailPassedOnBack, bool> {
+  /// Marks the back about to reach the browser screen's `BackButtonListener` as
+  /// one the slide-out panel already looked at and passed on — a predictive
+  /// gesture it claimed (so that it sees the whole gesture) but that was not
+  /// meant to open the panel. The listener performs it as an ordinary back.
+  ///
+  /// Without the mark the listener could not tell that back from one that came
+  /// with no predictive events at all, which it has to treat as a possible
+  /// swipe toward the panel.
+  CompactRailPassedOnBackProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'compactRailPassedOnBackProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$compactRailPassedOnBackHash();
+
+  @$internal
+  @override
+  CompactRailPassedOnBack create() => CompactRailPassedOnBack();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$compactRailPassedOnBackHash() =>
+    r'0fa1fc2cbfcc6ed91e0f07e55eb7feed1310e594';
+
+/// Marks the back about to reach the browser screen's `BackButtonListener` as
+/// one the slide-out panel already looked at and passed on — a predictive
+/// gesture it claimed (so that it sees the whole gesture) but that was not
+/// meant to open the panel. The listener performs it as an ordinary back.
+///
+/// Without the mark the listener could not tell that back from one that came
+/// with no predictive events at all, which it has to treat as a possible
+/// swipe toward the panel.
+
+abstract class _$CompactRailPassedOnBack extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

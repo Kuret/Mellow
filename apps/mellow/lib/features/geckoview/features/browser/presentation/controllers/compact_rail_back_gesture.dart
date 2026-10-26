@@ -83,3 +83,24 @@ RailSide? resolveCompactRailBackGesture({
     CompactRailSide.either => gestureSide,
   };
 }
+
+/// Whether the slide-out panel claims *every* predictive back gesture right
+/// now, including the ones it does not open on (the other edge, or any edge
+/// while the panel is already open).
+///
+/// It claims them so that it sees each gesture's start and its end. A gesture
+/// it claimed but does not open on is passed on as an ordinary back when it
+/// commits; and a back that then arrives with no start event at all can be
+/// told apart from it, and given an edge from the touch stream instead (see
+/// `EdgeTouchTracker`). Left unclaimed, both kinds reach the browser's back
+/// handling looking exactly alike.
+///
+/// The same gates as [resolveCompactRailBackGesture] apart from the panel
+/// being open: the setting on, the narrow layout, and the browser the
+/// current route — a pushed route keeps its own back gesture, and its own
+/// predictive transition.
+bool claimsCompactRailBackGestures({
+  required CompactRailSide? side,
+  required bool isNarrowViewport,
+  required bool isCurrentRoute,
+}) => side != null && isNarrowViewport && isCurrentRoute;

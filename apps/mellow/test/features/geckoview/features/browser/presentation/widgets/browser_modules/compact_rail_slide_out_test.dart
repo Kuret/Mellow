@@ -157,6 +157,18 @@ class _OpenWithoutAnimation extends CompactRailPanelOpen {
   bool build() => true;
 }
 
+/// Records the ordinary backs the slide-out performs, and stops them there
+/// (the harness has no browser `BackButtonListener` to take them).
+class _PopRecorder with WidgetsBindingObserver {
+  int pops = 0;
+
+  @override
+  Future<bool> didPopRoute() async {
+    pops++;
+    return true;
+  }
+}
+
 class _DefaultTabViewFilterController extends TabViewFilterController {
   @override
   TabViewFilterOptions build() => TabViewFilterOptions.withDefaults();
@@ -408,41 +420,137 @@ void main() {
     },
   );
 
-  testWidgets('an "open" panel with nothing on screen still opens', (
-    tester,
-  ) async {
-    final db = await _memoryDatabaseWithOneTab();
-    addTearDown(db.close);
+  group('back gestures that do not open the panel', () {
+    late _PopRecorder pops;
 
-    await tester.pumpWidget(
-      _harness(
-        overrides: [
-          ..._panelOverrides(db, compactRailSide: CompactRailSide.left),
+    setUp(() {
+      pops = _PopRecorder();
+      WidgetsBinding.instance.addObserver(pops);
+    });
+
+    tearDown(() => WidgetsBinding.instance.removeObserver(pops));
+
+    Future<(ProviderContainer, WidgetsBindingObserver)> pumpPanel(
+      WidgetTester tester, {
+      List<Override> extra = const [],
+    }) async {
+      final db = await _memoryDatabaseWithOneTab();
+      addTearDown(db.close);
+
+      await tester.pumpWidget(
+        _harness(
+          overrides: [
+            ..._panelOverrides(db, compactRailSide: CompactRailSide.left),
+            ...extra,
+          ],
+          viewportWidth: 360,
+        ),
+      );
+      await _settle(tester);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(CompactRailSlideOut)),
+      );
+      final observer =
+          tester.state(find.byType(CompactRailSlideOut))
+              as WidgetsBindingObserver;
+      return (container, observer);
+    }
+
+    testWidgets('a swipe from the other edge is claimed, then passed on', (
+      tester,
+    ) async {
+      final (container, observer) = await pumpPanel(tester);
+
+      // Claimed, so the slide-out sees the gesture end…
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.right)),
+        isTrue,
+      );
+      observer.handleCommitBackGesture();
+      await _settle(tester);
+
+      // …and performs it as the browser's ordinary back, marked as such.
+      expect(container.read(compactRailPanelOpenProvider), isFalse);
+      expect(container.read(compactRailPassedOnBackProvider), isTrue);
+      expect(pops.pops, 1);
+
+      await _disposeTree(tester);
+    });
+
+    testWidgets('with the panel open, a swipe is passed on as a back', (
+      tester,
+    ) async {
+      final (container, observer) = await pumpPanel(tester);
+      container.read(compactRailPanelOpenProvider.notifier).open();
+      await _settle(tester);
+
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
+        isTrue,
+      );
+      observer.handleCommitBackGesture();
+      await _settle(tester);
+
+      expect(container.read(compactRailPanelOpenProvider), isTrue);
+      expect(container.read(compactRailPassedOnBackProvider), isTrue);
+      expect(pops.pops, 1);
+
+      await _disposeTree(tester);
+    });
+
+    testWidgets('a commit with no start of its own becomes an edgeless back', (
+      tester,
+    ) async {
+      final (container, observer) = await pumpPanel(tester);
+
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
+        isTrue,
+      );
+      observer.handleCommitBackGesture();
+      await _settle(tester);
+      expect(container.read(compactRailPanelOpenProvider), isTrue);
+      container.read(compactRailPanelOpenProvider.notifier).close();
+      await _settle(tester);
+
+      // The framework hands a back without a start event to whoever claimed
+      // the previous gesture. It must not vanish, and must not count as one
+      // the slide-out passed on: the browser screen gives it an edge.
+      observer.handleCommitBackGesture();
+      await _settle(tester);
+
+      expect(pops.pops, 1);
+      expect(container.read(compactRailPassedOnBackProvider), isFalse);
+      expect(container.read(compactRailPanelOpenProvider), isFalse);
+
+      await _disposeTree(tester);
+    });
+
+    testWidgets('an "open" panel with nothing on screen still opens', (
+      tester,
+    ) async {
+      final (container, observer) = await pumpPanel(
+        tester,
+        extra: [
           compactRailPanelOpenProvider.overrideWith(_OpenWithoutAnimation.new),
         ],
-        viewportWidth: 360,
-      ),
-    );
-    await _settle(tester);
+      );
 
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(CompactRailSlideOut)),
-    );
-    final observer =
-        tester.state(find.byType(CompactRailSlideOut))
-            as WidgetsBindingObserver;
+      expect(
+        observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
+        isTrue,
+      );
+      observer.handleCommitBackGesture();
+      await _settle(tester);
 
-    expect(
-      observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
-      isTrue,
-    );
-    observer.handleCommitBackGesture();
-    await _settle(tester);
+      expect(pops.pops, 0);
+      expect(container.read(compactRailPassedOnBackProvider), isFalse);
+      expect(container.read(compactRailPanelOpenProvider), isTrue);
+      expect(tester.getRect(find.byType(WideRailLayout)).left, closeTo(0, 0.5));
 
-    expect(container.read(compactRailPanelOpenProvider), isTrue);
-    expect(tester.getRect(find.byType(WideRailLayout)).left, closeTo(0, 0.5));
-
-    await _disposeTree(tester);
+      await _disposeTree(tester);
+    });
   });
 
   testWidgets('leaving the narrow layout closes the panel', (tester) async {
