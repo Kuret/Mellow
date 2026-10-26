@@ -155,6 +155,21 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
   RailSide get _currentRailSide =>
       ref.read(zenSettingsWithDefaultsProvider).railSide;
 
+  /// Whether the panel is open, as far as a back gesture is concerned.
+  ///
+  /// The provider says open while the slide animation sits fully closed only
+  /// if the two fell out of step; nothing is on screen then, and trusting the
+  /// provider would pass every edge swipe on as a page back with no way to
+  /// tell why. Believe the screen, and bring the provider back in line.
+  bool _isPanelOpen() {
+    final isOpen = ref.read(compactRailPanelOpenProvider);
+    if (isOpen && _controller.isDismissed) {
+      _close();
+      return false;
+    }
+    return isOpen;
+  }
+
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
     // Recorded whether or not this gesture is claimed: what matters is that
@@ -167,7 +182,7 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
     final panelSide = resolveCompactRailBackGesture(
       side: _side,
       isNarrowViewport: widget.isNarrowViewport,
-      isOpen: ref.read(compactRailPanelOpenProvider),
+      isOpen: _isPanelOpen(),
       swipeEdge: backEvent.swipeEdge,
       isCurrentRoute: isCurrentRoute,
     );

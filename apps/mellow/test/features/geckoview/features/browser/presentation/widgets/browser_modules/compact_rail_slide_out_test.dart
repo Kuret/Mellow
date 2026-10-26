@@ -150,6 +150,13 @@ List<Override> _panelOverrides(
   pinnedAddonIdsProvider.overrideWith(_NoPinnedAddonIds.new),
 ];
 
+/// The panel provider reporting open from the start, with nothing having
+/// animated it — the out-of-step state the slide-out has to recover from.
+class _OpenWithoutAnimation extends CompactRailPanelOpen {
+  @override
+  bool build() => true;
+}
+
 class _DefaultTabViewFilterController extends TabViewFilterController {
   @override
   TabViewFilterOptions build() => TabViewFilterOptions.withDefaults();
@@ -399,6 +406,43 @@ void main() {
       await _disposeTree(tester);
     },
   );
+
+  testWidgets('an "open" panel with nothing on screen still opens', (
+    tester,
+  ) async {
+    final db = await _memoryDatabaseWithOneTab();
+    addTearDown(db.close);
+
+    await tester.pumpWidget(
+      _harness(
+        overrides: [
+          ..._panelOverrides(db, compactRailSide: CompactRailSide.left),
+          compactRailPanelOpenProvider.overrideWith(_OpenWithoutAnimation.new),
+        ],
+        viewportWidth: 360,
+      ),
+    );
+    await _settle(tester);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(CompactRailSlideOut)),
+    );
+    final observer =
+        tester.state(find.byType(CompactRailSlideOut))
+            as WidgetsBindingObserver;
+
+    expect(
+      observer.handleStartBackGesture(_backGesture(SwipeEdge.left)),
+      isTrue,
+    );
+    observer.handleCommitBackGesture();
+    await _settle(tester);
+
+    expect(container.read(compactRailPanelOpenProvider), isTrue);
+    expect(tester.getRect(find.byType(WideRailLayout)).left, closeTo(0, 0.5));
+
+    await _disposeTree(tester);
+  });
 }
 
 /// A predictive back gesture just starting at [edge]. `fromMap` is the only
