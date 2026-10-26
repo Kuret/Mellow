@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/edge_touch_tracker.dart';
 import 'package:mellow/features/user/data/models/zen_settings.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -86,6 +87,12 @@ class PredictiveBackSeen extends _$PredictiveBackSeen {
     if (!state) state = true;
   }
 }
+
+/// The app-wide [EdgeTouchTracker]: fed by the slide-out panel's global
+/// pointer route, read by the browser screen's `BackButtonListener` when a
+/// back arrives without a predictive start event to name its edge.
+@Riverpod(keepAlive: true)
+EdgeTouchTracker edgeTouchTracker(Ref ref) => EdgeTouchTracker();
 
 /// Marks the back about to reach the browser screen's `BackButtonListener` as
 /// one the slide-out panel already looked at and passed on — a predictive

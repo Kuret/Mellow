@@ -1769,11 +1769,15 @@ class _Browser extends HookConsumerWidget {
                 : null,
             child: BackButtonListener(
               onBackButtonPressed: () async {
-                // Taken before anything can return early, so a pass-on mark
-                // never outlives the back it belongs to.
+                // Both taken before anything can return early, so neither a
+                // pass-on mark nor a tracked swipe outlives the back it
+                // belongs to.
                 final passedOn = ref
                     .read(compactRailPassedOnBackProvider.notifier)
                     .take();
+                final swipedEdge = ref
+                    .read(edgeTouchTrackerProvider)
+                    .takeRecentSwipeEdge();
 
                 final tabState = ref.read(selectedTabStateProvider);
                 final promptOnBackBehavior = ref
@@ -1786,22 +1790,27 @@ class _Browser extends HookConsumerWidget {
                   return false;
                 }
 
-                // Compact rail slide-out fallback: on Android 12 and below,
-                // or with 3-button navigation, no predictive back events ever
-                // reach CompactRailSlideOut's observer — only this plain,
-                // already-committed back. Open the panel here instead of
+                // Compact rail slide-out fallback, for a back that reached
+                // here without CompactRailSlideOut having seen its start: on
+                // Android 12 and below, or with 3-button navigation, no
+                // predictive events arrive at all; and on a predictive-back
+                // device some backs still come without a start event (a
+                // quick flick on One UI, a swipe landing during the previous
+                // back's animation). Open the panel here instead of
                 // performing the browser's own back; with the panel already
                 // open, fall through and let that happen exactly as today.
                 //
-                // Gated on never having seen a predictive gesture: where they
-                // do arrive, a back swipe from the edge opposite the rail is
-                // deliberately not claimed, and the framework's ordinary pop
-                // then lands right here. Without the gate that swipe would
-                // open the panel too, and the setting's promise that the other
-                // edge still goes back would be false. A back the slide-out
-                // claimed and passed on (`passedOn`) already had its edge
-                // looked at, and goes straight through.
-                if (!passedOn && !ref.read(predictiveBackSeenProvider)) {
+                // A back the slide-out claimed and passed on (`passedOn`)
+                // already had its edge looked at, and goes straight through.
+                // Otherwise the edge comes from the touch stream, when the
+                // system took an edge swipe over just before. With no edge,
+                // a device that does send predictive events leaves the back
+                // alone — it was a key or a button, not a swipe toward the
+                // panel — and only one that never has opens the panel on the
+                // configured edge regardless, as it always did.
+                if (!passedOn &&
+                    (swipedEdge != null ||
+                        !ref.read(predictiveBackSeenProvider))) {
                   final fallbackPanelSide = resolveCompactRailBackGesture(
                     side: ref.read(
                       zenSettingsWithDefaultsProvider.select(
@@ -1812,8 +1821,10 @@ class _Browser extends HookConsumerWidget {
                       MediaQuery.sizeOf(context).width,
                     ),
                     isOpen: ref.read(compactRailPanelOpenProvider),
-                    swipeEdge: null,
-                    isCurrentRoute: true,
+                    swipeEdge: swipedEdge,
+                    // A modal (a sheet, a dialog) over the browser owns this
+                    // back, below.
+                    isCurrentRoute: ModalRoute.isCurrentOf(context) ?? true,
                   );
                   if (fallbackPanelSide != null) {
                     ref

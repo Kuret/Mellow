@@ -19,11 +19,13 @@
  */
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show GestureBinding;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PredictiveBackEvent;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_back_gesture.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/compact_rail_panel.dart';
+import 'package:mellow/features/geckoview/features/browser/presentation/controllers/edge_touch_tracker.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/controllers/wide_rail_move_back_gesture.dart';
 import 'package:mellow/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart'
     show BrowserTabBar;
@@ -51,6 +53,14 @@ import 'package:mellow/features/user/domain/repositories/zen_settings.dart';
 ///    panel open. Tapping the scrim is the only thing that closes it —
 ///    picking a tab and switching space both leave it up, so you can tap
 ///    through tabs to find the one you meant.
+///
+///    While the setting is on, every gesture is claimed — the ones that do
+///    not open the panel too — and those are passed on as an ordinary back
+///    when they commit (see `claimsCompactRailBackGestures`). That way a back
+///    that arrives *without* a start event (a quick flick on One UI, a swipe
+///    landing during the previous back's animation) is recognisable, and the
+///    browser screen gives it an edge from [EdgeTouchTracker], which this
+///    widget feeds from a global pointer route.
 ///  * On a wide viewport with [ZenSettings.swipeToMoveRail] on, a predictive
 ///    back gesture from the edge opposite the docked rail flips
 ///    [ZenSettings.railSide] there instead of running the ordinary back; a
@@ -137,10 +147,15 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
 
   _PendingBackGesture? _pending;
 
+  late final EdgeTouchTracker _edgeTouches = ref.read(edgeTouchTrackerProvider);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(
+      _edgeTouches.handleEvent,
+    );
   }
 
   @override
@@ -159,6 +174,9 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
 
   @override
   void dispose() {
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(
+      _edgeTouches.handleEvent,
+    );
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
@@ -194,6 +212,9 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
     // the platform sends these at all, which is what tells the plain-back
     // fallback to stand down.
     ref.read(predictiveBackSeenProvider.notifier).record();
+    // This gesture names its own edge; an edge swipe the tracker saw is this
+    // one, and must not answer for a later back.
+    _edgeTouches.forgetSwipe();
 
     final isCurrentRoute = ModalRoute.of(context)?.isCurrent == true;
 
@@ -258,6 +279,7 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
   void handleCommitBackGesture() {
     final pending = _pending;
     _pending = null;
+    if (pending != null) _edgeTouches.forgetSwipe();
 
     switch (pending) {
       // The side is not set here: `handleStartBackGesture` already did it, so
@@ -280,7 +302,7 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
       // that claimed the *previous* gesture and hands them the commit of a
       // back that came without a start event. Unhandled here it would vanish;
       // route it like the unclaimed back it is, unmarked, so the browser
-      // screen treats it as edgeless.
+      // screen treats it as edgeless and looks at the touch stream.
       case null:
         _performOrdinaryBack();
     }
@@ -291,6 +313,7 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
     if (_pending is _PendingPanelOpen) {
       unawaited(_controller.reverse());
     }
+    if (_pending != null) _edgeTouches.forgetSwipe();
     _pending = null;
   }
 
@@ -304,6 +327,12 @@ class _CompactRailSlideOutState extends ConsumerState<CompactRailSlideOut>
 
   @override
   Widget build(BuildContext context) {
+    final gestureInsets = MediaQuery.systemGestureInsetsOf(context);
+    _edgeTouches
+      ..viewportWidth = MediaQuery.sizeOf(context).width
+      ..leftEdgeZone = gestureInsets.left
+      ..rightEdgeZone = gestureInsets.right;
+
     final side = ref.watch(
       zenSettingsWithDefaultsProvider.select((value) => value.compactRailSide),
     );

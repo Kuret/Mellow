@@ -317,6 +317,63 @@ abstract class _$PredictiveBackSeen extends $Notifier<bool> {
   }
 }
 
+/// The app-wide [EdgeTouchTracker]: fed by the slide-out panel's global
+/// pointer route, read by the browser screen's `BackButtonListener` when a
+/// back arrives without a predictive start event to name its edge.
+
+@ProviderFor(edgeTouchTracker)
+final edgeTouchTrackerProvider = EdgeTouchTrackerProvider._();
+
+/// The app-wide [EdgeTouchTracker]: fed by the slide-out panel's global
+/// pointer route, read by the browser screen's `BackButtonListener` when a
+/// back arrives without a predictive start event to name its edge.
+
+final class EdgeTouchTrackerProvider
+    extends
+        $FunctionalProvider<
+          EdgeTouchTracker,
+          EdgeTouchTracker,
+          EdgeTouchTracker
+        >
+    with $Provider<EdgeTouchTracker> {
+  /// The app-wide [EdgeTouchTracker]: fed by the slide-out panel's global
+  /// pointer route, read by the browser screen's `BackButtonListener` when a
+  /// back arrives without a predictive start event to name its edge.
+  EdgeTouchTrackerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'edgeTouchTrackerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$edgeTouchTrackerHash();
+
+  @$internal
+  @override
+  $ProviderElement<EdgeTouchTracker> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  EdgeTouchTracker create(Ref ref) {
+    return edgeTouchTracker(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EdgeTouchTracker value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EdgeTouchTracker>(value),
+    );
+  }
+}
+
+String _$edgeTouchTrackerHash() => r'35a46f7cf5a9f4082a18e94ad61bbed8037a4e13';
+
 /// Marks the back about to reach the browser screen's `BackButtonListener` as
 /// one the slide-out panel already looked at and passed on — a predictive
 /// gesture it claimed (so that it sees the whole gesture) but that was not
